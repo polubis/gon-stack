@@ -120,7 +120,7 @@ The quiz covers eight comprehensive relationship categories (Relationship Dynami
 - **Built-in Feedback Module** - Integrated feedback collection system within the app to capture user insights, pain points, and suggestions
 - **Iteration Process** - Feedback will be analyzed to identify common themes, prioritize improvements, and inform feature development for subsequent releases
 
-## 7. Assumptions & Risks
+## 7. Assumptions
 
 **What are the biggest assumptions we are making with this MVP?** What are the potential risks that could prevent this MVP from being successful? (e.g., technical challenges, market acceptance).
 
@@ -137,56 +137,7 @@ The quiz covers eight comprehensive relationship categories (Relationship Dynami
 - **Educational Value Assumption** - Users will find value in educational tips and compatibility insights provided after questions
 - **Sensitive Topics Assumption** - Users will be comfortable discussing sensitive topics (sexual intimacy, trust, conflicts) within the app format
 
-### Potential Risks:
-
-- **Market Acceptance Risk** - Couples may not find gamified relationship discovery appealing or may prefer traditional conversation methods
-- **User Adoption Risk** - Difficulty getting both partners to use the app simultaneously and commit to completing sessions together
-- **Question Sensitivity Risk** - Some questions may be too personal or uncomfortable, leading to user drop-off or negative feedback
-- **Time Commitment Risk** - Users may find the time required to complete categories too demanding, especially with time limits on answers
-- **Privacy Concerns Risk** - Users may have concerns about sharing intimate relationship information, even within a private gaming room
-- **Engagement Retention Risk** - Users may complete initial sessions but lose interest in repeated play or exploring all categories
-- **Compatibility Interpretation Risk** - Users may misinterpret compatibility scores or results, leading to relationship stress rather than improvement
-- **LLM Accuracy Risk** - LLM image recognition may incorrectly identify drawings, leading to false matches or mismatches. LLM text analysis may incorrectly flag legitimate guesses as cheating in trash talk questions
-- **Voice Recognition Accuracy Risk** - Voice recognition may fail to accurately transcribe words, especially with accents, background noise, or unclear pronunciation, leading to incorrect validation
-- **Competitive Tension Risk** - The scoring system and win condition may create unhealthy competition between partners rather than fostering connection
-- **Technical Integration Risk** - YouTube API integration, LLM image processing, voice recognition, and LLM text analysis may introduce technical complexity and potential failures
-- **Trash Talk Difficulty Risk** - The trash talk word guessing game may be too difficult or frustrating with only 3 attempts, leading to negative point accumulation and user frustration. False cheating detection may frustrate legitimate players. The requirement to describe words without directly saying them may be confusing or too challenging
-
-## 8. Future Vision (Post-MVP)
-
-**Briefly describe the long-term vision for the product.** What are some of the key features or capabilities we envision adding after the initial MVP is validated?
-
-### Long-term Vision:
-
-The Romantic App aims to become a comprehensive relationship wellness platform that helps couples build stronger, more understanding relationships through interactive discovery and continuous growth.
-
-### Post-MVP Features & Capabilities:
-
-- **Expanded Question Library** - Continuously growing database of questions across all categories, with user-submitted questions and community contributions
-
-- **Advanced Analytics** - Deeper insights into relationship patterns, trends over time, and personalized recommendations based on compatibility scores
-
-- **Time-based Comparison** - Track how answers and compatibility evolve over time, showing relationship growth and changes
-
-- **Personalized Recommendations** - AI-driven suggestions for relationship improvement based on identified compatibility gaps
-
-- **Community Features** - Optional community forums or groups for couples to share experiences and learn from others (with privacy controls)
-
-- **Relationship Milestones** - Celebration and tracking of relationship milestones, anniversaries, and growth achievements
-
-- **Expert Content** - Integration of relationship expert advice, articles, and resources tailored to identified compatibility areas
-
-- **Custom Question Creation** - Allow couples to create and share their own questions within categories
-
-- **Multi-language Support** - Expand accessibility to couples speaking different languages
-
-- **Mobile App Expansion** - Native mobile applications for iOS and Android to improve accessibility and user experience
-
-- **Integration Features** - Potential integrations with calendar apps for scheduling relationship time, or other relationship wellness tools
-
-- **Premium Tiers** - Advanced features, unlimited sessions, priority support, and exclusive content for power users
-
-## 9. User Flow Diagrams
+## 8. User Flow Diagrams
 
 ### Event Storming User Flow
 
