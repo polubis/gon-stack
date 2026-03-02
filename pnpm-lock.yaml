@@ -96,6 +96,9 @@ importers:
       '@astrojs/react':
         specifier: ^4.4.2
         version: 4.4.2(@types/node@24.10.1)(@types/react-dom@19.2.3(@types/react@19.2.13))(@types/react@19.2.13)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(yaml@2.8.1)
+      '@hookform/resolvers':
+        specifier: ^5.2.2
+        version: 5.2.2(react-hook-form@7.71.2(react@19.2.4))
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.1.18(vite@6.4.1(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(yaml@2.8.1))
@@ -114,6 +117,9 @@ importers:
       react-dom:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
+      react-hook-form:
+        specifier: ^7.71.2
+        version: 7.71.2(react@19.2.4)
       tailwindcss:
         specifier: ^4.1.18
         version: 4.1.18
@@ -124,6 +130,9 @@ importers:
       wrangler:
         specifier: ^4.64.0
         version: 4.64.0(@cloudflare/workers-types@4.20260210.0)
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
 
   apps/web:
     dependencies:
@@ -1065,6 +1074,11 @@ packages:
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
+  '@hookform/resolvers@5.2.2':
+    resolution: {integrity: sha512-A/IxlMLShx3KjV/HeTcTfaMxdwy690+L/ZADoeaTltLx+CVuzkeVIPuybK3jrRfw7YZnmdKsVVHAlEPIAEUNlA==}
+    peerDependencies:
+      react-hook-form: ^7.55.0
+
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
     engines: {node: '>=18.18.0'}
@@ -1717,6 +1731,9 @@ packages:
 
   '@speed-highlight/core@1.2.14':
     resolution: {integrity: sha512-G4ewlBNhUtlLvrJTb88d2mdy2KRijzs4UhnlrOSRT4bmjh/IqNElZa3zkrZ+TC47TwtlDWzVLFADljF1Ijp5hA==}
+
+  '@standard-schema/utils@0.3.0':
+    resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
@@ -3675,6 +3692,12 @@ packages:
     peerDependencies:
       react: ^19.2.4
 
+  react-hook-form@7.71.2:
+    resolution: {integrity: sha512-1CHvcDYzuRUNOflt4MOq3ZM46AronNJtQ1S7tnX6YN4y72qhgiUItpacZUAQ0TyWYci3yz1X+rXaSxiuEm86PA==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      react: ^16.8.0 || ^17 || ^18 || ^19
+
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
@@ -4450,6 +4473,9 @@ packages:
   zod@4.1.12:
     resolution: {integrity: sha512-JInaHOamG8pt5+Ey8kGmdcAcg3OL9reK8ltczgHTAwNhMys/6ThXHityHxVV2p3fkw/c+MAvBHFVYHFZDmjMCQ==}
 
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
@@ -5127,6 +5153,11 @@ snapshots:
       '@eslint/core': 0.17.0
       levn: 0.4.1
 
+  '@hookform/resolvers@5.2.2(react-hook-form@7.71.2(react@19.2.4))':
+    dependencies:
+      '@standard-schema/utils': 0.3.0
+      react-hook-form: 7.71.2(react@19.2.4)
+
   '@humanfs/core@0.19.1': {}
 
   '@humanfs/node@0.16.7':
@@ -5570,6 +5601,8 @@ snapshots:
   '@sindresorhus/is@7.2.0': {}
 
   '@speed-highlight/core@1.2.14': {}
+
+  '@standard-schema/utils@0.3.0': {}
 
   '@swc/helpers@0.5.15':
     dependencies:
@@ -7959,6 +7992,10 @@ snapshots:
       react: 19.2.4
       scheduler: 0.27.0
 
+  react-hook-form@7.71.2(react@19.2.4):
+    dependencies:
+      react: 19.2.4
+
   react-is@16.13.1: {}
 
   react-refresh@0.17.0: {}
@@ -8860,5 +8897,7 @@ snapshots:
   zod@3.25.76: {}
 
   zod@4.1.12: {}
+
+  zod@4.3.6: {}
 
   zwitch@2.0.4: {}

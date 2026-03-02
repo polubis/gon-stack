@@ -1,0 +1,1 @@
+export { TypographyDoc } from './TypographyDoc';

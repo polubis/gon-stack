@@ -1,0 +1,171 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #f6f3e8;
+  --color-primary-100: #ece6d0;
+  --color-primary-200: #ddd3b2;
+  --color-primary-300: #c9b98b;
+  --color-primary-400: #b19f67;
+  --color-primary-500: #95864f;
+  --color-primary-600: #776a3e;
+  --color-primary-700: #5e5431;
+
+  --color-secondary-50: #eef5ee;
+  --color-secondary-100: #dce9dc;
+  --color-secondary-200: #bed3be;
+  --color-secondary-300: #9bbc9c;
+  --color-secondary-400: #79a57b;
+  --color-secondary-500: #5f8f62;
+  --color-secondary-600: #4a734f;
+  --color-secondary-700: #395a3d;
+
+  --color-surface-0: #fffdf7;
+  --color-surface-50: #f7f3e9;
+  --color-surface-100: #ede6d8;
+  --color-surface-200: #ddd4c3;
+
+  --color-text-primary: #2e2a23;
+  --color-text-secondary: #4b4439;
+  --color-text-tertiary: #786d5c;
+
+  --color-success: #3f8f5f;
+  --color-warning: #b9873b;
+  --color-error: #b24f4f;
+  --color-info: #4c7da6;
+
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-heading: 'Fraunces', Georgia, serif;
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer components {
+  .variant-shell {
+    background: linear-gradient(180deg, #f7f3e9 0%, #fffdf7 34%);
+  }
+
+  .variant-nav {
+    background: color-mix(in srgb, var(--color-surface-0) 94%, transparent);
+    border-bottom: 1px solid var(--color-surface-200);
+    backdrop-filter: blur(5px);
+  }
+
+  .variant-nav-item {
+    border-radius: 10px;
+    color: var(--color-text-tertiary);
+  }
+  .variant-nav-item:hover {
+    color: var(--color-secondary-700);
+    background: var(--color-secondary-100);
+  }
+  .variant-nav-active {
+    border-radius: 10px;
+    color: #ffffff;
+    background: var(--color-secondary-600);
+  }
+
+  .variant-hero {
+    background:
+      radial-gradient(circle at 18% 30%, color-mix(in srgb, var(--color-primary-200) 65%, transparent) 0%, transparent 38%),
+      radial-gradient(circle at 80% 18%, color-mix(in srgb, var(--color-secondary-200) 68%, transparent) 0%, transparent 34%);
+  }
+
+  .variant-card {
+    background: var(--color-surface-0);
+    border: 1px solid var(--color-surface-200);
+    border-radius: 14px;
+    box-shadow: 0 10px 22px rgba(80, 64, 44, 0.08);
+  }
+
+  .variant-button-primary,
+  .variant-button-secondary,
+  .variant-button-ghost,
+  .variant-input,
+  .variant-option,
+  .variant-option-active,
+  .variant-icon-button {
+    border-radius: 10px;
+    transition: all 150ms ease;
+  }
+
+  .variant-button-primary {
+    color: #fff;
+    background: var(--color-secondary-600);
+  }
+  .variant-button-primary:hover {
+    background: var(--color-secondary-700);
+  }
+
+  .variant-button-secondary {
+    color: var(--color-primary-700);
+    border: 1px solid var(--color-primary-400);
+    background: var(--color-primary-50);
+  }
+  .variant-button-secondary:hover {
+    background: var(--color-primary-100);
+  }
+
+  .variant-button-ghost {
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-surface-200);
+    background: var(--color-surface-50);
+  }
+  .variant-button-ghost:hover {
+    background: var(--color-surface-100);
+  }
+
+  .variant-input {
+    border: 1px solid var(--color-surface-200);
+    background: var(--color-surface-50);
+    color: var(--color-text-primary);
+  }
+  .variant-input:focus {
+    outline: none;
+    border-color: var(--color-secondary-400);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-secondary-300) 28%, transparent);
+  }
+
+  .variant-icon-button {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--color-surface-200);
+    background: var(--color-surface-50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .variant-pill {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.11em;
+    color: var(--color-secondary-700);
+    background: var(--color-secondary-100);
+  }
+  .variant-pill-secondary {
+    color: var(--color-primary-700);
+    background: var(--color-primary-100);
+  }
+
+  .variant-option {
+    border: 1px solid var(--color-surface-200);
+    background: var(--color-surface-50);
+    color: var(--color-text-primary);
+  }
+  .variant-option:hover {
+    border-color: var(--color-secondary-300);
+    background: var(--color-secondary-50);
+  }
+  .variant-option-active {
+    border: 1px solid var(--color-secondary-500);
+    background: var(--color-secondary-500);
+    color: white;
+  }
+}

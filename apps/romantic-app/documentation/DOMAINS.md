@@ -14,9 +14,8 @@ This document defines the core domains in the Romantic App application.
 **Responsibility:** User profile data management and user information.
 
 **Key Concepts:**
-- User profile data (name, age, preferences, etc.)
+- User profile data: name, age, romantic vibe
 - Profile creation and updates
-- User preferences and settings
 - Profile information storage
 - User metadata
 - Profile completeness tracking
@@ -44,7 +43,6 @@ This document defines the core domains in the Romantic App application.
 
 **Out of Scope:**
 - User profile data (handled by User Profile domain)
-- User preferences (handled by User Profile domain)
 
 ---
 

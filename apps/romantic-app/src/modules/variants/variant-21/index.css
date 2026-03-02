@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #fef2f2;
+  --color-primary-100: #fee2e2;
+  --color-primary-200: #fecaca;
+  --color-primary-300: #fca5a5;
+  --color-primary-400: #f87171;
+  --color-primary-500: #b91c1c;
+  --color-primary-600: #991b1b;
+  --color-primary-700: #7f1d1d;
+
+  --color-secondary-50: #fffbeb;
+  --color-secondary-100: #fef3c7;
+  --color-secondary-200: #fde68a;
+  --color-secondary-300: #fcd34d;
+  --color-secondary-400: #fbbf24;
+  --color-secondary-500: #eab308;
+  --color-secondary-600: #ca8a04;
+  --color-secondary-700: #a16207;
+
+  --color-surface-0: #fefefe;
+  --color-surface-50: #fef2f2;
+  --color-surface-100: #fee2e2;
+  --color-surface-200: #fecaca;
+
+  --color-text-primary: #450a0a;
+  --color-text-secondary: #7f1d1d;
+  --color-text-tertiary: #991b1b;
+
+  --color-success: #15803d;
+  --color-warning: #b45309;
+  --color-error: #b91c1c;
+  --color-info: #0e7490;
+
+  --font-sans: 'Noto Sans', system-ui, sans-serif;
+  --font-heading: 'Sora', system-ui, sans-serif;
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }
+}
+
+@layer components {
+  .variant-shell { background: linear-gradient(180deg, #fef2f2 0%, #fefefe 28%); }
+  .variant-nav {
+    background: color-mix(in srgb, var(--color-surface-0) 94%, transparent);
+    border-bottom: 1px solid var(--color-surface-200);
+    backdrop-filter: blur(5px);
+  }
+  .variant-nav-item { border-radius: 10px; color: var(--color-text-tertiary); }
+  .variant-nav-item:hover { color: var(--color-primary-600); background: var(--color-primary-100); }
+  .variant-nav-active { border-radius: 10px; color: #fff; background: var(--color-primary-500); }
+  .variant-hero {
+    background: radial-gradient(circle at 20% 70%, color-mix(in srgb, var(--color-secondary-200) 50%, transparent) 0%, transparent 45%);
+  }
+  .variant-card {
+    background: var(--color-surface-0);
+    border: 1px solid var(--color-surface-200);
+    border-radius: 14px;
+    box-shadow: 0 10px 22px rgba(185,28,28,0.06);
+  }
+  .variant-button-primary, .variant-button-secondary, .variant-button-ghost,
+  .variant-input, .variant-option, .variant-option-active, .variant-icon-button {
+    border-radius: 10px; transition: all 150ms ease;
+  }
+  .variant-button-primary { color: #fff; background: var(--color-primary-500); }
+  .variant-button-primary:hover { background: var(--color-primary-600); }
+  .variant-button-secondary {
+    color: var(--color-secondary-700);
+    border: 1px solid var(--color-secondary-400);
+    background: var(--color-secondary-100);
+  }
+  .variant-button-secondary:hover { background: var(--color-secondary-200); }
+  .variant-button-ghost {
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-surface-200);
+    background: var(--color-surface-50);
+  }
+  .variant-button-ghost:hover { background: var(--color-surface-100); }
+  .variant-input {
+    border: 1px solid var(--color-surface-200);
+    background: var(--color-surface-50);
+    color: var(--color-text-primary);
+  }
+  .variant-input:focus {
+    outline: none;
+    border-color: var(--color-primary-400);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-300) 28%, transparent);
+  }
+  .variant-icon-button {
+    width: 36px; height: 36px;
+    border: 1px solid var(--color-surface-200);
+    background: var(--color-surface-50);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .variant-pill {
+    padding: 4px 10px; border-radius: 999px;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.11em;
+    color: var(--color-primary-700); background: var(--color-primary-100);
+  }
+  .variant-pill-secondary { color: var(--color-secondary-700); background: var(--color-secondary-100); }
+  .variant-option {
+    border: 1px solid var(--color-surface-200);
+    background: var(--color-surface-50);
+    color: var(--color-text-primary);
+  }
+  .variant-option:hover { border-color: var(--color-primary-300); background: var(--color-primary-50); }
+  .variant-option-active {
+    border: 1px solid var(--color-primary-500);
+    background: var(--color-primary-500);
+    color: white;
+  }
+}

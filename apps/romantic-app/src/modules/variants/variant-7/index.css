@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #fff0b8;
+  --color-primary-100: #ffe47a;
+  --color-primary-200: #ffd84a;
+  --color-primary-300: #ffca1a;
+  --color-primary-400: #ffbf00;
+  --color-primary-500: #f4b000;
+  --color-primary-600: #d19100;
+  --color-primary-700: #a76f00;
+
+  --color-secondary-50: #f2ebff;
+  --color-secondary-100: #e4d7ff;
+  --color-secondary-200: #d1b8ff;
+  --color-secondary-300: #bd97ff;
+  --color-secondary-400: #a772ff;
+  --color-secondary-500: #8f4bff;
+  --color-secondary-600: #7a35e5;
+  --color-secondary-700: #6226bc;
+
+  --color-surface-0: #fffdf8;
+  --color-surface-50: #fff8e8;
+  --color-surface-100: #ffeecf;
+  --color-surface-200: #e6d7b6;
+
+  --color-text-primary: #111111;
+  --color-text-secondary: #262626;
+  --color-text-tertiary: #4b5563;
+
+  --color-success: #00a06e;
+  --color-warning: #e69500;
+  --color-error: #cf2d2d;
+  --color-info: #2563eb;
+
+  --font-sans: 'Manrope', system-ui, sans-serif;
+  --font-heading: 'Bricolage Grotesque', system-ui, sans-serif;
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer components {
+  .variant-shell {
+    background:
+      radial-gradient(circle at 92% 8%, #ffe47a 0%, transparent 22%),
+      radial-gradient(circle at 12% 20%, #d1b8ff 0%, transparent 20%),
+      var(--color-surface-50);
+  }
+
+  .variant-nav {
+    background: var(--color-surface-0);
+    border-bottom: 3px solid #111111;
+  }
+
+  .variant-nav-item,
+  .variant-nav-active {
+    border: 2px solid #111111;
+    border-radius: 8px;
+    box-shadow: 2px 2px 0 #111111;
+  }
+
+  .variant-nav-item {
+    background: #fff;
+    color: #111;
+  }
+  .variant-nav-item:hover {
+    background: var(--color-primary-200);
+  }
+  .variant-nav-active {
+    background: var(--color-secondary-400);
+    color: #111;
+  }
+
+  .variant-hero {
+    background: var(--color-surface-0);
+  }
+
+  .variant-card {
+    background: var(--color-surface-0);
+    border: 3px solid #111111;
+    border-radius: 14px;
+    box-shadow: 6px 6px 0 #111111;
+  }
+
+  .variant-button-primary,
+  .variant-button-secondary,
+  .variant-button-ghost,
+  .variant-input,
+  .variant-option,
+  .variant-option-active,
+  .variant-icon-button {
+    border: 2px solid #111111;
+    border-radius: 10px;
+    box-shadow: 3px 3px 0 #111111;
+    transition: all 120ms ease;
+  }
+
+  .variant-button-primary {
+    background: var(--color-primary-400);
+    color: #111111;
+  }
+  .variant-button-primary:hover {
+    transform: translate(-1px, -1px);
+  }
+
+  .variant-button-secondary {
+    background: var(--color-secondary-300);
+    color: #111111;
+  }
+  .variant-button-secondary:hover {
+    transform: translate(-1px, -1px);
+  }
+
+  .variant-button-ghost {
+    background: #ffffff;
+    color: #111111;
+  }
+  .variant-button-ghost:hover {
+    background: var(--color-surface-100);
+  }
+
+  .variant-input {
+    background: #ffffff;
+    color: #111111;
+  }
+  .variant-input:focus {
+    outline: 3px solid var(--color-secondary-400);
+    outline-offset: 1px;
+  }
+
+  .variant-icon-button {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+  }
+
+  .variant-pill {
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 2px solid #111111;
+    background: var(--color-primary-200);
+    color: #111111;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    box-shadow: 2px 2px 0 #111111;
+  }
+
+  .variant-pill-secondary {
+    background: var(--color-secondary-200);
+  }
+
+  .variant-option {
+    background: #ffffff;
+    color: #111111;
+  }
+  .variant-option:hover {
+    background: var(--color-primary-100);
+  }
+  .variant-option-active {
+    background: var(--color-secondary-300);
+    color: #111111;
+  }
+}

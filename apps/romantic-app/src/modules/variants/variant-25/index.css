@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #ecfdf5;
+  --color-primary-100: #d1fae5;
+  --color-primary-200: #a7f3d0;
+  --color-primary-300: #6ee7b7;
+  --color-primary-400: #34d399;
+  --color-primary-500: #10b981;
+  --color-primary-600: #059669;
+  --color-primary-700: #047857;
+
+  --color-secondary-50: #fdf2f8;
+  --color-secondary-100: #fce7f3;
+  --color-secondary-200: #fbcfe8;
+  --color-secondary-300: #f9a8d4;
+  --color-secondary-400: #f472b6;
+  --color-secondary-500: #ec4899;
+  --color-secondary-600: #db2777;
+  --color-secondary-700: #be185d;
+
+  --color-surface-0: #ffffff;
+  --color-surface-50: #f0fdf4;
+  --color-surface-100: #dcfce7;
+  --color-surface-200: #bbf7d0;
+
+  --color-text-primary: #052e16;
+  --color-text-secondary: #14532d;
+  --color-text-tertiary: #166534;
+
+  --color-success: #059669;
+  --color-warning: #d97706;
+  --color-error: #dc2626;
+  --color-info: #0891b2;
+
+  --font-sans: 'Oxygen', system-ui, sans-serif;
+  --font-heading: 'Quicksand', system-ui, sans-serif;
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }
+}
+
+@layer components {
+  .variant-shell {
+    background: linear-gradient(135deg, #ecfdf5 0%, #fdf2f8 50%, #f0fdf4 100%);
+  }
+  .variant-nav {
+    background: color-mix(in srgb, var(--color-surface-0) 94%, transparent);
+    border-bottom: 1px solid var(--color-surface-200);
+    backdrop-filter: blur(5px);
+  }
+  .variant-nav-item { border-radius: 14px; color: var(--color-text-tertiary); }
+  .variant-nav-item:hover { color: var(--color-primary-600); background: var(--color-primary-100); }
+  .variant-nav-active { border-radius: 14px; color: #fff; background: var(--color-primary-500); }
+  .variant-hero {
+    background: radial-gradient(circle at 20% 30%, color-mix(in srgb, var(--color-secondary-200) 60%, transparent) 0%, transparent 45%);
+  }
+  .variant-card {
+    background: var(--color-surface-0);
+    border: 1px solid var(--color-surface-200);
+    border-radius: 20px;
+    box-shadow: 0 10px 22px rgba(16,185,129,0.08);
+  }
+  .variant-button-primary, .variant-button-secondary, .variant-button-ghost,
+  .variant-input, .variant-option, .variant-option-active, .variant-icon-button {
+    border-radius: 14px; transition: all 150ms ease;
+  }
+  .variant-button-primary { color: #fff; background: var(--color-primary-500); }
+  .variant-button-primary:hover { background: var(--color-primary-600); }
+  .variant-button-secondary {
+    color: var(--color-secondary-700);
+    border: 1px solid var(--color-secondary-400);
+    background: var(--color-secondary-100);
+  }
+  .variant-button-secondary:hover { background: var(--color-secondary-200); }
+  .variant-button-ghost {
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-surface-200);
+    background: var(--color-surface-50);
+  }
+  .variant-button-ghost:hover { background: var(--color-surface-100); }
+  .variant-input {
+    border: 1px solid var(--color-surface-200);
+    background: var(--color-surface-50);
+    color: var(--color-text-primary);
+    border-radius: 14px;
+  }
+  .variant-input:focus {
+    outline: none;
+    border-color: var(--color-primary-400);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-300) 28%, transparent);
+  }
+  .variant-icon-button {
+    width: 36px; height: 36px;
+    border: 1px solid var(--color-surface-200);
+    background: var(--color-surface-50);
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 14px;
+  }
+  .variant-pill {
+    padding: 4px 10px; border-radius: 999px;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.11em;
+    color: var(--color-primary-700); background: var(--color-primary-100);
+  }
+  .variant-pill-secondary { color: var(--color-secondary-700); background: var(--color-secondary-100); }
+  .variant-option {
+    border: 1px solid var(--color-surface-200);
+    background: var(--color-surface-50);
+    color: var(--color-text-primary);
+    border-radius: 14px;
+  }
+  .variant-option:hover { border-color: var(--color-primary-300); background: var(--color-primary-50); }
+  .variant-option-active {
+    border: 1px solid var(--color-primary-500);
+    background: var(--color-primary-500);
+    color: white;
+  }
+}

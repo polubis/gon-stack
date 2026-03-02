@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #fafafa;
+  --color-primary-100: #f4f4f5;
+  --color-primary-200: #e4e4e7;
+  --color-primary-300: #d4d4d8;
+  --color-primary-400: #a1a1aa;
+  --color-primary-500: #18181b;
+  --color-primary-600: #09090b;
+  --color-primary-700: #09090b;
+
+  --color-secondary-50: #f4f4f5;
+  --color-secondary-100: #e4e4e7;
+  --color-secondary-200: #d4d4d8;
+  --color-secondary-300: #a1a1aa;
+  --color-secondary-400: #71717a;
+  --color-secondary-500: #52525b;
+  --color-secondary-600: #3f3f46;
+  --color-secondary-700: #27272a;
+
+  --color-surface-0: #ffffff;
+  --color-surface-50: #fafafa;
+  --color-surface-100: #f4f4f5;
+  --color-surface-200: #e4e4e7;
+
+  --color-text-primary: #09090b;
+  --color-text-secondary: #27272a;
+  --color-text-tertiary: #52525b;
+
+  --color-success: #15803d;
+  --color-warning: #a16207;
+  --color-error: #b91c1c;
+  --color-info: #0e7490;
+
+  --font-sans: 'Open Sans', system-ui, sans-serif;
+  --font-heading: 'Montserrat', system-ui, sans-serif;
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 700; }
+}
+
+@layer components {
+  .variant-shell { background: #ffffff; }
+  .variant-nav {
+    background: #fff;
+    border-bottom: 2px solid #09090b;
+  }
+  .variant-nav-item { border-radius: 4px; color: var(--color-text-tertiary); }
+  .variant-nav-item:hover { color: #09090b; background: var(--color-surface-100); }
+  .variant-nav-active { border-radius: 4px; color: #fff; background: #09090b; }
+  .variant-hero {
+    background: var(--color-surface-50);
+    border-bottom: 1px solid var(--color-surface-200);
+  }
+  .variant-card {
+    background: var(--color-surface-0);
+    border: 2px solid #09090b;
+    border-radius: 4px;
+    box-shadow: 4px 4px 0 #09090b;
+  }
+  .variant-button-primary, .variant-button-secondary, .variant-button-ghost,
+  .variant-input, .variant-option, .variant-option-active, .variant-icon-button {
+    border-radius: 4px; transition: all 150ms ease;
+  }
+  .variant-button-primary { color: #fff; background: #09090b; }
+  .variant-button-primary:hover { background: #27272a; }
+  .variant-button-secondary {
+    color: #09090b;
+    border: 2px solid #09090b;
+    background: #fff;
+  }
+  .variant-button-secondary:hover { background: var(--color-surface-50); }
+  .variant-button-ghost {
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-surface-200);
+    background: var(--color-surface-50);
+  }
+  .variant-button-ghost:hover { background: var(--color-surface-100); }
+  .variant-input {
+    border: 2px solid #09090b;
+    background: #fff;
+    color: var(--color-text-primary);
+  }
+  .variant-input:focus {
+    outline: 2px solid #09090b;
+    outline-offset: 2px;
+  }
+  .variant-icon-button {
+    width: 36px; height: 36px;
+    border: 2px solid #09090b;
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .variant-pill {
+    padding: 4px 10px; border-radius: 4px;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.11em;
+    color: #09090b; background: var(--color-surface-200);
+    border: 1px solid #09090b;
+  }
+  .variant-pill-secondary { color: #09090b; background: var(--color-surface-100); border: 1px solid #09090b; }
+  .variant-option {
+    border: 2px solid #09090b;
+    background: #fff;
+    color: var(--color-text-primary);
+  }
+  .variant-option:hover { background: var(--color-surface-50); }
+  .variant-option-active {
+    border: 2px solid #09090b;
+    background: #09090b;
+    color: white;
+  }
+}

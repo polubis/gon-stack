@@ -1,0 +1,184 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #f5f3ff;
+  --color-primary-100: #eae5ff;
+  --color-primary-200: #d7cdff;
+  --color-primary-300: #bfa9ff;
+  --color-primary-400: #a182ff;
+  --color-primary-500: #875dff;
+  --color-primary-600: #7148df;
+  --color-primary-700: #5a34b6;
+
+  --color-secondary-50: #e9fcff;
+  --color-secondary-100: #ccf7ff;
+  --color-secondary-200: #9cefff;
+  --color-secondary-300: #64e3ff;
+  --color-secondary-400: #34d2fa;
+  --color-secondary-500: #1fb7dd;
+  --color-secondary-600: #0f95ba;
+  --color-secondary-700: #0b7492;
+
+  --color-surface-0: #0f1021;
+  --color-surface-50: #151734;
+  --color-surface-100: #202447;
+  --color-surface-200: #313660;
+
+  --color-text-primary: #eef1ff;
+  --color-text-secondary: #d2d8f4;
+  --color-text-tertiary: #9aa4cf;
+
+  --color-success: #2dd4bf;
+  --color-warning: #fbbf24;
+  --color-error: #fb7185;
+  --color-info: #38bdf8;
+
+  --font-sans: 'Outfit', system-ui, sans-serif;
+  --font-heading: 'Prata', Georgia, serif;
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    letter-spacing: 0.01em;
+  }
+}
+
+@layer components {
+  .variant-shell {
+    background:
+      radial-gradient(circle at 15% 18%, color-mix(in srgb, var(--color-primary-500) 36%, transparent) 0%, transparent 34%),
+      radial-gradient(circle at 88% 10%, color-mix(in srgb, var(--color-secondary-400) 28%, transparent) 0%, transparent 26%),
+      linear-gradient(180deg, #0d1125 0%, #131834 42%, #181b3d 100%);
+  }
+
+  .variant-nav {
+    background: color-mix(in srgb, var(--color-surface-50) 78%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-surface-200) 70%, transparent);
+    backdrop-filter: blur(12px);
+  }
+
+  .variant-nav-item {
+    border-radius: 999px;
+    color: var(--color-text-tertiary);
+  }
+  .variant-nav-item:hover {
+    color: var(--color-text-primary);
+    background: color-mix(in srgb, var(--color-primary-300) 20%, transparent);
+  }
+  .variant-nav-active {
+    border-radius: 999px;
+    color: #ffffff;
+    background: linear-gradient(120deg, var(--color-primary-500), var(--color-secondary-500));
+  }
+
+  .variant-hero {
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-primary-600) 22%, transparent),
+      color-mix(in srgb, var(--color-secondary-600) 16%, transparent)
+    );
+  }
+
+  .variant-card {
+    background: color-mix(in srgb, var(--color-surface-100) 72%, transparent);
+    border: 1px solid color-mix(in srgb, #ffffff 16%, transparent);
+    border-radius: 18px;
+    box-shadow: 0 14px 34px rgba(6, 10, 30, 0.35);
+    backdrop-filter: blur(8px);
+  }
+
+  .variant-button-primary,
+  .variant-button-secondary,
+  .variant-button-ghost,
+  .variant-input,
+  .variant-option,
+  .variant-option-active,
+  .variant-icon-button {
+    border-radius: 12px;
+    transition: all 180ms ease;
+  }
+
+  .variant-button-primary {
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--color-primary-500), var(--color-secondary-500));
+  }
+  .variant-button-primary:hover {
+    filter: brightness(1.08);
+  }
+
+  .variant-button-secondary {
+    color: var(--color-secondary-200);
+    border: 1px solid color-mix(in srgb, var(--color-secondary-300) 55%, transparent);
+    background: color-mix(in srgb, var(--color-secondary-500) 10%, transparent);
+  }
+  .variant-button-secondary:hover {
+    background: color-mix(in srgb, var(--color-secondary-400) 18%, transparent);
+  }
+
+  .variant-button-ghost {
+    color: var(--color-text-primary);
+    border: 1px solid color-mix(in srgb, #ffffff 16%, transparent);
+    background: color-mix(in srgb, #ffffff 4%, transparent);
+  }
+  .variant-button-ghost:hover {
+    background: color-mix(in srgb, #ffffff 10%, transparent);
+  }
+
+  .variant-input {
+    border: 1px solid color-mix(in srgb, #ffffff 14%, transparent);
+    background: color-mix(in srgb, #ffffff 6%, transparent);
+    color: var(--color-text-primary);
+  }
+  .variant-input::placeholder {
+    color: var(--color-text-tertiary);
+  }
+  .variant-input:focus {
+    outline: none;
+    border-color: color-mix(in srgb, var(--color-primary-300) 65%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-300) 24%, transparent);
+  }
+
+  .variant-icon-button {
+    width: 36px;
+    height: 36px;
+    border: 1px solid color-mix(in srgb, #ffffff 18%, transparent);
+    background: color-mix(in srgb, #ffffff 7%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .variant-pill {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.11em;
+    color: #ffffff;
+    background: color-mix(in srgb, var(--color-primary-500) 40%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-primary-300) 60%, transparent);
+  }
+  .variant-pill-secondary {
+    background: color-mix(in srgb, var(--color-secondary-500) 30%, transparent);
+    border-color: color-mix(in srgb, var(--color-secondary-300) 62%, transparent);
+  }
+
+  .variant-option {
+    border: 1px solid color-mix(in srgb, #ffffff 14%, transparent);
+    background: color-mix(in srgb, #ffffff 4%, transparent);
+    color: var(--color-text-primary);
+  }
+  .variant-option:hover {
+    background: color-mix(in srgb, var(--color-primary-300) 18%, transparent);
+  }
+  .variant-option-active {
+    border: 1px solid color-mix(in srgb, var(--color-primary-300) 70%, transparent);
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-primary-500) 50%, transparent),
+      color-mix(in srgb, var(--color-secondary-500) 40%, transparent)
+    );
+    color: #ffffff;
+  }
+}

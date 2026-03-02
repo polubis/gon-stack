@@ -23,7 +23,7 @@ Helping people who have a lot of issues in relationships to meet each other perf
 
 **What is the unique value that our product offers to solve the identified problem?** How is it different from existing solutions?
 
-The app creates a user profile where individuals set all required information, and then the app presents questions via game sessions about each other in a fun and engaging way. This gamified approach to relationship discovery makes the process of getting to know someone more enjoyable and less intimidating compared to traditional dating apps or questionnaires. The real-time game format with deadlines adds excitement and encourages authentic responses.
+The app creates a user profile (name, age, [romantic vibe](./romantic-vibe.md)) where individuals set their information, and then the app presents questions via game sessions about each other in a fun and engaging way. This gamified approach to relationship discovery makes the process of getting to know someone more enjoyable and less intimidating compared to traditional dating apps or questionnaires. The real-time game format with deadlines adds excitement and encourages authentic responses.
 
 The quiz covers eight comprehensive relationship categories (Relationship Dynamics, Self-Discovery, Sexual Intimacy, Mutual Respect, Communication and Conflicts, Values and Life Goals, Love Languages and Showing Affection, Trust and Fidelity) plus creative question types (Drawing, Music, Trash Talk) that help couples explore compatibility across all aspects of their relationship. Questions are presented with varying difficulty levels, allowing couples to progress from light topics to deeper, more intimate conversations at their own pace. The simultaneous answering feature ensures honest responses without influence, and the results comparison helps couples understand their compatibility and areas for growth. The gamified scoring system (+1 for matches, 0 for no answer, -1 for mismatches) adds competitive fun, with the first player reaching 10 points declared the winner.
 
@@ -33,7 +33,7 @@ The quiz covers eight comprehensive relationship categories (Relationship Dynami
 
 ### Essential Features:
 
-- **User Profile Creation** - Users can set up their profile with all required information
+- **User Profile Creation** - Users can set up their profile with name, age, and romantic vibe (for now; see [romantic vibe spec](./romantic-vibe.md))
 
 - **Basic Authentication** - Support for Google OAuth and traditional login/password authentication
 
