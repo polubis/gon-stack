@@ -1,14 +1,30 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-import { Counter } from '../components/Counter';
+import '../modules/variants/variant-9/index.css';
+import VariantLayout from '../layouts/VariantLayout.astro';
+import { LandingHome } from '../modules/landing';
 ---
 
-<Layout>
-	<div class="container mx-auto px-4 py-8">
-		<Welcome />
-		<div class="mt-8">
-			<Counter client:load />
-		</div>
+<VariantLayout
+	title="Amoria · Home"
+	fontsUrl="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Sora:wght@400;500;600;700&display=swap"
+>
+	<div class="landing-page-bg">
+		<LandingHome client:load />
 	</div>
-</Layout>
+</VariantLayout>
+
+<style>
+	.landing-page-bg {
+		background:
+			radial-gradient(circle at 10% 50%, color-mix(in srgb, var(--color-secondary-400) 35%, transparent) 0%, transparent 28%),
+			radial-gradient(circle at 90% 30%, color-mix(in srgb, var(--color-primary-400) 35%, transparent) 0%, transparent 30%),
+			repeating-linear-gradient(
+				0deg,
+				rgba(255, 255, 255, 0.03) 0,
+				rgba(255, 255, 255, 0.03) 1px,
+				transparent 1px,
+				transparent 4px
+			),
+			linear-gradient(180deg, #0a0718 0%, #120c24 46%, #1a1133 100%);
+	}
+</style>

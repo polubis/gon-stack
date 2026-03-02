@@ -1,0 +1,187 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: hsl(300 100% 95%);   /* #ffe6ff */
+  --color-primary-100: hsl(300 100% 89%);  /* #ffc9ff */
+  --color-primary-200: hsl(300 100% 81%);  /* #ff9eff */
+  --color-primary-300: hsl(300 100% 70%);  /* #ff67ff */
+  --color-primary-400: hsl(303 100% 60%);  /* #ff33f5 */
+  --color-primary-500: hsl(305 85% 51%);   /* #ec16d9 */
+  --color-primary-600: hsl(305 87% 41%);   /* #c50eb6 */
+  --color-primary-700: hsl(304 90% 31%);    /* #98088f */
+
+  --color-secondary-50: hsl(191 100% 92%);   /* #d8f9ff */
+  --color-secondary-100: hsl(191 100% 85%);  /* #b5f1ff */
+  --color-secondary-200: hsl(191 100% 76%);  /* #84e8ff */
+  --color-secondary-300: hsl(191 100% 63%);  /* #40dcff */
+  --color-secondary-400: hsl(191 100% 48%);  /* #00c8f4 */
+  --color-secondary-500: hsl(191 100% 42%);  /* #00add4 */
+  --color-secondary-600: hsl(191 100% 33%);  /* #0088aa */
+  --color-secondary-700: hsl(191 100% 26%);  /* #006a84 */
+
+  --color-surface-0: hsl(252 42% 7%);    /* #0a0718 */
+  --color-surface-50: hsl(264 52% 10%); /* #120c24 */
+  --color-surface-100: hsl(264 48% 15%); /* #1a1133 */
+  --color-surface-200: hsl(264 51% 22%); /* #29194b */
+
+  --color-text-primary: hsl(258 100% 98%);  /* #f8f5ff */
+  --color-text-secondary: hsl(252 100% 92%); /* #ddd6ff */
+  --color-text-tertiary: hsl(258 44% 74%);  /* #a79ad9 */
+
+  --color-success: hsl(157 63% 55%);  /* #3ddc97 */
+  --color-warning: hsl(42 100% 64%);  /* #ffc857 */
+  --color-error: hsl(343 100% 68%);   /* #ff5d8f */
+  --color-info: hsl(199 95% 60%);     /* #38bdf8 */
+
+  --font-sans: 'Sora', system-ui, sans-serif;
+  --font-heading: 'Chakra Petch', system-ui, sans-serif;
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    letter-spacing: 0.01em;
+  }
+}
+
+@layer components {
+  .variant-shell {
+    background:
+      repeating-linear-gradient(
+        0deg,
+        rgba(255, 255, 255, 0.02) 0,
+        rgba(255, 255, 255, 0.02) 1px,
+        transparent 1px,
+        transparent 4px
+      ),
+      linear-gradient(180deg, #0a0718 0%, #120c24 46%, #1a1133 100%);
+  }
+
+  .variant-nav {
+    background: color-mix(in srgb, var(--color-surface-0) 88%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-primary-500) 45%, transparent);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--color-primary-500) 30%, transparent);
+    backdrop-filter: blur(8px);
+  }
+
+  .variant-nav-item {
+    border-radius: 8px;
+    color: var(--color-text-tertiary);
+  }
+  .variant-nav-item:hover {
+    color: #ffffff;
+    background: color-mix(in srgb, var(--color-primary-500) 24%, transparent);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--color-primary-500) 55%, transparent);
+  }
+  .variant-nav-active {
+    border-radius: 8px;
+    color: #ffffff;
+    background: linear-gradient(120deg, var(--color-primary-500), var(--color-secondary-500));
+    box-shadow: 0 0 12px color-mix(in srgb, var(--color-secondary-400) 60%, transparent);
+  }
+
+  .variant-hero {
+    background:
+      radial-gradient(circle at 10% 50%, color-mix(in srgb, var(--color-secondary-400) 35%, transparent) 0%, transparent 28%),
+      radial-gradient(circle at 90% 30%, color-mix(in srgb, var(--color-primary-400) 35%, transparent) 0%, transparent 30%);
+  }
+
+  .variant-card {
+    background: color-mix(in srgb, var(--color-surface-100) 88%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-secondary-400) 36%, transparent);
+    border-radius: 14px;
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--color-primary-500) 15%, transparent),
+      0 10px 28px rgba(0, 0, 0, 0.45);
+  }
+
+  .variant-button-primary,
+  .variant-button-secondary,
+  .variant-button-ghost,
+  .variant-input,
+  .variant-option,
+  .variant-option-active,
+  .variant-icon-button {
+    border-radius: 10px;
+    transition: all 160ms ease;
+  }
+
+  .variant-button-primary {
+    color: #ffffff;
+    background: linear-gradient(120deg, var(--color-primary-500), #ff4fe3);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--color-primary-400) 50%, transparent);
+  }
+  .variant-button-primary:hover {
+    filter: saturate(1.2);
+  }
+
+  .variant-button-secondary {
+    color: #e8faff;
+    border: 1px solid color-mix(in srgb, var(--color-secondary-300) 65%, transparent);
+    background: color-mix(in srgb, var(--color-secondary-500) 20%, transparent);
+  }
+  .variant-button-secondary:hover {
+    background: color-mix(in srgb, var(--color-secondary-400) 28%, transparent);
+  }
+
+  .variant-button-ghost {
+    color: var(--color-text-primary);
+    border: 1px solid color-mix(in srgb, #ffffff 16%, transparent);
+    background: color-mix(in srgb, #ffffff 5%, transparent);
+  }
+
+  .variant-input {
+    border: 1px solid color-mix(in srgb, var(--color-secondary-300) 45%, transparent);
+    background: color-mix(in srgb, #0f122d 80%, transparent);
+    color: var(--color-text-primary);
+  }
+  .variant-input::placeholder {
+    color: var(--color-text-tertiary);
+  }
+  .variant-input:focus {
+    outline: none;
+    border-color: var(--color-primary-300);
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--color-primary-300) 45%, transparent),
+      0 0 14px color-mix(in srgb, var(--color-primary-400) 50%, transparent);
+  }
+
+  .variant-icon-button {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid color-mix(in srgb, var(--color-secondary-300) 55%, transparent);
+    background: color-mix(in srgb, var(--color-secondary-500) 15%, transparent);
+  }
+
+  .variant-pill {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.11em;
+    color: #fff;
+    border: 1px solid color-mix(in srgb, var(--color-primary-300) 70%, transparent);
+    background: color-mix(in srgb, var(--color-primary-500) 30%, transparent);
+  }
+  .variant-pill-secondary {
+    border-color: color-mix(in srgb, var(--color-secondary-300) 70%, transparent);
+    background: color-mix(in srgb, var(--color-secondary-500) 24%, transparent);
+  }
+
+  .variant-option {
+    border: 1px solid color-mix(in srgb, var(--color-secondary-300) 40%, transparent);
+    background: color-mix(in srgb, #ffffff 4%, transparent);
+    color: var(--color-text-primary);
+  }
+  .variant-option:hover {
+    border-color: color-mix(in srgb, var(--color-primary-300) 70%, transparent);
+  }
+  .variant-option-active {
+    border: 1px solid var(--color-primary-300);
+    background: linear-gradient(120deg, color-mix(in srgb, var(--color-primary-500) 55%, transparent), color-mix(in srgb, var(--color-secondary-500) 45%, transparent));
+    color: #ffffff;
+  }
+}

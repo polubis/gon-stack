@@ -1,7 +1,6 @@
 ---
 version: 1.0
 updated: 2026-03-02
-source: .cursor/documentation/MVP.md, .cursor/documentation/QUIZ_STRUCTURE.md, .cursor/documentation/romantic-vibe.md
 ---
 
 # UX/UI Design Document
