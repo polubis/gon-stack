@@ -11,9 +11,7 @@ Act as a Senior Product Architect and Design System Lead. Transform the product 
 
 ## Input
 
-Read the MVP document at `$ARGUMENTS`. If no argument is provided, use `.cursor/documentation/MVP.md`.
-
-Also read any linked documents referenced within the MVP (e.g., romantic-vibe.md, auth-domain.md) to get full context.
+Use the MVP document provided by the user: from `$ARGUMENTS` (path to the MVP doc), or from the current conversation context (e.g. pasted content or referenced file). Infer all views, flows, and requirements from this MVP definition. If the MVP references other docs (linked or mentioned), use those when the user has made them available in context; otherwise infer from the MVP text alone.
 
 ## Instructions
 
@@ -27,9 +25,9 @@ Also read any linked documents referenced within the MVP (e.g., romantic-vibe.md
 
 ## Output
 
-Write the result to `.cursor/documentation/ux-ui.md` using the structure below.
+Write the result to the path the user requests, or to a documentation file named `ux-ui.md` in the same directory as the MVP (or the project root) if no path is specified. Use the structure below.
 
-For a complete real-world example of the expected output, see [ux-ui-designer-example.md](ux-ui-designer-example.md).
+For a complete real-world example of the expected output, see [examples/format.md](examples/format.md).
 
 ```markdown
 ---
@@ -120,4 +118,4 @@ Rank with a clear recommendation (Option A = recommended).
 
 ## Additional Resources
 
-- For a complete example of the expected output format, see [ux-ui-designer-example.md](ux-ui-designer-example.md)
+- For a complete example of the expected output format, see [examples/format.md](examples/format.md)
