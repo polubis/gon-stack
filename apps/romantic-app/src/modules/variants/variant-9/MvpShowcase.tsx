@@ -1,4 +1,20 @@
 import { type ReactNode } from 'react';
+import {
+  Brush,
+  Chrome,
+  Clock,
+  Eraser,
+  Heart,
+  MessageCircle,
+  Mic,
+  Minus,
+  Music2,
+  Plus,
+  Settings,
+  ShieldCheck,
+  Trophy,
+  User,
+} from 'lucide-react';
 
 const TOTAL_VARIANTS = 26;
 
@@ -42,7 +58,10 @@ function AuthView() {
           <p className="text-sm text-text-secondary">Get closer, one question at a time.</p>
         </div>
         <button className="variant-button-ghost w-full py-2.5 px-4 text-sm font-semibold">
-          Continue with Google
+          <span className="flex items-center justify-center gap-2">
+            <Chrome className="w-4 h-4" aria-hidden="true" />
+            <span>Continue with Google</span>
+          </span>
         </button>
         <div className="flex items-center gap-3">
           <span className="h-px flex-1 bg-surface-200" />
@@ -113,7 +132,9 @@ function RoomView() {
               <p className="text-xs text-text-tertiary">Ready for tonight&apos;s round</p>
             </div>
           </div>
-          <button className="variant-icon-button" aria-label="Settings">⚙️</button>
+          <button className="variant-icon-button" aria-label="Settings">
+            <Settings className="w-4 h-4" aria-hidden="true" />
+          </button>
         </div>
         <div className="variant-card p-5 flex flex-col gap-3">
           <div className="flex items-center justify-between">
@@ -210,7 +231,10 @@ function QuestionMultipleChoiceView() {
             ))}
           </div>
           <div className="flex items-center justify-between text-xs text-text-tertiary">
-            <span>Time remaining</span>
+            <span className="flex items-center gap-1">
+              <Clock className="w-3 h-3" aria-hidden="true" />
+              <span>Time remaining</span>
+            </span>
             <span className="font-semibold text-warning">18s</span>
           </div>
           <div className="h-2 bg-surface-200 overflow-hidden rounded-full">
@@ -254,7 +278,10 @@ function QuestionScaleView() {
             ))}
           </div>
           <div className="flex items-center justify-between text-xs text-text-tertiary">
-            <span>Time remaining</span>
+            <span className="flex items-center gap-1">
+              <Clock className="w-3 h-3" aria-hidden="true" />
+              <span>Time remaining</span>
+            </span>
             <span className="font-semibold text-warning">45s</span>
           </div>
           <div className="h-2 bg-surface-200 overflow-hidden rounded-full">
@@ -338,8 +365,12 @@ function QuestionDrawingView() {
             [Drawing canvas – brush, colors, eraser]
           </div>
           <div className="flex items-center gap-3">
-            <span className="variant-icon-button">🖌️</span>
-            <span className="variant-icon-button">🧹</span>
+            <button type="button" className="variant-icon-button" aria-label="Brush tool">
+              <Brush className="w-4 h-4" aria-hidden="true" />
+            </button>
+            <button type="button" className="variant-icon-button" aria-label="Eraser tool">
+              <Eraser className="w-4 h-4" aria-hidden="true" />
+            </button>
             <div className="flex gap-1">
               <span className="w-6 h-6 rounded-full bg-primary-500 border-2 border-white" />
               <span className="w-6 h-6 rounded-full bg-secondary-400 border-2 border-surface-200" />
@@ -482,7 +513,9 @@ function WinCelebrationView() {
   return (
     <div className="px-4 flex justify-center">
       <div className="variant-card w-full max-w-md p-8 flex flex-col gap-6 text-center">
-        <div className="text-5xl">🏆</div>
+        <div className="flex justify-center">
+          <Trophy className="w-12 h-12 text-yellow-400" aria-hidden="true" />
+        </div>
         <h3 className="text-3xl text-text-primary">Amelia wins!</h3>
         <p className="text-text-secondary">First to 10 points. Great game, you two.</p>
         <div className="flex justify-center gap-4 text-lg">
@@ -503,6 +536,21 @@ function WinCelebrationView() {
 function ComponentShowcaseView() {
   const primarySwatches = [50, 100, 200, 300, 400, 500, 600, 700] as const;
   const secondarySwatches = [50, 100, 200, 300, 400, 500, 600, 700] as const;
+  const sliderPreviewValue = 4;
+  const sliderPreviewRatio = (sliderPreviewValue - 1) / 4;
+  const sliderPreviewThumbSizePx = 16;
+  const systemIcons: { name: string; icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean }> }[] = [
+    { name: 'Heart', icon: Heart },
+    { name: 'User', icon: User },
+    { name: 'Chat', icon: MessageCircle },
+    { name: 'Music', icon: Music2 },
+    { name: 'Mic', icon: Mic },
+    { name: 'Timer', icon: Clock },
+    { name: 'Brush', icon: Brush },
+    { name: 'Eraser', icon: Eraser },
+    { name: 'Shield', icon: ShieldCheck },
+    { name: 'Trophy', icon: Trophy },
+  ];
   return (
     <div className="px-4 flex justify-center">
       <div className="w-full max-w-4xl grid md:grid-cols-2 gap-4">
@@ -522,10 +570,85 @@ function ComponentShowcaseView() {
             <button className="variant-button-secondary px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em]">Secondary</button>
             <button className="variant-button-ghost px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em]">Ghost</button>
           </div>
-          <input readOnly placeholder="Input" className="variant-input px-3 py-2.5 text-sm" />
+          <div className="space-y-1">
+            <div className="flex items-center justify-between gap-3">
+              <label className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
+                Player handle
+              </label>
+              <span className="text-[10px] font-medium text-error">Invalid · read-only</span>
+            </div>
+            <div className="relative">
+              <input
+                readOnly
+                aria-invalid="true"
+                value="player_///invalid"
+                className="variant-input w-full px-3 py-2.5 text-sm"
+                style={{
+                  borderColor: 'var(--color-error)',
+                  boxShadow:
+                    '0 0 0 1px color-mix(in srgb, var(--color-error) 40%, transparent), 0 0 14px color-mix(in srgb, var(--color-error) 55%, transparent)',
+                }}
+              />
+              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[11px] font-semibold uppercase tracking-[0.16em] text-error">
+                Error
+              </div>
+            </div>
+            <p className="text-[11px] text-text-tertiary">
+              Handle uses unsupported characters. Field locked in{' '}
+              <span className="font-semibold text-error">invalid</span> state for review.
+            </p>
+          </div>
           <div className="flex flex-wrap gap-2">
             <span className="variant-pill">Pill</span>
             <span className="variant-pill variant-pill-secondary">Pill secondary</span>
+          </div>
+          <div className="space-y-2 pt-1">
+            <label className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
+              Slider (1-5)
+            </label>
+            <div className="relative pt-7">
+              <span
+                className="variant-pill absolute top-0 -translate-x-1/2"
+                style={{
+                  left: `calc((100% - ${sliderPreviewThumbSizePx}px) * ${sliderPreviewRatio} + ${sliderPreviewThumbSizePx / 2}px)`,
+                }}
+              >
+                {sliderPreviewValue}
+              </span>
+              <input
+                type="range"
+                min={1}
+                max={5}
+                value={sliderPreviewValue}
+                readOnly
+                aria-label="Design system slider example"
+                className="w-full accent-primary-400"
+              />
+            </div>
+            <div className="flex items-center justify-between text-[11px] text-text-tertiary">
+              <span>Low agreement</span>
+              <span>High agreement</span>
+            </div>
+          </div>
+          <div className="space-y-2 pt-1">
+            <label className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
+              Numeric stepper
+            </label>
+            <div className="flex items-center gap-3">
+              <button type="button" className="variant-icon-button" aria-label="Decrease value">
+                <Minus className="w-4 h-4" aria-hidden="true" />
+              </button>
+              <input
+                readOnly
+                value={7}
+                aria-label="Stepper value"
+                className="variant-input w-20 px-3 py-2 text-sm text-center font-semibold"
+              />
+              <button type="button" className="variant-icon-button" aria-label="Increase value">
+                <Plus className="w-4 h-4" aria-hidden="true" />
+              </button>
+              <span className="text-xs text-text-tertiary">evenings per week</span>
+            </div>
           </div>
         </div>
         <div className="variant-card p-5 flex flex-col gap-3 md:col-span-2">
@@ -543,6 +666,29 @@ function ComponentShowcaseView() {
                 <span className="text-[10px] text-text-primary/80">{n}</span>
               </div>
             ))}
+          </div>
+          <div className="mt-4">
+            <p className="text-xs uppercase tracking-[0.16em] text-text-tertiary mb-2">Icons</p>
+            {/* Filled chip style (design system icon buttons) */}
+            <div className="grid grid-cols-5 gap-3 mb-4">
+              {systemIcons.map(({ name, icon: Icon }) => (
+                <div key={`chip-${name}`} className="flex flex-col items-center gap-1">
+                  <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-0 border border-surface-200">
+                    <Icon className="w-4 h-4 text-text-primary" aria-hidden />
+                  </span>
+                  <span className="text-[10px] text-text-tertiary">{name}</span>
+                </div>
+              ))}
+            </div>
+            {/* Raw text-style icons */}
+            <div className="grid grid-cols-5 gap-3">
+              {systemIcons.map(({ name, icon: Icon }) => (
+                <div key={`raw-${name}`} className="flex flex-col items-center gap-1 text-text-primary">
+                  <Icon className="w-4 h-4" aria-hidden />
+                  <span className="text-[10px] text-text-tertiary">{name}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

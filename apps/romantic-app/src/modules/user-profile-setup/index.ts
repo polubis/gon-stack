@@ -1,1 +1,1 @@
-export { ProfileForm } from './profile-form';
+export { UserProfileSetupForm } from './user-profile-setup-form';

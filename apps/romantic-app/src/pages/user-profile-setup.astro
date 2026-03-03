@@ -1,18 +1,22 @@
 ---
 import Main from '../core/layouts/main.astro';
-import { LandingHome } from '../modules/landing';
+import { UserProfileSetupForm } from '../modules/user-profile-setup';
 ---
 
 <Main
-	title="Amoria · Home"
+	title="Profile setup · Amoria"
 >
-	<div class="landing-page-bg">
-		<LandingHome client:load />
-	</div>
+	<main class="setup-page setup-page-bg min-h-screen flex items-center justify-center p-4 md:p-8">
+		<UserProfileSetupForm client:load />
+	</main>
 </Main>
 
 <style>
-	.landing-page-bg {
+	.setup-page {
+		font-family: var(--font-sans);
+	}
+
+	.setup-page-bg {
 		background:
 			radial-gradient(circle at 10% 50%, color-mix(in srgb, var(--color-secondary-400) 35%, transparent) 0%, transparent 28%),
 			radial-gradient(circle at 90% 30%, color-mix(in srgb, var(--color-primary-400) 35%, transparent) 0%, transparent 30%),
