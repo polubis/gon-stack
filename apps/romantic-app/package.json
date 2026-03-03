@@ -14,14 +14,17 @@
     "@astrojs/cloudflare": "^12.6.12",
     "@astrojs/react": "^4.4.2",
     "@hookform/resolvers": "^5.2.2",
+    "@nanostores/react": "^1.0.0",
     "@tailwindcss/vite": "^4.1.18",
     "@types/react": "^19.2.13",
     "@types/react-dom": "^19.2.3",
     "astro": "^5.17.1",
     "lucide-react": "^0.576.0",
+    "nanostores": "^1.1.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-hook-form": "^7.71.2",
+    "rxjs": "^7.8.2",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
