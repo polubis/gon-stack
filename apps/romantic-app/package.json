@@ -8,7 +8,9 @@
     "preview": "astro build && wrangler dev",
     "astro": "astro",
     "deploy": "astro build && wrangler deploy",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "supabase:init": "pnpx supabase init",
+    "supabase:start": "pnpx supabase start"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
@@ -29,6 +31,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
+    "supabase": "^2.76.16",
     "wrangler": "^4.64.0",
     "zod": "^4.3.6"
   }

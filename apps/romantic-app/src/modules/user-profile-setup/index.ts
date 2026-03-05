@@ -1,1 +1,1 @@
-export { UserProfileSetupForm } from './user-profile-setup-form';
+export { Main as UserProfileSetup } from './presentation/main';

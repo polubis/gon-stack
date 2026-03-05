@@ -11,6 +11,7 @@
       "./worker-configuration.d.ts",
       "node"
     ],
+    "strictNullChecks": true,
     "jsx": "react-jsx",
     "jsxImportSource": "react"
   }

@@ -1,78 +1,9 @@
 ---
 import '../modules/variants/variant-8/index.css';
 import VariantLayout from '../layouts/VariantLayout.astro';
-import { Chat as ChatComponent, ChatViewModel } from '../modules/chat';
+import { Chat as ChatComponent } from '../modules/chat';
 
 /** Default/sample view model for development or when no data is injected */
-const defaultChatViewModel: ChatViewModel = {
-  threads: [
-    {
-      id: 'th-01',
-      title: 'Date Night Brainstorm',
-      preview: 'Can you suggest cozy ideas for Friday?',
-      time: '2m ago',
-      unread: 2,
-      active: true,
-      state: 'active'
-    },
-    {
-      id: 'th-02',
-      title: 'Gift Ideas',
-      preview: 'Something meaningful under $50',
-      time: '12m ago',
-      unread: 0,
-      active: false,
-      state: 'idle'
-    },
-    {
-      id: 'th-03',
-      title: 'Weekend Escape',
-      preview: 'Looking for a calm place nearby',
-      time: '41m ago',
-      unread: 0,
-      active: false,
-      state: 'loading'
-    },
-    {
-      id: 'th-04',
-      title: 'Anniversary Note',
-      preview: 'Make it warm but not cheesy',
-      time: 'Yesterday',
-      unread: 0,
-      active: false,
-      state: 'error'
-    }
-  ],
-  messages: [
-    {
-      id: 'm-1',
-      role: 'model',
-      body: "Love this. Let's build a romantic evening with one surprise moment and one grounding ritual."
-    },
-    {
-      id: 'm-2',
-      role: 'user',
-      body: 'Perfect. Keep it low budget, intimate, and no crowded places.'
-    },
-    {
-      id: 'm-3',
-      role: 'system',
-      body: 'Memory updated: prefers intimate plans, low budget, and quiet locations.'
-    },
-    {
-      id: 'm-4',
-      role: 'model',
-      body: 'Plan draft: sunset walk, handwritten note exchange, then homemade dessert with a shared playlist.'
-    }
-  ],
-  threadsSummary: { total: 12 },
-  activeThreadHeader: {
-    title: 'Date Night Brainstorm',
-    modelLabel: 'Model: Amoria-4.1',
-    contextStatus: 'Context window healthy'
-  },
-  connectionStatus: 'connected'
-};
 
 ---
 
@@ -80,5 +11,5 @@ const defaultChatViewModel: ChatViewModel = {
   title="Chat UI: Glass Aurora"
   fontsUrl="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Prata&display=swap"
 >
-  <ChatComponent {...defaultChatViewModel} client:load />
+  <ChatComponent client:load />
 </VariantLayout>

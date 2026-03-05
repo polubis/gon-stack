@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { createHookContext } from '../../../libs/power-context';
-import { createStore } from '../logic/store';
+import { createStore } from '../core/store';
 
-export const [ChatProvider, useChatContext, ChatContext] = createHookContext(
-  'Chat',
+export const [Provider, useContext] = createHookContext(
+  'UserProfile',
   () => useState(createStore)[0],
 );

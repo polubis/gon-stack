@@ -1,10 +1,9 @@
-import { ChatViewModel } from '../models';
 import ChatModule from './chat';
 import { ChatProvider } from './chat-context';
 
-export const Chat = (props: ChatViewModel) => {
+export const Chat = () => {
   return (
-    <ChatProvider value={props}>
+    <ChatProvider>
       <ChatModule />
     </ChatProvider>
   );

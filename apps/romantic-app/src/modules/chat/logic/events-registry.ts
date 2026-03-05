@@ -1,19 +1,14 @@
 import { useEffect, useSyncExternalStore } from 'react';
-import { filter, from, map, mergeMap, of, switchMap, tap } from 'rxjs';
+import { EMPTY, catchError, filter, from, switchMap, tap } from 'rxjs';
 
-import {
-  eda,
-  type FactEvent,
-  type TaskEvent,
-  type TriggerEvent
-} from '../../../libs/eda';
+import { eda, type TriggerEvent } from '../../../libs/eda';
 import {
   getActiveThreadHeader,
   getConnectionStatus,
   getThreadMessages,
   getThreads,
   getThreadsSummary,
-  postAssistantReply
+  postAssistantReply,
 } from '../integration/backend';
 import type {
   ActiveThreadHeader,
@@ -21,76 +16,39 @@ import type {
   Message,
   Thread,
   ThreadState,
-  ThreadsSummary
+  ThreadsSummary,
 } from '../models';
-
-type ChatState = {
-  threads: Thread[];
-  messagesByThread: Record<string, Message[]>;
-  selectedThreadId: string;
-  summary: ThreadsSummary;
-  header: ActiveThreadHeader;
-  draft: string;
-  isSending: boolean;
-  assistantTyping: boolean;
-  connection: ConnectionStatus;
-  errorMessage: string | null;
-};
-
-type SendPayload = {
-  threadId: string;
-  body: string;
-};
+import {
+  $assistantTyping,
+  $chatState,
+  $connection,
+  $draft,
+  $errorMessage,
+  $header,
+  $isSending,
+  $messagesByThread,
+  $selectedThreadId,
+  $summary,
+  $threads,
+  type ChatStoreState,
+  fallbackHeader,
+  getChatState,
+} from './store';
 
 type ChatEvents =
   | TriggerEvent<'[TRIGGER]_CHAT_BOOTSTRAP'>
   | TriggerEvent<'[TRIGGER]_CHAT_THREAD_SELECTED', { threadId: string }>
   | TriggerEvent<'[TRIGGER]_CHAT_DRAFT_UPDATED', { body: string }>
   | TriggerEvent<'[TRIGGER]_CHAT_SEND_CLICKED'>
-  | TriggerEvent<'[TRIGGER]_CHAT_RETRY_CONNECTION'>
-  | TaskEvent<'[TASK]_CHAT_LOAD_BOOTSTRAP'>
-  | TaskEvent<'[TASK]_CHAT_LOAD_THREAD_HEADER', { threadId: string }>
-  | TaskEvent<'[TASK]_CHAT_REQUEST_ASSISTANT_REPLY', SendPayload>
-  | TaskEvent<'[TASK]_CHAT_RETRY_CONNECTION'>
-  | FactEvent<
-      '[FACT]_CHAT_BOOTSTRAP_READY',
-      {
-        threads: Thread[];
-        messagesByThread: Record<string, Message[]>;
-        selectedThreadId: string;
-        summary: ThreadsSummary;
-        header: ActiveThreadHeader;
-      }
-    >
-  | FactEvent<'[FACT]_CHAT_THREAD_SELECTED', { threadId: string }>
-  | FactEvent<'[FACT]_CHAT_THREAD_HEADER_READY', { threadId: string; header: ActiveThreadHeader }>
-  | FactEvent<'[FACT]_CHAT_DRAFT_UPDATED', { body: string }>
-  | FactEvent<'[FACT]_CHAT_USER_MESSAGE_ACCEPTED', SendPayload>
-  | FactEvent<'[FACT]_CHAT_ASSISTANT_TYPING_STARTED'>
-  | FactEvent<'[FACT]_CHAT_ASSISTANT_MESSAGE_READY', SendPayload>
-  | FactEvent<'[FACT]_CHAT_SEND_COMPLETED'>
-  | FactEvent<'[FACT]_CHAT_SEND_FAILED', { message: string }>
-  | FactEvent<'[FACT]_CHAT_CONNECTION_UPDATED', { status: ConnectionStatus }>;
+  | TriggerEvent<'[TRIGGER]_CHAT_RETRY_CONNECTION'>;
 
-const {
-  ofType,
-  trigger,
-  forwardAs,
-  createRegistry,
-  createForwardErrorAs
-} = eda<ChatEvents>();
+const { ofType, trigger, createRegistry } = eda<ChatEvents>();
 
-const forwardErrorAs = createForwardErrorAs<{ message: string }>((error) => {
-  if (error instanceof Error) {
-    return { message: error.message };
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error && error.message.length > 0) {
+    return error.message;
   }
-  return { message: 'Unknown chat error' };
-});
-
-const fallbackHeader: ActiveThreadHeader = {
-  title: 'New Chat',
-  modelLabel: 'Amoria-4.1',
-  contextStatus: 'Context window healthy'
+  return 'Unknown chat error';
 };
 
 const createBootstrap = async () => {
@@ -98,9 +56,15 @@ const createBootstrap = async () => {
   const selectedThread = threads.find((thread) => thread.active) ?? threads[0];
   const selectedThreadId = selectedThread?.id ?? '';
   const summary = await getThreadsSummary();
-  const header = selectedThreadId.length > 0 ? await getActiveThreadHeader(selectedThreadId) : fallbackHeader;
+  const header =
+    selectedThreadId.length > 0
+      ? await getActiveThreadHeader(selectedThreadId)
+      : fallbackHeader;
   const messagesEntries = await Promise.all(
-    threads.map(async (thread) => [thread.id, await getThreadMessages(thread.id)] as const)
+    threads.map(
+      async (thread) =>
+        [thread.id, await getThreadMessages(thread.id)] as const,
+    ),
   );
 
   return {
@@ -108,58 +72,38 @@ const createBootstrap = async () => {
     messagesByThread: Object.fromEntries(messagesEntries),
     selectedThreadId,
     summary,
-    header
+    header,
   };
-};
-
-const createInitialState = (): ChatState => ({
-  threads: [],
-  messagesByThread: {},
-  selectedThreadId: '',
-  summary: { total: 0 },
-  header: fallbackHeader,
-  draft: '',
-  isSending: false,
-  assistantTyping: false,
-  connection: 'connected',
-  errorMessage: null
-});
-
-let state: ChatState = createInitialState();
-const listeners = new Set<() => void>();
-
-const setState = (updater: (previous: ChatState) => ChatState) => {
-  state = updater(state);
-  listeners.forEach((listener) => listener());
 };
 
 const subscribe = (listener: () => void) => {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
+  return $chatState.listen(() => listener());
 };
 
-const getSnapshot = () => state;
+const getSnapshot = () => $chatState.get();
 
 const appendMessage = (
   currentMessagesByThread: Record<string, Message[]>,
   threadId: string,
-  message: Message
+  message: Message,
 ): Record<string, Message[]> => {
   return {
     ...currentMessagesByThread,
-    [threadId]: [...(currentMessagesByThread[threadId] ?? []), message]
+    [threadId]: [...(currentMessagesByThread[threadId] ?? []), message],
   };
 };
 
 const updateThreadState = (
   threads: Thread[],
   threadId: string,
-  updater: (thread: Thread) => Thread
-): Thread[] => threads.map((thread) => (thread.id === threadId ? updater(thread) : thread));
+  updater: (thread: Thread) => Thread,
+): Thread[] =>
+  threads.map((thread) => (thread.id === threadId ? updater(thread) : thread));
 
-const toThreadState = (connection: ConnectionStatus, isSelected: boolean): ThreadState => {
+const toThreadState = (
+  connection: ConnectionStatus,
+  isSelected: boolean,
+): ThreadState => {
   if (connection === 'disconnected') {
     return 'error';
   }
@@ -169,219 +113,179 @@ const toThreadState = (connection: ConnectionStatus, isSelected: boolean): Threa
   return isSelected ? 'active' : 'idle';
 };
 
-const register = () => createRegistry(
-  ofType('[TRIGGER]_CHAT_BOOTSTRAP').pipe(forwardAs('[TASK]_CHAT_LOAD_BOOTSTRAP')),
+const applySendFailed = (message: string) => {
+  const previous = getChatState();
+  $isSending.set(false);
+  $assistantTyping.set(false);
+  $connection.set('disconnected');
+  $errorMessage.set(message);
+  $threads.set(
+    previous.threads.map((thread) => ({
+      ...thread,
+      state: thread.id === previous.selectedThreadId ? 'error' : thread.state,
+    })),
+  );
+};
 
-  ofType('[TASK]_CHAT_LOAD_BOOTSTRAP').pipe(
-    switchMap(() =>
-      from(createBootstrap()).pipe(
-        forwardAs('[FACT]_CHAT_BOOTSTRAP_READY'),
-        forwardErrorAs('[FACT]_CHAT_SEND_FAILED', (error) => ({ message: error.message }))
-      )
-    )
-  ),
+const applyConnectionStatus = (status: ConnectionStatus) => {
+  const previous = getChatState();
+  $connection.set(status);
+  if (status === 'connected') {
+    $errorMessage.set(null);
+  }
+  $threads.set(
+    previous.threads.map((thread) => {
+      const isSelected = thread.id === previous.selectedThreadId;
+      return {
+        ...thread,
+        state: toThreadState(status, isSelected),
+      };
+    }),
+  );
+};
 
-  ofType('[FACT]_CHAT_BOOTSTRAP_READY').pipe(
-    tap(({ threads, messagesByThread, selectedThreadId, summary, header }) => {
-      setState((previous) => ({
-        ...previous,
-        threads,
-        messagesByThread,
-        selectedThreadId,
-        summary,
-        header
-      }));
-    })
-  ),
+const register = () =>
+  createRegistry(
+    ofType('[TRIGGER]_CHAT_BOOTSTRAP').pipe(
+      switchMap(() =>
+        from(createBootstrap()).pipe(
+          tap(
+            ({
+              threads,
+              messagesByThread,
+              selectedThreadId,
+              summary,
+              header,
+            }) => {
+              $threads.set(threads);
+              $messagesByThread.set(messagesByThread);
+              $selectedThreadId.set(selectedThreadId);
+              $summary.set(summary);
+              $header.set(header);
+            },
+          ),
+          catchError((error) => {
+            applySendFailed(getErrorMessage(error));
+            return EMPTY;
+          }),
+        ),
+      ),
+    ),
 
-  ofType('[TRIGGER]_CHAT_THREAD_SELECTED').pipe(forwardAs('[FACT]_CHAT_THREAD_SELECTED')),
-  ofType('[TRIGGER]_CHAT_THREAD_SELECTED').pipe(forwardAs('[TASK]_CHAT_LOAD_THREAD_HEADER')),
+    ofType('[TRIGGER]_CHAT_THREAD_SELECTED').pipe(
+      tap(({ threadId }) => {
+        const currentConnection = $connection.get();
+        const nextThreads = $threads.get().map((thread) => ({
+          ...thread,
+          active: thread.id === threadId,
+          unread: thread.id === threadId ? 0 : thread.unread,
+          state: toThreadState(currentConnection, thread.id === threadId),
+        }));
+        $selectedThreadId.set(threadId);
+        $threads.set(nextThreads);
+      }),
+      switchMap(({ threadId }) =>
+        from(getActiveThreadHeader(threadId)).pipe(
+          tap((header) => {
+            if ($selectedThreadId.get() === threadId) {
+              $header.set(header);
+            }
+          }),
+          catchError((error) => {
+            applySendFailed(getErrorMessage(error));
+            return EMPTY;
+          }),
+        ),
+      ),
+    ),
 
-  ofType('[FACT]_CHAT_THREAD_SELECTED').pipe(
-    tap(({ threadId }) => {
-      setState((previous) => {
-        return {
-          ...previous,
-          selectedThreadId: threadId,
-          threads: previous.threads.map((thread) => ({
-            ...thread,
-            active: thread.id === threadId,
-            unread: thread.id === threadId ? 0 : thread.unread,
-            state: toThreadState(previous.connection, thread.id === threadId)
-          }))
-        };
-      });
-    })
-  ),
-  ofType('[TASK]_CHAT_LOAD_THREAD_HEADER').pipe(
-    switchMap(({ threadId }) =>
-      from(getActiveThreadHeader(threadId)).pipe(
-        map((header) => ({ threadId, header })),
-        forwardAs('[FACT]_CHAT_THREAD_HEADER_READY'),
-        forwardErrorAs('[FACT]_CHAT_SEND_FAILED', (error) => ({ message: error.message }))
-      )
-    )
-  ),
-  ofType('[FACT]_CHAT_THREAD_HEADER_READY').pipe(
-    tap(({ threadId, header }) => {
-      setState((previous) => {
-        if (previous.selectedThreadId !== threadId) {
-          return previous;
+    ofType('[TRIGGER]_CHAT_DRAFT_UPDATED').pipe(
+      tap(({ body }) => {
+        $draft.set(body);
+      }),
+    ),
+
+    ofType('[TRIGGER]_CHAT_SEND_CLICKED').pipe(
+      filter(() => !getChatState().isSending),
+      switchMap(() => {
+        const previous = getChatState();
+        const threadId = previous.selectedThreadId;
+        const body = previous.draft.trim();
+        if (threadId.length === 0 || body.length === 0) {
+          return EMPTY;
         }
 
-        return {
-          ...previous,
-          header
-        };
-      });
-    })
-  ),
-
-  ofType('[TRIGGER]_CHAT_DRAFT_UPDATED').pipe(forwardAs('[FACT]_CHAT_DRAFT_UPDATED')),
-
-  ofType('[FACT]_CHAT_DRAFT_UPDATED').pipe(
-    tap(({ body }) => {
-      setState((previous) => ({ ...previous, draft: body }));
-    })
-  ),
-
-  ofType('[TRIGGER]_CHAT_SEND_CLICKED').pipe(
-    filter(() => !state.isSending),
-    map(() => ({ threadId: state.selectedThreadId, body: state.draft.trim() })),
-    filter(({ threadId, body }) => threadId.length > 0 && body.length > 0),
-    forwardAs('[FACT]_CHAT_USER_MESSAGE_ACCEPTED'),
-    forwardAs('[TASK]_CHAT_REQUEST_ASSISTANT_REPLY')
-  ),
-
-  ofType('[FACT]_CHAT_USER_MESSAGE_ACCEPTED').pipe(
-    tap(({ threadId, body }) => {
-      setState((previous) => {
         const userMessage: Message = {
           id: crypto.randomUUID(),
           role: 'user',
-          body
+          body,
         };
 
-        return {
-          ...previous,
-          draft: '',
-          isSending: true,
-          assistantTyping: true,
-          errorMessage: null,
-          messagesByThread: appendMessage(previous.messagesByThread, threadId, userMessage),
-          threads: updateThreadState(previous.threads, threadId, (thread) => ({
+        $draft.set('');
+        $isSending.set(true);
+        $assistantTyping.set(true);
+        $errorMessage.set(null);
+        $messagesByThread.set(
+          appendMessage(previous.messagesByThread, threadId, userMessage),
+        );
+        $threads.set(
+          updateThreadState(previous.threads, threadId, (thread) => ({
             ...thread,
             preview: body,
             time: 'now',
-            state: 'active'
-          }))
-        };
-      });
-    }),
-    forwardAs('[FACT]_CHAT_ASSISTANT_TYPING_STARTED')
-  ),
+            state: 'active',
+          })),
+        );
 
-  ofType('[TASK]_CHAT_REQUEST_ASSISTANT_REPLY').pipe(
-    switchMap(({ threadId, body }) =>
-      from(postAssistantReply({ threadId, body })).pipe(
-        map((reply) => ({ threadId, body: reply })),
-        forwardAs('[FACT]_CHAT_ASSISTANT_MESSAGE_READY'),
-        forwardErrorAs('[FACT]_CHAT_SEND_FAILED', (error) => ({ message: error.message }))
-      )
-    )
-  ),
+        return from(postAssistantReply({ threadId, body })).pipe(
+          tap((reply) => {
+            const current = getChatState();
+            const modelMessage: Message = {
+              id: crypto.randomUUID(),
+              role: 'model',
+              body: reply,
+            };
 
-  ofType('[FACT]_CHAT_ASSISTANT_MESSAGE_READY').pipe(
-    tap(({ threadId, body }) => {
-      setState((previous) => {
-        const modelMessage: Message = {
-          id: crypto.randomUUID(),
-          role: 'model',
-          body
-        };
+            $messagesByThread.set(
+              appendMessage(current.messagesByThread, threadId, modelMessage),
+            );
+            $threads.set(
+              updateThreadState(current.threads, threadId, (thread) => ({
+                ...thread,
+                preview: reply,
+                time: 'now',
+                state: 'active',
+              })),
+            );
+            $isSending.set(false);
+            $assistantTyping.set(false);
+          }),
+          catchError((error) => {
+            applySendFailed(getErrorMessage(error));
+            return EMPTY;
+          }),
+        );
+      }),
+    ),
 
-        return {
-          ...previous,
-          messagesByThread: appendMessage(previous.messagesByThread, threadId, modelMessage),
-          threads: updateThreadState(previous.threads, threadId, (thread) => ({
-            ...thread,
-            preview: body,
-            time: 'now',
-            state: 'active'
-          }))
-        };
-      });
-    }),
-    forwardAs('[FACT]_CHAT_SEND_COMPLETED')
-  ),
-
-  ofType('[FACT]_CHAT_SEND_COMPLETED').pipe(
-    tap(() => {
-      setState((previous) => ({
-        ...previous,
-        isSending: false,
-        assistantTyping: false
-      }));
-    })
-  ),
-
-  ofType('[FACT]_CHAT_SEND_FAILED').pipe(
-    tap(({ message }) => {
-      setState((previous) => ({
-        ...previous,
-        isSending: false,
-        assistantTyping: false,
-        connection: 'disconnected',
-        errorMessage: message,
-        threads: previous.threads.map((thread) => ({
-          ...thread,
-          state: thread.id === previous.selectedThreadId ? 'error' : thread.state
-        }))
-      }));
-    })
-  ),
-
-  ofType('[TRIGGER]_CHAT_RETRY_CONNECTION').pipe(
-    forwardAs('[TASK]_CHAT_RETRY_CONNECTION')
-  ),
-
-  ofType('[TASK]_CHAT_RETRY_CONNECTION').pipe(
-    switchMap(() =>
-      of({ status: 'reconnecting' as ConnectionStatus }).pipe(
-        forwardAs('[FACT]_CHAT_CONNECTION_UPDATED'),
-        mergeMap(() =>
-          from(getConnectionStatus()).pipe(
-            map((status) => ({ status })),
-            forwardAs('[FACT]_CHAT_CONNECTION_UPDATED'),
-            forwardErrorAs('[FACT]_CHAT_CONNECTION_UPDATED', () => ({ status: 'disconnected' as ConnectionStatus }))
-          )
-        )
-      )
-    )
-  ),
-
-  ofType('[FACT]_CHAT_CONNECTION_UPDATED').pipe(
-    tap(({ status }) => {
-      setState((previous) => ({
-        ...previous,
-        connection: status,
-        errorMessage: status === 'connected' ? null : previous.errorMessage,
-        threads: previous.threads.map((thread) => {
-          const isSelected = thread.id === previous.selectedThreadId;
-          return {
-            ...thread,
-            state: toThreadState(status, isSelected)
-          };
-        })
-      }));
-    })
-  )
-);
+    ofType('[TRIGGER]_CHAT_RETRY_CONNECTION').pipe(
+      tap(() => applyConnectionStatus('reconnecting')),
+      switchMap(() =>
+        from(getConnectionStatus()).pipe(
+          tap((status) => applyConnectionStatus(status)),
+          catchError(() => {
+            applyConnectionStatus('disconnected');
+            return EMPTY;
+          }),
+        ),
+      ),
+    ),
+  );
 
 type ChatEventsRegistry = {
   register: () => () => void;
   subscribe: (listener: () => void) => () => void;
-  getSnapshot: () => ChatState;
+  getSnapshot: () => ChatStoreState;
   triggerBootstrap: () => void;
   triggerThreadSelected: (threadId: string) => void;
   triggerDraftUpdated: (body: string) => void;
@@ -394,10 +298,12 @@ const createChatEventsRegistry = (): ChatEventsRegistry => ({
   subscribe,
   getSnapshot,
   triggerBootstrap: () => trigger('[TRIGGER]_CHAT_BOOTSTRAP'),
-  triggerThreadSelected: (threadId) => trigger('[TRIGGER]_CHAT_THREAD_SELECTED', { threadId }),
-  triggerDraftUpdated: (body) => trigger('[TRIGGER]_CHAT_DRAFT_UPDATED', { body }),
+  triggerThreadSelected: (threadId) =>
+    trigger('[TRIGGER]_CHAT_THREAD_SELECTED', { threadId }),
+  triggerDraftUpdated: (body) =>
+    trigger('[TRIGGER]_CHAT_DRAFT_UPDATED', { body }),
   triggerSendClicked: () => trigger('[TRIGGER]_CHAT_SEND_CLICKED'),
-  triggerRetryConnection: () => trigger('[TRIGGER]_CHAT_RETRY_CONNECTION')
+  triggerRetryConnection: () => trigger('[TRIGGER]_CHAT_RETRY_CONNECTION'),
 });
 
 const chatRegistry = createChatEventsRegistry();
@@ -436,7 +342,10 @@ export const useChatCommunication = (): ChatViewState & ChatViewActions => {
     ensureRegistryStarted();
   }, []);
 
-  const snapshot = useSyncExternalStore(chatRegistry.subscribe, chatRegistry.getSnapshot);
+  const snapshot = useSyncExternalStore(
+    chatRegistry.subscribe,
+    chatRegistry.getSnapshot,
+  );
 
   return {
     threads: snapshot.threads,
@@ -451,6 +360,6 @@ export const useChatCommunication = (): ChatViewState & ChatViewActions => {
     selectThread: chatRegistry.triggerThreadSelected,
     updateDraft: chatRegistry.triggerDraftUpdated,
     sendMessage: chatRegistry.triggerSendClicked,
-    retryConnection: chatRegistry.triggerRetryConnection
+    retryConnection: chatRegistry.triggerRetryConnection,
   };
 };
