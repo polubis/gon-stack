@@ -1,28 +1,16 @@
-import { ReactNode } from 'react';
+import { Key } from '../../../libs/ts-more';
+import { GetUserProfile } from '../../../shared/contracts/backend/open-schema';
 
 export type Step = number;
-export type QuestionId = string;
-export type Age = number;
-export type Name = string;
 
-type QuestionBase = {
-  id: QuestionId;
-  category: string;
-  content: string;
-};
+export type QuestionGroups = GetUserProfile['response']['groups'];
 
-export type TextQuestion = QuestionBase & {
-  type: 'text';
-  min: number;
-  max: number;
-};
+export type QuestionGroup = GetUserProfile['response']['groups'][number];
 
-export type NumberQuestion = QuestionBase & {
-  type: 'number';
-  min: number;
-  max: number;
-};
+export type Question = QuestionGroup['questions'][number];
 
-export type Question = TextQuestion | NumberQuestion;
+export type QuestionKey = Key<'user-profile.display-name' | 'user-profile.age'>;
 
-export type StepsAsComponents = Record<Step, ReactNode>;
+export type QuestionValue = string | number;
+
+export type Answers = Record<QuestionKey, QuestionValue>;

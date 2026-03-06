@@ -1,11 +1,13 @@
-import { useContext } from '../context';
-import { StepComponent } from './models';
+import { useContext } from './context';
 
-export const Initial: StepComponent = () => {
+export const Welcome = () => {
   const ctx = useContext();
 
   return (
     <div className="flex flex-col gap-4">
+      <header className="flex items-center justify-between gap-3">
+        <div className="variant-pill">PROFILE SETUP</div>
+      </header>
       <h1 className="text-2xl md:text-3xl font-heading font-semibold text-text-primary">
         Let&apos;s set up your relationship profile
       </h1>
@@ -26,5 +28,3 @@ export const Initial: StepComponent = () => {
     </div>
   );
 };
-
-Initial.label = 'Initial';

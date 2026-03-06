@@ -1,17 +1,13 @@
 type QuestionConstraints = {
-  min?: number;
-  max?: number;
-  required?: boolean;
+  min: number;
+  max: number;
+  required: boolean;
 };
-
-/** Tuple of supported question versions; only 'v1' is available for now */
-type QuestionVersion = 'v1';
 
 type UserProfileQuestion =
   | {
       id: number;
       key: string;
-      version: QuestionVersion;
       question: string;
       category: string;
       constraints: QuestionConstraints;
@@ -21,17 +17,17 @@ type UserProfileQuestion =
   | {
       id: number;
       key: string;
-      version: QuestionVersion;
+
       question: string;
       category: string;
       constraints: QuestionConstraints;
       type: 'select';
-      // add select-specific fields here
+      options: { value: string; label: string }[];
     }
   | {
       id: number;
       key: string;
-      version: QuestionVersion;
+
       question: string;
       category: string;
       constraints: QuestionConstraints;
@@ -41,7 +37,6 @@ type UserProfileQuestion =
   | {
       id: number;
       key: string;
-      version: QuestionVersion;
       question: string;
       category: string;
       constraints: QuestionConstraints;
@@ -52,6 +47,12 @@ type UserProfileQuestion =
 export type GetUserProfile = {
   path: '/config/user-profile';
   response: {
-    questions: UserProfileQuestion[];
+    groups: {
+      id: number;
+      key: string;
+      label: string;
+      description: string;
+      questions: UserProfileQuestion[];
+    }[];
   };
 };

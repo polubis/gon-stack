@@ -1,12 +1,22 @@
 import { useContext } from './context';
-import { Steps } from './steps';
+import { Final } from './final';
+import { Header } from './header';
+import { Welcome } from './welcome';
+import { Step } from './step';
 
 export const Router = () => {
   const ctx = useContext();
+  const isStarted = ctx.$isStarted.use();
+  const isFinished = ctx.$isFinished.use();
 
-  const step = ctx.$step.use();
-
-  const Step = Steps[step];
-
-  return <Step />;
+  return !isStarted ? (
+    <Welcome />
+  ) : isFinished ? (
+    <Final />
+  ) : (
+    <>
+      <Header />
+      <Step />
+    </>
+  );
 };
