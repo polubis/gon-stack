@@ -1,12 +1,7 @@
-import { ReactElement } from 'react';
-import { useContext } from './context';
+import { useContext } from '../context';
+import { StepComponent } from './models';
 
-type StepComponent = {
-  (): ReactElement;
-  label: string;
-};
-
-const Initial: StepComponent = () => {
+export const Initial: StepComponent = () => {
   const ctx = useContext();
 
   return (
@@ -33,9 +28,3 @@ const Initial: StepComponent = () => {
 };
 
 Initial.label = 'Initial';
-
-export const Steps = {
-  Initial,
-} as const;
-
-export const Components = [Steps.Initial] as const;

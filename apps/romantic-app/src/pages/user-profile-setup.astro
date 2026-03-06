@@ -1,20 +1,22 @@
 ---
-import Main from '../core/layouts/main.astro';
-import { UserProfileSetupForm } from '../modules/user-profile-setup';
+import Layout from '../core/layouts/main.astro';
+import { Main } from '../modules/user-profile-setup';
+import { UserProfileSetupForm } from '../modules/user-profile-setup/user-profile-setup-form';
 ---
 
-<Main
+<Layout
 	title="Profile setup · Amoria"
 >
 	<main class="setup-page setup-page-bg min-h-screen flex items-center justify-center p-4 md:p-8">
+		<Main client:load />
 		<UserProfileSetupForm client:load />
 	</main>
-</Main>
+</Layout>
 
 <style>
 	.setup-page {
 		font-family: var(--font-sans);
-	}
+}
 
 	.setup-page-bg {
 		background:

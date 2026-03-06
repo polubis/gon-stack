@@ -2,9 +2,12 @@ import { ReactNode } from 'react';
 
 export type Step = number;
 export type QuestionId = string;
+export type Age = number;
+export type Name = string;
 
 type QuestionBase = {
   id: QuestionId;
+  category: string;
   content: string;
 };
 

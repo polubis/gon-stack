@@ -593,9 +593,8 @@ function ComponentShowcaseView() {
                 Error
               </div>
             </div>
-            <p className="text-[11px] text-text-tertiary">
-              Handle uses unsupported characters. Field locked in{' '}
-              <span className="font-semibold text-error">invalid</span> state for review.
+            <p className="mt-1 min-h-4 text-[11px] text-error">
+              Handle is required and must be between 2 and 32 characters.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">

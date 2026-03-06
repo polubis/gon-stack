@@ -1,1 +1,1 @@
-export { Main as UserProfileSetup } from './presentation/main';
+export { Main } from './presentation/main';

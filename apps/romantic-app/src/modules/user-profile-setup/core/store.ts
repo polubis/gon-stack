@@ -7,16 +7,30 @@ export const createStore = () => {
   const $questionsList = computed([$questions], (questions) =>
     Object.values(questions),
   );
+  const $age = atom<Models.Age | null>(null);
+  const $name = atom<Models.Name | null>(null);
 
   const start = () => {
     $step.set(1);
+  };
+
+  const prev = () => {
+    $step.set($step.get() - 1);
+  };
+
+  const next = () => {
+    $step.set($step.get() + 1);
   };
 
   return {
     $step,
     $questions,
     $questionsList,
+    $age,
+    $name,
     start,
+    prev,
+    next,
   };
 };
 
