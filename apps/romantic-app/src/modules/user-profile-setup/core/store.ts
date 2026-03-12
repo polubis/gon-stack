@@ -18,10 +18,6 @@ export const createStore = () => {
     return group;
   });
 
-  const setGroups = (groups: QuestionGroups) => {
-    $groups.set(groups);
-  };
-
   const start = () => {
     $isStarted.set(true);
     $isFinished.set(false);
@@ -66,7 +62,6 @@ export const createStore = () => {
     $answers,
     $totalSteps,
     $currentGroup,
-    setGroups,
     start,
     prev,
     next,
