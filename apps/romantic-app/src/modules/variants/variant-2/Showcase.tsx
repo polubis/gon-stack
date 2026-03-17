@@ -61,7 +61,9 @@ function AuthSection() {
 
   return (
     <Section label="Section A — Auth View">
-      <h2 className="text-2xl font-bold text-text-primary mb-8">Login Screen</h2>
+      <h2 className="text-2xl font-bold text-text-primary mb-8">
+        Login Screen
+      </h2>
       <div className="flex justify-center">
         <div className="w-full max-w-sm bg-surface-0 rounded-2xl shadow-lg p-8 border border-surface-200">
           {/* Logo */}
@@ -69,7 +71,9 @@ function AuthSection() {
             <div className="w-16 h-16 rounded-2xl bg-primary-50 border border-primary-100 flex items-center justify-center text-3xl mb-3 shadow-sm">
               🌊
             </div>
-            <h1 className="text-2xl font-bold text-text-primary tracking-tight">Amoria</h1>
+            <h1 className="text-2xl font-bold text-text-primary tracking-tight">
+              Amoria
+            </h1>
             <p className="text-sm text-text-tertiary mt-1 text-center">
               Discover your love language together
             </p>
@@ -78,10 +82,22 @@ function AuthSection() {
           {/* Google OAuth */}
           <button className="w-full flex items-center justify-center gap-3 border border-surface-200 rounded-lg py-2.5 px-4 text-sm font-medium text-text-secondary hover:bg-surface-50 hover:border-primary-200 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 mb-4">
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              <path
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                fill="#4285F4"
+              />
+              <path
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                fill="#34A853"
+              />
+              <path
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
+                fill="#FBBC05"
+              />
+              <path
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                fill="#EA4335"
+              />
             </svg>
             Continue with Google
           </button>
@@ -89,7 +105,9 @@ function AuthSection() {
           {/* Divider */}
           <div className="relative flex items-center my-4">
             <div className="flex-grow border-t border-surface-200" />
-            <span className="mx-3 text-xs text-text-tertiary font-medium">or</span>
+            <span className="mx-3 text-xs text-text-tertiary font-medium">
+              or
+            </span>
             <div className="flex-grow border-t border-surface-200" />
           </div>
 
@@ -127,8 +145,11 @@ function AuthSection() {
           </button>
 
           <p className="text-center text-xs text-text-tertiary mt-5">
-            Don't have an account?{' '}
-            <a href="#" className="text-primary-600 font-semibold hover:text-primary-700 transition-colors">
+            {"Don't have an account?"}{' '}
+            <a
+              href="#"
+              className="text-primary-600 font-semibold hover:text-primary-700 transition-colors"
+            >
               Sign up
             </a>
           </p>
@@ -141,9 +162,24 @@ function AuthSection() {
 // ─── Section B: Dashboard ────────────────────────────────────────────────────
 
 const recentRooms = [
-  { title: 'Morning Check-in', date: 'Today', score: '12–10', category: 'Intimacy' },
-  { title: 'Weekend Reflections', date: 'Yesterday', score: '8–8', category: 'Values' },
-  { title: 'Communication Deep Dive', date: '2 days ago', score: '15–11', category: 'Communication' },
+  {
+    title: 'Morning Check-in',
+    date: 'Today',
+    score: '12–10',
+    category: 'Intimacy',
+  },
+  {
+    title: 'Weekend Reflections',
+    date: 'Yesterday',
+    score: '8–8',
+    category: 'Values',
+  },
+  {
+    title: 'Communication Deep Dive',
+    date: '2 days ago',
+    score: '15–11',
+    category: 'Communication',
+  },
 ];
 
 function DashboardSection() {
@@ -160,14 +196,32 @@ function DashboardSection() {
               AK
             </div>
             <div>
-              <p className="text-sm font-semibold text-text-primary leading-tight">Alex & Kim</p>
-              <p className="text-xs text-text-tertiary">Together since Jan 2023</p>
+              <p className="text-sm font-semibold text-text-primary leading-tight">
+                Alex & Kim
+              </p>
+              <p className="text-xs text-text-tertiary">
+                Together since Jan 2023
+              </p>
             </div>
           </div>
           <button className="w-9 h-9 rounded-lg flex items-center justify-center text-text-tertiary hover:bg-surface-50 hover:text-text-secondary transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+              />
             </svg>
           </button>
         </div>
@@ -180,7 +234,9 @@ function DashboardSection() {
                 <p className="text-xs font-semibold uppercase tracking-widest text-primary-600 mb-1">
                   Romantic Vibe
                 </p>
-                <h3 className="text-lg font-bold text-text-primary">Deeply Connected</h3>
+                <h3 className="text-lg font-bold text-text-primary">
+                  Deeply Connected
+                </h3>
               </div>
               <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center text-xl border border-primary-200">
                 💙
@@ -248,13 +304,19 @@ function DashboardSection() {
                       {room.title}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-xs text-text-tertiary">{room.date}</span>
+                      <span className="text-xs text-text-tertiary">
+                        {room.date}
+                      </span>
                       <span className="w-1 h-1 rounded-full bg-surface-200" />
-                      <span className="text-xs text-primary-600 font-medium">{room.category}</span>
+                      <span className="text-xs text-primary-600 font-medium">
+                        {room.category}
+                      </span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold text-text-secondary font-mono">{room.score}</p>
+                    <p className="text-sm font-bold text-text-secondary font-mono">
+                      {room.score}
+                    </p>
                     <p className="text-xs text-text-tertiary">Score</p>
                   </div>
                 </div>
@@ -282,7 +344,9 @@ function GameSessionSection() {
 
   return (
     <Section label="Section C — Game Session">
-      <h2 className="text-2xl font-bold text-text-primary mb-8">Question View</h2>
+      <h2 className="text-2xl font-bold text-text-primary mb-8">
+        Question View
+      </h2>
       <div className="max-w-lg mx-auto bg-surface-0 rounded-2xl shadow-lg border border-surface-200 overflow-hidden">
         {/* Score Bar */}
         <div className="flex items-center justify-between px-5 py-3.5 bg-surface-50 border-b border-surface-100">
@@ -318,7 +382,7 @@ function GameSessionSection() {
 
           {/* Question */}
           <p className="text-base font-semibold text-text-primary leading-snug mb-5">
-            What's the most important thing in a relationship?
+            {"What's the most important thing in a relationship?"}
           </p>
 
           {/* Options */}
@@ -333,9 +397,13 @@ function GameSessionSection() {
                     : 'bg-surface-50 border border-surface-200 text-text-secondary hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700'
                 }`}
               >
-                <span className={`inline-flex w-5 h-5 rounded-full mr-2.5 items-center justify-center text-xs font-bold ${
-                  selected === i ? 'bg-white/20 text-white' : 'bg-surface-200 text-text-tertiary'
-                }`}>
+                <span
+                  className={`inline-flex w-5 h-5 rounded-full mr-2.5 items-center justify-center text-xs font-bold ${
+                    selected === i
+                      ? 'bg-white/20 text-white'
+                      : 'bg-surface-200 text-text-tertiary'
+                  }`}
+                >
                   {String.fromCharCode(65 + i)}
                 </span>
                 {opt}
@@ -347,7 +415,10 @@ function GameSessionSection() {
           <div className="mb-4">
             <div className="flex justify-between text-xs text-text-tertiary mb-1.5">
               <span>Time remaining</span>
-              <span className="font-mono font-semibold text-primary-600">0:{timerPct < 10 ? '0' : ''}{Math.floor(timerPct * 0.62)}s</span>
+              <span className="font-mono font-semibold text-primary-600">
+                0:{timerPct < 10 ? '0' : ''}
+                {Math.floor(timerPct * 0.62)}s
+              </span>
             </div>
             <div className="h-2 rounded-full bg-surface-100 overflow-hidden">
               <div
@@ -373,29 +444,49 @@ function GameSessionSection() {
 function ResultsSection() {
   return (
     <Section label="Section D — Results Reveal">
-      <h2 className="text-2xl font-bold text-text-primary mb-8">Answer Reveal</h2>
+      <h2 className="text-2xl font-bold text-text-primary mb-8">
+        Answer Reveal
+      </h2>
       <div className="max-w-lg mx-auto space-y-5">
         {/* Answer cards */}
         <div className="grid grid-cols-2 gap-3">
           {[
-            { name: 'Alex', initials: 'A', answer: 'Open, empathetic communication', color: 'primary' },
-            { name: 'Kim', initials: 'K', answer: 'Open, empathetic communication', color: 'secondary' },
+            {
+              name: 'Alex',
+              initials: 'A',
+              answer: 'Open, empathetic communication',
+              color: 'primary',
+            },
+            {
+              name: 'Kim',
+              initials: 'K',
+              answer: 'Open, empathetic communication',
+              color: 'secondary',
+            },
           ].map(({ name, initials, answer, color }) => (
             <div
               key={name}
               className={`bg-surface-0 rounded-2xl border p-4 shadow-sm ${
-                color === 'primary' ? 'border-primary-200' : 'border-secondary-200'
+                color === 'primary'
+                  ? 'border-primary-200'
+                  : 'border-secondary-200'
               }`}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold mb-2 ${
-                color === 'primary'
-                  ? 'bg-primary-100 text-primary-700'
-                  : 'bg-secondary-100 text-secondary-600'
-              }`}>
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold mb-2 ${
+                  color === 'primary'
+                    ? 'bg-primary-100 text-primary-700'
+                    : 'bg-secondary-100 text-secondary-600'
+                }`}
+              >
                 {initials}
               </div>
-              <p className="text-xs font-semibold text-text-tertiary mb-1">{name} answered</p>
-              <p className="text-sm font-semibold text-text-primary leading-snug">{answer}</p>
+              <p className="text-xs font-semibold text-text-tertiary mb-1">
+                {name} answered
+              </p>
+              <p className="text-sm font-semibold text-text-primary leading-snug">
+                {answer}
+              </p>
             </div>
           ))}
         </div>
@@ -403,12 +494,24 @@ function ResultsSection() {
         {/* Match Indicator */}
         <div className="bg-surface-0 rounded-2xl border border-success/30 p-4 shadow-sm flex items-center justify-center gap-3">
           <div className="w-10 h-10 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center">
-            <svg className="w-5 h-5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            <svg
+              className="w-5 h-5 text-success"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4.5 12.75l6 6 9-13.5"
+              />
             </svg>
           </div>
           <div>
-            <p className="text-sm font-bold text-text-primary">Perfect Match!</p>
+            <p className="text-sm font-bold text-text-primary">
+              Perfect Match!
+            </p>
             <p className="text-xs text-success font-semibold">+1 point each</p>
           </div>
           <div className="ml-auto text-2xl font-bold text-success">+1</div>
@@ -421,16 +524,28 @@ function ResultsSection() {
           </p>
           <p className="text-sm text-text-secondary leading-relaxed">
             Couples who prioritize open communication report{' '}
-            <span className="font-semibold text-secondary-600">67% higher relationship satisfaction</span>{' '}
-            than those who don't. Practice active listening daily.
+            <span className="font-semibold text-secondary-600">
+              67% higher relationship satisfaction
+            </span>{' '}
+            {"than those who don't. Practice active listening daily."}
           </p>
         </div>
 
         {/* Next button */}
         <button className="w-full bg-primary-500 hover:bg-primary-600 text-white rounded-lg py-3 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 shadow-sm flex items-center justify-center gap-2">
           Next Question
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 5l7 7-7 7"
+            />
           </svg>
         </button>
       </div>
@@ -460,7 +575,10 @@ const badges = [
   { label: 'Intimacy', cls: 'bg-primary-100 text-primary-700' },
   { label: 'Values', cls: 'bg-emerald-100 text-emerald-700' },
   { label: 'Medium', cls: 'bg-amber-100 text-amber-700' },
-  { label: 'Easy', cls: 'bg-primary-50 text-primary-600 border border-primary-200' },
+  {
+    label: 'Easy',
+    cls: 'bg-primary-50 text-primary-600 border border-primary-200',
+  },
   { label: 'Hard', cls: 'bg-red-100 text-red-700' },
 ];
 
@@ -469,7 +587,9 @@ function ComponentShowcaseSection() {
 
   return (
     <Section label="Section E — Component Showcase">
-      <h2 className="text-2xl font-bold text-text-primary mb-8">Design System</h2>
+      <h2 className="text-2xl font-bold text-text-primary mb-8">
+        Design System
+      </h2>
       <div className="space-y-10">
         {/* Typography */}
         <div className="bg-surface-0 rounded-2xl border border-surface-200 p-7 shadow-sm">
@@ -477,17 +597,32 @@ function ComponentShowcaseSection() {
             Typography — Quicksand (headings) + Inter (body)
           </p>
           <div className="space-y-2">
-            <h1 className="text-4xl font-bold text-text-primary">H1 — Amoria Together</h1>
-            <h2 className="text-3xl font-bold text-text-primary">H2 — Your Journey</h2>
-            <h3 className="text-2xl font-bold text-text-primary">H3 — Daily Reflections</h3>
-            <h4 className="text-xl font-bold text-text-primary">H4 — Session Overview</h4>
-            <h5 className="text-lg font-semibold text-text-primary">H5 — Question Category</h5>
-            <h6 className="text-base font-semibold text-text-secondary">H6 — Room Details</h6>
+            <h1 className="text-4xl font-bold text-text-primary">
+              H1 — Amoria Together
+            </h1>
+            <h2 className="text-3xl font-bold text-text-primary">
+              H2 — Your Journey
+            </h2>
+            <h3 className="text-2xl font-bold text-text-primary">
+              H3 — Daily Reflections
+            </h3>
+            <h4 className="text-xl font-bold text-text-primary">
+              H4 — Session Overview
+            </h4>
+            <h5 className="text-lg font-semibold text-text-primary">
+              H5 — Question Category
+            </h5>
+            <h6 className="text-base font-semibold text-text-secondary">
+              H6 — Room Details
+            </h6>
             <p className="text-sm text-text-secondary leading-relaxed mt-3">
-              Body — Open, honest conversations help couples build deeper understanding. Share your thoughts freely and listen with empathy to strengthen your bond every day.
+              Body — Open, honest conversations help couples build deeper
+              understanding. Share your thoughts freely and listen with empathy
+              to strengthen your bond every day.
             </p>
             <p className="text-xs text-text-tertiary mt-1">
-              Caption — Session completed · March 2, 2026 · 12 questions answered
+              Caption — Session completed · March 2, 2026 · 12 questions
+              answered
             </p>
           </div>
         </div>
@@ -573,7 +708,9 @@ function ComponentShowcaseSection() {
                 defaultValue="invalid@"
                 className="w-full rounded-lg border border-error ring-2 ring-error/30 px-3 py-2.5 text-sm text-text-primary focus:outline-none transition-all bg-surface-0"
               />
-              <p className="text-xs text-error mt-1 font-medium">Please enter a valid email address</p>
+              <p className="text-xs text-error mt-1 font-medium">
+                Please enter a valid email address
+              </p>
             </div>
           </div>
         </div>
@@ -618,7 +755,10 @@ function SectionDivider() {
 
 export default function Showcase() {
   return (
-    <div className="min-h-screen bg-surface-50" style={{ fontFamily: 'var(--font-sans)' }}>
+    <div
+      className="min-h-screen bg-surface-50"
+      style={{ fontFamily: 'var(--font-sans)' }}
+    >
       <NavBar />
 
       {/* Hero header */}
@@ -626,17 +766,30 @@ export default function Showcase() {
         <div className="max-w-5xl mx-auto px-4 pt-12 pb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-100 border border-primary-200 mb-4">
             <span className="text-base">🌊</span>
-            <span className="text-xs font-semibold text-primary-700 tracking-wide">Ocean Breeze</span>
+            <span className="text-xs font-semibold text-primary-700 tracking-wide">
+              Ocean Breeze
+            </span>
           </div>
-          <h1 className="text-4xl font-bold text-text-primary mb-2">Variant 2</h1>
+          <h1 className="text-4xl font-bold text-text-primary mb-2">
+            Variant 2
+          </h1>
           <p className="text-base text-text-tertiary max-w-lg">
-            Clean, airy and refreshing. A teal-cyan and indigo palette inspired by calm coastal mornings — clarity and depth in every interaction.
+            Clean, airy and refreshing. A teal-cyan and indigo palette inspired
+            by calm coastal mornings — clarity and depth in every interaction.
           </p>
           <div className="flex flex-wrap items-center gap-2 mt-4">
-            <span className="px-3 py-1 rounded-full bg-primary-100 text-primary-700 text-xs font-semibold">Teal / Cyan</span>
-            <span className="px-3 py-1 rounded-full bg-secondary-100 text-secondary-700 text-xs font-semibold">Indigo</span>
-            <span className="px-3 py-1 rounded-full bg-surface-100 text-text-secondary text-xs font-semibold border border-surface-200">Quicksand</span>
-            <span className="px-3 py-1 rounded-full bg-surface-100 text-text-secondary text-xs font-semibold border border-surface-200">Inter</span>
+            <span className="px-3 py-1 rounded-full bg-primary-100 text-primary-700 text-xs font-semibold">
+              Teal / Cyan
+            </span>
+            <span className="px-3 py-1 rounded-full bg-secondary-100 text-secondary-700 text-xs font-semibold">
+              Indigo
+            </span>
+            <span className="px-3 py-1 rounded-full bg-surface-100 text-text-secondary text-xs font-semibold border border-surface-200">
+              Quicksand
+            </span>
+            <span className="px-3 py-1 rounded-full bg-surface-100 text-text-secondary text-xs font-semibold border border-surface-200">
+              Inter
+            </span>
           </div>
         </div>
       </div>

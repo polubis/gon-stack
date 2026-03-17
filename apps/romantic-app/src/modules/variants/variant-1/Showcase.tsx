@@ -18,9 +18,11 @@ function VariantNav() {
               href={`/${n}`}
               className={`
                 px-2 py-1 rounded-full text-xs font-semibold transition-colors
-                ${n === 1
-                  ? 'bg-primary-500 text-white'
-                  : 'text-text-secondary hover:bg-primary-50 hover:text-primary-600'}
+                ${
+                  n === 1
+                    ? 'bg-primary-500 text-white'
+                    : 'text-text-secondary hover:bg-primary-50 hover:text-primary-600'
+                }
               `}
             >
               {n}
@@ -66,7 +68,11 @@ function AuthView() {
         {/* Logo */}
         <div className="flex flex-col items-center gap-2">
           <div className="w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center">
-            <span className="text-3xl leading-none" role="img" aria-label="heart">
+            <span
+              className="text-3xl leading-none"
+              role="img"
+              aria-label="heart"
+            >
               &#10084;&#65039;
             </span>
           </div>
@@ -142,8 +148,11 @@ function AuthView() {
 
         {/* Sign up link */}
         <p className="text-center text-xs text-text-tertiary">
-          Don't have an account?{' '}
-          <a href="#" className="font-semibold text-primary-600 hover:text-primary-700 transition-colors">
+          {"Don't have an account?"}{' '}
+          <a
+            href="#"
+            className="font-semibold text-primary-600 hover:text-primary-700 transition-colors"
+          >
             Sign up
           </a>
         </p>
@@ -171,15 +180,37 @@ function DashboardView() {
             <span className="text-sm font-bold text-primary-700">AK</span>
           </div>
           <div>
-            <p className="text-sm font-bold text-text-primary leading-tight">Alex &amp; Kim</p>
+            <p className="text-sm font-bold text-text-primary leading-tight">
+              Alex &amp; Kim
+            </p>
             <p className="text-xs text-text-tertiary">Together 2y 4m</p>
           </div>
         </div>
         {/* Gear icon */}
-        <button className="text-text-tertiary hover:text-text-secondary transition-colors" aria-label="Settings">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065Z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+        <button
+          className="text-text-tertiary hover:text-text-secondary transition-colors"
+          aria-label="Settings"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.8}
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065Z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+            />
           </svg>
         </button>
       </div>
@@ -187,11 +218,19 @@ function DashboardView() {
       {/* Romantic vibe summary */}
       <div className="bg-primary-50 rounded-xl p-5 border border-primary-100">
         <div className="flex items-start gap-3">
-          <span className="text-2xl" role="img" aria-label="sparkles">&#10024;</span>
+          <span className="text-2xl" role="img" aria-label="sparkles">
+            &#10024;
+          </span>
           <div>
-            <h3 className="text-sm font-bold text-primary-700 mb-1">Your Romantic Vibe</h3>
+            <h3 className="text-sm font-bold text-primary-700 mb-1">
+              Your Romantic Vibe
+            </h3>
             <p className="text-xs text-text-secondary leading-relaxed">
-              You and Kim align beautifully on <strong>words of affirmation</strong> and <strong>quality time</strong>. Keep exploring new ways to connect — your compatibility score is <span className="text-primary-600 font-bold">87%</span>.
+              You and Kim align beautifully on{' '}
+              <strong>words of affirmation</strong> and{' '}
+              <strong>quality time</strong>. Keep exploring new ways to connect
+              — your compatibility score is{' '}
+              <span className="text-primary-600 font-bold">87%</span>.
             </p>
           </div>
         </div>
@@ -204,7 +243,9 @@ function DashboardView() {
 
       {/* Join room */}
       <div className="space-y-2">
-        <p className="text-xs font-semibold text-text-tertiary text-center">or enter a room code</p>
+        <p className="text-xs font-semibold text-text-tertiary text-center">
+          or enter a room code
+        </p>
         <input
           type="text"
           placeholder="A1B2C3"
@@ -219,24 +260,39 @@ function DashboardView() {
 
       {/* Recent games */}
       <div>
-        <h3 className="text-xs font-bold uppercase tracking-widest text-text-tertiary mb-3">Recent Games</h3>
+        <h3 className="text-xs font-bold uppercase tracking-widest text-text-tertiary mb-3">
+          Recent Games
+        </h3>
         <div className="space-y-2">
           {recentGames.map((g) => (
-            <div key={g.date} className="flex items-center justify-between bg-surface-0 rounded-xl px-4 py-3 shadow-sm border border-surface-100">
+            <div
+              key={g.date}
+              className="flex items-center justify-between bg-surface-0 rounded-xl px-4 py-3 shadow-sm border border-surface-100"
+            >
               <div>
                 <p className="text-xs text-text-tertiary">{g.date}</p>
-                <p className="text-sm font-semibold text-text-primary">vs {g.partner}</p>
+                <p className="text-sm font-semibold text-text-primary">
+                  vs {g.partner}
+                </p>
               </div>
               <div className="text-right">
-                <p className="text-sm font-bold font-mono text-text-primary">{g.score}</p>
-                <p className={`text-xs font-semibold ${
-                  g.result === 'win'
-                    ? 'text-success'
+                <p className="text-sm font-bold font-mono text-text-primary">
+                  {g.score}
+                </p>
+                <p
+                  className={`text-xs font-semibold ${
+                    g.result === 'win'
+                      ? 'text-success'
+                      : g.result === 'loss'
+                        ? 'text-error'
+                        : 'text-warning'
+                  }`}
+                >
+                  {g.result === 'win'
+                    ? 'Win'
                     : g.result === 'loss'
-                    ? 'text-error'
-                    : 'text-warning'
-                }`}>
-                  {g.result === 'win' ? 'Win' : g.result === 'loss' ? 'Loss' : 'Draw'}
+                      ? 'Loss'
+                      : 'Draw'}
                 </p>
               </div>
             </div>
@@ -264,12 +320,8 @@ function GameQuestionView() {
     <div className="max-w-sm mx-auto space-y-5">
       {/* Score bar */}
       <div className="grid grid-cols-2 rounded-xl overflow-hidden shadow-md text-center text-sm font-bold">
-        <div className="bg-primary-100 text-primary-700 py-3">
-          Alex: 7
-        </div>
-        <div className="bg-secondary-100 text-secondary-700 py-3">
-          Kim: 5
-        </div>
+        <div className="bg-primary-100 text-primary-700 py-3">Alex: 7</div>
+        <div className="bg-secondary-100 text-secondary-700 py-3">Kim: 5</div>
       </div>
 
       {/* Question card */}
@@ -282,12 +334,14 @@ function GameQuestionView() {
           <span className="bg-amber-100 text-amber-700 text-xs font-semibold rounded-full px-3 py-1">
             Medium
           </span>
-          <span className="ml-auto text-xs text-text-tertiary font-mono">Q 3 / 10</span>
+          <span className="ml-auto text-xs text-text-tertiary font-mono">
+            Q 3 / 10
+          </span>
         </div>
 
         {/* Question */}
         <h2 className="text-base font-bold text-text-primary leading-snug">
-          What's the most important thing in a relationship?
+          {"What's the most important thing in a relationship?"}
         </h2>
 
         {/* Options */}
@@ -298,14 +352,20 @@ function GameQuestionView() {
               onClick={() => setSelected(i)}
               className={`
                 w-full text-left rounded-md px-4 py-3 text-sm font-semibold transition-all border-2
-                ${selected === i
-                  ? 'bg-primary-500 text-white border-primary-500 shadow-md'
-                  : 'bg-surface-50 text-text-secondary border-surface-200 hover:border-primary-300 hover:bg-primary-50'}
+                ${
+                  selected === i
+                    ? 'bg-primary-500 text-white border-primary-500 shadow-md'
+                    : 'bg-surface-50 text-text-secondary border-surface-200 hover:border-primary-300 hover:bg-primary-50'
+                }
               `}
             >
-              <span className={`inline-block w-5 h-5 rounded-full text-xs text-center leading-5 mr-2 font-bold ${
-                selected === i ? 'bg-white text-primary-600' : 'bg-surface-200 text-text-tertiary'
-              }`}>
+              <span
+                className={`inline-block w-5 h-5 rounded-full text-xs text-center leading-5 mr-2 font-bold ${
+                  selected === i
+                    ? 'bg-white text-primary-600'
+                    : 'bg-surface-200 text-text-tertiary'
+                }`}
+              >
                 {String.fromCharCode(65 + i)}
               </span>
               {opt}
@@ -349,7 +409,9 @@ function ResultsRevealView() {
     <div className="max-w-sm mx-auto space-y-5">
       {/* Header */}
       <div className="text-center space-y-1">
-        <h2 className="text-xl font-bold text-text-primary">Answers Revealed!</h2>
+        <h2 className="text-xl font-bold text-text-primary">
+          Answers Revealed!
+        </h2>
         <p className="text-sm text-text-tertiary">You both answered the same</p>
       </div>
 
@@ -377,8 +439,21 @@ function ResultsRevealView() {
       {/* Match indicator */}
       <div className="flex flex-col items-center gap-1">
         <div className="w-10 h-10 rounded-full bg-success flex items-center justify-center shadow-md">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth={2.5} aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="white"
+            strokeWidth={2.5}
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M5 13l4 4L19 7"
+            />
           </svg>
         </div>
         <p className="text-base font-bold text-success">+1 point!</p>
@@ -388,15 +463,22 @@ function ResultsRevealView() {
       {/* Educational tip card */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-2">
         <div className="flex items-start gap-2">
-          <span className="text-lg" role="img" aria-label="lightbulb">&#128161;</span>
+          <span className="text-lg" role="img" aria-label="lightbulb">
+            &#128161;
+          </span>
           <div className="flex-1">
-            <p className="text-xs font-bold text-blue-700 mb-1">Did you know?</p>
+            <p className="text-xs font-bold text-blue-700 mb-1">
+              Did you know?
+            </p>
             <p className="text-xs text-blue-700 leading-relaxed">
-              Trust is consistently ranked as the #1 foundation in healthy long-term relationships across every culture studied.
+              Trust is consistently ranked as the #1 foundation in healthy
+              long-term relationships across every culture studied.
             </p>
             {learnMore && (
               <p className="text-xs text-blue-600 leading-relaxed mt-2">
-                Research from the Gottman Institute shows that couples who score high on trust and commitment are 89% more likely to report relationship satisfaction over 10 years.
+                Research from the Gottman Institute shows that couples who score
+                high on trust and commitment are 89% more likely to report
+                relationship satisfaction over 10 years.
               </p>
             )}
           </div>
@@ -423,10 +505,11 @@ function ResultsRevealView() {
 function ComponentShowcase() {
   return (
     <div className="max-w-2xl mx-auto space-y-10">
-
       {/* Typography */}
       <div className="bg-surface-0 rounded-xl shadow-md p-6 space-y-4">
-        <h3 className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Typography</h3>
+        <h3 className="text-xs font-bold uppercase tracking-widest text-text-tertiary">
+          Typography
+        </h3>
         <h1 className="text-4xl font-extrabold text-text-primary">Heading 1</h1>
         <h2 className="text-3xl font-bold text-text-primary">Heading 2</h2>
         <h3 className="text-2xl font-bold text-text-primary">Heading 3</h3>
@@ -434,16 +517,20 @@ function ComponentShowcase() {
         <h5 className="text-lg font-semibold text-text-primary">Heading 5</h5>
         <h6 className="text-base font-semibold text-text-primary">Heading 6</h6>
         <p className="text-base text-text-secondary">
-          Body text — DM Sans at 1rem. Use for main content, descriptions, and supportive copy that guides the user through the experience.
+          Body text — DM Sans at 1rem. Use for main content, descriptions, and
+          supportive copy that guides the user through the experience.
         </p>
         <p className="text-sm text-text-tertiary">
-          Caption — DM Sans at 0.875rem. Metadata, timestamps, and helper labels.
+          Caption — DM Sans at 0.875rem. Metadata, timestamps, and helper
+          labels.
         </p>
       </div>
 
       {/* Buttons */}
       <div className="bg-surface-0 rounded-xl shadow-md p-6 space-y-4">
-        <h3 className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Buttons</h3>
+        <h3 className="text-xs font-bold uppercase tracking-widest text-text-tertiary">
+          Buttons
+        </h3>
         <div className="flex flex-wrap gap-3 items-center">
           <button className="px-5 py-2.5 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-semibold transition-colors shadow-sm">
             Primary
@@ -465,23 +552,41 @@ function ComponentShowcase() {
 
       {/* Badges */}
       <div className="bg-surface-0 rounded-xl shadow-md p-6 space-y-4">
-        <h3 className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Badges</h3>
+        <h3 className="text-xs font-bold uppercase tracking-widest text-text-tertiary">
+          Badges
+        </h3>
         <div className="flex flex-wrap gap-2">
-          <span className="bg-primary-100 text-primary-700 text-xs font-semibold rounded-full px-3 py-1">Love Language</span>
-          <span className="bg-secondary-100 text-secondary-700 text-xs font-semibold rounded-full px-3 py-1">Communication</span>
-          <span className="bg-amber-100 text-amber-700 text-xs font-semibold rounded-full px-3 py-1">Medium</span>
-          <span className="bg-green-100 text-green-700 text-xs font-semibold rounded-full px-3 py-1">Easy</span>
-          <span className="bg-red-100 text-red-700 text-xs font-semibold rounded-full px-3 py-1">Hard</span>
-          <span className="bg-surface-200 text-text-tertiary text-xs font-semibold rounded-full px-3 py-1">Neutral</span>
+          <span className="bg-primary-100 text-primary-700 text-xs font-semibold rounded-full px-3 py-1">
+            Love Language
+          </span>
+          <span className="bg-secondary-100 text-secondary-700 text-xs font-semibold rounded-full px-3 py-1">
+            Communication
+          </span>
+          <span className="bg-amber-100 text-amber-700 text-xs font-semibold rounded-full px-3 py-1">
+            Medium
+          </span>
+          <span className="bg-green-100 text-green-700 text-xs font-semibold rounded-full px-3 py-1">
+            Easy
+          </span>
+          <span className="bg-red-100 text-red-700 text-xs font-semibold rounded-full px-3 py-1">
+            Hard
+          </span>
+          <span className="bg-surface-200 text-text-tertiary text-xs font-semibold rounded-full px-3 py-1">
+            Neutral
+          </span>
         </div>
       </div>
 
       {/* Input */}
       <div className="bg-surface-0 rounded-xl shadow-md p-6 space-y-4">
-        <h3 className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Input Fields</h3>
+        <h3 className="text-xs font-bold uppercase tracking-widest text-text-tertiary">
+          Input Fields
+        </h3>
         <div className="space-y-3">
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-text-secondary">Default state</label>
+            <label className="block text-xs font-semibold text-text-secondary">
+              Default state
+            </label>
             <input
               type="text"
               placeholder="Placeholder text"
@@ -490,7 +595,9 @@ function ComponentShowcase() {
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-text-secondary">Focus state (ring-2 ring-primary-500)</label>
+            <label className="block text-xs font-semibold text-text-secondary">
+              Focus state (ring-2 ring-primary-500)
+            </label>
             <input
               type="text"
               defaultValue="Active input"
@@ -503,11 +610,15 @@ function ComponentShowcase() {
 
       {/* Color palette */}
       <div className="bg-surface-0 rounded-xl shadow-md p-6 space-y-5">
-        <h3 className="text-xs font-bold uppercase tracking-widest text-text-tertiary">Color Palette</h3>
+        <h3 className="text-xs font-bold uppercase tracking-widest text-text-tertiary">
+          Color Palette
+        </h3>
 
         {/* Primary */}
         <div>
-          <p className="text-xs font-semibold text-text-tertiary mb-2">Primary — Pink</p>
+          <p className="text-xs font-semibold text-text-tertiary mb-2">
+            Primary — Pink
+          </p>
           <div className="flex gap-1">
             {[
               ['bg-primary-50', '50'],
@@ -521,7 +632,9 @@ function ComponentShowcase() {
             ].map(([cls, label]) => (
               <div key={label} className="flex-1 space-y-1">
                 <div className={`${cls} h-10 rounded`} />
-                <p className="text-center text-[10px] text-text-tertiary font-mono">{label}</p>
+                <p className="text-center text-[10px] text-text-tertiary font-mono">
+                  {label}
+                </p>
               </div>
             ))}
           </div>
@@ -529,7 +642,9 @@ function ComponentShowcase() {
 
         {/* Secondary */}
         <div>
-          <p className="text-xs font-semibold text-text-tertiary mb-2">Secondary — Violet</p>
+          <p className="text-xs font-semibold text-text-tertiary mb-2">
+            Secondary — Violet
+          </p>
           <div className="flex gap-1">
             {[
               ['bg-secondary-50', '50'],
@@ -543,7 +658,9 @@ function ComponentShowcase() {
             ].map(([cls, label]) => (
               <div key={label} className="flex-1 space-y-1">
                 <div className={`${cls} h-10 rounded`} />
-                <p className="text-center text-[10px] text-text-tertiary font-mono">{label}</p>
+                <p className="text-center text-[10px] text-text-tertiary font-mono">
+                  {label}
+                </p>
               </div>
             ))}
           </div>
@@ -551,19 +668,27 @@ function ComponentShowcase() {
 
         {/* Semantic */}
         <div>
-          <p className="text-xs font-semibold text-text-tertiary mb-2">Semantic</p>
+          <p className="text-xs font-semibold text-text-tertiary mb-2">
+            Semantic
+          </p>
           <div className="flex gap-2">
             <div className="flex-1 space-y-1">
               <div className="h-10 rounded bg-success" />
-              <p className="text-center text-[10px] text-text-tertiary font-mono">Success</p>
+              <p className="text-center text-[10px] text-text-tertiary font-mono">
+                Success
+              </p>
             </div>
             <div className="flex-1 space-y-1">
               <div className="h-10 rounded bg-warning" />
-              <p className="text-center text-[10px] text-text-tertiary font-mono">Warning</p>
+              <p className="text-center text-[10px] text-text-tertiary font-mono">
+                Warning
+              </p>
             </div>
             <div className="flex-1 space-y-1">
               <div className="h-10 rounded bg-error" />
-              <p className="text-center text-[10px] text-text-tertiary font-mono">Error</p>
+              <p className="text-center text-[10px] text-text-tertiary font-mono">
+                Error
+              </p>
             </div>
           </div>
         </div>
@@ -590,11 +715,12 @@ export default function Showcase() {
             Variant 1: Soft Rose
           </h1>
           <p className="text-sm text-text-tertiary">
-            <span className="font-semibold text-text-secondary">Nunito</span> headings
-            &nbsp;·&nbsp;
-            <span className="font-semibold text-text-secondary">DM Sans</span> body
-            &nbsp;·&nbsp;
-            Pink primary &amp; Violet secondary
+            <span className="font-semibold text-text-secondary">Nunito</span>{' '}
+            headings &nbsp;·&nbsp;
+            <span className="font-semibold text-text-secondary">
+              DM Sans
+            </span>{' '}
+            body &nbsp;·&nbsp; Pink primary &amp; Violet secondary
           </p>
         </div>
       </div>

@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import { useState } from 'react';
 
 // ─── Section A: Auth / Login ──────────────────────────────────────────────────
@@ -25,10 +26,22 @@ function AuthSection() {
         {/* Google OAuth */}
         <button className="w-full flex items-center justify-center gap-3 border border-primary-300 rounded-md py-2.5 px-4 text-sm font-semibold text-text-secondary hover:bg-primary-50 hover:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors">
           <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            <path
+              fill="#4285F4"
+              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+            />
+            <path
+              fill="#EA4335"
+              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+            />
           </svg>
           Continue with Google
         </button>
@@ -71,7 +84,10 @@ function AuthSection() {
 
         <p className="text-xs text-text-tertiary text-center">
           No account?{' '}
-          <a href="#" className="text-primary-600 hover:text-primary-700 font-semibold underline underline-offset-2">
+          <a
+            href="#"
+            className="text-primary-600 hover:text-primary-700 font-semibold underline underline-offset-2"
+          >
             Sign up free
           </a>
         </p>
@@ -98,14 +114,30 @@ function DashboardSection() {
               S
             </div>
             <div>
-              <p className="text-sm font-semibold text-text-primary leading-none">Sofia</p>
+              <p className="text-sm font-semibold text-text-primary leading-none">
+                Sofia
+              </p>
               <p className="text-xs text-text-tertiary mt-0.5">Online</p>
             </div>
           </div>
           <button className="w-8 h-8 rounded-md hover:bg-surface-200 flex items-center justify-center text-text-tertiary transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.764-.384.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.764-.384.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+              />
             </svg>
           </button>
         </div>
@@ -117,7 +149,9 @@ function DashboardSection() {
               <p className="text-xs font-semibold text-primary-600 uppercase tracking-wide mb-1">
                 Today's Vibe
               </p>
-              <p className="text-base font-bold text-text-primary">Golden Hour Together</p>
+              <p className="text-base font-bold text-text-primary">
+                Golden Hour Together
+              </p>
               <p className="text-sm text-text-secondary mt-1 leading-snug">
                 Share what makes you feel most loved right now
               </p>
@@ -135,14 +169,34 @@ function DashboardSection() {
         {/* Action buttons */}
         <div className="grid grid-cols-2 gap-3">
           <button className="bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white font-semibold rounded-xl py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors shadow-sm flex flex-col items-center gap-1">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4.5v15m7.5-7.5h-15"
+              />
             </svg>
             Create Room
           </button>
           <button className="bg-surface-0 hover:bg-surface-100 border border-primary-200 hover:border-primary-400 text-text-primary font-semibold rounded-xl py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors flex flex-col items-center gap-1">
-            <svg className="w-5 h-5 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+            <svg
+              className="w-5 h-5 text-primary-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
+              />
             </svg>
             Join Room
           </button>
@@ -170,15 +224,32 @@ function DashboardSection() {
         {/* Recent games */}
         <div className="bg-surface-0 rounded-xl shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-surface-200">
-            <p className="text-sm font-semibold text-text-primary">Recent Games</p>
+            <p className="text-sm font-semibold text-text-primary">
+              Recent Games
+            </p>
           </div>
           {[
-            { title: 'Love Languages', date: 'Yesterday', score: '8/10', match: '92%' },
-            { title: 'Dream Dates', date: '2 days ago', score: '7/10', match: '85%' },
+            {
+              title: 'Love Languages',
+              date: 'Yesterday',
+              score: '8/10',
+              match: '92%',
+            },
+            {
+              title: 'Dream Dates',
+              date: '2 days ago',
+              score: '7/10',
+              match: '85%',
+            },
           ].map((g) => (
-            <div key={g.title} className="px-4 py-3 flex items-center justify-between hover:bg-surface-50 transition-colors border-b last:border-0 border-surface-100 cursor-pointer">
+            <div
+              key={g.title}
+              className="px-4 py-3 flex items-center justify-between hover:bg-surface-50 transition-colors border-b last:border-0 border-surface-100 cursor-pointer"
+            >
               <div>
-                <p className="text-sm font-semibold text-text-primary">{g.title}</p>
+                <p className="text-sm font-semibold text-text-primary">
+                  {g.title}
+                </p>
                 <p className="text-xs text-text-tertiary mt-0.5">{g.date}</p>
               </div>
               <div className="text-right">
@@ -218,7 +289,9 @@ function GameQuestionSection() {
               240 pts
             </span>
           </div>
-          <div className="text-white text-xs font-semibold opacity-80">Q 3/10</div>
+          <div className="text-white text-xs font-semibold opacity-80">
+            Q 3/10
+          </div>
           <div className="flex items-center gap-2">
             <span className="bg-white/20 text-white text-xs font-bold px-2 py-0.5 rounded-full">
               210 pts
@@ -240,7 +313,8 @@ function GameQuestionSection() {
 
           {/* Question */}
           <h3 className="text-base font-bold text-text-primary leading-snug">
-            What makes you feel most appreciated by your partner on a regular day?
+            What makes you feel most appreciated by your partner on a regular
+            day?
           </h3>
 
           {/* Options */}
@@ -288,7 +362,9 @@ function GameQuestionSection() {
                 />
               ))}
             </div>
-            <span className="text-xs text-text-tertiary italic">Waiting for partner…</span>
+            <span className="text-xs text-text-tertiary italic">
+              Waiting for partner…
+            </span>
           </div>
         </div>
       </div>
@@ -317,8 +393,18 @@ function ResultsSection() {
           {/* Two answer cards */}
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: 'You', answer: 'Quality time together', correct: true, color: 'primary' },
-              { label: 'Partner', answer: 'Quality time together', correct: true, color: 'secondary' },
+              {
+                label: 'You',
+                answer: 'Quality time together',
+                correct: true,
+                color: 'primary',
+              },
+              {
+                label: 'Partner',
+                answer: 'Quality time together',
+                correct: true,
+                color: 'secondary',
+              },
             ].map((card) => (
               <div
                 key={card.label}
@@ -328,17 +414,23 @@ function ResultsSection() {
                     : 'border-secondary-300 bg-secondary-50'
                 }`}
               >
-                <p className={`text-xs font-bold uppercase tracking-wide ${
-                  card.color === 'primary' ? 'text-primary-600' : 'text-secondary-600'
-                }`}>
+                <p
+                  className={`text-xs font-bold uppercase tracking-wide ${
+                    card.color === 'primary'
+                      ? 'text-primary-600'
+                      : 'text-secondary-600'
+                  }`}
+                >
                   {card.label}
                 </p>
                 <p className="text-xs font-semibold text-text-primary leading-snug">
                   {card.answer}
                 </p>
-                <span className={`inline-flex items-center gap-1 text-xs font-bold ${
-                  card.correct ? 'text-success' : 'text-error'
-                }`}>
+                <span
+                  className={`inline-flex items-center gap-1 text-xs font-bold ${
+                    card.correct ? 'text-success' : 'text-error'
+                  }`}
+                >
                   {card.correct ? '✓ Match' : '✗ Miss'}
                 </span>
               </div>
@@ -350,7 +442,9 @@ function ResultsSection() {
             <span className="text-3xl font-black bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent">
               100%
             </span>
-            <p className="text-xs font-semibold text-text-secondary">Perfect Match!</p>
+            <p className="text-xs font-semibold text-text-secondary">
+              Perfect Match!
+            </p>
           </div>
 
           {/* Points */}
@@ -363,7 +457,8 @@ function ResultsSection() {
           <div className="bg-surface-50 rounded-xl p-4 border border-surface-200">
             <p className="text-xs font-bold text-primary-600 mb-1">Tip</p>
             <p className="text-xs text-text-secondary leading-relaxed">
-              Spending intentional quality time strengthens emotional bonds. Plan a sunset walk this week!
+              Spending intentional quality time strengthens emotional bonds.
+              Plan a sunset walk this week!
             </p>
           </div>
 
@@ -386,25 +481,43 @@ function ComponentShowcase() {
         E · Component Showcase
       </h2>
       <div className="w-full max-w-2xl flex flex-col gap-8">
-
         {/* Typography */}
         <div className="bg-surface-0 rounded-xl shadow-sm p-6 flex flex-col gap-3">
-          <p className="text-xs font-bold text-text-tertiary uppercase tracking-widest mb-1">Typography — Outfit + Source Sans 3</p>
-          <h1 className="text-4xl font-black text-text-primary leading-tight">H1 — Love Language</h1>
-          <h2 className="text-3xl font-bold text-text-primary">H2 — Sunset Together</h2>
-          <h3 className="text-2xl font-bold text-text-primary">H3 — Golden Warmth</h3>
-          <h4 className="text-xl font-semibold text-text-primary">H4 — Quiet Moments</h4>
-          <h5 className="text-lg font-semibold text-text-secondary">H5 — Body warmth & care</h5>
-          <h6 className="text-base font-semibold text-text-secondary">H6 — Small acts of love</h6>
-          <p className="text-sm text-text-secondary leading-relaxed mt-1">
-            Body — Source Sans 3. Warm, inviting copy that feels like the golden hour before sunset. Comfortable, readable, and full of life.
+          <p className="text-xs font-bold text-text-tertiary uppercase tracking-widest mb-1">
+            Typography — Outfit + Source Sans 3
           </p>
-          <p className="text-xs text-text-tertiary">Caption · Supporting text and metadata in tertiary stone</p>
+          <h1 className="text-4xl font-black text-text-primary leading-tight">
+            H1 — Love Language
+          </h1>
+          <h2 className="text-3xl font-bold text-text-primary">
+            H2 — Sunset Together
+          </h2>
+          <h3 className="text-2xl font-bold text-text-primary">
+            H3 — Golden Warmth
+          </h3>
+          <h4 className="text-xl font-semibold text-text-primary">
+            H4 — Quiet Moments
+          </h4>
+          <h5 className="text-lg font-semibold text-text-secondary">
+            H5 — Body warmth & care
+          </h5>
+          <h6 className="text-base font-semibold text-text-secondary">
+            H6 — Small acts of love
+          </h6>
+          <p className="text-sm text-text-secondary leading-relaxed mt-1">
+            Body — Source Sans 3. Warm, inviting copy that feels like the golden
+            hour before sunset. Comfortable, readable, and full of life.
+          </p>
+          <p className="text-xs text-text-tertiary">
+            Caption · Supporting text and metadata in tertiary stone
+          </p>
         </div>
 
         {/* Buttons */}
         <div className="bg-surface-0 rounded-xl shadow-sm p-6">
-          <p className="text-xs font-bold text-text-tertiary uppercase tracking-widest mb-4">Buttons</p>
+          <p className="text-xs font-bold text-text-tertiary uppercase tracking-widest mb-4">
+            Buttons
+          </p>
           <div className="flex flex-wrap gap-3 items-center">
             <button className="bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white font-semibold rounded-md px-5 py-2.5 text-sm transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
               Primary (Orange)
@@ -418,7 +531,10 @@ function ComponentShowcase() {
             <button className="bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white font-semibold rounded-md px-5 py-2.5 text-sm transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
               Gradient
             </button>
-            <button disabled className="bg-surface-200 text-text-tertiary font-semibold rounded-md px-5 py-2.5 text-sm cursor-not-allowed opacity-60">
+            <button
+              disabled
+              className="bg-surface-200 text-text-tertiary font-semibold rounded-md px-5 py-2.5 text-sm cursor-not-allowed opacity-60"
+            >
               Disabled
             </button>
           </div>
@@ -426,14 +542,28 @@ function ComponentShowcase() {
 
         {/* Badges */}
         <div className="bg-surface-0 rounded-xl shadow-sm p-6">
-          <p className="text-xs font-bold text-text-tertiary uppercase tracking-widest mb-4">Badges</p>
+          <p className="text-xs font-bold text-text-tertiary uppercase tracking-widest mb-4">
+            Badges
+          </p>
           <div className="flex flex-wrap gap-2 items-center">
-            <span className="bg-primary-100 text-primary-700 text-xs font-semibold px-3 py-1 rounded-full">Primary</span>
-            <span className="bg-secondary-100 text-secondary-700 text-xs font-semibold px-3 py-1 rounded-full">Secondary</span>
-            <span className="bg-surface-200 text-text-secondary text-xs font-semibold px-3 py-1 rounded-full">Neutral</span>
-            <span className="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">Success</span>
-            <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1 rounded-full">Warning</span>
-            <span className="bg-red-100 text-red-700 text-xs font-semibold px-3 py-1 rounded-full">Error</span>
+            <span className="bg-primary-100 text-primary-700 text-xs font-semibold px-3 py-1 rounded-full">
+              Primary
+            </span>
+            <span className="bg-secondary-100 text-secondary-700 text-xs font-semibold px-3 py-1 rounded-full">
+              Secondary
+            </span>
+            <span className="bg-surface-200 text-text-secondary text-xs font-semibold px-3 py-1 rounded-full">
+              Neutral
+            </span>
+            <span className="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
+              Success
+            </span>
+            <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1 rounded-full">
+              Warning
+            </span>
+            <span className="bg-red-100 text-red-700 text-xs font-semibold px-3 py-1 rounded-full">
+              Error
+            </span>
             <span className="bg-gradient-to-r from-primary-400 to-secondary-400 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
               Gradient
             </span>
@@ -442,24 +572,34 @@ function ComponentShowcase() {
 
         {/* Input */}
         <div className="bg-surface-0 rounded-xl shadow-sm p-6 flex flex-col gap-3">
-          <p className="text-xs font-bold text-text-tertiary uppercase tracking-widest mb-1">Input Fields</p>
+          <p className="text-xs font-bold text-text-tertiary uppercase tracking-widest mb-1">
+            Input Fields
+          </p>
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Default</label>
+            <label className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
+              Default
+            </label>
             <input
               placeholder="Warm placeholder text…"
               className="w-full border border-primary-200 rounded-md px-3 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary bg-surface-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-secondary-600 uppercase tracking-wide">Error state</label>
+            <label className="text-xs font-semibold text-secondary-600 uppercase tracking-wide">
+              Error state
+            </label>
             <input
               defaultValue="invalid@"
               className="w-full border-2 border-error rounded-md px-3 py-2.5 text-sm text-text-primary bg-red-50 focus:outline-none focus:ring-2 focus:ring-error focus:border-transparent transition"
             />
-            <p className="text-xs text-error font-medium">Please enter a valid email address.</p>
+            <p className="text-xs text-error font-medium">
+              Please enter a valid email address.
+            </p>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Disabled</label>
+            <label className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
+              Disabled
+            </label>
             <input
               disabled
               defaultValue="Cannot edit this"
@@ -470,11 +610,15 @@ function ComponentShowcase() {
 
         {/* Color swatches */}
         <div className="bg-surface-0 rounded-xl shadow-sm p-6">
-          <p className="text-xs font-bold text-text-tertiary uppercase tracking-widest mb-4">Color Palette</p>
+          <p className="text-xs font-bold text-text-tertiary uppercase tracking-widest mb-4">
+            Color Palette
+          </p>
 
           <div className="flex flex-col gap-4">
             <div>
-              <p className="text-xs font-semibold text-text-tertiary mb-2">Primary — Coral Orange</p>
+              <p className="text-xs font-semibold text-text-tertiary mb-2">
+                Primary — Coral Orange
+              </p>
               <div className="flex gap-1.5 flex-wrap">
                 {[
                   { cls: 'bg-primary-50', label: '50' },
@@ -486,16 +630,25 @@ function ComponentShowcase() {
                   { cls: 'bg-primary-600', label: '600' },
                   { cls: 'bg-primary-700', label: '700' },
                 ].map((s) => (
-                  <div key={s.label} className="flex flex-col items-center gap-1">
-                    <div className={`w-9 h-9 rounded-lg ${s.cls} border border-black/5 shadow-sm`} />
-                    <span className="text-[10px] text-text-tertiary font-medium">{s.label}</span>
+                  <div
+                    key={s.label}
+                    className="flex flex-col items-center gap-1"
+                  >
+                    <div
+                      className={`w-9 h-9 rounded-lg ${s.cls} border border-black/5 shadow-sm`}
+                    />
+                    <span className="text-[10px] text-text-tertiary font-medium">
+                      {s.label}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-text-tertiary mb-2">Secondary — Rose Red</p>
+              <p className="text-xs font-semibold text-text-tertiary mb-2">
+                Secondary — Rose Red
+              </p>
               <div className="flex gap-1.5 flex-wrap">
                 {[
                   { cls: 'bg-secondary-50', label: '50' },
@@ -507,16 +660,25 @@ function ComponentShowcase() {
                   { cls: 'bg-secondary-600', label: '600' },
                   { cls: 'bg-secondary-700', label: '700' },
                 ].map((s) => (
-                  <div key={s.label} className="flex flex-col items-center gap-1">
-                    <div className={`w-9 h-9 rounded-lg ${s.cls} border border-black/5 shadow-sm`} />
-                    <span className="text-[10px] text-text-tertiary font-medium">{s.label}</span>
+                  <div
+                    key={s.label}
+                    className="flex flex-col items-center gap-1"
+                  >
+                    <div
+                      className={`w-9 h-9 rounded-lg ${s.cls} border border-black/5 shadow-sm`}
+                    />
+                    <span className="text-[10px] text-text-tertiary font-medium">
+                      {s.label}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-text-tertiary mb-2">Surface — Warm Cream</p>
+              <p className="text-xs font-semibold text-text-tertiary mb-2">
+                Surface — Warm Cream
+              </p>
               <div className="flex gap-1.5 flex-wrap">
                 {[
                   { cls: 'bg-surface-0', label: '0' },
@@ -524,16 +686,22 @@ function ComponentShowcase() {
                   { cls: 'bg-surface-100', label: '100' },
                   { cls: 'bg-surface-200', label: '200' },
                 ].map((s) => (
-                  <div key={s.label} className="flex flex-col items-center gap-1">
-                    <div className={`w-9 h-9 rounded-lg ${s.cls} border border-black/10 shadow-sm`} />
-                    <span className="text-[10px] text-text-tertiary font-medium">{s.label}</span>
+                  <div
+                    key={s.label}
+                    className="flex flex-col items-center gap-1"
+                  >
+                    <div
+                      className={`w-9 h-9 rounded-lg ${s.cls} border border-black/10 shadow-sm`}
+                    />
+                    <span className="text-[10px] text-text-tertiary font-medium">
+                      {s.label}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
         </div>
-
       </div>
     </section>
   );

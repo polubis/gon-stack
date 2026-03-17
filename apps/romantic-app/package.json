@@ -3,6 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
+    "lint": "eslint --max-warnings 0",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro build && wrangler dev",
@@ -30,7 +31,9 @@
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
     "@types/node": "^24.10.1",
+    "eslint": "^9.39.1",
     "supabase": "^2.76.16",
     "wrangler": "^4.64.0",
     "zod": "^4.3.6"

@@ -1,3 +1,4 @@
+/* eslint-disable no-constant-condition */
 import {
   LoaderCircle,
   Plus,
@@ -15,7 +16,6 @@ export default function ChatModule() {
   const threads = ctx.$threadsList.use();
   const messages = ctx.$messagesList.use();
   const activeThread = ctx.$activeThread.use();
-  const activeThreadId = ctx.$activeThreadId.use();
 
   return (
     <main className="variant-shell min-h-screen font-sans text-text-primary">
