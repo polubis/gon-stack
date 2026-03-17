@@ -263,7 +263,7 @@ export const Step = () => {
     <form
       className="flex flex-col gap-4"
       onSubmit={form.handleSubmit((values) => {
-        ctx.next(values);
+        ctx.trigger('[TRIGGER]_NEXT', values);
       })}
       noValidate
     >
@@ -305,7 +305,7 @@ export const Step = () => {
           <button
             type="button"
             className="variant-button-ghost py-2.5 px-4 text-sm font-semibold"
-            onClick={ctx.prev}
+            onClick={() => ctx.trigger('[TRIGGER]_PREV')}
           >
             Back
           </button>

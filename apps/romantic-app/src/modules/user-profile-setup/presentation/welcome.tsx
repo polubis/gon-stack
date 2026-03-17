@@ -21,7 +21,7 @@ export const Welcome = () => {
       <button
         type="button"
         className="variant-button-primary w-full md:w-auto md:self-end py-2.5 px-5 text-sm font-semibold uppercase tracking-[0.14em]"
-        onClick={ctx.start}
+        onClick={() => ctx.trigger('[TRIGGER]_START')}
       >
         Let&apos;s go
       </button>

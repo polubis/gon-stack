@@ -50,8 +50,7 @@ const GROUPS: Response['groups'] = [
       {
         id: 3,
         key: 'communication.hints-over-talks',
-        question:
-          'I prefer hints and vibes over direct talks about problems.',
+        question: 'I prefer hints and vibes over direct talks about problems.',
         category: 'Communication',
         constraints: { min: 1, max: 5, required: true },
         type: 'slide',
@@ -263,7 +262,10 @@ const GROUPS: Response['groups'] = [
         options: [
           { value: 'avoid', label: 'Avoid and hope it passes' },
           { value: 'wait-then-talk', label: 'Wait a bit, then talk' },
-          { value: 'talk-directly', label: 'Talk about it quickly and directly' },
+          {
+            value: 'talk-directly',
+            label: 'Talk about it quickly and directly',
+          },
         ],
       },
       {
@@ -285,6 +287,13 @@ const GROUPS: Response['groups'] = [
 
 export const GET: APIRoute = async () => {
   const response: GetUserProfile['response'] = { groups: GROUPS };
+
+  await new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(true);
+    }, 2300);
+  });
+
   return new Response(JSON.stringify(response), {
     status: 200,
     headers: {

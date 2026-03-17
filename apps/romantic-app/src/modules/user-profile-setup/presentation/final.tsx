@@ -58,7 +58,7 @@ export const Final = () => {
         <button
           type="button"
           className="variant-button-ghost py-2.5 px-4 text-sm font-semibold"
-          onClick={ctx.editAnswers}
+          onClick={() => ctx.trigger('[TRIGGER]_EDIT_ANSWERS')}
         >
           Edit answers
         </button>

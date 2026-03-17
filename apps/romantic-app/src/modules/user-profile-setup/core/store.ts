@@ -18,41 +18,6 @@ export const createStore = () => {
     return group;
   });
 
-  const start = () => {
-    $isStarted.set(true);
-    $isFinished.set(false);
-    $step.set(0);
-    $answers.set({});
-  };
-
-  const prev = () => {
-    $step.set(Math.max(0, $step.get() - 1));
-  };
-
-  const next = (answers?: Partial<Answers>) => {
-    if (answers) {
-      $answers.set({
-        ...$answers.get(),
-        ...answers,
-      });
-    }
-
-    const currentStep = $step.get();
-    const maxStep = Math.max(0, $totalSteps.get() - 1);
-
-    if (currentStep >= maxStep) {
-      $isFinished.set(true);
-      return;
-    }
-
-    $step.set(Math.min(maxStep, currentStep + 1));
-  };
-
-  const editAnswers = () => {
-    $isFinished.set(false);
-    $step.set(0);
-  };
-
   return {
     $isStarted,
     $isFinished,
@@ -62,10 +27,6 @@ export const createStore = () => {
     $answers,
     $totalSteps,
     $currentGroup,
-    start,
-    prev,
-    next,
-    editAnswers,
   };
 };
 
