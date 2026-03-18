@@ -13,7 +13,8 @@
     "supabase:init": "pnpx supabase init",
     "supabase:start": "pnpx supabase start",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
@@ -39,6 +40,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^24.10.1",
     "@vitejs/plugin-react": "^5.1.4",
+    "@vitest/coverage-v8": "^4.1.0",
     "eslint": "^9.39.1",
     "jsdom": "^28.1.0",
     "msw": "^2.12.13",

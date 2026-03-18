@@ -8,6 +8,7 @@
     "check-types": "turbo run check-types",
     "test": "turbo run test",
     "test:watch": "turbo run test:watch",
+    "test:coverage": "turbo run test:coverage",
     "format": "prettier --write \"**/*.{ts,tsx,md,json,yaml,css,js,jsx}\"",
     "prepare": "husky",
     "check-deps": "ncu --workspaces",
