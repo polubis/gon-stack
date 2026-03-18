@@ -1,9 +1,9 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
-  "globalEnv": {
-    "env": ["CI"]
-  },
+  "globalEnv": [
+    "CI"
+  ],
   "tasks": {
     "build": {
       "dependsOn": [

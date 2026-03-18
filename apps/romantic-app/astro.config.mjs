@@ -19,6 +19,9 @@ export default defineConfig({
   integrations: [react()],
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    optimizeDeps: {
+      exclude: ['msw', 'msw/node', '@mswjs/interceptors']
+    }
   }
 });
