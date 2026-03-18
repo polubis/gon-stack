@@ -11,7 +11,9 @@
     "deploy": "astro build && wrangler deploy",
     "cf-typegen": "wrangler types",
     "supabase:init": "pnpx supabase init",
-    "supabase:start": "pnpx supabase start"
+    "supabase:start": "pnpx supabase start",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
@@ -32,9 +34,16 @@
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^24.10.1",
+    "@vitejs/plugin-react": "^5.1.4",
     "eslint": "^9.39.1",
+    "jsdom": "^28.1.0",
+    "msw": "^2.12.13",
     "supabase": "^2.76.16",
+    "vitest": "^4.0.18",
     "wrangler": "^4.64.0",
     "zod": "^4.3.6"
   }

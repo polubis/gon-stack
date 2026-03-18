@@ -1,0 +1,130 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`User profile setup works when > displays welcome screen 1`] = `
+<DocumentFragment>
+  <section
+    class="w-full max-w-2xl variant-card p-6 md:p-8 flex flex-col gap-6"
+  >
+    <div
+      class="flex flex-col gap-4"
+    >
+      <header
+        class="flex items-center justify-between gap-3"
+      >
+        <div
+          class="variant-pill"
+        >
+          PROFILE SETUP
+        </div>
+      </header>
+      <h1
+        class="text-2xl md:text-3xl font-heading font-semibold text-text-primary"
+      >
+        Let's set up your relationship profile
+      </h1>
+      <p
+        class="text-text-secondary"
+      >
+        Takes about 3-5 minutes. Your answers stay private in your room.
+      </p>
+      <div
+        class="variant-option p-4 text-sm text-text-secondary leading-relaxed"
+      >
+        We'll start with a few basics, then some quick questions about how you are in relationships. Ready?
+      </div>
+      <button
+        class="variant-button-primary w-full md:w-auto md:self-end py-2.5 px-5 text-sm font-semibold uppercase tracking-[0.14em]"
+        type="button"
+      >
+        Let's go
+      </button>
+    </div>
+  </section>
+</DocumentFragment>
+`;
+
+exports[`User profile setup works when > loads config from mocked backend and opens first step 1`] = `
+<DocumentFragment>
+  <section
+    class="w-full max-w-2xl variant-card p-6 md:p-8 flex flex-col gap-6"
+  >
+    <div
+      class="flex flex-col gap-4"
+    >
+      <header
+        class="flex items-center justify-between gap-3"
+      >
+        <div
+          class="variant-pill"
+        >
+          PROFILE SETUP
+        </div>
+      </header>
+      <h1
+        class="text-2xl md:text-3xl font-heading font-semibold text-text-primary"
+      >
+        Let's set up your relationship profile
+      </h1>
+      <p
+        class="text-text-secondary"
+      >
+        Takes about 3-5 minutes. Your answers stay private in your room.
+      </p>
+      <div
+        class="variant-option p-4 text-sm text-text-secondary leading-relaxed"
+      >
+        We'll start with a few basics, then some quick questions about how you are in relationships. Ready?
+      </div>
+      <button
+        class="variant-button-primary w-full md:w-auto md:self-end py-2.5 px-5 text-sm font-semibold uppercase tracking-[0.14em]"
+        type="button"
+      >
+        Let's go
+      </button>
+    </div>
+  </section>
+</DocumentFragment>
+`;
+
+exports[`UserProfileSetup + MSW > loads config from mocked backend and opens first step 1`] = `
+<DocumentFragment>
+  <section
+    class="w-full max-w-2xl variant-card p-6 md:p-8 flex flex-col gap-6"
+  >
+    <div
+      class="flex flex-col gap-4"
+    >
+      <header
+        class="flex items-center justify-between gap-3"
+      >
+        <div
+          class="variant-pill"
+        >
+          PROFILE SETUP
+        </div>
+      </header>
+      <h1
+        class="text-2xl md:text-3xl font-heading font-semibold text-text-primary"
+      >
+        Let's set up your relationship profile
+      </h1>
+      <p
+        class="text-text-secondary"
+      >
+        Takes about 3-5 minutes. Your answers stay private in your room.
+      </p>
+      <div
+        class="variant-option p-4 text-sm text-text-secondary leading-relaxed"
+      >
+        We'll start with a few basics, then some quick questions about how you are in relationships. Ready?
+      </div>
+      <button
+        class="variant-button-primary w-full md:w-auto md:self-end py-2.5 px-5 text-sm font-semibold uppercase tracking-[0.14em]"
+        type="button"
+      >
+        Let's go
+      </button>
+    </div>
+  </section>
+</DocumentFragment>
+`;
