@@ -1,9 +1,3 @@
----
-version: 1.0
-updated: 2026-03-02
-source: <path to MVP doc used>
----
-
 # UX/UI Design Document
 
 ## 1. General UX Principles

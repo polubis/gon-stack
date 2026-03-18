@@ -1,8 +1,6 @@
 ---
 name: ux-ui-designer
 description: Generate a comprehensive UX/UI design document from the product MVP definition. Use when designing UI/UX, defining design tokens, creating view layouts, or when asked to create a ux-ui.md document.
-argument-hint: [path-to-mvp-doc]
-disable-model-invocation: true
 ---
 
 # Role

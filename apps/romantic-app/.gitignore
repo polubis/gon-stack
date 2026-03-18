@@ -7,6 +7,10 @@ dist/
 # dependencies
 node_modules/
 
+# pw
+playwright-report/
+test-results/
+
 # logs
 npm-debug.log*
 yarn-debug.log*

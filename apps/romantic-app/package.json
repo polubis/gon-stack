@@ -12,9 +12,14 @@
     "cf-typegen": "wrangler types",
     "supabase:init": "pnpx supabase init",
     "supabase:start": "pnpx supabase start",
+    "pw:install": "playwright install chromium",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text"
+    "test:coverage": "vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
@@ -34,6 +39,7 @@
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@repo/eslint-config": "workspace:*",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

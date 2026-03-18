@@ -1,6 +1,9 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
+  "globalEnv": {
+    "env": ["CI"]
+  },
   "tasks": {
     "build": {
       "dependsOn": [
@@ -36,6 +39,13 @@
         "coverage/**"
       ]
     },
+    "test:e2e": {},
+    "test:e2e:ui": {
+      "cache": false,
+      "persistent": true
+    },
+    "test:e2e:headed": {},
+    "test:e2e:report": {},
     "dev": {
       "cache": false,
       "persistent": true
