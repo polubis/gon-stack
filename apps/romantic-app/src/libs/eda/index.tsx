@@ -322,7 +322,7 @@ export const eda = <TEvents extends Event>() => {
      * ```
      */
     createRegistry:
-      (...args: Observable<unknown>[]) =>
+      <TStreams extends readonly Observable<unknown>[]>(...args: TStreams) =>
       () => {
         const streams = args.map((stream) =>
           stream.pipe(catchError((_error, caught) => caught)),
