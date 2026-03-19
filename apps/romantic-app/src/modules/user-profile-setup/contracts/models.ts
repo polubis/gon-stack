@@ -1,16 +1,49 @@
-import { Key } from '../../../libs/ts-more';
-import { GetUserProfile } from '../../../shared/contracts/backend/open-schema';
+import { Brand, Prettify } from '../../../libs/ts-more';
 
-export type Step = number;
+export type StepId = Brand<number, 'StepId'>;
+export type StepKey = Brand<string, 'StepKey'>;
+export type QuestionId = Brand<number, 'QuestionId'>;
+export type QuestionKey = Brand<`${string}.${string}`, 'QuestionKey'>;
 
-export type QuestionGroups = GetUserProfile['response']['groups'];
+export type Constraints = {
+  min: number;
+  max: number;
+  required: boolean;
+};
 
-export type QuestionGroup = GetUserProfile['response']['groups'][number];
+type QuestionVariant<
+  TType extends string,
+  TValue extends string | number,
+  TRest extends Record<string, unknown> = Record<never, never>,
+> = Prettify<
+  {
+    id: QuestionId;
+    key: QuestionKey;
+    type: TType;
+    label: string;
+    min: number;
+    max: number;
+    required: boolean;
+    value: TValue;
+  } & TRest
+>;
 
-export type Question = QuestionGroup['questions'][number];
+export type Question =
+  | QuestionVariant<'numeric', number>
+  | QuestionVariant<
+      'select',
+      string,
+      { options: { value: string; label: string }[] }
+    >
+  | QuestionVariant<'text', string>
+  | QuestionVariant<'slide', number>;
 
-export type QuestionKey = Key<'user-profile.display-name' | 'user-profile.age'>;
+export type Step = {
+  id: StepId;
+  key: StepKey;
+  label: string;
+  description: string;
+  questions: Question[];
+};
 
-export type QuestionValue = string | number;
-
-export type Answers = Record<QuestionKey, QuestionValue>;
+export type Answers = Record<string, string | number>;

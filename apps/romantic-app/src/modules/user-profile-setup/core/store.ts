@@ -1,33 +1,40 @@
 import { atom, computed } from '../../../libs/supa-store';
-import type { QuestionGroups, Step, Answers } from '../contracts/models';
+import type { Step } from '../contracts/models';
 
 export const createStore = () => {
   const $isStarted = atom(false);
   const $isFinished = atom(false);
-  const $step = atom<Step>(0);
-  const $groups = atom<QuestionGroups>([]);
-  const $answers = atom<Partial<Answers>>({});
+  const $activeStepIndex = atom(0);
+  const $steps = atom<Step[]>([]);
 
-  const $totalSteps = computed([$groups], (groups) => groups.length);
+  const $totalSteps = computed([$steps], (steps) => steps.length);
 
-  const $hasPreviousStep = computed([$step], (step) => step > 0);
+  const $hasPreviousStep = computed(
+    [$activeStepIndex],
+    (activeStepIndex) => activeStepIndex > 0,
+  );
 
-  const $currentGroup = computed([$step, $groups], (step, groups) => {
-    const group = groups[step];
-    if (!group) throw new Error('Question group not found');
-    return group;
-  });
+  const $activeStep = computed(
+    [$activeStepIndex, $steps],
+    (activeStepIndex, steps) => steps[activeStepIndex],
+  );
+  // Math.min(activeStepIndex + 1, totalSteps) / totalSteps) * 100
+  const $progressPercentage = computed(
+    [$activeStepIndex, $totalSteps],
+    (activeStepIndex, totalSteps) => ((activeStepIndex + 1) / totalSteps) * 100,
+  );
 
   return {
     $isStarted,
     $isFinished,
-    $step,
+    $activeStepIndex,
     $hasPreviousStep,
-    $groups,
-    $answers,
+    $activeStep,
     $totalSteps,
-    $currentGroup,
+    $progressPercentage,
+    $steps,
   };
 };
 
 export type Store = ReturnType<typeof createStore>;
+

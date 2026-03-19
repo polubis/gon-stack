@@ -8,40 +8,40 @@ type UserProfileQuestion =
   | {
       id: number;
       key: string;
-      question: string;
+      label: string;
       category: string;
       constraints: QuestionConstraints;
+      value: number;
       type: 'numeric';
-      // add numeric-specific fields here
     }
   | {
       id: number;
       key: string;
-
-      question: string;
+      label: string;
       category: string;
       constraints: QuestionConstraints;
       type: 'select';
       options: { value: string; label: string }[];
+      value: string;
     }
   | {
       id: number;
       key: string;
-
-      question: string;
+      label: string;
       category: string;
       constraints: QuestionConstraints;
       type: 'text';
-      // add text-specific fields here
+      value: string;
     }
   | {
       id: number;
       key: string;
-      question: string;
+      label: string;
       category: string;
       constraints: QuestionConstraints;
       type: 'slide';
       badges: { min: string; max: string };
+      value: number;
     };
 
 export type GetUserProfile = {

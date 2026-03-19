@@ -1,0 +1,208 @@
+import type { ReactNode } from 'react';
+import { useWatch } from 'react-hook-form';
+import { VALIDATION_ERROR_MAP } from '../configuration/validation';
+import type { QuestionInputProps } from '../contracts/props';
+
+export const QuestionInput = ({
+  question,
+  register,
+  control,
+  setValue,
+}: QuestionInputProps) => {
+  const { min, max, required } = question;
+  const fieldName = question.key as string;
+
+  const watchedValue = useWatch({
+    control,
+    name: fieldName,
+    defaultValue: question.value,
+  });
+
+  let questionInputContent: ReactNode;
+
+  switch (question.type) {
+    case 'text': {
+      questionInputContent = (
+        <input
+          type="text"
+          {...register(fieldName, {
+            required: required ? VALIDATION_ERROR_MAP.required : false,
+            minLength: {
+              value: min,
+              message: VALIDATION_ERROR_MAP.min,
+            },
+            maxLength: {
+              value: max,
+              message: VALIDATION_ERROR_MAP.max,
+            },
+          })}
+          minLength={min}
+          maxLength={max}
+          placeholder="Your answer"
+          autoComplete="off"
+          className="variant-input w-full px-3 py-2.5 text-sm rounded-md border border-surface-300 bg-surface-100 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-400/50"
+        />
+      );
+      break;
+    }
+
+    case 'numeric': {
+      const numericValue =
+        typeof watchedValue === 'number' && Number.isFinite(watchedValue)
+          ? watchedValue
+          : min;
+
+      questionInputContent = (
+        <div className="flex items-center gap-3">
+          <input
+            type="hidden"
+            {...register(fieldName, {
+              valueAsNumber: true,
+              required: required ? VALIDATION_ERROR_MAP.required : false,
+              min: {
+                value: min,
+                message: VALIDATION_ERROR_MAP.min,
+              },
+              max: {
+                value: max,
+                message: VALIDATION_ERROR_MAP.max,
+              },
+            })}
+          />
+          <button
+            type="button"
+            className="variant-icon-button"
+            onClick={() =>
+              setValue(fieldName, Math.max(min, numericValue - 1), {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
+            aria-label="Decrease value"
+          >
+            -
+          </button>
+          <input
+            type="number"
+            min={min}
+            max={max}
+            value={numericValue}
+            onChange={(event) => {
+              const nextValue = Number(event.target.value);
+              if (!Number.isFinite(nextValue)) {
+                setValue(fieldName, min, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+                return;
+              }
+
+              setValue(fieldName, Math.max(min, Math.min(max, nextValue)), {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
+            }}
+            className="variant-input w-20 px-3 py-2 text-sm text-center"
+          />
+          <button
+            type="button"
+            className="variant-icon-button"
+            onClick={() =>
+              setValue(fieldName, Math.min(max, numericValue + 1), {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
+            aria-label="Increase value"
+          >
+            +
+          </button>
+        </div>
+      );
+      break;
+    }
+
+    case 'slide': {
+      const slideValue =
+        typeof watchedValue === 'number' && Number.isFinite(watchedValue)
+          ? watchedValue
+          : min;
+      const slideRange = max - min || 1;
+      const slideProgressRatio = (slideValue - min) / slideRange;
+      const sliderThumbSizePx = 16;
+
+      questionInputContent = (
+        <div className="flex flex-col gap-3">
+          <div className="relative pt-6">
+            <input
+              type="range"
+              {...register(fieldName, {
+                valueAsNumber: true,
+                required: required ? VALIDATION_ERROR_MAP.required : false,
+                min: {
+                  value: min,
+                  message: VALIDATION_ERROR_MAP.min,
+                },
+                max: {
+                  value: max,
+                  message: VALIDATION_ERROR_MAP.max,
+                },
+              })}
+              min={min}
+              max={max}
+              className="w-full h-2 rounded-full appearance-none bg-surface-200 accent-primary-400"
+            />
+            <span
+              className="variant-pill absolute top-0 -translate-x-1/2 text-xs"
+              style={{
+                left: `calc((100% - ${sliderThumbSizePx}px) * ${slideProgressRatio} + ${sliderThumbSizePx / 2}px)`,
+              }}
+            >
+              {slideValue}
+            </span>
+          </div>
+          <div className="flex justify-between text-xs text-text-tertiary">
+            <span>{question.min}</span>
+            <span>{question.max}</span>
+          </div>
+        </div>
+      );
+      break;
+    }
+
+    case 'select': {
+      questionInputContent = (
+        <div className="flex flex-col gap-2">
+          <input
+            type="hidden"
+            {...register(fieldName, {
+              required: required ? VALIDATION_ERROR_MAP.required : false,
+            })}
+          />
+          {question.options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={`w-full text-left px-3 py-2.5 text-sm rounded-md transition-colors ${
+                watchedValue === option.value
+                  ? 'variant-option-active'
+                  : 'variant-option'
+              }`}
+              onClick={() =>
+                setValue(fieldName, option.value, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                })
+              }
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      );
+      break;
+    }
+  }
+
+  return questionInputContent;
+};

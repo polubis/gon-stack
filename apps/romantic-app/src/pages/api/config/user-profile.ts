@@ -13,18 +13,20 @@ const GROUPS: Response['groups'] = [
       {
         id: 0,
         key: 'user-profile.display-name',
-        question: 'What should we call you?',
+        label: 'What should we call you?',
         category: 'Basics',
         constraints: { min: 2, max: 32, required: true },
         type: 'text',
+        value: '',
       },
       {
         id: 1,
         key: 'user-profile.age',
-        question: 'How old are you?',
+        label: 'How old are you?',
         category: 'Basics',
         constraints: { min: 18, max: 120, required: true },
         type: 'numeric',
+        value: 0,
       },
     ],
   },
@@ -37,7 +39,7 @@ const GROUPS: Response['groups'] = [
       {
         id: 2,
         key: 'communication.bring-up-directly',
-        question:
+        label:
           'When something bothers you, how likely are you to bring it up directly?',
         category: 'Communication',
         constraints: { min: 1, max: 5, required: true },
@@ -46,15 +48,17 @@ const GROUPS: Response['groups'] = [
           min: 'I almost never bring it up',
           max: 'I say it pretty directly',
         },
+        value: 0,
       },
       {
         id: 3,
         key: 'communication.hints-over-talks',
-        question: 'I prefer hints and vibes over direct talks about problems.',
+        label: 'I prefer hints and vibes over direct talks about problems.',
         category: 'Communication',
         constraints: { min: 1, max: 5, required: true },
         type: 'slide',
         badges: { min: 'Strongly disagree', max: 'Strongly agree' },
+        value: 0,
       },
     ],
   },
@@ -67,21 +71,23 @@ const GROUPS: Response['groups'] = [
       {
         id: 4,
         key: 'emotional-openness.share-fears',
-        question:
+        label:
           'How comfortable are you sharing your fears and insecurities with a partner?',
         category: 'Emotional openness',
         constraints: { min: 1, max: 5, required: true },
         type: 'slide',
         badges: { min: 'Not comfortable', max: 'Very comfortable' },
+        value: 0,
       },
       {
         id: 5,
         key: 'emotional-openness.keep-feelings-private',
-        question: 'I like to keep my deeper feelings to myself.',
+        label: 'I like to keep my deeper feelings to myself.',
         category: 'Emotional openness',
         constraints: { min: 1, max: 5, required: true },
         type: 'slide',
         badges: { min: 'Strongly disagree', max: 'Strongly agree' },
+        value: 0,
       },
     ],
   },
@@ -94,7 +100,7 @@ const GROUPS: Response['groups'] = [
       {
         id: 6,
         key: 'initiative.plans-romantic-activities',
-        question:
+        label:
           'How often do you like to be the one who plans romantic activities?',
         category: 'Initiative',
         constraints: { min: 1, max: 5, required: true },
@@ -105,11 +111,12 @@ const GROUPS: Response['groups'] = [
           { value: 'often', label: 'Often' },
           { value: 'very-often', label: 'Very often' },
         ],
+        value: '',
       },
       {
         id: 7,
         key: 'initiative.starts-gestures',
-        question:
+        label:
           'In an ideal relationship, who usually starts romantic gestures?',
         category: 'Initiative',
         constraints: { min: 1, max: 5, required: true },
@@ -119,6 +126,7 @@ const GROUPS: Response['groups'] = [
           { value: 'take-turns', label: 'We take turns' },
           { value: 'mostly-me', label: 'Mostly me' },
         ],
+        value: '',
       },
     ],
   },
@@ -131,22 +139,24 @@ const GROUPS: Response['groups'] = [
       {
         id: 8,
         key: 'playfulness.teasing-importance',
-        question:
+        label:
           'How important is playful teasing and jokes in your relationship?',
         category: 'Playfulness',
         constraints: { min: 1, max: 5, required: true },
         type: 'slide',
         badges: { min: 'Not important', max: 'Very important' },
+        value: 0,
       },
       {
         id: 9,
         key: 'playfulness.conflict-humor',
-        question:
+        label:
           'In conflicts, I prefer to keep things light and defuse with humor.',
         category: 'Playfulness',
         constraints: { min: 1, max: 5, required: true },
         type: 'slide',
         badges: { min: 'Strongly disagree', max: 'Strongly agree' },
+        value: 0,
       },
     ],
   },
@@ -159,7 +169,7 @@ const GROUPS: Response['groups'] = [
       {
         id: 10,
         key: 'planning.weekend-preference',
-        question: 'On a free weekend, I prefer...',
+        label: 'On a free weekend, I prefer...',
         category: 'Planning',
         constraints: { min: 1, max: 5, required: true },
         type: 'select',
@@ -168,11 +178,12 @@ const GROUPS: Response['groups'] = [
           { value: 'mix', label: 'A mix of planned and spontaneous' },
           { value: 'spontaneous', label: 'Mostly spontaneous decisions' },
         ],
+        value: '',
       },
       {
         id: 11,
         key: 'planning.last-minute-surprises',
-        question: 'Last-minute surprises make me feel...',
+        label: 'Last-minute surprises make me feel...',
         category: 'Planning',
         constraints: { min: 1, max: 5, required: true },
         type: 'select',
@@ -181,6 +192,7 @@ const GROUPS: Response['groups'] = [
           { value: 'neutral', label: 'Neutral' },
           { value: 'excited', label: 'Excited' },
         ],
+        value: '',
       },
     ],
   },
@@ -193,17 +205,18 @@ const GROUPS: Response['groups'] = [
       {
         id: 12,
         key: 'affection.physical-private',
-        question:
+        label:
           'How comfortable are you with physical affection (hugs, cuddles, kisses) in private?',
         category: 'Affection',
         constraints: { min: 1, max: 5, required: true },
         type: 'slide',
         badges: { min: 'Not comfortable', max: 'Very comfortable' },
+        value: 0,
       },
       {
         id: 13,
         key: 'affection.pda',
-        question: 'Public displays of affection (PDA) are...',
+        label: 'Public displays of affection (PDA) are...',
         category: 'Affection',
         constraints: { min: 1, max: 5, required: true },
         type: 'select',
@@ -213,6 +226,7 @@ const GROUPS: Response['groups'] = [
           { value: 'totally-fine', label: 'Totally fine' },
           { value: 'enjoy', label: 'I enjoy them a lot' },
         ],
+        value: '',
       },
     ],
   },
@@ -225,16 +239,17 @@ const GROUPS: Response['groups'] = [
       {
         id: 14,
         key: 'togetherness.evenings-per-week',
-        question:
+        label:
           'How many evenings per week do you ideally like to spend together?',
         category: 'Togetherness',
         constraints: { min: 0, max: 7, required: true },
         type: 'numeric',
+        value: 0,
       },
       {
         id: 15,
         key: 'togetherness.alone-time',
-        question: 'In a relationship, personal alone time is...',
+        label: 'In a relationship, personal alone time is...',
         category: 'Togetherness',
         constraints: { min: 1, max: 5, required: true },
         type: 'select',
@@ -243,6 +258,7 @@ const GROUPS: Response['groups'] = [
           { value: 'somewhat', label: 'Somewhat important' },
           { value: 'very', label: 'Very important' },
         ],
+        value: '',
       },
     ],
   },
@@ -255,7 +271,7 @@ const GROUPS: Response['groups'] = [
       {
         id: 16,
         key: 'conflict.approach',
-        question: 'When conflict appears, I tend to...',
+        label: 'When conflict appears, I tend to...',
         category: 'Conflict',
         constraints: { min: 1, max: 5, required: true },
         type: 'select',
@@ -267,11 +283,12 @@ const GROUPS: Response['groups'] = [
             label: 'Talk about it quickly and directly',
           },
         ],
+        value: '',
       },
       {
         id: 17,
         key: 'conflict.raised-voices',
-        question: 'Raised voices in arguments make me want to...',
+        label: 'Raised voices in arguments make me want to...',
         category: 'Conflict',
         constraints: { min: 1, max: 5, required: true },
         type: 'select',
@@ -280,6 +297,7 @@ const GROUPS: Response['groups'] = [
           { value: 'stay-tense', label: 'Stay but feel tense' },
           { value: 'keep-talking', label: 'Keep talking to resolve it' },
         ],
+        value: '',
       },
     ],
   },
