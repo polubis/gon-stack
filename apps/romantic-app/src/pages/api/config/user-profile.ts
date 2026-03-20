@@ -12,7 +12,7 @@ const GROUPS: Response['groups'] = [
     questions: [
       {
         id: 0,
-        key: 'user-profile.display-name',
+        key: 'display-name',
         label: 'What should we call you?',
         category: 'Basics',
         constraints: { min: 2, max: 32, required: true },
@@ -21,7 +21,7 @@ const GROUPS: Response['groups'] = [
       },
       {
         id: 1,
-        key: 'user-profile.age',
+        key: 'age',
         label: 'How old are you?',
         category: 'Basics',
         constraints: { min: 18, max: 120, required: true },
@@ -38,7 +38,7 @@ const GROUPS: Response['groups'] = [
     questions: [
       {
         id: 2,
-        key: 'communication.bring-up-directly',
+        key: 'bring-up-directly',
         label:
           'When something bothers you, how likely are you to bring it up directly?',
         category: 'Communication',
@@ -52,7 +52,7 @@ const GROUPS: Response['groups'] = [
       },
       {
         id: 3,
-        key: 'communication.hints-over-talks',
+        key: 'hints-over-talks',
         label: 'I prefer hints and vibes over direct talks about problems.',
         category: 'Communication',
         constraints: { min: 1, max: 5, required: true },
@@ -70,7 +70,7 @@ const GROUPS: Response['groups'] = [
     questions: [
       {
         id: 4,
-        key: 'emotional-openness.share-fears',
+        key: 'share-fears',
         label:
           'How comfortable are you sharing your fears and insecurities with a partner?',
         category: 'Emotional openness',
@@ -81,7 +81,7 @@ const GROUPS: Response['groups'] = [
       },
       {
         id: 5,
-        key: 'emotional-openness.keep-feelings-private',
+        key: 'keep-feelings-private',
         label: 'I like to keep my deeper feelings to myself.',
         category: 'Emotional openness',
         constraints: { min: 1, max: 5, required: true },
@@ -99,7 +99,7 @@ const GROUPS: Response['groups'] = [
     questions: [
       {
         id: 6,
-        key: 'initiative.plans-romantic-activities',
+        key: 'plans-romantic-activities',
         label:
           'How often do you like to be the one who plans romantic activities?',
         category: 'Initiative',
@@ -115,7 +115,7 @@ const GROUPS: Response['groups'] = [
       },
       {
         id: 7,
-        key: 'initiative.starts-gestures',
+        key: 'starts-gestures',
         label:
           'In an ideal relationship, who usually starts romantic gestures?',
         category: 'Initiative',
@@ -138,7 +138,7 @@ const GROUPS: Response['groups'] = [
     questions: [
       {
         id: 8,
-        key: 'playfulness.teasing-importance',
+        key: 'teasing-importance',
         label:
           'How important is playful teasing and jokes in your relationship?',
         category: 'Playfulness',
@@ -149,7 +149,7 @@ const GROUPS: Response['groups'] = [
       },
       {
         id: 9,
-        key: 'playfulness.conflict-humor',
+        key: 'conflict-humor',
         label:
           'In conflicts, I prefer to keep things light and defuse with humor.',
         category: 'Playfulness',
@@ -168,7 +168,7 @@ const GROUPS: Response['groups'] = [
     questions: [
       {
         id: 10,
-        key: 'planning.weekend-preference',
+        key: 'weekend-preference',
         label: 'On a free weekend, I prefer...',
         category: 'Planning',
         constraints: { min: 1, max: 5, required: true },
@@ -182,7 +182,7 @@ const GROUPS: Response['groups'] = [
       },
       {
         id: 11,
-        key: 'planning.last-minute-surprises',
+        key: 'last-minute-surprises',
         label: 'Last-minute surprises make me feel...',
         category: 'Planning',
         constraints: { min: 1, max: 5, required: true },
@@ -204,7 +204,7 @@ const GROUPS: Response['groups'] = [
     questions: [
       {
         id: 12,
-        key: 'affection.physical-private',
+        key: 'physical-private',
         label:
           'How comfortable are you with physical affection (hugs, cuddles, kisses) in private?',
         category: 'Affection',
@@ -215,7 +215,7 @@ const GROUPS: Response['groups'] = [
       },
       {
         id: 13,
-        key: 'affection.pda',
+        key: 'pda',
         label: 'Public displays of affection (PDA) are...',
         category: 'Affection',
         constraints: { min: 1, max: 5, required: true },
@@ -238,7 +238,7 @@ const GROUPS: Response['groups'] = [
     questions: [
       {
         id: 14,
-        key: 'togetherness.evenings-per-week',
+        key: 'evenings-per-week',
         label:
           'How many evenings per week do you ideally like to spend together?',
         category: 'Togetherness',
@@ -248,7 +248,7 @@ const GROUPS: Response['groups'] = [
       },
       {
         id: 15,
-        key: 'togetherness.alone-time',
+        key: 'alone-time',
         label: 'In a relationship, personal alone time is...',
         category: 'Togetherness',
         constraints: { min: 1, max: 5, required: true },
@@ -270,7 +270,7 @@ const GROUPS: Response['groups'] = [
     questions: [
       {
         id: 16,
-        key: 'conflict.approach',
+        key: 'approach',
         label: 'When conflict appears, I tend to...',
         category: 'Conflict',
         constraints: { min: 1, max: 5, required: true },
@@ -287,7 +287,7 @@ const GROUPS: Response['groups'] = [
       },
       {
         id: 17,
-        key: 'conflict.raised-voices',
+        key: 'raised-voices',
         label: 'Raised voices in arguments make me want to...',
         category: 'Conflict',
         constraints: { min: 1, max: 5, required: true },

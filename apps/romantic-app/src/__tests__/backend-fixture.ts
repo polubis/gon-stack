@@ -29,7 +29,7 @@ export const backendFixture = ({ beforeAll, afterAll, afterEach }) => {
               questions: [
                 {
                   id: 1,
-                  key: 'user-profile.display-name',
+                  key: 'display-name',
                   question: 'How should we call you?',
                   category: 'identity',
                   type: 'text',

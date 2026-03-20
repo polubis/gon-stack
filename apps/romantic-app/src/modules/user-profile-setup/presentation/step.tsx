@@ -1,40 +1,18 @@
-import { useEffect, useEffectEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { useContext } from './context';
 import { QuestionInput } from './question-input';
-import { Answers } from '../contracts/models';
 
-export const Step = () => {
+const StepForm = () => {
   const ctx = useContext();
-  const activeStepIndex = ctx.$activeStepIndex.use();
   const activeStep = ctx.$activeStep.use();
   const hasPreviousStep = ctx.$hasPreviousStep.use();
+  const stepAnswers = ctx.$stepAnswers.use();
 
-  const form = useForm<Answers>({
+  const form = useForm({
     mode: 'onChange',
     reValidateMode: 'onChange',
-    defaultValues: {},
+    defaultValues: stepAnswers,
   });
-
-  const resetStepForm = useEffectEvent(() => {
-    const nextValues: Answers = {};
-
-    for (const question of activeStep.questions) {
-      if (question.type === 'text' || question.type === 'select') {
-        nextValues[question.key] = '';
-        continue;
-      }
-
-      const minValue = question.min;
-      nextValues[question.key] = minValue;
-    }
-
-    form.reset(nextValues);
-  });
-
-  useEffect(() => {
-    resetStepForm();
-  }, [activeStepIndex, activeStep]);
 
   return (
     <form
@@ -48,9 +26,7 @@ export const Step = () => {
         <h2 className="text-2xl font-heading font-semibold text-text-primary">
           {activeStep.label}
         </h2>
-        <p className="text-sm text-text-secondary">
-          {activeStep.description}
-        </p>
+        <p className="text-sm text-text-secondary">{activeStep.description}</p>
       </div>
 
       {activeStep.questions.map((question) => {
@@ -97,4 +73,11 @@ export const Step = () => {
       </footer>
     </form>
   );
+};
+
+export const Step = () => {
+  const ctx = useContext();
+  const activeStepIndex = ctx.$activeStepIndex.use();
+
+  return <StepForm key={activeStepIndex} />;
 };

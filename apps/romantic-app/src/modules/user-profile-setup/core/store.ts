@@ -1,5 +1,5 @@
 import { atom, computed } from '../../../libs/supa-store';
-import type { Step } from '../contracts/models';
+import type { Answers, Step } from '../contracts/models';
 
 export const createStore = () => {
   const $isStarted = atom(false);
@@ -21,7 +21,14 @@ export const createStore = () => {
   // Math.min(activeStepIndex + 1, totalSteps) / totalSteps) * 100
   const $progressPercentage = computed(
     [$activeStepIndex, $totalSteps],
-    (activeStepIndex, totalSteps) => ((activeStepIndex + 1) / totalSteps) * 100,
+    (activeStepIndex, totalSteps) => (activeStepIndex / totalSteps) * 100,
+  );
+
+  const $stepAnswers = computed([$activeStep], (activeStep) =>
+    activeStep.questions.reduce<Answers>((acc, question) => {
+      acc[question.key] = question.value;
+      return acc;
+    }, {}),
   );
 
   return {
@@ -33,8 +40,8 @@ export const createStore = () => {
     $totalSteps,
     $progressPercentage,
     $steps,
+    $stepAnswers,
   };
 };
 
 export type Store = ReturnType<typeof createStore>;
-

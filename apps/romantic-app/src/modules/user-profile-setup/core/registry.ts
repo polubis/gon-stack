@@ -38,15 +38,47 @@ export const createRegistry = ({
     ),
     ofType('[TRIGGER]_NEXT').pipe(
       tap((answers) => {
-        const currentStep = $activeStepIndex.get();
+        const activeStepIndex = $activeStepIndex.get();
+
+        $steps.set(
+          $steps.get().map((step, idx) =>
+            idx === activeStepIndex
+              ? {
+                  ...step,
+                  questions: step.questions.map((question) => {
+                    const answer = answers[question.key];
+
+                    if (
+                      question.type === 'numeric' ||
+                      question.type === 'slide'
+                    ) {
+                      return {
+                        ...question,
+                        value:
+                          typeof answer === 'number' ? answer : question.value,
+                      };
+                    }
+
+                    return {
+                      ...question,
+                      value:
+                        typeof answer === 'string' ? answer : question.value,
+                    };
+                  }),
+                }
+              : step,
+          ),
+        );
+        console.log(answers);
+        console.log($steps.get());
         const maxStep = Math.max(0, $totalSteps.get() - 1);
 
-        if (currentStep >= maxStep) {
+        if (activeStepIndex >= maxStep) {
           $isFinished.set(true);
           return;
         }
 
-        $activeStepIndex.set(Math.min(maxStep, currentStep + 1));
+        $activeStepIndex.set(Math.min(maxStep, activeStepIndex + 1));
       }),
     ),
     ofType('[TRIGGER]_EDIT_ANSWERS').pipe(

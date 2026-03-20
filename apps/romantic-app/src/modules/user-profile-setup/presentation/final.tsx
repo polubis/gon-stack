@@ -4,10 +4,10 @@ import { useContext } from './context';
 export const Final = () => {
   const ctx = useContext();
   const [isSaved, setIsSaved] = useState(false);
-  const answers = ctx.$answers.use();
+  const stepAnswers = ctx.$stepAnswers.use();
 
-  const displayName = answers['user-profile.display-name'];
-  const age = answers['user-profile.age'];
+  const displayName = stepAnswers['display-name'];
+  const age = stepAnswers['age'];
 
   return (
     <div className="flex flex-col gap-5">

@@ -3,7 +3,7 @@ import { Brand, Prettify } from '../../../libs/ts-more';
 export type StepId = Brand<number, 'StepId'>;
 export type StepKey = Brand<string, 'StepKey'>;
 export type QuestionId = Brand<number, 'QuestionId'>;
-export type QuestionKey = Brand<`${string}.${string}`, 'QuestionKey'>;
+export type QuestionKey = Brand<string, 'QuestionKey'>;
 
 export type Constraints = {
   min: number;
@@ -47,3 +47,4 @@ export type Step = {
 };
 
 export type Answers = Record<string, string | number>;
+
