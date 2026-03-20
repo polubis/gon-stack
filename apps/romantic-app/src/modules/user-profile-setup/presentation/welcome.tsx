@@ -1,5 +1,7 @@
 import { useContext } from './context';
 
+import { Text } from '../../../libs/ui/text';
+
 export const Welcome = () => {
   const ctx = useContext();
   const isLoading = ctx.$isLoading.use();
@@ -18,9 +20,7 @@ export const Welcome = () => {
             Error
           </span>
         </header>
-        <h1 className="text-2xl md:text-3xl font-heading font-semibold text-text-primary">
-          We couldn&apos;t load your profile setup
-        </h1>
+        <Text.H4>We couldn&apos;t load your profile setup</Text.H4>
         <p className="text-text-secondary">
           There was a problem loading the configuration for this room.
         </p>
@@ -52,9 +52,7 @@ export const Welcome = () => {
       <header className="flex items-center justify-between gap-3">
         <div className="variant-pill">PROFILE SETUP</div>
       </header>
-      <h1 className="text-2xl md:text-3xl font-heading font-semibold text-text-primary">
-        Let&apos;s set up your relationship profile
-      </h1>
+      <Text.H4>Let&apos;s set up your relationship profile</Text.H4>
       <p className="text-text-secondary">
         Takes about 3-5 minutes. Your answers stay private in your room.
       </p>

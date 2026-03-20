@@ -102,6 +102,25 @@
   --card-outline: color-mix(in srgb, var(--color-primary-500) 15%, transparent);
   --card-shadow: 0 0 0 1px var(--card-outline), 0 10px 28px rgba(0, 0, 0, 0.45);
 
+  /* Text semantic tokens (per variant colors) */
+  --text-h1-color: var(--color-text-primary);
+  --text-h2-color: var(--color-text-primary);
+  --text-h3-color: var(--color-text-primary);
+  --text-h4-color: var(--color-text-primary);
+  --text-h5-color: var(--color-text-primary);
+  --text-h6-color: var(--color-text-primary);
+  --text-b1-color: var(--color-text-secondary);
+  --text-b2-color: var(--color-text-secondary);
+  --text-b3-color: var(--color-text-secondary);
+  --text-c1-color: var(--color-text-tertiary);
+  --text-c2-color: var(--color-text-tertiary);
+  --text-l1-color: var(--color-text-tertiary);
+  --text-l2-color: var(--color-text-tertiary);
+  --text-v1-color: var(--color-text-tertiary);
+  --text-v2-color: var(--color-text-tertiary);
+  --text-o1-color: var(--color-text-secondary);
+  --text-o2-color: var(--color-text-tertiary);
+
   /* Fonts */
   --font-sans: 'Sora', system-ui, sans-serif;
   --font-heading: 'Chakra Petch', system-ui, sans-serif;
@@ -115,17 +134,6 @@
   --breakpoint-2xl: 90rem; /* 1440px */
 }
 
-@layer base {
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: var(--font-heading);
-    letter-spacing: 0.01em;
-  }
-}
 
 @layer components {
   .variant-shell {

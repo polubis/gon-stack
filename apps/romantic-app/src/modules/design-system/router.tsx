@@ -1,8 +1,10 @@
 import { useState, type ReactNode } from 'react';
 
 import { Card } from '../../libs/ui/card';
+import { Text } from '../../libs/ui/text';
 import { CardSandbox } from './card-sandbox';
 import { SliderSandbox } from './slider-sandbox';
+import { TextSandbox } from './text-sandbox';
 
 type ComponentKey = string;
 
@@ -56,20 +58,16 @@ export function DesignSystemRouter({
   return (
     <div className="w-full max-w-6xl">
       <div className="mb-6 space-y-2">
-        <p className="text-xs uppercase tracking-[0.18em] text-text-tertiary">
-          Components / UI
-        </p>
-        <h1 className="text-3xl text-text-primary">{title}</h1>
-        <p className="text-sm text-text-secondary">{subtitle}</p>
+        <Text.V1>Components / UI</Text.V1>
+        <Text.H1>{title}</Text.H1>
+        <Text.B2>{subtitle}</Text.B2>
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[30%_70%]">
         <aside className="xl:sticky xl:top-6 xl:self-start">
           <Card className="p-5 space-y-5">
             <div>
-              <p className="text-xs uppercase tracking-[0.16em] text-text-tertiary">
-                On this page
-              </p>
+              <Text.V2>On this page</Text.V2>
               <nav className="mt-3 space-y-4 text-sm">
                 {components.map((component) => (
                   <div key={component.key} className="space-y-2">
@@ -126,6 +124,18 @@ export function DesignSystemSandboxRouter() {
         { id: 'card-nested', label: 'Nested cards' },
       ],
       content: <CardSandbox />,
+    },
+    {
+      key: 'text',
+      label: 'Text',
+      rootId: 'text-examples',
+      items: [
+        { id: 'text-headings', label: 'Headings (H1-H6)' },
+        { id: 'text-body', label: 'Body (B1-B3)' },
+        { id: 'text-meta', label: 'Captions / Labels / Overline' },
+        { id: 'text-ornamental', label: 'Ornamental (O1-O2)' },
+      ],
+      content: <TextSandbox />,
     },
     {
       key: 'slider',

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useContext } from './context';
 
+import { Text } from '../../../libs/ui/text';
+
 export const Final = () => {
   const ctx = useContext();
   const [isSaved, setIsSaved] = useState(false);
@@ -25,9 +27,7 @@ export const Final = () => {
 
   return (
     <div className="flex flex-col gap-5">
-      <h2 className="text-2xl font-heading font-semibold text-text-primary">
-        Here&apos;s your romantic vibe
-      </h2>
+      <Text.H4>Here&apos;s your romantic vibe</Text.H4>
       <p className="text-sm text-text-secondary leading-relaxed">
         This is how we&apos;ll describe your relationship style in the game. You
         can change this later if you want.

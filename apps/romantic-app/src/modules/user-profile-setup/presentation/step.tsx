@@ -2,6 +2,8 @@ import { useForm } from 'react-hook-form';
 import { useContext } from './context';
 import { QuestionInput } from './question-input';
 
+import { Text } from '../../../libs/ui/text';
+
 const StepForm = () => {
   const ctx = useContext();
   const activeStep = ctx.$activeStep.use();
@@ -23,9 +25,7 @@ const StepForm = () => {
       noValidate
     >
       <div className="flex flex-col gap-2">
-        <h2 className="text-2xl font-heading font-semibold text-text-primary">
-          {activeStep.label}
-        </h2>
+        <Text.H4>{activeStep.label}</Text.H4>
         <p className="text-sm text-text-secondary">{activeStep.description}</p>
       </div>
 

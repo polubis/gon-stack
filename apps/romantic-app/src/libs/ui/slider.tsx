@@ -30,15 +30,9 @@ const [SliderProvider, useSliderContext] = createHookContext(
 
 export type SliderRootCompoundProps = SliderRootProps;
 
-export type SliderTrackProps = ComponentProps<
-  typeof SliderPrimitive.Track
->;
-export type SliderRangeProps = ComponentProps<
-  typeof SliderPrimitive.Range
->;
-export type SliderThumbProps = ComponentProps<
-  typeof SliderPrimitive.Thumb
-> & {
+export type SliderTrackProps = ComponentProps<typeof SliderPrimitive.Track>;
+export type SliderRangeProps = ComponentProps<typeof SliderPrimitive.Range>;
+export type SliderThumbProps = ComponentProps<typeof SliderPrimitive.Thumb> & {
   showValueLabel?: boolean;
   formatValueLabel?: (value: number) => ReactNode;
   valueLabelClassName?: string;
@@ -70,7 +64,7 @@ const getResolvedValues = (
  * Root
  * ============================================================================= */
 
-const Root = ({
+export const SliderRoot = ({
   className,
   children,
   min = 0,
@@ -125,7 +119,7 @@ const Root = ({
  * Track
  * ============================================================================= */
 
-const Track = ({ className, ...props }: SliderTrackProps) => {
+export const SliderTrack = ({ className, ...props }: SliderTrackProps) => {
   return (
     <SliderPrimitive.Track
       className={cn(
@@ -143,7 +137,7 @@ const Track = ({ className, ...props }: SliderTrackProps) => {
  * Range
  * ============================================================================= */
 
-const Range = ({ className, ...props }: SliderRangeProps) => {
+export const SliderRange = ({ className, ...props }: SliderRangeProps) => {
   return (
     <SliderPrimitive.Range
       className={cn(
@@ -161,7 +155,7 @@ const Range = ({ className, ...props }: SliderRangeProps) => {
  * Thumb
  * ============================================================================= */
 
-const Thumb = ({
+export const SliderThumb = ({
   className,
   index,
   showValueLabel = true,
@@ -207,11 +201,11 @@ const Thumb = ({
  * Thumbs
  * ============================================================================= */
 
-const Thumbs = (props: SliderThumbsProps) => {
+export const SliderThumbs = (props: SliderThumbsProps) => {
   const context = useSliderContext();
 
   return context.values.map((_, index) => (
-    <Thumb key={index} {...props} index={index} />
+    <SliderThumb key={index} {...props} index={index} />
   ));
 };
 
@@ -220,9 +214,9 @@ const Thumbs = (props: SliderThumbsProps) => {
  * ============================================================================= */
 
 export const Slider = {
-  Root,
-  Track,
-  Range,
-  Thumb,
-  Thumbs,
+  Root: SliderRoot,
+  Track: SliderTrack,
+  Range: SliderRange,
+  Thumb: SliderThumb,
+  Thumbs: SliderThumbs,
 };

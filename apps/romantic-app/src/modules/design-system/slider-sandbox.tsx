@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactNode, type FormEvent } from 'react';
 
 import { Slider } from '../../libs/ui/slider';
+import { Text } from '../../libs/ui/text';
 
 function ExampleCard({
   id,
@@ -16,8 +17,8 @@ function ExampleCard({
   return (
     <section id={id} className="variant-card rounded-xl p-5 md:p-6">
       <header className="mb-4 space-y-1">
-        <h2 className="text-lg text-text-primary">{title}</h2>
-        <p className="text-sm text-text-secondary">{description}</p>
+        <Text.H2>{title}</Text.H2>
+        <Text.B2>{description}</Text.B2>
       </header>
       {children}
     </section>
@@ -50,10 +51,8 @@ export function SliderSandbox() {
   return (
     <div id="slider-examples" className="w-full max-w-6xl space-y-6">
       <div className="text-center space-y-2">
-        <p className="text-xs uppercase tracking-[0.18em] text-text-tertiary">
-          Radix Slider - usage examples
-        </p>
-        <h1 className="text-3xl text-text-primary">Slider Sandbox</h1>
+        <Text.V1>Radix Slider - usage examples</Text.V1>
+        <Text.H1>Slider Sandbox</Text.H1>
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -76,7 +75,9 @@ export function SliderSandbox() {
               </Slider.Track>
               <Slider.Thumbs showValueLabel />
             </Slider.Root>
-            <p className="text-xs text-text-tertiary">Range: 1 to 5, step 1.</p>
+            <Text.B3>
+              Range: 1 to 5, step 1.
+            </Text.B3>
           </div>
         </ExampleCard>
 
@@ -104,16 +105,14 @@ export function SliderSandbox() {
                 formatValueLabel={(value) => `Q${value}`}
               />
             </Slider.Root>
-            <div className="text-sm text-text-secondary">
+            <Text.B2>
               Live value:{' '}
-              <strong className="text-text-primary">
-                {controlledValue[0]}
-              </strong>
-            </div>
-            <div className="text-sm text-text-secondary">
+              <strong>{controlledValue[0]}</strong>
+            </Text.B2>
+            <Text.B2>
               Committed value:{' '}
-              <strong className="text-text-primary">{committedValue[0]}</strong>
-            </div>
+              <strong>{committedValue[0]}</strong>
+            </Text.B2>
           </div>
         </ExampleCard>
 
@@ -138,14 +137,14 @@ export function SliderSandbox() {
               </Slider.Track>
               <Slider.Thumbs />
             </Slider.Root>
-            <p className="text-sm text-text-secondary">
+            <Text.B2>
               Selected interval:{' '}
-              <strong className="text-text-primary">{formattedRange}</strong>
-            </p>
-            <p className="text-xs text-text-tertiary">
+              <strong>{formattedRange}</strong>
+            </Text.B2>
+            <Text.B3>
               `minStepsBetweenThumbs=2` with `step=5` enforces at least 10 units
               of gap.
-            </p>
+            </Text.B3>
           </div>
         </ExampleCard>
 
@@ -170,10 +169,10 @@ export function SliderSandbox() {
               </Slider.Track>
               <Slider.Thumbs />
             </Slider.Root>
-            <div className="text-sm text-text-secondary">
+            <Text.B2>
               Brightness:{' '}
-              <strong className="text-text-primary">{verticalValue[0]}%</strong>
-            </div>
+              <strong>{verticalValue[0]}%</strong>
+            </Text.B2>
           </div>
         </ExampleCard>
 
@@ -198,12 +197,10 @@ export function SliderSandbox() {
               </Slider.Track>
               <Slider.Thumbs />
             </Slider.Root>
-            <p className="text-sm text-text-secondary">
+            <Text.B2>
               Values:{' '}
-              <strong className="text-text-primary">
-                {tripleValue.join(' / ')}
-              </strong>
-            </p>
+              <strong>{tripleValue.join(' / ')}</strong>
+            </Text.B2>
           </div>
         </ExampleCard>
 
@@ -229,9 +226,9 @@ export function SliderSandbox() {
                 formatValueLabel={(value) => `${value}%`}
               />
             </Slider.Root>
-            <p className="text-xs text-text-tertiary">
+            <Text.B3>
               Use this form when you need explicit thumb-level composition.
-            </p>
+            </Text.B3>
           </div>
         </ExampleCard>
 
@@ -254,9 +251,9 @@ export function SliderSandbox() {
               </Slider.Track>
               <Slider.Thumbs showValueLabel />
             </Slider.Root>
-            <p className="text-xs text-text-tertiary">
+            <Text.B3>
               Disabled sliders are non-interactive.
-            </p>
+            </Text.B3>
           </div>
         </ExampleCard>
 
@@ -283,10 +280,10 @@ export function SliderSandbox() {
                 formatValueLabel={(value) => `${value}%`}
               />
             </Slider.Root>
-            <p className="text-sm text-text-secondary">
+            <Text.B2>
               Value:{' '}
-              <strong className="text-text-primary">{rtlValue[0]}%</strong>
-            </p>
+              <strong>{rtlValue[0]}%</strong>
+            </Text.B2>
           </div>
         </ExampleCard>
 
@@ -313,12 +310,10 @@ export function SliderSandbox() {
                 formatValueLabel={(value) => `${Math.round(value * 100)}%`}
               />
             </Slider.Root>
-            <p className="text-sm text-text-secondary">
+            <Text.B2>
               Volume:{' '}
-              <strong className="text-text-primary">
-                {Math.round(volumeValue[0] * 100)}%
-              </strong>
-            </p>
+              <strong>{Math.round(volumeValue[0] * 100)}%</strong>
+            </Text.B2>
           </div>
         </ExampleCard>
 
@@ -348,7 +343,7 @@ export function SliderSandbox() {
             >
               Submit form
             </button>
-            <p className="text-sm text-text-secondary">{formResult}</p>
+            <Text.B2>{formResult}</Text.B2>
           </form>
         </ExampleCard>
       </div>
