@@ -1,6 +1,8 @@
-import type { ReactNode } from 'react';
 import { useWatch } from 'react-hook-form';
-import { VALIDATION_ERROR_MAP } from '../configuration/validation';
+import {
+  createFieldConfig,
+  VALIDATION_ERROR_MAP,
+} from '../configuration/validation';
 import type { QuestionInputProps } from '../contracts/props';
 
 export const QuestionInput = ({
@@ -10,7 +12,7 @@ export const QuestionInput = ({
   setValue,
 }: QuestionInputProps) => {
   const { min, max, required } = question;
-  const fieldName = question.key as string;
+  const fieldName = question.key;
 
   const watchedValue = useWatch({
     control,
@@ -18,24 +20,12 @@ export const QuestionInput = ({
     defaultValue: question.value,
   });
 
-  let questionInputContent: ReactNode;
-
   switch (question.type) {
     case 'text': {
-      questionInputContent = (
+      return (
         <input
           type="text"
-          {...register(fieldName, {
-            required: required ? VALIDATION_ERROR_MAP.required : false,
-            minLength: {
-              value: min,
-              message: VALIDATION_ERROR_MAP.min,
-            },
-            maxLength: {
-              value: max,
-              message: VALIDATION_ERROR_MAP.max,
-            },
-          })}
+          {...register(fieldName, createFieldConfig({ required, min, max }))}
           minLength={min}
           maxLength={max}
           placeholder="Your answer"
@@ -43,7 +33,6 @@ export const QuestionInput = ({
           className="variant-input w-full px-3 py-2.5 text-sm rounded-md border border-surface-300 bg-surface-100 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-400/50"
         />
       );
-      break;
     }
 
     case 'numeric': {
@@ -52,22 +41,14 @@ export const QuestionInput = ({
           ? watchedValue
           : min;
 
-      questionInputContent = (
+      return (
         <div className="flex items-center gap-3">
           <input
             type="hidden"
-            {...register(fieldName, {
-              valueAsNumber: true,
-              required: required ? VALIDATION_ERROR_MAP.required : false,
-              min: {
-                value: min,
-                message: VALIDATION_ERROR_MAP.min,
-              },
-              max: {
-                value: max,
-                message: VALIDATION_ERROR_MAP.max,
-              },
-            })}
+            {...register(
+              fieldName,
+              createFieldConfig({ required, min, max, valueAsNumber: true }),
+            )}
           />
           <button
             type="button"
@@ -89,6 +70,7 @@ export const QuestionInput = ({
             value={numericValue}
             onChange={(event) => {
               const nextValue = Number(event.target.value);
+
               if (!Number.isFinite(nextValue)) {
                 setValue(fieldName, min, {
                   shouldDirty: true,
@@ -119,7 +101,6 @@ export const QuestionInput = ({
           </button>
         </div>
       );
-      break;
     }
 
     case 'slide': {
@@ -131,23 +112,15 @@ export const QuestionInput = ({
       const slideProgressRatio = (slideValue - min) / slideRange;
       const sliderThumbSizePx = 16;
 
-      questionInputContent = (
+      return (
         <div className="flex flex-col gap-3">
           <div className="relative pt-6">
             <input
               type="range"
-              {...register(fieldName, {
-                valueAsNumber: true,
-                required: required ? VALIDATION_ERROR_MAP.required : false,
-                min: {
-                  value: min,
-                  message: VALIDATION_ERROR_MAP.min,
-                },
-                max: {
-                  value: max,
-                  message: VALIDATION_ERROR_MAP.max,
-                },
-              })}
+              {...register(
+                fieldName,
+                createFieldConfig({ required, min, max, valueAsNumber: true }),
+              )}
               min={min}
               max={max}
               className="w-full h-2 rounded-full appearance-none bg-surface-200 accent-primary-400"
@@ -167,17 +140,14 @@ export const QuestionInput = ({
           </div>
         </div>
       );
-      break;
     }
 
     case 'select': {
-      questionInputContent = (
+      return (
         <div className="flex flex-col gap-2">
           <input
             type="hidden"
-            {...register(fieldName, {
-              required: required ? VALIDATION_ERROR_MAP.required : false,
-            })}
+            {...register(fieldName, createFieldConfig({ required }))}
           />
           {question.options.map((option) => (
             <button
@@ -200,9 +170,11 @@ export const QuestionInput = ({
           ))}
         </div>
       );
-      break;
+    }
+
+    default: {
+      const exhaustiveCheck: never = question;
+      return exhaustiveCheck;
     }
   }
-
-  return questionInputContent;
 };
