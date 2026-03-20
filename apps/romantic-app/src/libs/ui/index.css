@@ -1,44 +1,127 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
-  --color-primary-50: hsl(300 100% 95%);   /* #ffe6ff */
-  --color-primary-100: hsl(300 100% 89%);  /* #ffc9ff */
-  --color-primary-200: hsl(300 100% 81%);  /* #ff9eff */
-  --color-primary-300: hsl(300 100% 70%);  /* #ff67ff */
-  --color-primary-400: hsl(303 100% 60%);  /* #ff33f5 */
-  --color-primary-500: hsl(305 85% 51%);   /* #ec16d9 */
-  --color-primary-600: hsl(305 87% 41%);   /* #c50eb6 */
-  --color-primary-700: hsl(304 90% 31%);    /* #98088f */
+  /* General palette */
+  --color-primary-50: oklch(0.96 0.04 326); /* #ffe6ff */
+  --color-primary-100: oklch(0.91 0.08 326); /* #ffc9ff */
+  --color-primary-200: oklch(0.85 0.13 326); /* #ff9eff */
+  --color-primary-300: oklch(0.78 0.2 326); /* #ff67ff */
+  --color-primary-400: oklch(0.72 0.27 326); /* #ff33f5 */
+  --color-primary-500: oklch(0.64 0.26 327); /* #ec16d9 */
+  --color-primary-600: oklch(0.56 0.23 327); /* #c50eb6 */
+  --color-primary-700: oklch(0.47 0.19 327); /* #98088f */
 
-  --color-secondary-50: hsl(191 100% 92%);   /* #d8f9ff */
-  --color-secondary-100: hsl(191 100% 85%);  /* #b5f1ff */
-  --color-secondary-200: hsl(191 100% 76%);  /* #84e8ff */
-  --color-secondary-300: hsl(191 100% 63%);  /* #40dcff */
-  --color-secondary-400: hsl(191 100% 48%);  /* #00c8f4 */
-  --color-secondary-500: hsl(191 100% 42%);  /* #00add4 */
-  --color-secondary-600: hsl(191 100% 33%);  /* #0088aa */
-  --color-secondary-700: hsl(191 100% 26%);  /* #006a84 */
+  --color-secondary-50: oklch(0.95 0.04 220); /* #d8f9ff */
+  --color-secondary-100: oklch(0.9 0.07 220); /* #b5f1ff */
+  --color-secondary-200: oklch(0.84 0.11 220); /* #84e8ff */
+  --color-secondary-300: oklch(0.76 0.16 220); /* #40dcff */
+  --color-secondary-400: oklch(0.69 0.18 220); /* #00c8f4 */
+  --color-secondary-500: oklch(0.62 0.15 220); /* #00add4 */
+  --color-secondary-600: oklch(0.53 0.12 220); /* #0088aa */
+  --color-secondary-700: oklch(0.45 0.1 220); /* #006a84 */
 
-  --color-surface-0: hsl(252 42% 7%);    /* #0a0718 */
-  --color-surface-50: hsl(264 52% 10%); /* #120c24 */
-  --color-surface-100: hsl(264 48% 15%); /* #1a1133 */
-  --color-surface-200: hsl(264 51% 22%); /* #29194b */
+  --color-surface-0: oklch(0.18 0.03 290); /* #0a0718 */
+  --color-surface-50: oklch(0.22 0.04 290); /* #120c24 */
+  --color-surface-100: oklch(0.27 0.05 290); /* #1a1133 */
+  --color-surface-200: oklch(0.34 0.07 290); /* #29194b */
 
-  --color-text-primary: hsl(258 100% 98%);  /* #f8f5ff */
-  --color-text-secondary: hsl(252 100% 92%); /* #ddd6ff */
-  --color-text-tertiary: hsl(258 44% 74%);  /* #a79ad9 */
+  --color-text-primary: oklch(0.98 0.01 285); /* #f8f5ff */
+  --color-text-secondary: oklch(0.92 0.03 285); /* #ddd6ff */
+  --color-text-tertiary: oklch(0.75 0.08 285); /* #a79ad9 */
 
-  --color-success: hsl(157 63% 55%);  /* #3ddc97 */
-  --color-warning: hsl(42 100% 64%);  /* #ffc857 */
-  --color-error: hsl(343 100% 68%);   /* #ff5d8f */
-  --color-info: hsl(199 95% 60%);     /* #38bdf8 */
+  --color-success: oklch(0.79 0.16 156); /* #3ddc97 */
+  --color-warning: oklch(0.86 0.16 92); /* #ffc857 */
+  --color-error: oklch(0.74 0.2 8); /* #ff5d8f */
+  --color-info: oklch(0.76 0.14 242); /* #38bdf8 */
 
+  /* Slider semantic tokens */
+  --slider-track-border: color-mix(
+    in srgb,
+    var(--color-secondary-300) 45%,
+    transparent
+  );
+  --slider-track-bg: color-mix(
+    in srgb,
+    var(--color-surface-50) 85%,
+    transparent
+  );
+  --slider-track-shadow: color-mix(
+    in srgb,
+    var(--color-secondary-500) 20%,
+    transparent
+  );
+  --slider-range-from: var(--color-primary-500);
+  --slider-range-to: var(--color-secondary-500);
+  --slider-range-glow: color-mix(
+    in srgb,
+    var(--color-primary-500) 50%,
+    transparent
+  );
+  --slider-thumb-border: oklch(
+    from var(--color-secondary-200) calc(l - 0.22) calc(c * 0.72) h
+  );
+  --slider-thumb-from: oklch(
+    from var(--color-surface-0) calc(l + 0.06) calc(c * 1.05) h
+  );
+  --slider-thumb-to: oklch(
+    from var(--color-secondary-200) calc(l - 0.44) calc(c * 0.58) h
+  );
+  --slider-thumb-glow: color-mix(
+    in srgb,
+    var(--color-primary-500) 40%,
+    transparent
+  );
+  --slider-thumb-focus: color-mix(
+    in srgb,
+    var(--color-primary-300) 70%,
+    transparent
+  );
+  --slider-label-border: color-mix(
+    in srgb,
+    var(--color-primary-300) 70%,
+    transparent
+  );
+  --slider-label-bg: color-mix(
+    in srgb,
+    var(--color-primary-500) 30%,
+    transparent
+  );
+  --slider-label-text: var(--color-text-primary);
+  --slider-label-glow: color-mix(
+    in srgb,
+    var(--color-primary-500) 40%,
+    transparent
+  );
+  /* Card semantic tokens */
+  --card-bg: color-mix(in srgb, var(--color-surface-100) 88%, transparent);
+  --card-border: color-mix(
+    in srgb,
+    var(--color-secondary-400) 36%,
+    transparent
+  );
+  --card-outline: color-mix(in srgb, var(--color-primary-500) 15%, transparent);
+  --card-shadow: 0 0 0 1px var(--card-outline), 0 10px 28px rgba(0, 0, 0, 0.45);
+
+  /* Fonts */
   --font-sans: 'Sora', system-ui, sans-serif;
   --font-heading: 'Chakra Petch', system-ui, sans-serif;
+
+  /* Breakpoints */
+  --breakpoint-tn: 20rem; /* 320px */
+  --breakpoint-sm: 30rem; /* 480px */
+  --breakpoint-md: 48rem; /* 768px */
+  --breakpoint-lg: 62rem; /* 992px */
+  --breakpoint-xl: 75rem; /* 1200px */
+  --breakpoint-2xl: 90rem; /* 1440px */
 }
 
 @layer base {
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-heading);
     letter-spacing: 0.01em;
   }
@@ -59,8 +142,10 @@
 
   .variant-nav {
     background: color-mix(in srgb, var(--color-surface-0) 88%, transparent);
-    border-bottom: 1px solid color-mix(in srgb, var(--color-primary-500) 45%, transparent);
-    box-shadow: 0 0 14px color-mix(in srgb, var(--color-primary-500) 30%, transparent);
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--color-primary-500) 45%, transparent);
+    box-shadow: 0 0 14px
+      color-mix(in srgb, var(--color-primary-500) 30%, transparent);
     backdrop-filter: blur(8px);
   }
 
@@ -71,24 +156,39 @@
   .variant-nav-item:hover {
     color: #ffffff;
     background: color-mix(in srgb, var(--color-primary-500) 24%, transparent);
-    box-shadow: 0 0 10px color-mix(in srgb, var(--color-primary-500) 55%, transparent);
+    box-shadow: 0 0 10px
+      color-mix(in srgb, var(--color-primary-500) 55%, transparent);
   }
   .variant-nav-active {
     border-radius: 8px;
     color: #ffffff;
-    background: linear-gradient(120deg, var(--color-primary-500), var(--color-secondary-500));
-    box-shadow: 0 0 12px color-mix(in srgb, var(--color-secondary-400) 60%, transparent);
+    background: linear-gradient(
+      120deg,
+      var(--color-primary-500),
+      var(--color-secondary-500)
+    );
+    box-shadow: 0 0 12px
+      color-mix(in srgb, var(--color-secondary-400) 60%, transparent);
   }
 
   .variant-hero {
     background:
-      radial-gradient(circle at 10% 50%, color-mix(in srgb, var(--color-secondary-400) 35%, transparent) 0%, transparent 28%),
-      radial-gradient(circle at 90% 30%, color-mix(in srgb, var(--color-primary-400) 35%, transparent) 0%, transparent 30%);
+      radial-gradient(
+        circle at 10% 50%,
+        color-mix(in srgb, var(--color-secondary-400) 35%, transparent) 0%,
+        transparent 28%
+      ),
+      radial-gradient(
+        circle at 90% 30%,
+        color-mix(in srgb, var(--color-primary-400) 35%, transparent) 0%,
+        transparent 30%
+      );
   }
 
   .variant-card {
     background: color-mix(in srgb, var(--color-surface-100) 88%, transparent);
-    border: 1px solid color-mix(in srgb, var(--color-secondary-400) 36%, transparent);
+    border: 1px solid
+      color-mix(in srgb, var(--color-secondary-400) 36%, transparent);
     border-radius: 14px;
     box-shadow:
       0 0 0 1px color-mix(in srgb, var(--color-primary-500) 15%, transparent),
@@ -109,7 +209,8 @@
   .variant-button-primary {
     color: #ffffff;
     background: linear-gradient(120deg, var(--color-primary-500), #ff4fe3);
-    box-shadow: 0 0 12px color-mix(in srgb, var(--color-primary-400) 50%, transparent);
+    box-shadow: 0 0 12px
+      color-mix(in srgb, var(--color-primary-400) 50%, transparent);
   }
   .variant-button-primary:hover {
     filter: saturate(1.2);
@@ -117,7 +218,8 @@
 
   .variant-button-secondary {
     color: #e8faff;
-    border: 1px solid color-mix(in srgb, var(--color-secondary-300) 65%, transparent);
+    border: 1px solid
+      color-mix(in srgb, var(--color-secondary-300) 65%, transparent);
     background: color-mix(in srgb, var(--color-secondary-500) 20%, transparent);
   }
   .variant-button-secondary:hover {
@@ -131,7 +233,8 @@
   }
 
   .variant-input {
-    border: 1px solid color-mix(in srgb, var(--color-secondary-300) 45%, transparent);
+    border: 1px solid
+      color-mix(in srgb, var(--color-secondary-300) 45%, transparent);
     background: color-mix(in srgb, #0f122d 80%, transparent);
     color: var(--color-text-primary);
   }
@@ -152,7 +255,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid color-mix(in srgb, var(--color-secondary-300) 55%, transparent);
+    border: 1px solid
+      color-mix(in srgb, var(--color-secondary-300) 55%, transparent);
     background: color-mix(in srgb, var(--color-secondary-500) 15%, transparent);
   }
 
@@ -163,16 +267,22 @@
     text-transform: uppercase;
     letter-spacing: 0.11em;
     color: #fff;
-    border: 1px solid color-mix(in srgb, var(--color-primary-300) 70%, transparent);
+    border: 1px solid
+      color-mix(in srgb, var(--color-primary-300) 70%, transparent);
     background: color-mix(in srgb, var(--color-primary-500) 30%, transparent);
   }
   .variant-pill-secondary {
-    border-color: color-mix(in srgb, var(--color-secondary-300) 70%, transparent);
+    border-color: color-mix(
+      in srgb,
+      var(--color-secondary-300) 70%,
+      transparent
+    );
     background: color-mix(in srgb, var(--color-secondary-500) 24%, transparent);
   }
 
   .variant-option {
-    border: 1px solid color-mix(in srgb, var(--color-secondary-300) 40%, transparent);
+    border: 1px solid
+      color-mix(in srgb, var(--color-secondary-300) 40%, transparent);
     background: color-mix(in srgb, #ffffff 4%, transparent);
     color: var(--color-text-primary);
   }
@@ -181,7 +291,11 @@
   }
   .variant-option-active {
     border: 1px solid var(--color-primary-300);
-    background: linear-gradient(120deg, color-mix(in srgb, var(--color-primary-500) 55%, transparent), color-mix(in srgb, var(--color-secondary-500) 45%, transparent));
+    background: linear-gradient(
+      120deg,
+      color-mix(in srgb, var(--color-primary-500) 55%, transparent),
+      color-mix(in srgb, var(--color-secondary-500) 45%, transparent)
+    );
     color: #ffffff;
   }
 }

@@ -1,9 +1,7 @@
-import { useWatch } from 'react-hook-form';
-import {
-  createFieldConfig,
-  VALIDATION_ERROR_MAP,
-} from '../configuration/validation';
+import { Controller, useWatch } from 'react-hook-form';
+import { createFieldConfig } from '../configuration/validation';
 import type { QuestionInputProps } from '../contracts/props';
+import { Slider } from '../../../libs/ui/slider';
 
 export const QuestionInput = ({
   question,
@@ -104,41 +102,46 @@ export const QuestionInput = ({
     }
 
     case 'slide': {
-      const slideValue =
-        typeof watchedValue === 'number' && Number.isFinite(watchedValue)
-          ? watchedValue
-          : min;
-      const slideRange = max - min || 1;
-      const slideProgressRatio = (slideValue - min) / slideRange;
-      const sliderThumbSizePx = 16;
-
       return (
-        <div className="flex flex-col gap-3">
-          <div className="relative pt-6">
-            <input
-              type="range"
-              {...register(
-                fieldName,
-                createFieldConfig({ required, min, max, valueAsNumber: true }),
-              )}
-              min={min}
-              max={max}
-              className="w-full h-2 rounded-full appearance-none bg-surface-200 accent-primary-400"
-            />
-            <span
-              className="variant-pill absolute top-0 -translate-x-1/2 text-xs"
-              style={{
-                left: `calc((100% - ${sliderThumbSizePx}px) * ${slideProgressRatio} + ${sliderThumbSizePx / 2}px)`,
-              }}
-            >
-              {slideValue}
-            </span>
-          </div>
-          <div className="flex justify-between text-xs text-text-tertiary">
-            <span>{question.min}</span>
-            <span>{question.max}</span>
-          </div>
-        </div>
+        <Controller
+          name={fieldName}
+          control={control}
+          defaultValue={question.value}
+          rules={createFieldConfig({ required, min, max, valueAsNumber: true })}
+          render={({ field }) => {
+            const slideValue =
+              typeof field.value === 'number' && Number.isFinite(field.value)
+                ? field.value
+                : min;
+
+            return (
+              <Slider.Root
+                min={min}
+                max={max}
+                value={[slideValue]}
+                onValueChange={(nextValue) => {
+                  const nextSlideValue = nextValue[0];
+                  if (typeof nextSlideValue !== 'number') {
+                    return;
+                  }
+
+                  field.onChange(nextSlideValue);
+                }}
+                onValueCommit={() => field.onBlur()}
+                className="pt-7"
+                aria-label={question.label}
+              >
+                <Slider.Track>
+                  <Slider.Range />
+                </Slider.Track>
+                <Slider.Thumbs
+                  showValueLabel
+                  formatValueLabel={(value) => value}
+                />
+              </Slider.Root>
+            );
+          }}
+        />
       );
     }
 
