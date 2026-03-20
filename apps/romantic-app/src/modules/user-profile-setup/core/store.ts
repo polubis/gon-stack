@@ -7,6 +7,8 @@ export const createStore = () => {
   const $error = atom<string | null>(null);
   const $isStarted = atom(false);
   const $isFinished = atom(false);
+  const $isSaving = atom(false);
+  const $isSaved = atom(false);
   const $activeStepIndex = atom(0);
   const $steps = atom<Step[]>([]);
 
@@ -16,6 +18,8 @@ export const createStore = () => {
     $isFinished,
     $isLoading,
     $error,
+    $isSaving,
+    $isSaved,
     $activeStepIndex,
     $hasPreviousStep: computed(
       [$activeStepIndex],

@@ -6,5 +6,5 @@ export type Event =
   | TriggerEvent<'[TRIGGER]_START'>
   | TriggerEvent<'[TRIGGER]_PREV'>
   | TriggerEvent<'[TRIGGER]_NEXT', Answers>
-  | TriggerEvent<'[TRIGGER]_EDIT_ANSWERS'>;
-
+  | TriggerEvent<'[TRIGGER]_EDIT_ANSWERS'>
+  | TriggerEvent<'[TRIGGER]_SAVE_ANSWERS'>;

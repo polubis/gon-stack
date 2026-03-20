@@ -134,8 +134,76 @@
   --breakpoint-2xl: 90rem; /* 1440px */
 }
 
-
 @layer components {
+  /* Typography utilities */
+  .t1 {
+    @apply font-heading text-5xl leading-tight text-(--text-h1-color);
+  }
+
+  .t2 {
+    @apply font-heading text-4xl leading-tight text-(--text-h2-color);
+  }
+
+  .t3 {
+    @apply font-heading text-3xl leading-tight text-(--text-h3-color);
+  }
+
+  .t4 {
+    @apply font-heading text-2xl leading-snug text-(--text-h4-color);
+  }
+
+  .t5 {
+    @apply font-heading text-xl leading-snug text-(--text-h5-color);
+  }
+
+  .t6 {
+    @apply font-heading text-lg leading-snug text-(--text-h6-color);
+  }
+
+  .b1 {
+    @apply font-sans text-base leading-relaxed text-(--text-b1-color);
+  }
+
+  .b2 {
+    @apply font-sans text-sm leading-relaxed text-(--text-b2-color);
+  }
+
+  .b3 {
+    @apply font-sans text-xs leading-relaxed text-(--text-b3-color);
+  }
+
+  .c1 {
+    @apply font-sans text-xs leading-normal text-(--text-c1-color);
+  }
+
+  .c2 {
+    @apply font-sans text-[0.6875rem] leading-normal text-(--text-c2-color);
+  }
+
+  .l1 {
+    @apply font-sans text-xs font-semibold leading-normal uppercase tracking-[0.14em] text-(--text-l1-color);
+  }
+
+  .l2 {
+    @apply font-sans text-[0.6875rem] font-medium leading-normal uppercase tracking-[0.12em] text-(--text-l2-color);
+  }
+
+  .v1 {
+    @apply font-sans text-xs font-semibold leading-normal uppercase tracking-[0.2em] text-(--text-v1-color);
+  }
+
+  .v2 {
+    @apply font-sans text-[0.625rem] font-medium leading-normal uppercase tracking-[0.16em] text-(--text-v2-color);
+  }
+
+  .o1 {
+    @apply font-sans text-sm font-medium leading-relaxed italic tracking-[0.02em] text-(--text-o1-color);
+  }
+
+  .o2 {
+    @apply font-sans text-xs font-medium leading-relaxed italic tracking-[0.02em] text-(--text-o2-color);
+  }
+
   .variant-shell {
     background:
       repeating-linear-gradient(

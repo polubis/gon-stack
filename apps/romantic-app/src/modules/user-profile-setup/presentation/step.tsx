@@ -2,8 +2,6 @@ import { useForm } from 'react-hook-form';
 import { useContext } from './context';
 import { QuestionInput } from './question-input';
 
-import { Text } from '../../../libs/ui/text';
-
 const StepForm = () => {
   const ctx = useContext();
   const activeStep = ctx.$activeStep.use();
@@ -25,8 +23,8 @@ const StepForm = () => {
       noValidate
     >
       <div className="flex flex-col gap-2">
-        <Text.H4>{activeStep.label}</Text.H4>
-        <p className="text-sm text-text-secondary">{activeStep.description}</p>
+        <h4 className="t4">{activeStep.label}</h4>
+        <p className="b2">{activeStep.description}</p>
       </div>
 
       {activeStep.questions.map((question) => {
@@ -35,7 +33,7 @@ const StepForm = () => {
             key={question.key}
             className="variant-option p-4 flex flex-col gap-3"
           >
-            <p className="text-sm text-text-secondary leading-relaxed">
+            <p className="b2">
               {question.label}
             </p>
 

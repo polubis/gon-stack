@@ -1,6 +1,6 @@
 ---
 import Layout from '../core/layouts/main.astro';
-import { DesignSystemSandboxRouter } from '../modules/design-system';
+import { Main } from '../modules/design-system';
 ---
 
 <Layout
@@ -8,7 +8,7 @@ import { DesignSystemSandboxRouter } from '../modules/design-system';
 >
 	<main class="setup-page setup-page-bg min-h-screen p-4 md:p-8">
 		<div class="mx-auto w-full max-w-6xl py-6 md:py-10">
-			<DesignSystemSandboxRouter client:load />
+			<Main client:load />
 		</div>
 	</main>
 </Layout>

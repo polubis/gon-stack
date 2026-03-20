@@ -28,7 +28,7 @@ export const QuestionInput = ({
           maxLength={max}
           placeholder="Your answer"
           autoComplete="off"
-          className="variant-input w-full px-3 py-2.5 text-sm rounded-md border border-surface-300 bg-surface-100 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-400/50"
+          className="variant-input w-full px-3 py-2.5 b2 rounded-md border border-surface-300 bg-surface-100 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-400/50"
         />
       );
     }
@@ -82,7 +82,7 @@ export const QuestionInput = ({
                 shouldValidate: true,
               });
             }}
-            className="variant-input w-20 px-3 py-2 text-sm text-center"
+            className="variant-input w-20 px-3 py-2 b2 text-center"
           />
           <button
             type="button"

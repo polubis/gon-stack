@@ -1,40 +1,42 @@
 import { eda } from '../../../libs/eda';
-import { catchError, EMPTY, finalize, from, map, switchMap, tap } from 'rxjs';
-import { getConfig } from '../integration/repository';
+import {
+  catchError,
+  EMPTY,
+  exhaustMap,
+  finalize,
+  from,
+  map,
+  switchMap,
+  tap,
+} from 'rxjs';
+import { getConfig, saveUserProfileAnswers } from '../integration/repository';
 import { type Store } from './store';
 import { Event } from '../contracts/events';
 
-export const createRegistry = ({
-  $isIdle,
-  $isLoading,
-  $error,
-  $steps,
-  $isStarted,
-  $isFinished,
-  $activeStepIndex,
-  $totalSteps,
-}: Store) => {
+export const createRegistry = (store: Store) => {
   const { ofType, trigger, createRegistry } = eda<Event>();
 
   const registry = createRegistry(
     ofType('[TRIGGER]_INIT').pipe(
       tap(() => {
-        $isIdle.set(false);
-        $isLoading.set(true);
-        $error.reset();
-        $isStarted.reset();
-        $isFinished.reset();
-        $activeStepIndex.reset();
-        $steps.reset();
+        store.$isIdle.set(false);
+        store.$isLoading.set(true);
+        store.$error.reset();
+        store.$isStarted.reset();
+        store.$isFinished.reset();
+        store.$isSaving.reset();
+        store.$isSaved.reset();
+        store.$activeStepIndex.reset();
+        store.$steps.reset();
       }),
       map(() => new AbortController()),
       switchMap((ctrl) =>
         from(getConfig(ctrl.signal)).pipe(
           tap((steps) => {
-            $steps.set(steps);
+            store.$steps.set(steps);
           }),
           catchError((error) => {
-            $error.set(
+            store.$error.set(
               error instanceof Error
                 ? error.message
                 : 'Failed to load profile setup configuration.',
@@ -42,7 +44,7 @@ export const createRegistry = ({
             return EMPTY;
           }),
           finalize(() => {
-            $isLoading.reset();
+            store.$isLoading.reset();
             ctrl.abort();
           }),
         ),
@@ -50,22 +52,26 @@ export const createRegistry = ({
     ),
     ofType('[TRIGGER]_START').pipe(
       tap(() => {
-        $error.reset();
-        $isStarted.set(true);
-        $isFinished.reset();
-        $activeStepIndex.reset();
+        store.$error.reset();
+        store.$isStarted.set(true);
+        store.$isFinished.reset();
+        store.$isSaving.reset();
+        store.$isSaved.reset();
+        store.$activeStepIndex.reset();
       }),
     ),
     ofType('[TRIGGER]_PREV').pipe(
       tap(() => {
-        $activeStepIndex.set(Math.max(0, $activeStepIndex.get() - 1));
+        store.$activeStepIndex.set(
+          Math.max(0, store.$activeStepIndex.get() - 1),
+        );
       }),
     ),
     ofType('[TRIGGER]_NEXT').pipe(
       tap((answers) => {
-        const activeStepIndex = $activeStepIndex.get();
+        const activeStepIndex = store.$activeStepIndex.get();
 
-        const stepsWithUpdatedAnswers = $steps.get().map((step, idx) =>
+        const stepsWithUpdatedAnswers = store.$steps.get().map((step, idx) =>
           idx === activeStepIndex
             ? {
                 ...step,
@@ -92,22 +98,53 @@ export const createRegistry = ({
             : step,
         );
 
-        $steps.set(stepsWithUpdatedAnswers);
+        store.$steps.set(stepsWithUpdatedAnswers);
 
-        const maxStep = Math.max(0, $totalSteps.get() - 1);
+        const maxStep = Math.max(0, store.$totalSteps.get() - 1);
 
         if (activeStepIndex >= maxStep) {
-          $isFinished.set(true);
+          store.$isFinished.set(true);
           return;
         }
 
-        $activeStepIndex.set(Math.min(maxStep, activeStepIndex + 1));
+        store.$activeStepIndex.set(Math.min(maxStep, activeStepIndex + 1));
       }),
+    ),
+    ofType('[TRIGGER]_SAVE_ANSWERS').pipe(
+      map(() => new AbortController()),
+      tap(() => {
+        store.$isSaved.reset();
+        store.$isSaving.set(true);
+        store.$error.reset();
+      }),
+      exhaustMap((ctrl) =>
+        from(
+          saveUserProfileAnswers(store.$stepAnswers.get(), ctrl.signal),
+        ).pipe(
+          tap(() => {
+            store.$isSaved.set(true);
+          }),
+          catchError((error) => {
+            store.$error.set(
+              error instanceof Error
+                ? error.message
+                : 'Failed to save profile answers.',
+            );
+            return EMPTY;
+          }),
+          finalize(() => {
+            store.$isSaving.reset();
+            ctrl.abort();
+          }),
+        ),
+      ),
     ),
     ofType('[TRIGGER]_EDIT_ANSWERS').pipe(
       tap(() => {
-        $isFinished.reset();
-        $activeStepIndex.reset();
+        store.$isFinished.reset();
+        store.$isSaved.reset();
+        store.$isSaving.reset();
+        store.$activeStepIndex.reset();
       }),
     ),
   );

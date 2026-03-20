@@ -1,12 +1,10 @@
-import { useState } from 'react';
 import { useContext } from './context';
-
-import { Text } from '../../../libs/ui/text';
 
 export const Final = () => {
   const ctx = useContext();
-  const [isSaved, setIsSaved] = useState(false);
   const steps = ctx.$steps.use();
+  const isSaving = ctx.$isSaving.use();
+  const isSaved = ctx.$isSaved.use();
 
   const summaryItems = steps.flatMap((step) =>
     step.questions.map((question) => {
@@ -19,7 +17,7 @@ export const Final = () => {
       return {
         id: `${step.key}-${question.key}`,
         stepLabel: step.label,
-        questionKey: String(question.key),
+        questionKey: question.key,
         answer,
       };
     }),
@@ -27,16 +25,14 @@ export const Final = () => {
 
   return (
     <div className="flex flex-col gap-5">
-      <Text.H4>Here&apos;s your romantic vibe</Text.H4>
-      <p className="text-sm text-text-secondary leading-relaxed">
+      <h4 className="t4">Here&apos;s your romantic vibe</h4>
+      <p className="b2">
         This is how we&apos;ll describe your relationship style in the game. You
         can change this later if you want.
       </p>
 
       <div className="variant-option p-4 flex flex-col gap-3">
-        <p className="text-xs uppercase tracking-[0.14em] text-text-tertiary">
-          Full profile summary
-        </p>
+        <p className="l1">Full profile summary</p>
         <div className="max-h-80 overflow-y-auto pr-1">
           <ul className="flex flex-col gap-2.5">
             {summaryItems.map((item) => (
@@ -44,13 +40,11 @@ export const Final = () => {
                 key={item.id}
                 className="variant-option p-3 flex flex-col gap-2"
               >
-                <p className="text-[11px] uppercase tracking-[0.14em] text-text-tertiary">
-                  {item.stepLabel}
-                </p>
-                <p className="text-xs tracking-[0.04em] text-text-secondary capitalize">
+                <p className="c1">{item.stepLabel}</p>
+                <p className="b3 capitalize">
                   {item.questionKey.replace(/[-_]+/g, ' ')}
                 </p>
-                <p className="text-sm text-text-primary">
+                <p className="b2 text-text-primary">
                   {typeof item.answer === 'string' && item.answer.trim()
                     ? item.answer
                     : typeof item.answer === 'number'
@@ -64,7 +58,7 @@ export const Final = () => {
       </div>
 
       {isSaved && (
-        <p className="text-sm text-success">
+        <p className="b2 text-success">
           Profile saved. You are ready to start playing.
         </p>
       )}
@@ -80,7 +74,8 @@ export const Final = () => {
         <button
           type="button"
           className="variant-button-primary py-2.5 px-4 text-sm font-semibold uppercase tracking-[0.14em]"
-          onClick={() => setIsSaved(true)}
+          disabled={isSaving}
+          onClick={() => ctx.trigger('[TRIGGER]_SAVE_ANSWERS')}
         >
           Save profile &amp; start playing
         </button>

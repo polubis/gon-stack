@@ -3,6 +3,7 @@ import {
   type Question,
   QuestionId,
   QuestionKey,
+  type Answers,
   Step,
   StepId,
   StepKey,
@@ -72,3 +73,16 @@ export const getConfig = async (signal: AbortSignal): Promise<Step[]> => {
   }));
 };
 
+export const saveUserProfileAnswers = async (
+  answers: Answers,
+  signal?: AbortSignal,
+): Promise<void> => {
+  await fetch('/api/user-profile/save-answers', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ answers }),
+    signal,
+  });
+};

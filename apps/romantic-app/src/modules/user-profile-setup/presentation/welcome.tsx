@@ -1,7 +1,5 @@
 import { useContext } from './context';
 
-import { Text } from '../../../libs/ui/text';
-
 export const Welcome = () => {
   const ctx = useContext();
   const isLoading = ctx.$isLoading.use();
@@ -16,16 +14,16 @@ export const Welcome = () => {
       <div className="flex flex-col gap-5" role="alert" aria-live="assertive">
         <header className="flex items-center justify-between gap-3">
           <div className="variant-pill">SETUP UNAVAILABLE</div>
-          <span className="text-[10px] font-medium uppercase tracking-[0.16em] text-error">
+          <span className="c2 text-error">
             Error
           </span>
         </header>
-        <Text.H4>We couldn&apos;t load your profile setup</Text.H4>
-        <p className="text-text-secondary">
+        <h4 className="t4">We couldn&apos;t load your profile setup</h4>
+        <p className="b1">
           There was a problem loading the configuration for this room.
         </p>
         <div
-          className="variant-option p-4 text-sm text-error leading-relaxed"
+          className="variant-option p-4 b2 text-error"
           style={{
             borderColor: 'var(--color-error)',
             boxShadow:
@@ -52,11 +50,11 @@ export const Welcome = () => {
       <header className="flex items-center justify-between gap-3">
         <div className="variant-pill">PROFILE SETUP</div>
       </header>
-      <Text.H4>Let&apos;s set up your relationship profile</Text.H4>
-      <p className="text-text-secondary">
+      <h4 className="t4">Let&apos;s set up your relationship profile</h4>
+      <p className="b1">
         Takes about 3-5 minutes. Your answers stay private in your room.
       </p>
-      <div className="variant-option p-4 text-sm text-text-secondary leading-relaxed">
+      <div className="variant-option p-4 b2">
         We&apos;ll start with a few basics, then some quick questions about how
         you are in relationships. Ready?
       </div>

@@ -1,7 +1,6 @@
 import { type ReactNode } from 'react';
 
-import { Card } from '../../libs/ui/card';
-import { Text } from '../../libs/ui/text';
+import { Card } from '../../../../libs/ui/card';
 
 function DocsSection({
   id,
@@ -17,35 +16,33 @@ function DocsSection({
   return (
     <section id={id} className="space-y-3 scroll-mt-24">
       <header className="space-y-1">
-        <Text.H2>{title}</Text.H2>
-        <Text.B2>{description}</Text.B2>
+        <h2 className="t2">{title}</h2>
+        <p className="b2">{description}</p>
       </header>
       {children}
     </section>
   );
 }
 
-export function TextSandbox() {
+export function TextDemo() {
   return (
     <div id="text-examples" className="w-full max-w-6xl space-y-6">
       <div className="text-center space-y-2">
-        <Text.V1>UI primitive - usage examples</Text.V1>
-        <Text.H1>Text Sandbox</Text.H1>
+        <p className="v1">UI primitive - usage examples</p>
+        <h2 className="t2">Text Demo</h2>
       </div>
 
       <main className="space-y-8">
         <DocsSection
           id="text-headings"
-          title="1) Headings (H1-H6)"
-          description="Title hierarchy with heading defaults and optional style overrides."
+          title="1) Headings (H3-H6)"
+          description="Within this page section, H3-H6 map to their typography styles."
         >
           <Card className="p-5 md:p-6 space-y-3">
-            <Text.H1>Heading 1</Text.H1>
-            <Text.H2>Heading 2</Text.H2>
-            <Text.H3>Heading 3</Text.H3>
-            <Text.H4>Heading 4</Text.H4>
-            <Text.H5>Heading 5</Text.H5>
-            <Text.H6>Heading 6</Text.H6>
+            <h3 className="t3">Heading 3</h3>
+            <h4 className="t4">Heading 4</h4>
+            <h5 className="t5">Heading 5</h5>
+            <h6 className="t6">Heading 6</h6>
           </Card>
         </DocsSection>
 
@@ -55,15 +52,15 @@ export function TextSandbox() {
           description="Body scales for content blocks, helper text, and compact paragraphs."
         >
           <Card className="p-5 md:p-6 space-y-3">
-            <Text.B1>
+            <p className="b1">
               B1: Primary body copy for core content in cards and sections.
-            </Text.B1>
-            <Text.B2>
+            </p>
+            <p className="b2">
               B2: Secondary body text for supporting descriptions and details.
-            </Text.B2>
-            <Text.B3>
+            </p>
+            <p className="b3">
               B3: Compact body style for dense layouts and low-priority copy.
-            </Text.B3>
+            </p>
           </Card>
         </DocsSection>
 
@@ -75,26 +72,30 @@ export function TextSandbox() {
           <Card className="p-5 md:p-6 space-y-4">
             <div className="space-y-1">
               <div>
-                <Text.C1>C1 caption - timestamp, helper metadata, tiny notes.</Text.C1>
+                <span className="c1">
+                  C1 caption - timestamp, helper metadata, tiny notes.
+                </span>
               </div>
               <div>
-                <Text.C2>C2 caption - compact metadata for constrained spaces.</Text.C2>
-              </div>
-            </div>
-            <div className="space-y-1">
-              <div>
-                <Text.L1>L1 label - uppercase field label</Text.L1>
-              </div>
-              <div>
-                <Text.L2>L2 label - compact uppercase label</Text.L2>
+                <span className="c2">
+                  C2 caption - compact metadata for constrained spaces.
+                </span>
               </div>
             </div>
             <div className="space-y-1">
               <div>
-                <Text.V1>Overline V1 for subtle section context</Text.V1>
+                <span className="l1">L1 label - uppercase field label</span>
               </div>
               <div>
-                <Text.V2>Overline V2 for emphasized meta context</Text.V2>
+                <span className="l2">L2 label - compact uppercase label</span>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div>
+                <span className="v1">Overline V1 for subtle section context</span>
+              </div>
+              <div>
+                <span className="v2">Overline V2 for emphasized meta context</span>
               </div>
             </div>
           </Card>
@@ -106,13 +107,13 @@ export function TextSandbox() {
           description="Expressive text styles for quotes, decorative subtitles, and accents."
         >
           <Card className="p-5 md:p-6 space-y-3">
-            <Text.O1>
+            <p className="o1">
               O1: &quot;Love grows best in the little moments we choose each
               day.&quot;
-            </Text.O1>
-            <Text.O2>
+            </p>
+            <p className="o1">
               O2: &quot;Tiny ornamental style for subtle romantic accents.&quot;
-            </Text.O2>
+            </p>
           </Card>
         </DocsSection>
       </main>
