@@ -264,3 +264,7 @@ export function computed<TValue>(
 
   return computedWithMethods;
 }
+
+const C = () => {
+  const store = useStore($count);
+};

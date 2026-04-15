@@ -9,7 +9,7 @@ import { createBus } from './bus';
 
 export const createRegistry = (store: Store) => {
   const bus = createBus();
-
+ 
   const register = bus.createRegistry(
     init(store, bus),
     start(store, bus),

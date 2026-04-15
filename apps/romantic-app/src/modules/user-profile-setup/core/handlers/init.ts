@@ -37,3 +37,42 @@ export const init = (store: Store, { ofType }: Bus) =>
       ),
     ),
   );
+
+const userStore = store(
+  (initialState: { loading: boolean, error: string | null, steps: Step[] }) => ({
+    loading: false,
+    error: null,
+    steps: [],
+  }),
+  {
+    STARTED: (state, payload: { id: number }) => (state.loading = true),
+    FINISHED: (state) => (state.loading = false),
+    ERROR: (state, error) => (state.error = error),
+    STEPS: (state, steps) => (state.steps = steps),
+  },
+);
+
+export const [Provider, useContext] = userStore.createContext();
+
+userStore.set('loading', (prev) => !prev);
+userStore.set('loading', true);
+userStore.get('loading');
+
+userStore.subscribe((state) => {
+  console.log(state);
+});
+
+userStore.on('loading', (value) => {
+  console.log(value);
+});
+
+userStore.dispatch('STARTED', { id: 1 });
+
+const Component = () => {
+  const state = userStore.use();
+  const loading = userStore.use('loading');
+}
+
+const WithProvider = ({ children }: { children: React.ReactNode }) => {
+  return <Provider initialState={{ loading: false, error: null, steps: [] }}>{children}</Provider>;
+};
