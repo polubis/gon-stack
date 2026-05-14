@@ -31,6 +31,8 @@
     "@astrojs/check": "^0.9.8",
     "@astrojs/cloudflare": "^12.6.12",
     "@astrojs/react": "^4.4.2",
+    "@fontsource-variable/sora": "^5.2.8",
+    "@fontsource/chakra-petch": "^5.2.7",
     "@hookform/resolvers": "^5.2.2",
     "@nanostores/react": "^1.1.0",
     "@radix-ui/react-slider": "^1.3.6",

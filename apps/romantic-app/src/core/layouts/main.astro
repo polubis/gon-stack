@@ -7,7 +7,6 @@ type Props = {
 
 const { title = 'Amoria' } = Astro.props;
 ---
-<!-- [TODO](1): migrate to font-family in UI library apps\romantic-app\src\libs\ui and remove this link with direct spec here, leave just preload if possible -->
 <!doctype html>
 <html lang="en">
 	<head>
@@ -15,9 +14,6 @@ const { title = 'Amoria' } = Astro.props;
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>

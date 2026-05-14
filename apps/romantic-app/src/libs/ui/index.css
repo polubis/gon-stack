@@ -1,3 +1,7 @@
+@import '@fontsource-variable/sora';
+@import '@fontsource/chakra-petch/500.css';
+@import '@fontsource/chakra-petch/600.css';
+@import '@fontsource/chakra-petch/700.css';
 @import 'tailwindcss';
 
 @theme {
@@ -35,7 +39,7 @@
   --color-info: oklch(0.76 0.14 242); /* #38bdf8 */
 
   /* Fonts */
-  --font-sans: 'Sora', system-ui, sans-serif;
+  --font-sans: 'Sora Variable', system-ui, sans-serif;
   --font-heading: 'Chakra Petch', system-ui, sans-serif;
 
   /* Breakpoints */
