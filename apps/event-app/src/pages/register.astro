@@ -1,0 +1,16 @@
+---
+import Layout from '@/core/layouts/main.astro';
+import { Module } from '@/core/modules/register';
+import { Logo } from '@/libs/ui/logo';
+
+export const prerender = false;
+---
+
+<Layout title="Afisz · Zarejestruj się">
+  <div class="relative min-h-screen">
+    <div class="absolute top-6 left-8">
+      <Logo />
+    </div>
+    <Module client:load />
+  </div>
+</Layout>

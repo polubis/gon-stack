@@ -1,6 +1,11 @@
 {
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "test-results", "supabase", "./worker-configuration.d.ts"],
+  "exclude": [
+    "dist",
+    "test-results",
+    "supabase",
+    "./worker-configuration.d.ts"
+  ],
   "compilerOptions": {
     "moduleResolution": "bundler",
     "module": "ESNext",
@@ -9,7 +14,6 @@
     "strictNullChecks": true,
     "jsx": "react-jsx",
     "jsxImportSource": "react",
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@schemas/*": ["./src/shared/server-contracts/schemas/*"]

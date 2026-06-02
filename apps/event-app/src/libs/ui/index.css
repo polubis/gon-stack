@@ -1,0 +1,207 @@
+@import 'tailwindcss';
+
+@theme {
+  /* ============================================================
+   * Colors — Brand & Accent
+   * ============================================================ */
+  --color-canvas: #ffffff;
+  --color-soft-stone: #eeece7;
+  --color-pale-green: #edfce9;
+  --color-pale-blue: #f1f5ff;
+  --color-hairline: #d9d9dd;
+  --color-border-light: #e5e7eb;
+  --color-card-border: #f2f2f2;
+  --color-primary: #17171c;
+  --color-black: #000000;
+  --color-ink: #212121;
+  --color-deep-green: #003c33;
+  --color-navy: #071829;
+  --color-muted: #93939f;
+  --color-slate: #75758a;
+  --color-body-muted: #616161;
+  --color-action-blue: #1863dc;
+  --color-coral: #ff7759;
+  --color-coral-soft: #ffad9b;
+  --color-on-primary: #ffffff;
+
+  --color-accent: var(--color-coral);
+  --color-map-grid: #e5e7eb;
+  --color-map-land: #eeece7;
+  --color-map-coast: #c6c4be;
+  --color-map-city: #75758a;
+
+  --color-bg: var(--color-canvas);
+  --color-fg: var(--color-ink);
+  --color-surface: #fafaf7;
+  --color-card-bg: #ffffff;
+  --color-card-border-c: #ececec;
+
+  /* ============================================================
+   * Typography
+   * ============================================================ */
+  --font-display:
+    'CohereText', 'Space Grotesk', Inter, ui-sans-serif, system-ui;
+  --font-sans: 'Unica77 Cohere Web', Inter, Arial, ui-sans-serif, system-ui;
+  --font-mono: 'CohereMono', 'JetBrains Mono', 'Courier New', monospace;
+
+  /* ============================================================
+   * Breakpoints
+   * ============================================================ */
+  --breakpoint-sm: 26.5625rem; /* 425px — mobile */
+  --breakpoint-md: 40rem; /* 640px — large mobile */
+  --breakpoint-lg: 48rem; /* 768px — tablet */
+  --breakpoint-xl: 64rem; /* 1024px — desktop */
+  --breakpoint-2xl: 90rem; /* 1440px — large desktop */
+
+  /* ============================================================
+   * Border Radius
+   * ============================================================ */
+  --radius-xs: 0.25rem; /* 4px  — search fields, article thumbnails */
+  --radius-sm: 0.5rem; /* 8px  — blog chips, cards, small media */
+  --radius-md: 1rem; /* 16px — medium product cards */
+  --radius-lg: 1.375rem; /* 22px — signature media-card radius */
+  --radius-xl: 1.875rem; /* 30px — research filter pills */
+  --radius-pill: 2rem; /* 32px — primary CTA buttons */
+  --radius-full: 9999px; /* round status elements */
+
+  /* ============================================================
+   * Spacing
+   * ============================================================ */
+  --space-xxs: 0.125rem; /* 2px  */
+  --space-xs: 0.375rem; /* 6px  */
+  --space-sm: 0.5rem; /* 8px  */
+  --space-md: 0.75rem; /* 12px */
+  --space-lg: 1rem; /* 16px */
+  --space-xl: 1.5rem; /* 24px */
+  --space-xxl: 2rem; /* 32px */
+  --space-section: 5rem; /* 80px */
+}
+
+@layer base {
+  body {
+    @apply bg-(--color-bg) text-(--color-fg) font-sans text-base leading-normal antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  button,
+  a {
+    @apply cursor-pointer;
+  }
+}
+
+[data-theme='dark'] {
+  --color-bg: #0c0c10;
+  --color-canvas: #0c0c10;
+  --color-fg: #f1f1f2;
+  --color-ink: #f1f1f2;
+  --color-surface: #15151a;
+  --color-card-bg: #15151a;
+  --color-card-border-c: #2e2e36;
+  --color-hairline: #2e2e36;
+  --color-border-light: #2e2e36;
+  --color-primary: #f1f1f2;
+  --color-on-primary: #0c0c10;
+  --color-muted: #a8a8b4;
+  --color-slate: #c0c0cc;
+  --color-body-muted: #c8c8d0;
+  --color-coral: #ff8a6e;
+  --color-soft-stone: #1a1a1f;
+  --color-map-grid: #1f1f25;
+  --color-map-land: #1a1a1f;
+  --color-map-coast: #2c2c34;
+  --color-map-city: #a8a8b4;
+}
+
+@layer components {
+  .hero-bg {
+    background:
+      radial-gradient(
+        ellipse 65% 55% at 2% 8%,
+        rgba(255, 119, 89, 0.1) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 55% 65% at 98% 5%,
+        rgba(255, 180, 120, 0.15) 0%,
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 50% 45% at 55% 105%,
+        rgba(255, 150, 80, 0.1) 0%,
+        transparent 50%
+      ),
+      linear-gradient(150deg, #fffcfb 0%, #fff8f3 45%, #fff5ef 100%);
+  }
+
+  [data-theme='dark'] .hero-bg {
+    background:
+      radial-gradient(
+        ellipse 65% 55% at 2% 8%,
+        rgba(255, 119, 89, 0.12) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 55% 65% at 98% 5%,
+        rgba(255, 160, 90, 0.08) 0%,
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 50% 45% at 55% 105%,
+        rgba(255, 130, 60, 0.07) 0%,
+        transparent 50%
+      ),
+      linear-gradient(150deg, #120d0a 0%, #110c09 45%, #100b08 100%);
+  }
+
+  .mono-label {
+    @apply font-mono text-xs font-normal tracking-[0.18em] uppercase text-slate;
+  }
+
+  .hero-display {
+    @apply font-display font-medium text-[93.6px] leading-[0.92] tracking-[-0.04em];
+  }
+
+  .manifest-heading {
+    @apply font-display font-medium text-[clamp(44px,6vw,80px)] leading-none tracking-[-0.03em];
+  }
+
+  .page-heading {
+    @apply font-display font-medium text-[clamp(40px,5vw,72px)] leading-none tracking-[-0.03em];
+  }
+
+  .section-heading {
+    @apply font-display font-medium text-[clamp(32px,4.5vw,56px)] leading-[1.05] tracking-[-0.02em];
+  }
+
+  .category-heading {
+    @apply font-display font-medium text-[28px] leading-[1.05] tracking-[-0.02em];
+  }
+
+  .card-title-lg {
+    @apply font-display font-medium text-[22px] leading-[1.15] tracking-[-0.02em];
+  }
+
+  .card-title {
+    @apply font-display font-medium text-lg leading-[1.15] tracking-[-0.02em];
+  }
+
+  .logo-wordmark {
+    @apply font-display font-semibold text-[22px] tracking-[-0.02em];
+  }
+
+  .footer-brand {
+    @apply font-display font-semibold text-[36px] tracking-tight;
+  }
+
+  .date-display {
+    @apply font-display font-medium text-[44px] leading-none tracking-[-0.02em];
+  }
+
+  .date-num {
+    @apply font-display font-medium text-[36px] leading-none;
+  }
+
+  .subsection-heading {
+    @apply font-display font-medium text-2xl leading-[1.2] tracking-[-0.02em];
+  }
+}

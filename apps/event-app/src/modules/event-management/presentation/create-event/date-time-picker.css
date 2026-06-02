@@ -1,0 +1,82 @@
+.dp-wrapper {
+  --rdp-accent-color: var(--color-primary);
+  --rdp-accent-background-color: var(--color-surface);
+  --rdp-day_button-border-radius: var(--radius-xs);
+  --rdp-day-height: 34px;
+  --rdp-day-width: 34px;
+  --rdp-day_button-height: 32px;
+  --rdp-day_button-width: 32px;
+  --rdp-nav_button-height: 2rem;
+  --rdp-nav_button-width: 2rem;
+  --rdp-nav-height: 2.25rem;
+  --rdp-today-color: var(--color-coral);
+}
+
+/* Selected: filled dark background instead of just a border */
+.dp-wrapper .rdp-selected {
+  font-weight: 500;
+  font-size: inherit;
+}
+
+.dp-wrapper .rdp-selected .rdp-day_button {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  border-color: var(--color-primary);
+}
+
+.rdp-selected .rdp-day_button:hover {
+  color: var(--color-on-ink);
+}
+
+/* Hover */
+.dp-wrapper .rdp-day_button:hover:not(:disabled) {
+  background-color: var(--color-surface);
+}
+
+/* Navigation chevron */
+.dp-wrapper .rdp-chevron {
+  fill: var(--color-muted);
+}
+
+/* Nav buttons */
+.dp-wrapper .rdp-button_previous,
+.dp-wrapper .rdp-button_next {
+  border-radius: var(--radius-xs);
+  transition: background-color 0.15s;
+}
+
+.dp-wrapper .rdp-button_previous:hover,
+.dp-wrapper .rdp-button_next:hover {
+  background-color: var(--color-surface);
+}
+
+/* Month caption */
+.dp-wrapper .rdp-month_caption {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.dp-wrapper .rdp-caption_label {
+  text-transform: capitalize;
+}
+
+/* Weekday headers */
+.dp-wrapper .rdp-weekday {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-muted);
+  opacity: 1;
+}
+
+/* Day buttons base */
+.dp-wrapper .rdp-day_button {
+  font-size: 0.8125rem;
+  color: var(--color-ink);
+  transition: background-color 0.1s;
+}
+
+/* Outside days */
+.dp-wrapper .rdp-outside .rdp-day_button {
+  color: var(--color-muted);
+}

@@ -1,0 +1,15 @@
+---
+import Layout from '@/core/layouts/main.astro';
+import { Module } from '@/core/modules/landing';
+import { supabaseServer } from '@/shared/data-sources/supabase-server';
+
+export const prerender = false;
+
+const db = supabaseServer({ request: Astro.request, cookies: Astro.cookies });
+const { data } = await db.auth.getUser();
+const user = data.user ?? null;
+---
+
+<Layout title="Afisz · Strona główna">
+  <Module user={user} client:load />
+</Layout>

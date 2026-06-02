@@ -1,0 +1,49 @@
+{
+  "name": "event-app",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "lint": "eslint .",
+    "db:gen-types": "pnpx supabase gen types typescript --local > src/shared/data-sources/db-schema.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.98.0",
+    "@astrojs/cloudflare": "^12.6.12",
+    "@astrojs/react": "^5.0.3",
+    "@hookform/resolvers": "^5.2.2",
+    "@nanostores/react": "^1.0.0",
+    "@repo/ui": "workspace:*",
+    "@supabase/ssr": "^0.9.0",
+    "@supabase/supabase-js": "^2.100.1",
+    "@tailwindcss/vite": "^4.1.18",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "astro": "^6.1.8",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
+    "lucide-react": "^0.576.0",
+    "nanostores": "^1.1.1",
+    "react": "^19.2.5",
+    "react-day-picker": "^10.0.1",
+    "react-dom": "^19.2.5",
+    "react-hook-form": "^7.71.2",
+    "rxjs": "^7.8.2",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss": "^4.1.18",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "eslint": "^9.39.1",
+    "supabase": "^2.76.16",
+    "vite-tsconfig-paths": "^6.1.1"
+  }
+}

@@ -1,0 +1,10 @@
+---
+import Layout from '@/core/layouts/main.astro';
+import { Module } from '@/core/modules/create-event';
+
+export const prerender = false;
+---
+
+<Layout title="Afisz · Dodaj wydarzenie">
+  <Module client:load />
+</Layout>

@@ -1,5 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr';
-import { type Database } from '@/shared/data-sources/db-schema';
+import { type Database } from './db-schema';
 
 export const supabaseBrowser = createBrowserClient<Database>(
   import.meta.env.PUBLIC_SUPABASE_URL,
