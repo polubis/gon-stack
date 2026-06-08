@@ -29,7 +29,10 @@
     "db:start": "turbo run db:start",
     "db:stop": "turbo run db:stop",
     "db:gen-types": "turbo run db:gen-types",
-    "db:reset": "turbo run db:reset"
+    "db:reset": "turbo run db:reset",
+    "hash:build": "pnpm --filter @repo/hashy build",
+    "hash:check": "pnpm hash:build && node packages/hashy/dist/cli.js --manifest hashy.modules.txt",
+    "hash:stamp": "pnpm hash:build && node packages/hashy/dist/cli.js"
   },
   "commitlint": {
     "extends": [

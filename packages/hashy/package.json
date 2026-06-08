@@ -1,0 +1,31 @@
+{
+  "name": "@repo/hashy",
+  "version": "0.0.0",
+  "type": "module",
+  "bin": {
+    "hashy": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src --max-warnings 0",
+    "hashy": "node ./dist/cli.js"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^22.10.0",
+    "eslint": "^9.39.1",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,0 +1,7 @@
+# Documented modules — verified by `hashy --manifest` in CI.
+# Format: <module-dir> [<doc-file>]   (doc-file defaults to AGENTS.md)
+# Paths are relative to this file. Lines starting with `#` are comments.
+#
+# Add a module here once it has an AGENTS.md stamped by `hashy`.
+
+apps/romantic-app/src/modules/user-profile-setup AGENTS.md

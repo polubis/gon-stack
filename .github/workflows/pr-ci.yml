@@ -15,12 +15,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  hash-check:
+    name: hash-check
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.11.0
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify documented modules are in sync
+        run: pnpm hash:check
+
   e2e:
     name: e2e
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     env:
-      CI: "true"
+      CI: 'true'
       PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
       PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
       AUTH_CALLBACK_URL: ${{ vars.AUTH_CALLBACK_URL }}
