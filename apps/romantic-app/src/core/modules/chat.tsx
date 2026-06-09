@@ -1,5 +1,10 @@
-import { Main } from '@/modules/chat-2/presentation/main';
+import { Provider } from '@/modules/todo/presentation/context';
+import { Main } from '@/modules/todo/presentation/main';
 
 export const Module = () => {
-  return <Main />;
+  return (
+    <Provider>
+      <Main />
+    </Provider>
+  );
 };
