@@ -18,6 +18,7 @@ export type ProcedureSchema<TIn, TOut> = {
 
 const getUser = async (db: SupabaseServer): Promise<KnownUser> => {
   const userResult = await db.auth.getUser();
+  console.log('[procedure] getUser', { userId: userResult.data?.user?.id, error: userResult.error?.message });
 
   if (userResult.error || !userResult.data.user) throw new Unauthorized();
 
@@ -63,6 +64,7 @@ const createProcedureFactory = <TIn, TOut, TExtra>({
         if (APIError.is(error)) {
           return error.json() as TOut;
         } else {
+          console.error('[procedure] unhandled-error', error);
           return new InternalServer().json() as TOut;
         }
       }

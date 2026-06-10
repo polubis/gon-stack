@@ -28,6 +28,9 @@ export const astroAdapter =
       ...search,
       ...payload,
       ...body,
+      query: search,
+      path: payload,
+      payload: body,
     };
 
     const response = await procedure(input, context);
