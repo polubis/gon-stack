@@ -2,83 +2,44 @@
 version: 1.0.0
 name: Creating Astro app in Turborepo
 cdate: 07.06.2026
-mdate: 07.06.2026
+mdate: 15.06.2026
 tags: react,astro,turborepo,setup
 ---
 
 # Astro + Cloudflare + React + TypeScript + Tailwind
 
-Complete SSR + SSG + API + Deployment Setup
-
----
-
-# 1. Create the Project
+Create project:
 
 ```bash
 npm create cloudflare@latest astro-edge-app -- --framework=astro
 ```
 
-Choose:
-
-* TypeScript → `Strict`
-* Git → `Yes`
-
----
-
-# 2. Enter the Project
-
-```bash
-cd astro-edge-app
-```
-
----
-
-# 3. Add React
+Add React:
 
 ```bash
 npx astro add react
 ```
 
----
-
-# 4. Add Tailwind
+Add Tailwind:
 
 ```bash
 npx astro add tailwind
 ```
 
-This automatically:
-
-* installs Tailwind,
-* creates the configuration,
-* integrates it with Vite.
-
----
-
-# 5. Run Locally
+Install & run:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Application URL:
-
-```txt
-http://localhost:4321
-```
+Access: `http://localhost:4321`
 
 ---
 
-# 6. Enable Global SSR
+## Config
 
-Edit:
-
-```txt
-astro.config.mjs
-```
-
-Make sure it contains:
+`astro.config.mjs`:
 
 ```js
 import { defineConfig } from 'astro/config';
@@ -88,25 +49,16 @@ import tailwind from '@astrojs/tailwind';
 
 export default defineConfig({
   output: 'server',
-
   adapter: cloudflare(),
-
-  integrations: [
-    react(),
-    tailwind()
-  ]
+  integrations: [react(), tailwind()],
 });
 ```
 
 ---
 
-# 7. Add a Layout
+## Layout
 
-Create:
-
-```txt
-src/layouts/Layout.astro
-```
+Create `src/layouts/Layout.astro`:
 
 ```astro
 ---
@@ -123,7 +75,6 @@ const { title } = Astro.props;
     <meta name="viewport" content="width=device-width" />
     <title>{title}</title>
   </head>
-
   <body class="bg-zinc-950 text-zinc-100 min-h-screen">
     <main class="max-w-4xl mx-auto p-8">
       <slot />
@@ -134,77 +85,45 @@ const { title } = Astro.props;
 
 ---
 
-# 8. Create an SSR Page
+## SSR Page
 
-Edit:
-
-```txt
-src/pages/index.astro
-```
+`src/pages/index.astro`:
 
 ```astro
 ---
 import Layout from '../layouts/Layout.astro';
-
 const time = new Date().toISOString();
 ---
 
 <Layout title="SSR Home">
-  <h1 class="text-5xl font-bold mb-6">
-    Astro SSR
-  </h1>
-
-  <p class="text-zinc-400">
-    Rendered at:
-  </p>
-
-  <pre class="mt-4 p-4 bg-zinc-900 rounded-xl">
-    {time}
-  </pre>
+  <h1 class="text-5xl font-bold mb-6">Astro SSR</h1>
+  <pre class="mt-4 p-4 bg-zinc-900 rounded-xl">{time}</pre>
 </Layout>
 ```
 
-This page is rendered dynamically at the edge.
-
 ---
 
-# 9. Create an SSG Page
+## SSG Page
 
-Create:
-
-```txt
-src/pages/about.astro
-```
+Create `src/pages/about.astro`:
 
 ```astro
 ---
 export const prerender = true;
-
 import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="SSG Page">
-  <h1 class="text-5xl font-bold mb-6">
-    SSG Page
-  </h1>
-
-  <p class="text-zinc-400">
-    This page is statically generated.
-  </p>
+  <h1 class="text-5xl font-bold mb-6">SSG Page</h1>
+  <p class="text-zinc-400">Statically generated at build time.</p>
 </Layout>
 ```
 
-This will be generated as static HTML at build time.
-
 ---
 
-# 10. Add a React Component
+## React Component
 
-Create:
-
-```txt
-src/components/Counter.tsx
-```
+Create `src/components/Counter.tsx`:
 
 ```tsx
 import { useState } from 'react';
@@ -225,201 +144,63 @@ export default function Counter() {
 }
 ```
 
----
-
-# 11. Use a React Island
-
-In `src/pages/index.astro`:
+Use in `src/pages/index.astro`:
 
 ```astro
----
-import Layout from '../layouts/Layout.astro';
-import Counter from '../components/Counter';
-
-const time = new Date().toISOString();
----
-
-<Layout title="SSR Home">
-  <h1 class="text-5xl font-bold mb-6">
-    Astro SSR
-  </h1>
-
-  <pre class="mt-4 p-4 bg-zinc-900 rounded-xl">
-    {time}
-  </pre>
-
-  <Counter client:load />
-</Layout>
+<Counter client:load />
 ```
 
-`client:load`:
-
-* hydrates React only for this component,
-* leaves the rest of the page JavaScript-free.
-
 ---
 
-# 12. Add an API Endpoint
+## API Endpoint
 
-Create:
-
-```txt
-src/pages/api/hello.ts
-```
+Create `src/pages/api/hello.ts`:
 
 ```ts
 export async function GET() {
   return Response.json({
     ok: true,
     runtime: 'Cloudflare Workers',
-    time: new Date().toISOString()
+    time: new Date().toISOString(),
   });
 }
 ```
 
-Endpoint:
-
-```txt
-/api/hello
-```
-
-Runs as an edge function.
+Access: `/api/hello`
 
 ---
 
-# 13. Log In to Cloudflare
+## Deploy
 
-Install Wrangler if needed:
+Login:
 
 ```bash
 npm install -g wrangler
-```
-
-Log in:
-
-```bash
 wrangler login
 ```
 
----
-
-# 14. Deploy
+Deploy:
 
 ```bash
 npm run deploy
 ```
 
-Cloudflare will return a URL such as:
-
-```txt
-https://your-app.workers.dev
-```
+Returns URL: `https://your-app.workers.dev`
 
 ---
 
-# 15. What You Have After Deployment
+## Key Rules
 
-## SSR
-
-```txt
-/
-```
-
-Dynamic edge rendering.
-
----
-
-## SSG
-
-```txt
-/about
-```
-
-Static cached page.
-
----
-
-## API
-
-```txt
-/ api/hello
-```
-
-Edge function.
-
----
-
-## React Islands
-
-Hydration only where needed.
-
----
-
-# 16. Recommended Project Structure
-
-```txt
-src/
-  components/
-  layouts/
-  pages/
-    api/
-  lib/
-  styles/
-```
-
----
-
-# 17. Useful Additions Later
-
-## Authentication
-
-```bash
-npm install better-auth
-```
-
-Or:
-
-* Auth.js
-* Clerk
-
----
-
-## Database
-
-Best options for edge deployments:
-
-* Turso
-* Neon
-* Cloudflare D1
-
----
-
-## ORM
-
-```bash
-npm install drizzle-orm
-```
-
----
-
-# 18. Very Important
-
-In Astro:
-
-## SSR Page
+SSR page (dynamic):
 
 ```astro
 export const prerender = false;
 ```
 
-or simply omit the export.
+or omit export.
 
----
-
-## SSG Page
+SSG page (static):
 
 ```astro
 export const prerender = true;
 ```
-
-That's the entire SSR/SSG hybrid rendering mechanism in Astro.
