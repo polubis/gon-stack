@@ -23,7 +23,7 @@
     "update-deps:minor": "ncu -u --workspaces --target minor",
     "update-deps": "ncu -u --workspaces",
     "update-deps-i": "ncu -i --workspaces",
-    "ci:is-working": "pnpm lint && pnpm check-types && pnpm build",
+    "ci:is-working": "pnpm lint && pnpm check-types && pnpm build && pnpm test",
     "ci:format": "lint-staged",
     "ci:check-updates": "pnpm check-deps",
     "db:start": "turbo run db:start",
@@ -47,14 +47,14 @@
     }
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.5.3",
-    "@commitlint/config-conventional": "^20.5.3",
+    "@commitlint/cli": "^21.0.2",
+    "@commitlint/config-conventional": "^21.0.2",
     "husky": "^9.1.7",
-    "lint-staged": "^16.4.0",
-    "npm-check-updates": "^22.1.0",
-    "prettier": "^3.8.3",
+    "lint-staged": "^17.0.7",
+    "npm-check-updates": "^22.2.3",
+    "prettier": "^3.8.4",
     "prettier-plugin-tailwindcss": "^0.8.0",
-    "turbo": "^2.9.9"
+    "turbo": "^2.9.18"
   },
   "lint-staged": {
     "**/*.{ts,tsx,md,json,yaml,css,js,jsx}": [
@@ -62,8 +62,8 @@
       "git add"
     ]
   },
-  "packageManager": "pnpm@10.33.3",
+  "packageManager": "pnpm@11.7.0",
   "engines": {
-    "node": "24.11.0"
+    "node": "24.16.0"
   }
 }

@@ -2,5 +2,32 @@ packages:
   - apps/*
   - packages/*
 
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+  msw: true
+  sharp: true
+  workerd: true
+
+minimumReleaseAgeExclude:
+  - '@playwright/test@1.61.0'
+  - '@supabase/auth-js@2.108.2'
+  - '@supabase/functions-js@2.108.2'
+  - '@supabase/postgrest-js@2.108.2'
+  - '@supabase/realtime-js@2.108.2'
+  - '@supabase/storage-js@2.108.2'
+  - '@supabase/supabase-js@2.108.2'
+  - '@vitest/coverage-v8@4.1.9'
+  - '@vitest/expect@4.1.9'
+  - '@vitest/mocker@4.1.9'
+  - '@vitest/pretty-format@4.1.9'
+  - '@vitest/runner@4.1.9'
+  - '@vitest/snapshot@4.1.9'
+  - '@vitest/spy@4.1.9'
+  - '@vitest/utils@4.1.9'
+  - playwright-core@1.61.0
+  - playwright@1.61.0
+  - vitest@4.1.9
+
 onlyBuiltDependencies:
   - supabase
