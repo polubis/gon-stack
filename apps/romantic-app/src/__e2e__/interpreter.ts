@@ -1,4 +1,5 @@
-type CommandHandler = (...args: unknown[]) => unknown | Promise<unknown>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type CommandHandler = (...args: any[]) => any;
 
 type CommandRegistry = Record<string, CommandHandler>;
 

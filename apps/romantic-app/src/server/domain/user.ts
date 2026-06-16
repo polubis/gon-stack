@@ -5,7 +5,7 @@ export type Username = Brand<string, 'Username'>;
 export type UserId = Brand<string, 'UserId'>;
 
 export class KnownUser {
-  type: 'known';
+  readonly type = 'known' as const;
 
   constructor(
     public id: UserId,
@@ -15,7 +15,7 @@ export class KnownUser {
 }
 
 export class UnknownUser {
-  type: 'unknown';
+  readonly type = 'unknown' as const;
 }
 
 export type User = KnownUser | UnknownUser;

@@ -32,7 +32,8 @@
     "db:reset": "turbo run db:reset",
     "hash:build": "pnpm --filter @repo/hashy build",
     "hash:check": "pnpm hash:build && node packages/hashy/dist/cli.js --manifest hashy.modules.txt",
-    "hash:stamp": "pnpm hash:build && node packages/hashy/dist/cli.js"
+    "hash:stamp": "pnpm hash:build && node packages/hashy/dist/cli.js",
+    "clean:install": "bash clean-install.sh"
   },
   "commitlint": {
     "extends": [

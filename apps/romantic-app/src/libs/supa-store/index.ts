@@ -249,11 +249,13 @@ export function computed<TValue>(
   stores: Store | Store[],
   cb: (...values: unknown[]) => TValue,
 ): Computed<TValue> {
-  const $computed = nanoComputed(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    stores as any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    cb as any,
+  const $computed = (
+    Array.isArray(stores)
+      ? nanoComputed(
+          stores as [Store, ...Store[]],
+          cb as (...values: StoreValue<Store>[]) => TValue,
+        )
+      : nanoComputed(stores, cb as (value: StoreValue<Store>) => TValue)
   ) as ReadableAtom<TValue>;
 
   const computedWithMethods: Computed<TValue> = Object.assign($computed, {
