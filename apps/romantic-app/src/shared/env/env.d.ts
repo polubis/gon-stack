@@ -10,9 +10,8 @@ interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
 
-type Runtime = import('@astrojs/cloudflare').Runtime<Env>;
-
 declare namespace App {
+  // Cloudflare bindings are now accessed via `import { env } from 'cloudflare:workers'`
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  interface Locals extends Runtime {}
+  interface Locals {}
 }
