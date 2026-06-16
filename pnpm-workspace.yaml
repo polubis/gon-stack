@@ -25,6 +25,7 @@ minimumReleaseAgeExclude:
   - '@typescript-eslint/utils@8.61.1'
   - '@typescript-eslint/visitor-keys@8.61.1'
   - typescript-eslint@8.61.1
+  - lucide-react@1.20.0
 
 onlyBuiltDependencies:
   - supabase
