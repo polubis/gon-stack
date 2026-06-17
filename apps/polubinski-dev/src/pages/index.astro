@@ -1,0 +1,10 @@
+---
+import Layout from '../layouts/lay.astro';
+const time = new Date().toISOString();
+---
+
+<Layout title="polubinski-dev">
+  <h1 class="text-5xl font-bold mb-6">Welcome to polubinski-dev</h1>
+  <p class="text-zinc-400 mb-4">SSR Home Page</p>
+  <pre class="mt-4 p-4 bg-zinc-900 rounded-xl text-sm">{time}</pre>
+</Layout>

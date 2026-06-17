@@ -7,6 +7,14 @@ vi.stubEnv('PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'dasdsa-dadasd-231edd');
 
 server.listen({ onUnhandledRequest: 'error' });
 
+class ResizeObserverMock {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+globalThis.ResizeObserver = ResizeObserverMock;
+
 afterEach(() => {
   cleanup();
   server.resetHandlers();
