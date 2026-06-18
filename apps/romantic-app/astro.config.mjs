@@ -14,6 +14,12 @@ export default defineConfig({
     },
 
     imageService: 'cloudflare',
+
+    // Disable the workerd dev-inspector during build. It binds a fixed port
+    // (default 9229) via @cloudflare/vite-plugin; when Turbo builds multiple
+    // Cloudflare apps in parallel they race on that port and one fails with
+    // EADDRINUSE. The inspector is a debugging-only feature, unused in CI.
+    inspectorPort: false,
   }),
 
   integrations: [react()],
