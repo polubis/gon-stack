@@ -17,9 +17,9 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
+    "dev": "tsc --watch",
     "check-types": "tsc --noEmit",
-    "lint": "eslint src --max-warnings 0",
-    "hashy": "node ./dist/cli.js"
+    "lint": "eslint src --max-warnings 0"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

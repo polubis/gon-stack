@@ -11,6 +11,9 @@ const IGNORED = new Set([
   '__snapshots__',
 ]);
 
+/** File extensions included in the module content hash. */
+const ALLOWED_EXTENSIONS = new Set(['js', 'jsx', 'ts', 'tsx', 'css', 'scss']);
+
 export type Frontmatter = {
   version: string;
   hash: string;
@@ -27,8 +30,8 @@ export type HashResult = {
 
 /**
  * Collect every implementation file under `dir`, deterministically sorted.
- * The target markdown file and known noise directories are skipped so the
- * hash only reflects the code the doc describes.
+ * Only files with whitelisted extensions are included; known noise directories
+ * and the target markdown file are skipped.
  */
 export const collectFiles = (dir: string, skipMd: string): string[] => {
   const out: string[] = [];
@@ -42,6 +45,8 @@ export const collectFiles = (dir: string, skipMd: string): string[] => {
         continue;
       }
       if (full === skipMd) continue;
+      const ext = entry.name.split('.').pop();
+      if (!ext || !ALLOWED_EXTENSIONS.has(ext)) continue;
       out.push(relative(dir, full).split(sep).join('/'));
     }
   };

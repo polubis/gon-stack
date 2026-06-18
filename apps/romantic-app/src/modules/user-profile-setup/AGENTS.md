@@ -1,7 +1,8 @@
 ---
-version: 1.0
-hash: 8d5fbaa27e6029a341b96d329561521a8967807f99e52174282298c542b8c8f9
+version: 1.2
+hash: f15dbc4b3ef19482f2b49e92bf5dc0be22cece925fd5d4fd428258f81abfb9f2
 ---
+
 
 # User Profile Setup
 

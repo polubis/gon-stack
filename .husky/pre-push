@@ -1,2 +1,2 @@
 pnpm ci:check-updates
-pnpm ci:is-working
+pnpm ci:verify
