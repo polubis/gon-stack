@@ -55,13 +55,22 @@ export const collectFiles = (dir: string, skipMd: string): string[] => {
   return out.sort();
 };
 
-/** Compute a stable sha256 over the sorted file set (path + content). */
+/**
+ * Normalise source content before hashing so that formatter-only edits
+ * (whitespace reformatting, trailing-comma insertion/removal) don't cause drift.
+ */
+const normalise = (src: string): string =>
+  src
+    .replace(/,(\s*[}\])])/g, '$1') // drop trailing commas before }, ], )
+    .replace(/\s/g, ''); // drop all whitespace
+
+/** Compute a stable sha256 over the sorted file set (path + normalised content). */
 export const computeHash = (dir: string, files: string[]): string => {
   const hash = createHash('sha256');
   for (const rel of files) {
     hash.update(rel);
     hash.update('\0');
-    hash.update(readFileSync(join(dir, rel)));
+    hash.update(normalise(readFileSync(join(dir, rel), 'utf8')));
     hash.update('\0');
   }
   return hash.digest('hex');

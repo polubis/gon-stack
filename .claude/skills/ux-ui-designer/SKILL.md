@@ -56,11 +56,13 @@ source: <path to MVP doc used>
 # UX/UI Design Document
 
 ## 1. General UX Principles
+
 - [3-5 strategic UX principles for this MVP type]
 
 ## 2. Design System
 
 ### Palette
+
 - Primary: [HEX]
 - Secondary: [HEX]
 - Semantic colors (success, warning, error, info): [HEX values]
@@ -69,39 +71,47 @@ source: <path to MVP doc used>
 ### Typography
 
 #### Font Proposals
+
 For each proposal include:
+
 - Heading font: [name] ([weights]) — [rationale tied to a UX principle]
 - Body font: [name] ([weights]) — [rationale]
 - Tailwind/CSS config snippet
 - Google Fonts URL
-Rank with a clear recommendation (Option A = recommended).
+  Rank with a clear recommendation (Option A = recommended).
 
 [Provide 2-3 proposals. Example format:]
 
 **Option A (Recommended): [Heading Font] + [Body Font]**
+
 - Headings: **[Font]** ([weights]) — [why it fits this product]
 - Body: **[Font]** ([weights]) — [why it fits this product]
 - Tailwind v4 setup: `@theme { --font-sans: '[Body]', system-ui, sans-serif; --font-heading: '[Heading]', system-ui, sans-serif; }`
 - Google Fonts URL: `https://fonts.googleapis.com/css2?family=...&display=swap`
 
 #### Active Font Configuration
+
 [Instructions for how to activate the chosen font in the project's tech stack]
 
 #### Font Family Roles
+
 - Headings: `--font-heading`
 - Body: `--font-sans`
 - Mono: `font-mono`
 
 #### Type Scale
+
 - Type scale (h1-h6, body, caption, overline) with px/rem sizes
 - Line heights and letter spacing
 
 ### Spacing & Sizing
+
 - Base unit (e.g., 4px)
 - Spacing scale (xs, sm, md, lg, xl, 2xl)
 - Grid system (columns, gutter, max-width)
 
 ### Component Tokens
+
 - Border radius scale
 - Shadow scale (sm, md, lg)
 - Border widths and colors
@@ -109,6 +119,7 @@ Rank with a clear recommendation (Option A = recommended).
 ## 3. View-by-View Recommendations
 
 ### View: [Name]
+
 - **Objective:** What the user accomplishes here.
 - **Key Components:** Technical list of UI elements.
 - **Layout:** Structural description (grid, flex, positioning).
@@ -119,8 +130,8 @@ Rank with a clear recommendation (Option A = recommended).
 
 ## 4. Technical Correction Ledger
 
-| Original | Correction | Rationale |
-|----------|-----------|-----------|
+| Original     | Correction            | Rationale                    |
+| ------------ | --------------------- | ---------------------------- |
 | [Vague term] | [Precise requirement] | [Technical/UX justification] |
 ```
 

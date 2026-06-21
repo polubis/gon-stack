@@ -1,4 +1,10 @@
-import { type Control, Controller, type UseFormRegister, type UseFormSetValue, useWatch } from 'react-hook-form';
+import {
+  type Control,
+  Controller,
+  type UseFormRegister,
+  type UseFormSetValue,
+  useWatch,
+} from 'react-hook-form';
 import { createFieldConfig } from '../configuration/validation';
 import { Button } from '@/libs/ui/button';
 import { Input } from '@/libs/ui/input';

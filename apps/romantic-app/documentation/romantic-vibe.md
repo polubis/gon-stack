@@ -36,58 +36,58 @@ These are example question wordings for the MVP. Exact copy can be refined later
 
 ### 3.1 Communication Style
 
-- **Q1:** “When something bothers you, how likely are you to bring it up directly?”  
+- **Q1:** “When something bothers you, how likely are you to bring it up directly?”
   - Scale: 1–5 (1 = Very unlikely, 5 = Very likely)
-- **Q2:** “I prefer hints and vibes over direct talks about problems.”  
+- **Q2:** “I prefer hints and vibes over direct talks about problems.”
   - Scale: 1–5 (reverse-scored)
 
 ### 3.2 Emotional Openness
 
-- **Q1:** “How comfortable are you sharing your fears and insecurities with a partner?”  
+- **Q1:** “How comfortable are you sharing your fears and insecurities with a partner?”
   - Scale: 1–5 (1 = Not comfortable, 5 = Very comfortable)
-- **Q2:** “I like to keep my deeper feelings to myself.”  
+- **Q2:** “I like to keep my deeper feelings to myself.”
   - Scale: 1–5 (reverse-scored)
 
 ### 3.3 Initiative in Romance
 
-- **Q1:** “How often do you like to be the one who plans romantic activities?”  
+- **Q1:** “How often do you like to be the one who plans romantic activities?”
   - Options: Never / Sometimes / Often / Very often
-- **Q2:** “In an ideal relationship, who usually starts romantic gestures?”  
+- **Q2:** “In an ideal relationship, who usually starts romantic gestures?”
   - Options: Mostly my partner / We take turns / Mostly me
 
 ### 3.4 Playful vs Serious Tone
 
-- **Q1:** “How important is playful teasing and jokes in your relationship?”  
+- **Q1:** “How important is playful teasing and jokes in your relationship?”
   - Scale: 1–5 (1 = Not important, 5 = Very important)
-- **Q2:** “In conflicts, I prefer to keep things light and defuse with humor.”  
+- **Q2:** “In conflicts, I prefer to keep things light and defuse with humor.”
   - Scale: 1–5
 
 ### 3.5 Planning vs Spontaneity
 
-- **Q1:** “On a free weekend, I prefer…”  
+- **Q1:** “On a free weekend, I prefer…”
   - Options: Planned dates and activities / A mix of planned and spontaneous / Mostly spontaneous decisions
-- **Q2:** “Last-minute surprises make me feel…”  
+- **Q2:** “Last-minute surprises make me feel…”
   - Options: Stressed / Neutral / Excited
 
 ### 3.6 Physical Affection Comfort
 
-- **Q1:** “How comfortable are you with physical affection (hugs, cuddles, kisses) in private?”  
+- **Q1:** “How comfortable are you with physical affection (hugs, cuddles, kisses) in private?”
   - Scale: 1–5
-- **Q2:** “Public displays of affection (PDA) are…”  
+- **Q2:** “Public displays of affection (PDA) are…”
   - Options: Uncomfortable / Okay in small doses / Totally fine / I enjoy them a lot
 
 ### 3.7 Togetherness vs Independence
 
-- **Q1:** “How many evenings per week do you ideally like to spend together?”  
+- **Q1:** “How many evenings per week do you ideally like to spend together?”
   - Numeric: 0–7
-- **Q2:** “In a relationship, personal alone time is…”  
+- **Q2:** “In a relationship, personal alone time is…”
   - Options: Not important / Somewhat important / Very important
 
 ### 3.8 Conflict Style
 
-- **Q1:** “When conflict appears, I tend to…”  
+- **Q1:** “When conflict appears, I tend to…”
   - Options: Avoid and hope it passes / Wait a bit, then talk / Talk about it quickly and directly
-- **Q2:** “Raised voices in arguments make me want to…”  
+- **Q2:** “Raised voices in arguments make me want to…”
   - Options: Shut down / Stay but feel tense / Keep talking to resolve it
 
 ## 4. Data Model (MVP)
@@ -100,4 +100,3 @@ For the MVP, the app:
   - Potential future tuning of game questions or compatibility insights.
 
 This definition is intentionally minimal and can be extended with more traits, questions, or richer interpretations in later iterations.
-

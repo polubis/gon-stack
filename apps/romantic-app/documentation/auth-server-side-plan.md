@@ -34,13 +34,13 @@ src/
 
 ## Tech Stack
 
-| Concern | Choice |
-|---------|--------|
-| Auth provider | Supabase Auth |
-| Auth flow | PKCE (default in `@supabase/ssr`) |
-| Client package | `@supabase/ssr` + `@supabase/supabase-js` |
+| Concern         | Choice                                         |
+| --------------- | ---------------------------------------------- |
+| Auth provider   | Supabase Auth                                  |
+| Auth flow       | PKCE (default in `@supabase/ssr`)              |
+| Client package  | `@supabase/ssr` + `@supabase/supabase-js`      |
 | Session storage | HTTP-only cookies (managed by `@supabase/ssr`) |
-| Server runtime | Astro SSR on Cloudflare Workers |
+| Server runtime  | Astro SSR on Cloudflare Workers                |
 
 ---
 
@@ -70,8 +70,8 @@ Update `src/contracts/env/env.d.ts` (or existing `src/env.d.ts`) to type these v
 Create a factory function that builds a Supabase client configured for SSR with cookie-based session handling:
 
 ```ts
-import { createServerClient, parseCookieHeader } from "@supabase/ssr";
-import type { AstroCookies } from "astro";
+import { createServerClient, parseCookieHeader } from '@supabase/ssr';
+import type { AstroCookies } from 'astro';
 
 export function createSupabaseServerClient({
   request,
@@ -86,24 +86,25 @@ export function createSupabaseServerClient({
     {
       cookies: {
         getAll() {
-          const parsed = parseCookieHeader(request.headers.get("Cookie") ?? "");
+          const parsed = parseCookieHeader(request.headers.get('Cookie') ?? '');
           return parsed.map(({ name, value }) => ({
             name,
-            value: value ?? "",
+            value: value ?? '',
           }));
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) =>
-            cookies.set(name, value, options)
+            cookies.set(name, value, options),
           );
         },
       },
-    }
+    },
   );
 }
 ```
 
 Key points:
+
 - Uses `@supabase/ssr` which defaults to PKCE flow automatically
 - Reads/writes cookies via Astro's `AstroCookies` API
 - No browser client needed for this scope (login is server-side action)
@@ -113,11 +114,11 @@ Key points:
 **File:** `src/middleware.ts`
 
 ```ts
-import { defineMiddleware } from "astro:middleware";
-import { createSupabaseServerClient } from "./core/auth/supabase-server-client";
+import { defineMiddleware } from 'astro:middleware';
+import { createSupabaseServerClient } from './core/auth/supabase-server-client';
 
-const PROTECTED_ROUTES = ["/dashboard", "/game", "/profile"];
-const AUTH_ROUTES = ["/login"];
+const PROTECTED_ROUTES = ['/dashboard', '/game', '/profile'];
+const AUTH_ROUTES = ['/login'];
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const supabase = createSupabaseServerClient({
@@ -126,7 +127,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
   });
 
   // Refresh session on every request (reads/writes cookies)
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // Store user in locals for downstream pages/endpoints
   context.locals.user = user;
@@ -135,12 +138,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // Redirect unauthenticated users away from protected routes
   if (PROTECTED_ROUTES.some((r) => pathname.startsWith(r)) && !user) {
-    return context.redirect("/login");
+    return context.redirect('/login');
   }
 
   // Redirect authenticated users away from auth routes
   if (AUTH_ROUTES.some((r) => pathname.startsWith(r)) && user) {
-    return context.redirect("/dashboard");
+    return context.redirect('/dashboard');
   }
 
   return next();
@@ -152,7 +155,7 @@ Update `src/env.d.ts` to extend `App.Locals`:
 ```ts
 declare namespace App {
   interface Locals extends Runtime {
-    user: import("@supabase/supabase-js").User | null;
+    user: import('@supabase/supabase-js').User | null;
   }
 }
 ```
@@ -164,16 +167,16 @@ declare namespace App {
 Server-side endpoint that handles email/password sign-in:
 
 ```ts
-import type { APIRoute } from "astro";
-import { createSupabaseServerClient } from "../../../core/auth/supabase-server-client";
+import type { APIRoute } from 'astro';
+import { createSupabaseServerClient } from '../../../core/auth/supabase-server-client';
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const formData = await request.formData();
-  const email = formData.get("email")?.toString();
-  const password = formData.get("password")?.toString();
+  const email = formData.get('email')?.toString();
+  const password = formData.get('password')?.toString();
 
   if (!email || !password) {
-    return new Response("Email and password are required", { status: 400 });
+    return new Response('Email and password are required', { status: 400 });
   }
 
   const supabase = createSupabaseServerClient({ request, cookies });
@@ -186,11 +189,11 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {
       status: 401,
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 
-  return redirect("/dashboard", 302);
+  return redirect('/dashboard', 302);
 };
 ```
 
@@ -201,13 +204,13 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 **File:** `src/pages/api/auth/logout.ts`
 
 ```ts
-import type { APIRoute } from "astro";
-import { createSupabaseServerClient } from "../../../core/auth/supabase-server-client";
+import type { APIRoute } from 'astro';
+import { createSupabaseServerClient } from '../../../core/auth/supabase-server-client';
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const supabase = createSupabaseServerClient({ request, cookies });
   await supabase.auth.signOut();
-  return redirect("/login", 302);
+  return redirect('/login', 302);
 };
 ```
 
@@ -218,8 +221,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 Abstraction layer that modules consume (per ADR — modules use `shared`, not `core`):
 
 ```ts
-import type { AstroCookies } from "astro";
-import { createSupabaseServerClient } from "../../core/auth/supabase-server-client";
+import type { AstroCookies } from 'astro';
+import { createSupabaseServerClient } from '../../core/auth/supabase-server-client';
 
 export async function getAuthUser({
   request,
@@ -229,7 +232,10 @@ export async function getAuthUser({
   cookies: AstroCookies;
 }) {
   const supabase = createSupabaseServerClient({ request, cookies });
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
   return { user, error };
 }
 ```
@@ -248,17 +254,17 @@ For enhanced UX (inline error display without page reload), a React island compo
 
 ## File Summary
 
-| File | Layer | Purpose |
-|------|-------|---------|
-| `src/core/auth/supabase-server-client.ts` | Core | Supabase SSR client factory |
-| `src/core/auth/index.ts` | Core | Barrel export |
-| `src/shared/auth/get-user.ts` | Shared | Auth helper for modules |
-| `src/shared/auth/index.ts` | Shared | Barrel export |
-| `src/middleware.ts` | Infra | Session refresh + route guards |
-| `src/pages/api/auth/login.ts` | API | Email/password sign-in |
-| `src/pages/api/auth/logout.ts` | API | Sign out |
-| `src/pages/login.astro` | Pages | Login page |
-| `src/env.d.ts` | Contracts | Updated with `App.Locals.user` |
+| File                                      | Layer     | Purpose                        |
+| ----------------------------------------- | --------- | ------------------------------ |
+| `src/core/auth/supabase-server-client.ts` | Core      | Supabase SSR client factory    |
+| `src/core/auth/index.ts`                  | Core      | Barrel export                  |
+| `src/shared/auth/get-user.ts`             | Shared    | Auth helper for modules        |
+| `src/shared/auth/index.ts`                | Shared    | Barrel export                  |
+| `src/middleware.ts`                       | Infra     | Session refresh + route guards |
+| `src/pages/api/auth/login.ts`             | API       | Email/password sign-in         |
+| `src/pages/api/auth/logout.ts`            | API       | Sign out                       |
+| `src/pages/login.astro`                   | Pages     | Login page                     |
+| `src/env.d.ts`                            | Contracts | Updated with `App.Locals.user` |
 
 ---
 

@@ -72,9 +72,7 @@ export const TextDemo = () => {
               <Text.V1>Overline V1 for subtle section context</Text.V1>
             </div>
             <div>
-              <Text.V2>
-                Overline V2 for emphasized meta context
-              </Text.V2>
+              <Text.V2>Overline V2 for emphasized meta context</Text.V2>
             </div>
           </div>
         </div>

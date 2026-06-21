@@ -26,12 +26,12 @@ All primitives come with built-in React hooks, reset functionality, and TypeScri
 
 ```typescript
 // store.ts
-import { atom, map, computed } from "@/gen-store";
+import { atom, map, computed } from '@/gen-store';
 
 // Atoms for primitive/simple values
 export const $idle = atom(true);
 export const $error = atom<string | null>(null);
-export const $question = atom("");
+export const $question = atom('');
 
 // Maps for objects with key-level updates
 export const $threads = map<Record<ThreadId, Thread>>({});
@@ -49,7 +49,7 @@ export const $threadsList = computed($threads, (threads) =>
 
 ```tsx
 // MyComponent.tsx
-import { $question, $threadsList, $error } from "./store";
+import { $question, $threadsList, $error } from './store';
 
 const MyComponent = () => {
   // Use the .use() hook for reactive updates
@@ -73,7 +73,7 @@ const MyComponent = () => {
 
 ```typescript
 // api-handlers.ts
-import * as store from "./store";
+import * as store from './store';
 
 export const initializeApp = async () => {
   const { threads, examples } = await api.getConfig();
@@ -212,7 +212,7 @@ export const $idle = atom(true);
 export const $error = atom<string | null>(null);
 export const $isStartingThread = atom(false);
 export const $isLoadingThread = atom(false);
-export const $question = atom("");
+export const $question = atom('');
 export const $activeThreadId = atom<ThreadId | null>(null);
 export const $activeMessage = atom<MessageWithSources | null>(null);
 export const $outputEvents = atom<OutputEvent[]>([]);
@@ -249,8 +249,8 @@ export const $threadsList = computed($threads, (threads) =>
 export const $activeThreadStatus = computed(
   [$activeThread, $isBusy],
   (activeThread, isBusy) => {
-    if (isBusy || activeThread === null) return "unknown";
-    return activeThread.open ? "opened" : "closed";
+    if (isBusy || activeThread === null) return 'unknown';
+    return activeThread.open ? 'opened' : 'closed';
   },
 );
 ```
@@ -283,7 +283,7 @@ Append to array-based atoms using get/set pattern.
 ```typescript
 const addOutputEvent = (
   content: string,
-  type: OutputEvent["type"] = "error",
+  type: OutputEvent['type'] = 'error',
 ) => {
   store.$outputEvents.set([
     ...store.$outputEvents.get(),
@@ -305,7 +305,7 @@ const addOutputEvent = (
 ```typescript
 // Good - clear store identification
 export const $count = atom(0);
-export const $user = map({ name: "", email: "" });
+export const $user = map({ name: '', email: '' });
 
 // Bad - looks like regular variable
 export const count = atom(0);
@@ -410,11 +410,11 @@ const Component = () => {
 
 ```typescript
 // Bad - map overhead for simple object
-const $formData = map({ name: "", email: "", phone: "" });
+const $formData = map({ name: '', email: '', phone: '' });
 $formData.set(newFormData); // Always replacing whole object
 
 // Good - atom for whole-object updates
-const $formData = atom({ name: "", email: "", phone: "" });
+const $formData = atom({ name: '', email: '', phone: '' });
 ```
 
 ---

@@ -25,15 +25,15 @@ TRIGGER → TASK → FACT → EFFECT
 
 ```typescript
 // events.ts
-import { eda } from "@repo/gen-eda";
-import type { TriggerEvent, TaskEvent, FactEvent } from "@repo/gen-eda";
+import { eda } from '@repo/gen-eda';
+import type { TriggerEvent, TaskEvent, FactEvent } from '@repo/gen-eda';
 
 type Events =
-  | TriggerEvent<"[TRIGGER]_LOAD_DATA">
-  | TriggerEvent<"[TRIGGER]_SUBMIT", { formData: FormData }>
-  | TaskEvent<"[TASK]_FETCH_DATA">
-  | FactEvent<"[FACT]_DATA_LOADED", { items: Item[] }>
-  | FactEvent<"[FACT]_SUBMIT_SUCCESS">;
+  | TriggerEvent<'[TRIGGER]_LOAD_DATA'>
+  | TriggerEvent<'[TRIGGER]_SUBMIT', { formData: FormData }>
+  | TaskEvent<'[TASK]_FETCH_DATA'>
+  | FactEvent<'[FACT]_DATA_LOADED', { items: Item[] }>
+  | FactEvent<'[FACT]_SUBMIT_SUCCESS'>;
 
 export const { ofType, trigger, forwardAs, createRegistry } = eda<Events>();
 ```
@@ -42,24 +42,24 @@ export const { ofType, trigger, forwardAs, createRegistry } = eda<Events>();
 
 ```typescript
 // registry.ts
-import { switchMap, from, tap } from "rxjs";
-import { ofType, forwardAs, createRegistry } from "./events";
-import * as store from "./store";
-import * as api from "./api";
+import { switchMap, from, tap } from 'rxjs';
+import { ofType, forwardAs, createRegistry } from './events';
+import * as store from './store';
+import * as api from './api';
 
 export const register = createRegistry(
   // TRIGGER → TASK
-  ofType("[TRIGGER]_LOAD_DATA").pipe(forwardAs("[TASK]_FETCH_DATA")),
+  ofType('[TRIGGER]_LOAD_DATA').pipe(forwardAs('[TASK]_FETCH_DATA')),
 
   // TASK → FACT (async work)
-  ofType("[TASK]_FETCH_DATA").pipe(
+  ofType('[TASK]_FETCH_DATA').pipe(
     switchMap(() =>
-      from(api.fetchData()).pipe(forwardAs("[FACT]_DATA_LOADED")),
+      from(api.fetchData()).pipe(forwardAs('[FACT]_DATA_LOADED')),
     ),
   ),
 
   // FACT → Store update
-  ofType("[FACT]_DATA_LOADED").pipe(
+  ofType('[FACT]_DATA_LOADED').pipe(
     tap(({ items }) => store.$items.set(items)),
   ),
 );
@@ -69,13 +69,13 @@ export const register = createRegistry(
 
 ```tsx
 // main.tsx
-import { withEda } from "@repo/gen-eda";
-import { trigger } from "./events";
-import { register } from "./registry";
+import { withEda } from '@repo/gen-eda';
+import { trigger } from './events';
+import { register } from './registry';
 
 const Content = () => {
   useEffect(() => {
-    trigger("[TRIGGER]_LOAD_DATA");
+    trigger('[TRIGGER]_LOAD_DATA');
   }, []);
 
   return <YourComponent />;
@@ -226,12 +226,12 @@ ofType('[FACT]_MODAL_TOGGLED').pipe(
 
 ```typescript
 // Good
-TriggerEvent<"[TRIGGER]_SUBMIT_CONTACT_FORM", { email: string }>;
-FactEvent<"[FACT]_CONTACT_FORM_SUBMITTED">;
+TriggerEvent<'[TRIGGER]_SUBMIT_CONTACT_FORM', { email: string }>;
+FactEvent<'[FACT]_CONTACT_FORM_SUBMITTED'>;
 
 // Bad
-TriggerEvent<"[TRIGGER]_SUBMIT">;
-FactEvent<"[FACT]_DONE">;
+TriggerEvent<'[TRIGGER]_SUBMIT'>;
+FactEvent<'[FACT]_DONE'>;
 ```
 
 ### ✅ Keep Handlers Pure and Focused
@@ -340,10 +340,10 @@ ofType('[FACT]_B').pipe(forwardAs('[FACT]_A')), // ❌ Loop!
 
 ```typescript
 // Bad
-FactEvent<"[FACT]_UPDATE", { data: any }>; // ❌
+FactEvent<'[FACT]_UPDATE', { data: any }>; // ❌
 
 // Good
-FactEvent<"[FACT]_USER_UPDATED", { user: User }>;
+FactEvent<'[FACT]_USER_UPDATED', { user: User }>;
 ```
 
 ---

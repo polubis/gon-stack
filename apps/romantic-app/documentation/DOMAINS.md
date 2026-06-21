@@ -14,6 +14,7 @@ This document defines the core domains in the Romantic App application.
 **Responsibility:** User profile data management and user information.
 
 **Key Concepts:**
+
 - User profile data: name, age, romantic vibe
 - Profile creation and updates
 - Profile information storage
@@ -21,6 +22,7 @@ This document defines the core domains in the Romantic App application.
 - Profile completeness tracking
 
 **Out of Scope:**
+
 - Authentication flows (handled by Authentication domain)
 - Session management (handled by Authentication domain)
 - Access control (handled by Authentication domain)
@@ -32,6 +34,7 @@ This document defines the core domains in the Romantic App application.
 **Responsibility:** User authentication, authorization, and session management.
 
 **Key Concepts:**
+
 - Google OAuth integration
 - Email/password authentication
 - Login/logout flows
@@ -42,6 +45,7 @@ This document defines the core domains in the Romantic App application.
 - Password reset flows
 
 **Out of Scope:**
+
 - User profile data (handled by User Profile domain)
 
 ---
@@ -51,6 +55,7 @@ This document defines the core domains in the Romantic App application.
 **Responsibility:** Managing game rooms and multiplayer sessions.
 
 **Key Concepts:**
+
 - Gaming room creation
 - Room joining and leaving
 - Player participation tracking
@@ -65,6 +70,7 @@ This document defines the core domains in the Romantic App application.
 **Responsibility:** Question management and delivery system.
 
 **Key Concepts:**
+
 - Question categories (8 categories + creative types)
 - Question types (multiple choice, scale, yes/no, open text, drawing, music, trash talk)
 - Difficulty levels (Easy, Medium, Hard)
@@ -72,6 +78,7 @@ This document defines the core domains in the Romantic App application.
 - Question loading and presentation
 
 **Categories:**
+
 - Relationship Dynamics
 - Self-Discovery
 - Sexual Intimacy
@@ -91,6 +98,7 @@ This document defines the core domains in the Romantic App application.
 **Responsibility:** Answer submission, validation, and storage.
 
 **Key Concepts:**
+
 - Simultaneous answer submission
 - Answer validation
 - Answer history tracking
@@ -104,6 +112,7 @@ This document defines the core domains in the Romantic App application.
 **Responsibility:** Score calculation, win detection, and compatibility analysis.
 
 **Key Concepts:**
+
 - Point system (+1 for matches, 0 for no answer, -1 for mismatches)
 - Difficulty-based scoring
 - Win detection (first to 10 points)
@@ -119,6 +128,7 @@ This document defines the core domains in the Romantic App application.
 **Responsibility:** Drawing-based questions and image recognition.
 
 **Key Concepts:**
+
 - Canvas interface with drawing tools
 - Drawing submission and capture
 - LLM image recognition integration
@@ -126,6 +136,7 @@ This document defines the core domains in the Romantic App application.
 - Manual confirmation options
 
 **Technical Requirements:**
+
 - Canvas/Drawing library (Fabric.js, Konva.js, or HTML5 Canvas)
 - LLM Image Recognition API
 
@@ -136,12 +147,14 @@ This document defines the core domains in the Romantic App application.
 **Responsibility:** Music-related questions and YouTube integration.
 
 **Key Concepts:**
+
 - Song name input and matching
 - YouTube API integration
 - Automatic song playback on match
 - Immediate playback (regardless of game completion)
 
 **Technical Requirements:**
+
 - YouTube Data API v3
 - YouTube player integration
 
@@ -152,6 +165,7 @@ This document defines the core domains in the Romantic App application.
 **Responsibility:** Word guessing game with voice recognition and validation.
 
 **Key Concepts:**
+
 - 4-word suggestion display
 - Secret word selection
 - Voice input capture
@@ -160,6 +174,7 @@ This document defines the core domains in the Romantic App application.
 - Point deduction for failures
 
 **Technical Requirements:**
+
 - Voice Recognition API (Web Speech API, Google Cloud Speech-to-Text)
 - LLM Text Analysis API
 
@@ -170,6 +185,7 @@ This document defines the core domains in the Romantic App application.
 **Responsibility:** User feedback collection and analysis.
 
 **Key Concepts:**
+
 - Built-in feedback module
 - User insights collection
 - Pain point identification

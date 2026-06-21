@@ -65,18 +65,10 @@ export const Final = () => {
       )}
 
       <div className="flex items-center justify-between gap-3">
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={ctx.editAnswers}
-        >
+        <Button type="button" variant="secondary" onClick={ctx.editAnswers}>
           Edit answers
         </Button>
-        <Button
-          type="button"
-          disabled={isSaving}
-          onClick={ctx.saveAnswers}
-        >
+        <Button type="button" disabled={isSaving} onClick={ctx.saveAnswers}>
           Save profile &amp; start playing
         </Button>
       </div>

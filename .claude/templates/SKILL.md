@@ -65,7 +65,7 @@ Assistant:
 - **UI**: Minimalist SaaS aesthetic, Mobile-first, Tailwind CSS.
 - **Logic**: Filterable views by category; no manual reordering.
   </REQUIREMENTS_IMPROVED>
-</EXAMPLE_INTERACTION>
+  </EXAMPLE_INTERACTION>
 
 ## 🎯 END GOAL
 

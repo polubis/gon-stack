@@ -10,30 +10,30 @@ Mermaid flowcharts are provided per endpoint in Section 3.
 
 ## Section 2 — Endpoint Index
 
-| Method | Path | Auth | Summary |
-|--------|------|------|---------|
-| GET | /api/v1/rooms | Required | List public rooms (rooms wall) |
-| POST | /api/v1/rooms | Required | Create a room |
-| GET | /api/v1/rooms/{id} | Required | Get room details |
-| DELETE | /api/v1/rooms/{id} | Required | Delete room (creator only) |
-| POST | /api/v1/room-memberships | Required | Join room by code + optional password |
-| GET | /api/v1/rooms/{id}/participants | Required | List room participants (filter + sort) |
-| DELETE | /api/v1/rooms/{id}/participants/{userId} | Required | Remove participant (self or creator) |
-| GET | /api/v1/rooms/{id}/games | Required | List games in room (filter + sort) |
-| POST | /api/v1/rooms/{id}/games | Required | Create game in room |
-| GET | /api/v1/games/{id} | Required | Get game details |
-| PATCH | /api/v1/games/{id} | Required | Transition game status (creator only) |
-| DELETE | /api/v1/games/{id} | Required | Delete game (creator only) |
-| POST | /api/v1/games/{id}/participants | Required | Join a game |
-| DELETE | /api/v1/games/{id}/participants/{userId} | Required | Leave a game (self only) |
-| GET | /api/v1/games/{id}/questions | Required | List questions with options |
-| POST | /api/v1/games/{id}/questions | Required | Add question to game (creator only) |
-| DELETE | /api/v1/questions/{id} | Required | Delete question (game creator only) |
-| POST | /api/v1/questions/{id}/options | Required | Add option to multiple_choice question |
-| DELETE | /api/v1/question-options/{id} | Required | Delete question option (game creator only) |
-| GET | /api/v1/games/{id}/answers | Required | Get answers (own during pending; all after finished) |
-| POST | /api/v1/games/{id}/answers | Required | Submit answer (once per question per player) |
-| GET | /api/v1/games/{id}/scores | Required | Get game leaderboard and rankings |
+| Method | Path                                     | Auth     | Summary                                              |
+| ------ | ---------------------------------------- | -------- | ---------------------------------------------------- |
+| GET    | /api/v1/rooms                            | Required | List public rooms (rooms wall)                       |
+| POST   | /api/v1/rooms                            | Required | Create a room                                        |
+| GET    | /api/v1/rooms/{id}                       | Required | Get room details                                     |
+| DELETE | /api/v1/rooms/{id}                       | Required | Delete room (creator only)                           |
+| POST   | /api/v1/room-memberships                 | Required | Join room by code + optional password                |
+| GET    | /api/v1/rooms/{id}/participants          | Required | List room participants (filter + sort)               |
+| DELETE | /api/v1/rooms/{id}/participants/{userId} | Required | Remove participant (self or creator)                 |
+| GET    | /api/v1/rooms/{id}/games                 | Required | List games in room (filter + sort)                   |
+| POST   | /api/v1/rooms/{id}/games                 | Required | Create game in room                                  |
+| GET    | /api/v1/games/{id}                       | Required | Get game details                                     |
+| PATCH  | /api/v1/games/{id}                       | Required | Transition game status (creator only)                |
+| DELETE | /api/v1/games/{id}                       | Required | Delete game (creator only)                           |
+| POST   | /api/v1/games/{id}/participants          | Required | Join a game                                          |
+| DELETE | /api/v1/games/{id}/participants/{userId} | Required | Leave a game (self only)                             |
+| GET    | /api/v1/games/{id}/questions             | Required | List questions with options                          |
+| POST   | /api/v1/games/{id}/questions             | Required | Add question to game (creator only)                  |
+| DELETE | /api/v1/questions/{id}                   | Required | Delete question (game creator only)                  |
+| POST   | /api/v1/questions/{id}/options           | Required | Add option to multiple_choice question               |
+| DELETE | /api/v1/question-options/{id}            | Required | Delete question option (game creator only)           |
+| GET    | /api/v1/games/{id}/answers               | Required | Get answers (own during pending; all after finished) |
+| POST   | /api/v1/games/{id}/answers               | Required | Submit answer (once per question per player)         |
+| GET    | /api/v1/games/{id}/scores                | Required | Get game leaderboard and rankings                    |
 
 ---
 
@@ -639,30 +639,30 @@ export type Schema = z.infer<ReturnType<typeof schema>>;
 
 Use this matrix to decide how `in` is split for each endpoint:
 
-| Endpoint | `in.query` | `in.path` | `in.payload` |
-|---|---|---|---|
-| `GET /api/v1/rooms` | filters/pagination/sort (optional) | `{}` | `{}` |
-| `POST /api/v1/rooms` | `{}` | `{}` | room creation payload |
-| `GET /api/v1/rooms/{id}` | `{}` | `{ id }` | `{}` |
-| `DELETE /api/v1/rooms/{id}` | `{}` | `{ id }` | `{}` |
-| `POST /api/v1/room-memberships` | `{}` | `{}` | `{ code, password? }` |
-| `GET /api/v1/rooms/{id}/participants` | participant filter/sort | `{ id }` | `{}` |
-| `DELETE /api/v1/rooms/{id}/participants/{userId}` | `{}` | `{ id, userId }` | `{}` |
-| `GET /api/v1/rooms/{id}/games` | game filter/sort | `{ id }` | `{}` |
-| `POST /api/v1/rooms/{id}/games` | `{}` | `{ id }` | game creation payload |
-| `GET /api/v1/games/{id}` | `{}` | `{ id }` | `{}` |
-| `PATCH /api/v1/games/{id}` | `{}` | `{ id }` | `{ status }` |
-| `DELETE /api/v1/games/{id}` | `{}` | `{ id }` | `{}` |
-| `POST /api/v1/games/{id}/participants` | `{}` | `{ id }` | `{}` |
-| `DELETE /api/v1/games/{id}/participants/{userId}` | `{}` | `{ id, userId }` | `{}` |
-| `GET /api/v1/games/{id}/questions` | `{}` | `{ id }` | `{}` |
-| `POST /api/v1/games/{id}/questions` | `{}` | `{ id }` | question creation payload |
-| `DELETE /api/v1/questions/{id}` | `{}` | `{ id }` | `{}` |
-| `POST /api/v1/questions/{id}/options` | `{}` | `{ id }` | option creation payload |
-| `DELETE /api/v1/question-options/{id}` | `{}` | `{ id }` | `{}` |
-| `GET /api/v1/games/{id}/answers` | `{}` | `{ id }` | `{}` |
-| `POST /api/v1/games/{id}/answers` | `{}` | `{ id }` | answer payload |
-| `GET /api/v1/games/{id}/scores` | `{}` | `{ id }` | `{}` |
+| Endpoint                                          | `in.query`                         | `in.path`        | `in.payload`              |
+| ------------------------------------------------- | ---------------------------------- | ---------------- | ------------------------- |
+| `GET /api/v1/rooms`                               | filters/pagination/sort (optional) | `{}`             | `{}`                      |
+| `POST /api/v1/rooms`                              | `{}`                               | `{}`             | room creation payload     |
+| `GET /api/v1/rooms/{id}`                          | `{}`                               | `{ id }`         | `{}`                      |
+| `DELETE /api/v1/rooms/{id}`                       | `{}`                               | `{ id }`         | `{}`                      |
+| `POST /api/v1/room-memberships`                   | `{}`                               | `{}`             | `{ code, password? }`     |
+| `GET /api/v1/rooms/{id}/participants`             | participant filter/sort            | `{ id }`         | `{}`                      |
+| `DELETE /api/v1/rooms/{id}/participants/{userId}` | `{}`                               | `{ id, userId }` | `{}`                      |
+| `GET /api/v1/rooms/{id}/games`                    | game filter/sort                   | `{ id }`         | `{}`                      |
+| `POST /api/v1/rooms/{id}/games`                   | `{}`                               | `{ id }`         | game creation payload     |
+| `GET /api/v1/games/{id}`                          | `{}`                               | `{ id }`         | `{}`                      |
+| `PATCH /api/v1/games/{id}`                        | `{}`                               | `{ id }`         | `{ status }`              |
+| `DELETE /api/v1/games/{id}`                       | `{}`                               | `{ id }`         | `{}`                      |
+| `POST /api/v1/games/{id}/participants`            | `{}`                               | `{ id }`         | `{}`                      |
+| `DELETE /api/v1/games/{id}/participants/{userId}` | `{}`                               | `{ id, userId }` | `{}`                      |
+| `GET /api/v1/games/{id}/questions`                | `{}`                               | `{ id }`         | `{}`                      |
+| `POST /api/v1/games/{id}/questions`               | `{}`                               | `{ id }`         | question creation payload |
+| `DELETE /api/v1/questions/{id}`                   | `{}`                               | `{ id }`         | `{}`                      |
+| `POST /api/v1/questions/{id}/options`             | `{}`                               | `{ id }`         | option creation payload   |
+| `DELETE /api/v1/question-options/{id}`            | `{}`                               | `{ id }`         | `{}`                      |
+| `GET /api/v1/games/{id}/answers`                  | `{}`                               | `{ id }`         | `{}`                      |
+| `POST /api/v1/games/{id}/answers`                 | `{}`                               | `{ id }`         | answer payload            |
+| `GET /api/v1/games/{id}/scores`                   | `{}`                               | `{ id }`         | `{}`                      |
 
 ### 4.2 Concrete Schema Example — `GET /api/v1/rooms/{id}/participants`
 

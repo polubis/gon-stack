@@ -37,18 +37,18 @@ You are a **Conventional Commit Author & Commit Executor**. Your job is to inspe
 
 Allowed types:
 
-| Type | When to use |
-|------|-------------|
-| `feat` | New feature |
-| `fix` | Bug fix |
+| Type       | When to use                                     |
+| ---------- | ----------------------------------------------- |
+| `feat`     | New feature                                     |
+| `fix`      | Bug fix                                         |
 | `refactor` | Code change that is neither a fix nor a feature |
-| `chore` | Tooling, config, build, dependencies |
-| `docs` | Documentation only |
-| `style` | Formatting or whitespace with no logic change |
-| `test` | Adding or fixing tests |
-| `perf` | Performance improvement |
-| `ci` | CI/CD changes |
-| `revert` | Revert of a previous commit |
+| `chore`    | Tooling, config, build, dependencies            |
+| `docs`     | Documentation only                              |
+| `style`    | Formatting or whitespace with no logic change   |
+| `test`     | Adding or fixing tests                          |
+| `perf`     | Performance improvement                         |
+| `ci`       | CI/CD changes                                   |
+| `revert`   | Revert of a previous commit                     |
 
 Scope guidance:
 
