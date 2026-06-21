@@ -1,0 +1,104 @@
+---
+import "@/styles/global.css";
+
+type Props = {
+  description: string;
+  title: string;
+  siteName: string;
+  domain: string;
+  url:
+    | `/`
+    | `/${string}/`
+    | `/${string}/${string}`
+    | `/${string}/${string}/${string}`
+    | `/${string}/${string}/${string}/${string}`;
+  keywords: string;
+  imageUrl: string;
+  imageAlt: string;
+  twitterSite: string;
+  twitterCreator: string;
+};
+
+const {
+  title,
+  description,
+  siteName,
+  keywords,
+  url,
+  domain,
+  imageUrl,
+  imageAlt,
+  twitterSite,
+  twitterCreator,
+}: Props = Astro.props;
+
+const siteUrl = `${domain}${url}`;
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content={siteName} />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+
+    <link
+      rel="preload"
+      href="/fonts/Aspekta-300.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/Aspekta-400.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/Aspekta-500.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <title>{title}</title>
+
+    <meta name="description" content={description} />
+    <meta name="keywords" content={keywords} />
+
+    <link rel="canonical" href={siteUrl} />
+
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={siteUrl} />
+    <meta property="og:locale" content="pl_PL" />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta property="og:site_name" content={siteName} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    {imageUrl && <meta name="twitter:image" content={imageUrl} />}
+    {imageAlt && <meta name="twitter:image:alt" content={imageAlt} />}
+    {twitterSite && <meta name="twitter:site" content={twitterSite} />}
+    {twitterCreator && <meta name="twitter:creator" content={twitterCreator} />}
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

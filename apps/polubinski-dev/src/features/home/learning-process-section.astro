@@ -1,0 +1,184 @@
+---
+import { appConfig } from "@/core/config";
+---
+
+<style>
+  .learning-process-glass-1 {
+    background-color: rgba(11, 27, 18, 0.72);
+    backdrop-filter: blur(6px);
+  }
+
+  .learning-process-glass-2 {
+    background-color: rgba(11, 27, 18, 0.62);
+    backdrop-filter: blur(8px);
+  }
+
+  .learning-process-glass-3 {
+    background-color: rgba(11, 27, 18, 0.78);
+    backdrop-filter: blur(5px);
+  }
+
+  .learning-process-glass-4 {
+    background-color: rgba(11, 27, 18, 0.66);
+    backdrop-filter: blur(9px);
+  }
+</style>
+
+<section
+  class="fluid page-section"
+  aria-labelledby="learning-process-title"
+  id={appConfig.learningProcessSection.id}
+>
+  <div class="text-center">
+    <h2 class="text-h2 font-500" id="learning-process-title">
+      Jak wygląda proces współpracy?
+    </h2>
+    <p
+      class="text-regular font-300 text-foreground-secondary mt-6 max-w-2xl mx-auto"
+    >
+      Przejrzysty proces, który prowadzi Cię krok po kroku od pierwszej rozmowy
+      do realnych efektów.
+    </p>
+  </div>
+
+  <div class="relative mt-16">
+    <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+      <div
+        class="radial-flare size-56 -top-10 left-[8%] ltp:top-[10%] ltp:left-[2%]"
+      >
+      </div>
+      <div
+        class="radial-flare size-64 -bottom-12 right-[4%] ltp:bottom-[5%] ltp:right-[6%]"
+      >
+      </div>
+    </div>
+    <div
+      class="absolute left-[12.5%] right-[12.5%] top-[3.25rem] h-px bg-gradient-to-r from-foreground-secondary via-primary-400 to-foreground-secondary hidden ltp:block"
+      aria-hidden="true"
+    >
+    </div>
+    <div
+      class="absolute left-1/2 -translate-x-1/2 top-4 bottom-4 w-px bg-gradient-to-b from-foreground-secondary via-primary-400 to-foreground-secondary ltp:hidden"
+      aria-hidden="true"
+    >
+    </div>
+
+    <ol
+      class="relative flex flex-col gap-6 ltp:grid ltp:grid-cols-4 ltp:gap-6"
+      aria-label="Proces współpracy krok po kroku"
+    >
+      <li
+        class="relative flex items-start gap-4 ltp:flex-col ltp:items-center ltp:text-center rounded-xl p-[1px] bg-gradient-to-b from-background via-primary-500/20 to-background ltp:bg-gradient-to-r w-full max-w-[420px] mx-auto max-h-[240px] ltp:max-h-none ltp:max-w-none ltp:mx-0"
+      >
+        <div
+          class="flex flex-col items-center text-center gap-4 learning-process-glass-1 rounded-xl px-5 py-6 h-full"
+        >
+          <div
+            class="relative z-1 flex items-center justify-center size-14 rounded-full border border-primary-400 text-h4 font-500 text-primary-500"
+            aria-hidden="true"
+          >
+            1
+          </div>
+          <div class="relative z-1">
+            <h3 class="text-h5 font-500">Spotkanie zapoznawcze</h3>
+            <p class="text-regular font-300 text-foreground-secondary mt-2">
+              Poznajemy Twoje cele i obecny poziom, aby wyznaczyć właściwy kierunek rozwoju.
+            </p>
+          </div>
+        </div>
+      </li>
+
+      <li
+        class="relative flex items-start gap-4 ltp:flex-col ltp:items-center ltp:text-center rounded-xl p-[1px] bg-gradient-to-b from-background via-primary-500/20 to-background ltp:bg-gradient-to-r w-full max-w-[420px] mx-auto max-h-[240px] ltp:max-h-none ltp:max-w-none ltp:mx-0"
+      >
+        <div
+          class="flex flex-col items-center text-center gap-4 learning-process-glass-2 rounded-xl px-5 py-6 h-full"
+        >
+          <div
+            class="relative z-1 flex items-center justify-center size-14 rounded-full border border-primary-400 text-h4 font-500 text-primary-500"
+            aria-hidden="true"
+          >
+            2
+          </div>
+          <div class="relative z-1">
+            <h3 class="text-h5 font-500">Wybór planu</h3>
+            <p class="text-regular font-300 text-foreground-secondary mt-2">
+              Dobieramy plan, tempo i zasady działania, które Ci odpowiadają.
+            </p>
+          </div>
+        </div>
+      </li>
+
+      <li
+        class="relative flex items-start gap-4 ltp:flex-col ltp:items-center ltp:text-center rounded-xl p-[1px] bg-gradient-to-b from-background via-primary-500/20 to-background ltp:bg-gradient-to-r w-full max-w-[420px] mx-auto max-h-[240px] ltp:max-h-none ltp:max-w-none ltp:mx-0"
+      >
+        <div
+          class="flex flex-col items-center text-center gap-4 learning-process-glass-3 rounded-xl px-5 py-6 h-full"
+        >
+          <div
+            class="relative z-1 flex items-center justify-center size-14 rounded-full border border-primary-400 text-h4 font-500 text-primary-500"
+            aria-hidden="true"
+          >
+            3
+          </div>
+          <div class="relative z-1">
+            <h3 class="text-h5 font-500">Określenie celów</h3>
+            <p class="text-regular font-300 text-foreground-secondary mt-2">
+              Ustalamy cele krótko- i długoterminowe oraz mierniki postępu.
+            </p>
+          </div>
+        </div>
+      </li>
+
+      <li
+        class="relative flex items-start gap-4 ltp:flex-col ltp:items-center ltp:text-center rounded-xl p-[1px] bg-gradient-to-b from-background via-primary-500/20 to-background ltp:bg-gradient-to-r w-full max-w-[420px] mx-auto max-h-[240px] ltp:max-h-none ltp:max-w-none ltp:mx-0"
+      >
+        <div
+          class="flex flex-col items-center text-center gap-4 learning-process-glass-4 rounded-xl px-5 py-6 h-full"
+        >
+          <div
+            class="relative z-1 flex items-center justify-center size-14 rounded-full border border-primary-400 text-h4 font-500 text-primary-500"
+            aria-hidden="true"
+          >
+            4
+          </div>
+          <div class="relative z-1">
+            <h3 class="text-h5 font-500">Wspólna nauka i materiały</h3>
+            <p class="text-regular font-300 text-foreground-secondary mt-2">
+              Uczymy się razem, pracujemy nad projektem i korzystamy z materiałów.
+            </p>
+          </div>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <div class="flex justify-center mt-12">
+    <a
+      class="flex items-center gap-2 px-6 py-3 bg-primary-500 text-[#091610] rounded-full text-regular-bold font-500 shadow-[0_0_16px_2px_rgba(1,120,70,0.6)] hover:shadow-[0_0_20px_4px_rgba(1,120,70,0.8)] transition-shadow"
+      href={appConfig.contactSection.calendarLink}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Umów pierwsze spotkanie zapoznawcze"
+      title="Umów pierwsze spotkanie zapoznawcze"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        class="text-[#091610]"
+      >
+        <path d="M5 12h14"></path>
+        <path d="m12 5 7 7-7 7"></path>
+      </svg>
+      <span>Poznajmy się!</span>
+    </a>
+  </div>
+</section>

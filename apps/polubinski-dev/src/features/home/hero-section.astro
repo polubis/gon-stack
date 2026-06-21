@@ -1,0 +1,162 @@
+---
+import { appConfig } from "@/core/config";
+import PlanetGraphic from "./planet.astro";
+import GlassGraphic from "./glass.astro";
+---
+
+<style is:global>
+  @keyframes nova-boom {
+    0% {
+      transform: scale(0.4);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(0.8);
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes nova-pulse {
+    0% {
+      transform: scale(0);
+      opacity: 0.4;
+    }
+    50% {
+      transform: scale(0.6);
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(0);
+      opacity: 0;
+    }
+  }
+
+  @keyframes eclipse {
+    0% {
+      transform: translate(-100px, 100px);
+    }
+    100% {
+      transform: translate(0px, 0px);
+    }
+  }
+
+  .move-eclipse {
+    animation: eclipse 10s linear forwards;
+  }
+
+  .nova-boom,
+  .nova-pulse {
+    background: linear-gradient(
+      270deg,
+      #40df84 50%,
+      rgba(35, 121, 72, 0.4) 108.45%
+    );
+    filter: blur(84.3846px);
+    transform: matrix(1, 0.07, -0.07, 1, 0, 0);
+  }
+
+  .nova-boom {
+    animation: nova-boom 1s linear 10s forwards;
+  }
+
+  .nova-pulse {
+    animation: nova-pulse 4s ease-in-out 10.5s infinite;
+  }
+</style>
+
+<section
+  class="relative fluid page-section grid items-center gap-12 grid-rows-[auto_auto] justify-center ltp:grid-cols-2 ltp:grid-rows-1"
+  aria-labelledby="hero-title"
+>
+  <div>
+    <div
+      id="hero-milky-way"
+      class="absolute inset-0 size-full overflow-hidden rounded-full -z-1"
+      aria-hidden="true"
+    >
+    </div>
+    <h1 id="hero-title" class="text-h1 font-500 max-w-lg mbl:max-w-xl tbt:max-w-2xl">
+      Zagubiony w świecie IT? Naprawmy to!
+      <span class="bg-primary-500 h-1.5 w-7 inline-block" aria-hidden="true"
+      ></span>
+    </h1>
+    <p class="text-regular mt-6 font-300 sbl:max-w-xl">
+      Utknąłeś w IT? Skorzystaj z konsultacji i mentoringu, który pomoże Ci
+      awansować na poziom
+      <strong class="font-500">Juniora</strong>, <strong class="font-500"
+        >Mida</strong
+      > lub
+      <strong class="font-500">Seniora</strong>. Pomogę Ci również rozwinąć
+      umiejętności miękkie – kluczowe w każdej roli.
+    </p>
+    <p class="text-regular mt-2 font-300 sbl:max-w-xl">
+      Oferuję mentoring w różnych formach i technologiach – <strong
+        class="font-500">React</strong
+      >,
+      <strong class="font-500">Angular</strong>, <strong class="font-500"
+        >TypeScript</strong
+      >,
+      <strong class="font-500">Node.js</strong>, <strong class="font-500"
+        >Google Cloud</strong
+      > i nie tylko. Wspólnie zmierzymy się z każdym wyzwaniem.
+    </p>
+    <a
+      class="relative flex items-center pl-13.5 pr-6.5 w-fit h-11 group mt-7"
+      href={`#${appConfig.plansSection.id}`}
+      aria-label="Wybierz ścieżkę rozwoju"
+    >
+      <div
+        class="absolute left-0 top-0 bottom-0 my-auto bg-primary-500 size-11 rounded-full border border-primary-400 transition-all shadow-[0_0_16px_2px_rgba(1,120,70,0.6)] group-hover:w-full group-hover:shadow-[0_0_16px_2px_rgba(1,120,70,0.9)]"
+        aria-hidden="true"
+      >
+      </div>
+      <div
+        class="absolute transition-transform flex justify-center items-center left-0 top-0 bottom-0 my-auto size-11 text-[#091610] text-regular-bold font-500 group-hover:translate-x-3.5"
+        aria-hidden="true"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M5 12h14"></path>
+          <path d="m12 5 7 7-7 7"></path>
+        </svg>
+      </div>
+      <span
+        class="text-regular-bold font-500 drop-shadow-[0_0_11.9px_rgba(0,131,74,0.9)] transition-colors group-hover:text-[#091610]"
+      >
+        Wybierz plan
+      </span>
+    </a>
+  </div>
+
+  <div class="relative aspect-square mx-4" aria-hidden="true">
+    <div
+      class="nova-boom absolute opacity-0 inset-0 m-auto size-full rounded-full"
+    >
+    </div>
+    <div
+      class="nova-pulse absolute opacity-0 inset-0 m-auto size-full rounded-full"
+    >
+    </div>
+    <PlanetGraphic class="absolute inset-0 m-auto size-[70%] move-eclipse" />
+    <GlassGraphic class="absolute inset-0 m-auto size-[90%]" />
+  </div>
+</section>
+
+<script>
+  import { createMilkyWay } from "./milky-way";
+
+  createMilkyWay("#hero-milky-way");
+</script>

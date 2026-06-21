@@ -8,6 +8,16 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://polubinski.dev',
+
+  devToolbar: {
+    enabled: false,
+  },
+
+  build: {
+    inlineStylesheets: 'always',
+  },
+
   adapter: cloudflare({
     platformProxy: {
       enabled: true,

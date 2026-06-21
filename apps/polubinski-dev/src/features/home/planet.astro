@@ -1,0 +1,21 @@
+<style>
+  .planet-sphere {
+    background: radial-gradient(
+      circle at 30% 30%,
+      rgba(127, 255, 191, 0.9) 0%,
+      #41c57a 30%,
+      #144c2c 70%,
+      #0b2817 100%
+    );
+    box-shadow:
+      inset 5px 5px 20px rgba(11, 40, 23, 0.3),
+      inset -5px -5px 15px rgba(0, 0, 0, 0.2);
+  }
+</style>
+
+<div
+  role="presentation"
+  class:list={["planet-sphere rounded-full", Astro.props.class]}
+  aria-hidden="true"
+>
+</div>

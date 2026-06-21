@@ -1,0 +1,578 @@
+---
+---
+
+<style>
+  @keyframes gauge-fill {
+    from {
+      stroke-dashoffset: var(--dash-array);
+    }
+    to {
+      stroke-dashoffset: var(--dash-offset);
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%,
+    100% {
+      filter: drop-shadow(0 0 4px rgba(13, 217, 125, 0.4));
+    }
+    50% {
+      filter: drop-shadow(0 0 12px rgba(13, 217, 125, 0.8));
+    }
+  }
+
+  .gauge-progress {
+    animation: gauge-fill 2s ease-out forwards;
+  }
+
+  .gauge-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+</style>
+
+<section
+  class="fluid page-section isolate flex flex-col justify-center"
+  aria-labelledby="materials-quality-heading"
+>
+  <header class="mb-12 text-center">
+    <h2 id="materials-quality-heading" class="text-h2 font-500 mb-4">
+      Jakość Materiałów
+    </h2>
+    <p class="text-regular font-300 max-w-3xl mx-auto">
+      Wszystkie materiały są starannie przygotowane i weryfikowane. Sprawdź
+      metryki jakości, które gwarantują wysoką wartość edukacyjną.
+    </p>
+  </header>
+
+  <!-- Main Quality Gauges -->
+  <div
+    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12"
+    role="list"
+    aria-label="Metryki jakości materiałów"
+  >
+    <!-- Circular Gauge - Aktualność -->
+    <div
+      class="flex flex-col items-center justify-start p-6 rounded-xl bg-gradient-to-br from-[#0a1410] to-[#050a08] border border-[#1a2520] relative overflow-hidden"
+      role="listitem"
+    >
+      <div
+        class="radial-flare size-24 -top-6 right-4"
+        aria-hidden="true"
+      ></div>
+      <div class="relative w-[160px] h-[160px] flex items-center justify-center">
+        <svg
+          class="gauge-glow absolute inset-0"
+          width="160"
+          height="160"
+          viewBox="0 0 160 160"
+          aria-hidden="true"
+        >
+          <!-- Background circle -->
+          <circle
+            cx="80"
+            cy="80"
+            r="70"
+            fill="none"
+            stroke="#1a2520"
+            stroke-width="8"></circle>
+          <!-- Progress circle -->
+          <circle
+            cx="80"
+            cy="80"
+            r="70"
+            fill="none"
+            stroke="url(#gradient-green)"
+            stroke-width="8"
+            stroke-linecap="round"
+            class="gauge-progress"
+            style="--dash-array: 440; --dash-offset: 44;"
+            stroke-dasharray="440"
+            stroke-dashoffset="440"
+            transform="rotate(-90 80 80)"></circle>
+          <defs>
+            <linearGradient id="gradient-green" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#0bad67;stop-opacity:1"></stop>
+              <stop offset="100%" style="stop-color:#0dd97d;stop-opacity:1"
+              ></stop>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="flex flex-col items-center justify-center z-10">
+          <span class="text-h1 font-500 text-primary-400 leading-none">90</span>
+        </div>
+      </div>
+      <div class="mt-4 text-center">
+        <h3 class="text-h5 font-500 mb-2">Aktualność</h3>
+        <p class="text-small text-foreground-secondary">
+          Zgodne z najnowszymi standardami
+        </p>
+      </div>
+    </div>
+
+    <!-- Semi-circular Gauge - Praktyczność -->
+    <div
+      class="flex flex-col items-center justify-start p-6 rounded-xl bg-gradient-to-br from-[#0a1410] to-[#050a08] border border-[#1a2520] relative overflow-hidden"
+      role="listitem"
+    >
+      <div
+        class="radial-flare size-24 -top-6 left-4"
+        aria-hidden="true"
+      ></div>
+      <div class="relative w-[160px] h-[120px] flex items-center justify-center">
+        <svg
+          class="gauge-glow absolute inset-0"
+          width="160"
+          height="120"
+          viewBox="0 0 160 120"
+          aria-hidden="true"
+        >
+          <!-- Background arc -->
+          <path
+            d="M 20 100 A 60 60 0 0 1 140 100"
+            fill="none"
+            stroke="#1a2520"
+            stroke-width="8"
+            stroke-linecap="round"></path>
+          <!-- Progress arc -->
+          <path
+            d="M 20 100 A 60 60 0 0 1 140 100"
+            fill="none"
+            stroke="url(#gradient-green-2)"
+            stroke-width="8"
+            stroke-linecap="round"
+            class="gauge-progress"
+            style="--dash-array: 188; --dash-offset: 20;"
+            stroke-dasharray="188"
+            stroke-dashoffset="188"></path>
+          <defs>
+            <linearGradient id="gradient-green-2" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#0bad67;stop-opacity:1"></stop>
+              <stop offset="100%" style="stop-color:#0dd97d;stop-opacity:1"
+              ></stop>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="flex flex-col items-center justify-center z-10 mt-16">
+          <span class="text-h1 font-500 text-primary-400 leading-none">89</span>
+        </div>
+      </div>
+      <div class="mt-4 text-center">
+        <h3 class="text-h5 font-500 mb-2">Praktyczność</h3>
+        <p class="text-small text-foreground-secondary">
+          Kod testowany w realnych projektach
+        </p>
+      </div>
+    </div>
+
+    <!-- Mini Gauge - Przystępność -->
+    <div
+      class="flex flex-col items-center justify-start p-6 rounded-xl bg-gradient-to-br from-[#0a1410] to-[#050a08] border border-[#1a2520] relative overflow-hidden"
+      role="listitem"
+    >
+      <div
+        class="radial-flare size-24 -bottom-6 right-4"
+        aria-hidden="true"
+      ></div>
+      <div class="relative w-[140px] h-[140px] flex items-center justify-center">
+        <svg
+          class="gauge-glow absolute inset-0"
+          width="140"
+          height="140"
+          viewBox="0 0 140 140"
+          aria-hidden="true"
+        >
+          <!-- Background circle -->
+          <circle
+            cx="70"
+            cy="70"
+            r="60"
+            fill="none"
+            stroke="#1a2520"
+            stroke-width="7"></circle>
+          <!-- Progress circle -->
+          <circle
+            cx="70"
+            cy="70"
+            r="60"
+            fill="none"
+            stroke="url(#gradient-green-3)"
+            stroke-width="7"
+            stroke-linecap="round"
+            class="gauge-progress"
+            style="--dash-array: 377; --dash-offset: 38;"
+            stroke-dasharray="377"
+            stroke-dashoffset="377"
+            transform="rotate(-90 70 70)"></circle>
+          <defs>
+            <linearGradient id="gradient-green-3" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#0bad67;stop-opacity:1"></stop>
+              <stop offset="100%" style="stop-color:#0dd97d;stop-opacity:1"
+              ></stop>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="flex flex-col items-center justify-center z-10">
+          <span class="text-h1 font-500 text-primary-400 leading-none">90</span>
+        </div>
+      </div>
+      <div class="mt-4 text-center">
+        <h3 class="text-h5 font-500 mb-2">Przystępność</h3>
+        <p class="text-small text-foreground-secondary">
+          Zrozumiałe dla każdego poziomu
+        </p>
+      </div>
+    </div>
+
+    <!-- Linear Gauge - Kompletność -->
+    <div
+      class="flex flex-col items-center justify-start p-6 rounded-xl bg-gradient-to-br from-[#0a1410] to-[#050a08] border border-[#1a2520] relative overflow-hidden"
+      role="listitem"
+    >
+      <div
+        class="radial-flare size-24 -bottom-6 left-4"
+        aria-hidden="true"
+      ></div>
+      <div class="flex flex-col items-center justify-center w-[140px] h-[160px]">
+        <svg
+          class="gauge-glow"
+          width="140"
+          height="140"
+          viewBox="0 0 140 140"
+          aria-hidden="true"
+        >
+          <!-- Vertical gauge background -->
+          <rect
+            x="60"
+            y="20"
+            width="20"
+            height="100"
+            rx="10"
+            fill="#1a2520"></rect>
+          <!-- Vertical gauge progress -->
+          <rect
+            x="60"
+            y="35"
+            width="20"
+            height="85"
+            rx="10"
+            fill="url(#gradient-vertical)"
+          >
+            <animate
+              attributeName="height"
+              from="0"
+              to="85"
+              dur="2s"
+              fill="freeze"
+              begin="0s"></animate>
+            <animate
+              attributeName="y"
+              from="120"
+              to="35"
+              dur="2s"
+              fill="freeze"
+              begin="0s"></animate>
+          </rect>
+          <defs>
+            <linearGradient
+              id="gradient-vertical"
+              x1="0%"
+              y1="100%"
+              x2="0%"
+              y2="0%"
+            >
+              <stop offset="0%" style="stop-color:#0bad67;stop-opacity:1"
+              ></stop>
+              <stop offset="100%" style="stop-color:#0dd97d;stop-opacity:1"
+              ></stop>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="text-center mt-2">
+          <span class="text-h1 font-500 text-primary-400 leading-none">85</span>
+        </div>
+      </div>
+      <div class="mt-2 text-center">
+        <h3 class="text-h5 font-500 mb-2">Kompletność</h3>
+        <p class="text-small text-foreground-secondary">
+          Wyczerpujące omówienie tematów
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Additional Quality Metrics -->
+  <div
+    class="grid grid-cols-2 md:grid-cols-4 gap-4"
+    role="list"
+    aria-label="Dodatkowe metryki jakości"
+  >
+    <!-- Small indicator - Weryfikacja -->
+    <div
+      class="flex flex-col items-center justify-start p-4 rounded-xl bg-gradient-to-br from-[#0a1410] to-[#050a08] border border-[#1a2520] relative overflow-hidden"
+      role="listitem"
+    >
+      <div class="relative w-[80px] h-[80px] flex items-center justify-center mb-2">
+        <svg class="absolute inset-0" width="80" height="80" viewBox="0 0 80 80" aria-hidden="true">
+          <circle cx="40" cy="40" r="32" fill="none" stroke="#1a2520" stroke-width="5"></circle>
+          <circle
+            cx="40"
+            cy="40"
+            r="32"
+            fill="none"
+            stroke="#0bad67"
+            stroke-width="5"
+            stroke-linecap="round"
+            class="gauge-progress"
+            style="--dash-array: 201; --dash-offset: 20;"
+            stroke-dasharray="201"
+            stroke-dashoffset="201"
+            transform="rotate(-90 40 40)"></circle>
+        </svg>
+        <span class="text-h4 font-500 text-primary-400 z-10 leading-none">90</span>
+      </div>
+      <h4 class="text-regular-bold font-500 mb-1">Weryfikacja</h4>
+      <p class="text-small text-foreground-secondary text-center">
+        Wieloetapowy proces review
+      </p>
+    </div>
+
+    <!-- Small indicator - Feedback -->
+    <div
+      class="flex flex-col items-center justify-start p-4 rounded-xl bg-gradient-to-br from-[#0a1410] to-[#050a08] border border-[#1a2520] relative overflow-hidden"
+      role="listitem"
+    >
+      <div class="relative w-[80px] h-[80px] flex items-center justify-center mb-2">
+        <svg class="absolute inset-0" width="80" height="80" viewBox="0 0 80 80" aria-hidden="true">
+          <circle cx="40" cy="40" r="32" fill="none" stroke="#1a2520" stroke-width="5"></circle>
+          <circle
+            cx="40"
+            cy="40"
+            r="32"
+            fill="none"
+            stroke="#0dd97d"
+            stroke-width="5"
+            stroke-linecap="round"
+            class="gauge-progress"
+            style="--dash-array: 201; --dash-offset: 28;"
+            stroke-dasharray="201"
+            stroke-dashoffset="201"
+            transform="rotate(-90 40 40)"></circle>
+        </svg>
+        <span class="text-h4 font-500 text-primary-400 z-10 leading-none">86</span>
+      </div>
+      <h4 class="text-regular-bold font-500 mb-1">Feedback</h4>
+      <p class="text-small text-foreground-secondary text-center">
+        Reaguje na społeczność
+      </p>
+    </div>
+
+    <!-- Small indicator - Dostępność -->
+    <div
+      class="flex flex-col items-center justify-start p-4 rounded-xl bg-gradient-to-br from-[#0a1410] to-[#050a08] border border-[#1a2520] relative overflow-hidden"
+      role="listitem"
+    >
+      <div class="relative w-[80px] h-[80px] flex items-center justify-center mb-2">
+        <svg class="absolute inset-0" width="80" height="80" viewBox="0 0 80 80" aria-hidden="true">
+          <circle cx="40" cy="40" r="32" fill="none" stroke="#1a2520" stroke-width="5"></circle>
+          <circle
+            cx="40"
+            cy="40"
+            r="32"
+            fill="none"
+            stroke="#0bad67"
+            stroke-width="5"
+            stroke-linecap="round"
+            class="gauge-progress"
+            style="--dash-array: 201; --dash-offset: 40;"
+            stroke-dasharray="201"
+            stroke-dashoffset="201"
+            transform="rotate(-90 40 40)"></circle>
+        </svg>
+        <span class="text-h4 font-500 text-primary-400 z-10 leading-none">80</span>
+      </div>
+      <h4 class="text-regular-bold font-500 mb-1">Dostępność</h4>
+      <p class="text-small text-foreground-secondary text-center">
+        Większość darmowa, część premium
+      </p>
+    </div>
+
+    <!-- Small indicator - Aktualizacje -->
+    <div
+      class="flex flex-col items-center justify-start p-4 rounded-xl bg-gradient-to-br from-[#0a1410] to-[#050a08] border border-[#1a2520] relative overflow-hidden"
+      role="listitem"
+    >
+      <div class="relative w-[80px] h-[80px] flex items-center justify-center mb-2">
+        <svg class="absolute inset-0" width="80" height="80" viewBox="0 0 80 80" aria-hidden="true">
+          <circle cx="40" cy="40" r="32" fill="none" stroke="#1a2520" stroke-width="5"></circle>
+          <circle
+            cx="40"
+            cy="40"
+            r="32"
+            fill="none"
+            stroke="#0dd97d"
+            stroke-width="5"
+            stroke-linecap="round"
+            class="gauge-progress"
+            style="--dash-array: 201; --dash-offset: 24;"
+            stroke-dasharray="201"
+            stroke-dashoffset="201"
+            transform="rotate(-90 40 40)"></circle>
+        </svg>
+        <span class="text-h4 font-500 text-primary-400 z-10 leading-none">88</span>
+      </div>
+      <h4 class="text-regular-bold font-500 mb-1">Aktualizacje</h4>
+      <p class="text-small text-foreground-secondary text-center">
+        Regularna aktualizacja treści
+      </p>
+    </div>
+  </div>
+
+  <!-- Process Description -->
+  <div class="mt-16">
+    <div class="text-center mb-12">
+      <h3 class="text-h2 font-500">Jak mierzę te metryki?</h3>
+      <p class="text-regular font-300 text-foreground-secondary mt-6 max-w-2xl mx-auto">
+        Zautomatyzowany proces weryfikacji, który działa nieprzerwanie i zapewnia najwyższą jakość materiałów.
+      </p>
+    </div>
+
+    <div class="relative">
+      <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <div class="radial-flare size-56 -top-10 left-[8%]"></div>
+        <div class="radial-flare size-64 -bottom-12 right-[4%]"></div>
+      </div>
+      <div
+        class="absolute left-[12.5%] right-[12.5%] top-[3.25rem] h-px bg-gradient-to-r from-foreground-secondary via-primary-400 to-foreground-secondary hidden ltp:block"
+        aria-hidden="true"
+      >
+      </div>
+      <div
+        class="absolute left-1/2 -translate-x-1/2 top-4 bottom-4 w-px bg-gradient-to-b from-foreground-secondary via-primary-400 to-foreground-secondary ltp:hidden"
+        aria-hidden="true"
+      >
+      </div>
+
+      <ol
+        class="relative flex flex-col gap-6 ltp:grid ltp:grid-cols-4 ltp:gap-6"
+        aria-label="Proces weryfikacji jakości materiałów"
+      >
+        <li
+          class="relative flex items-start gap-4 ltp:flex-col ltp:items-center ltp:text-center rounded-xl p-[1px] bg-gradient-to-r from-background via-primary-500/20 to-background w-full max-w-[420px] mx-auto ltp:max-w-none ltp:mx-0"
+        >
+          <div
+            class="flex flex-col items-center text-center gap-4 rounded-xl px-5 py-6 h-full w-full"
+            style="background-color: rgba(11, 27, 18, 0.72); backdrop-filter: blur(6px);"
+          >
+            <div
+              class="relative z-1 flex items-center justify-center size-14 rounded-full border border-primary-400 text-h4 font-500 text-primary-500"
+              aria-hidden="true"
+            >
+              1
+            </div>
+            <div class="relative z-1">
+              <h4 class="text-h5 font-500">Tworzenie na żądanie</h4>
+              <p class="text-regular font-300 text-foreground-secondary mt-2">
+                Materiał powstaje na żądanie społeczności w moim unikalnym stylu
+              </p>
+            </div>
+          </div>
+        </li>
+
+        <li
+          class="relative flex items-start gap-4 ltp:flex-col ltp:items-center ltp:text-center rounded-xl p-[1px] bg-gradient-to-r from-background via-primary-500/20 to-background w-full max-w-[420px] mx-auto ltp:max-w-none ltp:mx-0"
+        >
+          <div
+            class="flex flex-col items-center text-center gap-4 rounded-xl px-5 py-6 h-full w-full"
+            style="background-color: rgba(11, 27, 18, 0.62); backdrop-filter: blur(8px);"
+          >
+            <div
+              class="relative z-1 flex items-center justify-center size-14 rounded-full border border-primary-400 text-h4 font-500 text-primary-500"
+              aria-hidden="true"
+            >
+              2
+            </div>
+            <div class="relative z-1">
+              <h4 class="text-h5 font-500">Automatyczna weryfikacja</h4>
+              <p class="text-regular font-300 text-foreground-secondary mt-2">
+                N8N pipeline: gramatyka, SEO, review przez wiele modeli LLM
+              </p>
+            </div>
+          </div>
+        </li>
+
+        <li
+          class="relative flex items-start gap-4 ltp:flex-col ltp:items-center ltp:text-center rounded-xl p-[1px] bg-gradient-to-r from-background via-primary-500/20 to-background w-full max-w-[420px] mx-auto ltp:max-w-none ltp:mx-0"
+        >
+          <div
+            class="flex flex-col items-center text-center gap-4 rounded-xl px-5 py-6 h-full w-full"
+            style="background-color: rgba(11, 27, 18, 0.78); backdrop-filter: blur(5px);"
+          >
+            <div
+              class="relative z-1 flex items-center justify-center size-14 rounded-full border border-primary-400 text-h4 font-500 text-primary-500"
+              aria-hidden="true"
+            >
+              3
+            </div>
+            <div class="relative z-1">
+              <h4 class="text-h5 font-500">Ocena & poprawki</h4>
+              <p class="text-regular font-300 text-foreground-secondary mt-2">
+                LLM wystawia oceny numeryczne, wprowadza poprawki, finalne review
+              </p>
+            </div>
+          </div>
+        </li>
+
+        <li
+          class="relative flex items-start gap-4 ltp:flex-col ltp:items-center ltp:text-center rounded-xl p-[1px] bg-gradient-to-r from-background via-primary-500/20 to-background w-full max-w-[420px] mx-auto ltp:max-w-none ltp:mx-0"
+        >
+          <div
+            class="flex flex-col items-center text-center gap-4 rounded-xl px-5 py-6 h-full w-full"
+            style="background-color: rgba(11, 27, 18, 0.66); backdrop-filter: blur(9px);"
+          >
+            <div
+              class="relative z-1 flex items-center justify-center size-14 rounded-full border border-primary-400 text-h4 font-500 text-primary-500"
+              aria-hidden="true"
+            >
+              4
+            </div>
+            <div class="relative z-1">
+              <h4 class="text-h5 font-500">Ciągła re-ewaluacja</h4>
+              <p class="text-regular font-300 text-foreground-secondary mt-2">
+                Cykliczny proces: feedback społeczności → poprawki → akceptacja
+              </p>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="flex justify-center mt-12">
+      <a
+        class="flex items-center gap-2 px-6 py-3 bg-primary-500 text-[#091610] rounded-full text-regular-bold font-500 shadow-[0_0_16px_2px_rgba(1,120,70,0.6)] hover:shadow-[0_0_20px_4px_rgba(1,120,70,0.8)] transition-shadow"
+        href="https://4markdown.com/document-preview/?id=fa9e7d53-fd86-43e8-bb0b-d2224560e5c5"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Zobacz szczegółową metodologię pomiaru jakości"
+        title="Zobacz szczegółową metodologię pomiaru jakości"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          class="text-[#091610]"
+        >
+          <path d="M5 12h14"></path>
+          <path d="m12 5 7 7-7 7"></path>
+        </svg>
+        <span>Zobacz metodologię</span>
+      </a>
+    </div>
+  </div>
+</section>

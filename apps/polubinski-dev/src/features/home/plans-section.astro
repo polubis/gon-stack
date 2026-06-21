@@ -1,0 +1,709 @@
+---
+import PlanTile from "./plan-tile.astro";
+import { appConfig } from "@/core/config";
+---
+
+<section
+  class="fluid page-section flex flex-col text-center justify-center items-center"
+  aria-labelledby="plans-title"
+  id={appConfig.plansSection.id}
+>
+  <h2 class="text-h2 font-500 mb-16 max-w-2xl" id="plans-title">
+    Wybierz plan nauki, umów spotkanie i otrzymaj materiały
+  </h2>
+
+  <div class="relative flex flex-wrap justify-center gap-4">
+    <PlanTile
+      button={{
+        label: "Umów spotkanie",
+        href: appConfig.contactSection.calendarLink,
+        title: "Umów spotkanie zapoznawcze",
+        target: "_blank",
+      }}
+      price={{
+        id: "introductory-meeting-price",
+        label: appConfig.plansSection.plans.introductoryMeeting.cost,
+        description: {
+          label: "Jak to działa?",
+          href: "https://4markdown.com/document-preview/?id=ff6840fd-13d9-4016-9222-dbe3361364ac",
+          title: "Jak to działa? Spotkanie zapoznawcze - szczegóły",
+          target: "_blank",
+        },
+      }}
+      heading={{
+        title: {
+          label: appConfig.plansSection.plans.introductoryMeeting.label,
+          id: "introductory-meeting-title",
+        },
+        description: {
+          label: "Pierwszy krok do świadomej współpracy bez zobowiązań",
+          id: "introductory-meeting-description",
+        },
+      }}
+      benefits={{
+        title: `Co otrzymujesz w ramach ${appConfig.plansSection.plans.introductoryMeeting.label}`,
+        items: [
+          "Bezpłatne, 30-minutowe spotkanie online (Google Meet)",
+          "Poznanie się i sprawdzenie, czy współpraca ma dla Ciebie sens",
+          "Określenie Twoich celów, wyzwań i oczekiwań rozwojowych",
+          "Ustalenie najlepszego kierunku rozwoju dopasowanego do Ciebie",
+          "Omówienie dostępnych form współpracy (konsultacje, MTI, Senior w rok, plan własny)",
+          "Odpowiedzi na pytania o proces, zasady, terminy i ceny",
+          "Możliwość anulowania lub zmiany terminu z wyprzedzeniem",
+          "Bez zobowiązań - to Ty decydujesz o dalszych krokach",
+          "Dla każdego, niezależnie od poziomu zaawansowania",
+        ],
+      }}
+    >
+      <Fragment slot="flare">
+        <div class="radial-flare size-40 bottom-0 right-0" aria-hidden="true">
+        </div>
+      </Fragment>
+      <Fragment slot="icon">
+        <svg
+          width="68"
+          height="64"
+          viewBox="0 0 68 64"
+          fill="none"
+          id="introductory-meeting-icon"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <title id="introductory-meeting-icon">Ikona kalendarza spotkania</title>
+          <g filter="url(#filter0_d_introductory)">
+            <rect x="20" y="18" width="28" height="28" rx="3" fill="#0BAD67"/>
+            <rect x="24" y="14" width="4" height="8" rx="2" fill="#0BAD67"/>
+            <rect x="40" y="14" width="4" height="8" rx="2" fill="#0BAD67"/>
+            <line x1="22" y1="24" x2="46" y2="24" stroke="#091610" stroke-width="2"/>
+            <circle cx="26" cy="30" r="1.5" fill="#091610"/>
+            <circle cx="34" cy="30" r="1.5" fill="#091610"/>
+            <circle cx="42" cy="30" r="1.5" fill="#091610"/>
+            <circle cx="26" cy="36" r="1.5" fill="#091610"/>
+            <circle cx="34" cy="36" r="1.5" fill="#091610"/>
+            <circle cx="42" cy="36" r="1.5" fill="#091610"/>
+            <circle cx="26" cy="42" r="1.5" fill="#091610"/>
+            <circle cx="34" cy="42" r="1.5" fill="#091610"/>
+          </g>
+          <defs>
+            <filter
+              id="filter0_d_introductory"
+              x="0.6"
+              y="0.6"
+              width="66.8"
+              height="62.8"
+              filterUnits="userSpaceOnUse"
+              color-interpolation-filters="sRGB"
+            >
+              <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+              <feColorMatrix
+                in="SourceAlpha"
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                result="hardAlpha"
+              ></feColorMatrix>
+              <feMorphology
+                radius="4"
+                operator="dilate"
+                in="SourceAlpha"
+                result="effect1_dropShadow_introductory"
+              ></feMorphology>
+              <feOffset></feOffset>
+              <feGaussianBlur stdDeviation="5.95"></feGaussianBlur>
+              <feComposite in2="hardAlpha" operator="out"></feComposite>
+              <feColorMatrix
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0.25 0 0 0 0 0.141483 0 0 0 1 0"
+              ></feColorMatrix>
+              <feBlend
+                mode="normal"
+                in2="BackgroundImageFix"
+                result="effect1_dropShadow_introductory"
+              ></feBlend>
+              <feBlend
+                mode="normal"
+                in="SourceGraphic"
+                in2="effect1_dropShadow_introductory"
+                result="shape"
+              ></feBlend>
+            </filter>
+          </defs>
+        </svg>
+      </Fragment>
+    </PlanTile>
+
+    <PlanTile
+      button={{
+        label: "Umów spotkanie",
+        href: appConfig.contactSection.calendarLink,
+        title: "Umów spotkanie konsultacyjne",
+        target: "_blank",
+      }}
+      price={{
+        id: "quick-help-price",
+        label: `${appConfig.plansSection.plans.quickCall.cost} ${appConfig.plansSection.plans.quickCall.currency}`,
+        description: {
+          label: "Jak to działa?",
+          href: "https://4markdown.com/document-preview/?id=0faabcbc-f7c3-4929-be32-f8a2040bfbb9",
+          title: "Jak to działa? Konsultacja programistyczna - szczegóły",
+          target: "_blank",
+        },
+      }}
+      heading={{
+        title: {
+          label: appConfig.plansSection.plans.quickCall.label,
+          id: "quick-help-title",
+        },
+        description: {
+          label: "Realne rozwiązywanie problemów i uzupełnianie wiedzy",
+          id: "quick-help-description",
+        },
+      }}
+      benefits={{
+        title: `Co otrzymujesz w ramach ${appConfig.plansSection.plans.quickCall.label}`,
+        items: [
+          "123 zł za rozpoczętą godzinę (cena zawiera VAT), płatność po spotkaniu",
+          "Elastyczne rozliczenie - ustalamy podczas spotkania, czy potrzeba 1, czy 2 godzin",
+          "Praktyczne rozwiązywanie konkretnych problemów technicznych",
+          "Analiza kodu, architektury i decyzji projektowych",
+          "Praca nad performance, testami lub jakością kodu",
+          "Przygotowanie do rozmów technicznych i techniczne code review",
+          "Porządkowanie wiedzy lub wchodzenie w nowe obszary IT",
+          "Wsparcie przy CV, problemach z projektem lub karierą",
+          "Jeśli nie mogę realnie pomóc - nie płacisz",
+          "Zakres i forma w pełni dopasowane do Twoich potrzeb",
+        ],
+      }}
+    >
+      <Fragment slot="flare">
+        <div class="radial-flare size-40 bottom-0 left-0" aria-hidden="true">
+        </div>
+        <div class="radial-flare size-40 bottom-0 right-0" aria-hidden="true">
+        </div>
+      </Fragment>
+      <Fragment slot="icon">
+        <svg
+          width="68"
+          height="66"
+          viewBox="0 0 68 66"
+          fill="none"
+          id="quick-help-icon"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <title id="quick-help-icon">Ikona konsultacji</title>
+          <g filter="url(#filter0_d_211_729)">
+            <path
+              d="M50.2605 42.1815C51.1242 40.3901 51.548 38.4184 51.4967 36.4303C51.4454 34.4422 50.9204 32.495 49.9654 30.7505C49.0104 29.006 47.653 27.5146 46.0058 26.4001C44.3587 25.2855 42.4694 24.5801 40.4949 24.3424C39.8379 22.8149 38.8827 21.4338 37.6853 20.28C36.4878 19.1262 35.0722 18.2229 33.5214 17.623C31.9705 17.0231 30.3155 16.7387 28.6534 16.7864C26.9912 16.8341 25.3552 17.213 23.8413 17.9008C22.3274 18.5886 20.9659 19.5716 19.8366 20.7922C18.7074 22.0127 17.833 23.4464 17.2646 25.0091C16.6963 26.5718 16.4455 28.2322 16.5269 29.893C16.6083 31.5539 17.0202 33.1818 17.7386 34.6815L16.6027 38.5424C16.4757 38.9735 16.4672 39.4307 16.5781 39.8662C16.689 40.3016 16.9152 40.6991 17.233 41.0168C17.5507 41.3346 17.9482 41.5608 18.3836 41.6717C18.8191 41.7826 19.2763 41.7741 19.7074 41.6471L23.5683 40.5112C24.808 41.1068 26.1372 41.4948 27.5027 41.6596C28.1661 43.214 29.1378 44.6177 30.3591 45.7859C31.5804 46.9541 33.0259 47.8625 34.6082 48.4562C36.1905 49.0499 37.8768 49.3166 39.5651 49.2401C41.2534 49.1636 42.9086 48.7455 44.4308 48.0112L48.2917 49.1471C48.7226 49.274 49.1797 49.2824 49.6149 49.1716C50.0502 49.0607 50.4475 48.8346 50.7652 48.5171C51.0829 48.1996 51.3091 47.8024 51.4202 47.3672C51.5313 46.932 51.5231 46.4749 51.3964 46.044L50.2605 42.1815ZM47.7214 42.4112L48.9996 46.7502L44.6621 45.4737C44.3487 45.3829 44.0122 45.4182 43.7246 45.5721C41.4227 46.8012 38.7319 47.0827 36.2255 46.3565C33.7192 45.6303 31.5956 43.9539 30.3074 41.6846C32.0189 41.506 33.675 40.9756 35.1719 40.1267C36.6688 39.2778 37.974 38.1287 39.0059 36.7515C40.0377 35.3744 40.7738 33.7988 41.1679 32.1237C41.5621 30.4487 41.6058 28.7102 41.2964 27.0174C42.7877 27.3689 44.1782 28.0584 45.3607 29.0326C46.5432 30.0068 47.486 31.2397 48.1164 32.6361C48.7468 34.0325 49.0479 35.555 48.9965 37.0863C48.9451 38.6175 48.5425 40.1165 47.8199 41.4674C47.6643 41.7569 47.6289 42.0959 47.7214 42.4112Z"
+              fill="#0BAD67"></path>
+          </g>
+          <defs>
+            <filter
+              id="filter0_d_211_729"
+              x="0.600733"
+              y="0.88125"
+              width="66.8"
+              height="64.2717"
+              filterUnits="userSpaceOnUse"
+              color-interpolation-filters="sRGB"
+            >
+              <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+              <feColorMatrix
+                in="SourceAlpha"
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                result="hardAlpha"></feColorMatrix>
+              <feMorphology
+                radius="4"
+                operator="dilate"
+                in="SourceAlpha"
+                result="effect1_dropShadow_211_729"></feMorphology>
+              <feOffset></feOffset>
+              <feGaussianBlur stdDeviation="5.95"></feGaussianBlur>
+              <feComposite in2="hardAlpha" operator="out"></feComposite>
+              <feColorMatrix
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0.25 0 0 0 0 0.141483 0 0 0 1 0"
+              ></feColorMatrix>
+              <feBlend
+                mode="normal"
+                in2="BackgroundImageFix"
+                result="effect1_dropShadow_211_729"></feBlend>
+              <feBlend
+                mode="normal"
+                in="SourceGraphic"
+                in2="effect1_dropShadow_211_729"
+                result="shape"></feBlend>
+            </filter>
+          </defs>
+        </svg>
+      </Fragment>
+    </PlanTile>
+
+    <PlanTile
+      button={{
+        label: "Umów spotkanie",
+        href: appConfig.contactSection.calendarLink,
+        title: "Umów spotkanie Mocked Technical Interview",
+        target: "_blank",
+      }}
+      price={{
+        id: "mocked-technical-interview-price",
+        label: `${appConfig.plansSection.plans.mockedTechInterview.cost} ${appConfig.plansSection.plans.mockedTechInterview.currency}`,
+        description: {
+          label: "Jak to działa?",
+          href: "https://4markdown.com/document-preview/?id=5aa6b408-d6fb-40dc-a55c-68b38a7b156b",
+          title: "Jak to działa? Mocked Technical Interview - szczegóły",
+          target: "_blank",
+        },
+      }}
+      heading={{
+        title: {
+          label: appConfig.plansSection.plans.mockedTechInterview.label,
+          id: "mocked-technical-interview-title",
+        },
+        description: {
+          label: "Maksymalnie realistyczna symulacja rozmowy technicznej - stress test",
+          id: "mocked-technical-interview-description",
+        },
+      }}
+      benefits={{
+        title: `Co otrzymujesz w ramach ${appConfig.plansSection.plans.mockedTechInterview.label}`,
+        items: [
+          "369 zł (cena zawiera VAT), płatność po spotkaniu, 2h spotkania",
+          "1h 45min realistyczna rozmowa techniczna + 15min ustny feedback",
+          "Losowanie jednego z 10 typów rozmów (1:1, panel, architekt, format mieszany itd.)",
+          "Wcielanie się w różne role - rekruter, developer, tech lead, architekt",
+          "Realne warunki rozmów - presja czasu, dopytywanie, przerywanie",
+          "Personalizacja pod Twoje CV lub konkretną ofertę pracy",
+          "Sprawdzenie kompletne - teoria, live coding, code review, architektura, soft skills",
+          "Szczegółowy raport: ocena techniczna, komunikacja, rozumowanie, feedback CV",
+          "Rekomendacje i wskazanie realnych braków do poprawy",
+          "Dla Junior, Mid, Senior, Staff/Lead - poziom dostosowany do Ciebie",
+          "4 lata doświadczenia w prowadzeniu rozmów technicznych",
+        ],
+      }}
+    >
+      <Fragment slot="flare">
+        <div
+          class="radial-flare size-40 bottom-0 left-0"
+          aria-hidden="true"
+        >
+        </div>
+      </Fragment>
+      <Fragment slot="icon">
+        <svg
+          width="68"
+          height="59"
+          viewBox="0 0 68 59"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          role="img"
+          aria-labelledby="self-study-icon"
+        >
+          <title id="self-study-icon">Ikona laptopa</title>
+          <g filter="url(#filter0_d_211_714)">
+            <path
+              d="M50.25 35.25H49V20.25C49 19.2554 48.6049 18.3016 47.9017 17.5983C47.1984 16.8951 46.2446 16.5 45.25 16.5H22.75C21.7554 16.5 20.8016 16.8951 20.0983 17.5983C19.3951 18.3016 19 19.2554 19 20.25V35.25H17.75C17.4185 35.25 17.1005 35.3817 16.8661 35.6161C16.6317 35.8505 16.5 36.1685 16.5 36.5V39C16.5 39.9946 16.8951 40.9484 17.5983 41.6517C18.3016 42.3549 19.2554 42.75 20.25 42.75H47.75C48.7446 42.75 49.6984 42.3549 50.4016 41.6517C51.1049 40.9484 51.5 39.9946 51.5 39V36.5C51.5 36.1685 51.3683 35.8505 51.1339 35.6161C50.8995 35.3817 50.5815 35.25 50.25 35.25ZM31.5 20.25H36.5C36.8315 20.25 37.1495 20.3817 37.3839 20.6161C37.6183 20.8505 37.75 21.1685 37.75 21.5C37.75 21.8315 37.6183 22.1495 37.3839 22.3839C37.1495 22.6183 36.8315 22.75 36.5 22.75H31.5C31.1685 22.75 30.8505 22.6183 30.6161 22.3839C30.3817 22.1495 30.25 21.8315 30.25 21.5C30.25 21.1685 30.3817 20.8505 30.6161 20.6161C30.8505 20.3817 31.1685 20.25 31.5 20.25ZM49 39C49 39.3315 48.8683 39.6495 48.6339 39.8839C48.3995 40.1183 48.0815 40.25 47.75 40.25H20.25C19.9185 40.25 19.6005 40.1183 19.3661 39.8839C19.1317 39.6495 19 39.3315 19 39V37.75H49V39Z"
+              fill="#0BAD67"></path>
+          </g>
+          <defs>
+            <filter
+              id="filter0_d_211_714"
+              x="0.6"
+              y="0.6"
+              width="66.8"
+              height="58.05"
+              filterUnits="userSpaceOnUse"
+              color-interpolation-filters="sRGB"
+            >
+              <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+              <feColorMatrix
+                in="SourceAlpha"
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                result="hardAlpha"></feColorMatrix>
+              <feMorphology
+                radius="4"
+                operator="dilate"
+                in="SourceAlpha"
+                result="effect1_dropShadow_211_714"></feMorphology>
+              <feOffset></feOffset>
+              <feGaussianBlur stdDeviation="5.95"></feGaussianBlur>
+              <feComposite in2="hardAlpha" operator="out"></feComposite>
+              <feColorMatrix
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0.25 0 0 0 0 0.141483 0 0 0 1 0"
+              ></feColorMatrix>
+              <feBlend
+                mode="normal"
+                in2="BackgroundImageFix"
+                result="effect1_dropShadow_211_714"></feBlend>
+              <feBlend
+                mode="normal"
+                in="SourceGraphic"
+                in2="effect1_dropShadow_211_714"
+                result="shape"></feBlend>
+            </filter>
+          </defs>
+        </svg>
+      </Fragment>
+    </PlanTile>
+
+    <PlanTile
+      button={{
+        label: "Umów spotkanie",
+        href: appConfig.contactSection.calendarLink,
+        target: "_blank",
+        title: "Dowiedz się więcej o planie Senior w rok",
+      }}
+      price={{
+        id: "senior-price",
+        label: `${appConfig.plansSection.plans.seniorInYear.cost} ${appConfig.plansSection.plans.seniorInYear.currency}`,
+        description: {
+          label: "Jak to działa?",
+          href: "https://4markdown.com/document-preview/?id=94a9b3c3-d4da-433d-b3dd-6ced417b5697",
+          title: "Jak to działa? Senior w rok - szczegóły",
+          target: "_blank",
+        },
+      }}
+      heading={{
+        title: {
+          label: appConfig.plansSection.plans.seniorInYear.label,
+          id: "senior-title",
+        },
+        description: {
+          label: "Kompleksowy program mentoringowy - 10 lat doświadczenia w 48 godzin",
+          id: "senior-description",
+        },
+      }}
+      benefits={{
+        title: `Co otrzymujesz w ramach ${appConfig.plansSection.plans.seniorInYear.label}`,
+        items: [
+          "4920 zł (VAT wliczony), możliwa płatność w ratach",
+          "48h spotkań 1:1 (2h MTI + 46h mentoringu) w dowolnym tempie",
+          "Mocked Technical Interview na początku - określamy poziom, stack i kierunek",
+          "Interaktywne mindmapy do każdej technologii (React, JavaScript, itd.)",
+          "Repozytorium-template - projekt gotowy do pracy od pierwszego dnia",
+          "Wybór 1 z 30 unikalnych projektów lub własny pomysł",
+          "Realny projekt do portfolio tworzony wspólnie od zera",
+          "Dostęp do platformy edukacyjnej 4markdown.com",
+          "Codzienny kontakt asynchroniczny - odpowiedzi po 16:00",
+          "Program rozwijany dożywotnio - materiały stale aktualizowane",
+          "Dla każdego - nawet bez doświadczenia, zaczynamy od podstaw",
+          "Podejście holistyczne - od teorii po praktykę w realnym projekcie",
+        ],
+      }}
+    >
+      <Fragment slot="flare">
+        <div class="radial-flare size-40 top-0 right-0" aria-hidden="true">
+        </div>
+      </Fragment>
+      <Fragment slot="icon">
+        <svg
+          width="64"
+          height="64"
+          viewBox="0 0 64 64"
+          fill="none"
+          aria-labelledby="senior-1-year-icon"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <title id="senior-1-year-icon">Ikona rakiety</title>
+          <g filter="url(#filter0_d_211_698)">
+            <path
+              d="M28.9142 40.8658C28.2095 42.4064 25.858 46.0002 19.2502 46.0002C18.9186 46.0002 18.6007 45.8685 18.3663 45.6341C18.1319 45.3997 18.0002 45.0817 18.0002 44.7502C18.0002 38.1424 21.5939 35.7908 23.1345 35.0861C23.2839 35.018 23.4453 34.98 23.6093 34.9742C23.7734 34.9684 23.937 34.995 24.0908 35.0525C24.2446 35.1099 24.3856 35.1971 24.5057 35.3091C24.6258 35.421 24.7227 35.5555 24.7908 35.7049C24.8589 35.8543 24.897 36.0156 24.9027 36.1797C24.9085 36.3437 24.8819 36.5074 24.8244 36.6611C24.767 36.8149 24.6798 36.9559 24.5679 37.076C24.4559 37.1961 24.3214 37.293 24.172 37.3611C23.1674 37.8189 20.9502 39.2924 20.5595 43.4408C24.708 43.0502 26.1845 40.833 26.6392 39.8283C26.7074 39.6789 26.8042 39.5444 26.9243 39.4325C27.0444 39.3206 27.1854 39.2334 27.3392 39.1759C27.493 39.1185 27.6566 39.0919 27.8207 39.0976C27.9848 39.1034 28.1461 39.1414 28.2955 39.2096C28.4449 39.2777 28.5794 39.3746 28.6913 39.4947C28.8032 39.6148 28.8904 39.7557 28.9479 39.9095C29.0053 40.0633 29.0319 40.2269 29.0262 40.391C29.0204 40.5551 28.9824 40.7164 28.9142 40.8658ZM47.9767 18.3658C47.9397 17.7563 47.6809 17.1815 47.2491 16.7497C46.8173 16.3179 46.2425 16.0591 45.633 16.0221C43.6674 15.9049 38.6439 16.0846 34.4767 20.2517L26.7502 27.9846C26.6341 28.1008 26.4963 28.193 26.3447 28.256C26.193 28.319 26.0304 28.3515 25.8661 28.3517C25.5344 28.352 25.2162 28.2205 24.9814 27.9861C24.7467 27.7518 24.6146 27.4338 24.6143 27.1021C24.614 26.7704 24.7455 26.4521 24.9799 26.2174L29.1299 22.0658C29.2167 21.9784 29.2758 21.8673 29.2997 21.7464C29.3236 21.6255 29.3113 21.5002 29.2642 21.3864C29.2171 21.2725 29.1374 21.1751 29.0351 21.1064C28.9328 21.0376 28.8125 21.0007 28.6892 21.0002H24.6174C24.288 20.9985 23.9617 21.0622 23.6572 21.1877C23.3528 21.3133 23.0763 21.4981 22.8439 21.7314L17.4845 27.0939C17.1559 27.4224 16.9252 27.8359 16.8185 28.2882C16.7118 28.7404 16.7333 29.2135 16.8804 29.6542C17.0276 30.0949 17.2947 30.4859 17.6518 30.7833C18.0088 31.0807 18.4416 31.2726 18.9017 31.3377L24.9127 32.1768L31.8205 39.0846L32.6595 45.0986C32.7241 45.5587 32.916 45.9916 33.2137 46.3484C33.5113 46.7051 33.9028 46.9715 34.3439 47.1174C34.6008 47.2032 34.8699 47.247 35.1408 47.2471C35.4688 47.2477 35.7937 47.1834 36.0967 47.0579C36.3997 46.9324 36.6749 46.7481 36.9064 46.5158L42.2689 41.1564C42.5016 40.9235 42.6859 40.647 42.8114 40.3426C42.9369 40.0383 43.001 39.7122 43.0002 39.383V35.3111C43 35.1876 42.9631 35.0669 42.8943 34.9642C42.8256 34.8616 42.7279 34.7817 42.6137 34.7345C42.4995 34.6873 42.3739 34.6751 42.2527 34.6993C42.1316 34.7235 42.0203 34.7831 41.933 34.8705L37.7814 39.0205C37.66 39.142 37.5148 39.2373 37.355 39.3002C37.1951 39.3631 37.024 39.3924 36.8523 39.3863C36.6806 39.3801 36.512 39.3386 36.3571 39.2644C36.2021 39.1902 36.0641 39.0848 35.9517 38.9549C35.7467 38.7068 35.6425 38.3907 35.6599 38.0694C35.6772 37.748 35.8149 37.445 36.0455 37.2205L43.7439 29.5221C47.9142 25.3533 48.0939 20.3299 47.9767 18.3627V18.3658Z"
+              fill="#0BAD67"></path>
+          </g>
+          <defs>
+            <filter
+              id="filter0_d_211_698"
+              x="0.851709"
+              y="0.0990238"
+              width="63.048"
+              height="63.048"
+              filterUnits="userSpaceOnUse"
+              color-interpolation-filters="sRGB"
+            >
+              <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+              <feColorMatrix
+                in="SourceAlpha"
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                result="hardAlpha"></feColorMatrix>
+              <feMorphology
+                radius="4"
+                operator="dilate"
+                in="SourceAlpha"
+                result="effect1_dropShadow_211_698"></feMorphology>
+              <feOffset></feOffset>
+              <feGaussianBlur stdDeviation="5.95"></feGaussianBlur>
+              <feComposite in2="hardAlpha" operator="out"></feComposite>
+              <feColorMatrix
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0.25 0 0 0 0 0.141483 0 0 0 1 0"
+              ></feColorMatrix>
+              <feBlend
+                mode="normal"
+                in2="BackgroundImageFix"
+                result="effect1_dropShadow_211_698"></feBlend>
+              <feBlend
+                mode="normal"
+                in="SourceGraphic"
+                in2="effect1_dropShadow_211_698"
+                result="shape"></feBlend>
+            </filter>
+          </defs>
+        </svg>
+      </Fragment>
+    </PlanTile>
+
+    <PlanTile
+      button={{
+        label: "Dogadajmy się",
+        href: appConfig.contactSection.calendarLink,
+        title: "Umów spotkanie zapoznawcze i stwórz własny plan",
+        target: "_blank",
+      }}
+      price={{
+        id: "own-plan-price",
+        label: appConfig.plansSection.plans.custom.cost,
+        description: {
+          label: "Jak to działa?",
+          href: "https://4markdown.com/document-preview/?id=94d8df7e-552f-42e7-9114-b721650eba57",
+          title: "Jak to działa? Własny plan - szczegóły",
+          target: "_blank",
+        },
+      }}
+      heading={{
+        title: {
+          label: appConfig.plansSection.plans.custom.label,
+          id: "own-plan-title",
+        },
+        description: {
+          label: "Całkowicie spersonalizowana współpraca - tworzymy od zera",
+          id: "own-plan-description",
+        },
+      }}
+      benefits={{
+        title: `Co otrzymujesz w ramach ${appConfig.plansSection.plans.custom.label}`,
+        items: [
+          "Stawka bazowa: 123 zł/h (VAT wliczony), rabaty przy większej liczbie godzin",
+          "Wszystko ustalamy razem: zakres, częstotliwość, formę, długość i warunki",
+          "Rozpoczynamy od bezpłatnego 30-minutowego spotkania zapoznawczego",
+          "Dowolna liczba godzin i częstotliwość spotkań dopasowana do Ciebie",
+          "Elastyczna płatność: jednorazowa, ratalna lub godzinowa",
+          "Możliwe: materiały teoretyczne, repozytorium projektu, codzienny kontakt",
+          "Idealne dla osób z konkretną wizją i unikalnymi celami",
+          "Dla firm szkolących zespoły - indywidualne ustalenia",
+          "Plan w 100% negocjowalny - nie jest gotowym programem",
+          "Warunki współpracy zawsze uzgadniane na piśmie",
+          "Maksymalna elastyczność i kontrola nad każdym aspektem",
+        ],
+      }}
+    >
+      <Fragment slot="flare">
+        <div
+          class="radial-flare size-40 top-0 left-0"
+          aria-hidden="true"
+        >
+        </div>
+        <div
+          class="radial-flare size-40 top-0 right-0"
+          aria-hidden="true"
+        >
+        </div>
+      </Fragment>
+      <Fragment slot="icon">
+        <svg
+          width="64"
+          height="64"
+          viewBox="0 0 64 64"
+          fill="none"
+          aria-labelledby="own-plan-icon"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <title id="own-plan-icon">Ikona celu</title>
+          <g filter="url(#filter0_d_own_plan)">
+            <circle
+              cx="32"
+              cy="32"
+              r="20"
+              stroke="#0BAD67"
+              stroke-width="4"
+            ></circle>
+            <circle
+              cx="32"
+              cy="32"
+              r="10"
+              stroke="#0BAD67"
+              stroke-width="4"
+            ></circle>
+            <circle cx="32" cy="32" r="4" fill="#0BAD67"></circle>
+          </g>
+          <defs>
+            <filter
+              id="filter0_d_own_plan"
+              x="0.6"
+              y="0.6"
+              width="62.8"
+              height="62.8"
+              filterUnits="userSpaceOnUse"
+              color-interpolation-filters="sRGB"
+            >
+              <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+              <feColorMatrix
+                in="SourceAlpha"
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                result="hardAlpha"
+              ></feColorMatrix>
+              <feMorphology
+                radius="4"
+                operator="dilate"
+                in="SourceAlpha"
+                result="effect1_dropShadow_own_plan"
+              ></feMorphology>
+              <feOffset></feOffset>
+              <feGaussianBlur stdDeviation="5.95"></feGaussianBlur>
+              <feComposite in2="hardAlpha" operator="out"></feComposite>
+              <feColorMatrix
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0.25 0 0 0 0 0.141483 0 0 0 1 0"
+              ></feColorMatrix>
+              <feBlend
+                mode="normal"
+                in2="BackgroundImageFix"
+                result="effect1_dropShadow_own_plan"
+              ></feBlend>
+              <feBlend
+                mode="normal"
+                in="SourceGraphic"
+                in2="effect1_dropShadow_own_plan"
+                result="shape"
+              ></feBlend>
+            </filter>
+          </defs>
+        </svg>
+      </Fragment>
+    </PlanTile>
+
+    <PlanTile
+      button={{
+        label: "Umów spotkanie",
+        href: appConfig.contactSection.calendarLink,
+        title: "Umów spotkanie CV Mastering",
+        target: "_blank",
+      }}
+      price={{
+        id: "cv-mastering-price",
+        label: `${appConfig.plansSection.plans.cvMastering.cost} ${appConfig.plansSection.plans.cvMastering.currency}`,
+        description: {
+          label: "Jak to działa?",
+          href: "https://4markdown.com/document-preview/?id=e397a6fb-500c-45ab-be58-128c80b5a008",
+          title: "Jak to działa? CV Mastering - szczegóły",
+          target: "_blank",
+        },
+      }}
+      heading={{
+        title: {
+          label: appConfig.plansSection.plans.cvMastering.label,
+          id: "cv-mastering-title",
+        },
+        description: {
+          label: "Dopracuj CV do perfekcji - zarówno dla rekruterów, jak i systemów ATS",
+          id: "cv-mastering-description",
+        },
+      }}
+      benefits={{
+        title: `Co otrzymujesz w ramach ${appConfig.plansSection.plans.cvMastering.label}`,
+        items: [
+          "246 zł (cena zawiera VAT), płatność po spotkaniu",
+          "Analiza CV pod kątem człowieka - rekruterzy i managerowie",
+          "Analiza CV pod kątem systemów ATS i scraperów",
+          "Wskazanie antypatternów i błędów w aktualnym CV",
+          "Pokazanie dobrych praktyk w tworzeniu CV technologicznego",
+          "Polecenie najlepszych narzędzi do tworzenia CV",
+          "Wiedza zbudowana na latach prowadzenia rozmów rekrutacyjnych",
+          "Konkretne wskazówki co poprawić, dodać lub usunąć",
+          "Optymalizacja słów kluczowych dla ATS",
+          "Pomoc w strukturze i formatowaniu CV",
+          "Wsparcie w wyeksponowaniu najważniejszych umiejętności",
+          "Po spotkaniu otrzymujesz dopracowaną wersję CV przygotowaną przeze mnie",
+          "Nieograniczone wsparcie po spotkaniu - jestem do dyspozycji bez limitu czasowego",
+          "Pomoc przy kolejnych wersjach i iteracjach tego samego CV",
+        ],
+      }}
+    >
+      <Fragment slot="flare">
+        <div
+          class="radial-flare size-40 top-0 left-0"
+          aria-hidden="true"
+        >
+        </div>
+      </Fragment>
+      <Fragment slot="icon">
+        <svg
+          width="64"
+          height="64"
+          viewBox="0 0 64 64"
+          fill="none"
+          aria-labelledby="cv-mastering-icon"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <title id="cv-mastering-icon">Ikona dokumentu CV</title>
+          <g filter="url(#filter0_d_cv_mastering)">
+            <rect x="18" y="14" width="28" height="36" rx="2" fill="#0BAD67"/>
+            <line x1="22" y1="22" x2="42" y2="22" stroke="#091610" stroke-width="2" stroke-linecap="round"/>
+            <line x1="22" y1="28" x2="38" y2="28" stroke="#091610" stroke-width="2" stroke-linecap="round"/>
+            <line x1="22" y1="34" x2="42" y2="34" stroke="#091610" stroke-width="2" stroke-linecap="round"/>
+            <line x1="22" y1="40" x2="36" y2="40" stroke="#091610" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="38" cy="40" r="2" fill="#091610"/>
+          </g>
+          <defs>
+            <filter
+              id="filter0_d_cv_mastering"
+              x="0.6"
+              y="0.6"
+              width="62.8"
+              height="62.8"
+              filterUnits="userSpaceOnUse"
+              color-interpolation-filters="sRGB"
+            >
+              <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+              <feColorMatrix
+                in="SourceAlpha"
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                result="hardAlpha"
+              ></feColorMatrix>
+              <feMorphology
+                radius="4"
+                operator="dilate"
+                in="SourceAlpha"
+                result="effect1_dropShadow_cv_mastering"
+              ></feMorphology>
+              <feOffset></feOffset>
+              <feGaussianBlur stdDeviation="5.95"></feGaussianBlur>
+              <feComposite in2="hardAlpha" operator="out"></feComposite>
+              <feColorMatrix
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0.25 0 0 0 0 0.141483 0 0 0 1 0"
+              ></feColorMatrix>
+              <feBlend
+                mode="normal"
+                in2="BackgroundImageFix"
+                result="effect1_dropShadow_cv_mastering"
+              ></feBlend>
+              <feBlend
+                mode="normal"
+                in="SourceGraphic"
+                in2="effect1_dropShadow_cv_mastering"
+                result="shape"
+              ></feBlend>
+            </filter>
+          </defs>
+        </svg>
+      </Fragment>
+    </PlanTile>
+  </div>
+  <p class="mt-4 text-regular font-300 text-foreground-secondary">
+    Ceny zawierają podatek VAT
+  </p>
+</section>

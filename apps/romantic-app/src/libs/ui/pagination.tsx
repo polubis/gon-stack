@@ -6,7 +6,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
-import { createHookContext } from '../power-context';
+import { createHookContext } from '@repo/react-kit/context';
 import { cn } from './cn';
 
 /* =============================================================================

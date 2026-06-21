@@ -2,7 +2,7 @@ import { useState, type ComponentProps } from 'react';
 
 import { Check } from 'lucide-react';
 
-import { createHookContext } from '../power-context';
+import { createHookContext } from '@repo/react-kit/context';
 import { cn } from './cn';
 
 /* =============================================================================

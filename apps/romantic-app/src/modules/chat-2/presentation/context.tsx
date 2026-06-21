@@ -1,5 +1,5 @@
 import { useLayoutEffect, useState } from 'react';
-import { createHookContext } from '../../../libs/power-context';
+import { createHookContext } from '@repo/react-kit/context';
 import { createMediator } from '../core/mediator';
 
 export const [Provider, useContext] = createHookContext('Chat2', () => {

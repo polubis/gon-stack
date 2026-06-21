@@ -1,0 +1,243 @@
+---
+import { appConfig } from "@/core/config";
+import Logo from "../../../public/logo.svg";
+---
+
+<style>
+  #mobile-menu-toggle {
+    display: none;
+  }
+
+  #mobile-menu-toggle:checked ~ #mobile-navigation {
+    display: grid;
+  }
+
+  #mobile-navigation {
+    display: none;
+  }
+</style>
+
+<input type="checkbox" id="mobile-menu-toggle" class="peer hidden" />
+<header
+  class="h-16 mbl:h-18 tbt:h-20 ltp:pt-6 ltp:pb-4 sticky z-[var(--z-layout-navigation)] top-0 backdrop-blur-[24px] bg-[#000100]/10 border-b-2 border-black"
+  aria-label="Główna nawigacja"
+>
+  <nav class="fluid flex items-center h-full">
+    <a title="Strona główna" href="/">
+      <Logo class="size-12" role="img" />
+    </a>
+
+    <ul class="gap-6 ltp:gap-7 ml-auto ltp:flex hidden">
+      <li>
+        <a
+          class="text-regular hover:text-white transition-colors font-400 duration-300 ease-in-out"
+          href={`#${appConfig.faqSection.id}`}
+        >
+          FAQ
+        </a>
+      </li>
+      <li>
+        <a
+          class="text-regular hover:text-white transition-colors font-400 duration-300 ease-in-out"
+          href={appConfig.contactSection.linkedInLink}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Kontakt
+        </a>
+      </li>
+      <li>
+        <a
+          class="text-regular hover:text-white transition-colors font-400 duration-300 ease-in-out"
+          href={`#${appConfig.materialsSection.id}`}
+        >
+          Materiały
+        </a>
+      </li>
+      <li>
+        <a
+          class="text-regular hover:text-white transition-colors font-400 duration-300 ease-in-out"
+          href={`#${appConfig.aboutSection.id}`}
+        >
+          O mnie
+        </a>
+      </li>
+      <li>
+        <a
+          class="text-regular hover:text-white transition-colors font-400 duration-300 ease-in-out"
+          href={`#${appConfig.opinionsSection.id}`}
+        >
+          Opinie
+        </a>
+      </li>
+      <li>
+        <a
+          class="text-regular hover:text-white transition-colors font-400 duration-300 ease-in-out"
+          href={`#${appConfig.plansSection.id}`}
+        >
+          Plany
+        </a>
+      </li>
+      <li>
+        <a
+          class="text-regular hover:text-white transition-colors font-400 duration-300 ease-in-out"
+          href={`#${appConfig.specializationsSection.id}`}
+        >
+          Specjalizacje
+        </a>
+      </li>
+    </ul>
+
+    <a
+      class="primary-button text-center px-6 py-2.5 ml-10 ltp:inline hidden"
+      href={`#${appConfig.contactSection.id}`}
+    >
+      Umów konsultację
+    </a>
+
+    <label
+      for="mobile-menu-toggle"
+      class="ml-auto ltp:hidden cursor-pointer"
+      aria-label="Otwórz menu"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        role="img"
+        aria-labelledby="menuIconTitle"
+      >
+        <line x1="4" x2="20" y1="12" y2="12"></line>
+        <line x1="4" x2="20" y1="6" y2="6"></line>
+        <line x1="4" x2="20" y1="18" y2="18"></line>
+        <title id="menuIconTitle">Ikona do otwierania nawigacji mobilnej</title>
+      </svg>
+    </label>
+  </nav>
+</header>
+
+<nav
+  id="mobile-navigation"
+  class="fixed grid grid-rows-[auto_1fr] inset-0 z-[var(--z-layout-mobile-navigation)] backdrop-blur-[24px] bg-[#000100]/10 ltp:hidden animate-in fade-in-0 duration-200"
+  aria-label="Nawigacja mobilna"
+>
+  <div
+    class="h-16 mbl:h-18 tbt:h-20 flex items-center justify-end px-4 mbl:px-6 tbt:px-10"
+  >
+    <label
+      for="mobile-menu-toggle"
+      class="cursor-pointer"
+      aria-label="Zamknij menu"
+      title="Zamknij menu"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        role="img"
+        aria-labelledby="mobileMenuIconTitle"
+      >
+        <path d="M18 6 6 18"></path>
+        <path d="m6 6 12 12"></path>
+        <title id="mobileMenuIconTitle">
+          Ikona do zamykania nawigacji mobilnej
+        </title>
+      </svg>
+    </label>
+  </div>
+  <div class="flex flex-col items-center justify-center">
+    <ul class="space-y-4">
+      <li class="text-center animate-jump-top-bottom opacity-0 delay-100">
+        <a
+          class="hover:text-white font-500 text-h4"
+          href={`#${appConfig.faqSection.id}`}
+        >
+          FAQ
+        </a>
+      </li>
+      <li class="text-center animate-jump-top-bottom opacity-0 delay-200">
+        <a
+          class="hover:text-white font-500 text-h4"
+          href={appConfig.contactSection.linkedInLink}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Kontakt
+        </a>
+      </li>
+      <li class="text-center animate-jump-top-bottom opacity-0 delay-300">
+        <a
+          class="hover:text-white font-500 text-h4"
+          href={`#${appConfig.materialsSection.id}`}
+        >
+          Materiały
+        </a>
+      </li>
+      <li class="text-center animate-jump-top-bottom opacity-0 delay-400">
+        <a
+          class="hover:text-white font-500 text-h4"
+          href={`#${appConfig.aboutSection.id}`}
+        >
+          O mnie
+        </a>
+      </li>
+      <li class="text-center animate-jump-top-bottom opacity-0 delay-500">
+        <a
+          class="hover:text-white font-500 text-h4"
+          href={`#${appConfig.opinionsSection.id}`}
+        >
+          Opinie
+        </a>
+      </li>
+      <li class="text-center animate-jump-top-bottom opacity-0 delay-600">
+        <a
+          class="hover:text-white font-500 text-h4"
+          href={`#${appConfig.plansSection.id}`}
+        >
+          Plany
+        </a>
+      </li>
+      <li class="text-center animate-jump-top-bottom opacity-0 delay-700">
+        <a
+          class="hover:text-white font-500 text-h4"
+          href={`#${appConfig.specializationsSection.id}`}
+        >
+          Specjalizacje
+        </a>
+      </li>
+    </ul>
+    <a
+      class="primary-button text-center px-6 py-2.5 mt-10 animate-jump-top-bottom opacity-0 delay-800"
+      href={`#${appConfig.contactSection.id}`}
+    >
+      Umów konsultację
+    </a>
+  </div>
+</nav>
+
+<script>
+  const mobileNavLinks = document.querySelectorAll("#mobile-navigation a");
+  const menuToggleCheckbox = document.getElementById(
+    "mobile-menu-toggle"
+  ) as HTMLInputElement | null;
+
+  if (menuToggleCheckbox) {
+    mobileNavLinks.forEach((link) => {
+      link.addEventListener("click", () => {
+        menuToggleCheckbox.checked = false;
+      });
+    });
+  }
+</script>

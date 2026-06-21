@@ -1,0 +1,224 @@
+---
+import { appConfig } from "@/core/config";
+// import { ArticlesSection } from "./articles-section";
+---
+
+<div class="page-section" id={appConfig.aboutSection.id}>
+  <section
+    class="fluid max-w-6xl mb-10 gap-6 flex items-center justify-between flex-col ltp:flex-row"
+    aria-labelledby="about-title"
+  >
+    <div class="max-w-[512px] w-full">
+      <h2 class="text-h2 font-500" id="about-title">Działam w IT od 10 lat</h2>
+      <p class="text-regular font-300 pt-8 pb-2">
+        Cześć, jestem Adrian. Programuję i chętnie dzielę się wiedzą. Pracuję
+        jako <strong class="font-500">Front-end Tech Lead</strong>. Więcej o
+        mojej karierze znajdziesz na moim profilu <a
+          href={appConfig.contactSection.linkedInLink}
+          target="_blank"
+          class="underline"
+          rel="noopener noreferrer">LinkedIn</a
+        >, gdzie regularnie piszę o programowaniu. Moje posty osiągnęły 4
+        miliony wyświetleń w ciągu roku, a mój profil śledzi ponad 20 tysięcy obserwujących.
+      </p>
+      <p class="text-regular font-300 pb-2">
+        Swoim doświadczeniem wspieram innych w rozwoju umiejętności i kariery w
+        IT. Uważam, że świadome planowanie i działanie to klucz do sukcesu.
+      </p>
+      <p class="text-regular font-300">
+        W wolnym czasie rozwijam <a
+          href="https://greenonsoftware.com"
+          target="_blank"
+          class="underline"
+          rel="noopener noreferrer">greenonsoftware.com</a
+        >, gdzie dzielę się wiedzą, oraz <a
+          href="https://4markdown.com"
+          target="_blank"
+          class="underline"
+          rel="noopener noreferrer">4markdown.com</a
+        > – CMS oparty na plikach Markdown z AI, służący do tworzenia notatek i roadmap.
+      </p>
+    </div>
+
+    <div
+      class="max-w-[354px] w-full flex flex-col mbl:flex-row items-center mbl:gap-12 gap-6"
+    >
+      <div class="size-[284px]">
+        <img
+          src="/adrian-284.webp"
+          alt="Adrian - IT Mentor"
+          height="284"
+          width="284"
+          loading="lazy"
+        />
+      </div>
+      <ul
+        class="flex mbl:flex-col gap-4"
+        aria-label="Linki do mediów społecznościowych"
+      >
+        <li>
+          <a
+            href={appConfig.contactSection.linkedInLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Skontaktuj się ze mną na LinkedIn"
+          >
+            <span class="sr-only">Skontaktuj się ze mną na LinkedIn</span>
+            <svg
+              width="26"
+              height="26"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              role="img"
+            >
+              <g clip-path="url(#clip0_656_67)">
+                <path
+                  d="M12.0005 0.47998C5.63807 0.47998 0.480469 5.63758 0.480469 12C0.480469 18.3624 5.63807 23.52 12.0005 23.52C18.3629 23.52 23.5205 18.3624 23.5205 12C23.5205 5.63758 18.3629 0.47998 12.0005 0.47998ZM9.18047 16.7748H6.84767V9.26758H9.18047V16.7748ZM7.99967 8.34598C7.26287 8.34598 6.78647 7.82398 6.78647 7.17838C6.78647 6.51958 7.27727 6.01318 8.02967 6.01318C8.78207 6.01318 9.24287 6.51958 9.25727 7.17838C9.25727 7.82398 8.78207 8.34598 7.99967 8.34598ZM17.7005 16.7748H15.3677V12.6144C15.3677 11.646 15.0293 10.9884 14.1857 10.9884C13.5413 10.9884 13.1585 11.4336 12.9893 11.862C12.9269 12.0144 12.9113 12.2304 12.9113 12.4452V16.7736H10.5773V11.6616C10.5773 10.7244 10.5473 9.94078 10.5161 9.26638H12.5429L12.6497 10.3092H12.6965C13.0037 9.81958 13.7561 9.09718 15.0149 9.09718C16.5497 9.09718 17.7005 10.1256 17.7005 12.336V16.7748Z"
+                  fill="#0BAD67"></path>
+              </g>
+              <defs>
+                <clipPath id="clip0_656_67">
+                  <rect width="24" height="24" fill="#000100"></rect>
+                </clipPath>
+              </defs>
+            </svg>
+          </a>
+        </li>
+        <li>
+          <a
+            href="https://x.com/polubis"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Mój profil na X"
+          >
+            <span class="sr-only">Skontaktuj się ze mną na X</span>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              role="img"
+            >
+              <path
+                d="M23.9921 12.6406C23.9921 18.7013 19.5008 23.7119 13.6663 24.5249C13.1208 24.6006 12.5626 24.6401 11.996 24.6401C11.3421 24.6401 10.6999 24.588 10.0745 24.4871C4.36266 23.5672 0 18.613 0 12.6406C0 6.01308 5.37136 0.640137 11.9969 0.640137C18.6224 0.640137 23.9938 6.01308 23.9938 12.6406H23.9921Z"
+                fill="#0BAD67"></path>
+              <path
+                d="M4.86528 5.93213L10.398 13.3315L4.83081 19.3477H6.08413L10.9587 14.0807L14.8969 19.3477H19.1612L13.3174 11.5321L18.4996 5.93213H17.2463L12.7576 10.7829L9.13043 5.93213H4.86611H4.86528ZM6.70784 6.85537H8.66642L17.3169 18.4244H15.3583L6.70784 6.85537Z"
+                fill="#000100"></path>
+            </svg>
+          </a>
+        </li>
+        <li>
+          <a
+            href="https://discord.com/invite/PxXQayT3x3"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Dołącz do mojego kanału Discord"
+          >
+            <span class="sr-only">Dołącz do mojego kanału Discord</span>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              role="img"
+            >
+              <path
+                d="M12.0273 0.640137H11.9727C5.36034 0.640137 0 6.00049 0 12.6128V12.6675C0 19.2798 5.36034 24.6401 11.9727 24.6401H12.0273C18.6396 24.6401 24 19.2798 24 12.6675V12.6128C24 6.00049 18.6396 0.640137 12.0273 0.640137Z"
+                fill="#0BAD67"></path>
+              <path
+                d="M18.0057 7.13051C16.9008 6.62349 15.7169 6.25016 14.4783 6.03658C14.4556 6.03238 14.4329 6.04247 14.422 6.06349C14.2698 6.33424 14.1008 6.68823 13.9831 6.96571C12.6512 6.76643 11.3261 6.76643 10.0211 6.96571C9.90252 6.6815 9.72762 6.33424 9.57458 6.06349C9.56281 6.04331 9.54012 6.03322 9.51825 6.03658C8.28054 6.25016 7.09581 6.62349 5.99095 7.13051C5.9817 7.13472 5.97329 7.14144 5.9674 7.15069C3.72069 10.5073 3.10518 13.7815 3.40704 17.0154C3.40872 17.0314 3.41713 17.0465 3.42974 17.0557C4.91214 18.1446 6.3483 18.8055 7.75755 19.2436C7.78025 19.2503 7.80379 19.2419 7.81808 19.2234C8.15106 18.7685 8.44871 18.2884 8.70349 17.7831C8.71862 17.7536 8.70348 17.7183 8.67321 17.7066C8.2015 17.5275 7.75333 17.3097 7.32114 17.0625C7.28666 17.0423 7.28415 16.9935 7.31527 16.97C7.40608 16.9019 7.49688 16.8312 7.58349 16.7598C7.59946 16.7463 7.62132 16.7438 7.63982 16.7522C10.476 18.0471 13.5467 18.0471 16.3492 16.7522C16.3677 16.743 16.3896 16.7463 16.4055 16.7589C16.4921 16.8304 16.583 16.9019 16.6746 16.97C16.7057 16.9935 16.7041 17.0423 16.6696 17.0625C16.2382 17.3147 15.7892 17.5283 15.3167 17.7066C15.2856 17.7183 15.2721 17.7536 15.2872 17.7839C15.5479 18.2876 15.8447 18.7677 16.1718 19.2234C16.1852 19.2428 16.2096 19.2512 16.2323 19.2444C17.6483 18.8064 19.0844 18.1455 20.5668 17.0566C20.5795 17.0473 20.5879 17.0322 20.5895 17.0171C20.9511 13.2787 19.9841 10.0314 18.0275 7.15237C18.0225 7.14312 18.0149 7.13556 18.0048 7.13135L18.0057 7.13051ZM9.12557 15.0461C8.27128 15.0461 7.56836 14.2625 7.56836 13.2997C7.56836 12.337 8.25867 11.5533 9.12557 11.5533C9.99247 11.5533 10.6971 12.3445 10.6828 13.2997C10.6828 14.2625 9.99247 15.0461 9.12557 15.0461ZM14.8845 15.0461C14.0302 15.0461 13.3272 14.2625 13.3272 13.2997C13.3272 12.337 14.0176 11.5533 14.8845 11.5533C15.7514 11.5533 16.456 12.3445 16.4417 13.2997C16.4417 14.2625 15.7589 15.0461 14.8845 15.0461Z"
+                fill="#000100"></path>
+            </svg>
+          </a>
+        </li>
+        <li>
+          <a
+            href="https://github.com/polubis"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Mój profil na Github"
+          >
+            <span class="sr-only">Mój profil na Github</span>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              role="img"
+            >
+              <g clip-path="url(#clip0_430_2759)">
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M12 0.678223C5.37258 0.678223 0 6.0508 0 12.6782C0 18.1643 3.68144 22.7905 8.70865 24.2213V22.2601C8.56074 22.2741 8.415 22.28 8.27127 22.2777C6.82799 22.2552 6.20905 21.1506 5.62784 20.1132C5.18436 19.3217 4.76285 18.5694 4.01384 18.3668C3.79112 18.3067 3.6 18.1267 3.6 17.8959C3.6 17.6653 3.78823 17.4751 4.0175 17.501C5.16553 17.6307 5.79277 18.2951 6.43787 18.9782C6.81208 19.3745 7.19228 19.7772 7.68364 20.0856C7.86796 20.2011 8.05832 20.2688 8.30765 20.2728C8.41866 20.2745 8.55487 20.2637 8.72039 20.2299C8.76716 19.4855 8.9533 18.7551 9.27028 18.0775C6.64441 17.1389 4.1373 15.1437 4.1373 12.7548C4.1373 11.2353 4.69698 9.45248 5.95177 8.39626V5.47822L9.48712 6.66454C10.2779 6.47206 11.1226 6.36796 11.9999 6.36796C12.8772 6.36796 13.722 6.47206 14.5127 6.66454L18.048 5.47822V8.39626C19.3027 9.45248 19.8626 11.2352 19.8626 12.7547C19.8626 15.1436 17.3555 17.139 14.7295 18.0776C15.0994 18.8683 15.2911 19.7307 15.2911 20.6037V24.2213C20.3184 22.7906 24 18.1644 24 12.6782C24 6.0508 18.6274 0.678223 12 0.678223Z"
+                  fill="#0BAD67"></path>
+              </g>
+              <defs>
+                <clipPath id="clip0_430_2759)">
+                  <rect
+                    width="24"
+                    height="24"
+                    fill="white"
+                    transform="translate(0 0.640137)"></rect>
+                </clipPath>
+              </defs>
+            </svg>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section
+    aria-labelledby="achievements-title"
+    class="fluid max-w-6xl mx-auto flex flex-wrap gap-4"
+  >
+    <h2 id="achievements-title" class="sr-only">Osiągnięcia</h2>
+    <span
+      class="block before:animate-fade-in-out before:delay-[2s] w-fit before:opacity-0 text-regular-bold font-500 px-4 py-2 rounded-xl relative border border-[#212923] bg-black/2 before:absolute before:top-[-1px] before:mx-auto before:left-0 before:right-0 before:w-6 before:h-[1px] before:bg-gradient-to-r before:from-[#373838] before:via-[#0CC776] before:to-[#383838]"
+    >
+      ~ 4 miliony wyświetleń (rok do roku)
+    </span>
+    <span
+      class="block before:animate-fade-in-out before:delay-[6s] w-fit before:opacity-0 text-regular-bold font-500 px-4 py-2 rounded-xl relative border border-[#212923] bg-black/2 before:absolute before:top-[-1px] before:mx-auto before:left-0 before:right-0 before:w-6 before:h-[1px] before:bg-gradient-to-r before:from-[#373838] before:via-[#0CC776] before:to-[#383838]"
+    >
+      ~ 400 postów (rok do roku)
+    </span>
+    <span
+      class="block before:animate-fade-in-out before:delay-[4s] w-fit before:opacity-0 text-regular-bold font-500 px-4 py-2 rounded-xl relative border border-[#212923] bg-black/2 before:absolute before:top-[-1px] before:mx-auto before:left-0 before:right-0 before:w-6 before:h-[1px] before:bg-gradient-to-r before:from-[#373838] before:via-[#0CC776] before:to-[#383838]"
+    >
+      ~ 150 artykułów
+    </span>
+    <span
+      class="block before:animate-fade-in-out before:delay-[3s] w-fit before:opacity-0 text-regular-bold font-500 px-4 py-2 rounded-xl relative border border-[#212923] bg-black/2 before:absolute before:top-[-1px] before:mx-auto before:left-0 before:right-0 before:w-6 before:h-[1px] before:bg-gradient-to-r before:from-[#373838] before:via-[#0CC776] before:to-[#383838]"
+    >
+      ~ 250 klientów
+    </span>
+    <span
+      class="block before:animate-fade-in-out before:delay-[3s] w-fit before:opacity-0 text-regular-bold font-500 px-4 py-2 rounded-xl relative border border-[#212923] bg-black/2 before:absolute before:top-[-1px] before:mx-auto before:left-0 before:right-0 before:w-6 before:h-[1px] before:bg-gradient-to-r before:from-[#373838] before:via-[#0CC776] before:to-[#383838]"
+    >
+      ~ 5000 odsłon na blogu (miesięcznie)
+    </span>
+    <span
+      class="block before:animate-fade-in-out before:delay-[6s] w-fit before:opacity-0 text-regular-bold font-500 px-4 py-2 rounded-xl relative border border-[#212923] bg-black/2 before:absolute before:top-[-1px] before:mx-auto before:left-0 before:right-0 before:w-6 before:h-[1px] before:bg-gradient-to-r before:from-[#373838] before:via-[#0CC776] before:to-[#383838]"
+    >
+      ~ 61 prezentacji
+    </span>
+    <span
+      class="block before:animate-fade-in-out before:delay-[6s] w-fit before:opacity-0 text-regular-bold font-500 px-4 py-2 rounded-xl relative border border-[#212923] bg-black/2 before:absolute before:top-[-1px] before:mx-auto before:left-0 before:right-0 before:w-6 before:h-[1px] before:bg-gradient-to-r before:from-[#373838] before:via-[#0CC776] before:to-[#383838]"
+    >
+      ~ 300 pasjonatów na Discord
+    </span>
+  </section>
+
+  <!-- <ArticlesSection client:visible /> -->
+</div>

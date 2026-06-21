@@ -1,0 +1,24 @@
+{
+  "name": "polubinski.dev",
+  "short_name": "polubinski.dev",
+  "description": "Mentoring IT - Mentoring/Konsultacje i Rozwój Kariery | Adrian Połubiński",
+  "start_url": "/",
+  "lang": "pl-PL",
+  "icons": [
+    {
+      "src": "/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "theme_color": "#0bad67",
+  "background_color": "#000100",
+  "display": "standalone"
+}

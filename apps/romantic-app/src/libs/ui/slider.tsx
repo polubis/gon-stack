@@ -1,7 +1,7 @@
 import { useState, type ComponentProps, type ReactNode } from 'react';
 import * as SliderPrimitive from '@radix-ui/react-slider';
 
-import { createHookContext } from '../power-context';
+import { createHookContext } from '@repo/react-kit/context';
 import { cn } from './cn';
 
 /* =============================================================================
