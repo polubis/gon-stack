@@ -8,7 +8,7 @@ import {
 import { Minus, Plus } from 'lucide-react';
 
 import { createHookContext } from '@repo/react-kit/context';
-import { cn } from './cn';
+import { cn } from '@repo/react-kit/cn';
 
 /* =============================================================================
  * Shared Types

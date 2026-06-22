@@ -1,4 +1,4 @@
-import { cn } from '../../../libs/ui/cn';
+import { cn } from '@repo/react-kit/cn';
 import { Card } from '../../../libs/ui/card';
 
 const NAV_ITEMS = [

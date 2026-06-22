@@ -1,6 +1,6 @@
 import { type ComponentProps, forwardRef } from 'react';
 
-import { cn } from './cn';
+import { cn } from '@repo/react-kit/cn';
 
 /* =============================================================================
  * Public Props

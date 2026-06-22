@@ -1,6 +1,6 @@
 import { type ComponentProps, createElement, type ElementType } from 'react';
 
-import { cn } from './cn';
+import { cn } from '@repo/react-kit/cn';
 
 /* =============================================================================
  * Shared Types

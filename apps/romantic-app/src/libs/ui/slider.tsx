@@ -2,7 +2,7 @@ import { useState, type ComponentProps, type ReactNode } from 'react';
 import * as SliderPrimitive from '@radix-ui/react-slider';
 
 import { createHookContext } from '@repo/react-kit/context';
-import { cn } from './cn';
+import { cn } from '@repo/react-kit/cn';
 
 /* =============================================================================
  * Shared Types

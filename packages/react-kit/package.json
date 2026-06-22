@@ -20,6 +20,10 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text"
   },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.6.0"
+  },
   "peerDependencies": {
     "react": "^19"
   },

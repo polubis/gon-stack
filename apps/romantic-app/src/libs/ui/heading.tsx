@@ -1,6 +1,6 @@
 import { createElement, type ComponentProps } from 'react';
 
-import { cn } from './cn';
+import { cn } from '@repo/react-kit/cn';
 
 /* =============================================================================
  * Public Props
