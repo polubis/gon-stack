@@ -51,8 +51,8 @@
     "@commitlint/cli": "^21.0.2",
     "@commitlint/config-conventional": "^21.0.2",
     "husky": "^9.1.7",
-    "lint-staged": "^17.0.7",
-    "npm-check-updates": "^22.2.3",
+    "lint-staged": "^17.0.8",
+    "npm-check-updates": "^22.2.7",
     "prettier": "^3.8.4",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "turbo": "^2.9.18"
@@ -63,7 +63,7 @@
       "git add"
     ]
   },
-  "packageManager": "pnpm@11.7.0",
+  "packageManager": "pnpm@11.8.0",
   "engines": {
     "node": "24.16.0"
   }

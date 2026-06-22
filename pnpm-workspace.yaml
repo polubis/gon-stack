@@ -26,6 +26,10 @@ minimumReleaseAgeExclude:
   - '@typescript-eslint/visitor-keys@8.61.1'
   - typescript-eslint@8.61.1
   - lucide-react@1.20.0
+  - '@astrojs/cloudflare@14.0.0'
+  - '@astrojs/markdown-satteri@0.3.1'
+  - '@astrojs/react@6.0.0'
+  - astro@7.0.0
 
 onlyBuiltDependencies:
   - supabase
