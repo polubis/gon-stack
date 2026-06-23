@@ -1,114 +1,23 @@
 ---
-import MainLayout from "@/layouts/main.astro";
-import LayoutNavigation from "@/components/layout/layout-navigation.astro";
-import SeniorProgramBanner from "@/components/senior-program-banner.astro";
-import HeroSection from "@/features/home/hero-section.astro";
-import CategoriesSection from "@/features/home/categories-section.astro";
-import AboutSection from "@/features/home/about-section.astro";
-import LearningProcessSection from "@/features/home/learning-process-section.astro";
-import PlansSection from "@/features/home/plans-section.astro";
-import { MeetingSection } from "@/features/home/meeting-section";
-import { TestimonialsSection } from "@/features/home/testimonials-section";
-import { FaqSection } from "@/features/home/faq-section";
-import MaterialsSection from "@/features/home/materials-section.astro";
-import MaterialsQualitySection from "@/features/home/materials-quality-section.astro";
-import Footer from "@/features/home/footer.astro";
-import { routing } from "@/core/config";
-import type { TestimonialProps } from "@/features/home/testimonial";
+import MainLayout from "@/core/layouts/main.astro";
+import { Module } from "@/core/modules/home";
+import { getTestimonials } from "@/modules/home/integration/repository";
+import type { Testimonial } from "@/modules/home/domain/models";
 
 // `site` is configured in astro.config.mjs, so `Astro.site` is always defined.
 const domain = Astro.site!.toString().replace(/\/$/, "");
 const imageUrl = `${domain}/adrian-512.webp`;
 
-// TODO: Replace with your real testimonials endpoint
-const TESTIMONIALS_ENDPOINT =
-  "https://us-central1-markdown-b9f5e.cloudfunctions.net/getUserProfile";
-let testimonials: TestimonialProps[] = [];
-
-type Payload = {
-  data: {
-    profileId: string;
-  };
-};
-
-type UserProfile = {
-  id: string;
-  cdate: string;
-  mdate: string;
-  displayNameSlug: string | null;
-  displayName: string | null;
-  bio: string | null;
-  avatar: Record<
-    "tn" | "sm" | "md" | "lg",
-    {
-      w: number;
-      h: number;
-      id: string;
-      src: string;
-    }
-  > | null;
-  githubUrl: string | null;
-  linkedInUrl: string | null;
-  twitterUrl: string | null;
-  fbUrl: string | null;
-  blogUrl: string | null;
-  ugly?: number;
-  bad?: number;
-  decent?: number;
-  good?: number;
-  perfect?: number;
-  scoreAverage?: number;
-  scoreCount?: number;
-  scoreValues?: (1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10)[];
-};
-
-type Comment = {
-  id: string;
-  ownerProfile: UserProfile;
-  cdate: string;
-  mdate: string;
-  content: string;
-};
-
-type Response = {
-  result: {
-    profile: UserProfile;
-    comments: Comment[];
-  };
-};
+let testimonials: Testimonial[] = [];
 
 try {
-  const payload: Payload = {
-    data: {
-      profileId: "2eec0829-0a2f-4f3f-b2a2-a7b4b8a890e0",
-    },
-  };
-  const res = await fetch(TESTIMONIALS_ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (res.ok) {
-    const data = (await res.json()) as Response;
-    testimonials = data.result.comments.map((comment) => ({
-      content: comment.content,
-      avatar: comment.ownerProfile.avatar
-        ? {
-            url: comment.ownerProfile.avatar.lg.src,
-            title: comment.ownerProfile.displayName ?? "User avatar",
-            alt: comment.ownerProfile.displayName ?? "User avatar",
-          }
-        : undefined,
-      name: comment.ownerProfile.displayName ?? "Anonymous",
-      position: comment.ownerProfile.bio ?? undefined,
-    }));
-  }
+  testimonials = await getTestimonials();
 } catch (error) {}
 ---
 
 <MainLayout
   siteName="Mentoring IT - Konsultacje i Rozwój Kariery | Adrian Połubiński"
-  url={routing.home}
+  url="/"
   twitterCreator="@polubis"
   imageAlt="Adrian Połubiński"
   twitterSite="@polubis"
@@ -118,23 +27,5 @@ try {
   title="Mentoring IT - Konsultacje i Rozwój Kariery | Adrian Połubiński"
   description="Mentoring IT – rozwijaj karierę programisty, przygotuj się do rozmów rekrutacyjnych i ucz się świadomie. Uzyskaj awans!"
 >
-  <SeniorProgramBanner />
-  <LayoutNavigation />
-  <main>
-    <HeroSection />
-    <CategoriesSection />
-    <AboutSection />
-    <LearningProcessSection />
-    <PlansSection />
-    {
-      testimonials.length > 0 && (
-        <TestimonialsSection client:visible testimonials={testimonials} />
-      )
-    }
-    <MeetingSection client:visible testimonials={testimonials} />
-    <MaterialsSection />
-    <MaterialsQualitySection />
-    <FaqSection client:visible />
-  </main>
-  <Footer />
+  <Module client:load testimonials={testimonials} />
 </MainLayout>

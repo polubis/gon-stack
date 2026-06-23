@@ -1,0 +1,176 @@
+@import './fonts.css';
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@keyframes jump-top-bottom {
+  0% {
+    opacity: 0;
+    transform: translateY(var(--spacing));
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-out {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Check for more info "ui-spec.md" file */
+:root {
+  /* Colors */
+  --background: #000100;
+  --foreground: #d7d8d9;
+  --primary-400: #0dd97d;
+  --primary-500: #0bad67;
+  --foreground-secondary: #888888;
+
+  /* Indexes */
+  --z-layout-navigation: 40;
+  --z-layout-mobile-navigation: 50;
+
+  /* Typography - Font Family */
+  --font-main:
+    'Aspekta', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+  /* Layout */
+  --container-fluid: 1440px;
+
+  /* Typography - Font Weights */
+  --font-weight-500: 500;
+  --font-weight-400: 400;
+  --font-weight-300: 300;
+
+  /* Typography - Regular Text Styles */
+  --text-regular: 16px;
+  --text-regular--line-height: 130%;
+  --text-regular-bold: 16px;
+  --text-regular-bold--line-height: 135%;
+  --text-small: 13px;
+  --text-small--line-height: 135%;
+
+  /* Typography - Heading Styles */
+  --text-h5: 16px;
+  --text-h5--line-height: 125%;
+  --text-h4: 20px;
+  --text-h4--line-height: 125%;
+  --text-h3: 25px;
+  --text-h3--line-height: 135%;
+  --text-h2: 31px;
+  --text-h2--line-height: 120%;
+  --text-h1: 39px;
+  --text-h1--line-height: 120%;
+}
+
+/* Responsive Typography - Tablet and Above (768px+) */
+@media (min-width: 768px) {
+  :root {
+    /* Regular Text Styles */
+    --text-regular: 18px;
+    --text-regular--line-height: 135%;
+    --text-regular-bold: 18px;
+    --text-regular-bold--line-height: 135%;
+    --text-small: 14px;
+    --text-small--line-height: 130%;
+
+    /* Heading Styles */
+    --text-h5: 18px;
+    --text-h5--line-height: 120%;
+    --text-h4: 24px;
+    --text-h4--line-height: 120%;
+    --text-h3: 32px;
+    --text-h3--line-height: 120%;
+    --text-h2: 43px;
+    --text-h2--line-height: 120%;
+    --text-h1: 57px;
+    --text-h1--line-height: 105%;
+  }
+}
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* Colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary-400: var(--primary-400);
+  --color-primary-500: var(--primary-500);
+  --color-foreground-secondary: var(--foreground-secondary);
+  /* Typography - Font Family */
+  --font-main: var(--font-main);
+
+  /* Typography - Regular Text Styles */
+  --text-regular: var(--text-regular);
+  --text-regular--line-height: var(--text-regular--line-height);
+  --text-regular-bold: var(--text-regular-bold);
+  --text-regular-bold--line-height: var(--text-regular-bold--line-height);
+  --text-small: var(--text-small);
+  --text-small--line-height: var(--text-small--line-height);
+
+  /* Typography - Heading Styles */
+  --text-h5: var(--text-h5);
+  --text-h5--line-height: var(--text-h5--line-height);
+  --text-h4: var(--text-h4);
+  --text-h4--line-height: var(--text-h4--line-height);
+  --text-h3: var(--text-h3);
+  --text-h3--line-height: var(--text-h3--line-height);
+  --text-h2: var(--text-h2);
+  --text-h2--line-height: var(--text-h2--line-height);
+  --text-h1: var(--text-h1);
+  --text-h1--line-height: var(--text-h1--line-height);
+
+  /* Layout */
+  --container-fluid: var(--container-fluid);
+  --breakpoint-dsp: 1280px;
+  --breakpoint-ltp: 1024px;
+  --breakpoint-tbt: 768px;
+  --breakpoint-mbl: 640px;
+  --breakpoint-sbl: 480px;
+
+  /* Typography - Font Weights */
+  --font-weight-500: var(--font-weight-500);
+  --font-weight-400: var(--font-weight-400);
+  --font-weight-300: var(--font-weight-300);
+
+  /* Animation */
+  --animate-jump-top-bottom: jump-top-bottom 0.4s ease-in-out forwards;
+  --animate-fade-in-out: fade-in-out 4s ease-in-out infinite;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground font-main;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+}
+
+@layer components {
+  .fluid {
+    @apply max-w-fluid mx-auto px-4 mbl:px-6 tbt:px-10;
+  }
+
+  .page-section {
+    @apply py-10 tbt:py-20;
+  }
+
+  .primary-button {
+    @apply bg-primary-500 text-[#091610] rounded-full border border-primary-400 text-regular-bold font-500 transition-shadow duration-500 ease-in-out shadow-[0_0_16px_2px_rgba(1,120,70,0.6)] hover:shadow-[0_0_16px_2px_rgba(1,120,70,0.9)];
+  }
+
+  .radial-flare {
+    @apply absolute bg-[#00ff9144] rounded-full blur-3xl;
+  }
+}
