@@ -1,4 +1,4 @@
-import { atom, computed } from '@/libs/supa-store';
+import { atom, computed } from '@repo/react-kit/supa-store';
 import type { Answers, Step } from '../domain/models';
 
 export const createStore = () => {

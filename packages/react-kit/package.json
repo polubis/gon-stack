@@ -21,7 +21,9 @@
     "test:coverage": "vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text"
   },
   "dependencies": {
+    "@nanostores/react": "^1.1.0",
     "clsx": "^2.1.1",
+    "nanostores": "^1.3.0",
     "tailwind-merge": "^3.6.0"
   },
   "peerDependencies": {
