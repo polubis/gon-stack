@@ -42,7 +42,7 @@
     "@tailwindcss/vite": "^4.3.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "astro": "^7.0.0",
+    "astro": "^7.0.2",
     "lucide-react": "^1.21.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
@@ -52,13 +52,13 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@playwright/test": "^1.61.0",
+    "@playwright/test": "^1.61.1",
     "@repo/eslint-config": "workspace:*",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
-    "@types/node": "^26.0.0",
-    "@vitejs/plugin-react": "^6.0.2",
+    "@types/node": "^26.0.1",
+    "@vitejs/plugin-react": "^6.0.3",
     "@vitest/coverage-v8": "^4.1.9",
     "eslint": "^9.39.1",
     "jsdom": "^29.1.1",
@@ -66,6 +66,6 @@
     "supabase": "^2.107.0",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.9",
-    "wrangler": "^4.103.0"
+    "wrangler": "^4.104.0"
   }
 }
