@@ -1,3 +1,8 @@
+declare module '*.md?raw' {
+  const content: string;
+  export default content;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface ImportMetaEnv {}
 

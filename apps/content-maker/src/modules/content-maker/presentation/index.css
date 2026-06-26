@@ -1,0 +1,8 @@
+/**
+ * Live-demo recreation of https://mdxeditor.dev/editor/demo
+ *
+ * Loaded AFTER `@mdxeditor/editor/style.css` so any overrides here win the
+ * cascade. The demo itself uses the default MDXEditor look with the editor
+ * content styled by the `@tailwindcss/typography` (`prose`) plugin, so no
+ * overrides are needed here yet.
+ */

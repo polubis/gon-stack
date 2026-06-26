@@ -1,7 +1,10 @@
 ---
 import Layout from '@/core/layouts/main.astro';
+import { Module } from '@/core/modules/landing';
 
 export const prerender = false;
 ---
 
-<Layout />
+<Layout>
+  <Module client:only="react" />
+</Layout>
