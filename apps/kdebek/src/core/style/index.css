@@ -1,0 +1,26 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Playfair Display', ui-serif, Georgia, serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  --color-primary: #1ca3a3;
+  --color-primary-dark: #0d7c7c;
+  --color-secondary: #0b2545;
+  --color-ink: #1a2a3a;
+  --color-ink-light: #64748b;
+  --color-line: #e2e8f0;
+  --color-surface: #f8fafc;
+
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+@layer base {
+  body {
+    @apply bg-surface text-ink font-sans;
+  }
+}
