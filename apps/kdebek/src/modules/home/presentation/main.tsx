@@ -7,7 +7,7 @@ import { Offer } from './offer';
 import { OnlineBookingCta } from './online-booking-cta';
 import { Testimonials } from './testimonials';
 
-const Main = () => (
+export const Main = () => (
   <>
     <Navbar />
     <Hero />
@@ -19,5 +19,3 @@ const Main = () => (
     <Footer />
   </>
 );
-
-export { Main };

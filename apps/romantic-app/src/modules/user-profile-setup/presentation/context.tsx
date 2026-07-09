@@ -1,9 +1,9 @@
 import { useLayoutEffect, useState } from 'react';
-import { createHookContext } from '@repo/react-kit/context';
+import { context } from '@repo/react-kit/context';
 import { createMediator } from '../core/mediator';
 import { FEATURE_NAME } from '../configuration/constraints';
 
-export const [Provider, useContext] = createHookContext(
+export const [Provider, useContext] = context(
   FEATURE_NAME,
   ({ mediatorFactory } = { mediatorFactory: createMediator }) => {
     const [{ facade, register }] = useState(mediatorFactory);

@@ -34,7 +34,7 @@ type IsOptional<T> = undefined extends T ? true : false;
  * @param displayName PascalCase base name (must not end with "Provider"/"Context").
  * @param useHook Custom hook whose return value is placed into context.
  */
-export const createHookContext = <TName extends string, THook extends OneArgFn>(
+export const context = <TName extends string, THook extends OneArgFn>(
   displayName: ValidatedName<TName>,
   useHook: THook,
 ) => {

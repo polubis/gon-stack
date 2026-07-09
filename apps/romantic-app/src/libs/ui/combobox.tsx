@@ -2,7 +2,7 @@ import { useState, type ComponentProps } from 'react';
 
 import { Check } from 'lucide-react';
 
-import { createHookContext } from '@repo/react-kit/context';
+import { context } from '@repo/react-kit/context';
 import { cn } from '@repo/react-kit/cn';
 
 /* =============================================================================
@@ -20,7 +20,7 @@ type ComboboxContextValue = {
  * Context
  * ============================================================================= */
 
-const [ComboboxProvider, useComboboxContext] = createHookContext(
+const [ComboboxProvider, useComboboxContext] = context(
   'Combobox',
   (value: ComboboxContextValue) => value,
 );

@@ -6,7 +6,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
-import { createHookContext } from '@repo/react-kit/context';
+import { context } from '@repo/react-kit/context';
 import { cn } from '@repo/react-kit/cn';
 
 /* =============================================================================
@@ -23,7 +23,7 @@ type PaginationContextValue = {
  * Context
  * ============================================================================= */
 
-const [PaginationProvider, usePaginationContext] = createHookContext(
+const [PaginationProvider, usePaginationContext] = context(
   'Pagination',
   (value: PaginationContextValue) => value,
 );

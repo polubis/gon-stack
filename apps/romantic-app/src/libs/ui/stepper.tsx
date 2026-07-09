@@ -7,7 +7,7 @@ import {
 } from 'react';
 import { Minus, Plus } from 'lucide-react';
 
-import { createHookContext } from '@repo/react-kit/context';
+import { context } from '@repo/react-kit/context';
 import { cn } from '@repo/react-kit/cn';
 
 /* =============================================================================
@@ -31,7 +31,7 @@ type StepperContextValue = {
  * Context
  * ============================================================================= */
 
-const [StepperProvider, useStepperContext] = createHookContext(
+const [StepperProvider, useStepperContext] = context(
   'Stepper',
   (value: StepperContextValue) => value,
 );

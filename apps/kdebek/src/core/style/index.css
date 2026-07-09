@@ -11,6 +11,14 @@
   --color-ink-light: #64748b;
   --color-line: #e2e8f0;
   --color-surface: #f8fafc;
+  --color-footer: #eef1f5;
+  --color-rating: #fbbf24;
+  --color-logo-mark: #9ca3af;
+  --color-logo-accent: #2e9bf5;
+  --color-dot-grid: #94a3b8;
+
+  --text-3xs: 0.5rem;
+  --text-2xs: 0.6875rem;
 
   --radius-md: 12px;
   --radius-lg: 16px;
@@ -20,6 +28,10 @@
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-surface text-ink font-sans;
   }

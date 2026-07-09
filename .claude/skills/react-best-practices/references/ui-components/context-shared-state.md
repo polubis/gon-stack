@@ -1,13 +1,13 @@
 ---
-title: Use createHookContext for Shared State in Compound Components
+title: Use context for Shared State in Compound Components
 impact: MEDIUM
 impactDescription: Avoids prop drilling across sub-parts while keeping the context API type-safe
 tags: context, compound-components, state
 ---
 
-## Use createHookContext for Shared State in Compound Components
+## Use context for Shared State in Compound Components
 
-When compound component sub-parts need to read shared state (e.g. current values, orientation, disabled flag), use `createHookContext` from the local `power-context` utility. Do not prop-drill or use React's raw `createContext` directly.
+When compound component sub-parts need to read shared state (e.g. current values, orientation, disabled flag), use `context` from the local `power-context` utility. Do not prop-drill or use React's raw `createContext` directly.
 
 The provider lives in `Root`. Sub-parts consume via the generated hook.
 
@@ -23,14 +23,14 @@ const useSliderContext = () => {
 };
 ```
 
-**✅ Correct (createHookContext handles the null-check and error message):**
+**✅ Correct (context handles the null-check and error message):**
 
 ```tsx
-import { createHookContext } from '../power-context';
+import { context } from '../power-context';
 
 type SliderContextValue = { values: number[] };
 
-const [SliderProvider, useSliderContext] = createHookContext(
+const [SliderProvider, useSliderContext] = context(
   'Slider', // used in the error message when consumed outside provider
   (value: SliderContextValue) => value,
 );

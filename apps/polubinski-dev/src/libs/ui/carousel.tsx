@@ -3,7 +3,7 @@ import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from 'embla-carousel-react';
 
-import { createHookContext } from '@repo/react-kit/context';
+import { context } from '@repo/react-kit/context';
 import { cn } from '@repo/react-kit/cn';
 
 /* =============================================================================
@@ -26,7 +26,7 @@ type CarouselContextValue = {
  * Context
  * ============================================================================= */
 
-const [CarouselProvider, useCarouselContext] = createHookContext(
+const [CarouselProvider, useCarouselContext] = context(
   'Carousel',
   (value: CarouselContextValue) => value,
 );

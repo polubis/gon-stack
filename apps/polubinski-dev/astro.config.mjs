@@ -30,6 +30,13 @@ export default defineConfig({
     // Cloudflare apps in parallel they race on that port and one fails with
     // EADDRINUSE. The inspector is a debugging-only feature, unused in CI.
     inspectorPort: false,
+
+    // This site is fully static (mode: "static"), so Astro emits no server
+    // build and dist/server is empty. The default workerd prerenderer points
+    // a preview server at that empty dir, so /__astro_prerender answers 200
+    // with the string "[object Object]", which Astro writes as index.html.
+    // Prerender in Node instead; nothing here needs the workers runtime.
+    prerenderEnvironment: 'node',
   }),
 
   integrations: [react()],

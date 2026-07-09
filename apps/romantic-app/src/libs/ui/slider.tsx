@@ -1,7 +1,7 @@
 import { useState, type ComponentProps, type ReactNode } from 'react';
 import * as SliderPrimitive from '@radix-ui/react-slider';
 
-import { createHookContext } from '@repo/react-kit/context';
+import { context } from '@repo/react-kit/context';
 import { cn } from '@repo/react-kit/cn';
 
 /* =============================================================================
@@ -19,7 +19,7 @@ type SliderContextValue = {
  * Context (single root provider)
  * ============================================================================= */
 
-const [SliderProvider, useSliderContext] = createHookContext(
+const [SliderProvider, useSliderContext] = context(
   'Slider',
   (value: SliderContextValue) => value,
 );
