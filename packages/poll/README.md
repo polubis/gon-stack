@@ -18,3 +18,4 @@ const result = await poll(() => checkJobStatus(jobId), {
 - `delayMs` — wait between attempts, either a fixed number or `(attempt: number) => number`, `attempt` being the 1-based iteration that just ran.
 - `until` — predicate over the latest result; once it returns `true`, `poll` resolves with that result.
 - `stopEmitter` — optional. Called once with a `stop` callback. Invoking `stop()` cancels any pending delay, runs the polled function one last time, and resolves with that result regardless of `until`.
+- `onTick` — optional. Called with `(result, attempt)` after every attempt, including the one that satisfies `until` or is exhausted by `maxAttempts`.

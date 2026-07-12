@@ -7,6 +7,7 @@ export type PollOptions<T> = {
   delayMs: PollDelay;
   until: (result: T) => boolean;
   stopEmitter?: (stop: PollStop) => void;
+  onTick?: (result: T, attempt: number) => void;
 };
 
 export class PollMaxAttemptsError extends Error {
@@ -33,7 +34,7 @@ export const poll = async <T>(
   fn: () => T | Promise<T>,
   options: PollOptions<T>,
 ): Promise<T> => {
-  const { maxAttempts, delayMs, until, stopEmitter } = options;
+  const { maxAttempts, delayMs, until, stopEmitter, onTick } = options;
 
   let stopRequested = false;
   let signalStop: PollStop = () => {};
@@ -48,6 +49,7 @@ export const poll = async <T>(
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     const result = await fn();
+    onTick?.(result, attempt);
 
     if (until(result) || stopRequested) {
       return result;

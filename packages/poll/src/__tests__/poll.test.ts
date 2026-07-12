@@ -337,4 +337,115 @@ describe('poll', () => {
       await expect(pollA).resolves.toBe(2);
     });
   });
+
+  describe('onTick', () => {
+    it('calls `onTick` with the result and attempt number of every attempt, including the last', async () => {
+      const ticks: Array<[number, number]> = [];
+      let calls = 0;
+
+      const result = await poll(
+        () => {
+          calls++;
+          return calls;
+        },
+        {
+          maxAttempts: 5,
+          delayMs: 1,
+          until: (r) => r === 3,
+          onTick: (r, attempt) => {
+            ticks.push([r, attempt]);
+          },
+        },
+      );
+
+      expect(result).toBe(3);
+      expect(ticks).toEqual([
+        [1, 1],
+        [2, 2],
+        [3, 3],
+      ]);
+    });
+
+    it('calls `onTick` for every attempt exhausted by `maxAttempts`', async () => {
+      const ticks: Array<[string, number]> = [];
+
+      await expect(
+        poll(() => 'nope', {
+          maxAttempts: 3,
+          delayMs: 1,
+          until: () => false,
+          onTick: (r, attempt) => {
+            ticks.push([r, attempt]);
+          },
+        }),
+      ).rejects.toThrow(PollMaxAttemptsError);
+      expect(ticks).toEqual([
+        ['nope', 1],
+        ['nope', 2],
+        ['nope', 3],
+      ]);
+    });
+
+    it('calls `onTick` for the final attempt triggered by `stopEmitter`', async () => {
+      const ticks: number[] = [];
+      let stop: () => void = () => {};
+      let calls = 0;
+
+      const promise = poll(
+        () => {
+          calls++;
+          return calls;
+        },
+        {
+          maxAttempts: 100,
+          delayMs: 1000,
+          until: () => false,
+          onTick: (r) => {
+            ticks.push(r);
+          },
+          stopEmitter: (s) => {
+            stop = s;
+          },
+        },
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      stop();
+      await promise;
+
+      expect(ticks).toEqual([1, 2]);
+    });
+
+    it('is not required — `poll` behaves the same when `onTick` is omitted', async () => {
+      const result = await poll(() => 1, {
+        maxAttempts: 3,
+        delayMs: 1,
+        until: () => true,
+      });
+
+      expect(result).toBe(1);
+    });
+
+    it('propagates an error thrown by `onTick` without retrying', async () => {
+      let calls = 0;
+
+      await expect(
+        poll(
+          () => {
+            calls++;
+            return calls;
+          },
+          {
+            maxAttempts: 5,
+            delayMs: 1,
+            until: () => false,
+            onTick: () => {
+              throw new Error('onTick boom');
+            },
+          },
+        ),
+      ).rejects.toThrow('onTick boom');
+      expect(calls).toBe(1);
+    });
+  });
 });
