@@ -94,7 +94,7 @@ export const Testimonials = () => (
               <div className="mt-5 flex items-center gap-3">
                 <span
                   aria-hidden
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white"
                 >
                   {initials}
                 </span>

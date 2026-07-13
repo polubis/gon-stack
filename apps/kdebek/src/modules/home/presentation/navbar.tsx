@@ -85,7 +85,10 @@ export const Navbar = () => {
             </span>
           </a>
 
-          <nav className="hidden items-center gap-7 xl:flex">
+          <nav
+            data-e2e="home:nav-desktop"
+            className="hidden items-center gap-7 xl:flex"
+          >
             {navItems.map(({ label, icon: Icon, href }) => (
               <a
                 key={label}
@@ -126,6 +129,7 @@ export const Navbar = () => {
             </a>
             <button
               type="button"
+              data-e2e="home:nav-toggle"
               aria-label={isMenuOpen ? 'Zamknij menu' : 'Otwórz menu'}
               aria-expanded={isMenuOpen}
               onClick={() => (isMenuOpen ? closeMenu() : openMenu())}
@@ -143,6 +147,7 @@ export const Navbar = () => {
         {isMenuOpen && (
           <nav
             aria-label="Menu mobilne"
+            data-e2e="home:nav-menu-mobile"
             className="absolute left-0 right-0 top-full z-40 overflow-hidden rounded-b-3xl bg-white xl:hidden"
           >
             <div

@@ -10,12 +10,14 @@ import { Testimonials } from './testimonials';
 export const Main = () => (
   <>
     <Navbar />
-    <Hero />
-    <Testimonials />
-    <OnlineBookingCta />
-    <About />
-    <Blog />
-    <Offer />
+    <main data-e2e="home:main">
+      <Hero />
+      <Testimonials />
+      <OnlineBookingCta />
+      <About />
+      <Blog />
+      <Offer />
+    </main>
     <Footer />
   </>
 );

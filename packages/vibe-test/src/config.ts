@@ -5,7 +5,7 @@ export type CreatePlaywrightConfigOptions = {
   port: number;
   /** Host the dev server binds to. Defaults to '127.0.0.1'. */
   host?: string;
-  /** Command that boots the dev server. Defaults to `pnpm dev --host <host> --port <port>`. */
+  /** Command that boots the server under test. Defaults to serving the production build via `wrangler dev`. */
   webServerCommand?: string;
   /** Root Playwright scans for spec files. Defaults to './src'. */
   testDir?: string;
@@ -38,7 +38,9 @@ export const createPlaywrightConfig = ({
       trace: 'on-first-retry',
     },
     webServer: {
-      command: webServerCommand ?? `pnpm dev --host ${host} --port ${port}`,
+      command:
+        webServerCommand ??
+        `pnpm exec wrangler dev --ip ${host} --port ${port} --show-interactive-dev-session=false`,
       url: baseURL,
       reuseExistingServer: !process.env.CI,
       timeout: 120000,

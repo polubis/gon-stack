@@ -22,7 +22,10 @@ export const Hero = () => (
           <p className="text-xs font-bold tracking-[0.2em] text-primary">
             ZDROWIE &nbsp;•&nbsp; RUCH &nbsp;•&nbsp; LEPSZA JAKOŚĆ ŻYCIA
           </p>
-          <h1 className="mt-4 font-display text-4xl font-bold leading-[1.15] text-secondary sm:text-5xl">
+          <h1
+            data-e2e="home:hero-heading"
+            className="mt-4 font-display text-4xl font-bold leading-[1.15] text-secondary sm:text-5xl"
+          >
             Profesjonalna fizjoterapia
             <br />
             <span className="text-primary">dopasowana do Ciebie</span>
