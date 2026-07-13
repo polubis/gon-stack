@@ -1,22 +1,23 @@
 import { defineConfig, devices } from '@playwright/test';
+import { createPlaywrightConfig } from '@repo/vibe-test';
+
+const base = createPlaywrightConfig({ port: 4322 });
+
+const viewports = {
+  mobile: { width: 320, height: 568 },
+  tablet: { width: 768, height: 1024 },
+  laptop: { width: 1280, height: 800 },
+  desktop: { width: 1920, height: 1080 },
+};
 
 export default defineConfig({
-  testDir: './src',
-  testMatch: ['**/__e2e__/**/*.spec.ts'],
-  testIgnore: ['**/__tests__/**'],
-  fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  reporter: 'html',
+  ...base,
   use: {
-    baseURL: 'http://127.0.0.1:4321',
-    trace: 'on-first-retry',
+    ...base.use,
+    contextOptions: { reducedMotion: 'reduce' },
   },
-  webServer: {
-    command: 'pnpm dev --host 127.0.0.1 --port 4321',
-    url: 'http://127.0.0.1:4321',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-  },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: Object.entries(viewports).map(([name, viewport]) => ({
+    name,
+    use: { ...devices['Desktop Chrome'], viewport },
+  })),
 });

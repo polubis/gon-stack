@@ -4,6 +4,12 @@ import { config } from '@repo/eslint-config/react-internal';
 export default [
   ...config,
   {
-    ignores: ['.astro/**', 'worker-configuration.d.ts', 'playwright-report/**'],
+    ignores: [
+      '.astro/**',
+      '.wrangler/**',
+      'worker-configuration.d.ts',
+      'playwright-report/**',
+      'test-results/**',
+    ],
   },
 ];

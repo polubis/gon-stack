@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { interpreter } from '@/__e2e__/interpreter';
+import { interpreter } from '@repo/vibe-test';
 
 const mockConfigResponse = {
   code: 200,

@@ -18,7 +18,7 @@
     "db:stop": "pnpx supabase stop",
     "db:migration:new": "pnpx supabase migration new",
     "db:migration:up": "pnpx supabase migration up",
-    "pw:install": "playwright install chromium",
+    "pw:install": "playwright install --with-deps chromium",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text",
@@ -54,6 +54,7 @@
   "devDependencies": {
     "@playwright/test": "^1.61.1",
     "@repo/eslint-config": "workspace:*",
+    "@repo/vibe-test": "workspace:*",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",

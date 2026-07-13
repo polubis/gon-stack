@@ -34,3 +34,7 @@ yarn-error.log*
 
 # ui
 dist/
+
+# playwright
+playwright-report/
+test-results/

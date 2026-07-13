@@ -5,6 +5,12 @@ export default [
   ...config,
   // Ignore generated/third-party type files (regenerated frequently).
   {
-    ignores: ['.astro/**', 'worker-configuration.d.ts', 'playwright-report/**'],
+    ignores: [
+      '.astro/**',
+      '.wrangler/**',
+      'worker-configuration.d.ts',
+      'playwright-report/**',
+      'test-results/**',
+    ],
   },
 ];

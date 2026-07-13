@@ -13,6 +13,6 @@ export const interpreter =
     for (const step of steps) {
       const [commandName, ...args] = step;
 
-      await commands[commandName](...args);
+      await commands[commandName]?.(...args);
     }
   };

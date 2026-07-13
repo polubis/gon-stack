@@ -1,4 +1,4 @@
-name: PR E2E
+name: PR CI
 
 on:
   pull_request:
@@ -15,10 +15,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  hash-check:
-    name: hash-check
+  verify:
+    name: verify
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
+    env:
+      CI: 'true'
+      PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
+      PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      AUTH_CALLBACK_URL: ${{ vars.AUTH_CALLBACK_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,45 +40,16 @@ jobs:
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
-      - name: Verify documented modules are in sync
-        run: pnpm hash:check
+      - name: Install Playwright browsers
+        run: pnpm pw:install
 
-  e2e:
-    name: e2e
-    if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
-    env:
-      CI: 'true'
-      PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
-      PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-      AUTH_CALLBACK_URL: ${{ vars.AUTH_CALLBACK_URL }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Build e2e image
-        run: docker build -f Dockerfile.e2e -t gon-e2e .
-
-      - name: Create e2e container
-        run: docker create --name gon-e2e-run -e CI -e PUBLIC_SUPABASE_URL -e PUBLIC_SUPABASE_PUBLISHABLE_KEY -e AUTH_CALLBACK_URL gon-e2e pnpm ci:e2e
-
-      - name: Run e2e tests
-        run: docker start -a gon-e2e-run
-
-      - name: Copy Playwright report
-        if: always()
-        run: |
-          mkdir -p playwright-report
-          docker cp gon-e2e-run:/repo/apps/romantic-app/playwright-report ./playwright-report || true
+      - name: Verify (format, lint, types, tests, build, e2e)
+        run: pnpm ci:verify
 
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
-          path: playwright-report
+          path: apps/romantic-app/playwright-report
           if-no-files-found: ignore
-
-      - name: Remove e2e container
-        if: always()
-        run: docker rm gon-e2e-run || true
