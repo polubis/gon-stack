@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { interpreter } from '@repo/vibe-test';
+import { interpreter, type CommandRegistry } from '@repo/vibe-test';
 
 const { describe } = test;
 
@@ -17,8 +17,8 @@ for (const [name, viewport] of Object.entries(viewports)) {
     const commands = {
       // pauseAt (not install alone) actually freezes time, so the
       // about-gallery carousel's autoplay setInterval never fires
-      'i freeze time': (page: Page) => page.clock.pauseAt(new Date()),
-      'im on the home page': (page: Page) => page.goto('/'),
+      'i freeze time': (page) => page.clock.pauseAt(new Date()),
+      'im on the home page': (page) => page.goto('/'),
       // decode() (unlike the load event) guarantees the browser has
       // actually rasterized the image and it's safe to paint - complete/
       // load only confirm fetch, not that a frame has landed. aria-hidden
@@ -26,7 +26,7 @@ for (const [name, viewport] of Object.entries(viewports)) {
       // stay lazy/unfetched forever once time is frozen. page.waitForTimeout
       // (not a page-side setTimeout) is the safety cap, since page.clock
       // also fakes any in-page setTimeout.
-      'all images should be loaded': (page: Page) =>
+      'all images should be loaded': (page) =>
         Promise.race([
           page.evaluate(() =>
             Promise.all(
@@ -37,19 +37,19 @@ for (const [name, viewport] of Object.entries(viewports)) {
           ),
           page.waitForTimeout(8000),
         ]),
-      'i should match the home page screenshot': (page: Page) =>
+      'i should match the home page screenshot': (page) =>
         expect(page).toHaveScreenshot(`home-${name}.png`, {
           fullPage: true,
           timeout: 15000,
         }),
-    };
+    } satisfies CommandRegistry<Page>;
 
     test('home page matches visual baseline', async ({ page }) => {
-      await interpreter(commands)(
-        ['i freeze time', page],
-        ['im on the home page', page],
-        ['all images should be loaded', page],
-        ['i should match the home page screenshot', page],
+      await interpreter(commands, page)(
+        ['i freeze time'],
+        ['im on the home page'],
+        ['all images should be loaded'],
+        ['i should match the home page screenshot'],
       );
     });
   });

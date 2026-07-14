@@ -1,39 +1,47 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Page } from '@playwright/test';
-import { interpreter } from '@repo/vibe-test';
+import { expect } from '@playwright/test';
+import { interpreter, type CommandRegistry } from '@repo/vibe-test';
+import { test, type Ctx } from '../../../__e2e__/test';
 
 const { describe, use } = test;
 
-const navToggle = (page: Page) => page.locator('[data-e2e="home:nav-toggle"]');
-const navMenuMobile = (page: Page) =>
-  page.locator('[data-e2e="home:nav-menu-mobile"]');
-
 const commands = {
-  'im on the home page': (page: Page) => page.goto('/'),
-  'it should have no wcag violations': async (page: Page) => {
+  'im on the home page': ({ page }) => page.goto('/'),
+  'it should have no wcag violations': async ({ page }) => {
     const { violations } = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
       .analyze();
 
     expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
   },
-  'i focus the mobile nav toggle': (page: Page) => navToggle(page).focus(),
-  'i press enter': (page: Page) => page.keyboard.press('Enter'),
-  'the mobile nav toggle should be collapsed': (page: Page) =>
-    expect(navToggle(page)).toHaveAttribute('aria-expanded', 'false'),
-  'the mobile nav toggle should be expanded': (page: Page) =>
-    expect(navToggle(page)).toHaveAttribute('aria-expanded', 'true'),
-  'the mobile nav menu should be hidden': (page: Page) =>
-    expect(navMenuMobile(page)).toBeHidden(),
-  'the mobile nav menu should be visible with focusable links': (page: Page) =>
-    expect(navMenuMobile(page).getByRole('link').first()).toBeVisible(),
-};
+  'i focus the mobile nav toggle': ({ getByE2e }) =>
+    getByE2e('home:nav-toggle').focus(),
+  'i press enter': ({ page }) => page.keyboard.press('Enter'),
+  'the mobile nav toggle should be collapsed': ({ getByE2e }) =>
+    expect(getByE2e('home:nav-toggle')).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    ),
+  'the mobile nav toggle should be expanded': ({ getByE2e }) =>
+    expect(getByE2e('home:nav-toggle')).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    ),
+  'the mobile nav menu should be hidden': ({ getByE2e }) =>
+    expect(getByE2e('home:nav-menu-mobile')).toBeHidden(),
+  'the mobile nav menu should be visible with focusable links': ({
+    getByE2e,
+  }) =>
+    expect(
+      getByE2e('home:nav-menu-mobile').getByRole('link').first(),
+    ).toBeVisible(),
+} satisfies CommandRegistry<Ctx>;
 
 describe('home page accessibility', () => {
-  test('has no automatic wcag violations', async ({ page }) => {
-    await interpreter(commands)(
-      ['im on the home page', page],
-      ['it should have no wcag violations', page],
+  test('has no automatic wcag violations', async ({ page, getByE2e }) => {
+    await interpreter(commands, { page, getByE2e })(
+      ['im on the home page'],
+      ['it should have no wcag violations'],
     );
   });
 
@@ -42,19 +50,20 @@ describe('home page accessibility', () => {
 
     test('exposes correct aria-expanded state and stays keyboard operable', async ({
       page,
+      getByE2e,
     }) => {
-      await interpreter(commands)(
-        ['im on the home page', page],
-        ['the mobile nav toggle should be collapsed', page],
-        ['the mobile nav menu should be hidden', page],
-        ['i focus the mobile nav toggle', page],
-        ['i press enter', page],
-        ['the mobile nav toggle should be expanded', page],
-        ['the mobile nav menu should be visible with focusable links', page],
-        ['i focus the mobile nav toggle', page],
-        ['i press enter', page],
-        ['the mobile nav toggle should be collapsed', page],
-        ['the mobile nav menu should be hidden', page],
+      await interpreter(commands, { page, getByE2e })(
+        ['im on the home page'],
+        ['the mobile nav toggle should be collapsed'],
+        ['the mobile nav menu should be hidden'],
+        ['i focus the mobile nav toggle'],
+        ['i press enter'],
+        ['the mobile nav toggle should be expanded'],
+        ['the mobile nav menu should be visible with focusable links'],
+        ['i focus the mobile nav toggle'],
+        ['i press enter'],
+        ['the mobile nav toggle should be collapsed'],
+        ['the mobile nav menu should be hidden'],
       );
     });
   });

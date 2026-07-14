@@ -36,6 +36,7 @@ export const createPlaywrightConfig = ({
     use: {
       baseURL,
       trace: 'on-first-retry',
+      testIdAttribute: 'data-e2e',
     },
     webServer: {
       command:
