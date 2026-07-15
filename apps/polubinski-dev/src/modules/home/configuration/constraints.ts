@@ -1,11 +1,19 @@
 export const FEATURE_NAME = 'Home';
 
+const PROFILE_ID = '2eec0829-0a2f-4f3f-b2a2-a7b4b8a890e0';
+
 const appConfig = {
   aboutSection: {
     id: 'about',
   },
   opinionsSection: {
     id: 'opinions',
+    profileId: PROFILE_ID,
+    profileLink: `https://4markdown.com/user-profile-preview/?profileId=${PROFILE_ID}`,
+    platformLink: 'https://4markdown.com/',
+  },
+  articlesSection: {
+    link: 'https://4markdown.com/education-zone',
   },
   faqSection: {
     id: 'faq',

@@ -6,4 +6,5 @@ export {
   type Material,
   type PlanKey,
   type PlanType,
+  type ScoreStats,
 } from './domain/models';

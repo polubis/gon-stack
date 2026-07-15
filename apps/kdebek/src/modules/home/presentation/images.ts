@@ -1,32 +1,45 @@
 export const images = {
-  hero: '/images/hero.jpg',
+  hero: '/images/hero.webp',
+
   about: {
     gallery: [
       {
-        src: '/images/about-posty/03.jpg',
+        src: '/images/03.webp',
+
         alt: 'Kacper Dębek — Biuro Masażu',
       },
+
       {
-        src: '/images/about-posty/04.jpg',
+        src: '/images/04.webp',
+
         alt: 'Ćwiczenia rehabilitacyjne',
       },
+
       {
-        src: '/images/about-posty/05.jpg',
+        src: '/images/05.webp',
+
         alt: 'Kacper Dębek w gabinecie',
       },
+
       {
-        src: '/images/about-posty/06.jpg',
+        src: '/images/06.webp',
+
         alt: 'Sesja fizjoterapeutyczna',
       },
     ],
   },
+
   testimonials: {
-    therapy: '/images/testimonials-therapy.jpg',
+    therapy: '/images/testimonials-therapy.webp',
   },
+
   blog: {
-    neckPain: '/images/blog-neck-pain.jpg',
-    kneeRehab: '/images/blog-knee-rehab.jpg',
-    spineCare: '/images/blog-spine-care.jpg',
-    massage: '/images/about-massage.jpg',
+    neckPain: '/images/blog-neck-pain.webp',
+
+    kneeRehab: '/images/blog-knee-rehab.webp',
+
+    spineCare: '/images/blog-spine-care.webp',
+
+    massage: '/images/about-massage.webp',
   },
 } as const;

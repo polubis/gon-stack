@@ -26,6 +26,20 @@ type Material = {
   url: string;
 };
 
+type ScoreBreakdown = {
+  perfect: number;
+  good: number;
+  decent: number;
+  bad: number;
+  ugly: number;
+};
+
+type ScoreStats = {
+  average: number;
+  count: number;
+  breakdown: ScoreBreakdown;
+};
+
 type PlanKey =
   | 'cvMastering'
   | 'introductoryMeeting'
@@ -43,4 +57,6 @@ export type {
   Material,
   PlanKey,
   PlanType,
+  ScoreBreakdown,
+  ScoreStats,
 };

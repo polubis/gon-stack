@@ -5,22 +5,22 @@ import { GOOGLE_REVIEWS_URL } from './links';
 
 const testimonials = [
   {
-    name: 'Michał K.',
-    subtitle: 'Ból pleców',
-    initials: 'MK',
-    text: 'Profesjonalne podejście i świetne efekty. Dzięki terapii pozbyłem się bólu pleców, który dokuczał mi od lat. Polecam!',
+    name: 'Marek W.',
+    subtitle: 'Ból kręgosłupa',
+    initials: 'MW',
+    text: 'Bardzo profesjonalne podejście i widoczne efekty już po kilku wizytach. Ból, który towarzyszył mi od dawna, w końcu ustąpił. Polecam każdemu!',
   },
   {
-    name: 'Katarzyna R.',
-    subtitle: 'Rehabilitacja po urazie',
-    initials: 'KR',
-    text: 'Po urazie kolana wróciłam do pełnej sprawności szybciej, niż się spodziewałam. Świetna atmosfera i fachowa opieka.',
+    name: 'Agnieszka N.',
+    subtitle: 'Powrót do formy po kontuzji',
+    initials: 'AN',
+    text: 'Po kontuzji stawu wróciłam do sprawności znacznie szybciej, niż zakładałam. Miła atmosfera i naprawdę fachowe podejście.',
   },
   {
-    name: 'Tomasz S.',
-    subtitle: 'Ból szyi i karku',
-    initials: 'TS',
-    text: 'Indywidualne podejście i skuteczne metody. Czuję się zaopiekowany na każdym etapie terapii.',
+    name: 'Paweł D.',
+    subtitle: 'Napięcie karku i barków',
+    initials: 'PD',
+    text: 'Indywidualne podejście do każdego problemu i skuteczne metody pracy. Na każdej wizycie czuję się dobrze zaopiekowany.',
   },
 ];
 

@@ -1,12 +1,18 @@
 import { context } from '@repo/react-kit/context';
 import { FEATURE_NAME } from '../configuration/constraints';
-import type { Testimonial } from '../domain/models';
+import type { Article, ScoreStats, Testimonial } from '../domain/models';
 
 type HomeContextValue = {
   testimonials: Testimonial[];
+  articles: Article[];
+  scoreStats: ScoreStats | null;
 };
 
 export const [Provider, useContext] = context(
   FEATURE_NAME,
-  ({ testimonials }: HomeContextValue) => ({ testimonials }),
+  ({ testimonials, articles, scoreStats }: HomeContextValue) => ({
+    testimonials,
+    articles,
+    scoreStats,
+  }),
 );

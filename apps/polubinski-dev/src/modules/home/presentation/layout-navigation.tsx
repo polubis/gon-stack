@@ -112,7 +112,8 @@ const LayoutNavigation = () => {
               {navLinks.map(({ label, href, external }, i) => (
                 <li
                   key={label}
-                  className={`text-center animate-jump-top-bottom opacity-0 delay-${(i + 1) * 100}`}
+                  className="text-center animate-jump-top-bottom opacity-0"
+                  style={{ animationDelay: `${(i + 1) * 100}ms` }}
                 >
                   <a
                     className="hover:text-white font-500 text-h4"

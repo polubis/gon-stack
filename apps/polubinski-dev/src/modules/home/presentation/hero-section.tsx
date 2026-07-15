@@ -3,9 +3,12 @@ import { appConfig } from '../configuration/constraints';
 import { createMilkyWay } from './milky-way';
 import { Planet } from './planet';
 import { Glass } from './glass';
+import { TestimonialsWidget } from './testimonials-widget';
+import { useContext } from './context';
 
 const HeroSection = () => {
   const milkyWayRef = useRef<HTMLDivElement>(null);
+  const { testimonials, scoreStats } = useContext();
 
   useEffect(() => {
     if (milkyWayRef.current) {
@@ -25,6 +28,14 @@ const HeroSection = () => {
           className="absolute inset-0 size-full overflow-hidden rounded-full -z-1"
           aria-hidden="true"
         />
+        {scoreStats && (
+          <TestimonialsWidget
+            stats={scoreStats}
+            commentsCount={testimonials.length}
+            className="mb-4"
+          />
+        )}
+
         <h1
           id="hero-title"
           className="text-h1 font-500 max-w-lg mbl:max-w-xl tbt:max-w-2xl"

@@ -1,3 +1,56 @@
+/* === Testimonials widget === */
+@keyframes stat-icon-hop {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  30% {
+    transform: translateY(-3px) rotate(-10deg);
+  }
+  55% {
+    transform: translateY(0) rotate(8deg);
+  }
+  80% {
+    transform: translateY(-1px) rotate(-3deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+@keyframes stat-ping-ring {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+.stat-ping {
+  opacity: 0;
+}
+
+.stat-link:hover .stat-icon {
+  animation: stat-icon-hop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: var(--primary-400);
+  filter: drop-shadow(0 0 8px rgba(13, 217, 125, 0.9));
+}
+
+.stat-link:hover .stat-ping {
+  animation: stat-ping-ring 0.6s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stat-link:hover .stat-icon {
+    animation: none;
+  }
+  .stat-link:hover .stat-ping {
+    animation: none;
+  }
+}
+
 /* === Testimonials === */
 @keyframes testimonial-slide-in {
   0% {

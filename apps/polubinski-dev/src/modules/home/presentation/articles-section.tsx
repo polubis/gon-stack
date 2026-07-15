@@ -1,48 +1,57 @@
 import { ArticleTile } from './article-tile';
-import { publicationsMock } from '../integration/repository';
 import { Carousel } from '@/libs/ui/carousel';
+import { useAutoScrollOnVisible } from './use-auto-scroll-on-visible';
+import { useContext } from './context';
+import { appConfig } from '../configuration/constraints';
+import { cn } from '@repo/react-kit/cn';
 import AutoScroll from 'embla-carousel-auto-scroll';
 
-const currentYear = new Date().getFullYear();
+type ArticlesSectionProps = {
+  className?: string;
+};
 
-const ArticlesSection = () => {
+const ArticlesSection = ({ className }: ArticlesSectionProps) => {
+  const { articles } = useContext();
+  const { sectionRef, setApi } = useAutoScrollOnVisible();
+
+  if (articles.length === 0) return null;
+
   return (
     <section
-      className="flex flex-col justify-center mt-20"
+      ref={sectionRef}
+      className={cn('flex flex-col justify-center', className)}
       aria-labelledby="activity-title"
     >
       <header className="fluid flex items-center justify-between w-full mb-6">
         <h2 id="activity-title" className="text-h5 font-500">
           Twórczość
         </h2>
-        <span
-          className="text-h5 font-500 text-foreground-secondary"
-          aria-hidden="true"
+        <a
+          href={appConfig.articlesSection.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-regular font-400 text-foreground-secondary underline underline-offset-4"
         >
-          /{currentYear}
-        </span>
+          Zobacz wszystko
+        </a>
       </header>
       <Carousel.Root
-        aria-label="Opinie uczestników konsultacji"
+        aria-label="Lista opublikowanych artykułów"
         opts={{
           loop: true,
         }}
-        plugins={[
-          AutoScroll({
-            playOnInit: true,
-            speed: 0.5,
-          }),
-        ]}
+        setApi={setApi}
+        plugins={[AutoScroll({ speed: 0.5 })]}
       >
         <div
           className="absolute size-[50%] aspect-square inset-0 m-auto bg-[rgba(21,214,130,0.24)] blur-3xl"
           aria-hidden="true"
         />
         <Carousel.Content>
-          {publicationsMock.map((publication) => (
+          {articles.map((publication) => (
             <Carousel.Item
               className="sbl:basis-1/2 tbt:basis-1/3 ltp:basis-1/4 dsp:basis-1/5"
-              key={publication.name}
+              key={publication.id}
             >
               <div className="px-4 sbl:px-0 py-1">
                 <ArticleTile {...publication} />

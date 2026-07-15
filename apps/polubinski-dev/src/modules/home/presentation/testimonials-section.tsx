@@ -1,41 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
 import AutoScroll from 'embla-carousel-auto-scroll';
 import { appConfig } from '../configuration/constraints';
 import { Testimonial } from './testimonial';
 import { useContext } from './context';
-import { Carousel, type CarouselApi } from '@/libs/ui/carousel';
+import { Carousel } from '@/libs/ui/carousel';
+import { useAutoScrollOnVisible } from './use-auto-scroll-on-visible';
 
 const TestimonialsSection = () => {
   const { testimonials } = useContext();
-  const sectionRef = useRef<HTMLElement>(null);
-  const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
-
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section || !carouselApi) return;
-
-    const autoScroll = carouselApi.plugins()?.autoScroll;
-    if (!autoScroll) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (entry?.isIntersecting) {
-          autoScroll.play();
-        } else {
-          autoScroll.stop();
-        }
-      },
-      { threshold: 0.1, rootMargin: '0px' },
-    );
-
-    observer.observe(section);
-    return () => observer.disconnect();
-  }, [carouselApi]);
-
-  const setApi = useCallback((api: CarouselApi) => {
-    setCarouselApi(api ?? null);
-  }, []);
+  const { sectionRef, setApi } = useAutoScrollOnVisible();
 
   if (testimonials.length === 0) return null;
 
