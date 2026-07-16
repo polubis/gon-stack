@@ -71,6 +71,9 @@ const appConfig = {
     linkedInLink:
       'https://www.linkedin.com/in/adrian-po%C5%82ubi%C5%84ski-281ab2172/',
   },
+  footerSection: {
+    greenOnSoftwareLink: 'https://greenonsoftware.com',
+  },
 } as const;
 
 export { appConfig };

@@ -111,6 +111,8 @@ export const Testimonials = () => (
           <img
             src={images.testimonials.therapy}
             alt="Gabinet masażu i fizjoterapii"
+            loading="lazy"
+            decoding="async"
             className="absolute inset-0 h-full w-full object-cover object-center"
           />
         </div>

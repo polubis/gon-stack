@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "a11y": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "a11y-mcp"],
+      "env": {}
+    }
+  }
+}

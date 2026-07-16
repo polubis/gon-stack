@@ -42,6 +42,10 @@
     },
     "test:e2e:headed": {},
     "test:e2e:report": {},
+    "test:e2e:update-snapshots": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
     "dev": {
       "cache": false,
       "persistent": true

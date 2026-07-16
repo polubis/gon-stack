@@ -68,6 +68,9 @@ export const Hero = () => (
             <img
               src={images.hero}
               alt="Kacper Dębek — fizjoterapeuta"
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
               className="block w-full h-auto rounded-[3rem]"
             />
           </div>

@@ -3,22 +3,33 @@ import '../style/index.css';
 
 type Props = {
   title: string;
+  description: string;
 };
 
-const { title }: Props = Astro.props;
+const { title, description }: Props = Astro.props;
+
+const fontsHref =
+  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap';
 ---
 
-<html lang="en">
+<html lang="pl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <title>{title}</title>
+    <meta name="description" content={description} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href={fontsHref} />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
+      href={fontsHref}
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link href={fontsHref} rel="stylesheet" />
+    </noscript>
   </head>
   <body>
     <slot />

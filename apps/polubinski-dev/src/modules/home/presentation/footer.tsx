@@ -1,5 +1,6 @@
 import { appConfig } from '../configuration/constraints';
 import { Glass } from './glass';
+import { GreenOnLogo } from './green-on-logo';
 
 const Footer = () => (
   <footer className="fluid page-section flex items-center gap-12 ltp:gap-20 justify-center flex-col ltp:flex-row">
@@ -265,23 +266,26 @@ const Footer = () => (
           </ul>
         </div>
       </nav>
-      <div className="flex mt-20 gap-2 flex-col mbl:gap-8 mbl:flex-row text-center ltp:text-left">
-        <a
-          href="https://greenonsoftware.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-small font-400 text-foreground-secondary hover:text-white transition-colors duration-300 ease-in-out"
-        >
-          Powered by GreenOn Software © {new Date().getFullYear()}
-        </a>
+      <div className="mt-20 flex flex-col gap-6 mbl:gap-8">
         <a
           href="https://www.malgokruszynska.com/"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-small font-400 text-foreground-secondary hover:text-white transition-colors duration-300 ease-in-out"
+          className="text-small font-400 text-foreground-secondary hover:text-foreground transition-colors duration-300 ease-in-out text-center ltp:text-left"
         >
           Design by Małgorzata Kruszyńska
         </a>
+        <div className="flex justify-end">
+          <a
+            href={appConfig.footerSection.greenOnSoftwareLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Powered by GreenOn Software"
+            className="rounded text-foreground-secondary outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-400"
+          >
+            <GreenOnLogo className="h-18 w-auto shrink-0" />
+          </a>
+        </div>
       </div>
     </div>
   </footer>
