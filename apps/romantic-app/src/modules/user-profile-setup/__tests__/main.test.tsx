@@ -500,7 +500,7 @@ describe('User profile setup works when', () => {
           answers: { nickname: 'Alice' },
         });
 
-        return HttpResponse.json({ ok: true });
+        return HttpResponse.json({ code: 200, ok: true });
       }),
     );
 

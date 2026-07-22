@@ -1,26 +1,32 @@
 import {
   CalendarPlus,
-  FileText,
   Mail,
   Menu,
   Tag,
   Target,
   User,
   X,
+  type LucideIcon,
 } from 'lucide-react';
 import { useEffect, useState, type MouseEvent } from 'react';
 import { cn } from '@repo/react-kit/cn';
 
+import { copy } from './copy';
 import { BOOKING_URL } from './links';
 import { LogoMark } from './logo-mark';
 
-const navItems = [
-  { label: 'O mnie', icon: User, href: 'o-mnie' },
-  { label: 'Oferta', icon: Target, href: 'oferta' },
-  { label: 'Cennik', icon: Tag, href: 'cennik' },
-  { label: 'Blog', icon: FileText, href: 'blog' },
-  { label: 'Kontakt', icon: Mail, href: 'kontakt' },
-];
+const navIcons: Record<string, LucideIcon> = {
+  'o-mnie': User,
+  oferta: Target,
+  cennik: Tag,
+  kontakt: Mail,
+};
+
+const navItems = copy.navbar.navItems.map((item) => ({
+  ...item,
+  href: item.id,
+  icon: navIcons[item.id],
+}));
 
 const scrollToSection = (
   event: MouseEvent<HTMLAnchorElement>,
@@ -64,7 +70,7 @@ export const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 px-3 pt-3 sm:px-4 sm:pt-4 @max-h-[800px]:pt-2 sm:@max-h-[800px]:pt-2.5">
+    <header className="sticky top-0 z-sticky-header px-3 pt-3 sm:px-4 sm:pt-4 @max-h-[800px]:pt-2 sm:@max-h-[800px]:pt-2.5">
       <div className="relative mx-auto max-w-7xl rounded-3xl bg-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
         <div
           className={cn(
@@ -74,13 +80,15 @@ export const Navbar = () => {
         >
           <a href="/" className="flex min-w-0 items-center gap-1 sm:gap-2">
             <LogoMark className="h-7 w-9 shrink-0" />
-            <span className="flex flex-col leading-none">
-              <span className="font-display text-xl italic text-secondary sm:text-2xl">
-                <span className="sm:hidden">KDębek</span>
-                <span className="hidden sm:inline">Kacper Dębek</span>
+            <span className="flex flex-col gap-0.5">
+              <span className="font-display text-xl italic leading-tight text-secondary sm:text-2xl">
+                <span className="sm:hidden">{copy.navbar.brandShort}</span>
+                <span className="hidden sm:inline">
+                  {copy.navbar.brandFull}
+                </span>
               </span>
-              <span className="mt-0.5 hidden text-2xs font-semibold tracking-[0.2em] text-ink-light sm:block">
-                BIURO MASAŻ
+              <span className="hidden text-2xs font-semibold leading-tight tracking-[0.2em] text-ink-light sm:block">
+                {copy.navbar.brandTag}
               </span>
             </span>
           </a>
@@ -113,13 +121,13 @@ export const Navbar = () => {
                 className="h-4.5 w-4.5 shrink-0"
                 aria-hidden="true"
               />
-              Zarezerwuj wizytę
+              {copy.navbar.cta}
             </a>
             <a
               href={BOOKING_URL}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Zarezerwuj wizytę"
+              aria-label={copy.navbar.cta}
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-sm sm:hidden"
             >
               <CalendarPlus
@@ -130,7 +138,11 @@ export const Navbar = () => {
             <button
               type="button"
               data-e2e="home:nav-toggle"
-              aria-label={isMenuOpen ? 'Zamknij menu' : 'Otwórz menu'}
+              aria-label={
+                isMenuOpen
+                  ? copy.navbar.ariaCloseMenu
+                  : copy.navbar.ariaOpenMenu
+              }
               aria-expanded={isMenuOpen}
               onClick={() => (isMenuOpen ? closeMenu() : openMenu())}
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line text-ink-light xl:hidden"
@@ -146,7 +158,7 @@ export const Navbar = () => {
 
         {isMenuOpen && (
           <nav
-            aria-label="Menu mobilne"
+            aria-label={copy.navbar.ariaMobileNav}
             data-e2e="home:nav-menu-mobile"
             className="absolute left-0 right-0 top-full z-40 overflow-hidden rounded-b-3xl bg-white xl:hidden"
           >
@@ -210,7 +222,7 @@ export const Navbar = () => {
                       className="h-4.5 w-4.5 shrink-0"
                       aria-hidden="true"
                     />
-                    Zarezerwuj wizytę
+                    {copy.navbar.cta}
                   </a>
                 </div>
               </div>

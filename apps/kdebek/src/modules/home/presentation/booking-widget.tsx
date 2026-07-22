@@ -2,6 +2,7 @@ import { Lock } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 // import { Calendar, ChevronDown, Clock, User } from 'lucide-react';
 
+import { copy } from './copy';
 import { BOOKING_URL } from './links';
 
 export const BookingWidget = ({ className = '' }: { className?: string }) => (
@@ -12,10 +13,10 @@ export const BookingWidget = ({ className = '' }: { className?: string }) => (
     )}
   >
     <h3 className="font-display text-2xl font-bold text-secondary">
-      Zarejestruj wizytę
+      {copy.bookingWidget.heading}
     </h3>
     <p className="mt-1 text-sm text-ink-light">
-      Wybierz dogodny termin i zarezerwuj wizytę online w kilka sekund.
+      {copy.bookingWidget.subheading}
     </p>
 
     <div className="mt-6 space-y-3">
@@ -43,12 +44,12 @@ export const BookingWidget = ({ className = '' }: { className?: string }) => (
         rel="noopener noreferrer"
         className="block w-full rounded-xl bg-primary py-3 text-center text-sm font-bold tracking-wide text-white"
       >
-        DALEJ
+        {copy.bookingWidget.cta}
       </a>
 
       <p className="flex items-start justify-center gap-1.5 text-xs text-ink-light">
         <Lock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-        Twoje dane są bezpieczne i chronione.
+        {copy.bookingWidget.trust}
       </p>
     </div>
   </div>

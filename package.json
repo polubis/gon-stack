@@ -2,6 +2,7 @@
   "name": "with-tailwind",
   "private": true,
   "scripts": {
+    "skills:update": "pnpm dlx skills update -y",
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",

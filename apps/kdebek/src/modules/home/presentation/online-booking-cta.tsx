@@ -1,43 +1,33 @@
-import { Bell, Calendar, CalendarPlus, Clock, ShieldCheck } from 'lucide-react';
+import {
+  Bell,
+  Calendar,
+  CalendarPlus,
+  Clock,
+  ShieldCheck,
+  type LucideIcon,
+} from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 
+import { copy } from './copy';
 import { BOOKING_URL } from './links';
 
-const features = [
-  {
-    icon: Calendar,
-    title: '24/7',
-    description: 'Rezerwuj o każdej porze dnia i nocy, bez ograniczeń',
-  },
-  {
-    icon: Clock,
-    title: 'Szybko',
-    description: 'Wybierz dogodny termin, który najlepiej Ci pasuje',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Bezpiecznie',
-    description: 'Twoje dane osobowe są u nas w pełni chronione',
-  },
-  {
-    icon: Bell,
-    title: 'Przypomnienia',
-    description: 'Wyślemy Ci przypomnienie o wizycie SMS-em na czas',
-  },
-];
+const featureIcons: Record<string, LucideIcon> = {
+  '24-7': Calendar,
+  fast: Clock,
+  safe: ShieldCheck,
+  reminders: Bell,
+};
 
-const bookingSteps = [
-  { label: 'Usługa', active: false },
-  { label: 'Termin', active: true },
-  { label: 'Dane', active: false },
-  { label: 'Potwierdzenie', active: false },
-];
+const bookingSteps = copy.onlineBookingCta.bookingSteps.map((step) => ({
+  ...step,
+  active: step.id === copy.onlineBookingCta.activeStepId,
+}));
 
 const MiniCalendar = () => (
   <>
     <div className="flex items-center justify-between text-ink-light">
       <span>‹</span>
-      <span>Czerwiec 2024</span>
+      <span>{copy.onlineBookingCta.miniCalendarMonth}</span>
       <span>›</span>
     </div>
     <div className="mt-2 grid grid-cols-7 gap-1 text-center text-ink-light">
@@ -56,19 +46,23 @@ const MiniCalendar = () => (
 const PhoneBookingScreen = () => (
   <div className="w-full rounded-xl bg-white p-3 text-3xs shadow-inner">
     <div className="flex items-center justify-between text-primary">
-      <span className="font-semibold">Wybierz termin wizyty</span>
+      <span className="font-semibold">
+        {copy.onlineBookingCta.chooseDateLabel}
+      </span>
     </div>
     <div className="mt-2">
       <MiniCalendar />
     </div>
-    <p className="mt-2 font-medium text-secondary">Dostępne godziny</p>
+    <p className="mt-2 font-medium text-secondary">
+      {copy.onlineBookingCta.availableHoursLabel}
+    </p>
     <div className="mt-1 grid grid-cols-3 gap-1">
-      {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00'].map((time) => (
+      {copy.onlineBookingCta.timeSlots.map((time) => (
         <span
           key={time}
           className={cn(
             'rounded border py-1 text-center',
-            time === '10:00'
+            time === copy.onlineBookingCta.selectedTimeSlot
               ? 'border-primary bg-primary text-white'
               : 'border-line text-ink-light',
           )}
@@ -82,9 +76,9 @@ const PhoneBookingScreen = () => (
 
 const DesktopBookingScreen = () => (
   <div className="w-full rounded-xl bg-white p-3 text-3xs shadow-inner">
-    <ol className="flex items-center gap-1.5">
-      {bookingSteps.map(({ label, active }, i) => (
-        <li key={label} className="flex items-center gap-1.5">
+    <ol className="flex items-center gap-1.5 whitespace-nowrap">
+      {bookingSteps.map(({ id, label, active }, i) => (
+        <li key={id} className="flex items-center gap-1.5">
           <span
             className={cn(
               'flex h-3 w-3 items-center justify-center rounded-full font-semibold',
@@ -107,31 +101,27 @@ const DesktopBookingScreen = () => (
         </li>
       ))}
     </ol>
-    <p className="mt-2.5 font-semibold text-secondary">Wybierz termin wizyty</p>
+    <p className="mt-2.5 font-semibold text-secondary">
+      {copy.onlineBookingCta.chooseDateLabel}
+    </p>
     <div className="mt-2 grid grid-cols-2 gap-3">
       <div>
         <MiniCalendar />
       </div>
       <div>
-        <p className="font-medium text-secondary">Dostępne godziny</p>
-        <p className="text-ink-light">Środa, 12 czerwca</p>
+        <p className="font-medium text-secondary">
+          {copy.onlineBookingCta.availableHoursLabel}
+        </p>
+        <p className="text-ink-light">
+          {copy.onlineBookingCta.selectedDateLabel}
+        </p>
         <div className="mt-1 grid grid-cols-3 gap-1">
-          {[
-            '08:00',
-            '09:00',
-            '10:00',
-            '11:00',
-            '12:00',
-            '13:00',
-            '14:00',
-            '15:00',
-            '16:00',
-          ].map((time) => (
+          {copy.onlineBookingCta.timeSlotsExtended.map((time) => (
             <span
               key={time}
               className={cn(
                 'rounded border py-1 text-center',
-                time === '10:00'
+                time === copy.onlineBookingCta.selectedTimeSlot
                   ? 'border-primary bg-primary text-white'
                   : 'border-line text-ink-light',
               )}
@@ -150,42 +140,54 @@ export const OnlineBookingCta = () => (
     <div className="grid grid-cols-1 gap-8 sm:gap-10 sm:rounded-2xl sm:bg-gradient-to-br sm:from-surface sm:to-primary/5 sm:p-6 sm:ring-1 sm:ring-line md:grid-cols-2 md:items-center md:gap-x-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)_minmax(12rem,auto)] lg:gap-8 lg:rounded-3xl lg:p-12">
       <div>
         <p className="text-xs font-bold tracking-[0.2em] text-primary">
-          ZAREJESTRUJ SIĘ JUŻ DZIŚ
+          {copy.onlineBookingCta.eyebrow}
         </p>
         <h2 className="mt-3 font-display text-2xl font-bold leading-tight text-secondary sm:text-3xl">
-          Łatwa rejestracja online
+          {copy.onlineBookingCta.headingLine1}
           <br />
-          <span className="text-primary">w kilka sekund</span>
+          <span className="text-primary">
+            {copy.onlineBookingCta.headingLine2}
+          </span>
         </h2>
         <p className="mt-3 max-w-sm text-sm leading-relaxed text-ink-light">
-          Wybierz dogodny termin i zarezerwuj wizytę bez wychodzenia z domu. To
-          proste, szybkie i bezpieczne.
+          {copy.onlineBookingCta.subheading}
         </p>
 
         <ul className="mt-6 grid grid-cols-2 gap-x-4 gap-y-5 list-none p-0 sm:mt-8 sm:gap-x-6 sm:gap-y-6">
-          {features.map(({ icon: Icon, title, description }) => (
-            <li key={title}>
-              <span aria-hidden="true">
-                <Icon className="h-6 w-6 shrink-0 text-primary" />
-              </span>
-              <p className="mt-2 text-sm font-semibold text-secondary">
-                {title}
-              </p>
-              <p className="mt-0.5 text-xs leading-relaxed text-ink-light">
-                {description}
-              </p>
-            </li>
-          ))}
+          {copy.onlineBookingCta.features.map(({ id, title, description }) => {
+            const Icon = featureIcons[id];
+
+            return (
+              <li key={id}>
+                <span aria-hidden="true">
+                  <Icon className="h-6 w-6 shrink-0 text-primary" />
+                </span>
+                <p className="mt-2 text-sm font-semibold text-secondary">
+                  {title}
+                </p>
+                <p className="mt-0.5 text-xs leading-relaxed text-ink-light">
+                  {description}
+                </p>
+              </li>
+            );
+          })}
         </ul>
       </div>
 
-      <div className="relative flex items-center justify-center py-2 sm:py-4 lg:py-6">
-        <div className="hidden w-44 rotate-[2deg] rounded-lg bg-secondary p-2 pb-4 shadow-md md:block lg:w-56">
-          <DesktopBookingScreen />
-        </div>
-        <div className="w-36 shrink-0 rotate-[-3deg] rounded-[1.4rem] bg-secondary p-1.5 pt-3 shadow-md sm:w-40 md:-ml-8 md:w-36 lg:-ml-9 lg:w-32">
-          <span className="mx-auto mb-1 block h-1 w-6 rounded-full bg-ink-light" />
-          <PhoneBookingScreen />
+      <div
+        aria-hidden="true"
+        className="@container relative py-2 sm:py-4 lg:py-6"
+      >
+        <div className="relative mx-auto h-[calc(15rem*min(1,100cqw/25rem))]">
+          <div className="absolute left-1/2 top-0 flex origin-top -translate-x-1/2 scale-[min(1,calc(100cqw/25rem))] items-start justify-center">
+            <div className="hidden w-80 rotate-2 rounded-lg bg-secondary p-2 pb-4 shadow-md md:block">
+              <DesktopBookingScreen />
+            </div>
+            <div className="w-40 shrink-0 -rotate-3 rounded-[1.4rem] bg-secondary p-1.5 pt-3 shadow-md md:-ml-20 md:mt-6">
+              <span className="mx-auto mb-1 block h-1 w-6 rounded-full bg-ink-light" />
+              <PhoneBookingScreen />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -197,9 +199,9 @@ export const OnlineBookingCta = () => (
           <CalendarPlus className="h-7 w-7 shrink-0 text-primary" />
         </span>
         <p className="font-display text-xl font-bold leading-snug text-secondary">
-          Zarezerwuj wizytę
+          {copy.onlineBookingCta.finalHeadingLine1}
           <br />
-          już teraz!
+          {copy.onlineBookingCta.finalHeadingLine2}
         </p>
         <a
           href={BOOKING_URL}
@@ -207,9 +209,11 @@ export const OnlineBookingCta = () => (
           rel="noopener noreferrer"
           className="w-full rounded-xl bg-primary px-5 py-3 text-center text-sm font-bold text-white sm:w-auto sm:whitespace-nowrap"
         >
-          ZAREJESTRUJ WIZYTĘ ONLINE
+          {copy.onlineBookingCta.finalCta}
         </a>
-        <p className="text-xs text-ink-light">To zajmie tylko chwilę!</p>
+        <p className="text-xs text-ink-light">
+          {copy.onlineBookingCta.finalMicrocopy}
+        </p>
       </div>
     </div>
   </section>

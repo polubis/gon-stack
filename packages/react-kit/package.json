@@ -13,7 +13,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "check-types": "tsc --noEmit",
     "lint": "eslint src --max-warnings 0",
     "test": "vitest run",

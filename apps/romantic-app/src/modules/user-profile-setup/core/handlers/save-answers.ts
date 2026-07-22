@@ -12,7 +12,7 @@ export const saveAnswers = (store: Store, { ofType }: Bus) =>
       store.$error.reset();
     }),
     exhaustMap((ctrl) =>
-      from(saveUserProfileAnswers(store.$stepAnswers.get(), ctrl.signal)).pipe(
+      from(saveUserProfileAnswers(store.$allAnswers.get(), ctrl.signal)).pipe(
         tap(() => {
           store.$isSaved.set(true);
         }),

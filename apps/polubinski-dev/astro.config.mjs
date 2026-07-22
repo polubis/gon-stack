@@ -10,6 +10,8 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   site: 'https://polubinski.dev',
 
+  output: 'server',
+
   devToolbar: {
     enabled: false,
   },
@@ -31,11 +33,12 @@ export default defineConfig({
     // EADDRINUSE. The inspector is a debugging-only feature, unused in CI.
     inspectorPort: false,
 
-    // This site is fully static (mode: "static"), so Astro emits no server
-    // build and dist/server is empty. The default workerd prerenderer points
-    // a preview server at that empty dir, so /__astro_prerender answers 200
-    // with the string "[object Object]", which Astro writes as index.html.
-    // Prerender in Node instead; nothing here needs the workers runtime.
+    // The default "workerd" prerender environment spins up a second embedded
+    // Workers runtime just to render `prerender: true` pages, both in `astro
+    // dev` and at build time. That extra runtime is flaky on dev-server
+    // restarts (Vite dependency re-optimization) and can serve a blank page
+    // with a "server connection lost" console error. Render prerendered
+    // pages in plain Node instead; none of them touch Cloudflare bindings.
     prerenderEnvironment: 'node',
   }),
 

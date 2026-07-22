@@ -1,0 +1,85 @@
+{
+  "skill_name": "copyman",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Write homepage copy for a SaaS tool that automates employee onboarding. Target audience is HR directors at mid-size companies (200-2000 employees). Main differentiator is that it integrates with all major HRIS systems and cuts onboarding time from 2 weeks to 2 days.",
+      "assertions": [
+        "Checks for product-marketing.md",
+        "Full page copy by section: Headline/Subhead/CTA above fold, then Social Proof, Problem/Pain, Solution/Benefits, How It Works, Objection Handling, Final CTA",
+        "Uses '2 weeks to 2 days' specificity",
+        "CTAs action-oriented, not generic",
+        "2-3 headline alternatives w/ rationale",
+        "Annotations explaining copy choices",
+        "Meta content (SEO title + description)"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Rewrite this headline: 'An Innovative AI-Powered Platform for Streamlined Business Operations' — it's for a B2B SaaS tool that helps small businesses manage invoicing and payments.",
+      "assertions": [
+        "Flags jargon ('innovative,' 'AI-powered,' 'streamlined')",
+        "Flags vagueness + company-language-not-customer-language",
+        "2-3 alternative headlines using skill's formulas",
+        "Each alternative has rationale",
+        "Suggests a subheadline"
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "i need copy for my pricing page. we have three plans: starter ($29/mo), pro ($79/mo), business ($199/mo). it's a social media scheduling tool for marketers",
+      "assertions": [
+        "Applies Pricing page guidance: resolve 'which plan for me,' make recommended plan obvious",
+        "Benefit-oriented feature copy, not just feature names",
+        "Page headline, per-plan CTAs",
+        "FAQ/objection handling included",
+        "Alternatives for key elements"
+      ],
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Write copy for our About page. We're a 3-person startup that built a developer tool for database migrations. Founded because we kept losing data during migrations at our last jobs. Tone should be professional but human.",
+      "assertions": [
+        "Applies About page guidance: founder story, mission tied to customer benefit, still has CTA",
+        "Tone matches 'professional but human'",
+        "Personal pain connected to customer pain",
+        "Active voice, not corporate/generic"
+      ],
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Can you improve this CTA? We currently have 'Learn More' on our feature page for our analytics dashboard product.",
+      "assertions": [
+        "Flags 'Learn More' as weak CTA",
+        "Applies formula: [Verb] + [What they get] + [qualifier]",
+        "2-3 strong alternatives w/ rationale",
+        "Considers primary vs secondary CTA hierarchy"
+      ],
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "Write me a 5-email welcome sequence for new trial users of our project management tool.",
+      "assertions": [
+        "Recognizes this is email work, not page copy",
+        "Defers to emails skill",
+        "Does not write a full sequence using page-copy patterns"
+      ],
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "Review this copy and tell me what's wrong: 'We are extremely excited to announce our revolutionary, cutting-edge platform that will totally transform how businesses optimize their workflows! Sign up now!!'",
+      "assertions": [
+        "Flags exclamation points, buzzwords ('revolutionary,' 'cutting-edge,' 'optimize'), vague language, weak passive framing",
+        "Applies style rules: simple/specific/active/confident",
+        "Rewrites per principles, gives alternatives"
+      ],
+      "files": []
+    }
+  ]
+}

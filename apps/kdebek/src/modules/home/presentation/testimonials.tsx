@@ -1,28 +1,13 @@
-import { ArrowRight, MessageSquare, Quote, Star } from 'lucide-react';
+import { Quote, Star } from 'lucide-react';
 
+import { copy } from './copy';
 import { images } from './images';
-import { GOOGLE_REVIEWS_URL } from './links';
+import { BOOKING_URL, GOOGLE_REVIEWS_URL } from './links';
 
-const testimonials = [
-  {
-    name: 'Marek W.',
-    subtitle: 'Ból kręgosłupa',
-    initials: 'MW',
-    text: 'Bardzo profesjonalne podejście i widoczne efekty już po kilku wizytach. Ból, który towarzyszył mi od dawna, w końcu ustąpił. Polecam każdemu!',
-  },
-  {
-    name: 'Agnieszka N.',
-    subtitle: 'Powrót do formy po kontuzji',
-    initials: 'AN',
-    text: 'Po kontuzji stawu wróciłam do sprawności znacznie szybciej, niż zakładałam. Miła atmosfera i naprawdę fachowe podejście.',
-  },
-  {
-    name: 'Paweł D.',
-    subtitle: 'Napięcie karku i barków',
-    initials: 'PD',
-    text: 'Indywidualne podejście do każdego problemu i skuteczne metody pracy. Na każdej wizycie czuję się dobrze zaopiekowany.',
-  },
-];
+const reviewUrls = {
+  google: GOOGLE_REVIEWS_URL,
+  booksy: BOOKING_URL,
+} as const;
 
 const Stars = () => (
   <div className="flex gap-0.5 text-rating" aria-hidden="true">
@@ -32,53 +17,76 @@ const Stars = () => (
   </div>
 );
 
+const RatingSource = ({
+  name,
+  ratingValue,
+  reviewsCountLabel,
+  url,
+}: {
+  name: string;
+  ratingValue: string;
+  reviewsCountLabel: string;
+  url: string;
+}) => (
+  <div className="text-right">
+    <p className="flex items-center justify-end gap-1.5 text-2xl font-bold text-secondary">
+      <Star
+        className="h-5 w-5 shrink-0 fill-current text-rating"
+        aria-hidden="true"
+      />
+      {ratingValue}
+    </p>
+    <p className="text-sm text-ink-light">{name}</p>
+    <div className="mt-2 flex justify-end">
+      <Stars />
+    </div>
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="mt-1 inline-block text-sm text-ink-light underline"
+    >
+      {reviewsCountLabel}
+    </a>
+  </div>
+);
+
 export const Testimonials = () => (
   <section className="mx-auto max-w-7xl px-6 py-20">
     <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
       <div className="lg:col-span-2">
         <p className="text-xs font-bold tracking-[0.2em] text-primary">
-          OPINIE PACJENTÓW
+          {copy.testimonials.eyebrow}
         </p>
         <h2 className="mt-3 font-display text-3xl font-bold text-secondary sm:text-4xl">
-          Zaufanie, które procentuje
+          {copy.testimonials.heading}
         </h2>
         <p className="mt-3 max-w-lg text-ink-light">
-          Zobacz, co mówią osoby, które skorzystały z naszej pomocy. Ich
-          doświadczenie może być Twoją motywacją.
+          {copy.testimonials.subheading}
         </p>
       </div>
 
-      <div className="flex items-start justify-end gap-3 rounded-2xl">
-        <div className="text-right">
-          <p className="flex items-center justify-end gap-1.5 text-2xl font-bold text-secondary">
-            <Star
-              className="h-5 w-5 shrink-0 fill-current text-rating"
-              aria-hidden="true"
+      <div className="flex items-start justify-end gap-6 sm:gap-8">
+        {copy.testimonials.sources.map(
+          ({ id, name, ratingValue, reviewsCountLabel }) => (
+            <RatingSource
+              key={id}
+              name={name}
+              ratingValue={ratingValue}
+              reviewsCountLabel={reviewsCountLabel}
+              url={reviewUrls[id as keyof typeof reviewUrls]}
             />
-            5.0
-          </p>
-          <p className="text-sm text-ink-light">Średnia ocen w Google</p>
-          <div className="mt-2 flex justify-end">
-            <Stars />
-          </div>
-          <a
-            href={GOOGLE_REVIEWS_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-1 inline-block text-sm text-ink-light underline"
-          >
-            Na podstawie 240 opinii
-          </a>
-        </div>
+          ),
+        )}
       </div>
     </div>
 
-    <div className="mt-10 flex flex-col gap-5">
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-stretch">
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-          {testimonials.map(({ name, subtitle, text, initials }) => (
+    <div className="mt-10 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-stretch">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+        {copy.testimonials.items.map(
+          ({ id, name, subtitle, text, initials }) => (
             <article
-              key={name}
+              key={id}
               className="flex flex-col rounded-2xl bg-white p-6 shadow-sm ring-1 ring-line"
             >
               <div
@@ -104,30 +112,19 @@ export const Testimonials = () => (
                 </div>
               </div>
             </article>
-          ))}
-        </div>
-
-        <div className="relative aspect-[4/3] min-h-0 overflow-hidden rounded-3xl lg:aspect-auto lg:h-full">
-          <img
-            src={images.testimonials.therapy}
-            alt="Gabinet masażu i fizjoterapii"
-            loading="lazy"
-            decoding="async"
-            className="absolute inset-0 h-full w-full object-cover object-center"
-          />
-        </div>
+          ),
+        )}
       </div>
 
-      <a
-        href={GOOGLE_REVIEWS_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-1.5 text-sm font-medium text-primary"
-      >
-        <MessageSquare className="h-4 w-4 shrink-0" aria-hidden="true" />
-        Zobacz więcej opinii na Google
-        <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
-      </a>
+      <div className="relative aspect-[4/3] min-h-0 overflow-hidden rounded-3xl lg:aspect-auto lg:h-full">
+        <img
+          src={images.testimonials.therapy}
+          alt={copy.testimonials.imageAlt}
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover object-center"
+        />
+      </div>
     </div>
   </section>
 );

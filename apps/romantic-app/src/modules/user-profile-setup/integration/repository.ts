@@ -1,4 +1,5 @@
-import type { Schema } from '@/shared/server-contracts/schemas/get-user-profile-questions';
+import type { Schema } from '@/shared/server-contracts/schemas/save-user-profile-answers';
+import type { Schema as ConfigSchema } from '@/shared/server-contracts/schemas/get-user-profile-questions';
 import {
   type Answers,
   type Step,
@@ -17,7 +18,7 @@ export const getConfig = async (signal: AbortSignal): Promise<Step[]> => {
     throw new Error('Failed to fetch config');
   }
 
-  const data = (await response.json()) as InferOut<Schema['out'], 200>;
+  const data = (await response.json()) as InferOut<ConfigSchema['out'], 200>;
 
   return data.groups.map((group) => ({
     id: group.id as StepId,
@@ -28,11 +29,25 @@ export const getConfig = async (signal: AbortSignal): Promise<Step[]> => {
   }));
 };
 
+const getErrorMessage = (
+  data:
+    | InferOut<Schema['out'], 400>
+    | InferOut<Schema['out'], 401>
+    | InferOut<Schema['out'], 500>
+    | null,
+) => {
+  if (data && 'message' in data) {
+    return data.message;
+  }
+
+  return 'Failed to save profile answers.';
+};
+
 export const saveUserProfileAnswers = async (
   answers: Answers,
   signal?: AbortSignal,
 ): Promise<void> => {
-  await fetch('/api/user-profile/save-answers', {
+  const response = await fetch('/api/user-profile/save-answers', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -40,4 +55,12 @@ export const saveUserProfileAnswers = async (
     body: JSON.stringify({ answers }),
     signal,
   });
+
+  const data = (await response.json()) as InferOut<Schema['out']>;
+
+  if (data.code === 200) {
+    return;
+  }
+
+  throw new Error(getErrorMessage(data));
 };

@@ -233,7 +233,7 @@ const commands = {
       route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ ok: true }),
+        body: JSON.stringify({ code: 200, ok: true }),
       }),
     ),
   'im on user profile setup page': (page) => page.goto('/user-profile-setup'),

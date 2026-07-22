@@ -1,5 +1,4 @@
 import { About } from './about';
-import { Blog } from './blog';
 import { Footer } from './footer';
 import { Hero } from './hero';
 import { Navbar } from './navbar';
@@ -13,10 +12,9 @@ export const Main = () => (
     <main data-e2e="home:main">
       <Hero />
       <Testimonials />
-      <OnlineBookingCta />
       <About />
-      <Blog />
       <Offer />
+      <OnlineBookingCta />
     </main>
     <Footer />
   </>

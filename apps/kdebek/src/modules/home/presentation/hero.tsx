@@ -1,5 +1,6 @@
 import { Calendar, Info, Quote, ShieldCheck } from 'lucide-react';
 import { BookingWidget } from './booking-widget';
+import { copy } from './copy';
 import { images } from './images';
 import { BOOKING_URL } from './links';
 import { ServicesGrid } from './services-grid';
@@ -20,19 +21,18 @@ export const Hero = () => (
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 pb-24 pt-16 md:pb-10 lg:grid-cols-2 lg:pb-32 lg:pt-20">
         <div className="relative z-10">
           <p className="text-xs font-bold tracking-[0.2em] text-primary">
-            ZDROWIE &nbsp;•&nbsp; RUCH &nbsp;•&nbsp; LEPSZA JAKOŚĆ ŻYCIA
+            {copy.hero.eyebrow}
           </p>
           <h1
             data-e2e="home:hero-heading"
             className="mt-4 font-display text-4xl font-bold leading-[1.15] text-secondary sm:text-5xl"
           >
-            Profesjonalna fizjoterapia
+            {copy.hero.headingLine1}
             <br />
-            <span className="text-primary">dopasowana do Ciebie</span>
+            <span className="text-primary">{copy.hero.headingLine2}</span>
           </h1>
           <p className="mt-5 max-w-md text-base leading-relaxed text-ink-light">
-            Pomagam wrócić do sprawności, złagodzić ból i zapobiegać kontuzjom.
-            Indywidualne podejście, skuteczne metody, realne efekty.
+            {copy.hero.subheading}
           </p>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -43,14 +43,14 @@ export const Hero = () => (
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold uppercase text-white shadow-sm sm:w-auto sm:justify-start"
             >
               <Calendar className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
-              Umów się
+              {copy.hero.ctaPrimary}
             </a>
             <a
               href="#o-mnie"
               className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-primary px-5 py-3 text-sm font-bold uppercase text-primary sm:w-auto sm:justify-start"
             >
               <Info className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
-              Więcej
+              {copy.hero.ctaSecondary}
             </a>
           </div>
 
@@ -59,7 +59,7 @@ export const Hero = () => (
               className="h-4.5 w-4.5 shrink-0 text-primary"
               aria-hidden="true"
             />
-            Bezpiecznie &nbsp;•&nbsp; Skutecznie &nbsp;•&nbsp; Z myślą o Tobie
+            {copy.hero.trustLine}
           </p>
         </div>
 
@@ -67,7 +67,7 @@ export const Hero = () => (
           <div className="w-full overflow-hidden rounded-[3rem] shadow-md">
             <img
               src={images.hero}
-              alt="Kacper Dębek — fizjoterapeuta"
+              alt={copy.hero.imageAlt}
               loading="eager"
               fetchPriority="high"
               decoding="async"
@@ -89,8 +89,7 @@ export const Hero = () => (
         <blockquote className="mt-10 flex items-start gap-4 rounded-2xl bg-surface px-6 py-5 ring-1 ring-line">
           <Quote className="h-6 w-6 shrink-0 text-primary" aria-hidden="true" />
           <p className="font-display text-base italic text-secondary">
-            Twoje ciało zasługuje na najlepszą opiekę. Razem osiągniemy Twój
-            cel.
+            {copy.hero.quote}
           </p>
         </blockquote>
       </div>

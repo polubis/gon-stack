@@ -1,13 +1,20 @@
+import { Pause, Play } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
+import { copy } from './copy';
 import { images } from './images';
 
-const slides = images.about.gallery;
+const slides = images.about.gallery.map((src, index) => ({
+  src,
+  alt: copy.aboutGallery.slides[index],
+}));
 const AUTOPLAY_MS = 5000;
 
 export const AboutGallery = () => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isManuallyPaused, setIsManuallyPaused] = useState(false);
+  const isPaused = isHovered || isManuallyPaused;
 
   const goNext = useCallback(() => {
     setActiveIndex((index) => (index + 1) % slides.length);
@@ -24,10 +31,10 @@ export const AboutGallery = () => {
     <div
       className="relative w-full"
       role="region"
-      aria-label="Galeria zdjęć"
+      aria-label={copy.aboutGallery.ariaLabel}
       aria-live="polite"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <div className="overflow-hidden rounded-3xl ring-1 ring-line">
         <div
@@ -48,8 +55,26 @@ export const AboutGallery = () => {
           ))}
         </div>
       </div>
+      <button
+        type="button"
+        aria-label={
+          isManuallyPaused
+            ? copy.aboutGallery.ariaPlay
+            : copy.aboutGallery.ariaPause
+        }
+        aria-pressed={isManuallyPaused}
+        onClick={() => setIsManuallyPaused((paused) => !paused)}
+        className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-white text-secondary shadow-[0_4px_14px_rgba(15,23,42,0.35)] ring-1 ring-line outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      >
+        {isManuallyPaused ? (
+          <Play className="h-4 w-4 shrink-0" aria-hidden="true" />
+        ) : (
+          <Pause className="h-4 w-4 shrink-0" aria-hidden="true" />
+        )}
+      </button>
       <span className="sr-only">
-        Slajd {activeIndex + 1} z {slides.length}
+        {copy.aboutGallery.srOnlyPrefix} {activeIndex + 1}{' '}
+        {copy.aboutGallery.srOnlySeparator} {slides.length}
       </span>
     </div>
   );

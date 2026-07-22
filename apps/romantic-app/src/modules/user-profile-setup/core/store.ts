@@ -43,6 +43,14 @@ export const createStore = () => {
           return acc;
         }, {}),
     ),
+    $allAnswers: computed([$steps], (steps) =>
+      steps.reduce<Answers>((acc, step) => {
+        for (const question of step.questions) {
+          acc[question.key] = question.value;
+        }
+        return acc;
+      }, {}),
+    ),
     $hasError: computed([$error], (error) => Boolean(error)),
   };
 };

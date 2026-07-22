@@ -9,6 +9,7 @@ export const Final = () => {
   const steps = ctx.useSteps();
   const isSaving = ctx.useIsSaving();
   const isSaved = ctx.useIsSaved();
+  const error = ctx.useError();
 
   const summaryItems = steps.flatMap((step) =>
     step.questions.map((question) => {
@@ -63,6 +64,8 @@ export const Final = () => {
           Profile saved. You are ready to start playing.
         </Alert>
       )}
+
+      {error && <Alert variant="error">{error}</Alert>}
 
       <div className="flex items-center justify-between gap-3">
         <Button type="button" variant="secondary" onClick={ctx.editAnswers}>

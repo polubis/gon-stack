@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './fonts.css';
 
 @theme {
   --font-display: 'Playfair Display', ui-serif, Georgia, serif;
@@ -25,6 +26,8 @@
 
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+  --z-index-sticky-header: 50;
 }
 
 @layer base {

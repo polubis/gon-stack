@@ -275,7 +275,7 @@ const Footer = () => (
         >
           Design by Małgorzata Kruszyńska
         </a>
-        <div className="flex justify-end">
+        <div className="flex justify-center ltp:justify-end">
           <a
             href={appConfig.footerSection.greenOnSoftwareLink}
             target="_blank"
