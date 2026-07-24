@@ -30,6 +30,14 @@ export default defineConfig({
     // Cloudflare apps in parallel they race on that port and one fails with
     // EADDRINUSE. The inspector is a debugging-only feature, unused in CI.
     inspectorPort: false,
+
+    // The default "workerd" prerender environment spins up a second embedded
+    // Workers runtime just to render `prerender: true` pages, both in `astro
+    // dev` and at build time. That extra runtime is flaky on dev-server
+    // restarts (Vite dependency re-optimization) and can serve a blank page
+    // with a "server connection lost" console error. Render prerendered
+    // pages in plain Node instead; none of them touch Cloudflare bindings.
+    prerenderEnvironment: 'node',
   }),
 
   integrations: [react()],

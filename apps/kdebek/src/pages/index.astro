@@ -1,6 +1,8 @@
 ---
+export const prerender = true;
+
 import MainLayout from '@/core/layouts/main.astro';
-import { Module, copy } from '@/core/modules/home';
+import { Main as Module, copy } from '@/modules/home';
 ---
 
 <MainLayout title={copy.meta.title} description={copy.meta.description}>

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
+import { seedAcceptedConsent } from '@/__e2e__/cookie-consent';
 
 const { describe } = test;
 
@@ -18,6 +19,7 @@ for (const [name, viewport] of Object.entries(viewports)) {
       // pauseAt (not install alone) actually freezes time, so the
       // about-gallery carousel's autoplay setInterval never fires
       'i freeze time': (page) => page.clock.pauseAt(new Date()),
+      'i have already accepted cookies': (page) => seedAcceptedConsent(page),
       'im on the home page': (page) => page.goto('/'),
       // decode() (unlike the load event) guarantees the browser has
       // actually rasterized the image and it's safe to paint - complete/
@@ -47,6 +49,7 @@ for (const [name, viewport] of Object.entries(viewports)) {
     test('home page matches visual baseline', async ({ page }) => {
       await interpreter(commands, page)(
         ['i freeze time'],
+        ['i have already accepted cookies'],
         ['im on the home page'],
         ['all images should be loaded'],
         ['i should match the home page screenshot'],

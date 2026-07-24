@@ -220,7 +220,7 @@ export const copy = {
     ariaExpandPrefix: 'Rozwiń',
     ariaCollapsePrefix: 'Zwiń',
     ctaAllServices: 'Zobacz wszystkie usługi',
-    ctaBook: 'Umów wizytę online',
+    ctaBook: 'Umów wizytę',
     privateServices: [
       {
         id: 'therapeutic-massage',
@@ -443,8 +443,8 @@ export const copy = {
           { label: 'Czas trwania zabiegu' },
           { label: 'Przygotowanie do wizyty' },
           { label: 'FAQ – najczęstsze pytania' },
-          { label: 'Regulamin', href: '#' },
-          { label: 'Polityka prywatności', href: '#' },
+          { label: 'Regulamin' },
+          { label: 'Polityka prywatności', href: '/polityka-prywatnosci' },
         ],
       },
       {

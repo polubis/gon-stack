@@ -1,11 +1,13 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
-import { test, type Ctx } from '../../../__e2e__/test';
+import { seedAcceptedConsent } from '@/__e2e__/cookie-consent';
+import { test, type Ctx } from '@/__e2e__/test';
 
 const { describe, use } = test;
 
 const commands = {
+  'i have already accepted cookies': ({ page }) => seedAcceptedConsent(page),
   'im on the home page': ({ page }) => page.goto('/'),
   'it should have no wcag violations': async ({ page }) => {
     const { violations } = await new AxeBuilder({ page })
@@ -40,6 +42,7 @@ const commands = {
 describe('home page accessibility', () => {
   test('has no automatic wcag violations', async ({ page, getByE2e }) => {
     await interpreter(commands, { page, getByE2e })(
+      ['i have already accepted cookies'],
       ['im on the home page'],
       ['it should have no wcag violations'],
     );
@@ -53,6 +56,7 @@ describe('home page accessibility', () => {
       getByE2e,
     }) => {
       await interpreter(commands, { page, getByE2e })(
+        ['i have already accepted cookies'],
         ['im on the home page'],
         ['the mobile nav toggle should be collapsed'],
         ['the mobile nav menu should be hidden'],

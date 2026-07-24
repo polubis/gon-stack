@@ -247,7 +247,6 @@ export const useApi: UseApi = <TData>(
       (data): Result<TData> => ({ is: 'ok', data }),
       (error): Result<TData> => ({ is: 'fail', error: APIError.from(error) }),
     );
-
     // A newer call already replaced this controller; let its result win
     // instead of clobbering fresher state with this stale one.
     if (abortController.current === ctrl) {

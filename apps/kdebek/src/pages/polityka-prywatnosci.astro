@@ -1,0 +1,10 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { Main as Module, copy } from '@/modules/privacy-policy';
+---
+
+<MainLayout title={copy.meta.title} description={copy.meta.description}>
+  <Module client:load />
+</MainLayout>

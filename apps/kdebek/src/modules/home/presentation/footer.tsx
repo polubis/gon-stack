@@ -191,7 +191,7 @@ export const Footer = () => (
               <ul className="mt-4 space-y-2.5">
                 {links.map((link) => {
                   const href = link.href ?? BOOKING_URL;
-                  const isExternal = href !== '#';
+                  const isExternal = href !== '#' && !href.startsWith('/');
 
                   return (
                     <li key={link.label}>

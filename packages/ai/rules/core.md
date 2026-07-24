@@ -7,6 +7,10 @@
 - No direct colors/spacing/z-index/fonts — main stylesheet vars only
 - No built-in Tailwind palette. Own palette always
 
+## Testing e2e
+
+- Use `getByE2e` and data-e2e for selectors with convention: `region:selector-name`
+
 ## React
 
 - Context: `context()` from `@react-kit`
@@ -31,3 +35,7 @@
 
 // public module code (exported one)
 ```
+
+## Imports
+
+- Absolute imports via `@/`

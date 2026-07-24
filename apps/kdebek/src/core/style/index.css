@@ -17,6 +17,7 @@
   --color-logo-mark: #9ca3af;
   --color-logo-accent: #2e9bf5;
   --color-dot-grid: #94a3b8;
+  --color-overlay: rgba(11, 37, 69, 0.6);
 
   --text-3xs: 0.5rem;
   --text-2xs: 0.6875rem;
@@ -28,6 +29,7 @@
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
 
   --z-index-sticky-header: 50;
+  --z-index-cookies: 100;
 }
 
 @layer base {
