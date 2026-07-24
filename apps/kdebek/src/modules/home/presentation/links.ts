@@ -5,7 +5,7 @@ export const GOOGLE_REVIEWS_URL = 'https://maps.app.goo.gl/E6EpVcEyoS1Bhvm5A';
 
 export const GREENON_URL = 'https://greenonsoftware.com';
 
-export const CONTACT_EMAIL = 'kontakt@kacperdebek.pl';
+export const CONTACT_EMAIL = 'biuro.masazdebek@gmail.com';
 
 export const CONTACT_PHONE = '+48 666 735 220';
 

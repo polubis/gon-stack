@@ -279,7 +279,7 @@ export const copy = {
         id: 'office-massage',
         title: 'Masaż biurowy',
         description:
-          'Krótkie sesje masażu dla pracowników biurowych — w gabinecie lub u klienta. Łagodzą napięcie po długim siedzeniu i wspierają dobre samopoczucie zespołu.',
+          'Krótkie sesje masażu dla pracowników biurowych u klienta w firmie. Łagodzą napięcie po długim siedzeniu i wspierają dobre samopoczucie zespołu.',
         price: 'wycena indywidualna',
         videoUrl: 'https://www.youtube-nocookie.com/embed/nn3lrCW5dgk',
         videoTitle: 'Masaż biurowy dla firm — Kacper Dębek',
@@ -415,7 +415,7 @@ export const copy = {
     brandName: 'Kacper Dębek',
     brandTag: 'masazysta-olsztyn.pl',
     description:
-      'Certyfikowany technik masażysta w Olsztynie. Masaż leczniczy i klasyczny oparte na indywidualnym podejściu i 5-letnim doświadczeniu.',
+      'Certyfikowany technik masażysta w Olsztynie. Masaż leczniczy i klasyczny oparty na indywidualnym podejściu i 5-letnim doświadczeniu.',
     socialLinks: [
       { id: 'facebook', label: 'Facebook' },
       { id: 'instagram', label: 'Instagram' },
@@ -476,7 +476,7 @@ export const copy = {
       },
       email: {
         title: 'Napisz do nas',
-        address: 'kontakt@kacperdebek.pl',
+        address: 'biuro.masazdebek@gmail.com',
         linkLine1: 'Odpowiemy najszybciej',
         linkLine2: 'jak to możliwe',
       },

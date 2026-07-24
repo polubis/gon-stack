@@ -17,7 +17,7 @@ export const copy = {
       title: '1. Postanowienia ogólne',
       paragraphs: [
         'Niniejsza Polityka Prywatności opisuje zasady przetwarzania danych osobowych oraz wykorzystywania plików cookie w związku z korzystaniem ze strony internetowej masazysta-olsztyn.pl.',
-        'Administratorem danych osobowych jest Kacper Dębek, prowadzący gabinet masażu pod adresem ul. Profesorska 9A, 10-080 Olsztyn. W sprawach związanych z przetwarzaniem danych osobowych można kontaktować się pod adresem e-mail kontakt@kacperdebek.pl lub telefonicznie pod numerem +48 666 735 220.',
+        'Administratorem danych osobowych jest Kacper Dębek, prowadzący gabinet masażu pod adresem ul. Profesorska 9A, 10-080 Olsztyn. W sprawach związanych z przetwarzaniem danych osobowych można kontaktować się pod adresem e-mail biuro.masazdebek@gmail.com lub telefonicznie pod numerem +48 666 735 220.',
       ],
     },
     {
@@ -99,7 +99,7 @@ export const copy = {
       id: 'kontakt',
       title: '11. Kontakt',
       paragraphs: [
-        'W sprawach dotyczących niniejszej Polityki Prywatności oraz przetwarzania danych osobowych możesz skontaktować się z nami pod adresem e-mail kontakt@kacperdebek.pl, telefonicznie pod numerem +48 666 735 220 lub listownie na adres: ul. Profesorska 9A, 10-080 Olsztyn.',
+        'W sprawach dotyczących niniejszej Polityki Prywatności oraz przetwarzania danych osobowych możesz skontaktować się z nami pod adresem e-mail biuro.masazdebek@gmail.com, telefonicznie pod numerem +48 666 735 220 lub listownie na adres: ul. Profesorska 9A, 10-080 Olsztyn.',
       ],
     },
   ],

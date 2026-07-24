@@ -4,6 +4,7 @@
   "scripts": {
     "skills:update": "pnpm dlx skills update -y",
     "build": "turbo run build",
+    "deploy": "turbo run deploy",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "check-types": "turbo run check-types",
