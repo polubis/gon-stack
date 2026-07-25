@@ -1,16 +1,22 @@
 import { Pause, Play } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
-import { copy } from './copy';
-import { images } from './images';
+import type { ResolvedImage } from '../domain/models';
 
-const slides = images.about.gallery.map((src, index) => ({
-  src,
-  alt: copy.aboutGallery.slides[index],
-}));
+import { copy } from './copy';
+import { OptimizedImage } from './optimized-image';
+
 const AUTOPLAY_MS = 5000;
 
-export const AboutGallery = () => {
+type AboutGalleryProps = {
+  images: ResolvedImage[];
+};
+
+export const AboutGallery = ({ images }: AboutGalleryProps) => {
+  const slides = images.map((image, index) => ({
+    image,
+    alt: copy.aboutGallery.slides[index] ?? '',
+  }));
   const [activeIndex, setActiveIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isManuallyPaused, setIsManuallyPaused] = useState(false);
@@ -18,7 +24,7 @@ export const AboutGallery = () => {
 
   const goNext = useCallback(() => {
     setActiveIndex((index) => (index + 1) % slides.length);
-  }, []);
+  }, [slides.length]);
 
   useEffect(() => {
     if (isPaused) return;
@@ -41,10 +47,10 @@ export const AboutGallery = () => {
           className="flex items-start transition-transform duration-700 ease-in-out motion-reduce:transition-none"
           style={{ transform: `translateX(-${activeIndex * 100}%)` }}
         >
-          {slides.map(({ src, alt }, index) => (
-            <figure key={src} className="w-full shrink-0">
-              <img
-                src={src}
+          {slides.map(({ image, alt }, index) => (
+            <figure key={image.src} className="w-full shrink-0">
+              <OptimizedImage
+                image={image}
                 alt={alt}
                 loading={index === 0 ? 'eager' : 'lazy'}
                 decoding="async"

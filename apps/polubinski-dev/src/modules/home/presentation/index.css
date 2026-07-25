@@ -35,7 +35,13 @@
 .stat-link:hover .stat-icon {
   animation: stat-icon-hop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   color: var(--primary-400);
-  filter: drop-shadow(0 0 8px rgba(13, 217, 125, 0.9));
+  filter: drop-shadow(
+    0 0 6px color-mix(in srgb, var(--primary-500) 50%, transparent)
+  );
+}
+
+.stat-chip {
+  box-shadow: 0 0 8px color-mix(in srgb, var(--primary-500) 4%, transparent);
 }
 
 .stat-link:hover .stat-ping {

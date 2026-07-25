@@ -1,11 +1,18 @@
 import { Calendar, Info, Quote, ShieldCheck } from 'lucide-react';
+
+import type { ResolvedImage } from '../domain/models';
+
 import { BookingWidget } from './booking-widget';
 import { copy } from './copy';
-import { images } from './images';
 import { BOOKING_URL } from './links';
+import { OptimizedImage } from './optimized-image';
 import { ServicesGrid } from './services-grid';
 
-export const Hero = () => (
+type HeroProps = {
+  image: ResolvedImage;
+};
+
+export const Hero = ({ image }: HeroProps) => (
   <section className="relative">
     <div className="relative overflow-hidden">
       <div
@@ -65,13 +72,13 @@ export const Hero = () => (
 
         <div className="relative z-10">
           <div className="w-full overflow-hidden rounded-[3rem] shadow-md">
-            <img
-              src={images.hero}
+            <OptimizedImage
+              image={image}
               alt={copy.hero.imageAlt}
               loading="eager"
               fetchPriority="high"
               decoding="async"
-              className="block w-full h-auto rounded-[3rem]"
+              className="block h-auto w-full rounded-[3rem]"
             />
           </div>
 

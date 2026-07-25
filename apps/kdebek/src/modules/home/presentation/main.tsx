@@ -1,3 +1,5 @@
+import type { HomeImages } from '../domain/models';
+
 import { About } from './about';
 import { Footer } from './footer';
 import { Hero } from './hero';
@@ -6,13 +8,17 @@ import { Offer } from './offer';
 import { OnlineBookingCta } from './online-booking-cta';
 import { Testimonials } from './testimonials';
 
-export const Main = () => (
+type MainProps = {
+  images: HomeImages;
+};
+
+export const Main = ({ images }: MainProps) => (
   <>
     <Navbar />
     <main data-e2e="home:main">
-      <Hero />
-      <Testimonials />
-      <About />
+      <Hero image={images.hero} />
+      <Testimonials image={images.therapy} />
+      <About galleryImages={images.gallery} />
       <Offer />
       <OnlineBookingCta />
     </main>

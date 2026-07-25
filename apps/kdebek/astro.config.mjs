@@ -23,7 +23,7 @@ export default defineConfig({
       enabled: true,
     },
 
-    imageService: 'cloudflare',
+    imageService: 'compile',
 
     // Disable the workerd dev-inspector during build. It binds a fixed port
     // (default 9229) via @cloudflare/vite-plugin; when Turbo builds multiple

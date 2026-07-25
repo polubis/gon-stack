@@ -1,5 +1,9 @@
 # Web dev rules
 
+## General
+
+- Minimalistic code (less characters or complex names then better)
+
 ## Style
 
 - `cn()` + Tailwind from `@react-kit`
@@ -38,4 +42,5 @@
 
 ## Imports
 
-- Absolute imports via `@/`
+- Absolute imports via `@/` for cross-module paths (e.g. `@/shared/...`, `@/assets/...`, `@/modules/foo` from pages)
+- Inside a module, use relative imports between its own layers (e.g. `../domain/models`, `./copy`)

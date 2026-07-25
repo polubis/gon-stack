@@ -1,8 +1,10 @@
 import { Quote, Star } from 'lucide-react';
 
+import type { ResolvedImage } from '../domain/models';
+
 import { copy } from './copy';
-import { images } from './images';
 import { BOOKING_URL, GOOGLE_REVIEWS_URL } from './links';
+import { OptimizedImage } from './optimized-image';
 
 const reviewUrls = {
   google: GOOGLE_REVIEWS_URL,
@@ -51,7 +53,11 @@ const RatingSource = ({
   </div>
 );
 
-export const Testimonials = () => (
+type TestimonialsProps = {
+  image: ResolvedImage;
+};
+
+export const Testimonials = ({ image }: TestimonialsProps) => (
   <section className="mx-auto max-w-7xl px-6 py-20">
     <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
       <div className="lg:col-span-2">
@@ -117,8 +123,8 @@ export const Testimonials = () => (
       </div>
 
       <div className="relative aspect-[4/3] min-h-0 overflow-hidden rounded-3xl lg:aspect-auto lg:h-full">
-        <img
-          src={images.testimonials.therapy}
+        <OptimizedImage
+          image={image}
           alt={copy.testimonials.imageAlt}
           loading="lazy"
           decoding="async"

@@ -10,6 +10,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+import type { ResolvedImage } from '../domain/models';
+
 import { AboutGallery } from './about-gallery';
 import { Counter } from './counter';
 import { copy } from './copy';
@@ -29,7 +31,11 @@ const statIcons: Record<string, LucideIcon> = {
   courses: BookOpen,
 };
 
-export const About = () => (
+type AboutProps = {
+  galleryImages: ResolvedImage[];
+};
+
+export const About = ({ galleryImages }: AboutProps) => (
   <section id="o-mnie" className="scroll-mt-28 bg-white py-20">
     <div className="mx-auto max-w-7xl px-6">
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
@@ -88,7 +94,7 @@ export const About = () => (
           </blockquote>
         </div>
 
-        <AboutGallery />
+        <AboutGallery images={galleryImages} />
       </div>
     </div>
 
