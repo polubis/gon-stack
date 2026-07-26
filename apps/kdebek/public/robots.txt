@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://masazysta-olsztyn.pl/sitemap-index.xml

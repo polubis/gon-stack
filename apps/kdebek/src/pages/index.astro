@@ -3,23 +3,25 @@ export const prerender = true;
 
 import MainLayout from '@/core/layouts/main.astro';
 import { Main as Module, resolveHomeImages } from '@/modules/home';
+import { copy } from '@/modules/home/presentation/copy';
 
-// `site` is configured in astro.config.mjs; normalized in src/middleware.ts.
 const domain = Astro.locals.siteDomain;
-const imageUrl = `${domain}/logo.webp`;
+const imageUrl = `${domain}/og.webp`;
 
 const images = await resolveHomeImages();
 ---
 
 <MainLayout
-  siteName="Kacper Dębek — masaż leczniczy i klasyczny | masazysta-olsztyn.pl"
+  siteName={copy.meta.siteName}
   url="/"
-  imageAlt="Kacper Dębek Biuro Masaż — logo"
+  imageAlt={copy.meta.imageAlt}
   domain={domain}
   imageUrl={imageUrl}
-  keywords="masaż Olsztyn, masaż leczniczy Olsztyn, masaż klasyczny Olsztyn, masaż sportowy Olsztyn, masaż tkanek głębokich, masażysta Olsztyn, technik masażysta Olsztyn, certyfikowany masażysta, gabinet masażu Olsztyn, Kacper Dębek, ból pleców masaż, ból karku masaż, ból barków masaż, rwy kulszowa masaż, napięcia mięśniowe, ulga w bólu kręgosłupa, regeneracja po treningu, masaż biurowy dla firm, rezerwacja masażu online, umów wizytę Booksy, masaż pleców Olsztyn, Warmia masaż, masazysta-olsztyn.pl"
-  title="Kacper Dębek — masaż leczniczy i klasyczny"
-  description="Kacper Dębek – certyfikowany technik masażysta w Olsztynie. Masaż leczniczy, klasyczny, sportowy i tkanek głębokich. Ulga w bólu pleców, karku i barków. Umów wizytę online."
+  ogImageWidth={1200}
+  ogImageHeight={630}
+  keywords={copy.meta.keywords}
+  title={copy.meta.title}
+  description={copy.meta.description}
 >
   <Module client:load images={images} />
 </MainLayout>

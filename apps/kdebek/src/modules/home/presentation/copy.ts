@@ -21,9 +21,14 @@ const reviewTrustLine = reviewSources
 
 export const copy = {
   meta: {
+    siteName:
+      'Kacper Dębek — masaż leczniczy i klasyczny | masazysta-olsztyn.pl',
     title: 'Kacper Dębek — masaż leczniczy i klasyczny',
     description:
-      'Kacper Dębek – certyfikowany technik masażysta w Olsztynie. Masaż leczniczy i klasyczny, indywidualne podejście do bólu i napięć mięśniowych. Umów wizytę online.',
+      'Kacper Dębek – certyfikowany technik masażysta w Olsztynie. Masaż leczniczy, klasyczny, sportowy i tkanek głębokich. Ulga w bólu pleców, karku i barków. Umów wizytę online.',
+    keywords:
+      'masaż Olsztyn, masaż leczniczy Olsztyn, masaż klasyczny Olsztyn, masaż sportowy Olsztyn, masaż tkanek głębokich, masażysta Olsztyn, technik masażysta Olsztyn, certyfikowany masażysta, gabinet masażu Olsztyn, Kacper Dębek, ból pleców masaż, ból karku masaż, ból barków masaż, rwy kulszowa masaż, napięcia mięśniowe, ulga w bólu kręgosłupa, regeneracja po treningu, masaż biurowy dla firm, rezerwacja masażu online, umów wizytę Booksy, masaż pleców Olsztyn, Warmia masaż, masazysta-olsztyn.pl',
+    imageAlt: 'Kacper Dębek — masażysta',
   },
 
   navbar: {

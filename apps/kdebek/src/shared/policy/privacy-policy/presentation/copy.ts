@@ -1,8 +1,13 @@
 export const copy = {
   meta: {
+    siteName:
+      'Kacper Dębek — masaż leczniczy i klasyczny | masazysta-olsztyn.pl',
     title: 'Polityka prywatności — Kacper Dębek',
     description:
-      'Polityka prywatności gabinetu masażu Kacper Dębek — jakie dane zbieramy, w jakim celu je przetwarzamy oraz jakie prawa Ci przysługują.',
+      'Polityka prywatności i cookies gabinetu masażu Kacper Dębek w Olsztynie — jakie dane zbieramy, w jakim celu je przetwarzamy oraz jakie prawa Ci przysługują.',
+    keywords:
+      'polityka prywatności, polityka cookies, RODO, ochrona danych osobowych, administrator danych, zgoda na cookies, przetwarzanie danych, pliki cookie, Kacper Dębek, gabinet masażu Olsztyn, masaż Olsztyn, masazysta-olsztyn.pl, Booksy rezerwacja',
+    imageAlt: 'Kacper Dębek — masażysta',
   },
 
   header: {

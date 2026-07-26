@@ -2,22 +2,23 @@
 export const prerender = true;
 
 import MainLayout from '@/core/layouts/main.astro';
-import { Main as Module } from '@/modules/privacy-policy';
+import { Main as Module, copy } from '@/modules/privacy-policy';
 
-// `site` is configured in astro.config.mjs; normalized in src/middleware.ts.
 const domain = Astro.locals.siteDomain;
-const imageUrl = `${domain}/logo.webp`;
+const imageUrl = `${domain}/og.webp`;
 ---
 
 <MainLayout
-  siteName="Kacper Dębek — masaż leczniczy i klasyczny | masazysta-olsztyn.pl"
+  siteName={copy.meta.siteName}
   url="/polityka-prywatnosci/"
-  imageAlt="Kacper Dębek Biuro Masaż — logo"
+  imageAlt={copy.meta.imageAlt}
   domain={domain}
   imageUrl={imageUrl}
-  keywords="polityka prywatności, polityka cookies, RODO, ochrona danych osobowych, administrator danych, zgoda na cookies, przetwarzanie danych, pliki cookie, Kacper Dębek, gabinet masażu Olsztyn, masaż Olsztyn, masazysta-olsztyn.pl, Booksy rezerwacja"
-  title="Polityka prywatności — Kacper Dębek"
-  description="Polityka prywatności i cookies gabinetu masażu Kacper Dębek w Olsztynie — jakie dane zbieramy, w jakim celu je przetwarzamy oraz jakie prawa Ci przysługują."
+  ogImageWidth={1200}
+  ogImageHeight={630}
+  keywords={copy.meta.keywords}
+  title={copy.meta.title}
+  description={copy.meta.description}
 >
   <Module />
 </MainLayout>
