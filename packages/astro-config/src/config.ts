@@ -12,6 +12,7 @@ export type CreateAstroConfigOptions = {
 export const createAstroConfig = ({ site }: CreateAstroConfigOptions) =>
   defineConfig({
     site,
+    trailingSlash: 'always',
 
     output: 'server',
 

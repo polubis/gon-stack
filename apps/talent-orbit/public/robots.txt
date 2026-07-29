@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://talent-orbit.com/sitemap-index.xml

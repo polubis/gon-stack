@@ -449,7 +449,7 @@ export const copy = {
           { label: 'Przygotowanie do wizyty' },
           { label: 'FAQ – najczęstsze pytania' },
           { label: 'Regulamin' },
-          { label: 'Polityka prywatności', href: '/polityka-prywatnosci' },
+          { label: 'Polityka prywatności', href: '/polityka-prywatnosci/' },
         ],
       },
       {

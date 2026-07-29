@@ -5,7 +5,8 @@ import { seedAcceptedConsent } from '@/__e2e__/cookie-consent';
 
 const commands = {
   'i have already accepted cookies': (page) => seedAcceptedConsent(page),
-  'im on the privacy policy page': (page) => page.goto('/polityka-prywatnosci'),
+  'im on the privacy policy page': (page) =>
+    page.goto('/polityka-prywatnosci/'),
   'it should have no wcag violations': async (page) => {
     const { violations } = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])

@@ -25,7 +25,7 @@ for (const [name, viewport] of Object.entries(viewports)) {
       'i have already accepted cookies': ({ page }) =>
         seedAcceptedConsent(page),
       'im on the privacy policy page': ({ page }) =>
-        page.goto('/polityka-prywatnosci'),
+        page.goto('/polityka-prywatnosci/'),
       'the cookie dialog should not appear': ({ page }) =>
         expect(page.getByRole('dialog')).toHaveCount(0),
       'the cookie reopen trigger should be visible': ({ getByE2e }) =>

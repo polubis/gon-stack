@@ -10,7 +10,15 @@ import type {
   CookiesView,
   PolicyOrigin,
 } from '../domain/models';
+import { loadCloudflareWebAnalytics } from '../integration/cloudflare-web-analytics';
 import { readConsent, writeConsent } from '../integration/storage';
+
+// Cloudflare Web Analytics is gated behind the "performance" category: that's
+// the category whose copy promises visit/traffic-source measurement, so it's
+// the one consent this script should ride on.
+const loadAnalyticsIfConsented = (preferences: ConsentPreferences): void => {
+  if (preferences.performance) loadCloudflareWebAnalytics();
+};
 
 export const useConsent = () => {
   const [preferences, setPreferences] =
@@ -33,6 +41,7 @@ export const useConsent = () => {
       if (stored) {
         setPreferences(stored.preferences);
         setHasConsented(true);
+        loadAnalyticsIfConsented(stored.preferences);
       } else {
         setView('banner');
       }
@@ -54,12 +63,14 @@ export const useConsent = () => {
     writeConsent(next);
     setHasConsented(true);
     setView(null);
+    loadAnalyticsIfConsented(next);
   };
 
   const savePreferences = () => {
     writeConsent(preferences);
     setHasConsented(true);
     setView(null);
+    loadAnalyticsIfConsented(preferences);
   };
 
   const toggleCategory = (id: ConsentCategoryId) => {
