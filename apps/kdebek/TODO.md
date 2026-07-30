@@ -6,7 +6,13 @@ Remaining items below.
 
 ## Performance
 
-- [ ] **Stop hydrating the whole page as one `client:load` island.**
+- [x] **Stop hydrating the whole page as one `client:load` island.**
+      Fixed: static sections (`Hero`, `Testimonials`, `ServicesGrid`, `BookingWidget`,
+      `OpeningHours`, `OnlineBookingCta`, `Footer`) now render as plain SSR markup with
+      zero client JS. `About`/`Offer`/`OfferPanel` were rewritten as `.astro` components
+      so only the genuinely interactive pieces ship JS: `Navbar` (`client:load`,
+      above the fold) and `AboutGallery`/`Counter`/`OfferWidget` (`client:visible`,
+      below the fold). See `modules/home/presentation/home.astro`.
       `pages/index.astro` mounts `Main` (`modules/home/presentation/main.tsx`) — which
       renders Navbar + Hero + Testimonials + About + Offer + OnlineBookingCta + Footer —
       as a single eager React tree. This is the main driver of LCP being 4.2s (poor):
