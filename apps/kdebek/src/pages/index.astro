@@ -2,8 +2,9 @@
 export const prerender = true;
 
 import MainLayout from '@/core/layouts/main.astro';
-import { Main as Module, resolveHomeImages } from '@/modules/home';
+import { resolveHomeImages } from '@/modules/home';
 import { copy } from '@/modules/home/presentation/copy';
+import Home from '@/modules/home/presentation/home.astro';
 
 const domain = Astro.locals.siteDomain;
 const imageUrl = `${domain}/og.webp`;
@@ -23,5 +24,5 @@ const images = await resolveHomeImages();
   title={copy.meta.title}
   description={copy.meta.description}
 >
-  <Module client:load images={images} />
+  <Home images={images} />
 </MainLayout>
