@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import type { ConsentPreferences } from '@/shared/policy/cookies/domain/models';
+import type { ConsentPreferences } from '@/shared/cookies/domain/models';
 
 export const COOKIE_CONSENT_STORAGE_KEY = 'kdebek:cookie-consent';
 

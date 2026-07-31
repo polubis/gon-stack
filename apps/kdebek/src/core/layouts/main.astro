@@ -1,8 +1,19 @@
 ---
 import '../style/index.css';
-import { Cookies } from '@/shared/policy/cookies';
+import { Cookies } from '@/shared/cookies';
+
+const PRIVACY_POLICY_URL = '/polityka-prywatnosci/';
+
+type TwitterMeta = {
+  card?: 'summary' | 'summary_large_image';
+  site?: string;
+  siteId?: string;
+  creator?: string;
+  creatorId?: string;
+};
 
 type Props = {
+  author: string;
   description: string;
   title: string;
   siteName: string;
@@ -18,11 +29,11 @@ type Props = {
   imageAlt: string;
   ogImageWidth?: number;
   ogImageHeight?: number;
-  twitterSite?: string;
-  twitterCreator?: string;
+  twitter?: TwitterMeta;
 };
 
 const {
+  author,
   title,
   description,
   siteName,
@@ -33,11 +44,13 @@ const {
   imageAlt,
   ogImageWidth,
   ogImageHeight,
-  twitterSite,
-  twitterCreator,
+  twitter,
 }: Props = Astro.props;
 
 const siteUrl = `${domain}${url}`;
+const twitterCard =
+  twitter?.card ?? (imageUrl ? 'summary_large_image' : 'summary');
+const isPrivacyPolicyPage = url === PRIVACY_POLICY_URL;
 ---
 
 <!doctype html>
@@ -51,6 +64,8 @@ const siteUrl = `${domain}${url}`;
     <meta name="apple-mobile-web-app-title" content={siteName} />
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="color-scheme" content="light" />
     <meta name="generator" content={Astro.generator} />
 
     <link
@@ -114,11 +129,22 @@ const siteUrl = `${domain}${url}`;
 
     <meta name="description" content={description} />
     <meta name="keywords" content={keywords} />
+    <meta name="author" content={author} />
+    <meta name="creator" content={author} />
+    <meta
+      name="format-detection"
+      content="telephone=no, address=no, email=no"
+    />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
 
     <link rel="canonical" href={siteUrl} />
+    <link rel="sitemap" href="/sitemap-index.xml" />
 
     <meta name="robots" content="index, follow" />
-    <meta name="googlebot" content="index, follow" />
+    <meta
+      name="googlebot"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
 
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -138,17 +164,27 @@ const siteUrl = `${domain}${url}`;
     )}
     <meta property="og:site_name" content={siteName} />
 
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:card" content={twitterCard} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
 
     {imageUrl && <meta name="twitter:image" content={imageUrl} />}
     {imageAlt && <meta name="twitter:image:alt" content={imageAlt} />}
-    {twitterSite && <meta name="twitter:site" content={twitterSite} />}
-    {twitterCreator && <meta name="twitter:creator" content={twitterCreator} />}
+    {twitter?.site && <meta name="twitter:site" content={twitter.site} />}
+    {twitter?.siteId && (
+      <meta name="twitter:site:id" content={twitter.siteId} />
+    )}
+    {twitter?.creator && (
+      <meta name="twitter:creator" content={twitter.creator} />
+    )}
+    {twitter?.creatorId && (
+      <meta name="twitter:creator:id" content={twitter.creatorId} />
+    )}
   </head>
   <body>
     <slot />
-    <Cookies client:only="react" />
+    {!isPrivacyPolicyPage && (
+      <Cookies client:only="react" privacyPolicyUrl={PRIVACY_POLICY_URL} />
+    )}
   </body>
 </html>

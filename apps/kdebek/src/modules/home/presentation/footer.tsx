@@ -140,6 +140,7 @@ export const Footer = () => (
     className="scroll-mt-28 bg-footer px-4 py-6 sm:px-6 sm:py-8"
   >
     <div className="mx-auto max-w-7xl rounded-3xl bg-white px-6 py-10 shadow-sm sm:px-8 lg:px-10">
+      <h2 className="sr-only">Kontakt</h2>
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-[minmax(0,1.35fr)_repeat(4,minmax(0,1fr))] xl:gap-x-8 xl:gap-y-0">
         <div className="min-w-0 sm:col-span-2 lg:col-span-4 xl:col-span-1">
           <a href="/" className="flex items-center gap-2">

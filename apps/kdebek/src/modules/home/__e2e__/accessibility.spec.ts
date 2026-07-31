@@ -18,7 +18,20 @@ const commands = {
   },
   'i focus the mobile nav toggle': ({ getByE2e }) =>
     getByE2e('home:nav-toggle').focus(),
-  'i press enter': ({ page }) => page.keyboard.press('Enter'),
+  'i press enter': async ({ page, getByE2e }) => {
+    // The toggle button is server-rendered before the Navbar island
+    // hydrates (client:load), so a single Enter press can land before
+    // React attaches its onClick handler and get silently swallowed.
+    // Retry the press until aria-expanded actually flips instead of
+    // trusting the first keystroke landed.
+    const toggle = getByE2e('home:nav-toggle');
+    const before = await toggle.getAttribute('aria-expanded');
+
+    await expect(async () => {
+      await page.keyboard.press('Enter');
+      await expect(toggle).not.toHaveAttribute('aria-expanded', before ?? '');
+    }).toPass();
+  },
   'the mobile nav toggle should be collapsed': ({ getByE2e }) =>
     expect(getByE2e('home:nav-toggle')).toHaveAttribute(
       'aria-expanded',

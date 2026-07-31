@@ -28,8 +28,8 @@ for (const [name, viewport] of Object.entries(viewports)) {
         page.goto('/polityka-prywatnosci/'),
       'the cookie dialog should not appear': ({ page }) =>
         expect(page.getByRole('dialog')).toHaveCount(0),
-      'the cookie reopen trigger should be visible': ({ getByE2e }) =>
-        expect(getByE2e('cookies:reopen')).toBeVisible({ timeout: 8000 }),
+      'the cookie reopen trigger should not appear': ({ getByE2e }) =>
+        expect(getByE2e('cookies:reopen')).toHaveCount(0),
       'all images should be loaded': ({ page }) =>
         Promise.race([
           page.evaluate(() =>
@@ -57,7 +57,7 @@ for (const [name, viewport] of Object.entries(viewports)) {
         ['i have already accepted cookies'],
         ['im on the privacy policy page'],
         ['the cookie dialog should not appear'],
-        ['the cookie reopen trigger should be visible'],
+        ['the cookie reopen trigger should not appear'],
         ['all images should be loaded'],
         ['i should match the privacy policy page screenshot'],
       );

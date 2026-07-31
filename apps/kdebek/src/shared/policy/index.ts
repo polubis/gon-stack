@@ -1,2 +1,4 @@
-export { Cookies } from './cookies';
-export { Content, Intro, Main, copy } from './privacy-policy';
+export { Content } from './presentation/content';
+export { Intro } from './presentation/intro';
+export { Main } from './presentation/main';
+export { copy } from './presentation/copy';

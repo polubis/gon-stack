@@ -12,9 +12,9 @@ export const BookingWidget = ({ className = '' }: { className?: string }) => (
       className,
     )}
   >
-    <h3 className="font-display text-2xl font-bold text-secondary">
+    <p className="font-display text-2xl font-bold text-secondary">
       {copy.bookingWidget.heading}
-    </h3>
+    </p>
     <p className="mt-1 text-sm text-ink-light">
       {copy.bookingWidget.subheading}
     </p>

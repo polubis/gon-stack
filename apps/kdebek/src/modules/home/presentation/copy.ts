@@ -21,6 +21,7 @@ const reviewTrustLine = reviewSources
 
 export const copy = {
   meta: {
+    author: 'GreenOn Software Adrian Połubiński',
     siteName:
       'Kacper Dębek — masaż leczniczy i klasyczny | masazysta-olsztyn.pl',
     title: 'Kacper Dębek — masaż leczniczy i klasyczny',
