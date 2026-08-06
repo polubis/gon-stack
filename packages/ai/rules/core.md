@@ -6,7 +6,6 @@
 
 ## Style
 
-- `cn()` + Tailwind from `@react-kit`
 - No raw `px`. Need it? Why + inline comment
 - No direct colors/spacing/z-index/fonts — main stylesheet vars only
 - No built-in Tailwind palette. Own palette always
@@ -19,6 +18,7 @@
 
 - Context: `context()` from `@react-kit`
 - Arrow fns only: `const fn = () => {}`
+- `cn()` + Tailwind from `@react-kit` if performance not important (SPA apps/parts)
 
 ## Architecture
 

@@ -2,13 +2,25 @@
 export const prerender = true;
 
 import MainLayout from '@/core/layouts/main.astro';
-import { Main as Module, resolveHomeImages } from '@/modules/home';
+import About from '@/modules/home/presentation/about.astro';
+import AboutStats from '@/modules/home/presentation/about-stats.astro';
 import { copy } from '@/modules/home/presentation/copy';
+import Faq from '@/modules/home/presentation/faq.astro';
+import { Footer } from '@/modules/home/presentation/footer';
+import { Hero } from '@/modules/home/presentation/hero';
+import { buildHomeJsonLd } from '@/modules/home/presentation/json-ld';
+import Navbar from '@/modules/home/presentation/navbar.astro';
+import Offer from '@/modules/home/presentation/offer.astro';
+import OnlineBookingCta from '@/modules/home/presentation/online-booking-cta.astro';
+import StructuredData from '@/modules/home/presentation/structured-data.astro';
+import { Testimonials } from '@/modules/home/presentation/testimonials';
+import { resolveHomeImages } from '@/modules/home/integration/resolve-home-images';
 
 const domain = Astro.locals.siteDomain;
 const imageUrl = `${domain}/og.webp`;
 
 const images = await resolveHomeImages();
+const jsonLd = buildHomeJsonLd(domain);
 ---
 
 <MainLayout
@@ -24,5 +36,16 @@ const images = await resolveHomeImages();
   title={copy.meta.title}
   description={copy.meta.description}
 >
-  <Module client:load images={images} />
+  <StructuredData data={jsonLd} />
+  <Navbar />
+  <main data-e2e="home:main">
+    <Hero image={images.hero} />
+    <Testimonials image={images.therapy} />
+    <About galleryImages={images.gallery} />
+    <AboutStats />
+    <Offer />
+    <Faq />
+    <OnlineBookingCta />
+  </main>
+  <Footer />
 </MainLayout>

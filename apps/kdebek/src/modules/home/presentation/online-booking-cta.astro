@@ -1,0 +1,188 @@
+---
+import {
+  Bell,
+  Calendar,
+  CalendarPlus,
+  Clock,
+  ShieldCheck,
+  type LucideIcon,
+} from 'lucide-react';
+
+import { copy } from './copy';
+import { BOOKING_URL } from './links';
+import MiniCalendar from './mini-calendar.astro';
+
+const featureIcons: Record<string, LucideIcon> = {
+  '24-7': Calendar,
+  fast: Clock,
+  safe: ShieldCheck,
+  reminders: Bell,
+};
+
+const bookingSteps = copy.onlineBookingCta.bookingSteps.map((step) => ({
+  ...step,
+  active: step.id === copy.onlineBookingCta.activeStepId,
+}));
+---
+
+<section class="mx-auto max-w-7xl px-4 pb-16 sm:px-6 sm:pb-20">
+  <div class="grid grid-cols-1 gap-8 sm:gap-10 sm:rounded-2xl sm:bg-gradient-to-br sm:from-surface sm:to-primary/5 sm:p-6 sm:ring-1 sm:ring-line md:grid-cols-2 md:items-center md:gap-x-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)_minmax(12rem,auto)] lg:gap-8 lg:rounded-3xl lg:p-12">
+    <div>
+      <p class="text-xs font-bold tracking-[0.2em] text-primary">
+        {copy.onlineBookingCta.eyebrow}
+      </p>
+      <h2 class="mt-3 font-display text-2xl font-bold leading-tight text-secondary sm:text-3xl">
+        {copy.onlineBookingCta.headingLine1}
+        <br />
+        <span class="text-primary">
+          {copy.onlineBookingCta.headingLine2}
+        </span>
+      </h2>
+      <p class="mt-3 max-w-sm text-sm leading-relaxed text-ink-light">
+        {copy.onlineBookingCta.subheading}
+      </p>
+
+      <ul class="mt-6 grid grid-cols-2 gap-x-4 gap-y-5 list-none p-0 sm:mt-8 sm:gap-x-6 sm:gap-y-6">
+        {
+          copy.onlineBookingCta.features.map(({ id, title, description }) => {
+            const Icon = featureIcons[id];
+
+            return (
+              <li>
+                <span aria-hidden="true">
+                  <Icon className="h-6 w-6 shrink-0 text-primary" />
+                </span>
+                <p class="mt-2 text-sm font-semibold text-secondary">
+                  {title}
+                </p>
+                <p class="mt-0.5 text-xs leading-relaxed text-ink-light">
+                  {description}
+                </p>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </div>
+
+    <div aria-hidden="true" class="@container relative py-2 sm:py-4 lg:py-6">
+      <div class="relative mx-auto h-[calc(15rem*min(1,100cqw/25rem))]">
+        <div class="absolute left-1/2 top-0 flex origin-top -translate-x-1/2 scale-[min(1,calc(100cqw/25rem))] items-start justify-center">
+          <div class="hidden w-80 rotate-2 rounded-lg bg-secondary p-2 pb-4 shadow-md md:block">
+            <div class="w-full rounded-xl bg-white p-3 text-3xs shadow-inner">
+              <ol class="flex items-center gap-1.5 whitespace-nowrap">
+                {
+                  bookingSteps.map(({ label, active }, i) => (
+                    <li class="flex items-center gap-1.5">
+                      <span
+                        class={`flex h-3 w-3 items-center justify-center rounded-full font-semibold ${
+                          active ? 'bg-primary text-white' : 'bg-surface text-ink-light'
+                        }`}
+                        aria-hidden="true"
+                      >
+                        {i + 1}
+                      </span>
+                      <span class={active ? 'font-semibold text-secondary' : 'text-ink-light'}>
+                        {label}
+                      </span>
+                      {i < bookingSteps.length - 1 && (
+                        <span class="mx-0.5 h-px w-2 bg-line" />
+                      )}
+                    </li>
+                  ))
+                }
+              </ol>
+              <p class="mt-2.5 font-semibold text-secondary">
+                {copy.onlineBookingCta.chooseDateLabel}
+              </p>
+              <div class="mt-2 grid grid-cols-2 gap-3">
+                <div>
+                  <MiniCalendar />
+                </div>
+                <div>
+                  <p class="font-medium text-secondary">
+                    {copy.onlineBookingCta.availableHoursLabel}
+                  </p>
+                  <p class="text-ink-light">
+                    {copy.onlineBookingCta.selectedDateLabel}
+                  </p>
+                  <div class="mt-1 grid grid-cols-3 gap-1">
+                    {
+                      copy.onlineBookingCta.timeSlotsExtended.map((time) => (
+                        <span
+                          class={`rounded border py-1 text-center ${
+                            time === copy.onlineBookingCta.selectedTimeSlot
+                              ? 'border-primary bg-primary text-white'
+                              : 'border-line text-ink-light'
+                          }`}
+                        >
+                          {time}
+                        </span>
+                      ))
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="w-40 shrink-0 -rotate-3 rounded-[1.4rem] bg-secondary p-1.5 pt-3 shadow-md md:-ml-20 md:mt-6">
+            <span class="mx-auto mb-1 block h-1 w-6 rounded-full bg-ink-light" />
+            <div class="w-full rounded-xl bg-white p-3 text-3xs shadow-inner">
+              <div class="flex items-center justify-between text-primary">
+                <span class="font-semibold">
+                  {copy.onlineBookingCta.chooseDateLabel}
+                </span>
+              </div>
+              <div class="mt-2">
+                <MiniCalendar />
+              </div>
+              <p class="mt-2 font-medium text-secondary">
+                {copy.onlineBookingCta.availableHoursLabel}
+              </p>
+              <div class="mt-1 grid grid-cols-3 gap-1">
+                {
+                  copy.onlineBookingCta.timeSlots.map((time) => (
+                    <span
+                      class={`rounded border py-1 text-center ${
+                        time === copy.onlineBookingCta.selectedTimeSlot
+                          ? 'border-primary bg-primary text-white'
+                          : 'border-line text-ink-light'
+                      }`}
+                    >
+                      {time}
+                    </span>
+                  ))
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center gap-4 text-center md:col-span-2 lg:col-span-1 lg:items-center lg:text-center">
+      <span
+        class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/10"
+        aria-hidden="true"
+      >
+        <CalendarPlus className="h-7 w-7 shrink-0 text-primary" />
+      </span>
+      <p class="font-display text-xl font-bold leading-snug text-secondary">
+        {copy.onlineBookingCta.finalHeadingLine1}
+        <br />
+        {copy.onlineBookingCta.finalHeadingLine2}
+      </p>
+      <a
+        href={BOOKING_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="w-full rounded-xl bg-primary px-5 py-3 text-center text-sm font-bold text-white sm:w-auto sm:whitespace-nowrap"
+      >
+        {copy.onlineBookingCta.finalCta}
+      </a>
+      <p class="text-xs text-ink-light">
+        {copy.onlineBookingCta.finalMicrocopy}
+      </p>
+    </div>
+  </div>
+</section>

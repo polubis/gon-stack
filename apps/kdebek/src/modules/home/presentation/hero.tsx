@@ -34,6 +34,7 @@ export const Hero = ({ image }: HeroProps) => (
             data-e2e="home:hero-heading"
             className="mt-4 font-display text-4xl font-bold leading-[1.15] text-secondary sm:text-5xl"
           >
+            <span className="sr-only">{copy.hero.headingKeyword} — </span>
             {copy.hero.headingLine1}
             <br />
             <span className="text-primary">{copy.hero.headingLine2}</span>

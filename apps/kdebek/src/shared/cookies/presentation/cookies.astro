@@ -1,0 +1,334 @@
+---
+import { Cookie } from 'lucide-react';
+import { categoryOrder } from '../core/consent';
+import { copy } from './copy';
+
+type Props = {
+  privacyPolicyUrl: string;
+};
+
+const { privacyPolicyUrl }: Props = Astro.props;
+---
+
+<div id="cookies-root" hidden>
+  <div class="fixed inset-0 z-cookies bg-overlay"></div>
+  <div
+    id="cookies-dialog"
+    role="dialog"
+    aria-modal="true"
+    tabindex="-1"
+    class="fixed inset-x-4 bottom-4 z-cookies mx-auto max-w-md rounded-3xl bg-white py-6 pl-6 shadow-md focus:outline-none sm:py-8 sm:pl-8"
+  >
+    <div
+      id="cookies-banner-view"
+      data-e2e="cookies:banner"
+      class="flex flex-col gap-4 pr-6 sm:pr-8"
+    >
+      <h2
+        id="cookies-banner-title"
+        class="font-display text-xl italic text-secondary"
+      >
+        {copy.banner.title}
+      </h2>
+      <p
+        id="cookies-banner-description"
+        class="text-sm leading-relaxed text-ink-light"
+      >
+        {copy.banner.description}
+      </p>
+      <a
+        href={privacyPolicyUrl}
+        data-e2e="cookies:policy-link"
+        class="self-start text-left text-sm font-medium text-primary underline underline-offset-2"
+      >
+        {copy.banner.policyLinkLabel}
+      </a>
+      <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          id="cookies-customize"
+          data-e2e="cookies:customize"
+          class="rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-secondary"
+        >
+          {copy.banner.customize}
+        </button>
+        <button
+          type="button"
+          id="cookies-accept-all"
+          data-e2e="cookies:accept-all"
+          class="rounded-full bg-primary-dark px-5 py-2.5 text-sm font-bold text-white"
+        >
+          {copy.banner.accept}
+        </button>
+      </div>
+    </div>
+
+    <div
+      id="cookies-preferences-view"
+      data-e2e="cookies:preferences"
+      class="flex flex-col gap-4"
+      hidden
+    >
+      <h2
+        id="cookies-preferences-title"
+        class="pr-6 font-display text-xl italic text-secondary sm:pr-8"
+      >
+        {copy.preferences.title}
+      </h2>
+      <p id="cookies-preferences-description" class="sr-only">
+        {copy.preferences.description}
+      </p>
+      <div class="max-h-[50vh] overflow-y-auto pr-6 sm:pr-8">
+        {
+          categoryOrder.map((id) => {
+            const category = copy.preferences.categories[id];
+            const isNecessary = id === 'necessary';
+
+            return (
+              <div class="flex items-start justify-between gap-4 border-b border-line py-4 last:border-b-0">
+                <div class="min-w-0">
+                  <p class="font-semibold text-secondary">{category.title}</p>
+                  <p class="mt-1 text-sm leading-relaxed text-ink-light">
+                    {category.description}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  class={`js-cookie-toggle relative h-6 w-11 shrink-0 rounded-full transition-colors${
+                    isNecessary ? ' bg-primary opacity-60' : ' bg-line'
+                  }`}
+                  aria-checked={isNecessary}
+                  aria-label={category.title}
+                  disabled={isNecessary}
+                  data-category={id}
+                >
+                  <span class={`js-cookie-toggle-thumb absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform${isNecessary ? ' translate-x-5' : ''}`} />
+                </button>
+              </div>
+            );
+          })
+        }
+      </div>
+      <div class="mt-4 flex flex-col gap-2 pr-6 sm:flex-row sm:justify-end sm:pr-8">
+        <button
+          type="button"
+          id="cookies-back"
+          data-e2e="cookies:back"
+          class="rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-secondary"
+        >
+          {copy.preferences.back}
+        </button>
+        <button
+          type="button"
+          id="cookies-save-preferences"
+          data-e2e="cookies:save-preferences"
+          class="rounded-full bg-primary-dark px-5 py-2.5 text-sm font-bold text-white"
+        >
+          {copy.preferences.accept}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button
+  type="button"
+  id="cookies-reopen"
+  data-e2e="cookies:reopen"
+  aria-label={copy.reopenTrigger.ariaLabel}
+  hidden
+  class="fixed bottom-4 left-4 z-cookies flex h-11 w-11 items-center justify-center rounded-full bg-white text-primary shadow-md ring-1 ring-line"
+>
+  <Cookie className="h-5 w-5" aria-hidden="true" />
+</button>
+
+<script>
+  import {
+    acceptAllPreferences,
+    defaultPreferences,
+    toggleCategoryPreference,
+  } from '../core/consent';
+  import type {
+    ConsentCategoryId,
+    ConsentPreferences,
+    CookiesView,
+  } from '../domain/models';
+  import { loadCloudflareWebAnalytics } from '../integration/cloudflare-web-analytics';
+  import { readConsent, writeConsent } from '../integration/storage';
+
+  // Cloudflare Web Analytics is gated behind the "performance" category: that's
+  // the category whose copy promises visit/traffic-source measurement, so it's
+  // the one consent this script should ride on.
+  const loadAnalyticsIfConsented = (preferences: ConsentPreferences): void => {
+    if (preferences.performance) loadCloudflareWebAnalytics();
+  };
+
+  const root = document.getElementById('cookies-root');
+  const dialog = document.getElementById('cookies-dialog');
+  const bannerView = document.getElementById('cookies-banner-view');
+  const preferencesView = document.getElementById('cookies-preferences-view');
+  const reopenTrigger = document.getElementById('cookies-reopen');
+
+  if (root && dialog && bannerView && preferencesView && reopenTrigger) {
+    const toggles = preferencesView.querySelectorAll<HTMLButtonElement>(
+      '.js-cookie-toggle',
+    );
+
+    let preferences: ConsentPreferences = defaultPreferences;
+    let view: CookiesView | null = null;
+    let hasConsented = false;
+    let wasOpen = false;
+
+    const getFocusable = (container: HTMLElement) =>
+      Array.from(
+        container.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.hidden && el.offsetParent !== null);
+
+    // Mirrors the background-inerting Radix applies to sibling content while
+    // the dialog is open, so screen readers can't navigate behind the modal.
+    const inertTargets = Array.from(document.body.children).filter(
+      (el) => el !== root && el !== reopenTrigger,
+    );
+
+    const setBackgroundInert = (isInert: boolean) => {
+      inertTargets.forEach((el) => {
+        el.toggleAttribute('inert', isInert);
+        if (isInert) {
+          el.setAttribute('aria-hidden', 'true');
+        } else {
+          el.removeAttribute('aria-hidden');
+        }
+      });
+    };
+
+    const renderToggles = () => {
+      toggles.forEach((toggle) => {
+        const id = toggle.dataset.category as ConsentCategoryId;
+        const checked = preferences[id];
+
+        toggle.setAttribute('aria-checked', String(checked));
+        toggle.classList.toggle('bg-primary', checked);
+        toggle.classList.toggle('bg-line', !checked);
+        toggle
+          .querySelector<HTMLElement>('.js-cookie-toggle-thumb')
+          ?.classList.toggle('translate-x-5', checked);
+      });
+    };
+
+    const render = () => {
+      const isOpen = view !== null;
+
+      root.hidden = !isOpen;
+      bannerView.hidden = view !== 'banner';
+      preferencesView.hidden = view !== 'preferences';
+      reopenTrigger.hidden = !(hasConsented && view === null);
+      setBackgroundInert(isOpen);
+
+      if (view === 'preferences') {
+        dialog.setAttribute('aria-labelledby', 'cookies-preferences-title');
+        dialog.setAttribute(
+          'aria-describedby',
+          'cookies-preferences-description',
+        );
+      } else {
+        dialog.setAttribute('aria-labelledby', 'cookies-banner-title');
+        dialog.setAttribute('aria-describedby', 'cookies-banner-description');
+      }
+
+      renderToggles();
+
+      if (isOpen && !wasOpen) {
+        const focusable = getFocusable(dialog);
+        (focusable[0] ?? dialog).focus();
+      }
+
+      wasOpen = isOpen;
+    };
+
+    const setView = (next: CookiesView | null) => {
+      view = next;
+      render();
+    };
+
+    const reveal = () => {
+      const stored = readConsent();
+
+      if (stored) {
+        preferences = stored.preferences;
+        hasConsented = true;
+        loadAnalyticsIfConsented(stored.preferences);
+      } else {
+        view = 'banner';
+      }
+
+      render();
+    };
+
+    window.requestIdleCallback(reveal, { timeout: 2000 });
+
+    document
+      .getElementById('cookies-accept-all')
+      ?.addEventListener('click', () => {
+        preferences = acceptAllPreferences();
+        writeConsent(preferences);
+        hasConsented = true;
+        setView(null);
+        loadAnalyticsIfConsented(preferences);
+      });
+
+    document
+      .getElementById('cookies-save-preferences')
+      ?.addEventListener('click', () => {
+        writeConsent(preferences);
+        hasConsented = true;
+        setView(null);
+        loadAnalyticsIfConsented(preferences);
+      });
+
+    document
+      .getElementById('cookies-customize')
+      ?.addEventListener('click', () => setView('preferences'));
+
+    reopenTrigger.addEventListener('click', () => setView('preferences'));
+
+    document
+      .getElementById('cookies-back')
+      ?.addEventListener('click', () =>
+        setView(hasConsented ? null : 'banner'),
+      );
+
+    toggles.forEach((toggle) => {
+      toggle.addEventListener('click', () => {
+        const id = toggle.dataset.category as ConsentCategoryId;
+        preferences = toggleCategoryPreference(preferences, id);
+        renderToggles();
+      });
+    });
+
+    dialog.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+
+      const focusable = getFocusable(dialog);
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+  }
+</script>

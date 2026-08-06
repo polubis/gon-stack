@@ -1,0 +1,30 @@
+---
+import { copy } from './copy';
+---
+
+<section id="faq" class="scroll-mt-28 bg-white py-20">
+  <div class="mx-auto max-w-3xl px-6">
+    <p class="text-center text-xs font-bold tracking-[0.2em] text-primary">
+      {copy.faq.eyebrow}
+    </p>
+    <h2 class="mt-3 text-center font-display text-3xl font-bold leading-tight text-secondary sm:text-4xl">
+      {copy.faq.heading}
+    </h2>
+    <p class="mt-3 text-center text-sm leading-relaxed text-ink-light">
+      {copy.faq.subheading}
+    </p>
+
+    <div class="mt-10 divide-y divide-line">
+      {
+        copy.faq.items.map(({ id, question, answer }) => (
+          <div id={`faq-${id}`} class="scroll-mt-28 py-5 first:pt-0 last:pb-0">
+            <h3 class="font-semibold text-secondary">{question}</h3>
+            <p class="mt-2 text-sm leading-relaxed text-ink-light">
+              {answer}
+            </p>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

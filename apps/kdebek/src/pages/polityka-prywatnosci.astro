@@ -2,7 +2,8 @@
 export const prerender = true;
 
 import MainLayout from '@/core/layouts/main.astro';
-import { Main as Module, copy } from '@/modules/privacy-policy';
+import { Main as Module } from '@/modules/privacy-policy/presentation/main';
+import { copy } from '@/modules/privacy-policy/presentation/copy';
 
 const domain = Astro.locals.siteDomain;
 const imageUrl = `${domain}/og.webp`;

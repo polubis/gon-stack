@@ -1,0 +1,140 @@
+---
+import {
+  Award,
+  BookOpen,
+  FileText,
+  Star,
+  Users,
+  type LucideIcon,
+} from 'lucide-react';
+
+import { copy } from './copy';
+
+const statIcons: Record<string, LucideIcon> = {
+  clients: Users,
+  visits: FileText,
+  'google-rating': Star,
+  'booksy-rating': Star,
+  years: Award,
+  courses: BookOpen,
+};
+
+const stats = copy.about.stats.map((stat) => {
+  const { id, value, suffix, label } = stat;
+  const decimals = 'decimals' in stat ? stat.decimals : 0;
+
+  return {
+    id,
+    value,
+    suffix,
+    label,
+    decimals,
+    initialText: `${(0).toFixed(decimals)}${suffix}`,
+    Icon: statIcons[id],
+  };
+});
+---
+
+<section class="bg-white pt-16 pb-20">
+  <div class="mx-auto max-w-7xl px-6">
+    <dl
+      class="grid grid-cols-2 gap-8 rounded-3xl bg-surface px-8 py-10 ring-1 ring-line sm:grid-cols-3 lg:grid-cols-7 lg:gap-4"
+    >
+      <div class="col-span-2 sm:col-span-3 lg:col-span-1">
+        <dt class="flex items-center gap-2">
+          <Users
+            className="h-6 w-6 shrink-0 text-ink-light"
+            aria-hidden="true"
+          />
+          <span class="text-sm font-semibold text-secondary">
+            {copy.about.statsTitle}
+          </span>
+        </dt>
+        <dd class="mt-0.5 text-xs leading-relaxed text-ink-light">
+          {copy.about.statsDescription}
+        </dd>
+      </div>
+      {
+        stats.map(({ value, suffix, label, decimals, initialText, Icon }) => (
+          <div>
+            <dt class="flex items-center gap-2">
+              <Icon
+                className="h-6 w-6 shrink-0 text-primary"
+                aria-hidden="true"
+              />
+              <span class="sr-only">{label}</span>
+            </dt>
+            <dd class="mt-2 font-display text-2xl font-bold text-secondary">
+              <span
+                class="js-counter"
+                data-value={value}
+                data-decimals={decimals}
+                data-suffix={suffix}
+                aria-label={initialText}
+              >
+                {initialText}
+              </span>
+            </dd>
+            <dd
+              aria-hidden="true"
+              class="mt-0.5 whitespace-nowrap text-xs leading-relaxed text-ink-light"
+            >
+              {label}
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</section>
+
+<script>
+  const DURATION = 1800;
+
+  const easeOutQuad = (progress: number) => progress * (2 - progress);
+
+  const animate = (element: HTMLElement) => {
+    const value = Number(element.dataset.value);
+    const decimals = Number(element.dataset.decimals ?? 0);
+    const suffix = element.dataset.suffix ?? '';
+
+    const render = (display: number) => {
+      const text = `${display.toFixed(decimals)}${suffix}`;
+      element.textContent = text;
+      element.setAttribute('aria-label', text);
+    };
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      render(value);
+      return;
+    }
+
+    const start = performance.now();
+
+    const step = (now: number) => {
+      const progress = Math.min((now - start) / DURATION, 1);
+      render(value * easeOutQuad(progress));
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+
+    requestAnimationFrame(step);
+  };
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        observer.unobserve(entry.target);
+        animate(entry.target as HTMLElement);
+      });
+    },
+    { threshold: 0.4 },
+  );
+
+  document
+    .querySelectorAll<HTMLElement>('.js-counter')
+    .forEach((counter) => observer.observe(counter));
+</script>

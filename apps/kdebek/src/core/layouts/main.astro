@@ -84,6 +84,34 @@ const isPrivacyPolicyPage = url === PRIVACY_POLICY_URL;
     />
     <link
       rel="preload"
+      href="/fonts/Inter-500.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/Inter-500-ext.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/Inter-600.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/Inter-600-ext.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
       href="/fonts/Inter-700.woff2"
       as="font"
       type="font/woff2"
@@ -184,7 +212,7 @@ const isPrivacyPolicyPage = url === PRIVACY_POLICY_URL;
   <body>
     <slot />
     {!isPrivacyPolicyPage && (
-      <Cookies client:only="react" privacyPolicyUrl={PRIVACY_POLICY_URL} />
+      <Cookies privacyPolicyUrl={PRIVACY_POLICY_URL} />
     )}
   </body>
 </html>

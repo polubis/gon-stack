@@ -1,5 +1,4 @@
 import { Lock } from 'lucide-react';
-import { cn } from '@repo/react-kit/cn';
 // import { Calendar, ChevronDown, Clock, User } from 'lucide-react';
 
 import { copy } from './copy';
@@ -7,10 +6,7 @@ import { BOOKING_URL } from './links';
 
 export const BookingWidget = ({ className = '' }: { className?: string }) => (
   <div
-    className={cn(
-      'w-full rounded-2xl bg-white p-6 shadow-md ring-1 ring-line sm:p-7',
-      className,
-    )}
+    className={`w-full rounded-2xl bg-white p-6 shadow-md ring-1 ring-line sm:p-7${className ? ` ${className}` : ''}`}
   >
     <p className="font-display text-2xl font-bold text-secondary">
       {copy.bookingWidget.heading}

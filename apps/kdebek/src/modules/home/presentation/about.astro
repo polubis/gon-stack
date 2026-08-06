@@ -1,0 +1,228 @@
+---
+import {
+  FileText,
+  Heart,
+  Pause,
+  Play,
+  Quote,
+  Target,
+  type LucideIcon,
+} from 'lucide-react';
+
+import type { ResolvedImage } from '../domain/models';
+
+import { copy } from './copy';
+import { OptimizedImage } from './optimized-image';
+
+const credentialIcons: Record<string, LucideIcon> = {
+  experience: FileText,
+  specializations: Target,
+  approach: Heart,
+};
+
+type Props = {
+  galleryImages: ResolvedImage[];
+};
+
+const { galleryImages }: Props = Astro.props;
+
+const slides = galleryImages.map((image, index) => ({
+  image,
+  alt: copy.aboutGallery.slides[index] ?? '',
+}));
+---
+
+<section id="o-mnie" class="scroll-mt-28 bg-white pt-20">
+  <div class="mx-auto max-w-7xl px-6">
+    <div class="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
+      <div>
+        <p class="text-xs font-bold tracking-[0.2em] text-primary">
+          {copy.about.eyebrow}
+        </p>
+        <h2 class="mt-3 font-display text-3xl font-bold leading-tight text-secondary sm:text-4xl">
+          {copy.about.headingLine1}
+          <br />
+          {copy.about.headingLine2}
+        </h2>
+        <div class="mt-4 max-w-md space-y-3">
+          {
+            copy.about.introParagraphs.map((paragraph) => (
+              <p class="text-sm leading-relaxed text-ink-light">
+                {paragraph}
+              </p>
+            ))
+          }
+        </div>
+        <span class="mt-5 block h-0.5 w-10 bg-primary" />
+
+        <ul class="mt-6 divide-y divide-line list-none p-0">
+          {
+            copy.about.credentials.map(({ id, title, description }) => {
+              const Icon = credentialIcons[id];
+
+              return (
+                <li class="flex gap-4 py-4 first:pt-0">
+                  <span
+                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"
+                    aria-hidden="true"
+                  >
+                    <Icon className="h-5 w-5 shrink-0" />
+                  </span>
+                  <div>
+                    <h3 class="font-semibold text-secondary">{title}</h3>
+                    <p class="mt-0.5 text-sm leading-relaxed text-ink-light">
+                      {description}
+                    </p>
+                  </div>
+                </li>
+              );
+            })
+          }
+        </ul>
+
+        <blockquote class="mt-6 flex items-start gap-3">
+          <Quote
+            className="h-6 w-6 shrink-0 text-primary"
+            aria-hidden="true"
+          />
+          <p class="font-display text-base italic leading-snug text-secondary">
+            {copy.about.quote}
+          </p>
+        </blockquote>
+      </div>
+
+      <div
+        id="about-gallery"
+        class="relative w-full"
+        role="region"
+        aria-label={copy.aboutGallery.ariaLabel}
+        aria-live="polite"
+      >
+        <div class="overflow-hidden rounded-3xl ring-1 ring-line">
+          <div
+            id="about-gallery-track"
+            class="flex items-start transition-transform duration-700 ease-in-out motion-reduce:transition-none"
+          >
+            {
+              slides.map(({ image, alt }, index) => (
+                <figure class="w-full shrink-0">
+                  <OptimizedImage
+                    image={image}
+                    alt={alt}
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    className="block h-auto w-full max-w-full"
+                    aria-hidden={index !== 0}
+                  />
+                </figure>
+              ))
+            }
+          </div>
+        </div>
+        <button
+          type="button"
+          id="about-gallery-toggle"
+          aria-label={copy.aboutGallery.ariaPause}
+          aria-pressed="false"
+          data-label-pause={copy.aboutGallery.ariaPause}
+          data-label-play={copy.aboutGallery.ariaPlay}
+          class="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-white text-secondary shadow-[0_4px_14px_rgba(15,23,42,0.35)] ring-1 ring-line outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        >
+          <Pause
+            id="about-gallery-icon-pause"
+            className="h-4 w-4 shrink-0"
+            aria-hidden="true"
+          />
+          <Play
+            id="about-gallery-icon-play"
+            className="hidden h-4 w-4 shrink-0"
+            aria-hidden="true"
+          />
+        </button>
+        <span
+          id="about-gallery-status"
+          class="sr-only"
+          data-prefix={copy.aboutGallery.srOnlyPrefix}
+          data-separator={copy.aboutGallery.srOnlySeparator}
+        >
+          {copy.aboutGallery.srOnlyPrefix} 1 {copy.aboutGallery.srOnlySeparator}{' '}
+          {slides.length}
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const AUTOPLAY_MS = 5000;
+
+  const root = document.getElementById('about-gallery');
+  const track = document.getElementById('about-gallery-track');
+  const toggle = document.getElementById('about-gallery-toggle');
+  const iconPause = document.getElementById('about-gallery-icon-pause');
+  const iconPlay = document.getElementById('about-gallery-icon-play');
+  const status = document.getElementById('about-gallery-status');
+
+  if (root && track && toggle && iconPause && iconPlay && status) {
+    const slides = Array.from(track.children) as HTMLElement[];
+    const total = slides.length;
+    const prefix = status.dataset.prefix ?? '';
+    const separator = status.dataset.separator ?? '';
+
+    let activeIndex = 0;
+    let isHovered = false;
+    let isManuallyPaused = false;
+    let timer: number | undefined;
+
+    const render = () => {
+      track.style.transform = `translateX(-${activeIndex * 100}%)`;
+      slides.forEach((slide, index) => {
+        slide
+          .querySelector('img')
+          ?.setAttribute('aria-hidden', String(index !== activeIndex));
+      });
+      status.textContent = `${prefix} ${activeIndex + 1} ${separator} ${total}`;
+    };
+
+    const stop = () => {
+      if (timer === undefined) return;
+      window.clearInterval(timer);
+      timer = undefined;
+    };
+
+    const start = () => {
+      stop();
+      if (isHovered || isManuallyPaused) return;
+
+      timer = window.setInterval(() => {
+        activeIndex = (activeIndex + 1) % total;
+        render();
+      }, AUTOPLAY_MS);
+    };
+
+    root.addEventListener('mouseenter', () => {
+      isHovered = true;
+      start();
+    });
+    root.addEventListener('mouseleave', () => {
+      isHovered = false;
+      start();
+    });
+
+    toggle.addEventListener('click', () => {
+      isManuallyPaused = !isManuallyPaused;
+      toggle.setAttribute('aria-pressed', String(isManuallyPaused));
+      toggle.setAttribute(
+        'aria-label',
+        (isManuallyPaused
+          ? toggle.dataset.labelPlay
+          : toggle.dataset.labelPause) ?? '',
+      );
+      iconPause.classList.toggle('hidden', isManuallyPaused);
+      iconPlay.classList.toggle('hidden', !isManuallyPaused);
+      start();
+    });
+
+    start();
+  }
+</script>

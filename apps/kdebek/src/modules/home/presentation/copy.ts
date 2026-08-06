@@ -24,9 +24,9 @@ export const copy = {
     author: 'GreenOn Software Adrian Połubiński',
     siteName:
       'Kacper Dębek — masaż leczniczy i klasyczny | masazysta-olsztyn.pl',
-    title: 'Kacper Dębek — masaż leczniczy i klasyczny',
+    title: 'Masaż Leczniczy i Klasyczny Olsztyn | Kacper Dębek',
     description:
-      'Kacper Dębek – certyfikowany technik masażysta w Olsztynie. Masaż leczniczy, klasyczny, sportowy i tkanek głębokich. Ulga w bólu pleców, karku i barków. Umów wizytę online.',
+      'Certyfikowany masażysta w Olsztynie. Masaż leczniczy, klasyczny i sportowy na ból pleców, karku i barków. Umów wizytę online.',
     keywords:
       'masaż Olsztyn, masaż leczniczy Olsztyn, masaż klasyczny Olsztyn, masaż sportowy Olsztyn, masaż tkanek głębokich, masażysta Olsztyn, technik masażysta Olsztyn, certyfikowany masażysta, gabinet masażu Olsztyn, Kacper Dębek, ból pleców masaż, ból karku masaż, ból barków masaż, rwy kulszowa masaż, napięcia mięśniowe, ulga w bólu kręgosłupa, regeneracja po treningu, masaż biurowy dla firm, rezerwacja masażu online, umów wizytę Booksy, masaż pleców Olsztyn, Warmia masaż, masazysta-olsztyn.pl',
     imageAlt: 'Kacper Dębek — masażysta',
@@ -50,6 +50,7 @@ export const copy = {
 
   hero: {
     eyebrow: `MNIEJ BÓLU ${NBSP}•${NBSP} WIĘCEJ RUCHU ${NBSP}•${NBSP} SZYBSZY POWRÓT DO FORMY`,
+    headingKeyword: 'Masażysta Olsztyn — masaż leczniczy i klasyczny',
     headingLine1: 'Wróć do ruchu',
     headingLine2: 'bez bólu, który Cię ogranicza',
     subheading:
@@ -351,6 +352,51 @@ export const copy = {
     ],
   },
 
+  faq: {
+    eyebrow: 'FAQ',
+    heading: 'Najczęściej zadawane pytania',
+    subheading:
+      'Odpowiedzi na pytania, które najczęściej pojawiają się przed pierwszą wizytą.',
+    items: [
+      {
+        id: 'referral',
+        question: 'Czy potrzebuję skierowania na masaż leczniczy?',
+        answer:
+          'Nie, skierowanie nie jest wymagane. Podczas pierwszej wizyty przeprowadzam wywiad i testy, które pozwalają ustalić prawdopodobną przyczynę dolegliwości i dobrać odpowiednią terapię.',
+      },
+      {
+        id: 'first-visit-duration',
+        question: 'Ile trwa pierwsza wizyta?',
+        answer:
+          'Pierwsza wizyta na masażu leczniczym trwa około 55 minut i obejmuje wywiad, testy oraz pracę z przyczyną bólu. Kolejne wizyty kontynuujące trwają zwykle 30 minut.',
+      },
+      {
+        id: 'does-it-hurt',
+        question: 'Czy masaż leczniczy boli?',
+        answer:
+          'Praca z bolesnymi napięciami i punktami spustowymi bywa chwilowo intensywna, ale siłę nacisku zawsze dostosowuję do odczuć pacjenta — dyskomfort nie powinien być nie do zniesienia.',
+      },
+      {
+        id: 'therapeutic-vs-classic',
+        question: 'Czym różni się masaż leczniczy od klasycznego?',
+        answer:
+          'Masaż leczniczy koncentruje się na konkretnej przyczynie bólu, np. kręgosłupa, barków czy rwy kulszowej. Masaż klasyczny to regeneracja całego ciała lub wybranej partii — rozluźnienie mięśni i lepsze dokrwienie tkanek.',
+      },
+      {
+        id: 'preparation',
+        question: 'Jak przygotować się do wizyty?',
+        answer:
+          'Wystarczy wygodny strój oraz informacja o dolegliwościach, przyjmowanych lekach czy przebytych kontuzjach — to pomaga dobrać bezpieczną i skuteczną terapię.',
+      },
+      {
+        id: 'booking',
+        question: 'Jak umówić wizytę?',
+        answer:
+          'Najszybciej przez rezerwację online (Booksy) dostępną na stronie — zajmuje mniej niż minutę. Można też napisać na biuro.masazdebek@gmail.com lub zadzwonić pod +48 666 735 220.',
+      },
+    ],
+  },
+
   onlineBookingCta: {
     eyebrow: 'REZERWACJA ONLINE',
     headingLine1: 'Umów wizytę online',
@@ -448,7 +494,7 @@ export const copy = {
           { label: 'Jak wygląda wizyta?' },
           { label: 'Czas trwania zabiegu' },
           { label: 'Przygotowanie do wizyty' },
-          { label: 'FAQ – najczęstsze pytania' },
+          { label: 'FAQ – najczęstsze pytania', href: '#faq' },
           { label: 'Regulamin' },
           { label: 'Polityka prywatności', href: '/polityka-prywatnosci/' },
         ],

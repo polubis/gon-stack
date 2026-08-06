@@ -1,0 +1,195 @@
+---
+import {
+  CalendarPlus,
+  Mail,
+  Menu,
+  Tag,
+  Target,
+  User,
+  X,
+  type LucideIcon,
+} from 'lucide-react';
+
+import { copy } from './copy';
+import { BOOKING_URL } from './links';
+import { LogoMark } from './logo-mark';
+
+const navIcons: Record<string, LucideIcon> = {
+  'o-mnie': User,
+  oferta: Target,
+  cennik: Tag,
+  kontakt: Mail,
+};
+
+const navItems = copy.navbar.navItems.map((item) => ({
+  ...item,
+  href: item.id,
+  icon: navIcons[item.id],
+}));
+---
+
+<header
+  class="sticky top-0 z-sticky-header px-3 pt-3 sm:px-4 sm:pt-4 @max-h-[800px]:pt-2 sm:@max-h-[800px]:pt-2.5"
+>
+  <div
+    class="relative mx-auto max-w-7xl rounded-3xl bg-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+  >
+    <div
+      id="navbar-bar"
+      class="relative z-10 flex items-center justify-between gap-4 rounded-3xl bg-white px-4 py-3 sm:px-6 @max-h-[800px]:py-2"
+    >
+      <a href="/" class="flex min-w-0 items-center gap-1 sm:gap-2">
+        <LogoMark className="h-7 w-9 shrink-0" />
+        <span class="flex flex-col gap-0.5">
+          <span
+            class="font-display text-xl italic leading-tight text-secondary sm:text-2xl"
+          >
+            <span class="sm:hidden">{copy.navbar.brandShort}</span>
+            <span class="hidden sm:inline">{copy.navbar.brandFull}</span>
+          </span>
+          <span
+            class="hidden text-2xs font-semibold leading-tight tracking-[0.2em] text-ink-light sm:block"
+          >
+            {copy.navbar.brandTag}
+          </span>
+        </span>
+      </a>
+
+      <nav data-e2e="home:nav-desktop" class="hidden items-center gap-7 xl:flex">
+        {
+          navItems.map(({ label, icon: Icon, href }) => (
+            <a
+              href={`#${href}`}
+              class="relative flex items-center gap-1.5 py-2 text-sm font-medium text-ink-light @max-h-[800px]:py-1.5"
+            >
+              <Icon className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
+              {label}
+            </a>
+          ))
+        }
+      </nav>
+
+      <div class="flex shrink-0 items-center gap-2 sm:gap-3">
+        <a
+          href={BOOKING_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hidden items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm sm:flex"
+        >
+          <CalendarPlus className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
+          {copy.navbar.cta}
+        </a>
+        <a
+          href={BOOKING_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={copy.navbar.cta}
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-sm sm:hidden"
+        >
+          <CalendarPlus className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
+        </a>
+
+        <button
+          type="button"
+          id="navbar-toggle"
+          data-e2e="home:nav-toggle"
+          aria-expanded="false"
+          aria-controls="navbar-mobile-menu"
+          aria-label={copy.navbar.ariaOpenMenu}
+          data-label-open={copy.navbar.ariaOpenMenu}
+          data-label-close={copy.navbar.ariaCloseMenu}
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line text-ink-light xl:hidden"
+        >
+          <Menu id="navbar-icon-menu" className="h-5 w-5 shrink-0" aria-hidden="true" />
+          <X
+            id="navbar-icon-close"
+            className="hidden h-5 w-5 shrink-0"
+            aria-hidden="true"
+          />
+        </button>
+      </div>
+    </div>
+
+    <nav
+      id="navbar-mobile-menu"
+      aria-label={copy.navbar.ariaMobileNav}
+      data-e2e="home:nav-menu-mobile"
+      hidden
+      class="absolute left-0 right-0 top-full z-40 overflow-hidden rounded-b-3xl bg-white xl:hidden"
+    >
+      <div
+        id="navbar-mobile-grid"
+        class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out"
+      >
+        <div class="min-h-0 overflow-hidden">
+          <div class="flex flex-col gap-1 px-4 pb-3 pt-3">
+            {
+              navItems.map(({ label, icon: Icon, href }) => (
+                <a
+                  href={`#${href}`}
+                  class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-ink-light"
+                >
+                  <Icon className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
+                  {label}
+                </a>
+              ))
+            }
+            <a
+              href={BOOKING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="mt-2 flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm sm:hidden"
+            >
+              <CalendarPlus className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
+              {copy.navbar.cta}
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const toggle = document.getElementById('navbar-toggle');
+  const panel = document.getElementById('navbar-mobile-menu');
+  const grid = document.getElementById('navbar-mobile-grid');
+  const bar = document.getElementById('navbar-bar');
+  const iconMenu = document.getElementById('navbar-icon-menu');
+  const iconClose = document.getElementById('navbar-icon-close');
+
+  if (toggle && panel && grid && bar && iconMenu && iconClose) {
+    const setOpen = (isOpen: boolean) => {
+      panel.hidden = !isOpen;
+      bar.classList.toggle('rounded-t-3xl', isOpen);
+      bar.classList.toggle('rounded-3xl', !isOpen);
+      iconMenu.classList.toggle('hidden', isOpen);
+      iconClose.classList.toggle('hidden', !isOpen);
+      toggle.setAttribute('aria-expanded', String(isOpen));
+      toggle.setAttribute(
+        'aria-label',
+        (isOpen ? toggle.dataset.labelClose : toggle.dataset.labelOpen) ?? '',
+      );
+
+      if (isOpen) {
+        // Wait a frame so the panel's 0fr starting height is actually
+        // painted once before switching to 1fr — otherwise the browser
+        // batches both changes together and the grid transition has
+        // nothing to animate from. A double rAF gets the same flush as
+        // reading offsetHeight without forcing a synchronous layout.
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            grid.classList.replace('grid-rows-[0fr]', 'grid-rows-[1fr]');
+          });
+        });
+      } else {
+        grid.classList.replace('grid-rows-[1fr]', 'grid-rows-[0fr]');
+      }
+    };
+
+    toggle.addEventListener('click', () => setOpen(!!panel.hidden));
+    panel
+      .querySelectorAll('a')
+      .forEach((link) => link.addEventListener('click', () => setOpen(false)));
+  }
+</script>

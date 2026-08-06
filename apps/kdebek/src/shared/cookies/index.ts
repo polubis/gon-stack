@@ -1,1 +1,1 @@
-export { Cookies, type CookiesProps } from './presentation/main';
+export { default as Cookies } from './presentation/cookies.astro';
