@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { useOnInternetReconnect } from './use-on-internet-reconnect.js';
 
 /* =============================================================================
  * Internal Types
@@ -14,28 +15,6 @@ type UseApi = <TData>(
   fn: Fetcher<TData>,
   config?: UseApiConfig,
 ) => UseApiReturn<TData>;
-
-/* =============================================================================
- * Helpers
- * ============================================================================= */
-
-/**
- * Runs `onReconnect` whenever the browser regains connectivity
- * (the `online` event), always calling the latest closure.
- */
-const useOnInternetReconnect = (onReconnect: () => void): void => {
-  const handleReconnect = useEffectEvent(() => {
-    onReconnect();
-  });
-
-  useEffect(() => {
-    window.addEventListener('online', handleReconnect);
-
-    return () => {
-      window.removeEventListener('online', handleReconnect);
-    };
-  }, []);
-};
 
 /* =============================================================================
  * Public Types

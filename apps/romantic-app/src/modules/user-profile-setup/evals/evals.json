@@ -1,0 +1,139 @@
+{
+  "skill_name": "user-profile-setup",
+  "rules_source": "../AGENTS.md",
+  "evals": [
+    {
+      "id": 1,
+      "name": "review-domain-layer-violations",
+      "prompt": "Review the attached domain models against @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md (Architecture + Code sections). List every violation. Audit only — do not rewrite yet.",
+      "files": ["fixtures/violating-domain-models.ts"],
+      "assertions": [
+        "Flags interface usage (Step) — module requires type aliases only",
+        "Flags class usage (QuestionBuilder) — no class allowed",
+        "Flags missing branded ids (StepId, QuestionKey are plain number/string aliases)",
+        "Flags Question as non-discriminated union (type: string instead of literal variants)",
+        "Flags default export — named exports only",
+        "References domain/models.ts as the correct pattern (Brand<>, QuestionVariant discriminated union)"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "review-events-violations",
+      "prompt": "Review the attached events file against @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md. List violations in event naming and shape.",
+      "files": ["fixtures/violating-events.ts"],
+      "assertions": [
+        "Flags events not using TriggerEvent<'[TRIGGER]_NAME'> from @/libs/eda",
+        "Flags wrong literal names (INIT, GO_NEXT, saveAnswers) instead of [TRIGGER]_INIT, [TRIGGER]_NEXT, etc.",
+        "Flags custom Trigger type instead of bus/registry trigger surface",
+        "References domain/events.ts as correct Event union shape"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "review-handler-violations",
+      "prompt": "Review the attached handler against @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md and core/handlers/next.ts. List violations. Audit only.",
+      "files": ["fixtures/violating-handler.ts"],
+      "assertions": [
+        "Flags function declaration (handleNext) — arrow functions only",
+        "Flags manual bus.subscribe instead of ofType('[TRIGGER]_X').pipe(tap(...)) RxJS pattern",
+        "Flags handler not exported as const arrow returning observable pipe",
+        "Flags event type string mismatch with module [TRIGGER]_NEXT convention",
+        "Notes handler belongs in core/handlers/ wired through registry.ts, one file per trigger"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "review-presentation-layer-violations",
+      "prompt": "Review the attached presentation component against @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md. List every architecture and code violation.",
+      "files": ["fixtures/violating-step.tsx"],
+      "assertions": [
+        "Flags default export — named exports only",
+        "Flags function declaration — arrow functions only",
+        "Flags fetch/repository call in presentation (getUserProfileQuestions) — belongs in integration + init handler",
+        "Flags direct store access (createStore, $activeStepIndex.get/set) — presentation must use facade via context",
+        "Flags domain state in useState instead of store/facade selectors",
+        "References presentation/step.tsx + context.tsx + router.tsx as correct patterns"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "review-integration-mapper-violations",
+      "prompt": "Review the attached mappers against @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md and integration/mappers.ts. List violations.",
+      "files": ["fixtures/violating-mappers.ts"],
+      "assertions": [
+        "Flags toStep using any — mappers must map backend DTOs to domain models explicitly",
+        "Flags toQuestion missing exhaustive switch on question.type with const _: never = default",
+        "Flags missing branded id casts (QuestionId, QuestionKey)",
+        "Flags returned shape not matching Question discriminated union variants (numeric/select/text/slide)",
+        "Notes only integration/repository.ts may fetch — mappers stay pure transforms"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "review-black-box-test-violations",
+      "prompt": "Review the attached tests against @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md and __tests__/main.test.tsx conventions. List violations.",
+      "files": ["fixtures/violating-main.test.tsx"],
+      "assertions": [
+        "Flags describe name referencing internals ('createFacade internals')",
+        "Flags test names mentioning methods/atoms (trigger NEXT, $activeStepIndex, createStore, $steps)",
+        "Flags renderHook on mediator/facade instead of rendering Main + Provider",
+        "Recommends behavior names like 'loads config from mocked backend and opens first step'",
+        "References __tests__/main.test.tsx pattern: MSW mock server, user-facing screen assertions, snapshots OK"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "review-e2e-spec-violations",
+      "prompt": "Review the attached e2e spec against @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md and __e2e__/main-flow.spec.ts. List violations.",
+      "files": ["fixtures/violating-e2e.spec.ts"],
+      "assertions": [
+        "Flags test names referencing handlers/atoms (next handler, init handler, $steps atom, $activeStepIndex)",
+        "Flags page.evaluate on internal store (__PROFILE_STORE__, custom events) as implementation leak",
+        "Flags data-testid / raw locators instead of vibe-test interpreter + behavior commands",
+        "Proposes interpreter(commands, page) with steps like 'im on user profile setup page', 'i click start profile setup button'",
+        "Notes e2e mocks config via command registry, not ad-hoc page.route in spec body when commands exist"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "clone-feature-module-scaffold",
+      "prompt": "Clone the user-profile-setup module conventions from @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md to scaffold `account-deletion` — a multi-step flow: confirm intent, enter password, see confirmation. Show folder tree and skeleton for each layer (configuration, domain, core, integration, presentation). No full implementation.",
+      "files": [],
+      "assertions": [
+        "Layers: configuration/, domain/, core/handlers/, integration/, presentation/, __tests__/, __e2e__/",
+        "domain/events.ts uses TriggerEvent<'[TRIGGER]_...'> union",
+        "core has store.ts, bus.ts, registry.ts, facade.ts, mediator.ts, one handler file per trigger",
+        "Factory pattern: createStore, createFacade, createMediator with ReturnType-derived types",
+        "presentation has context.tsx (context from @repo/react-kit/context), router.tsx, view components",
+        "No tech buckets (components/, hooks/, utils/) inside the module",
+        "Intra-module relative imports; @/ only for app-root cross-module paths"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "fix-handler-to-module-pattern",
+      "prompt": "Rewrite fixtures/violating-handler.ts as a compliant core/handlers/next.ts-style handler per @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md. Return the complete fixed file.",
+      "files": ["fixtures/violating-handler.ts"],
+      "assertions": [
+        "Exported as const arrow: export const next = (store, { ofType }) => ...",
+        "Uses ofType('[TRIGGER]_NEXT').pipe(tap(...))",
+        "Updates store via $-prefixed atoms (e.g. $steps, $activeStepIndex, $isFinished)",
+        "No function declarations",
+        "Business logic for answer merge + step advance matches next.ts responsibilities"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "reject-wrong-layer-placement",
+      "prompt": "A teammate wants to add profile validation logic and API fetch for steps inside configuration/validation.ts, and expose $activeStepIndex directly from presentation/header.tsx. Explain why this violates @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md and where each concern belongs.",
+      "files": [],
+      "assertions": [
+        "configuration/ holds static config + react-hook-form field builder only — no fetch, no business state transitions",
+        "Fetch belongs in integration/repository.ts; loading steps belongs in core/handlers/init.ts",
+        "Validation error map/builder OK in configuration/validation.ts; step transition rules belong in core/handlers/",
+        "presentation/header.tsx reads facade use* selectors only — never store atoms directly",
+        "Cites correct reference files from AGENTS.md References section when pointing to patterns"
+      ]
+    }
+  ]
+}

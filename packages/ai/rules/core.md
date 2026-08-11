@@ -14,6 +14,11 @@
 
 - Use `getByE2e` and data-e2e for selectors with convention: `region:selector-name`
 
+## Testing unit/integration
+
+- Always BLACK BOX, never leak implementation details (one exception -> testing generic codebase like libraries)
+- Never code in test names methods, property names, ...etc -> test names must reflect behaviors
+
 ## React
 
 - Context: `context()` from `@react-kit`
