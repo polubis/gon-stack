@@ -9,5 +9,42 @@ allowBuilds:
   sharp: true
   workerd: true
 
+minimumReleaseAgeExclude:
+  - '@turbo/darwin-64@2.10.11'
+  - '@turbo/darwin-arm64@2.10.11'
+  - '@turbo/linux-64@2.10.11'
+  - '@turbo/linux-arm64@2.10.11'
+  - '@turbo/windows-64@2.10.11'
+  - '@turbo/windows-arm64@2.10.11'
+  - turbo@2.10.11
+  - '@astrojs/cloudflare@14.2.2 || 14.2.3'
+  - '@astrojs/internal-helpers@0.10.3 || 0.10.4'
+  - '@astrojs/markdown-satteri@0.3.6 || 0.3.7'
+  - '@astrojs/react@6.0.3 || 6.0.4'
+  - '@supabase/cli-darwin-arm64@2.115.0'
+  - '@supabase/cli-darwin-x64@2.115.0'
+  - '@supabase/cli-linux-arm64-musl@2.115.0'
+  - '@supabase/cli-linux-arm64@2.115.0'
+  - '@supabase/cli-linux-x64-musl@2.115.0'
+  - '@supabase/cli-linux-x64@2.115.0'
+  - '@supabase/cli-windows-arm64@2.115.0'
+  - '@supabase/cli-windows-x64@2.115.0'
+  - '@vitest/coverage-v8@4.1.11'
+  - '@vitest/expect@4.1.11'
+  - '@vitest/mocker@4.1.11'
+  - '@vitest/pretty-format@4.1.11'
+  - '@vitest/runner@4.1.11'
+  - '@vitest/snapshot@4.1.11'
+  - '@vitest/spy@4.1.11'
+  - '@vitest/utils@4.1.11'
+  - astro@7.2.3 || 7.2.4
+  - eslint-plugin-turbo@2.10.11
+  - lucide-react@1.32.0 || 1.33.0
+  - miniflare@5.20260815.0-alpha
+  - supabase@2.115.0
+  - vitest@4.1.11
+  - wrangler@4.124.0
+  - '@vitejs/plugin-react@6.1.0'
+
 onlyBuiltDependencies:
   - supabase
