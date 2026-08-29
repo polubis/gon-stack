@@ -1,5 +1,8 @@
 ---
 import '../style/index.css';
+import { CookieConsent } from '@/shared/cookies';
+
+const PRIVACY_POLICY_URL = '/privacy-policy/';
 
 type Props = {
   description: string;
@@ -66,5 +69,6 @@ const siteUrl = `${domain}${url}`;
   </head>
   <body>
     <slot />
+    <CookieConsent client:load privacyPolicyUrl={PRIVACY_POLICY_URL} />
   </body>
 </html>

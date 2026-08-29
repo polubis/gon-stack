@@ -1,0 +1,17 @@
+export const copy = {
+  title: 'Welcome back',
+  subtitle: 'Sign in to continue',
+  emailLabel: 'Email',
+  emailPlaceholder: 'you@company.com',
+  passwordLabel: 'Password',
+  passwordPlaceholder: '••••••••••••',
+  showPassword: 'Show',
+  passwordError: 'Please enter your password.',
+  keepSignedIn: 'Keep me signed in',
+  forgotPassword: 'Forgot password?',
+  submit: 'Sign in',
+  divider: 'or',
+  sso: 'Sign in with SSO',
+  noAccount: "Don't have an account?",
+  createAccount: 'Create one',
+} as const;

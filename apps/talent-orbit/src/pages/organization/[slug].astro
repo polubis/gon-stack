@@ -1,0 +1,27 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { DetailMain as Module } from '@/modules/organization';
+
+export function getStaticPaths() {
+  return [{ params: { slug: 'orbit-labs' } }];
+}
+
+const { slug } = Astro.params;
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Talent Orbit"
+  url={`/organization/${slug}/`}
+  imageAlt="Talent Orbit"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="talent orbit, organization, orbit labs, hiring"
+  title="Orbit Labs | Talent Orbit"
+  description="Access your organization overview and manage knowledge, questions, tests, and shared resources."
+>
+  <Module client:load />
+</MainLayout>

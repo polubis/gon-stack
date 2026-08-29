@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { ConfirmationMain as Module } from '@/modules/organization';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Talent Orbit"
+  url="/organization-share-confirmation/"
+  imageAlt="Talent Orbit"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="talent orbit, sharing confirmation, organization, hiring"
+  title="Sharing confirmation | Talent Orbit"
+  description="Confirm successful sharing, review access details, and open or stop sharing."
+>
+  <Module client:load />
+</MainLayout>

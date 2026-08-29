@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { DetailMain as Module } from '@/modules/questions-library';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Talent Orbit"
+  url="/questions-library-detail/"
+  imageAlt="Talent Orbit"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="talent orbit, question details, questions library, hiring"
+  title="Question details | Talent Orbit"
+  description="View question details, linked concept, type, and answers."
+>
+  <Module client:load />
+</MainLayout>

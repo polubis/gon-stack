@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { CreateMain as Module } from '@/modules/organization';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Talent Orbit"
+  url="/organization-create/"
+  imageAlt="Talent Orbit"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="talent orbit, create organization, hiring, teams"
+  title="Create organization | Talent Orbit"
+  description="Create a new organization with a name, description, and owner."
+>
+  <Module client:load />
+</MainLayout>

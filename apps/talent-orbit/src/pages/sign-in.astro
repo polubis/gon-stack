@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { Main as Module } from '@/modules/sign-in';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Talent Orbit"
+  url="/sign-in/"
+  imageAlt="Talent Orbit"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="talent orbit, sign in, login, recruitment"
+  title="Sign in | Talent Orbit"
+  description="Sign in to your Talent Orbit account."
+>
+  <Module client:load />
+</MainLayout>
