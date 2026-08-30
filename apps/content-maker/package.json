@@ -23,10 +23,10 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
-    "@astrojs/cloudflare": "^14.2.3",
+    "@astrojs/cloudflare": "^14.2.5",
     "@astrojs/react": "^6.0.4",
     "@astrojs/sitemap": "^3.7.3",
-    "@mdxeditor/editor": "^4.2.0",
+    "@mdxeditor/editor": "^4.2.3",
     "@mdxeditor/gurx": "^1.2.4",
     "@repo/react-kit": "workspace:*",
     "@repo/type-beast": "workspace:*",
@@ -34,14 +34,14 @@
     "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
-    "astro": "^7.2.4",
-    "lucide-react": "^1.33.0",
+    "@types/react-dom": "^19.2.5",
+    "astro": "^7.2.9",
+    "lucide-react": "^1.37.0",
     "mdast-util-directive": "^3.1.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tailwindcss": "^4.3.3",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
@@ -49,10 +49,10 @@
     "@repo/eslint-config": "workspace:*",
     "@repo/vibe-test": "workspace:*",
     "@testing-library/jest-dom": "^6.10.0",
-    "@testing-library/react": "^16.3.2",
-    "@testing-library/user-event": "^14.6.5",
-    "@types/node": "^26.2.0",
-    "@vitejs/plugin-react": "^6.1.0",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.6",
+    "@types/node": "^26.4.0",
+    "@vitejs/plugin-react": "^6.1.1",
     "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^9.39.5",
     "jsdom": "^29.1.1",
@@ -60,6 +60,6 @@
     "sharp": "^0.35.3",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.11",
-    "wrangler": "^4.124.0"
+    "wrangler": "^4.127.1"
   }
 }

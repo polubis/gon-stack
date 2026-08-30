@@ -30,14 +30,14 @@
     "sharp": "^0.34.0 || ^0.35.0"
   },
   "devDependencies": {
-    "@astrojs/cloudflare": "^14.2.3",
+    "@astrojs/cloudflare": "^14.2.5",
     "@astrojs/react": "^6.0.4",
     "@astrojs/sitemap": "^3.7.3",
     "@tailwindcss/vite": "^4.3.3",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^26.2.0",
-    "astro": "^7.2.4",
+    "@types/node": "^26.4.0",
+    "astro": "^7.2.9",
     "eslint": "^9.39.5",
     "sharp": "^0.35.3",
     "typescript": "6.0.3"

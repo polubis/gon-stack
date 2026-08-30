@@ -24,7 +24,7 @@
     "@playwright/test": "^1.62.1",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^26.2.0",
+    "@types/node": "^26.4.0",
     "eslint": "^9.39.5",
     "typescript": "6.0.3"
   }
