@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { Main as Module } from '@/modules/home';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Cebool"
+  url="/"
+  imageAlt="Cebool"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="cebool, recruitment, careers, hiring"
+  title="Cebool | Hello world"
+  description="Minimal Cebool app scaffold."
+>
+  <Module client:load />
+</MainLayout>
