@@ -1,0 +1,74 @@
+---
+import '../style/index.css';
+import { CookieConsent } from '@/shared/cookies';
+
+const PRIVACY_POLICY_URL = '/privacy-policy/';
+
+type Props = {
+  description: string;
+  title: string;
+  siteName: string;
+  domain: string;
+  url:
+    | `/`
+    | `/${string}/`
+    | `/${string}/${string}`
+    | `/${string}/${string}/${string}`
+    | `/${string}/${string}/${string}/${string}`;
+  keywords: string;
+  imageUrl: string;
+  imageAlt: string;
+};
+
+const {
+  title,
+  description,
+  siteName,
+  keywords,
+  url,
+  domain,
+  imageUrl,
+  imageAlt,
+}: Props = Astro.props;
+
+const siteUrl = `${domain}${url}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content={keywords} />
+    <meta name="apple-mobile-web-app-title" content={siteName} />
+    <link rel="canonical" href={siteUrl} />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={siteUrl} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta property="og:site_name" content={siteName} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+    <meta name="twitter:image:alt" content={imageAlt} />
+  </head>
+  <body>
+    <slot />
+    <CookieConsent client:load privacyPolicyUrl={PRIVACY_POLICY_URL} />
+  </body>
+</html>

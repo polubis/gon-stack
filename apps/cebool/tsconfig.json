@@ -1,0 +1,17 @@
+{
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist", "test-results", "./worker-configuration.d.ts"],
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "verbatimModuleSyntax": true,
+    "types": ["./worker-configuration.d.ts", "node", "vitest/globals"],
+    "strictNullChecks": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}

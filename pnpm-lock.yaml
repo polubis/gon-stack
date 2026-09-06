@@ -32,6 +32,106 @@ importers:
         specifier: ^2.10.12
         version: 2.10.12
 
+  apps/cebool:
+    dependencies:
+      '@astrojs/check':
+        specifier: ^0.9.10
+        version: 0.9.10(prettier@3.9.6)(typescript@5.9.3)
+      '@astrojs/cloudflare':
+        specifier: ^14.2.5
+        version: 14.2.5(@types/node@26.4.0)(astro@7.2.9(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@26.4.0)(jiti@2.7.0)(yaml@2.9.0))(esbuild@0.28.1)(jiti@2.7.0)(wrangler@4.127.1)(yaml@2.9.0)
+      '@astrojs/react':
+        specifier: ^6.0.4
+        version: 6.0.4(@types/node@26.4.0)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(esbuild@0.28.1)(jiti@2.7.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@10.2.2)(yaml@2.9.0)
+      '@astrojs/sitemap':
+        specifier: ^3.7.3
+        version: 3.7.3
+      '@radix-ui/react-dialog':
+        specifier: ^1.1.23
+        version: 1.1.23(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@repo/react-kit':
+        specifier: workspace:*
+        version: link:../../packages/react-kit
+      '@tailwindcss/vite':
+        specifier: ^4.3.3
+        version: 4.3.3(vite@8.1.4(@types/node@26.4.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
+      '@types/react':
+        specifier: ^19.2.18
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.2.5
+        version: 19.2.5(@types/react@19.2.18)
+      astro:
+        specifier: ^7.2.9
+        version: 7.2.9(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@26.4.0)(jiti@2.7.0)(yaml@2.9.0)
+      lucide-react:
+        specifier: ^1.37.0
+        version: 1.37.0(react@19.2.8)
+      react:
+        specifier: ^19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.8
+        version: 19.2.8(react@19.2.8)
+      tailwindcss:
+        specifier: ^4.3.3
+        version: 4.3.3
+    devDependencies:
+      '@axe-core/playwright':
+        specifier: ^4.13.0
+        version: 4.13.0(playwright-core@1.62.1)
+      '@playwright/test':
+        specifier: ^1.62.1
+        version: 1.62.1
+      '@repo/astro-config':
+        specifier: workspace:*
+        version: link:../../packages/astro-config
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
+      '@repo/vibe-test':
+        specifier: workspace:*
+        version: link:../../packages/vibe-test
+      '@testing-library/jest-dom':
+        specifier: ^6.10.0
+        version: 6.10.0(@testing-library/dom@10.4.1)
+      '@testing-library/react':
+        specifier: ^16.3.3
+        version: 16.3.3(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@testing-library/user-event':
+        specifier: ^14.6.6
+        version: 14.6.6(@testing-library/dom@10.4.1)
+      '@types/node':
+        specifier: ^26.4.0
+        version: 26.4.0
+      '@vitejs/plugin-react':
+        specifier: ^6.1.1
+        version: 6.1.1(vite@8.1.4(@types/node@26.4.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
+      '@vitest/coverage-v8':
+        specifier: ^4.1.11
+        version: 4.1.11(vitest@4.1.11)
+      eslint:
+        specifier: ^9.39.5
+        version: 9.39.5(jiti@2.7.0)(supports-color@10.2.2)
+      jsdom:
+        specifier: ^29.1.1
+        version: 29.1.1(@noble/hashes@1.8.0)
+      msw:
+        specifier: ^2.15.0
+        version: 2.15.0(@types/node@26.4.0)(typescript@5.9.3)
+      sharp:
+        specifier: ^0.35.3
+        version: 0.35.3(@types/node@26.4.0)
+      vite-tsconfig-paths:
+        specifier: ^6.1.1
+        version: 6.1.1(supports-color@10.2.2)(typescript@5.9.3)(vite@8.1.4(@types/node@26.4.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
+      vitest:
+        specifier: ^4.1.11
+        version: 4.1.11(@types/node@26.4.0)(@vitest/coverage-v8@4.1.11)(jsdom@29.1.1(@noble/hashes@1.8.0))(msw@2.15.0(@types/node@26.4.0)(typescript@5.9.3))(vite@8.1.4(@types/node@26.4.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
+      wrangler:
+        specifier: ^4.127.1
+        version: 4.127.1
+
   apps/content-maker:
     dependencies:
       '@astrojs/check':
