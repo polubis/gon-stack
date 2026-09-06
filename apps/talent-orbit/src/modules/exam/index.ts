@@ -1,0 +1,9 @@
+export { ListMain } from './presentation/list-main';
+export { ChooseTestMain } from './presentation/choose-test-main';
+export { ConfigureMain } from './presentation/configure-main';
+export { ShareMain } from './presentation/share-main';
+export { JoinMain } from './presentation/join-main';
+export { QuestionMain } from './presentation/question-main';
+export { SubmittedMain } from './presentation/submitted-main';
+export { DetailMain } from './presentation/detail-main';
+export { StatisticsMain } from './presentation/statistics-main';

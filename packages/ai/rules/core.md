@@ -9,6 +9,7 @@
 - No raw `px`. Need it? Why + inline comment
 - No direct colors/spacing/z-index/fonts — main stylesheet vars only
 - No built-in Tailwind palette. Own palette always
+- If color required create variable and use Tailwind auto-gen classes
 
 ## Testing e2e
 

@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { ChooseTestMain as Module } from '@/modules/exam';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Talent Orbit"
+  url="/exams-choose-test/"
+  imageAlt="Talent Orbit"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="talent orbit, choose test, exams, hiring"
+  title="Choose test | Talent Orbit"
+  description="Search and select a test to use for your exam."
+>
+  <Module client:load />
+</MainLayout>

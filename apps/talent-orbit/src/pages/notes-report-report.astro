@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { ReportMain as Module } from '@/modules/notes-report';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Talent Orbit"
+  url="/notes-report-report/"
+  imageAlt="Talent Orbit"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="talent orbit, interview report, exams, hiring"
+  title="Report ready | Talent Orbit"
+  description="View the AI-generated report with summary, strengths, and areas to explore."
+>
+  <Module client:load />
+</MainLayout>

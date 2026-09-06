@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { ThankYouMain as Module } from '@/modules/notes-report';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Talent Orbit"
+  url="/notes-report-thank-you/"
+  imageAlt="Talent Orbit"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="talent orbit, thank you, post exam, hiring"
+  title="Thank you | Talent Orbit"
+  description="Your attempt is closed. We'll be in touch."
+>
+  <Module client:load />
+</MainLayout>

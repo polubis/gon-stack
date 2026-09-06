@@ -45,6 +45,8 @@ minimumReleaseAgeExclude:
   - vitest@4.1.11
   - wrangler@4.124.0
   - '@vitejs/plugin-react@6.1.0'
+  - react-hook-form@7.87.0
+  - zod@4.5.4
 
 onlyBuiltDependencies:
   - supabase

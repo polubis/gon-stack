@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { NotesMain as Module } from '@/modules/notes-report';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Talent Orbit"
+  url="/notes-report-notes/"
+  imageAlt="Talent Orbit"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="talent orbit, interview notes, exams, hiring"
+  title="Add interview notes | Talent Orbit"
+  description="Capture key observations, strengths, areas to improve, and next steps."
+>
+  <Module client:load />
+</MainLayout>

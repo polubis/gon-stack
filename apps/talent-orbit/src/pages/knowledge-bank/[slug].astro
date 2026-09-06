@@ -1,0 +1,27 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { DetailMain as Module } from '@/modules/knowledge-bank';
+
+export function getStaticPaths() {
+  return [{ params: { slug: 'frontend-engineering' } }];
+}
+
+const { slug } = Astro.params;
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Talent Orbit"
+  url={`/knowledge-bank/${slug}/`}
+  imageAlt="Talent Orbit"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="talent orbit, knowledge bank, frontend engineering, concepts"
+  title="Frontend Engineering | Talent Orbit"
+  description="Overview of the Frontend Engineering knowledge bank."
+>
+  <Module client:load />
+</MainLayout>

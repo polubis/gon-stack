@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { StatisticsMain as Module } from '@/modules/exam';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Talent Orbit"
+  url="/exams-statistics/"
+  imageAlt="Talent Orbit"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="talent orbit, exam statistics, exams, hiring"
+  title="Statistics | Talent Orbit"
+  description="Analyze exam results with key metrics and performance insights."
+>
+  <Module client:load />
+</MainLayout>

@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { JoinMain as Module } from '@/modules/exam';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Talent Orbit"
+  url="/exams-join/"
+  imageAlt="Talent Orbit"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="talent orbit, join exam, exams, hiring"
+  title="Join exam | Talent Orbit"
+  description="Enter the password to join this exam anonymously."
+>
+  <Module client:load />
+</MainLayout>
