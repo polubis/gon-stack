@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { DetailMain as Module } from '@/modules/tests';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Talent Orbit"
+  url="/tests-detail/"
+  imageAlt="Talent Orbit"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="talent orbit, test details, tests library, hiring"
+  title="Test details | Talent Orbit"
+  description="Your test is ready to use. Review details, edit, or create an exam."
+>
+  <Module client:load />
+</MainLayout>

@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { ComposeMain as Module } from '@/modules/questions-library';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Talent Orbit"
+  url="/questions-library-compose/"
+  imageAlt="Talent Orbit"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="talent orbit, compose question, questions library, hiring"
+  title="Compose question | Talent Orbit"
+  description="Compose your question with options and mark the correct answer."
+>
+  <Module client:load />
+</MainLayout>

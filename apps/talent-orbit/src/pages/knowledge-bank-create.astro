@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { CreateMain as Module } from '@/modules/knowledge-bank';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Talent Orbit"
+  url="/knowledge-bank-create/"
+  imageAlt="Talent Orbit"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="talent orbit, create knowledge bank, hiring, concepts"
+  title="Create bank | Talent Orbit"
+  description="Build a new knowledge bank to organize concepts and share knowledge with your team."
+>
+  <Module client:load />
+</MainLayout>

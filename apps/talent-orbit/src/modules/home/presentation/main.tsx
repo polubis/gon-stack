@@ -1,18 +1,12 @@
+import { HeroPanel } from './hero-panel';
+import { WelcomeContent } from './welcome-content';
+
 export const Main = () => (
-  <main
-    data-e2e="home:main"
-    className="mx-auto flex min-h-screen max-w-5xl items-center justify-center px-6"
-  >
-    <section className="w-full rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm">
-      <p className="text-sm font-semibold uppercase tracking-wide text-brand">
-        Talent Orbit
-      </p>
-      <h1 className="mt-4 text-4xl font-bold tracking-tight text-slate-900">
-        Hello world
-      </h1>
-      <p className="mt-4 text-base text-slate-600">
-        Minimal app scaffold ready for future features.
-      </p>
-    </section>
-  </main>
+  <div data-e2e="home:main" className="flex min-h-dvh bg-slate-950 text-white">
+    <HeroPanel />
+
+    <div className="flex flex-1 flex-col items-center justify-center px-6 pb-52 pt-20 sm:px-10 lg:items-start lg:justify-center lg:px-20 lg:pb-44 xl:px-28">
+      <WelcomeContent />
+    </div>
+  </div>
 );

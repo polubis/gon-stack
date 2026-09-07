@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { ShareMain as Module } from '@/modules/exam';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Talent Orbit"
+  url="/exams-share/"
+  imageAlt="Talent Orbit"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="talent orbit, share exam, exams, hiring"
+  title="Share exam | Talent Orbit"
+  description="Review the session details and share the join link with candidates."
+>
+  <Module client:load />
+</MainLayout>

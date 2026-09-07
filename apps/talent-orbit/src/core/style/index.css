@@ -5,6 +5,8 @@
   --color-brand: #2563eb;
   --color-surface: #f8fafc;
   --color-ink: #0f172a;
+  /* WCAG AA with white text (default orange-500 #ff6900 is 2.88:1). */
+  --color-orange-500: #c2410c;
 }
 
 @layer base {

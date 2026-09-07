@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { ReviewMain as Module } from '@/modules/notes-report';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Talent Orbit"
+  url="/notes-report-review/"
+  imageAlt="Talent Orbit"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="talent orbit, review submission, exams, hiring"
+  title="Review submission | Talent Orbit"
+  description="Review your notes and transcript before generating the report."
+>
+  <Module client:load />
+</MainLayout>

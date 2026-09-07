@@ -19,6 +19,39 @@ const reviewTrustLine = reviewSources
   .map((source) => `${source.ratingValue} ${source.name}`)
   .join(`${NBSP}•${NBSP}`);
 
+type OpeningHoursDay = {
+  id: string;
+  label: string;
+  closed?: boolean;
+  slots: string[];
+};
+
+const openingHoursDays = [
+  {
+    id: 'monday',
+    label: 'Poniedziałek',
+    slots: ['13:00 - 21:00'],
+  },
+  {
+    id: 'tuesday',
+    label: 'Wtorek',
+    slots: ['07:00 - 15:15'],
+  },
+  {
+    id: 'wednesday',
+    label: 'Środa',
+    slots: ['07:00 - 15:15'],
+  },
+  {
+    id: 'thursday',
+    label: 'Czwartek',
+    slots: ['07:00 - 15:15', '17:30 - 18:30'],
+  },
+  { id: 'friday', label: 'Piątek', closed: true, slots: [] },
+  { id: 'saturday', label: 'Sobota', closed: true, slots: [] },
+  { id: 'sunday', label: 'Niedziela', closed: true, slots: [] },
+] satisfies OpeningHoursDay[];
+
 export const copy = {
   meta: {
     author: 'GreenOn Software Adrian Połubiński',
@@ -190,31 +223,7 @@ export const copy = {
     openingHours: {
       title: 'Godziny otwarcia',
       closedLabel: 'Zamknięte',
-      days: [
-        {
-          id: 'monday',
-          label: 'Poniedziałek',
-          slots: ['13:00 - 21:00'],
-        },
-        {
-          id: 'tuesday',
-          label: 'Wtorek',
-          slots: ['07:00 - 15:15'],
-        },
-        {
-          id: 'wednesday',
-          label: 'Środa',
-          slots: ['07:00 - 15:15'],
-        },
-        {
-          id: 'thursday',
-          label: 'Czwartek',
-          slots: ['07:00 - 15:15', '17:30 - 18:30'],
-        },
-        { id: 'friday', label: 'Piątek', closed: true, slots: [] },
-        { id: 'saturday', label: 'Sobota', closed: true, slots: [] },
-        { id: 'sunday', label: 'Niedziela', closed: true, slots: [] },
-      ],
+      days: openingHoursDays,
     },
   },
 
