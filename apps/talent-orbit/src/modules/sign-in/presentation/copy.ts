@@ -6,7 +6,7 @@ export const copy = {
   passwordLabel: 'Password',
   passwordPlaceholder: '••••••••••••',
   showPassword: 'Show',
-  passwordError: 'Please enter your password.',
+  hidePassword: 'Hide',
   keepSignedIn: 'Keep me signed in',
   forgotPassword: 'Forgot password?',
   submit: 'Sign in',

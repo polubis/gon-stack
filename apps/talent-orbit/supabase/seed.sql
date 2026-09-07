@@ -1,0 +1,1 @@
+-- Talent Orbit local seed data (add inserts here after schema migrations exist)

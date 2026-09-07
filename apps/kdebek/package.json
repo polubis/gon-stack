@@ -23,15 +23,15 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
-    "@astrojs/cloudflare": "^14.2.5",
-    "@astrojs/react": "^6.0.4",
-    "@astrojs/sitemap": "^3.7.3",
+    "@astrojs/cloudflare": "^14.2.6",
+    "@astrojs/react": "^6.0.5",
+    "@astrojs/sitemap": "^3.7.4",
     "@repo/react-kit": "workspace:*",
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
-    "astro": "^7.2.9",
-    "lucide-react": "^1.37.0",
+    "astro": "^7.2.10",
+    "lucide-react": "^1.39.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tailwindcss": "^4.3.3"
@@ -44,8 +44,8 @@
     "@repo/vibe-test": "workspace:*",
     "@testing-library/jest-dom": "^6.10.0",
     "@testing-library/react": "^16.3.3",
-    "@testing-library/user-event": "^14.6.6",
-    "@types/node": "^26.4.0",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/node": "^26.4.1",
     "@vitejs/plugin-react": "^6.1.1",
     "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^9.39.5",
@@ -54,6 +54,6 @@
     "sharp": "^0.35.3",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.11",
-    "wrangler": "^4.127.1"
+    "wrangler": "^4.128.0"
   }
 }

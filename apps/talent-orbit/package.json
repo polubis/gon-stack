@@ -19,23 +19,34 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:report": "playwright show-report",
-    "test:e2e:update-snapshots": "playwright test --update-snapshots"
+    "test:e2e:update-snapshots": "playwright test --update-snapshots",
+    "db:init": "pnpx supabase init",
+    "db:start": "pnpx supabase start",
+    "db:gen-types": "pnpx supabase gen types typescript --local > src/shared/data-sources/db-schema.ts",
+    "db:reset": "pnpx supabase db reset",
+    "db:stop": "pnpx supabase stop",
+    "db:migration:new": "pnpx supabase migration new",
+    "db:migration:up": "pnpx supabase migration up"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
-    "@astrojs/cloudflare": "^14.2.5",
-    "@astrojs/react": "^6.0.4",
-    "@astrojs/sitemap": "^3.7.3",
+    "@astrojs/cloudflare": "^14.2.6",
+    "@astrojs/react": "^6.0.5",
+    "@astrojs/sitemap": "^3.7.4",
     "@radix-ui/react-dialog": "^1.1.23",
     "@repo/react-kit": "workspace:*",
+    "@repo/type-beast": "workspace:*",
+    "@supabase/ssr": "^0.12.4",
+    "@supabase/supabase-js": "^2.114.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
-    "astro": "^7.2.9",
-    "lucide-react": "^1.37.0",
+    "astro": "^7.2.10",
+    "lucide-react": "^1.39.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "tailwindcss": "^4.3.3"
+    "tailwindcss": "^4.3.3",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
@@ -45,16 +56,17 @@
     "@repo/vibe-test": "workspace:*",
     "@testing-library/jest-dom": "^6.10.0",
     "@testing-library/react": "^16.3.3",
-    "@testing-library/user-event": "^14.6.6",
-    "@types/node": "^26.4.0",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/node": "^26.4.1",
     "@vitejs/plugin-react": "^6.1.1",
     "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^9.39.5",
     "jsdom": "^29.1.1",
     "msw": "^2.15.0",
     "sharp": "^0.35.3",
+    "supabase": "^2.116.0",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.11",
-    "wrangler": "^4.127.1"
+    "wrangler": "^4.128.0"
   }
 }
