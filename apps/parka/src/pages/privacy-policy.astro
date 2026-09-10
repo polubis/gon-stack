@@ -1,0 +1,46 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Parka"
+  url="/privacy-policy/"
+  imageAlt="Parka"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="parka, polityka prywatności, rodo, gdpr"
+  title="Polityka prywatności | Parka"
+  description="Polityka prywatności aplikacji Parka."
+>
+  <main
+    data-e2e="privacy:main"
+    class="mx-auto flex min-h-screen w-full max-w-md flex-col gap-4 px-6 py-10"
+  >
+    <a href="/settings/" class="text-sm font-semibold text-brand-dark underline">← Wróć</a>
+    <h1 class="text-2xl font-semibold tracking-tight">Polityka prywatności</h1>
+    <p class="text-sm text-ink-soft">
+      Parka przetwarza dane finansowe wyłącznie w celu świadczenia usługi zarządzania
+      wydatkami. Dane są przechowywane na serwerach w Unii Europejskiej oraz szyfrowane
+      w spoczynku i podczas przesyłania.
+    </p>
+    <h2 class="text-lg font-semibold">Zakres danych</h2>
+    <p class="text-sm text-ink-soft">
+      Adres e-mail, dane paragonów, kategorie, limity i cele oszczędnościowe. Zdjęcia
+      paragonów są analizowane przez AI wyłącznie w celu ekstrakcji pozycji i kategorii.
+    </p>
+    <h2 class="text-lg font-semibold">Twoje prawa (RODO / GDPR)</h2>
+    <p class="text-sm text-ink-soft">
+      Masz prawo dostępu, sprostowania, przenoszenia i usunięcia danych. Eksport danych
+      dostępny jest w formacie CSV oraz PDF w sekcji „Eksport danych”.
+    </p>
+    <h2 class="text-lg font-semibold">Pliki cookie</h2>
+    <p class="text-sm text-ink-soft">
+      Śledzenie i analityka są uruchamiane dopiero po wyrażeniu zgody na pliki cookie.
+    </p>
+  </main>
+</MainLayout>

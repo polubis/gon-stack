@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { PrivacyMain } from '@/modules/info';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Parka"
+  url="/privacy/"
+  imageAlt="Parka"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="parka, budżet, wydatki, finanse osobiste"
+  title="RODO i prywatność | Parka"
+  description="Jak Parka chroni Twoje dane."
+>
+  <PrivacyMain client:load  />
+</MainLayout>

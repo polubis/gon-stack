@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { Main as Module } from '@/modules/home';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Parka"
+  url="/"
+  imageAlt="Parka"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="parka, budżet, wydatki, finanse osobiste, paragony"
+  title="Parka — Twoje wydatki pod kontrolą"
+  description="Parka pomaga trzymać wydatki pod kontrolą: skanuj paragony, kategoryzuj wydatki i pilnuj limitów."
+>
+  <Module client:load />
+</MainLayout>

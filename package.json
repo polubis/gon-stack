@@ -60,12 +60,6 @@
     "prettier-plugin-tailwindcss": "^0.8.1",
     "turbo": "^2.10.12"
   },
-  "lint-staged": {
-    "**/*.{ts,tsx,md,json,yaml,css,js,jsx}": [
-      "prettier --write",
-      "git add"
-    ]
-  },
   "packageManager": "pnpm@11.25.0",
   "engines": {
     "node": "24.16.0"

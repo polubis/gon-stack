@@ -1,0 +1,29 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+
+  /* Parka green palette — tuned for WCAG AA on white / with white text. */
+  --color-brand: #0b6e46;
+  --color-brand-dark: #08512f;
+  --color-brand-soft: #e3f2ea;
+  --color-brand-softer: #f1f8f4;
+
+  --color-surface: #f4f7f5;
+  --color-ink: #10241b;
+  --color-ink-soft: #46564d;
+
+  /* WCAG AA with white text (default orange-500 #ff6900 is 2.88:1). */
+  --color-orange-500: #c2410c;
+}
+
+@layer base {
+  body {
+    @apply bg-surface text-ink font-sans antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+}

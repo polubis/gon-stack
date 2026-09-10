@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { Main } from '@/modules/limits';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Parka"
+  url="/limits/"
+  imageAlt="Parka"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="parka, budżet, wydatki, finanse osobiste"
+  title="Limity i cele | Parka"
+  description="Limity wydatków i cele oszczędnościowe."
+>
+  <Main client:load  />
+</MainLayout>

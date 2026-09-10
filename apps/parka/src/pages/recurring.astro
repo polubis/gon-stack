@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { Main } from '@/modules/recurring';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Parka"
+  url="/recurring/"
+  imageAlt="Parka"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="parka, budżet, wydatki, finanse osobiste"
+  title="Wydatki cykliczne | Parka"
+  description="Zarządzaj subskrypcjami i rachunkami."
+>
+  <Main client:load  />
+</MainLayout>

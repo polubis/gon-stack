@@ -1,0 +1,5 @@
+# Local Supabase (from `pnpm db:start`). Both keys are safe to expose to the client.
+PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_ACJWlzQHBrEguOxg_3BJgxAaH
+# Only used by the Google OAuth callback (disabled in the UI by default).
+AUTH_CALLBACK_URL=http://127.0.0.1:4325/api/auth/callback/

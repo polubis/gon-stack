@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { Main } from '@/modules/auth';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Parka"
+  url="/sign-in/"
+  imageAlt="Parka"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="parka, logowanie, rejestracja"
+  title="Logowanie | Parka"
+  description="Dostęp do Twojego konta Parka."
+>
+  <Main client:load mode="sign-in" />
+</MainLayout>

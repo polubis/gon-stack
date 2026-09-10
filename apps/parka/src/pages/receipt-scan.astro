@@ -1,0 +1,22 @@
+---
+export const prerender = true;
+
+import MainLayout from '@/core/layouts/main.astro';
+import { Main } from '@/modules/receipt';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<MainLayout
+  siteName="Parka"
+  url="/receipt-scan/"
+  imageAlt="Parka"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="parka, budżet, wydatki, finanse osobiste"
+  title="Skanowanie paragonu | Parka"
+  description="Zeskanuj paragon i zapisz wydatek."
+>
+  <Main client:load  />
+</MainLayout>
