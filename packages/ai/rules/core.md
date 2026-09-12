@@ -53,9 +53,10 @@
 ### E2E
 
 1. (A) Done via `vibe-test` internal lib
-2. (A) Type-safe selectors
+2. (A) Unique type-safe selectors
 3. (A) Selectors per "module" and combined in single place
 4. (A) Disable animations/images when testing visuals
+5. (A) Partial type-safe selectors for dynamic content `range:name:${string|number}`
 
 ### Unit/Integration
 

@@ -59,7 +59,7 @@ export const Main = () => {
                     type="button"
                     className="flex-1 text-left"
                     aria-expanded={open}
-                    data-e2e="recurring:row"
+                    data-e2e={`recurring:row:${r.id}`}
                     onClick={() => setOpenId(open ? null : r.id)}
                   >
                     <span className="block text-sm font-medium">{r.name}</span>

@@ -79,8 +79,8 @@ test('every feature works against the real Supabase backend', async ({
   await expect(page.getByTestId('receipt:review')).toBeVisible();
   await page.getByTestId('receipt:merchant').fill('Sklep E2E Backend');
   await page.getByRole('button', { name: /Chleb pszenny/ }).click();
-  await page.getByTestId('receipt:item-name').first().fill('Chleb razowy');
-  await page.getByTestId('receipt:item-price').first().fill('3.20');
+  await page.getByTestId(/^receipt:item-name:/).fill('Chleb razowy');
+  await page.getByTestId(/^receipt:item-price:/).fill('3.20');
   await page.getByTestId('receipt:save').click();
   await page.waitForURL('**/expenses/');
   await expect(page.getByText('Sklep E2E Backend')).toBeVisible();

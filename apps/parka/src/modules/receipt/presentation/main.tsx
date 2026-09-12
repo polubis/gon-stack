@@ -25,6 +25,21 @@ type Draft = {
   items: ReceiptItem[];
 };
 
+const emptyDraft = (): Draft => ({
+  merchant: '',
+  date: new Date().toISOString().slice(0, 10),
+  items: [
+    {
+      id: genId('ri'),
+      name: 'Nowy produkt',
+      unitPrice: 0,
+      quantity: 1,
+      discount: 0,
+      categoryId: 'other',
+    },
+  ],
+});
+
 /** Simulated AI extraction — deterministic sample so review always has data. */
 const extract = (): Draft => ({
   merchant: 'Biedronka',
@@ -82,6 +97,11 @@ export const Main = () => {
       setDraft(extract());
       setStep('review');
     }, 600);
+  };
+
+  const startManual = () => {
+    setDraft(emptyDraft());
+    setStep('review');
   };
 
   const patchItem = (id: string, patch: Partial<ReceiptItem>) =>
@@ -153,14 +173,25 @@ export const Main = () => {
               <Camera className="h-12 w-12" aria-hidden="true" />
             )}
           </div>
-          <Button
-            data-e2e="receipt:capture"
-            onClick={capture}
-            disabled={step === 'processing'}
-          >
-            <Camera className="h-4 w-4" aria-hidden="true" />
-            {step === 'processing' ? 'Przetwarzanie…' : 'Zrób zdjęcie'}
-          </Button>
+          <div className="flex w-full max-w-xs flex-col gap-3">
+            <Button
+              variant="ghost"
+              data-e2e="receipt:manual"
+              onClick={startManual}
+              disabled={step === 'processing'}
+            >
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Wprowadź ręcznie
+            </Button>
+            <Button
+              data-e2e="receipt:capture"
+              onClick={capture}
+              disabled={step === 'processing'}
+            >
+              <Camera className="h-4 w-4" aria-hidden="true" />
+              {step === 'processing' ? 'Przetwarzanie…' : 'Zrób zdjęcie'}
+            </Button>
+          </div>
         </main>
       </AppShell>
     );
@@ -267,7 +298,7 @@ export const Main = () => {
                           <input
                             className={inputClass}
                             value={item.name}
-                            data-e2e="receipt:item-name"
+                            data-e2e={`receipt:item-name:${item.id}`}
                             onChange={(e) =>
                               patchItem(item.id, { name: e.target.value })
                             }
@@ -280,7 +311,7 @@ export const Main = () => {
                           step="0.01"
                           className={inputClass}
                           value={item.unitPrice}
-                          data-e2e="receipt:item-price"
+                          data-e2e={`receipt:item-price:${item.id}`}
                           onChange={(e) =>
                             patchItem(item.id, {
                               unitPrice: Number(e.target.value),
@@ -295,7 +326,7 @@ export const Main = () => {
                           min="1"
                           className={inputClass}
                           value={item.quantity}
-                          data-e2e="receipt:item-qty"
+                          data-e2e={`receipt:item-qty:${item.id}`}
                           onChange={(e) =>
                             patchItem(item.id, {
                               quantity: Number(e.target.value),
@@ -310,7 +341,7 @@ export const Main = () => {
                           min="0"
                           className={inputClass}
                           value={item.discount}
-                          data-e2e="receipt:item-discount"
+                          data-e2e={`receipt:item-discount:${item.id}`}
                           onChange={(e) =>
                             patchItem(item.id, {
                               discount: Number(e.target.value),
@@ -322,7 +353,7 @@ export const Main = () => {
                         <select
                           className={inputClass}
                           value={item.categoryId}
-                          data-e2e="receipt:item-category"
+                          data-e2e={`receipt:item-category:${item.id}`}
                           onChange={(e) =>
                             patchItem(item.id, { categoryId: e.target.value })
                           }

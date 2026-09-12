@@ -78,7 +78,7 @@ export const Main = () => {
                   type="button"
                   role="tab"
                   aria-selected={r === range}
-                  data-e2e="statistics:range"
+                  data-e2e={`statistics:range:${r}`}
                   onClick={() => setRange(r)}
                   className={cn(
                     'shrink-0 rounded-full px-3 py-1.5 text-sm font-medium',

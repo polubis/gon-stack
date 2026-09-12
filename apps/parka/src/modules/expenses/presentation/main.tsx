@@ -55,7 +55,7 @@ export const Main = () => {
             setEditing(false);
           }}
           className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left hover:bg-black/[0.03]"
-          data-e2e="expenses:row"
+          data-e2e={`expenses:row:${e.id}`}
         >
           <CategoryAvatar category={category} />
           <span className="flex-1">

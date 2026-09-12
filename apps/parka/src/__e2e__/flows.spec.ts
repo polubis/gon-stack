@@ -66,8 +66,8 @@ test('a scanned receipt can be reviewed, corrected and persisted as an expense',
 
   // Correct the first item.
   await page.getByRole('button', { name: /Chleb pszenny/ }).click();
-  await page.getByTestId('receipt:item-name').first().fill('Chleb razowy');
-  await page.getByTestId('receipt:item-price').first().fill('3.20');
+  await page.getByTestId(/^receipt:item-name:/).fill('Chleb razowy');
+  await page.getByTestId(/^receipt:item-price:/).fill('3.20');
 
   await page.getByTestId('receipt:save').click();
   await page.waitForURL('**/expenses/');

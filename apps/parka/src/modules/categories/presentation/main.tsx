@@ -63,7 +63,7 @@ export const Main = () => {
             <li key={c.id} className="border-b border-black/5 last:border-0">
               <button
                 type="button"
-                data-e2e="categories:row"
+                data-e2e={`categories:row:${c.id}`}
                 onClick={() => setEditing({ mode: 'edit', category: c })}
                 className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-black/[0.02]"
               >
