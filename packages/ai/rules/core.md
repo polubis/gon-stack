@@ -75,6 +75,10 @@
 4. (A) When decision add under `__decision__` dir per task
 5. (A) Each session ends with entry in `__activity__` and `__decision__`
 
+## Astro
+
+1. (A) Backend endpoints via builded-in adapaters and type-safe input/output validation
+
 ## React
 
 1. (A) `Context API` via `react-kit` utils
