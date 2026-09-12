@@ -15,10 +15,10 @@ test('onboarding leads an anonymous visitor to registration', async ({
 }) => {
   await open(page, '/');
   // Step through the product introduction, then hand off to sign-up.
-  await page.getByTestId('home:primary').click();
-  await page.getByTestId('home:primary').click();
-  await page.getByTestId('home:primary').click();
-  await page.getByTestId('home:primary').click();
+  await page.getByTestId('walkthrough:primary').click();
+  await page.getByTestId('walkthrough:primary').click();
+  await page.getByTestId('walkthrough:primary').click();
+  await page.getByTestId('walkthrough:primary').click();
   await page.waitForURL('**/sign-up/');
   await expect(page.getByTestId('auth:main')).toBeVisible();
 });

@@ -42,6 +42,8 @@ test('every feature works against the real Supabase backend', async ({
   await page.getByTestId('auth:password').fill(PASSWORD);
   await page.getByTestId('auth:submit').click();
   await page.waitForURL('**/dashboard/');
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(150);
 
   // Totals are computed from rows the trigger inserted into Postgres.
   await expect(page.getByTestId('dashboard:month-label')).toHaveText(

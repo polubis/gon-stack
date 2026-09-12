@@ -1,4 +1,5 @@
 import { cn } from '@repo/react-kit/cn';
+import type { E2eId } from '@/__e2e__/selectors';
 
 type SegmentedProps<T extends string> = {
   options: { value: T; label: string }[];
@@ -106,6 +107,7 @@ export const Button = ({
   onClick,
   href,
   className,
+  'data-e2e': dataE2e,
   ...rest
 }: {
   children: React.ReactNode;
@@ -114,6 +116,10 @@ export const Button = ({
   onClick?: () => void;
   href?: string;
   className?: string;
+  // Named explicitly (not left to the `Record<string, unknown>` catch-all
+  // below) so every `<Button data-e2e="...">` call site is checked against
+  // the real `E2eId` union instead of accepting any string.
+  'data-e2e'?: E2eId;
 } & Record<string, unknown>) => {
   const base =
     'inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-colors';
@@ -125,7 +131,12 @@ export const Button = ({
         : 'bg-white text-brand-dark border border-black/10 hover:bg-brand-softer';
   if (href) {
     return (
-      <a href={href} className={cn(base, styles, className)} {...rest}>
+      <a
+        href={href}
+        className={cn(base, styles, className)}
+        data-e2e={dataE2e}
+        {...rest}
+      >
         {children}
       </a>
     );
@@ -135,6 +146,7 @@ export const Button = ({
       type={type}
       onClick={onClick}
       className={cn(base, styles, className)}
+      data-e2e={dataE2e}
       {...rest}
     >
       {children}

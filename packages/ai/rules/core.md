@@ -1,52 +1,90 @@
-# Web dev rules
+# Legend
 
-## General
+- A = always
+- O = optional
+- D = when directly mentioned
+- I = infer during task
 
-- Minimalistic code (less characters or complex names then better)
+## Coding
 
-## Style
+1. (A) Turbo minimal code
 
-- No raw `px`. Need it? Why + inline comment
-- No direct colors/spacing/z-index/fonts — main stylesheet vars only
-- No built-in Tailwind palette. Own palette always
-- If color required create variable and use Tailwind auto-gen classes
+## Code style
 
-## Testing e2e
+1. (A) Inline exports in order public bottom/private top order
 
-- Use `getByE2e` and data-e2e for selectors with convention: `region:selector-name`
+## Git
 
-## Testing unit/integration
+1. (A) Commit names with feat|fix|refactor|chore: scope format
+2. (A) As a unordered list in description scope of changes
 
-- Always BLACK BOX, never leak implementation details (one exception -> testing generic codebase like libraries)
-- Never code in test names methods, property names, ...etc -> test names must reflect behaviors
+## Communication
 
-## React
-
-- Context: `context()` from `@react-kit`
-- Arrow fns only: `const fn = () => {}`
-- `cn()` + Tailwind from `@react-kit` if performance not important (SPA apps/parts)
+1. (A) Turbo minimal text
+2. (I) Prefer ASCI
 
 ## Architecture
 
-- Domain-sliced modular arch always
-- Per feature: `presentation`, `core`, `integration`, `configuration`, barrel `index.ts`, `domain`. Skip layers when OK
-- `shared` = reusable domains
-- No tech buckets (`containers`, `components`, etc.)
-- Fully modularized with clear layers (always)
-- Focus isolation (instead of tons of files -> prefer single)
+1. (A) Modular & domain based
+2. (I) Layers in modules per case complexity
+3. (I) Presentation/logic
+4. (I) Isolation more important than duplication
+5. (A) Low coupling
 
-## Exports
+## Styling
 
-- Inline only. No bottom export block
-- Structure:
+1. (A) No raw `px`
+2. (A) Design tokens
+3. (A) No direct colors/spacing/z-index/fonts
+4. (A) Theming in single app/lib file
+5. (A) `cn` from `react-kit`
 
-```js
-// private module code
+## Testing
 
-// public module code (exported one)
-```
+1. (A) Black Box/Arrange Act Assert organized
+2. (I) No implementation details
+3. (A) Short and "like user story" test names
+4. (A) No Gherkin
+5. (A) Test behaviors/not implementation
+6. (A) Verify TypeScript behavior in tests for public interface
+7. (A) No internals testing, public behaviors only
+8. (A) Test pyramid
 
-## Imports
+### E2E
 
-- Absolute imports via `@/` for cross-module paths (e.g. `@/shared/...`, `@/assets/...`, `@/modules/foo` from pages)
-- Inside a module, use relative imports between its own layers (e.g. `../domain/models`, `./copy`)
+1. (A) Done via `vibe-test` internal lib
+2. (A) Type-safe selectors
+3. (A) Selectors per "module" and combined in single place
+4. (A) Disable animations/images when testing visuals
+
+### Unit/Integration
+
+1. (A) Accessible selectors
+2. (A) Do not use `e2e` selectors
+
+## Way of work
+
+1. (A) Each module has `__activity__` and `__decision__`. Either, app root and repo root
+
+## AI
+
+1. (A) Use `/caveman 70%` to reduce text inside any `markdown`
+2. (A) Document progress/cost/time in `__activity__` dir per task
+3. (A) During modification follow conventions/style around
+4. (A) When decision add under `__decision__` dir per task
+5. (A) Each session ends with entry in `__activity__` and `__decision__`
+
+## React
+
+1. (A) `Context API` via `react-kit` utils
+2. (A) `useEffectEvent` instead of hacks
+3. (A) `ComponentProps` for generic components def merging
+
+## TypeScript
+
+1. (A) Type-safe & Strict
+2. (I) Exh checking and disc property
+
+## Security
+
+1. (A) Yield and stop everything when any personal or sensitive data detected
