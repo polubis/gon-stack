@@ -65,15 +65,12 @@
 
 ## Way of work
 
-1. (A) Each module has `__activity__` and `__decision__`. Either, app root and repo root
+1. (A) Each session ends with entry in `__log__`. Template `claude/templates/task-log.md`
 
 ## AI
 
-1. (A) Use `/caveman 70%` to reduce text inside any `markdown`
-2. (A) Document progress/cost/time in `__activity__` dir per task
-3. (A) During modification follow conventions/style around
-4. (A) When decision add under `__decision__` dir per task
-5. (A) Each session ends with entry in `__activity__` and `__decision__`
+1. (A) Use `/caveman full` skill to reduce text inside any `markdown`
+2. (A) During modification follow conventions/style around
 
 ## Astro
 
