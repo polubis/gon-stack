@@ -24,8 +24,7 @@ pnpm db:gen-types      # regenerate src/shared/data-sources/db-schema.ts
 Every table lives under row-level security keyed to the session user. A Postgres
 trigger (`handle_new_user`) seeds a fresh demo dataset for each account on
 sign-up. The React store hydrates from `GET /api/state` and writes the whole
-per-user graph back through `PUT /api/state`; anonymous visitors fall back to an
-in-browser demo store.
+per-user graph back through `PUT /api/state`.
 
 ## Development
 

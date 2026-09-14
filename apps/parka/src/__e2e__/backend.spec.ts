@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 /**
  * End-to-end verification that every Parka feature works against the real
- * Supabase (Postgres) backend — not the localStorage demo store.
+ * Supabase (Postgres) backend.
  *
  * The flow registers a fresh account (which seeds per-user demo data through a
  * Postgres trigger), then exercises each feature and reloads the page to prove

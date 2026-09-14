@@ -1,8 +1,6 @@
 import type { ParkaState } from './types';
 import { createSeedState } from './seed';
 
-const STORAGE_KEY = 'parka:state:v1';
-
 let state: ParkaState = createSeedState();
 const listeners = new Set<() => void>();
 
@@ -11,33 +9,12 @@ const isBrowser = typeof window !== 'undefined';
 /**
  * `pending`  — first bootstrap request in flight.
  * `backend`  — a signed-in session; every mutation syncs to Postgres.
- * `local`    — anonymous visitor; state lives in localStorage (demo mode).
+ * `anonymous` — no backend session; state stays in memory only.
  */
-type Mode = 'pending' | 'backend' | 'local';
+type Mode = 'pending' | 'backend' | 'anonymous';
 let mode: Mode = 'pending';
 
 const notify = () => listeners.forEach((l) => l());
-
-const loadLocal = () => {
-  if (!isBrowser) return;
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      state = { ...createSeedState(), ...(JSON.parse(raw) as ParkaState) };
-    }
-  } catch {
-    /* fall back to seed */
-  }
-};
-
-const persistLocal = () => {
-  if (!isBrowser) return;
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    /* ignore quota / private mode */
-  }
-};
 
 const toPayload = (s: ParkaState) => ({
   categories: s.categories,
@@ -73,7 +50,6 @@ const persistBackend = () => {
 
 const persist = () => {
   if (mode === 'backend') persistBackend();
-  else persistLocal();
 };
 
 /** Resolves once the current backend sync (if any) has been flushed. */
@@ -113,11 +89,10 @@ export const bootstrap = (): Promise<void> => {
         return;
       }
     } catch {
-      /* offline / no backend — fall through to local mode */
+      /* offline / no backend — fall through to anonymous mode */
     }
 
-    mode = 'local';
-    loadLocal();
+    mode = 'anonymous';
     notify();
   })();
 
