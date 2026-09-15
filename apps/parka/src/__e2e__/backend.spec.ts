@@ -18,13 +18,13 @@ const open = async (page: Page, path: string): Promise<void> => {
   await page.waitForTimeout(150);
 };
 
-/** Wait for the store's debounced full-state sync (PUT /api/state) to land. */
-const synced = (page: Page) =>
+/** Wait for a specific per-entity write to land. */
+const synced = (page: Page, method: string, path: string, status = 200) =>
   page.waitForResponse(
     (r) =>
-      r.url().includes('/api/state') &&
-      r.request().method() === 'PUT' &&
-      r.status() === 200,
+      r.url().includes(path) &&
+      r.request().method() === method &&
+      r.status() === status,
   );
 
 const reload = async (page: Page): Promise<void> => {
@@ -66,7 +66,7 @@ test('every feature works against the real Supabase backend', async ({
   await page.getByTestId('categories:new').click();
   await page.getByTestId('categories:form-name').fill('Kultura');
   await Promise.all([
-    synced(page),
+    synced(page, 'POST', '/api/categories', 201),
     page.getByTestId('categories:form-save').click(),
   ]);
   await expect(page.getByText('Kultura')).toBeVisible();
@@ -99,14 +99,17 @@ test('every feature works against the real Supabase backend', async ({
   await expect(page.getByTestId('expenses:detail')).toBeVisible();
   await page.getByTestId('expenses:edit').click();
   await page.getByTestId('expenses:edit-merchant').fill('Kino Nowe Horyzonty');
-  await Promise.all([synced(page), page.getByTestId('expenses:save').click()]);
+  await Promise.all([
+    synced(page, 'PUT', '/api/expenses/'),
+    page.getByTestId('expenses:save').click(),
+  ]);
   await expect(page.getByText('Kino Nowe Horyzonty')).toBeVisible();
   await reload(page);
   await expect(page.getByText('Kino Nowe Horyzonty')).toBeVisible();
 
   await page.getByRole('button', { name: /Kino Nowe Horyzonty/ }).click();
   await Promise.all([
-    synced(page),
+    synced(page, 'DELETE', '/api/expenses/'),
     page.getByTestId('expenses:delete').click(),
   ]);
   await expect(page.getByText('Kino Nowe Horyzonty')).toHaveCount(0);
@@ -136,7 +139,7 @@ test('every feature works against the real Supabase backend', async ({
   await page.getByTestId('limits:new').click();
   await page.getByTestId('limits:form-amount').fill('450');
   await Promise.all([
-    synced(page),
+    synced(page, 'POST', '/api/limits', 201),
     page.getByTestId('limits:form-save').click(),
   ]);
   await expect(page.getByTestId('limits:form')).toHaveCount(0);
@@ -151,7 +154,7 @@ test('every feature works against the real Supabase backend', async ({
   await page.getByRole('tab', { name: 'Wszystkie' }).click();
   const spotify = page.getByRole('switch', { name: /Spotify/ }).first();
   await expect(spotify).toHaveAttribute('aria-checked', 'true');
-  await Promise.all([synced(page), spotify.click()]);
+  await Promise.all([synced(page, 'PUT', '/api/recurring/'), spotify.click()]);
   await expect(spotify).toHaveAttribute('aria-checked', 'false');
   await reload(page);
   await page.getByRole('tab', { name: 'Wszystkie' }).click();
@@ -170,7 +173,7 @@ test('every feature works against the real Supabase backend', async ({
   await page.getByTestId('settings:edit-profile').click();
   await page.getByTestId('settings:profile-name').fill('Anna Backendowa');
   await Promise.all([
-    synced(page),
+    synced(page, 'PUT', '/api/settings'),
     page.getByTestId('settings:save-profile').click(),
   ]);
   await expect(page.getByTestId('settings:name')).toHaveText('Anna Backendowa');

@@ -1,5 +1,6 @@
-import type { FinanceState } from '@schemas/state';
+import type { z } from 'zod';
 import { listExpensesSchema } from '@schemas/expenses';
+import { receiptItem } from '@schemas/general';
 import { InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
@@ -17,7 +18,7 @@ export const listExpenses = privateProcedure({
 
     const itemsByExpense = new Map<
       string,
-      FinanceState['expenses'][number]['items']
+      z.infer<ReturnType<typeof receiptItem>>[]
     >();
     for (const it of items.data) {
       const list = itemsByExpense.get(it.expense_id) ?? [];

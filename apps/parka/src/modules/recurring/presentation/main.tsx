@@ -8,7 +8,7 @@ import {
 } from '@/modules/shared/ui';
 import {
   useParkaState,
-  setState,
+  updateRecurring,
   dateLabel,
   money,
   type Recurring,
@@ -26,11 +26,10 @@ export const Main = () => {
       ? state.recurring.filter((r) => r.active)
       : state.recurring;
 
-  const toggle = (id: string, active: boolean) =>
-    setState((p) => ({
-      ...p,
-      recurring: p.recurring.map((r) => (r.id === id ? { ...r, active } : r)),
-    }));
+  const toggle = (id: string, active: boolean) => {
+    const item = state.recurring.find((r) => r.id === id);
+    if (item) updateRecurring({ ...item, active });
+  };
 
   return (
     <AppShell e2e="recurring:main" nav="more" title="Wydatki cykliczne">

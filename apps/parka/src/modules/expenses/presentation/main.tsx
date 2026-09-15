@@ -11,7 +11,8 @@ import {
 } from '@/modules/shared/ui';
 import {
   useParkaState,
-  setState,
+  updateExpense,
+  deleteExpense,
   itemTotal,
   monthOf,
   monthLabel,
@@ -164,22 +165,17 @@ const ExpenseDetail = ({
   const [categoryId, setCategoryId] = useState(expense.categoryId);
 
   const save = () => {
-    setState((p) => ({
-      ...p,
-      expenses: p.expenses.map((e) =>
-        e.id === expense.id
-          ? { ...e, merchant, amount: Number(amount) || 0, categoryId }
-          : e,
-      ),
-    }));
+    updateExpense({
+      ...expense,
+      merchant,
+      amount: Number(amount) || 0,
+      categoryId,
+    });
     onClose();
   };
 
   const remove = () => {
-    setState((p) => ({
-      ...p,
-      expenses: p.expenses.filter((e) => e.id !== expense.id),
-    }));
+    deleteExpense(expense.id);
     onClose();
   };
 

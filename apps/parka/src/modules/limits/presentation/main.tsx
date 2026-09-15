@@ -13,7 +13,9 @@ import {
 } from '@/modules/shared/ui';
 import {
   useParkaState,
-  setState,
+  updateLimit,
+  createLimit,
+  createGoal,
   genId,
   limitProgress,
   monthLabel,
@@ -149,12 +151,9 @@ const TotalLimit = ({
     return <p className="text-sm text-ink-soft">Brak zdefiniowanego limitu.</p>;
 
   const save = () => {
-    setState((p) => ({
-      ...p,
-      limits: p.limits.map((l) =>
-        l.scope === 'total' ? { ...l, amount: Number(amount) || l.amount } : l,
-      ),
-    }));
+    const total = state.limits.find((l) => l.scope === 'total');
+    if (total)
+      updateLimit({ ...total, amount: Number(amount) || total.amount });
     setEditing(false);
   };
 
@@ -219,20 +218,14 @@ const NewLimitForm = ({ onDone }: { onDone: () => void }) => {
   const [delivery, setDelivery] = useState<'push' | 'email'>('push');
 
   const save = () => {
-    setState((p) => ({
-      ...p,
-      limits: [
-        ...p.limits,
-        {
-          id: genId('limit'),
-          scope: 'category',
-          categoryId,
-          amount: Number(amount) || 0,
-          alertAt80,
-          delivery,
-        },
-      ],
-    }));
+    createLimit({
+      id: genId('limit'),
+      scope: 'category',
+      categoryId,
+      amount: Number(amount) || 0,
+      alertAt80,
+      delivery,
+    });
     onDone();
   };
 
@@ -313,19 +306,13 @@ const NewGoalForm = ({ onDone }: { onDone: () => void }) => {
   const [months, setMonths] = useState('6');
 
   const save = () => {
-    setState((p) => ({
-      ...p,
-      goals: [
-        ...p.goals,
-        {
-          id: genId('goal'),
-          name: name || 'Nowy cel',
-          target: Number(target) || 0,
-          saved: 0,
-          months: Number(months) || 1,
-        },
-      ],
-    }));
+    createGoal({
+      id: genId('goal'),
+      name: name || 'Nowy cel',
+      target: Number(target) || 0,
+      saved: 0,
+      months: Number(months) || 1,
+    });
     onDone();
   };
 

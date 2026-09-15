@@ -1,9 +1,9 @@
 import z from 'zod';
 
 /**
- * Per-entity shapes shared across the aggregate `/api/state` schema and the
- * per-entity REST schemas. Kept as factory functions so each call site gets
- * its own zod instance rather than sharing a mutated singleton.
+ * Per-entity shapes shared across the per-entity REST schemas. Kept as
+ * factory functions so each call site gets its own zod instance rather than
+ * sharing a mutated singleton.
  */
 
 export const category = () =>

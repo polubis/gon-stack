@@ -14,7 +14,8 @@ import {
 } from '@/modules/shared/ui';
 import {
   useParkaState,
-  setState,
+  createCategory,
+  updateCategory,
   genId,
   type Category,
   type CategoryIconId,
@@ -100,22 +101,19 @@ const CategoryForm = ({
 
   const save = () => {
     if (editing.mode === 'new') {
-      setState((p) => ({
-        ...p,
-        categories: [
-          ...p.categories,
-          { id: genId('cat'), name: name || 'Nowa kategoria', icon, color },
-        ],
-      }));
+      createCategory({
+        id: genId('cat'),
+        name: name || 'Nowa kategoria',
+        icon,
+        color,
+      });
     } else {
-      setState((p) => ({
-        ...p,
-        categories: p.categories.map((c) =>
-          c.id === editing.category.id
-            ? { ...c, name: name || c.name, icon, color }
-            : c,
-        ),
-      }));
+      updateCategory({
+        ...editing.category,
+        name: name || editing.category.name,
+        icon,
+        color,
+      });
     }
     onDone();
   };

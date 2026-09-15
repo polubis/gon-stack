@@ -19,7 +19,11 @@ import {
   Toggle,
   inputClass,
 } from '@/modules/shared/ui';
-import { useParkaState, setState, whenSynced } from '@/modules/shared/data';
+import {
+  useParkaState,
+  updateSettings,
+  whenSynced,
+} from '@/modules/shared/data';
 
 const signOut = async () => {
   await whenSynced();
@@ -56,21 +60,15 @@ export const Main = () => {
   const [email, setEmail] = useState(state.settings.profile.email);
 
   const saveProfile = () => {
-    setState((p) => ({
-      ...p,
-      settings: { ...p.settings, profile: { name, email } },
-    }));
+    updateSettings({ ...state.settings, profile: { name, email } });
     setEditing(false);
   };
 
   const setNotif = (key: (typeof NOTIF_KEYS)[number][0], value: boolean) =>
-    setState((p) => ({
-      ...p,
-      settings: {
-        ...p.settings,
-        notifications: { ...p.settings.notifications, [key]: value },
-      },
-    }));
+    updateSettings({
+      ...state.settings,
+      notifications: { ...state.settings.notifications, [key]: value },
+    });
 
   return (
     <AppShell e2e="settings:main" nav="more" title="Ustawienia">

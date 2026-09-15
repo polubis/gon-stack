@@ -11,8 +11,8 @@ import {
 import { CategoryAvatar } from '@/modules/shared/ui';
 import {
   useParkaState,
-  setState,
-  whenSynced,
+  createExpense,
+  createNotification,
   genId,
   itemTotal,
   money,
@@ -117,34 +117,26 @@ export const Main = () => {
   const persist = async () => {
     if (!draft) return;
     const primary = draft.items[0]?.categoryId ?? 'other';
-    setState((p) => ({
-      ...p,
-      expenses: [
-        {
-          id: genId('exp'),
-          merchant: draft.merchant,
-          date: `${draft.date}T12:00:00`,
-          amount: Number(total.toFixed(2)),
-          categoryId: primary,
-          paymentMethod: 'Karta **** 4213',
-          isBill: false,
-          source: 'receipt',
-          items: draft.items,
-        },
-        ...p.expenses,
-      ],
-      notifications: [
-        {
-          id: genId('ntf'),
-          kind: 'receipt-confirmation',
-          title: 'Nowy paragon',
-          body: `${draft.merchant} · ${money(Number(total.toFixed(2)))}`,
-          ageDays: 0,
-        },
-        ...p.notifications,
-      ],
-    }));
-    await whenSynced();
+    await Promise.all([
+      createExpense({
+        id: genId('exp'),
+        merchant: draft.merchant,
+        date: `${draft.date}T12:00:00`,
+        amount: Number(total.toFixed(2)),
+        categoryId: primary,
+        paymentMethod: 'Karta **** 4213',
+        isBill: false,
+        source: 'receipt',
+        items: draft.items,
+      }),
+      createNotification({
+        id: genId('ntf'),
+        kind: 'receipt-confirmation',
+        title: 'Nowy paragon',
+        body: `${draft.merchant} · ${money(Number(total.toFixed(2)))}`,
+        ageDays: 0,
+      }),
+    ]);
     window.location.href = '/expenses/';
   };
 

@@ -1,4 +1,13 @@
-import type { ParkaState } from './types';
+import type {
+  ParkaState,
+  Category,
+  Expense,
+  Limit,
+  SavingsGoal,
+  Recurring,
+  AppNotification,
+  Settings,
+} from './types';
 import { createSeedState } from './seed';
 
 let state: ParkaState = createSeedState();
@@ -16,52 +25,59 @@ let mode: Mode = 'pending';
 
 const notify = () => listeners.forEach((l) => l());
 
-const toPayload = (s: ParkaState) => ({
-  categories: s.categories,
-  expenses: s.expenses,
-  limits: s.limits,
-  goals: s.goals,
-  recurring: s.recurring,
-  notifications: s.notifications,
-  settings: s.settings,
-});
-
-let syncTimer: ReturnType<typeof setTimeout> | undefined;
 let syncChain: Promise<unknown> = Promise.resolve();
 
-const flushToBackend = () => {
-  const snapshot = toPayload(state);
+/** Chains a write onto the in-flight queue so writes settle in order. */
+const track = (p: Promise<unknown>): Promise<unknown> => {
   syncChain = syncChain
     .catch(() => undefined)
-    .then(() =>
-      fetch('/api/state/', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(snapshot),
-      }),
-    )
+    .then(() => p)
     .catch(() => undefined);
+  return syncChain;
 };
 
-const persistBackend = () => {
-  if (syncTimer) clearTimeout(syncTimer);
-  syncTimer = setTimeout(flushToBackend, 250);
+const jsonHeaders = { 'Content-Type': 'application/json' };
+
+const postEntity = (path: string, body: unknown) => {
+  if (mode !== 'backend') return Promise.resolve();
+  return track(
+    fetch(`/api/${path}/`, {
+      method: 'POST',
+      headers: jsonHeaders,
+      body: JSON.stringify(body),
+    }),
+  );
 };
 
-const persist = () => {
-  if (mode === 'backend') persistBackend();
+const putEntity = (path: string, id: string, body: unknown) => {
+  if (mode !== 'backend') return Promise.resolve();
+  return track(
+    fetch(`/api/${path}/${id}/`, {
+      method: 'PUT',
+      headers: jsonHeaders,
+      body: JSON.stringify(body),
+    }),
+  );
 };
 
-/** Resolves once the current backend sync (if any) has been flushed. */
+const deleteEntity = (path: string, id: string) => {
+  if (mode !== 'backend') return Promise.resolve();
+  return track(fetch(`/api/${path}/${id}/`, { method: 'DELETE' }));
+};
+
+/** Resolves once every in-flight entity write has settled. */
 export const whenSynced = async (): Promise<void> => {
-  if (mode !== 'backend') return;
-  if (syncTimer) {
-    clearTimeout(syncTimer);
-    syncTimer = undefined;
-    flushToBackend();
-  }
   await syncChain;
 };
+
+const ENTITY_ENDPOINTS = [
+  'categories',
+  'expenses',
+  'limits',
+  'goals',
+  'recurring',
+  'notifications',
+] as const;
 
 let bootstrapPromise: Promise<void> | undefined;
 
@@ -71,16 +87,33 @@ export const bootstrap = (): Promise<void> => {
 
   bootstrapPromise = (async () => {
     try {
-      const res = await fetch('/api/state/', {
-        headers: { Accept: 'application/json' },
-      });
-      const body = (await res.json()) as
-        { code: 200; data: Partial<ParkaState> } | { code: number };
+      const responses = await Promise.all([
+        ...ENTITY_ENDPOINTS.map((path) =>
+          fetch(`/api/${path}/`, { headers: { Accept: 'application/json' } }),
+        ),
+        fetch('/api/settings/', { headers: { Accept: 'application/json' } }),
+      ]);
 
-      if (res.ok && body.code === 200 && 'data' in body) {
+      if (responses.every((r) => r.ok)) {
+        const bodies = (await Promise.all(responses.map((r) => r.json()))) as (
+          { code: 200; data: unknown } | { code: number }
+        )[];
+
+        const patch: Partial<ParkaState> = {};
+        ENTITY_ENDPOINTS.forEach((key, i) => {
+          const body = bodies[i];
+          if (body.code === 200 && 'data' in body) {
+            (patch as Record<string, unknown>)[key] = body.data;
+          }
+        });
+        const settingsBody = bodies[bodies.length - 1];
+        if (settingsBody.code === 200 && 'data' in settingsBody) {
+          patch.settings = settingsBody.data as Settings;
+        }
+
         state = {
           ...createSeedState(),
-          ...body.data,
+          ...patch,
           authed: true,
           selectedMonth: state.selectedMonth,
         };
@@ -112,15 +145,94 @@ export const subscribe = (listener: () => void): (() => void) => {
 
 export const setState = (updater: (prev: ParkaState) => ParkaState): void => {
   state = updater(state);
-  persist();
   notify();
 };
 
 export const resetState = (): void => {
   state = createSeedState();
-  persist();
   notify();
 };
 
 export const genId = (prefix: string): string =>
   `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
+
+// --- Per-entity actions ----------------------------------------------------
+
+export const createCategory = (category: Category): void => {
+  setState((p) => ({ ...p, categories: [...p.categories, category] }));
+  void postEntity('categories', category);
+};
+
+export const updateCategory = (category: Category): void => {
+  setState((p) => ({
+    ...p,
+    categories: p.categories.map((c) => (c.id === category.id ? category : c)),
+  }));
+  void putEntity('categories', category.id, category);
+};
+
+export const createExpense = (expense: Expense): Promise<unknown> => {
+  setState((p) => ({ ...p, expenses: [expense, ...p.expenses] }));
+  return postEntity('expenses', expense);
+};
+
+export const updateExpense = (expense: Expense): void => {
+  setState((p) => ({
+    ...p,
+    expenses: p.expenses.map((e) => (e.id === expense.id ? expense : e)),
+  }));
+  void putEntity('expenses', expense.id, expense);
+};
+
+export const deleteExpense = (id: string): void => {
+  setState((p) => ({ ...p, expenses: p.expenses.filter((e) => e.id !== id) }));
+  void deleteEntity('expenses', id);
+};
+
+export const createLimit = (limit: Limit): void => {
+  setState((p) => ({ ...p, limits: [...p.limits, limit] }));
+  void postEntity('limits', limit);
+};
+
+export const updateLimit = (limit: Limit): void => {
+  setState((p) => ({
+    ...p,
+    limits: p.limits.map((l) => (l.id === limit.id ? limit : l)),
+  }));
+  void putEntity('limits', limit.id, limit);
+};
+
+export const createGoal = (goal: SavingsGoal): void => {
+  setState((p) => ({ ...p, goals: [...p.goals, goal] }));
+  void postEntity('goals', goal);
+};
+
+export const updateRecurring = (recurring: Recurring): void => {
+  setState((p) => ({
+    ...p,
+    recurring: p.recurring.map((r) => (r.id === recurring.id ? recurring : r)),
+  }));
+  void putEntity('recurring', recurring.id, recurring);
+};
+
+export const createNotification = (
+  notification: AppNotification,
+): Promise<unknown> => {
+  setState((p) => ({
+    ...p,
+    notifications: [notification, ...p.notifications],
+  }));
+  return postEntity('notifications', notification);
+};
+
+export const updateSettings = (settings: Settings): void => {
+  setState((p) => ({ ...p, settings }));
+  if (mode !== 'backend') return;
+  void track(
+    fetch('/api/settings/', {
+      method: 'PUT',
+      headers: jsonHeaders,
+      body: JSON.stringify(settings),
+    }),
+  );
+};

@@ -8,6 +8,17 @@ export {
   genId,
   bootstrap,
   whenSynced,
+  createCategory,
+  updateCategory,
+  createExpense,
+  updateExpense,
+  deleteExpense,
+  createLimit,
+  updateLimit,
+  createGoal,
+  updateRecurring,
+  createNotification,
+  updateSettings,
 } from './store';
 export * from './selectors';
 export * from './format';
