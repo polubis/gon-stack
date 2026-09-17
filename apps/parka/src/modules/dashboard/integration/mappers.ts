@@ -1,25 +1,19 @@
-import {
-  monthTotal,
-  changeVsPrevMonth,
-  categoryBreakdown,
-  trend,
-  type ParkaState,
-} from '@/modules/shared/data';
-import { TREND_MONTHS } from '../configuration/constraints';
-import type { DashboardSummary } from '../domain/models';
+import type { Schema } from '@schemas/dashboard';
+import type { InferOut } from '@/shared/server-contracts/extraction';
+import type { CategoryId, Summary } from '../domain/models';
+import { toMonth } from '../domain/format';
 
-export const toLocalSummary = (
-  state: ParkaState,
-  month: string,
-): DashboardSummary => ({
-  total: monthTotal(state, month),
-  change: changeVsPrevMonth(state, month),
-  trend: trend(state, month, TREND_MONTHS),
-  categories: categoryBreakdown(state, [month]).map((s) => ({
-    categoryId: s.category.id,
-    name: s.category.name,
-    color: s.category.color,
-    amount: s.amount,
-    pct: s.pct,
+export const toSummary = (
+  dto: InferOut<Schema['out'], 200>['data'],
+): Summary => ({
+  total: dto.total,
+  change: dto.change,
+  trend: dto.trend.map((t) => ({ month: toMonth(t.month), total: t.total })),
+  categories: dto.categories.map((c) => ({
+    id: c.categoryId as CategoryId,
+    name: c.name,
+    color: c.color,
+    amount: c.amount,
+    pct: c.pct,
   })),
 });

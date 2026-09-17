@@ -1,18 +1,23 @@
-export type DashboardTrendPoint = { month: string; total: number };
+import type { Brand } from '@repo/type-beast/brand';
 
-export type DashboardCategorySlice = {
-  categoryId: string;
+export type Month = Brand<string, 'Month'>;
+export type CategoryId = Brand<string, 'CategoryId'>;
+
+export type TrendPoint = { month: Month; total: number };
+
+export type CategorySlice = {
+  id: CategoryId;
   name: string;
   color: string;
   amount: number;
   pct: number;
 };
 
-export type DashboardSummary = {
+export type Summary = {
   total: number;
   change: number;
-  trend: DashboardTrendPoint[];
-  categories: DashboardCategorySlice[];
+  trend: TrendPoint[];
+  categories: CategorySlice[];
 };
 
 export type QuickActionIconId = 'add' | 'camera' | 'target' | 'repeat';

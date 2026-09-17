@@ -1,16 +1,16 @@
 ---
-version: 2.2
-hash: e11cc9fd85e874bcceeb55e520b5f62253de5da0647c692c6d66aec38572f8e6
+version: 2.4
+hash: 32bf7e98f93feeed9737eaa446683291ecf5b6334e4a7bdf5997c933bd613440
 ---
-
 
 # Dashboard
 
 Ideal-example module for Parka read-only summary screens. A self-contained,
-layer-separated feature: month-scoped expense summary with local/backend data
-sources, event-driven state, backend integration, and a state-driven UI. Clone
-this module's structure and conventions when building similar dashboard or
-overview features.
+layer-separated feature: month-scoped expense summary fetched from the
+backend, event-driven state, backend integration, and a state-driven UI.
+Requires an authenticated session — there is no local/offline data source.
+Clone this module's structure and conventions when building similar dashboard
+or overview features.
 
 ## Architecture
 
@@ -27,13 +27,12 @@ overview features.
    (wires handlers to the bus), `facade.ts` (actions + `use*` selectors),
    `mediator.ts` (composes store + registry + facade).
 4. "integration" — backend boundary. `repository.ts` does the `fetch` call
-   for the backend-mode summary; `mappers.ts` derives the same summary shape
-   from shared app state for local/offline mode. Nothing else fetches.
+   to `GET /api/dashboard` (private, session-scoped); `mappers.ts` converts
+   the response DTO into the domain `Summary` shape. Nothing else fetches.
 5. "presentation" — React only. `context.tsx` provides the facade via
    power-context; `main.tsx` wraps the view in the `Provider` and is the page
    entry; subcomponents (e.g. `quick-action-icon.tsx`) are presentational.
-   Components read the facade + shared app state and render; no business
-   logic in JSX.
+   Components read the facade and render; no business logic in JSX.
 6. "index.ts" — public barrel; re-exports the presentation entry only.
 
 ## Code
@@ -45,13 +44,14 @@ overview features.
 4. `type` aliases only — no `interface`, no `class`.
 5. Events are `[TRIGGER]_NAME` literals; handlers are RxJS
    `ofType('[TRIGGER]_X').pipe(...)`.
-6. Presentation reaches core only through the facade (actions + selectors);
-   month/expenses/categories/settings come from the shared app store
-   (`@/modules/shared/data`) directly, since dashboard doesn't own that state.
-7. Local vs backend mode: view checks `getMode()`; when `backend`, it triggers
-   `facade.loadSummary(month)` and prefers the fetched result once it matches
-   the current month; otherwise it falls back to `integration/mappers.ts`'s
-   `toLocalSummary`, which derives the same summary from shared state.
+6. Presentation reaches core only through the facade (actions + selectors).
+   The selected month is the view's own state, seeded from the `month` URL
+   query param (falling back to the current calendar month) and kept in sync
+   with it; dashboard does not read `@/modules/shared/data`.
+7. On mount and on every month change, the view triggers `facade.load(month)`,
+   which fetches the summary from the backend. There is no local/offline
+   fallback — an anonymous session gets a 401 and the view renders the error
+   state (`$error`) inside the boundary described below.
 8. Presentation uses shared UI (`AppShell`, `Card`, charts) and formatting
    helpers from `@/modules/shared/*`; styling via design tokens and `cn`.
 9. E2e selectors use `dashboard:*` prefix on interactive/readout elements.
@@ -64,12 +64,12 @@ overview features.
   types.
 - [domain/events.ts](./domain/events.ts) — the trigger event shape.
 - [core/mediator.ts](./core/mediator.ts) — how store/registry/facade compose.
-- [core/handlers/load-summary.ts](./core/handlers/load-summary.ts) — handler
-  (RxJS) pattern.
+- [core/handlers/load.ts](./core/handlers/load.ts) — handler (RxJS) pattern,
+  incl. abort/loading/error state.
 - [core/facade.ts](./core/facade.ts) — actions + `use*` selector surface.
 - [integration/repository.ts](./integration/repository.ts) — fetch boundary.
-- [integration/mappers.ts](./integration/mappers.ts) — shared-state → domain
-  mapping for local mode.
+- [integration/mappers.ts](./integration/mappers.ts) — response DTO → domain
+  `Summary` mapping.
 - [presentation/main.tsx](./presentation/main.tsx) — page layout and wiring.
 - [configuration/constraints.ts](./configuration/constraints.ts) — feature
   name, trend window, quick-actions config.

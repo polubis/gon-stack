@@ -1,0 +1,40 @@
+import { catchError, EMPTY, finalize, from, map, switchMap, tap } from 'rxjs';
+import type { Store } from '../store';
+import type { Bus } from '../bus';
+import { fetchSummary } from '../../integration/repository';
+
+export const load = (store: Store, { ofType }: Bus) =>
+  ofType('[TRIGGER]_LOAD').pipe(
+    tap(() => {
+      store.$isLoading.set(true);
+      store.$error.reset();
+      store.$data.reset();
+    }),
+    map(({ month }) => ({ month, ctrl: new AbortController() })),
+    switchMap(({ month, ctrl }) =>
+      from(fetchSummary(month, ctrl.signal)).pipe(
+        tap((summary) => {
+          store.$data.set(summary);
+        }),
+        catchError((error) => {
+          const isAbort =
+            error instanceof DOMException && error.name === 'AbortError';
+
+          if (!isAbort) {
+            store.$error.set(
+              error instanceof Error
+                ? error.message
+                : 'Failed to load dashboard summary.',
+            );
+          }
+
+          return EMPTY;
+        }),
+        finalize(() => {
+          store.$initializing.set(false);
+          store.$isLoading.reset();
+          ctrl.abort();
+        }),
+      ),
+    ),
+  );

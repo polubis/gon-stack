@@ -55,3 +55,6 @@ export const nextMonth = (month: string): string => {
 };
 
 export const monthOf = (iso: string): string => iso.slice(0, 7);
+
+/** Today's month, e.g. `2026-09`. */
+export const currentMonth = (): string => monthOf(new Date().toISOString());

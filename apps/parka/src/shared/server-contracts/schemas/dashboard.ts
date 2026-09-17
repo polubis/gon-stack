@@ -32,3 +32,5 @@ export const getDashboardSchema = () =>
       errorOut(),
     ]),
   });
+
+export type Schema = z.infer<ReturnType<typeof getDashboardSchema>>;

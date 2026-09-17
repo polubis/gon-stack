@@ -1,11 +1,11 @@
 import type { Store } from './store';
-import { loadSummary } from './handlers/load-summary';
+import { load } from './handlers/load';
 import { createBus } from './bus';
 
 export const createRegistry = (store: Store) => {
   const bus = createBus();
 
-  const register = bus.createRegistry(loadSummary(store, bus));
+  const register = bus.createRegistry(load(store, bus));
 
   return { trigger: bus.trigger, register };
 };

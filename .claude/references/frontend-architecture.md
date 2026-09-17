@@ -1,4 +1,4 @@
-Scalable frontend architecture guide.
+# Scalable frontend architecture guide
 
 1. Low coupling
 2. High cohesion
@@ -9,6 +9,7 @@ Scalable frontend architecture guide.
 ```md
 src/
 ├── `__e2e__/` — e2e test setup
+├── `__log__/` — app decisions record
 ├── `__tests__/` — unit/integration test setup
 ├── `core/` — shell/bootstrap; wires app
 ├── `libs/` — generic non-app code
@@ -46,9 +47,11 @@ src/
 `domain/` — pure types; no UI, transport, or persistence
 ├── `events.ts` — typed event union
 └── `models.ts` — branded ids, discriminated unions
+└── `*.ts` — business logic
 `integration/` — backend boundary; nothing else fetches
 ├── `mappers.ts` — DTO → domain mapping
 └── `repository.ts` — external/persistence calls
+└── `*.ts` — other integration related logic
 `presentation/` — UI only; read state + call facade
 ├── `connector.ts` — optional; glues all providers
 ├── `context.*` — provides facade via context
@@ -60,3 +63,4 @@ src/
 ## Examples
 
 - `apps/romantic-app/src/modules/user-profile-setup`
+- `apps/parka/src/modules/dashboard`

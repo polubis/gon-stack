@@ -1,20 +1,21 @@
-import type { DashboardSummary } from '../domain/models';
+import type { Schema } from '@schemas/dashboard';
+import type { Month, Summary } from '../domain/models';
+import { toSummary } from './mappers';
 
-type DashboardResponse =
-  { code: 200; data: DashboardSummary } | { code: number };
+export const fetchSummary = async (
+  month: Month,
+  signal: AbortSignal,
+): Promise<Summary> => {
+  const response = await fetch(`/api/dashboard/?month=${month}`, {
+    headers: { Accept: 'application/json' },
+    signal,
+  });
 
-export const fetchDashboardSummary = async (
-  month: string,
-): Promise<DashboardSummary | null> => {
-  try {
-    const res = await fetch(`/api/dashboard/?month=${month}`, {
-      headers: { Accept: 'application/json' },
-    });
-    if (!res.ok) return null;
+  const json = (await response.json()) as Schema['out'];
 
-    const body = (await res.json()) as DashboardResponse;
-    return body.code === 200 && 'data' in body ? body.data : null;
-  } catch {
-    return null;
+  if (json.code !== 200) {
+    throw new Error(json.message);
   }
+
+  return toSummary(json.data);
 };

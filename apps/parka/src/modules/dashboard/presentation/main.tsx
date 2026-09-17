@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -6,53 +6,86 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
-import { AppShell, Card, BarChart, Donut } from '@/modules/shared/ui';
+import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import {
-  useParkaState,
-  getMode,
-  setState,
   money,
   percent,
   monthLabel,
   prevMonth,
   nextMonth,
-} from '@/modules/shared/data';
-import { QUICK_ACTIONS } from '../configuration/constraints';
-import { toLocalSummary } from '../integration/mappers';
+  currentMonth,
+  toMonth,
+} from '../domain/format';
+import type { Month } from '../domain/models';
 import { Provider, useContext } from './context';
 import { QuickActionIcon } from './quick-action-icon';
+import { AppShell, Card } from './layout';
+import { BarChart, Donut } from './charts';
+import { LoadErrorFallback } from './load-error-fallback';
+
+type IconId = 'add' | 'camera' | 'target' | 'repeat';
+
+type Action = {
+  label: string;
+  href: string;
+  iconId: IconId;
+};
+
+const QUICK_ACTIONS: Action[] = [
+  { label: 'Dodaj paragon', href: '/receipt-scan/', iconId: 'add' },
+  { label: 'Zrób zdjęcie', href: '/receipt-scan/', iconId: 'camera' },
+  { label: 'Limity', href: '/limits/', iconId: 'target' },
+  { label: 'Cykliczne', href: '/recurring/', iconId: 'repeat' },
+];
+
+const MONTH_PARAM = 'month';
+
+const setMonthParam = (month: Month) => {
+  const url = new URL(window.location.href);
+  url.searchParams.set(MONTH_PARAM, month);
+  window.history.replaceState(window.history.state, '', url);
+};
+
+const initialMonth = (): Month => {
+  const fromUrl = new URLSearchParams(window.location.search).get(MONTH_PARAM);
+  return toMonth(fromUrl ?? currentMonth());
+};
 
 const DashboardView = () => {
   const ctx = useContext();
-  const state = useParkaState();
-  const month = state.selectedMonth;
-  const fetched = ctx.useFetchedSummary();
+  const [month, setMonth] = useState(initialMonth);
+  const summary = ctx.useData();
+  const error = ctx.useError();
 
   useEffect(() => {
-    if (getMode() === 'backend') ctx.loadSummary(month);
+    ctx.load(month);
   }, [month, ctx]);
 
-  const summary =
-    fetched?.month === month ? fetched.summary : toLocalSummary(state, month);
-  const firstName = state.settings.profile.name.split(' ')[0];
-  const down = summary.change <= 0;
+  const goToMonth = (next: Month) => {
+    setMonthParam(next);
+    setMonth(next);
+  };
+  const goToPrevMonth = () => goToMonth(prevMonth(month));
+  const goToNextMonth = () => goToMonth(nextMonth(month));
 
-  const goToPrevMonth = () =>
-    setState((p) => ({ ...p, selectedMonth: prevMonth(p.selectedMonth) }));
-  const goToNextMonth = () =>
-    setState((p) => ({ ...p, selectedMonth: nextMonth(p.selectedMonth) }));
+  const down = (summary?.change ?? 0) <= 0;
 
   return (
     <AppShell e2e="dashboard:main" nav="start">
       <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-4">
         <div>
-          <p className="text-sm text-ink-soft">Cześć,</p>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {firstName} 👋
-          </h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Cześć 👋</h1>
           <p className="mt-1 text-sm text-ink-soft">
             Oto Twoje wydatki w tym miesiącu.
           </p>
+          {error && (
+            <p
+              className="mt-1 text-xs text-rose-700"
+              data-e2e="dashboard:summary-error"
+            >
+              {error}
+            </p>
+          )}
         </div>
 
         <Card className="space-y-3">
@@ -88,7 +121,7 @@ const DashboardView = () => {
               className="text-3xl font-bold tracking-tight"
               data-e2e="dashboard:total"
             >
-              {money(summary.total)}
+              {money(summary?.total ?? 0)}
             </p>
             <p
               className={cn(
@@ -101,12 +134,12 @@ const DashboardView = () => {
               ) : (
                 <TrendingUp className="h-4 w-4" aria-hidden="true" />
               )}
-              {percent(summary.change)} vs {monthLabel(prevMonth(month))}
+              {percent(summary?.change ?? 0)} vs {monthLabel(prevMonth(month))}
             </p>
           </div>
 
           <BarChart
-            data={summary.trend.map((t) => ({
+            data={(summary?.trend ?? []).map((t) => ({
               label: monthLabel(t.month).slice(0, 3),
               value: t.total,
             }))}
@@ -142,7 +175,7 @@ const DashboardView = () => {
           <h2 className="text-sm font-semibold text-ink-soft">
             Rozkład wydatków
           </h2>
-          {summary.categories.length > 0 ? (
+          {summary && summary.categories.length > 0 ? (
             <Donut
               caption={`Rozkład wydatków wg kategorii w ${monthLabel(month)}`}
               slices={summary.categories.map((c) => ({
@@ -163,7 +196,9 @@ const DashboardView = () => {
 };
 
 export const Main = () => (
-  <Provider>
-    <DashboardView />
-  </Provider>
+  <ErrorBoundary fallback={({ reset }) => <LoadErrorFallback reset={reset} />}>
+    <Provider>
+      <DashboardView />
+    </Provider>
+  </ErrorBoundary>
 );

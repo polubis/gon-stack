@@ -4,9 +4,9 @@ This file + `rules/`, `skills/`, `references/`, `templates/` guide agents in **g
 
 ## Prerequisites
 
-### Legend (how to read `rules/*.md`)
+Always check `references/aodi-framework.md` and `rules/general.md` before any task and force rules.
 
-Check `references/aodi-framework.md`
+## Ecosystem
 
 ### Structure
 
@@ -18,12 +18,6 @@ Check `references/aodi-framework.md`
 `agents/` -> agent personas
 ```
 
-### Boundaries
-
-- Always check `rules/general.md` before any task for general style
-
-## Ecosystem
-
 ### Rules
 
 | Path               | What                                 |
@@ -34,6 +28,7 @@ Check `references/aodi-framework.md`
 
 | Path                                  | What                                                      |
 | ------------------------------------- | --------------------------------------------------------- |
+| `references/aodi-framework.md`        | A/O/D/I tag legend for `rules/*.md`                       |
 | `references/frontend-architecture.md` | Module layout: presentation / core / domain / integration |
 
 ### Templates
@@ -42,15 +37,15 @@ Check `references/aodi-framework.md`
 | --------------------------- | ----------------------------- |
 | `templates/task-log.md`     | Session end log entry         |
 | `templates/feature.md`      | Feature requirements scaffold |
-| `templates/AGENT.md`        | Agent persona scaffold        |
+| `templates/AGENTS.md`       | Module agent doc scaffold     |
 | `templates/SKILL.md`        | Skill scaffold                |
 | `templates/power_prompt.md` | Power prompt scaffold         |
 
 ### Agents
 
-| Path      | What                           |
-| --------- | ------------------------------ |
-| `agents/` | Agent personas (empty for now) |
+| Path                               | What                                                         |
+| ---------------------------------- | ------------------------------------------------------------ |
+| [agents/coord.md](agents/coord.md) | Orchestrator: Planner → specialists → verifiers → dev report |
 
 ### Worktrees
 
