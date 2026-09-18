@@ -4,7 +4,7 @@ This file + `rules/`, `skills/`, `references/`, `templates/` guide agents in **g
 
 ## Prerequisites
 
-Always check `references/aodi-framework.md` and `rules/general.md` before any task and force rules.
+Always check `references/aodi-framework.md` and `rules/*.md` before any task and force rules.
 
 ## Ecosystem
 
@@ -20,9 +20,21 @@ Always check `references/aodi-framework.md` and `rules/general.md` before any ta
 
 ### Rules
 
-| Path               | What                                 |
-| ------------------ | ------------------------------------ |
-| `rules/general.md` | Standing coding/style/test/AI policy |
+Read `references/aodi-framework.md` for tag legend (`A` / `O` / `D` / `I`). Apply every `rules/*.md` file whose domain matches the task.
+
+| Path                    | What                                                 |
+| ----------------------- | ---------------------------------------------------- |
+| `rules/general.md`      | Communication, AI, session logging                   |
+| `rules/coding.md`       | Minimal code, inline export order                    |
+| `rules/typescript.md`   | TypeScript strictness, exhaustive checks             |
+| `rules/react.md`        | React patterns (Context, useEffectEvent, props)      |
+| `rules/astro.md`        | Astro backend endpoints + validation                 |
+| `rules/styling.md`      | Design tokens, theming, `cn` from `react-kit`        |
+| `rules/ux.md`           | Errors, skeletons, spinners, optimistic UI           |
+| `rules/testing.md`      | Black-box tests, selectors, E2E via `vibe-test`      |
+| `rules/git.md`          | Conventional commits with scoped descriptions        |
+| `rules/security.md`     | Stop on personal or sensitive data                   |
+| `rules/architecture.md` | Frontend module layout (`frontend-architecture` ref) |
 
 ### References
 
