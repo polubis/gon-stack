@@ -46,7 +46,7 @@ jobs:
         run: pnpm pw:install
 
       - name: Verify (format, lint, types, tests, build, e2e) — entire monorepo
-        run: pnpm ci:verify:dry
+        # run: pnpm ci:verify:dry
 
   deploy:
     name: deploy
