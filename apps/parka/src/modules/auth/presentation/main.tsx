@@ -29,6 +29,7 @@ export const Main = ({ mode }: { mode: Mode }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
   const [pending, setPending] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
@@ -40,6 +41,7 @@ export const Main = ({ mode }: { mode: Mode }) => {
 
     setPending(true);
     setError('');
+    setInfo('');
     try {
       const res = await fetch(
         mode === 'sign-in' ? '/api/auth/login/' : '/api/auth/register/',
@@ -51,14 +53,21 @@ export const Main = ({ mode }: { mode: Mode }) => {
         },
       );
 
-      if (res.type === 'opaqueredirect' || res.ok) {
+      if (res.type === 'opaqueredirect') {
         window.location.href = '/dashboard/';
         return;
       }
 
       const body = (await res.json().catch(() => null)) as {
+        ok?: boolean;
         message?: string;
       } | null;
+
+      if (res.ok && body?.ok) {
+        setInfo('Sprawdź skrzynkę e-mail i potwierdź rejestrację.');
+        return;
+      }
+
       setError(body?.message ?? 'Nie udało się. Spróbuj ponownie.');
     } catch {
       setError('Brak połączenia z serwerem. Spróbuj ponownie.');
@@ -111,6 +120,11 @@ export const Main = ({ mode }: { mode: Mode }) => {
         {error ? (
           <p role="alert" className="text-sm text-rose-700">
             {error}
+          </p>
+        ) : null}
+        {info ? (
+          <p role="status" className="text-sm text-brand-dark">
+            {info}
           </p>
         ) : null}
 

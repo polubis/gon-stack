@@ -10,10 +10,20 @@ export const registerUser = publicProcedure({
     const signUpResult = await db.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: import.meta.env.PARKA_AUTH_CONFIRM_URL,
+      },
     });
 
     if (signUpResult.error) {
       throw new InternalServer(signUpResult.error.message);
+    }
+
+    if (!signUpResult.data.session) {
+      return {
+        code: 200,
+        ok: true,
+      };
     }
 
     return {

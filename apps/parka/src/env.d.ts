@@ -1,11 +1,12 @@
 /// <reference types="astro/client" />
 
 interface ImportMetaEnv {
-  readonly PUBLIC_SUPABASE_URL: string;
-  readonly PUBLIC_SUPABASE_PUBLISHABLE_KEY: string;
-  readonly AUTH_CALLBACK_URL: string;
-  readonly SUPABASE_GOOGLE_CLIENT_SECRET: string;
-  readonly SUPABASE_GOOGLE_CLIENT_ID: string;
+  readonly PUBLIC_PARKA_SUPABASE_URL: string;
+  readonly PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY: string;
+  readonly PARKA_AUTH_CALLBACK_URL: string;
+  readonly PARKA_AUTH_CONFIRM_URL: string;
+  readonly PARKA_SUPABASE_GOOGLE_CLIENT_SECRET: string;
+  readonly PARKA_SUPABASE_GOOGLE_CLIENT_ID: string;
 }
 
 interface ImportMeta {

@@ -12,7 +12,7 @@ export const loginUser = publicProcedure({
       const oauthResult = await db.auth.signInWithOAuth({
         provider: input.provider as Provider,
         options: {
-          redirectTo: import.meta.env.AUTH_CALLBACK_URL,
+          redirectTo: import.meta.env.PARKA_AUTH_CALLBACK_URL,
           queryParams: { prompt: 'select_account' },
         },
       });

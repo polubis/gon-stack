@@ -3,17 +3,12 @@ import z from 'zod';
 export const schema = () =>
   z.object({
     in: z.object({
-      email: z.string().min(1),
-      password: z.string().min(1),
+      code: z.string(),
     }),
     out: z.union([
       z.object({
         code: z.literal(303),
         location: z.string(),
-      }),
-      z.object({
-        code: z.literal(200),
-        ok: z.literal(true),
       }),
       z.object({
         code: z.literal(400),

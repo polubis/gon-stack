@@ -1,0 +1,89 @@
+name: Deploy Parka
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: deploy-parka
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+    env:
+      CI: 'true'
+      PUBLIC_PARKA_SUPABASE_URL: ${{ secrets.PUBLIC_PARKA_SUPABASE_URL }}
+      PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY }}
+      PARKA_AUTH_CALLBACK_URL: ${{ secrets.PARKA_AUTH_CALLBACK_URL }}
+      PARKA_AUTH_CONFIRM_URL: ${{ secrets.PARKA_AUTH_CONFIRM_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # turbo --affected diffs base..head; a shallow clone makes it treat every
+          # package as changed. https://turborepo.dev/docs/reference/run#--affected
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.16.0
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm pw:install
+
+      - name: Verify (format, lint, types, tests, build, e2e) — entire monorepo
+        run: pnpm ci:verify:dry
+
+  deploy:
+    name: deploy
+    needs: verify
+    runs-on: ubuntu-latest
+    # Scopes deploy secrets to this GitHub Environment (Settings > Environments > production).
+    # Add PARKA_CLOUDFLARE_API_TOKEN and PARKA_CLOUDFLARE_ACCOUNT_ID as environment secrets
+    # there, not at the repo level, so a workflow change on a branch can't exfiltrate them
+    # without review.
+    environment: production
+    permissions:
+      contents: read
+    env:
+      PUBLIC_PARKA_SUPABASE_URL: ${{ secrets.PUBLIC_PARKA_SUPABASE_URL }}
+      PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY }}
+      PARKA_AUTH_CALLBACK_URL: ${{ secrets.PARKA_AUTH_CALLBACK_URL }}
+      PARKA_AUTH_CONFIRM_URL: ${{ secrets.PARKA_AUTH_CONFIRM_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.16.0
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Deploy Worker (affected)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.PARKA_CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.PARKA_CLOUDFLARE_ACCOUNT_ID }}
+        run: pnpm exec turbo run deploy --affected --filter=parka...

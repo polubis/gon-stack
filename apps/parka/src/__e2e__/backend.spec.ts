@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
+import { registerAndConfirm } from './mailbox';
 
 /**
  * End-to-end verification that every Parka feature works against the real
@@ -36,11 +37,9 @@ const reload = async (page: Page): Promise<void> => {
 
 const commands = {
   'i register a new account': async (page) => {
-    await open(page, '/sign-up/');
-    await page.getByTestId('auth:email').fill(EMAIL);
-    await page.getByTestId('auth:password').fill(PASSWORD);
-    await page.getByTestId('auth:submit').click();
-    await page.waitForURL('**/dashboard/');
+    await registerAndConfirm(page, EMAIL, PASSWORD);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(150);
   },
 
   'the dashboard shows april demo totals': async (page) => {

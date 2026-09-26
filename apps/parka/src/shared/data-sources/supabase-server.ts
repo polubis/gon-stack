@@ -12,8 +12,8 @@ export const supabaseServer = ({
   const cookieHeader = request.headers.get('Cookie') || '';
 
   return createServerClient<Database>(
-    import.meta.env.PUBLIC_SUPABASE_URL,
-    import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    import.meta.env.PUBLIC_PARKA_SUPABASE_URL,
+    import.meta.env.PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY,
     {
       cookies: {
         getAll() {

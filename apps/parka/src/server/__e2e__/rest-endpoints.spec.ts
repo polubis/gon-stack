@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
+import { registerAndConfirm } from '@/__e2e__/mailbox';
 
 /**
  * Integration coverage for the per-entity REST endpoints (categories,
@@ -25,12 +26,7 @@ const settingsEmailByPage = new WeakMap<Page, string>();
 
 const commands = {
   'i register and sign in': async (page) => {
-    await page.goto('/sign-up/');
-    await page.waitForLoadState('networkidle');
-    await page.getByTestId('auth:email').fill(EMAIL);
-    await page.getByTestId('auth:password').fill(PASSWORD);
-    await page.getByTestId('auth:submit').click();
-    await page.waitForURL('**/dashboard/');
+    await registerAndConfirm(page, EMAIL, PASSWORD);
   },
 
   'seeded categories are listed': async (page) => {
