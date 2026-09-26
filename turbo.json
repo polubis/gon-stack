@@ -38,9 +38,6 @@
     "test:coverage": {
       "outputs": ["coverage/**"]
     },
-    "pw:install": {
-      "cache": false
-    },
     "test:e2e": {
       "dependsOn": ["build"]
     },

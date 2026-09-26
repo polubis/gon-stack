@@ -18,7 +18,6 @@
     "db:stop": "pnpx supabase stop",
     "db:migration:new": "pnpx supabase migration new",
     "db:migration:up": "pnpx supabase migration up",
-    "pw:install": "playwright install --with-deps chromium",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text",

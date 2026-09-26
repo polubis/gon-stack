@@ -11,7 +11,7 @@
     "test": "turbo run test",
     "test:watch": "turbo run test:watch",
     "test:coverage": "turbo run test:coverage",
-    "pw:install": "turbo run pw:install",
+    "pw:install": "playwright install --with-deps chromium",
     "test:e2e": "turbo run test:e2e --concurrency=1",
     "test:e2e:ui": "turbo run test:e2e:ui",
     "test:e2e:headed": "turbo run test:e2e:headed",
@@ -51,6 +51,7 @@
     }
   },
   "devDependencies": {
+    "@playwright/test": "1.62.1",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
     "husky": "^9.1.7",

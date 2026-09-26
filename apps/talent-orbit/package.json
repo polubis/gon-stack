@@ -14,7 +14,6 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text",
-    "pw:install": "playwright install --with-deps chromium",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
