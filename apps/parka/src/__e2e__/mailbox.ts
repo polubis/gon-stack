@@ -1,7 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 
 /** Local Supabase mail server (Mailpit) web/API port from `supabase/config.toml`. */
-const MAILBOX_URL = 'http://127.0.0.1:54324';
+const MAILBOX_URL = 'http://localhost:54324';
 const CONFIRM_LINK = /https?:\/\/[^\s"<>]+\/auth\/v1\/verify\?[^\s"<>]+/;
 
 type Message = { ID: string };

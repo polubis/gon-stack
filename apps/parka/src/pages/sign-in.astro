@@ -1,8 +1,17 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
 import MainLayout from '@/core/layouts/main.astro';
 import { Main } from '@/modules/auth';
+import { supabaseServer } from '@/shared/data-sources/supabase-server';
+
+const db = supabaseServer({
+  request: Astro.request,
+  cookies: Astro.cookies,
+});
+const { data } = await db.auth.getUser();
+
+if (data.user) return Astro.redirect('/dashboard/');
 
 const domain = Astro.locals.siteDomain;
 const imageUrl = `${domain}/og.svg`;

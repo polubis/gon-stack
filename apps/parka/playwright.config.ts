@@ -1,7 +1,7 @@
 import { defineConfig } from '@playwright/test';
 import { createPlaywrightConfig } from '@repo/vibe-test';
 
-const base = createPlaywrightConfig({ port: 4325 });
+const base = createPlaywrightConfig({ port: 4325, host: 'localhost' });
 const deviceUse = base.projects![0]!.use;
 
 // backend.spec.ts and rest-endpoints.spec.ts drive the real Supabase backend

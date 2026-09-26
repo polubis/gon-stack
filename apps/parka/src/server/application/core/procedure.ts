@@ -45,7 +45,7 @@ const createProcedureFactory = <TIn, TOut, TExtra>({
   }: {
     handler: (
       input: TIn,
-      extra: { db: SupabaseServer } & TExtra,
+      extra: { db: SupabaseServer; origin: string } & TExtra,
     ) => Promise<TOut>;
   }) => {
     return async (input: unknown, context: APIContext): Promise<TOut> => {
@@ -56,6 +56,7 @@ const createProcedureFactory = <TIn, TOut, TExtra>({
         const parsedInput = await schema.parseInput(input);
         const result = await handler(parsedInput, {
           db,
+          origin: new URL(context.request.url).origin,
           ...extra,
         });
         return await schema.parseOutput(result);

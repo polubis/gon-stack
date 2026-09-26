@@ -7,12 +7,12 @@ import { publicProcedure } from '../../core/procedure';
 export const loginUser = publicProcedure({
   schema: withZodSchema({ schema }),
 })({
-  handler: async (input, { db }) => {
+  handler: async (input, { db, origin }) => {
     if ('provider' in input) {
       const oauthResult = await db.auth.signInWithOAuth({
         provider: input.provider as Provider,
         options: {
-          redirectTo: import.meta.env.PARKA_AUTH_CALLBACK_URL,
+          redirectTo: `${origin}/api/auth/callback/`,
           queryParams: { prompt: 'select_account' },
         },
       });

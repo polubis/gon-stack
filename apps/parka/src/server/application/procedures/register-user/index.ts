@@ -6,12 +6,12 @@ import { publicProcedure } from '../../core/procedure';
 export const registerUser = publicProcedure({
   schema: withZodSchema({ schema }),
 })({
-  handler: async ({ email, password }, { db }) => {
+  handler: async ({ email, password }, { db, origin }) => {
     const signUpResult = await db.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: import.meta.env.PARKA_AUTH_CONFIRM_URL,
+        emailRedirectTo: `${origin}/api/auth/confirm/`,
       },
     });
 

@@ -3,8 +3,6 @@
 interface ImportMetaEnv {
   readonly PUBLIC_PARKA_SUPABASE_URL: string;
   readonly PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY: string;
-  readonly PARKA_AUTH_CALLBACK_URL: string;
-  readonly PARKA_AUTH_CONFIRM_URL: string;
   readonly PARKA_SUPABASE_GOOGLE_CLIENT_SECRET: string;
   readonly PARKA_SUPABASE_GOOGLE_CLIENT_ID: string;
 }
