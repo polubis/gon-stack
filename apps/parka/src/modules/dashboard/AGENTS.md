@@ -1,7 +1,8 @@
 ---
-version: 2.4
-hash: 32bf7e98f93feeed9737eaa446683291ecf5b6334e4a7bdf5997c933bd613440
+version: 2.5
+hash: f0fbdeae01e46ec2496cb9fb68250d2debab69a028dfcff057a24efabd2a5305
 ---
+
 
 # Dashboard
 
@@ -32,7 +33,9 @@ or overview features.
 5. "presentation" — React only. `context.tsx` provides the facade via
    power-context; `main.tsx` wraps the view in the `Provider` and is the page
    entry; subcomponents (e.g. `quick-action-icon.tsx`) are presentational.
-   Components read the facade and render; no business logic in JSX.
+   `layout.tsx` holds only the module-local `Card`; the page shell and bottom
+   nav are not module-owned (see point 8). Components read the facade and
+   render; no business logic in JSX.
 6. "index.ts" — public barrel; re-exports the presentation entry only.
 
 ## Code
@@ -52,8 +55,12 @@ or overview features.
    which fetches the summary from the backend. There is no local/offline
    fallback — an anonymous session gets a 401 and the view renders the error
    state (`$error`) inside the boundary described below.
-8. Presentation uses shared UI (`AppShell`, `Card`, charts) and formatting
-   helpers from `@/modules/shared/*`; styling via design tokens and `cn`.
+8. No module-owned `AppShell`/bottom nav: `pages/dashboard.astro` wraps `Main`
+   in `core/layouts/app-layout.astro` (`client:only="react"`), which renders
+   the mobile frame and the persisted `shared/navigation/app-nav`
+   `SyncedAppNav`. `Main` renders page content only. Presentation uses the
+   local `Card` (`./layout`), shared charts, and formatting helpers from
+   `@/modules/shared/*`; styling via design tokens and `cn`.
 9. E2e selectors use `dashboard:*` prefix on interactive/readout elements.
 10. Imports: `@/` alias for app-root modules; relative paths within this
     module.

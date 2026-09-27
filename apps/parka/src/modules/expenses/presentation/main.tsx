@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Trash2, Pencil } from 'lucide-react';
 import {
-  AppShell,
   Card,
   Segmented,
   Button,
@@ -10,18 +9,14 @@ import {
   CategoryAvatar,
 } from '@/modules/shared/ui';
 import {
-  useParkaState,
-  updateExpense,
-  deleteExpense,
   itemTotal,
   monthOf,
   monthLabel,
   dateTimeLabel,
   money,
-  type Expense,
-} from '@/modules/shared/data';
-
-type Filter = 'all' | 'category' | 'bills';
+} from '../domain/format';
+import type { Expense, Filter } from '../domain/models';
+import { Provider, useContext } from './context';
 
 const groupByMonth = (list: Expense[]) => {
   const map = new Map<string, Expense[]>();
@@ -32,21 +27,27 @@ const groupByMonth = (list: Expense[]) => {
   return [...map.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1));
 };
 
-export const Main = () => {
-  const state = useParkaState();
+const ExpensesView = () => {
+  const ctx = useContext();
+  const expenses = ctx.useExpenses();
+  const categories = ctx.useCategories();
+  const error = ctx.useError();
   const [filter, setFilter] = useState<Filter>('all');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
 
-  const selected = state.expenses.find((e) => e.id === selectedId) ?? null;
+  useEffect(() => {
+    ctx.load();
+  }, [ctx]);
 
-  const sorted = [...state.expenses].sort((a, b) => (a.date < b.date ? 1 : -1));
+  const selected = expenses.find((e) => e.id === selectedId) ?? null;
+
+  const sorted = [...expenses].sort((a, b) => (a.date < b.date ? 1 : -1));
   const visible = filter === 'bills' ? sorted.filter((e) => e.isBill) : sorted;
 
   const row = (e: Expense) => {
     const category =
-      state.categories.find((c) => c.id === e.categoryId) ??
-      state.categories[0];
+      categories.find((c) => c.id === e.categoryId) ?? categories[0];
     return (
       <li key={e.id}>
         <button
@@ -74,8 +75,21 @@ export const Main = () => {
   };
 
   return (
-    <AppShell e2e="expenses:main" nav="expenses" title="Wydatki">
+    <div data-e2e="expenses:main" className="flex flex-1 flex-col">
+      <header className="flex items-center gap-3 px-5 pb-2 pt-6">
+        <h1 className="text-2xl font-semibold tracking-tight">Wydatki</h1>
+      </header>
       <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2">
+        {error ? (
+          <p
+            role="alert"
+            className="text-xs text-rose-700"
+            data-e2e="expenses:load-error"
+          >
+            {error}
+          </p>
+        ) : null}
+
         <Segmented<Filter>
           label="Filtruj wydatki"
           value={filter}
@@ -89,7 +103,7 @@ export const Main = () => {
 
         {filter === 'category' ? (
           <div className="space-y-4">
-            {state.categories.map((category) => {
+            {categories.map((category) => {
               const items = visible.filter((e) => e.categoryId === category.id);
               if (items.length === 0) return null;
               return (
@@ -141,7 +155,7 @@ export const Main = () => {
           }}
         />
       ) : null}
-    </AppShell>
+    </div>
   );
 };
 
@@ -156,16 +170,16 @@ const ExpenseDetail = ({
   onEdit: () => void;
   onClose: () => void;
 }) => {
-  const state = useParkaState();
+  const ctx = useContext();
+  const categories = ctx.useCategories();
   const category =
-    state.categories.find((c) => c.id === expense.categoryId) ??
-    state.categories[0];
+    categories.find((c) => c.id === expense.categoryId) ?? categories[0];
   const [merchant, setMerchant] = useState(expense.merchant);
   const [amount, setAmount] = useState(String(expense.amount));
   const [categoryId, setCategoryId] = useState(expense.categoryId);
 
   const save = () => {
-    updateExpense({
+    ctx.update({
       ...expense,
       merchant,
       amount: Number(amount) || 0,
@@ -175,7 +189,7 @@ const ExpenseDetail = ({
   };
 
   const remove = () => {
-    deleteExpense(expense.id);
+    ctx.remove(expense.id);
     onClose();
   };
 
@@ -233,7 +247,7 @@ const ExpenseDetail = ({
                 data-e2e="expenses:edit-category"
                 onChange={(e) => setCategoryId(e.target.value)}
               >
-                {state.categories.map((c) => (
+                {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
                   </option>
@@ -306,3 +320,9 @@ const ExpenseDetail = ({
     </div>
   );
 };
+
+export const Main = () => (
+  <Provider>
+    <ExpensesView />
+  </Provider>
+);

@@ -19,7 +19,7 @@ import {
 import type { Month } from '../domain/models';
 import { Provider, useContext } from './context';
 import { QuickActionIcon } from './quick-action-icon';
-import { AppShell, Card } from './layout';
+import { Card } from './layout';
 import { BarChart, Donut } from './charts';
 import { LoadErrorFallback } from './load-error-fallback';
 
@@ -71,7 +71,7 @@ const DashboardView = () => {
   const down = (summary?.change ?? 0) <= 0;
 
   return (
-    <AppShell e2e="dashboard:main" nav="start">
+    <div data-e2e="dashboard:main" className="flex flex-1 flex-col">
       <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Cześć 👋</h1>
@@ -191,7 +191,7 @@ const DashboardView = () => {
           )}
         </Card>
       </main>
-    </AppShell>
+    </div>
   );
 };
 

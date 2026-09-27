@@ -10,14 +10,14 @@ export const LoadErrorFallback = ({ reset }: Props) => (
       <TriangleAlert className="h-6 w-6" aria-hidden="true" />
     </span>
     <p className="text-sm font-medium text-ink-soft">
-      Wystąpił błąd podczas ładowania danych.
+      Something went wrong while loading data.
     </p>
     <button
       type="button"
       onClick={reset}
       className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark"
     >
-      Spróbuj ponownie
+      Try again
     </button>
   </div>
 );

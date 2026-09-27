@@ -1,46 +1,8 @@
 import type { ReactNode } from 'react';
-import { ArrowLeft, Home, Wallet, ChartColumn, LayoutGrid } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import type { E2eId } from '@/__e2e__/selectors';
-
-type NavKey = 'start' | 'expenses' | 'stats' | 'more';
-
-const NAV: { key: NavKey; label: string; href: string; icon: typeof Home }[] = [
-  { key: 'start', label: 'Start', href: '/dashboard/', icon: Home },
-  { key: 'expenses', label: 'Wydatki', href: '/expenses/', icon: Wallet },
-  {
-    key: 'stats',
-    label: 'Statystyki',
-    href: '/statistics/',
-    icon: ChartColumn,
-  },
-  { key: 'more', label: 'Więcej', href: '/settings/', icon: LayoutGrid },
-];
-
-export const BottomNav = ({ active }: { active: NavKey }) => (
-  <nav
-    aria-label="Nawigacja główna"
-    className="sticky bottom-0 z-10 mt-auto flex items-stretch justify-around border-t border-black/5 bg-white px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2"
-  >
-    {NAV.map(({ key, label, href, icon: Icon }) => {
-      const isActive = key === active;
-      return (
-        <a
-          key={key}
-          href={href}
-          aria-current={isActive ? 'page' : undefined}
-          className={cn(
-            'flex flex-1 flex-col items-center gap-1 rounded-lg py-1 text-xs font-medium',
-            isActive ? 'text-brand' : 'text-ink-soft',
-          )}
-        >
-          <Icon className="h-5 w-5" aria-hidden="true" />
-          {label}
-        </a>
-      );
-    })}
-  </nav>
-);
+import { AppNav, type NavKey } from '@/shared/navigation/app-nav';
 
 type ShellProps = {
   children: ReactNode;
@@ -62,7 +24,7 @@ export const AppShell = ({ children, e2e, nav, title }: ShellProps) => (
         </header>
       ) : null}
       {children}
-      {nav ? <BottomNav active={nav} /> : null}
+      {nav ? <AppNav active={nav} /> : null}
     </div>
   </div>
 );

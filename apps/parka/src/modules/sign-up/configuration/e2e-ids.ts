@@ -1,4 +1,4 @@
-export const AUTH_E2E_IDS = [
+export const SIGN_UP_E2E_IDS = [
   'auth:main',
   'auth:email',
   'auth:password',
@@ -7,4 +7,4 @@ export const AUTH_E2E_IDS = [
   'auth:apple',
 ] as const;
 
-export type AuthE2eId = (typeof AUTH_E2E_IDS)[number];
+export type SignUpE2eId = (typeof SIGN_UP_E2E_IDS)[number];

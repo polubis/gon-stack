@@ -1,31 +1,9 @@
 import { useState } from 'react';
 import { Leaf } from 'lucide-react';
 import { Button, Field, inputClass } from '@/modules/shared/ui';
+import { signUp } from '../integration/repository';
 
-type Mode = 'sign-in' | 'sign-up';
-
-const COPY: Record<
-  Mode,
-  { title: string; cta: string; alt: string; altHref: string; altLabel: string }
-> = {
-  'sign-in': {
-    title: 'Witaj ponownie!',
-    cta: 'Zaloguj się',
-    alt: 'Nie masz konta?',
-    altHref: '/sign-up/',
-    altLabel: 'Zarejestruj się',
-  },
-  'sign-up': {
-    title: 'Załóż konto',
-    cta: 'Utwórz konto',
-    alt: 'Masz już konto?',
-    altHref: '/sign-in/',
-    altLabel: 'Zaloguj się',
-  },
-};
-
-export const Main = ({ mode }: { mode: Mode }) => {
-  const copy = COPY[mode];
+export const Main = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -35,7 +13,7 @@ export const Main = ({ mode }: { mode: Mode }) => {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.includes('@') || password.length < 6) {
-      setError('Podaj poprawny e-mail i hasło (min. 6 znaków).');
+      setError('Enter a valid email and password (min. 6 characters).');
       return;
     }
 
@@ -43,34 +21,24 @@ export const Main = ({ mode }: { mode: Mode }) => {
     setError('');
     setInfo('');
     try {
-      const res = await fetch(
-        mode === 'sign-in' ? '/api/auth/login/' : '/api/auth/register/',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-          redirect: 'manual',
-        },
-      );
-
-      if (res.type === 'opaqueredirect') {
-        window.location.href = '/dashboard/';
-        return;
+      const result = await signUp(email, password);
+      switch (result.status) {
+        case 'redirected':
+          window.location.href = '/dashboard/';
+          return;
+        case 'pending-confirmation':
+          setInfo('Sprawdź skrzynkę e-mail i potwierdź rejestrację.');
+          return;
+        case 'rejected':
+          setError(result.message);
+          return;
+        default: {
+          const exhaustive: never = result;
+          return exhaustive;
+        }
       }
-
-      const body = (await res.json().catch(() => null)) as {
-        ok?: boolean;
-        message?: string;
-      } | null;
-
-      if (res.ok && body?.ok) {
-        setInfo('Sprawdź skrzynkę e-mail i potwierdź rejestrację.');
-        return;
-      }
-
-      setError(body?.message ?? 'Nie udało się. Spróbuj ponownie.');
     } catch {
-      setError('Brak połączenia z serwerem. Spróbuj ponownie.');
+      setError('Could not reach the server. Try again.');
     } finally {
       setPending(false);
     }
@@ -84,7 +52,7 @@ export const Main = ({ mode }: { mode: Mode }) => {
       <span className="mb-6 grid h-14 w-14 place-items-center rounded-2xl bg-brand-soft text-brand">
         <Leaf className="h-7 w-7" aria-hidden="true" />
       </span>
-      <h1 className="text-2xl font-semibold tracking-tight">{copy.title}</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Załóż konto</h1>
       <p className="mt-1 text-sm text-ink-soft">
         Zaloguj się, aby kontynuować.
       </p>
@@ -106,9 +74,7 @@ export const Main = ({ mode }: { mode: Mode }) => {
           <input
             type="password"
             name="password"
-            autoComplete={
-              mode === 'sign-in' ? 'current-password' : 'new-password'
-            }
+            autoComplete="new-password"
             className={inputClass}
             value={password}
             data-e2e="auth:password"
@@ -129,18 +95,9 @@ export const Main = ({ mode }: { mode: Mode }) => {
         ) : null}
 
         <Button type="submit" data-e2e="auth:submit" disabled={pending}>
-          {pending ? 'Chwila…' : copy.cta}
+          {pending ? 'Chwila…' : 'Utwórz konto'}
         </Button>
       </form>
-
-      {mode === 'sign-in' ? (
-        <a
-          href="/sign-in/"
-          className="mt-3 block text-center text-sm text-ink-soft underline"
-        >
-          Nie pamiętasz hasła?
-        </a>
-      ) : null}
 
       <div className="mt-6 space-y-2">
         <Button
@@ -162,12 +119,9 @@ export const Main = ({ mode }: { mode: Mode }) => {
       </div>
 
       <p className="mt-6 text-center text-sm text-ink-soft">
-        {copy.alt}{' '}
-        <a
-          href={copy.altHref}
-          className="font-semibold text-brand-dark underline"
-        >
-          {copy.altLabel}
+        Masz już konto?{' '}
+        <a href="/sign-in/" className="font-semibold text-brand-dark underline">
+          Zaloguj się
         </a>
       </p>
     </div>

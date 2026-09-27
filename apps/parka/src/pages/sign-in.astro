@@ -1,8 +1,8 @@
 ---
 export const prerender = false;
 
-import MainLayout from '@/core/layouts/main.astro';
-import { Main } from '@/modules/auth';
+import MainLayout from '@/core/layouts/main-layout.astro';
+import { Main } from '@/modules/sign-in';
 import { supabaseServer } from '@/shared/data-sources/supabase-server';
 
 const db = supabaseServer({
@@ -27,5 +27,5 @@ const imageUrl = `${domain}/og.svg`;
   title="Logowanie | Parka"
   description="Dostęp do Twojego konta Parka."
 >
-  <Main client:load mode="sign-in" />
+  <Main client:load />
 </MainLayout>

@@ -116,6 +116,82 @@ const commands = {
     await page.waitForURL('**/expenses/');
   },
 
+  'i mock the expenses list': async (page) => {
+    // Expenses is backend-only, same as dashboard (see modules/expenses core/
+    // facade) — stub categories/expenses so the view has deterministic rows
+    // to assert against instead of relying on the removed local demo mode.
+    const category = {
+      id: 'cat-1',
+      name: 'Rachunki',
+      icon: 'receipt',
+      color: '#4f46e5',
+    };
+    const billExpense = {
+      id: 'exp-bill-1',
+      merchant: 'Tauron — Energia',
+      date: new Date().toISOString(),
+      amount: 210.5,
+      categoryId: category.id,
+      paymentMethod: 'card',
+      isBill: true,
+      source: 'manual',
+      items: [],
+    };
+    const purchaseExpense = {
+      id: 'exp-purchase-1',
+      merchant: 'Kino Helios',
+      date: new Date().toISOString(),
+      amount: 45,
+      categoryId: category.id,
+      paymentMethod: 'card',
+      isBill: false,
+      source: 'manual',
+      items: [],
+    };
+
+    await page.route('**/api/categories/**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ code: 200, data: [category] }),
+      });
+    });
+    await page.route('**/api/expenses/**', async (route) => {
+      const method = route.request().method();
+      if (method === 'GET') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            code: 200,
+            data: [billExpense, purchaseExpense],
+          }),
+        });
+        return;
+      }
+      if (method === 'PUT') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            code: 200,
+            data: route.request().postDataJSON(),
+          }),
+        });
+        return;
+      }
+      if (method === 'DELETE') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ code: 200, ok: true }),
+        });
+        return;
+      }
+      await route.continue();
+    });
+  },
+
   'expenses can be filtered to bills only': async (page) => {
     await open(page, '/expenses/');
     await page.getByRole('tab', { name: 'Rachunki' }).click();
@@ -250,11 +326,15 @@ test('a scanned receipt can be reviewed, corrected and saved as an expense', asy
 });
 
 test('expenses can be filtered to bills only', async ({ page }) => {
-  await interpreter(commands, page)(['expenses can be filtered to bills only']);
+  await interpreter(commands, page)(
+    ['i mock the expenses list'],
+    ['expenses can be filtered to bills only'],
+  );
 });
 
 test('an expense can be updated and removed', async ({ page }) => {
   await interpreter(commands, page)(
+    ['i mock the expenses list'],
     ['i update an expense merchant name'],
     ['i delete the updated expense'],
   );

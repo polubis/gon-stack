@@ -1,4 +1,5 @@
-import type { AuthE2eId } from '@/modules/auth/configuration/e2e-ids';
+import type { SignInE2eId } from '@/modules/sign-in/configuration/e2e-ids';
+import type { SignUpE2eId } from '@/modules/sign-up/configuration/e2e-ids';
 import type { CategoriesE2eId } from '@/modules/categories/configuration/e2e-ids';
 import type { DashboardE2eId } from '@/modules/dashboard/configuration/e2e-ids';
 import type { ExpensesE2eId } from '@/modules/expenses/configuration/e2e-ids';
@@ -29,7 +30,8 @@ import type { WalkthroughE2eId } from '@/shared/walkthrough/configuration/e2e-id
 export type E2eId =
   | HomeE2eId
   | WalkthroughE2eId
-  | AuthE2eId
+  | SignInE2eId
+  | SignUpE2eId
   | DashboardE2eId
   | ReceiptE2eId
   | ExpensesE2eId

@@ -1,0 +1,25 @@
+---
+import Seo from './seo.astro';
+
+type Props = {
+  description: string;
+  title: string;
+  siteName: string;
+  domain: string;
+  url:
+    | `/`
+    | `/${string}/`
+    | `/${string}/${string}`
+    | `/${string}/${string}/${string}`
+    | `/${string}/${string}/${string}/${string}`;
+  keywords: string;
+  imageUrl: string;
+  imageAlt: string;
+};
+
+const props: Props = Astro.props;
+---
+
+<Seo {...props}>
+  <slot />
+</Seo>

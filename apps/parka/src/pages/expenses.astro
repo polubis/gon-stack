@@ -1,14 +1,14 @@
 ---
 export const prerender = true;
 
-import MainLayout from '@/core/layouts/main.astro';
+import AppLayout from '@/core/layouts/app-layout.astro';
 import { Main } from '@/modules/expenses';
 
 const domain = Astro.locals.siteDomain;
 const imageUrl = `${domain}/og.svg`;
 ---
 
-<MainLayout
+<AppLayout
   siteName="Parka"
   url="/expenses/"
   imageAlt="Parka"
@@ -18,5 +18,5 @@ const imageUrl = `${domain}/og.svg`;
   title="Wydatki | Parka"
   description="Przeglądaj i filtruj swoje wydatki."
 >
-  <Main client:load  />
-</MainLayout>
+  <Main client:only="react" />
+</AppLayout>

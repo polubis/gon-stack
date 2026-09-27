@@ -1,4 +1,4 @@
-export { AppShell, BottomNav, ScreenHeader, Card } from './layout';
+export { AppShell, ScreenHeader, Card } from './layout';
 export {
   Segmented,
   Toggle,

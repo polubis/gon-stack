@@ -1,5 +1,6 @@
 export const EXPENSES_E2E_IDS = [
   'expenses:main',
+  'expenses:load-error',
   'expenses:detail',
   'expenses:edit-merchant',
   'expenses:edit-amount',
