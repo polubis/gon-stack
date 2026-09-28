@@ -24,25 +24,26 @@ import {
   updateSettings,
   whenSynced,
 } from '@/modules/shared/data';
+import { apiRoutes, navigateTo, routes } from '@/shared/router';
 
 const signOut = async () => {
   await whenSynced();
-  await fetch('/api/auth/logout/', {
+  await fetch(apiRoutes.authLogout(), {
     method: 'POST',
     redirect: 'manual',
   }).catch(() => undefined);
-  window.location.href = '/sign-in/';
+  navigateTo(routes.signIn());
 };
 
 const LINKS: { label: string; href: string; icon: LucideIcon }[] = [
-  { label: 'RODO — Twoje dane', href: '/privacy/', icon: ShieldCheck },
-  { label: 'AI — jak to działa', href: '/ai-info/', icon: Sparkles },
-  { label: 'Kategorie', href: '/categories/', icon: LayoutGrid },
-  { label: 'Limity i budżet', href: '/limits/', icon: Target },
-  { label: 'Cykliczne wydatki', href: '/recurring/', icon: Repeat },
-  { label: 'Powiadomienia', href: '/notifications/', icon: Bell },
-  { label: 'Raport miesięczny', href: '/reports/', icon: FileText },
-  { label: 'Eksport danych', href: '/data-export/', icon: FileText },
+  { label: 'RODO — Twoje dane', href: routes.privacy(), icon: ShieldCheck },
+  { label: 'AI — jak to działa', href: routes.aiInfo(), icon: Sparkles },
+  { label: 'Kategorie', href: routes.categories(), icon: LayoutGrid },
+  { label: 'Limity i budżet', href: routes.limits(), icon: Target },
+  { label: 'Cykliczne wydatki', href: routes.recurring(), icon: Repeat },
+  { label: 'Powiadomienia', href: routes.notifications(), icon: Bell },
+  { label: 'Raport miesięczny', href: routes.reports(), icon: FileText },
+  { label: 'Eksport danych', href: routes.dataExport(), icon: FileText },
 ];
 
 const NOTIF_KEYS = [

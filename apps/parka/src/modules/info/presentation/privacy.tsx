@@ -1,5 +1,6 @@
 import { ShieldCheck, Lock, MapPin, Trash2, Download } from 'lucide-react';
 import { AppShell, Card, ScreenHeader, Button } from '@/modules/shared/ui';
+import { routes } from '@/shared/router';
 
 const POINTS = [
   { icon: MapPin, text: 'Dane przechowywane w Unii Europejskiej.' },
@@ -13,7 +14,7 @@ const POINTS = [
 
 export const PrivacyMain = () => (
   <AppShell e2e="privacy:main" nav="more">
-    <ScreenHeader title="RODO / Prywatność" backHref="/settings/" />
+    <ScreenHeader title="RODO / Prywatność" backHref={routes.settings()} />
     <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2">
       <Card as="section" className="space-y-3">
         <h2 className="text-sm font-semibold">Twoje dane</h2>
@@ -36,7 +37,7 @@ export const PrivacyMain = () => (
           Przetwarzanie odbywa się wyłącznie po wyrażeniu zgody na pliki cookie.
         </p>
         <a
-          href="/privacy-policy/"
+          href={routes.privacyPolicy()}
           className="text-sm font-semibold text-brand-dark underline"
         >
           Otwórz politykę prywatności
@@ -44,7 +45,7 @@ export const PrivacyMain = () => (
       </Card>
 
       <div className="space-y-2">
-        <Button href="/data-export/" data-e2e="privacy:manage-data">
+        <Button href={routes.dataExport()} data-e2e="privacy:manage-data">
           <Download className="h-4 w-4" aria-hidden="true" /> Zarządzaj danymi
         </Button>
       </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Leaf } from 'lucide-react';
 import { Button, Field, inputClass } from '@/modules/shared/ui';
+import { navigateTo, routes } from '@/shared/router';
 import { signIn } from '../integration/repository';
 
 export const Main = () => {
@@ -22,7 +23,7 @@ export const Main = () => {
       const result = await signIn(email, password);
       switch (result.status) {
         case 'redirected':
-          window.location.href = '/dashboard/';
+          navigateTo(routes.dashboard());
           return;
         case 'rejected':
           setError(result.message);
@@ -90,7 +91,7 @@ export const Main = () => {
       </form>
 
       <a
-        href="/sign-in/"
+        href={routes.signIn()}
         className="mt-3 block text-center text-sm text-ink-soft underline"
       >
         Nie pamiętasz hasła?
@@ -117,7 +118,10 @@ export const Main = () => {
 
       <p className="mt-6 text-center text-sm text-ink-soft">
         Nie masz konta?{' '}
-        <a href="/sign-up/" className="font-semibold text-brand-dark underline">
+        <a
+          href={routes.signUp()}
+          className="font-semibold text-brand-dark underline"
+        >
           Zarejestruj się
         </a>
       </p>

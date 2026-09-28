@@ -9,6 +9,7 @@ import type {
   Settings,
 } from './types';
 import { createSeedState } from './seed';
+import { apiRoutes } from '@/shared/router';
 
 let state: ParkaState = createSeedState();
 const listeners = new Set<() => void>();
@@ -38,38 +39,6 @@ const track = (p: Promise<unknown>): Promise<unknown> => {
 
 const jsonHeaders = { 'Content-Type': 'application/json' };
 
-const postEntity = (path: string, body: unknown) => {
-  if (mode !== 'backend') return Promise.resolve();
-  return track(
-    fetch(`/api/${path}/`, {
-      method: 'POST',
-      headers: jsonHeaders,
-      body: JSON.stringify(body),
-    }),
-  );
-};
-
-const putEntity = (path: string, id: string, body: unknown) => {
-  if (mode !== 'backend') return Promise.resolve();
-  return track(
-    fetch(`/api/${path}/${id}/`, {
-      method: 'PUT',
-      headers: jsonHeaders,
-      body: JSON.stringify(body),
-    }),
-  );
-};
-
-const deleteEntity = (path: string, id: string) => {
-  if (mode !== 'backend') return Promise.resolve();
-  return track(fetch(`/api/${path}/${id}/`, { method: 'DELETE' }));
-};
-
-/** Resolves once every in-flight entity write has settled. */
-export const whenSynced = async (): Promise<void> => {
-  await syncChain;
-};
-
 const ENTITY_ENDPOINTS = [
   'categories',
   'expenses',
@@ -78,6 +47,74 @@ const ENTITY_ENDPOINTS = [
   'recurring',
   'notifications',
 ] as const;
+
+type EntityPath = (typeof ENTITY_ENDPOINTS)[number];
+
+const collectionUrl = (path: EntityPath): string => {
+  switch (path) {
+    case 'categories':
+      return apiRoutes.categories();
+    case 'expenses':
+      return apiRoutes.expenses();
+    case 'limits':
+      return apiRoutes.limits();
+    case 'goals':
+      return apiRoutes.goals();
+    case 'recurring':
+      return apiRoutes.recurring();
+    case 'notifications':
+      return apiRoutes.notifications();
+  }
+};
+
+const entityUrl = (path: EntityPath, id: string): string => {
+  switch (path) {
+    case 'categories':
+      return apiRoutes.categoryById(id);
+    case 'expenses':
+      return apiRoutes.expenseById(id);
+    case 'limits':
+      return apiRoutes.limitById(id);
+    case 'goals':
+      return apiRoutes.goalById(id);
+    case 'recurring':
+      return apiRoutes.recurringById(id);
+    case 'notifications':
+      return apiRoutes.notificationById(id);
+  }
+};
+
+const postEntity = (path: EntityPath, body: unknown) => {
+  if (mode !== 'backend') return Promise.resolve();
+  return track(
+    fetch(collectionUrl(path), {
+      method: 'POST',
+      headers: jsonHeaders,
+      body: JSON.stringify(body),
+    }),
+  );
+};
+
+const putEntity = (path: EntityPath, id: string, body: unknown) => {
+  if (mode !== 'backend') return Promise.resolve();
+  return track(
+    fetch(entityUrl(path, id), {
+      method: 'PUT',
+      headers: jsonHeaders,
+      body: JSON.stringify(body),
+    }),
+  );
+};
+
+const deleteEntity = (path: EntityPath, id: string) => {
+  if (mode !== 'backend') return Promise.resolve();
+  return track(fetch(entityUrl(path, id), { method: 'DELETE' }));
+};
+
+/** Resolves once every in-flight entity write has settled. */
+export const whenSynced = async (): Promise<void> => {
+  await syncChain;
+};
 
 let bootstrapPromise: Promise<void> | undefined;
 
@@ -89,9 +126,13 @@ export const bootstrap = (): Promise<void> => {
     try {
       const responses = await Promise.all([
         ...ENTITY_ENDPOINTS.map((path) =>
-          fetch(`/api/${path}/`, { headers: { Accept: 'application/json' } }),
+          fetch(collectionUrl(path), {
+            headers: { Accept: 'application/json' },
+          }),
         ),
-        fetch('/api/settings/', { headers: { Accept: 'application/json' } }),
+        fetch(apiRoutes.settings(), {
+          headers: { Accept: 'application/json' },
+        }),
       ]);
 
       if (responses.every((r) => r.ok)) {
@@ -229,7 +270,7 @@ export const updateSettings = (settings: Settings): void => {
   setState((p) => ({ ...p, settings }));
   if (mode !== 'backend') return;
   void track(
-    fetch('/api/settings/', {
+    fetch(apiRoutes.settings(), {
       method: 'PUT',
       headers: jsonHeaders,
       body: JSON.stringify(settings),

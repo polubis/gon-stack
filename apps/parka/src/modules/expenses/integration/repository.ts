@@ -5,6 +5,7 @@ import {
   deleteExpenseSchema,
 } from '@schemas/expenses';
 import { listCategoriesSchema } from '@schemas/categories';
+import { apiRoutes } from '@/shared/router';
 import type { Category, Expense } from '../domain/models';
 
 type ListExpensesOut = z.infer<ReturnType<typeof listExpensesSchema>>['out'];
@@ -18,7 +19,7 @@ type ListCategoriesOut = z.infer<
 export const fetchExpenses = async (
   signal: AbortSignal,
 ): Promise<Expense[]> => {
-  const response = await fetch('/api/expenses/', {
+  const response = await fetch(apiRoutes.expenses(), {
     headers: { Accept: 'application/json' },
     signal,
   });
@@ -30,7 +31,7 @@ export const fetchExpenses = async (
 export const fetchCategories = async (
   signal: AbortSignal,
 ): Promise<Category[]> => {
-  const response = await fetch('/api/categories/', {
+  const response = await fetch(apiRoutes.categories(), {
     headers: { Accept: 'application/json' },
     signal,
   });
@@ -41,7 +42,7 @@ export const fetchCategories = async (
 };
 
 export const putExpense = async (expense: Expense): Promise<Expense> => {
-  const response = await fetch(`/api/expenses/${expense.id}/`, {
+  const response = await fetch(apiRoutes.expenseById(expense.id), {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(expense),
@@ -52,7 +53,7 @@ export const putExpense = async (expense: Expense): Promise<Expense> => {
 };
 
 export const removeExpense = async (id: string): Promise<void> => {
-  const response = await fetch(`/api/expenses/${id}/`, { method: 'DELETE' });
+  const response = await fetch(apiRoutes.expenseById(id), { method: 'DELETE' });
   const json = (await response.json()) as DeleteExpenseOut;
   if (json.code !== 200) throw new Error(json.message);
 };

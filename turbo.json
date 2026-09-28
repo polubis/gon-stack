@@ -18,7 +18,8 @@
     },
     "deploy": {
       "cache": false,
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "passThroughEnv": ["CLOUDFLARE_API_TOKEN", "CLOUDFLARE_ACCOUNT_ID"]
     },
     "lint": {
       "dependsOn": ["^lint"]

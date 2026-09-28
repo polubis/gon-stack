@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Leaf } from 'lucide-react';
 import { Button, Field, inputClass } from '@/modules/shared/ui';
+import { navigateTo, routes } from '@/shared/router';
 import { signUp } from '../integration/repository';
 
 export const Main = () => {
@@ -24,7 +25,7 @@ export const Main = () => {
       const result = await signUp(email, password);
       switch (result.status) {
         case 'redirected':
-          window.location.href = '/dashboard/';
+          navigateTo(routes.dashboard());
           return;
         case 'pending-confirmation':
           setInfo('Sprawdź skrzynkę e-mail i potwierdź rejestrację.');
@@ -120,7 +121,10 @@ export const Main = () => {
 
       <p className="mt-6 text-center text-sm text-ink-soft">
         Masz już konto?{' '}
-        <a href="/sign-in/" className="font-semibold text-brand-dark underline">
+        <a
+          href={routes.signIn()}
+          className="font-semibold text-brand-dark underline"
+        >
           Zaloguj się
         </a>
       </p>

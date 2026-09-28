@@ -20,6 +20,7 @@ import {
   type Category,
   type CategoryIconId,
 } from '@/modules/shared/data';
+import { routes } from '@/shared/router';
 
 const COLORS = [
   '#0f7a4f',
@@ -42,7 +43,7 @@ export const Main = () => {
     <AppShell e2e="categories:main" nav="more">
       <ScreenHeader
         title="Kategorie"
-        backHref="/settings/"
+        backHref={routes.settings()}
         action={
           <button
             type="button"

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
+import { readQueryParam, routes, writeQueryParam } from '@/shared/router';
 import {
   money,
   percent,
@@ -32,22 +33,20 @@ type Action = {
 };
 
 const QUICK_ACTIONS: Action[] = [
-  { label: 'Dodaj paragon', href: '/receipt-scan/', iconId: 'add' },
-  { label: 'Zrób zdjęcie', href: '/receipt-scan/', iconId: 'camera' },
-  { label: 'Limity', href: '/limits/', iconId: 'target' },
-  { label: 'Cykliczne', href: '/recurring/', iconId: 'repeat' },
+  { label: 'Dodaj paragon', href: routes.receiptScan(), iconId: 'add' },
+  { label: 'Zrób zdjecie', href: routes.receiptScan(), iconId: 'camera' },
+  { label: 'Limity', href: routes.limits(), iconId: 'target' },
+  { label: 'Cykliczne', href: routes.recurring(), iconId: 'repeat' },
 ];
 
 const MONTH_PARAM = 'month';
 
 const setMonthParam = (month: Month) => {
-  const url = new URL(window.location.href);
-  url.searchParams.set(MONTH_PARAM, month);
-  window.history.replaceState(window.history.state, '', url);
+  writeQueryParam(MONTH_PARAM, month);
 };
 
 const initialMonth = (): Month => {
-  const fromUrl = new URLSearchParams(window.location.search).get(MONTH_PARAM);
+  const fromUrl = readQueryParam(MONTH_PARAM);
   return toMonth(fromUrl ?? currentMonth());
 };
 

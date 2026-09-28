@@ -1,4 +1,5 @@
 import type { Schema } from '@schemas/login-user';
+import { apiRoutes } from '@/shared/router';
 
 export type SignInResult =
   { status: 'redirected' } | { status: 'rejected'; message: string };
@@ -8,7 +9,7 @@ export const signIn = async (
   email: string,
   password: string,
 ): Promise<SignInResult> => {
-  const res = await fetch('/api/auth/login/', {
+  const res = await fetch(apiRoutes.authLogin(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),

@@ -1,4 +1,5 @@
 import { schema } from '@schemas/auth-callback';
+import { routes } from '@/shared/router';
 import { InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { publicProcedure } from '../../core/procedure';
@@ -15,7 +16,7 @@ export const authCallback = publicProcedure({
 
     return {
       code: 303,
-      location: '/dashboard/',
+      location: routes.dashboard(),
     };
   },
 });

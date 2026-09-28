@@ -1,20 +1,16 @@
 ---
 import '../style/index.css';
 import { CookieConsent } from '@/shared/cookies';
+import { routes, type PageUrl } from '@/shared/router';
 
-const PRIVACY_POLICY_URL = '/privacy-policy/';
+const PRIVACY_POLICY_URL = routes.privacyPolicy();
 
 type Props = {
   description: string;
   title: string;
   siteName: string;
   domain: string;
-  url:
-    | `/`
-    | `/${string}/`
-    | `/${string}/${string}`
-    | `/${string}/${string}/${string}`
-    | `/${string}/${string}/${string}/${string}`;
+  url: PageUrl;
   keywords: string;
   imageUrl: string;
   imageAlt: string;

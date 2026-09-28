@@ -1,5 +1,6 @@
 import { FileText, Download } from 'lucide-react';
 import { AppShell, Card, ScreenHeader, Button } from '@/modules/shared/ui';
+import { routes } from '@/shared/router';
 import {
   useParkaState,
   expensesForMonth,
@@ -55,7 +56,7 @@ export const Main = () => {
 
   return (
     <AppShell e2e="reports:main" nav="more">
-      <ScreenHeader title="Raport" backHref="/settings/" />
+      <ScreenHeader title="Raport" backHref={routes.settings()} />
       <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2">
         <p className="text-sm capitalize text-ink-soft">{monthLabel(month)}</p>
 

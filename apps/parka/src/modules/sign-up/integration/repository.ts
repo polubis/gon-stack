@@ -1,4 +1,5 @@
 import type { Schema } from '@schemas/register-user';
+import { apiRoutes } from '@/shared/router';
 
 export type SignUpResult =
   | { status: 'redirected' }
@@ -10,7 +11,7 @@ export const signUp = async (
   email: string,
   password: string,
 ): Promise<SignUpResult> => {
-  const res = await fetch('/api/auth/register/', {
+  const res = await fetch(apiRoutes.authRegister(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),

@@ -4,6 +4,7 @@ export const prerender = false;
 import MainLayout from '@/core/layouts/main-layout.astro';
 import { Main } from '@/modules/sign-up';
 import { supabaseServer } from '@/shared/data-sources/supabase-server';
+import { routes } from '@/shared/router';
 
 const db = supabaseServer({
   request: Astro.request,
@@ -11,7 +12,7 @@ const db = supabaseServer({
 });
 const { data } = await db.auth.getUser();
 
-if (data.user) return Astro.redirect('/dashboard/');
+if (data.user) return Astro.redirect(routes.dashboard());
 
 const domain = Astro.locals.siteDomain;
 const imageUrl = `${domain}/og.svg`;
@@ -19,7 +20,7 @@ const imageUrl = `${domain}/og.svg`;
 
 <MainLayout
   siteName="Parka"
-  url="/sign-up/"
+  url={routes.signUp()}
   imageAlt="Parka"
   domain={domain}
   imageUrl={imageUrl}

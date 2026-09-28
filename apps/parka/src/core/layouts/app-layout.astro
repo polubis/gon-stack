@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from 'astro:transitions';
 import { SyncedAppNav } from '@/shared/navigation/app-nav';
+import type { PageUrl } from '@/shared/router';
 import Seo from './seo.astro';
 
 type Props = {
@@ -8,12 +9,7 @@ type Props = {
   title: string;
   siteName: string;
   domain: string;
-  url:
-    | `/`
-    | `/${string}/`
-    | `/${string}/${string}`
-    | `/${string}/${string}/${string}`
-    | `/${string}/${string}/${string}/${string}`;
+  url: PageUrl;
   keywords: string;
   imageUrl: string;
   imageAlt: string;

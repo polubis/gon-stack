@@ -18,6 +18,7 @@ import {
   money,
   type ReceiptItem,
 } from '@/modules/shared/data';
+import { navigateTo, routes } from '@/shared/router';
 
 type Draft = {
   merchant: string;
@@ -137,13 +138,16 @@ export const Main = () => {
         ageDays: 0,
       }),
     ]);
-    window.location.href = '/expenses/';
+    navigateTo(routes.expenses());
   };
 
   if (step !== 'review') {
     return (
       <AppShell e2e="receipt:main">
-        <ScreenHeader title="Zrób zdjęcie paragonu" backHref="/dashboard/" />
+        <ScreenHeader
+          title="Zrób zdjęcie paragonu"
+          backHref={routes.dashboard()}
+        />
         <main className="flex flex-1 flex-col items-center justify-between px-6 pb-10 pt-4">
           <p className="text-center text-sm text-ink-soft">
             Automatyczne odczytywanie danych. Ustaw paragon w kadrze i zrób
@@ -193,7 +197,10 @@ export const Main = () => {
 
   return (
     <AppShell e2e="receipt:main">
-      <ScreenHeader title="Paragon — edycja danych" backHref="/dashboard/" />
+      <ScreenHeader
+        title="Paragon — edycja danych"
+        backHref={routes.dashboard()}
+      />
       <main
         className="flex flex-1 flex-col gap-4 px-4 pb-28 pt-2"
         data-e2e="receipt:review"

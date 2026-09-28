@@ -1,6 +1,7 @@
 import { Leaf, ScanLine, Pencil, ChartColumn } from 'lucide-react';
 import { Main as Walkthrough } from '@/shared/walkthrough';
 import type { WalkthroughStep, WalkthroughStepId } from '@/shared/walkthrough';
+import { navigateTo, routes } from '@/shared/router';
 
 const STEPS: WalkthroughStep[] = [
   {
@@ -38,7 +39,7 @@ const PERSISTENCE_KEY = 'parka:onboarding-walkthrough';
 const enterApp = () => {
   // Personal finance features need a real account; onboarding hands off to
   // registration where the backend session (and demo data) is created.
-  window.location.href = '/sign-up/';
+  navigateTo(routes.signUp());
 };
 
 export const Main = () => {
@@ -55,7 +56,7 @@ export const Main = () => {
           <p className="text-center text-sm text-ink-soft">
             Masz już konto?{' '}
             <a
-              href="/sign-in/"
+              href={routes.signIn()}
               className="font-semibold text-brand-dark underline"
             >
               Zaloguj się

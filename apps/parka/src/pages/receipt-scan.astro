@@ -3,6 +3,7 @@ export const prerender = true;
 
 import MainLayout from '@/core/layouts/main-layout.astro';
 import { Main } from '@/modules/receipt';
+import { routes } from '@/shared/router';
 
 const domain = Astro.locals.siteDomain;
 const imageUrl = `${domain}/og.svg`;
@@ -10,7 +11,7 @@ const imageUrl = `${domain}/og.svg`;
 
 <MainLayout
   siteName="Parka"
-  url="/receipt-scan/"
+  url={routes.receiptScan()}
   imageAlt="Parka"
   domain={domain}
   imageUrl={imageUrl}

@@ -1,8 +1,7 @@
 ---
-version: 2.5
-hash: f0fbdeae01e46ec2496cb9fb68250d2debab69a028dfcff057a24efabd2a5305
+version: 2.6
+hash: 24f14332c5059d2469a17beed386fc8252825730a3da19510909f1bf6e47080a
 ---
-
 
 # Dashboard
 
@@ -27,8 +26,9 @@ or overview features.
    over the domain `Event`), `handlers/` (one file per trigger), `registry.ts`
    (wires handlers to the bus), `facade.ts` (actions + `use*` selectors),
    `mediator.ts` (composes store + registry + facade).
-4. "integration" — backend boundary. `repository.ts` does the `fetch` call
-   to `GET /api/dashboard` (private, session-scoped); `mappers.ts` converts
+4. "integration" — backend boundary. `repository.ts` calls
+   `apiRoutes.dashboard({ month })` from `@/shared/router` (`GET
+/api/dashboard`, private, session-scoped); `mappers.ts` converts
    the response DTO into the domain `Summary` shape. Nothing else fetches.
 5. "presentation" — React only. `context.tsx` provides the facade via
    power-context; `main.tsx` wraps the view in the `Provider` and is the page
