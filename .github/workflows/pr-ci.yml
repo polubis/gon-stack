@@ -14,9 +14,13 @@ concurrency:
   group: pr-ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   verify:
     name: verify
+    timeout-minutes: 15
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     env:
@@ -28,13 +32,16 @@ jobs:
       PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY: ${{ vars.PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          # log-check diffs origin/<base>...HEAD, needs full history.
+          fetch-depth: 0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24.16.0
           cache: pnpm
@@ -42,13 +49,17 @@ jobs:
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
-      # TEMPORARY: PR checks run hash-only for now (e2e is local-only via
-      # pnpm test:e2e / ci:e2e). romantic-app e2e webServer crashes in CI:
-      # Supabase URL/Key missing at build/runtime, every SSR request throws.
-      # Restore the Verify step below once CI env/fixtures are fixed.
+      - name: Format check
+        run: pnpm format:check
+
       - name: Hash check
         run: pnpm hash:check
 
-      # TEMPORARY-DISABLED: full verification (format, lint, types, tests, build)
-      # - name: Verify (format, lint, types, tests, build)
-      #   run: turbo run format:check lint check-types test build --ui=stream
+      - name: Log check
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: node scripts/log-check.mjs --base "origin/$BASE_REF"
+
+      # e2e stays local-only (pnpm test:e2e): CI webServer lacks Supabase fixtures.
+      - name: Verify (lint, types, tests) - parka and its deps
+        run: pnpm exec turbo run lint check-types test --filter=parka... --ui=stream

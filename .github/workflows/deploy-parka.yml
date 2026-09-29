@@ -4,6 +4,15 @@ on:
   push:
     branches:
       - main
+    paths:
+      - apps/parka/**
+      - packages/**
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - turbo.json
+      - .github/workflows/deploy-parka.yml
+  workflow_dispatch:
 
 concurrency:
   group: deploy-parka
@@ -15,6 +24,7 @@ permissions:
 jobs:
   verify:
     name: verify
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     env:
       CI: 'true'
@@ -22,17 +32,13 @@ jobs:
       PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          # turbo --affected diffs base..head; a shallow clone makes it treat every
-          # package as changed. https://turborepo.dev/docs/reference/run#--affected
-          fetch-depth: 0
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24.16.0
           cache: pnpm
@@ -40,16 +46,19 @@ jobs:
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright browsers
-        run: pnpm pw:install
-      # TEMPORARY: e2e removed from PR checks (local-only via pnpm test:e2e / ci:e2e).
-      # romantic-app e2e webServer crashes in CI: Supabase URL/Key missing at
-      # build/runtime, every SSR request throws. Restore once CI env/fixtures fixed.
-      # - name: Verify (format, lint, types, tests, build, e2e) — entire monorepo
-        # run: pnpm ci:verify:dry
+      # e2e stays local-only (pnpm test:e2e): CI webServer lacks Supabase fixtures.
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Hash check
+        run: pnpm hash:check
+
+      - name: Verify (lint, types, tests) - parka and its deps
+        run: pnpm exec turbo run lint check-types test --filter=parka... --ui=stream
 
   deploy:
     name: deploy
+    timeout-minutes: 15
     needs: verify
     runs-on: ubuntu-latest
     environment: production
@@ -60,15 +69,16 @@ jobs:
       PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
+          # Need the previous main commit to diff migrations.
           fetch-depth: 0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24.16.0
           cache: pnpm
@@ -76,8 +86,23 @@ jobs:
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
+      # Skip only when the previous commit is known and migrations are untouched.
+      - name: Detect migration changes
+        id: migrations
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ] \
+            && git cat-file -e "$BEFORE^{commit}" 2>/dev/null \
+            && git diff --quiet "$BEFORE" "$GITHUB_SHA" -- apps/parka/supabase/migrations; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
       # DB first: new code never runs against an old schema.
       - name: Migrate DB
+        if: steps.migrations.outputs.changed == 'true'
         working-directory: apps/parka
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.PARKA_SUPABASE_ACCESS_TOKEN }}
