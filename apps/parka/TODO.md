@@ -1,0 +1,1 @@
+1. Migrate Supabase to direct `config.toml` usage instead of storing part of configuration in dashboard, and part of configuration under CI/CD

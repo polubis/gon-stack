@@ -1,18 +1,10 @@
 ---
-export const prerender = false;
+export const prerender = true;
 
 import MainLayout from '@/core/layouts/main-layout.astro';
 import { Main } from '@/modules/sign-in';
-import { supabaseServer } from '@/shared/data-sources/supabase-server';
+import { AuthGuard } from '@/shared/auth';
 import { APP_ROUTER } from '@/shared/router';
-
-const db = supabaseServer({
-  request: Astro.request,
-  cookies: Astro.cookies,
-});
-const { data } = await db.auth.getUser();
-
-if (data.user) return Astro.redirect(APP_ROUTER.dashboard());
 
 const domain = Astro.locals.siteDomain;
 const imageUrl = `${domain}/og.svg`;
@@ -28,5 +20,6 @@ const imageUrl = `${domain}/og.svg`;
   title="Logowanie | Parka"
   description="Dostęp do Twojego konta Parka."
 >
+  <AuthGuard mode="guest" client:only="react" />
   <Main client:load />
 </MainLayout>

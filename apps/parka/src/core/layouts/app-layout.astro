@@ -1,5 +1,6 @@
 ---
 import { ClientRouter } from 'astro:transitions';
+import { AuthGuard } from '@/shared/auth';
 import { SyncedAppNav } from '@/shared/navigation/app-nav';
 import type { PageUrl } from '@/shared/router';
 import Seo from './seo.astro';
@@ -20,6 +21,9 @@ const props: Props = Astro.props;
 
 <Seo {...props}>
   <ClientRouter slot="head-extra" />
+  <div transition:persist="app-auth-guard">
+    <AuthGuard mode="protected" client:only="react" />
+  </div>
   <div class="min-h-screen w-full bg-surface">
     <div
       class="mx-auto flex min-h-screen w-full max-w-md flex-col bg-surface shadow-sm"
