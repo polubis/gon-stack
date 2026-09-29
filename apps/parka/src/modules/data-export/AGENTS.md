@@ -3,6 +3,7 @@ version: 1.2
 hash: 4d653d65dbe49bedab19c3afaf9bc25e0fe1b3116762dc0c5d46c4091051f3b2
 ---
 
+
 # Data export
 
 Download expenses as CSV or text-PDF placeholder. Cloned from `../expenses` convention (read-only subset). Backend-only, session required. Isolated: imports nothing from other modules.

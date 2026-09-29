@@ -3,6 +3,7 @@ version: 1.2
 hash: 83e2a3e0102c5b775f298f0e718eb93281ad371161abcf77403c4740a067b01e
 ---
 
+
 # Limits
 
 Isolated module: total/category limits + savings goals. Month-scoped progress

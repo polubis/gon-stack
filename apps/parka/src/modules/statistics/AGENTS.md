@@ -4,6 +4,7 @@ hash: 0973af49470224e90cea1862a626185b095290484117011f038415026ced2b85
 ---
 
 
+
 # Statistics
 
 Read-only stats screen. Fetches expenses + categories on mount, derives

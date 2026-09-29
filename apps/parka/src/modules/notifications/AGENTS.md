@@ -5,6 +5,7 @@ name: notifications
 description: Read-only notifications list module. Use for list-only Parka screens fed by one endpoint.
 ---
 
+
 # Notifications
 
 Isolated module. List of user notifications from `/api/notifications`. Auth required, no offline source. Imports nothing from other modules.

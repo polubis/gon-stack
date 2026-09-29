@@ -3,6 +3,7 @@ version: 1.2
 hash: 5a756656a997e246ddc959568fa01b5da3f4764cf28d7b66dc47aa15f5396ffc
 ---
 
+
 # Recurring
 
 Recurring expenses list, active/all filter, expandable detail, tracking toggle. Cloned from `../expenses` convention. Backend-only, session required. Isolated: fetches categories itself (display only).

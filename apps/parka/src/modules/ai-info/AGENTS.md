@@ -3,6 +3,7 @@ version: 1.1
 hash: c4a7324b9ef50bd098877361d3e44a32a293ff88ac372b4411371e9a522232ad
 ---
 
+
 # AI info
 
 Static "how AI works" page. No data, no state: only configuration + presentation. Isolated: imports nothing from other modules.

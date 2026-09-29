@@ -3,6 +3,7 @@ version: 1.6
 hash: 290a143ba8c81cd38bcdbaf8b71dbc7b7efec4e376a190cc165541a1a2083ece
 ---
 
+
 # Expenses
 
 Expense list + detail/edit/delete. Cloned from `../dashboard` convention. Backend-only, session required.

@@ -3,6 +3,7 @@ version: 1.1
 hash: 12b29ff190f45ff2312c2b8f96d343a8b9d3eb6c0337b0fbb25154f7f6559980
 ---
 
+
 # Privacy
 
 Static RODO / privacy info page. No data, no state: only configuration + presentation. Isolated: imports nothing from other modules.

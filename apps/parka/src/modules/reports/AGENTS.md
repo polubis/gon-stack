@@ -3,6 +3,7 @@ version: 0.2
 hash: 95958fa2ce2d17be2271e06b0dbd2009515159553f791b586f718183992949e2
 ---
 
+
 # Reports
 
 Read-only monthly report. Fetches expenses + categories + recurring on

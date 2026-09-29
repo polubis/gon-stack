@@ -79,19 +79,23 @@ describe('sign up', () => {
   });
 
   it('sends only one request when the form is submitted twice', async () => {
+    let finishFetch!: (value: { type: string }) => void;
     const fetchMock = stubFetch(
       () =>
-        new Promise((resolve) =>
-          setTimeout(resolve, 20, { type: 'opaqueredirect' }),
-        ),
+        new Promise<{ type: string }>((resolve) => {
+          finishFetch = resolve;
+        }),
     );
     const user = userEvent.setup();
     render(<Main />);
     await user.type(screen.getByLabelText('E-mail'), 'a@b.co');
     await user.type(screen.getByLabelText('Hasło'), 'secret1{Enter}{Enter}');
 
-    await waitFor(() => expect(navigateTo).toHaveBeenCalled());
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    finishFetch({ type: 'opaqueredirect' });
+    await waitFor(() => expect(navigateTo).toHaveBeenCalled());
   });
 
   it('asks the user to confirm the e-mail when registration needs it', async () => {

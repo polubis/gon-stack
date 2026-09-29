@@ -4,6 +4,7 @@ hash: 3681f4cd1db34b896adc2eb8aefdf42bdd38b9a61773eb31fb1165f168eeaf62
 ---
 
 
+
 # Settings
 
 Profile edit, notification toggles, links to detail pages, sign-out. Cloned from `../expenses` convention. Backend-only, session required. Isolated: imports nothing from other modules.

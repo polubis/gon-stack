@@ -6,6 +6,7 @@ description: Receipt entry module (scan/manual draft, review, save). Use for cre
 ---
 
 
+
 # Receipt
 
 Isolated module. Loads `/api/categories` on mount, user builds a draft (scan is a fake 600 ms delay, or manual), save POSTs an expense and a `receipt-confirmation` notification, then navigates to `APP_ROUTER.expenses()`. Imports nothing from other modules.

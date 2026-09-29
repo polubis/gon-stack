@@ -3,6 +3,7 @@ version: 1.1
 hash: 9fce7ffc69182b6d5a311310ef24d2572b20001ab4a1e6480d2c329d8d0bb071
 ---
 
+
 # Categories
 
 Category list + create/edit form + suggested defaults. Cloned from `../expenses` convention. Backend-only, session required. Isolated: imports no other module.

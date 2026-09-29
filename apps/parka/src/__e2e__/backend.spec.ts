@@ -67,7 +67,10 @@ const commands = {
 
   'i add suggested categories and they survive a reload': async (page) => {
     await open(page, APP_ROUTER.categories());
-    await page.getByTestId('categories:add-default:groceries').click();
+    await Promise.all([
+      synced(page, 'POST', API_ROUTER.categories(), 201),
+      page.getByTestId('categories:add-default:groceries').click(),
+    ]);
     await expect(page.getByTestId('categories:row:groceries')).toContainText(
       'Spożywcze',
     );
