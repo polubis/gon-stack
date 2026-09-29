@@ -7,7 +7,9 @@ import {
 } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
-import { readQueryParam, routes, writeQueryParam } from '@/shared/router';
+import { ErrorState, LoadingBanner, Skeleton } from '@/modules/shared/ui';
+import { ERROR_CODES } from '../configuration/constraints';
+import { readQueryParam, APP_ROUTER, writeQueryParam } from '@/shared/router';
 import {
   money,
   percent,
@@ -22,7 +24,6 @@ import { Provider, useContext } from './context';
 import { QuickActionIcon } from './quick-action-icon';
 import { Card } from './layout';
 import { BarChart, Donut } from './charts';
-import { LoadErrorFallback } from './load-error-fallback';
 
 type IconId = 'add' | 'camera' | 'target' | 'repeat';
 
@@ -33,10 +34,10 @@ type Action = {
 };
 
 const QUICK_ACTIONS: Action[] = [
-  { label: 'Dodaj paragon', href: routes.receiptScan(), iconId: 'add' },
-  { label: 'Zrób zdjecie', href: routes.receiptScan(), iconId: 'camera' },
-  { label: 'Limity', href: routes.limits(), iconId: 'target' },
-  { label: 'Cykliczne', href: routes.recurring(), iconId: 'repeat' },
+  { label: 'Dodaj paragon', href: APP_ROUTER.receiptScan(), iconId: 'add' },
+  { label: 'Zrób zdjecie', href: APP_ROUTER.receiptScan(), iconId: 'camera' },
+  { label: 'Limity', href: APP_ROUTER.limits(), iconId: 'target' },
+  { label: 'Cykliczne', href: APP_ROUTER.recurring(), iconId: 'repeat' },
 ];
 
 const MONTH_PARAM = 'month';
@@ -55,6 +56,8 @@ const DashboardView = () => {
   const [month, setMonth] = useState(initialMonth);
   const summary = ctx.useData();
   const error = ctx.useError();
+  const initializing = ctx.useInitializing();
+  const isLoading = ctx.useIsLoading();
 
   useEffect(() => {
     ctx.load(month);
@@ -70,22 +73,26 @@ const DashboardView = () => {
   const down = (summary?.change ?? 0) <= 0;
 
   return (
-    <div data-e2e="dashboard:main" className="flex flex-1 flex-col">
+    <div data-e2e="dashboard:main" className="relative flex flex-1 flex-col">
+      <LoadingBanner active={isLoading && !initializing} />
       <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Cześć 👋</h1>
           <p className="mt-1 text-sm text-ink-soft">
             Oto Twoje wydatki w tym miesiącu.
           </p>
-          {error && (
-            <p
-              className="mt-1 text-xs text-rose-700"
-              data-e2e="dashboard:summary-error"
-            >
-              {error}
-            </p>
-          )}
         </div>
+
+        {error && (
+          <ErrorState
+            data-e2e="dashboard:summary-error"
+            title="Nie udało się wczytać podsumowania"
+            code={ERROR_CODES.load}
+            description={error}
+            onRetry={() => ctx.load(month)}
+            backHref={APP_ROUTER.home()}
+          />
+        )}
 
         <Card className="space-y-3">
           <div className="flex items-center justify-between">
@@ -94,7 +101,7 @@ const DashboardView = () => {
               aria-label="Poprzedni miesiąc"
               data-e2e="dashboard:prev-month"
               onClick={goToPrevMonth}
-              className="grid h-8 w-8 place-items-center rounded-full text-ink-soft hover:bg-black/5"
+              className="grid h-8 w-8 place-items-center rounded-full text-ink-soft hover:bg-hover"
             >
               <ChevronLeft className="h-5 w-5" aria-hidden="true" />
             </button>
@@ -109,7 +116,7 @@ const DashboardView = () => {
               aria-label="Następny miesiąc"
               data-e2e="dashboard:next-month"
               onClick={goToNextMonth}
-              className="grid h-8 w-8 place-items-center rounded-full text-ink-soft hover:bg-black/5"
+              className="grid h-8 w-8 place-items-center rounded-full text-ink-soft hover:bg-hover"
             >
               <ChevronRight className="h-5 w-5" aria-hidden="true" />
             </button>
@@ -120,30 +127,43 @@ const DashboardView = () => {
               className="text-3xl font-bold tracking-tight"
               data-e2e="dashboard:total"
             >
-              {money(summary?.total ?? 0)}
-            </p>
-            <p
-              className={cn(
-                'mt-1 inline-flex items-center gap-1 text-sm font-medium',
-                down ? 'text-brand-dark' : 'text-rose-600',
-              )}
-            >
-              {down ? (
-                <TrendingDown className="h-4 w-4" aria-hidden="true" />
+              {initializing ? (
+                <Skeleton className="h-9 w-40" />
               ) : (
-                <TrendingUp className="h-4 w-4" aria-hidden="true" />
+                money(summary?.total ?? 0)
               )}
-              {percent(summary?.change ?? 0)} vs {monthLabel(prevMonth(month))}
             </p>
+            {initializing ? (
+              <Skeleton className="mt-1 h-5 w-32" />
+            ) : (
+              <p
+                className={cn(
+                  'mt-1 inline-flex items-center gap-1 text-sm font-medium',
+                  down ? 'text-brand-dark' : 'text-danger-strong',
+                )}
+              >
+                {down ? (
+                  <TrendingDown className="h-4 w-4" aria-hidden="true" />
+                ) : (
+                  <TrendingUp className="h-4 w-4" aria-hidden="true" />
+                )}
+                {percent(summary?.change ?? 0)} vs{' '}
+                {monthLabel(prevMonth(month))}
+              </p>
+            )}
           </div>
 
-          <BarChart
-            data={(summary?.trend ?? []).map((t) => ({
-              label: monthLabel(t.month).slice(0, 3),
-              value: t.total,
-            }))}
-            caption={`Wydatki w ostatnich miesiącach do ${monthLabel(month)}`}
-          />
+          {initializing ? (
+            <Skeleton className="h-37" />
+          ) : (
+            <BarChart
+              data={(summary?.trend ?? []).map((t) => ({
+                label: monthLabel(t.month).slice(0, 3),
+                value: t.total,
+              }))}
+              caption={`Wydatki w ostatnich miesiącach do ${monthLabel(month)}`}
+            />
+          )}
         </Card>
 
         <section aria-labelledby="quick-actions" className="space-y-2">
@@ -158,7 +178,7 @@ const DashboardView = () => {
               <li key={label}>
                 <a
                   href={href}
-                  className="flex flex-col items-center gap-1.5 rounded-xl border border-black/5 bg-white p-2 text-center text-[11px] font-medium text-ink-soft hover:bg-brand-softer"
+                  className="flex flex-col items-center gap-1.5 rounded-xl border border-line bg-card p-2 text-center text-caption font-medium text-ink-soft hover:bg-brand-softer"
                 >
                   <span className="grid h-9 w-9 place-items-center rounded-full bg-brand-soft text-brand">
                     <QuickActionIcon id={iconId} className="h-4.5 w-4.5" />
@@ -174,7 +194,9 @@ const DashboardView = () => {
           <h2 className="text-sm font-semibold text-ink-soft">
             Rozkład wydatków
           </h2>
-          {summary && summary.categories.length > 0 ? (
+          {initializing ? (
+            <Skeleton className="h-36 w-full" />
+          ) : summary && summary.categories.length > 0 ? (
             <Donut
               caption={`Rozkład wydatków wg kategorii w ${monthLabel(month)}`}
               slices={summary.categories.map((c) => ({
@@ -195,7 +217,17 @@ const DashboardView = () => {
 };
 
 export const Main = () => (
-  <ErrorBoundary fallback={({ reset }) => <LoadErrorFallback reset={reset} />}>
+  <ErrorBoundary
+    fallback={({ reset }) => (
+      <ErrorState
+        title="Wystąpił błąd widoku podsumowania"
+        code={ERROR_CODES.render}
+        description="Nie udało się wyświetlić podsumowania. Spróbuj ponownie."
+        onRetry={reset}
+        backHref={APP_ROUTER.home()}
+      />
+    )}
+  >
     <Provider>
       <DashboardView />
     </Provider>

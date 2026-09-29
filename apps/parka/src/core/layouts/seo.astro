@@ -1,9 +1,9 @@
 ---
 import '../style/index.css';
 import { CookieConsent } from '@/shared/cookies';
-import { routes, type PageUrl } from '@/shared/router';
+import { APP_ROUTER, type PageUrl } from '@/shared/router';
 
-const PRIVACY_POLICY_URL = routes.privacyPolicy();
+const PRIVACY_POLICY_URL = APP_ROUTER.privacyPolicy();
 
 type Props = {
   description: string;

@@ -1,5 +1,5 @@
 import type { Schema } from '@schemas/dashboard';
-import { apiRoutes } from '@/shared/router';
+import { API_ROUTER } from '@/shared/router';
 import type { Month, Summary } from '../domain/models';
 import { toSummary } from './mappers';
 
@@ -7,7 +7,7 @@ export const fetchSummary = async (
   month: Month,
   signal: AbortSignal,
 ): Promise<Summary> => {
-  const response = await fetch(apiRoutes.dashboard({ month }), {
+  const response = await fetch(API_ROUTER.dashboard({ month }), {
     headers: { Accept: 'application/json' },
     signal,
   });

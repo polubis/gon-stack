@@ -5,8 +5,9 @@ import {
   deleteExpenseSchema,
 } from '@schemas/expenses';
 import { listCategoriesSchema } from '@schemas/categories';
-import { apiRoutes } from '@/shared/router';
-import type { Category, Expense } from '../domain/models';
+import { API_ROUTER } from '@/shared/router';
+import type { Category, Expense, ExpenseId } from '../domain/models';
+import { toCategory, toExpense } from './mappers';
 
 type ListExpensesOut = z.infer<ReturnType<typeof listExpensesSchema>>['out'];
 type UpdateExpenseOut = z.infer<ReturnType<typeof updateExpenseSchema>>['out'];
@@ -19,41 +20,42 @@ type ListCategoriesOut = z.infer<
 export const fetchExpenses = async (
   signal: AbortSignal,
 ): Promise<Expense[]> => {
-  const response = await fetch(apiRoutes.expenses(), {
+  const response = await fetch(API_ROUTER.expenses(), {
     headers: { Accept: 'application/json' },
     signal,
   });
   const json = (await response.json()) as ListExpensesOut;
   if (json.code !== 200) throw new Error(json.message);
-  return json.data;
+  return json.data.map(toExpense);
 };
 
 export const fetchCategories = async (
   signal: AbortSignal,
 ): Promise<Category[]> => {
-  const response = await fetch(apiRoutes.categories(), {
+  const response = await fetch(API_ROUTER.categories(), {
     headers: { Accept: 'application/json' },
     signal,
   });
   const json = (await response.json()) as ListCategoriesOut;
   if (json.code !== 200) throw new Error(json.message);
-  // Server validates `icon` as a non-empty string, not the closed union.
-  return json.data as Category[];
+  return json.data.map(toCategory);
 };
 
 export const putExpense = async (expense: Expense): Promise<Expense> => {
-  const response = await fetch(apiRoutes.expenseById(expense.id), {
+  const response = await fetch(API_ROUTER.expenseById(expense.id), {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(expense),
   });
   const json = (await response.json()) as UpdateExpenseOut;
   if (json.code !== 200) throw new Error(json.message);
-  return json.data;
+  return toExpense(json.data);
 };
 
-export const removeExpense = async (id: string): Promise<void> => {
-  const response = await fetch(apiRoutes.expenseById(id), { method: 'DELETE' });
+export const removeExpense = async (id: ExpenseId): Promise<void> => {
+  const response = await fetch(API_ROUTER.expenseById(id), {
+    method: 'DELETE',
+  });
   const json = (await response.json()) as DeleteExpenseOut;
   if (json.code !== 200) throw new Error(json.message);
 };

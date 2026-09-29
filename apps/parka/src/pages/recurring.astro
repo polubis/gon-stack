@@ -3,7 +3,7 @@ export const prerender = true;
 
 import MainLayout from '@/core/layouts/main-layout.astro';
 import { Main } from '@/modules/recurring';
-import { routes } from '@/shared/router';
+import { APP_ROUTER } from '@/shared/router';
 
 const domain = Astro.locals.siteDomain;
 const imageUrl = `${domain}/og.svg`;
@@ -11,7 +11,7 @@ const imageUrl = `${domain}/og.svg`;
 
 <MainLayout
   siteName="Parka"
-  url={routes.recurring()}
+  url={APP_ROUTER.recurring()}
   imageAlt="Parka"
   domain={domain}
   imageUrl={imageUrl}

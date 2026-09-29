@@ -1,5 +1,5 @@
 import { schema } from '@schemas/register-user';
-import { apiRoutes, routes } from '@/shared/router';
+import { API_ROUTER, APP_ROUTER } from '@/shared/router';
 import { InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { publicProcedure } from '../../core/procedure';
@@ -12,7 +12,7 @@ export const registerUser = publicProcedure({
       email,
       password,
       options: {
-        emailRedirectTo: `${origin}${apiRoutes.authConfirm()}`,
+        emailRedirectTo: `${origin}${API_ROUTER.authConfirm()}`,
       },
     });
 
@@ -29,7 +29,7 @@ export const registerUser = publicProcedure({
 
     return {
       code: 303,
-      location: routes.dashboard(),
+      location: APP_ROUTER.dashboard(),
     };
   },
 });

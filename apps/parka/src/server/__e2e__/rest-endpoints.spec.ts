@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
 import { registerAndConfirm } from '@/__e2e__/mailbox';
+import { API_ROUTER } from '@/shared/router';
 
 /**
  * Integration coverage for the per-entity REST endpoints (categories,
@@ -30,14 +31,14 @@ const commands = {
   },
 
   'seeded categories are listed': async (page) => {
-    const res = await page.request.get('/api/categories');
+    const res = await page.request.get(API_ROUTER.categories());
     expect(res.ok()).toBe(true);
     const data = (await res.json()).data;
     expect(data.length).toBeGreaterThan(0);
     categoryIdByPage.set(page, data[0].id);
   },
   'i create a category': async (page) => {
-    const res = await page.request.post('/api/categories', {
+    const res = await page.request.post(API_ROUTER.categories(), {
       data: {
         id: 'e2e-cat-1',
         name: 'Kultura',
@@ -49,7 +50,7 @@ const commands = {
     expect((await res.json()).data.name).toBe('Kultura');
   },
   'i rename the category': async (page) => {
-    const res = await page.request.put('/api/categories/e2e-cat-1', {
+    const res = await page.request.put(API_ROUTER.categoryById('e2e-cat-1'), {
       data: { id: 'e2e-cat-1', name: 'Sztuka', icon: 'star', color: '#ff0000' },
     });
     expect(res.ok()).toBe(true);
@@ -58,7 +59,7 @@ const commands = {
 
   'i create an expense with items': async (page) => {
     const categoryId = categoryIdByPage.get(page)!;
-    const res = await page.request.post('/api/expenses', {
+    const res = await page.request.post(API_ROUTER.expenses(), {
       data: {
         id: 'e2e-exp-1',
         merchant: 'Sklep E2E',
@@ -85,7 +86,7 @@ const commands = {
   },
   'i update the expense removing its items': async (page) => {
     const categoryId = categoryIdByPage.get(page)!;
-    const res = await page.request.put('/api/expenses/e2e-exp-1', {
+    const res = await page.request.put(API_ROUTER.expenseById('e2e-exp-1'), {
       data: {
         id: 'e2e-exp-1',
         merchant: 'Sklep E2E Zmieniony',
@@ -104,24 +105,24 @@ const commands = {
     expect(body.data.items).toHaveLength(0);
   },
   'the expense list reflects the update': async (page) => {
-    const body = await (await page.request.get('/api/expenses')).json();
+    const body = await (await page.request.get(API_ROUTER.expenses())).json();
     expect(
       body.data.find((e: { id: string }) => e.id === 'e2e-exp-1').merchant,
     ).toBe('Sklep E2E Zmieniony');
   },
   'i delete the expense': async (page) => {
-    const res = await del(page, '/api/expenses/e2e-exp-1');
+    const res = await del(page, API_ROUTER.expenseById('e2e-exp-1'));
     expect(res.ok()).toBe(true);
   },
   'the expense is gone from the list': async (page) => {
-    const body = await (await page.request.get('/api/expenses')).json();
+    const body = await (await page.request.get(API_ROUTER.expenses())).json();
     expect(body.data.some((e: { id: string }) => e.id === 'e2e-exp-1')).toBe(
       false,
     );
   },
 
   'i create a limit': async (page) => {
-    const res = await page.request.post('/api/limits', {
+    const res = await page.request.post(API_ROUTER.limits(), {
       data: {
         id: 'e2e-limit-1',
         scope: 'total',
@@ -133,7 +134,7 @@ const commands = {
     expect(res.status()).toBe(201);
   },
   'i raise the limit amount': async (page) => {
-    const res = await page.request.put('/api/limits/e2e-limit-1', {
+    const res = await page.request.put(API_ROUTER.limitById('e2e-limit-1'), {
       data: {
         id: 'e2e-limit-1',
         scope: 'total',
@@ -146,16 +147,16 @@ const commands = {
     expect((await res.json()).data.amount).toBe(1500);
   },
   'i delete the limit': async (page) => {
-    const res = await del(page, '/api/limits/e2e-limit-1');
+    const res = await del(page, API_ROUTER.limitById('e2e-limit-1'));
     expect(res.ok()).toBe(true);
   },
   'deleting the limit again is not found': async (page) => {
-    const res = await del(page, '/api/limits/e2e-limit-1');
+    const res = await del(page, API_ROUTER.limitById('e2e-limit-1'));
     expect(res.status()).toBe(404);
   },
 
   'i create a savings goal': async (page) => {
-    const res = await page.request.post('/api/goals', {
+    const res = await page.request.post(API_ROUTER.goals(), {
       data: {
         id: 'e2e-goal-1',
         name: 'Wakacje',
@@ -167,7 +168,7 @@ const commands = {
     expect(res.status()).toBe(201);
   },
   'i add savings to the goal': async (page) => {
-    const res = await page.request.put('/api/goals/e2e-goal-1', {
+    const res = await page.request.put(API_ROUTER.goalById('e2e-goal-1'), {
       data: {
         id: 'e2e-goal-1',
         name: 'Wakacje',
@@ -180,13 +181,13 @@ const commands = {
     expect((await res.json()).data.saved).toBe(500);
   },
   'i delete the goal': async (page) => {
-    const res = await del(page, '/api/goals/e2e-goal-1');
+    const res = await del(page, API_ROUTER.goalById('e2e-goal-1'));
     expect(res.ok()).toBe(true);
   },
 
   'i create a recurring expense with history': async (page) => {
     const categoryId = categoryIdByPage.get(page)!;
-    const res = await page.request.post('/api/recurring', {
+    const res = await page.request.post(API_ROUTER.recurring(), {
       data: {
         id: 'e2e-rec-1',
         name: 'Netflix',
@@ -203,7 +204,7 @@ const commands = {
   },
   'i deactivate the recurring expense and clear history': async (page) => {
     const categoryId = categoryIdByPage.get(page)!;
-    const res = await page.request.put('/api/recurring/e2e-rec-1', {
+    const res = await page.request.put(API_ROUTER.recurringById('e2e-rec-1'), {
       data: {
         id: 'e2e-rec-1',
         name: 'Netflix',
@@ -221,12 +222,12 @@ const commands = {
     expect(body.data.history).toHaveLength(0);
   },
   'i delete the recurring expense': async (page) => {
-    const res = await del(page, '/api/recurring/e2e-rec-1');
+    const res = await del(page, API_ROUTER.recurringById('e2e-rec-1'));
     expect(res.ok()).toBe(true);
   },
 
   'i create a notification': async (page) => {
-    const res = await page.request.post('/api/notifications', {
+    const res = await page.request.post(API_ROUTER.notifications(), {
       data: {
         id: 'e2e-notif-1',
         kind: 'info',
@@ -238,21 +239,23 @@ const commands = {
     expect(res.status()).toBe(201);
   },
   'i dismiss the notification': async (page) => {
-    const res = await del(page, '/api/notifications/e2e-notif-1');
+    const res = await del(page, API_ROUTER.notificationById('e2e-notif-1'));
     expect(res.ok()).toBe(true);
   },
   'the notification is gone from the list': async (page) => {
-    const body = await (await page.request.get('/api/notifications')).json();
+    const body = await (
+      await page.request.get(API_ROUTER.notifications())
+    ).json();
     expect(body.data.some((n: { id: string }) => n.id === 'e2e-notif-1')).toBe(
       false,
     );
   },
 
   'settings are readable': async (page) => {
-    const body = await (await page.request.get('/api/settings')).json();
+    const body = await (await page.request.get(API_ROUTER.settings())).json();
     expect(body.data.profile.email).toBeDefined();
     settingsEmailByPage.set(page, body.data.profile.email);
-    const putRes = await page.request.put('/api/settings', {
+    const putRes = await page.request.put(API_ROUTER.settings(), {
       data: {
         profile: { name: 'Anna REST', email: body.data.profile.email },
         notifications: body.data.notifications,
@@ -261,7 +264,7 @@ const commands = {
     expect(putRes.ok()).toBe(true);
   },
   'the settings profile name is updated': async (page) => {
-    const body = await (await page.request.get('/api/settings')).json();
+    const body = await (await page.request.get(API_ROUTER.settings())).json();
     expect(body.data.profile.name).toBe('Anna REST');
   },
 } satisfies CommandRegistry<Page>;

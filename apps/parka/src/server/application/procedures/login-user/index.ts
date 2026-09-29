@@ -1,6 +1,6 @@
 import type { Provider } from '@supabase/supabase-js';
 import { schema } from '@schemas/login-user';
-import { apiRoutes, routes } from '@/shared/router';
+import { API_ROUTER, APP_ROUTER } from '@/shared/router';
 import { InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { publicProcedure } from '../../core/procedure';
@@ -13,7 +13,7 @@ export const loginUser = publicProcedure({
       const oauthResult = await db.auth.signInWithOAuth({
         provider: input.provider as Provider,
         options: {
-          redirectTo: `${origin}${apiRoutes.authCallback()}`,
+          redirectTo: `${origin}${API_ROUTER.authCallback()}`,
           queryParams: { prompt: 'select_account' },
         },
       });
@@ -39,7 +39,7 @@ export const loginUser = publicProcedure({
 
     return {
       code: 303,
-      location: routes.dashboard(),
+      location: APP_ROUTER.dashboard(),
     };
   },
 });

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Leaf } from 'lucide-react';
 import { Button, Field, inputClass } from '@/modules/shared/ui';
-import { navigateTo, routes } from '@/shared/router';
+import { navigateTo, APP_ROUTER } from '@/shared/router';
 import { signUp } from '../integration/repository';
 
 export const Main = () => {
@@ -25,7 +25,7 @@ export const Main = () => {
       const result = await signUp(email, password);
       switch (result.status) {
         case 'redirected':
-          navigateTo(routes.dashboard());
+          navigateTo(APP_ROUTER.dashboard());
           return;
         case 'pending-confirmation':
           setInfo('Sprawdź skrzynkę e-mail i potwierdź rejestrację.');
@@ -85,7 +85,7 @@ export const Main = () => {
         </Field>
 
         {error ? (
-          <p role="alert" className="text-sm text-rose-700">
+          <p role="alert" className="text-sm text-danger">
             {error}
           </p>
         ) : null}
@@ -122,7 +122,7 @@ export const Main = () => {
       <p className="mt-6 text-center text-sm text-ink-soft">
         Masz już konto?{' '}
         <a
-          href={routes.signIn()}
+          href={APP_ROUTER.signIn()}
           className="font-semibold text-brand-dark underline"
         >
           Zaloguj się

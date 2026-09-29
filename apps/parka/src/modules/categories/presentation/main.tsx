@@ -20,7 +20,7 @@ import {
   type Category,
   type CategoryIconId,
 } from '@/modules/shared/data';
-import { routes } from '@/shared/router';
+import { APP_ROUTER } from '@/shared/router';
 
 const COLORS = [
   '#0f7a4f',
@@ -43,14 +43,14 @@ export const Main = () => {
     <AppShell e2e="categories:main" nav="more">
       <ScreenHeader
         title="Kategorie"
-        backHref={routes.settings()}
+        backHref={APP_ROUTER.settings()}
         action={
           <button
             type="button"
             aria-label="Dodaj kategorię"
             data-e2e="categories:new"
             onClick={() => setEditing({ mode: 'new' })}
-            className="grid h-9 w-9 place-items-center rounded-full bg-brand text-white"
+            className="grid h-9 w-9 place-items-center rounded-full bg-brand text-on-brand"
           >
             <Plus className="h-5 w-5" aria-hidden="true" />
           </button>
@@ -58,11 +58,11 @@ export const Main = () => {
       />
       <main className="flex flex-1 flex-col gap-2 px-4 pb-6 pt-2">
         <ul
-          className="overflow-hidden rounded-2xl border border-black/5 bg-white"
+          className="overflow-hidden rounded-2xl border border-line bg-card"
           data-e2e="categories:list"
         >
           {state.categories.map((c) => (
-            <li key={c.id} className="border-b border-black/5 last:border-0">
+            <li key={c.id} className="border-b border-line last:border-0">
               <button
                 type="button"
                 data-e2e={`categories:row:${c.id}`}
@@ -151,7 +151,7 @@ const CategoryForm = ({
                 'grid h-9 w-9 place-items-center rounded-full border',
                 opt === icon
                   ? 'border-brand bg-brand-soft text-brand'
-                  : 'border-black/10 text-ink-soft',
+                  : 'border-line-strong text-ink-soft',
               )}
             >
               <CategoryIcon id={opt} className="h-4 w-4" />
@@ -177,7 +177,7 @@ const CategoryForm = ({
               style={{ backgroundColor: c }}
             >
               {c === color ? (
-                <Check className="h-4 w-4 text-white" aria-hidden="true" />
+                <Check className="h-4 w-4 text-on-brand" aria-hidden="true" />
               ) : null}
             </button>
           ))}

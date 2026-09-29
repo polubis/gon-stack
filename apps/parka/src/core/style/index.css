@@ -1,17 +1,106 @@
 @import 'tailwindcss';
 
-@theme {
-  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+/*
+ * Theme tokens — single source for app colors, shadows and z-index.
+ * Light values in `:root` are the shipped look. The dark palette is opt-in
+ * via `:root[data-theme='dark']`; it never follows the OS on its own.
+ * Components use the Tailwind utilities generated below (`bg-card`,
+ * `text-danger`, `z-(--z-modal)` ...), never raw colors.
+ */
+:root {
+  --surface: #f4f7f5;
+  --card: #ffffff;
+  --ink: #10241b;
+  --ink-soft: #46564d;
+  --line: rgb(0 0 0 / 0.05);
+  --line-strong: rgb(0 0 0 / 0.1);
+  --hover: rgb(0 0 0 / 0.05);
+  --hover-soft: rgb(0 0 0 / 0.03);
+  --track: rgb(0 0 0 / 0.1);
+  --track-strong: rgb(0 0 0 / 0.15);
+  --overlay: rgb(0 0 0 / 0.4);
 
   /* Parka green palette — tuned for WCAG AA on white / with white text. */
-  --color-brand: #0b6e46;
-  --color-brand-dark: #08512f;
-  --color-brand-soft: #e3f2ea;
-  --color-brand-softer: #f1f8f4;
+  --brand: #0b6e46;
+  --brand-dark: #08512f;
+  --brand-soft: #e3f2ea;
+  --brand-softer: #f1f8f4;
+  --on-brand: #ffffff;
 
-  --color-surface: #f4f7f5;
-  --color-ink: #10241b;
-  --color-ink-soft: #46564d;
+  --danger: #be123c;
+  --danger-strong: #e11d48;
+  --danger-soft: #ffe4e6;
+  --danger-faint: #fff1f2;
+  --danger-line: #fecdd3;
+  --warn: #c2410c;
+
+  --shadow-card-value: 0 1px 2px rgb(16 36 27 / 0.04);
+  --z-nav: 10;
+  --z-modal: 20;
+}
+
+:root[data-theme='dark'] {
+  --surface: #0d1712;
+  --card: #15221b;
+  --ink: #e6f0ea;
+  --ink-soft: #a3b5ab;
+  --line: rgb(255 255 255 / 0.1);
+  --line-strong: rgb(255 255 255 / 0.18);
+  --hover: rgb(255 255 255 / 0.08);
+  --hover-soft: rgb(255 255 255 / 0.05);
+  --track: rgb(255 255 255 / 0.16);
+  --track-strong: rgb(255 255 255 / 0.24);
+  --overlay: rgb(0 0 0 / 0.6);
+
+  --brand: #34c88a;
+  --brand-dark: #6fdcaa;
+  --brand-soft: #143325;
+  --brand-softer: #102a1f;
+  --on-brand: #06281a;
+
+  --danger: #fda4af;
+  --danger-strong: #fb7185;
+  --danger-soft: #4c1225;
+  --danger-faint: #3b0f1d;
+  --danger-line: #7f1d3a;
+  --warn: #fb923c;
+
+  --shadow-card-value: none;
+}
+
+@theme inline {
+  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-hover: var(--hover);
+  --color-hover-soft: var(--hover-soft);
+  --color-track: var(--track);
+  --color-track-strong: var(--track-strong);
+  --color-overlay: var(--overlay);
+
+  --color-brand: var(--brand);
+  --color-brand-dark: var(--brand-dark);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-softer: var(--brand-softer);
+  --color-on-brand: var(--on-brand);
+
+  --color-danger: var(--danger);
+  --color-danger-strong: var(--danger-strong);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-faint: var(--danger-faint);
+  --color-danger-line: var(--danger-line);
+  --color-warn: var(--warn);
+
+  --shadow-card: var(--shadow-card-value);
+
+  /* Exact former sizes (10px / 11px at the default root size), in rem. */
+  --text-micro: 0.625rem;
+  --text-caption: 0.6875rem;
 
   /* WCAG AA with white text (default orange-500 #ff6900 is 2.88:1). */
   --color-orange-500: #c2410c;

@@ -1,15 +1,16 @@
 import { MORE_SECTION_PATHS } from '../configuration/constraints';
-import { normalizePath, routes } from '@/shared/router';
+import { normalizePath, APP_ROUTER } from '@/shared/router';
 import type { NavKey } from './models';
 
 export const activeNavKeyFromPathname = (pathname: string): NavKey | null => {
   const p = normalizePath(pathname);
 
-  if (p === routes.dashboard() || p.startsWith(routes.dashboard()))
-    return 'start';
-  if (p === routes.expenses() || p.startsWith(routes.expenses()))
+  // Dashboard lives at the `/app/` root, so it must match exactly — every
+  // other `/app/*` page is a prefix-match of it.
+  if (p === APP_ROUTER.dashboard()) return 'start';
+  if (p === APP_ROUTER.expenses() || p.startsWith(APP_ROUTER.expenses()))
     return 'expenses';
-  if (p === routes.statistics() || p.startsWith(routes.statistics()))
+  if (p === APP_ROUTER.statistics() || p.startsWith(APP_ROUTER.statistics()))
     return 'stats';
 
   if (MORE_SECTION_PATHS.some((m) => p === m || p.startsWith(m))) {

@@ -2,6 +2,7 @@ import type { Store } from './store';
 import { load } from './handlers/load';
 import { update } from './handlers/update';
 import { remove } from './handlers/delete';
+import { dismissNotice } from './handlers/dismiss-notice';
 import { createBus } from './bus';
 
 export const createRegistry = (store: Store) => {
@@ -11,6 +12,7 @@ export const createRegistry = (store: Store) => {
     load(store, bus),
     update(store, bus),
     remove(store, bus),
+    dismissNotice(store, bus),
   );
 
   return { trigger: bus.trigger, register };

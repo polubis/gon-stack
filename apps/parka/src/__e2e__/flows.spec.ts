@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
+import { API_ROUTER, APP_ROUTER } from '@/shared/router';
 
 /**
  * Navigate and wait for the Astro islands on the page to hydrate before the
@@ -23,13 +24,13 @@ const currentTotalByPage = new WeakMap<Page, string>();
 
 const commands = {
   'i complete onboarding and reach sign-up': async (page) => {
-    await open(page, '/');
+    await open(page, APP_ROUTER.home());
     // Step through the product introduction, then hand off to sign-up.
     await page.getByTestId('walkthrough:primary').click();
     await page.getByTestId('walkthrough:primary').click();
     await page.getByTestId('walkthrough:primary').click();
     await page.getByTestId('walkthrough:primary').click();
-    await page.waitForURL('**/sign-up/');
+    await page.waitForURL(`**${APP_ROUTER.signUp()}`);
     await expect(page.getByTestId('auth:main')).toBeVisible();
   },
 
@@ -43,26 +44,29 @@ const commands = {
       [yearMonth(current)]: 1234,
       [yearMonth(previous)]: 999,
     };
-    await page.route('**/api/dashboard/**', async (route) => {
-      const month = new URL(route.request().url()).searchParams.get('month');
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          code: 200,
-          data: {
-            total: (month && totals[month]) ?? 0,
-            change: 0,
-            trend: [],
-            categories: [],
-          },
-        }),
-      });
-    });
+    await page.route(
+      `**${API_ROUTER.dashboard({ month: '' })}**`,
+      async (route) => {
+        const month = new URL(route.request().url()).searchParams.get('month');
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            code: 200,
+            data: {
+              total: (month && totals[month]) ?? 0,
+              change: 0,
+              trend: [],
+              categories: [],
+            },
+          }),
+        });
+      },
+    );
   },
   'the dashboard shows the current month totals': async (page) => {
     const current = new Date();
-    await open(page, '/dashboard/');
+    await open(page, APP_ROUTER.dashboard());
     await expect(page.getByTestId('dashboard:month-label')).toHaveText(
       new RegExp(
         plMonthLabel(current.getFullYear(), current.getMonth() + 1),
@@ -88,20 +92,20 @@ const commands = {
   },
 
   'the dashboard links to limits': async (page) => {
-    await open(page, '/dashboard/');
+    await open(page, APP_ROUTER.dashboard());
     await page.getByRole('link', { name: 'Limity' }).click();
-    await page.waitForURL('**/limits/');
+    await page.waitForURL(`**${APP_ROUTER.limits()}`);
     await expect(page.getByTestId('limits:main')).toBeVisible();
   },
   'the dashboard links to recurring': async (page) => {
-    await open(page, '/dashboard/');
+    await open(page, APP_ROUTER.dashboard());
     await page.getByRole('link', { name: 'Cykliczne' }).click();
-    await page.waitForURL('**/recurring/');
+    await page.waitForURL(`**${APP_ROUTER.recurring()}`);
     await expect(page.getByTestId('recurring:main')).toBeVisible();
   },
 
   'i scan and save a receipt as an expense': async (page) => {
-    await open(page, '/receipt-scan/');
+    await open(page, APP_ROUTER.receiptScan());
     await page.getByTestId('receipt:capture').click();
 
     await expect(page.getByTestId('receipt:review')).toBeVisible();
@@ -113,7 +117,7 @@ const commands = {
     await page.getByTestId(/^receipt:item-price:/).fill('3.20');
 
     await page.getByTestId('receipt:save').click();
-    await page.waitForURL('**/expenses/');
+    await page.waitForURL(`**${APP_ROUTER.expenses()}`);
   },
 
   'i mock the expenses list': async (page) => {
@@ -149,14 +153,14 @@ const commands = {
       items: [],
     };
 
-    await page.route('**/api/categories/**', async (route) => {
+    await page.route(`**${API_ROUTER.categories()}**`, async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ code: 200, data: [category] }),
       });
     });
-    await page.route('**/api/expenses/**', async (route) => {
+    await page.route(`**${API_ROUTER.expenses()}**`, async (route) => {
       const method = route.request().method();
       if (method === 'GET') {
         await route.fulfill({
@@ -193,7 +197,7 @@ const commands = {
   },
 
   'expenses can be filtered to bills only': async (page) => {
-    await open(page, '/expenses/');
+    await open(page, APP_ROUTER.expenses());
     await page.getByRole('tab', { name: 'Rachunki' }).click();
     await expect(page.getByRole('button', { name: /Tauron/ })).toBeVisible();
     await expect(page.getByRole('button', { name: /Kino Helios/ })).toHaveCount(
@@ -202,7 +206,7 @@ const commands = {
   },
 
   'i update an expense merchant name': async (page) => {
-    await open(page, '/expenses/');
+    await open(page, APP_ROUTER.expenses());
     await page.getByRole('button', { name: /Kino Helios/ }).click();
     await expect(page.getByTestId('expenses:detail')).toBeVisible();
 
@@ -220,7 +224,7 @@ const commands = {
   },
 
   'statistics show the yearly total': async (page) => {
-    await open(page, '/statistics/');
+    await open(page, APP_ROUTER.statistics());
     await page.getByRole('tab', { name: 'Rok' }).click();
     await expect(page.getByTestId('statistics:total')).toBeVisible();
   },
@@ -231,7 +235,7 @@ const commands = {
   },
 
   'i create an 80 percent category limit': async (page) => {
-    await open(page, '/limits/');
+    await open(page, APP_ROUTER.limits());
     await expect(page.getByTestId('limits:total')).toBeVisible();
 
     await page.getByRole('tab', { name: 'Kategorie' }).click();
@@ -242,7 +246,7 @@ const commands = {
   },
 
   'a new category appears in the list': async (page) => {
-    await open(page, '/categories/');
+    await open(page, APP_ROUTER.categories());
     await page.getByTestId('categories:new').click();
     await page.getByTestId('categories:form-name').fill('Kultura');
     await page.getByTestId('categories:form-save').click();
@@ -250,7 +254,7 @@ const commands = {
   },
 
   'i toggle recurring tracking off': async (page) => {
-    await open(page, '/recurring/');
+    await open(page, APP_ROUTER.recurring());
     // "Wszystkie" keeps disabled entries visible after toggling.
     await page.getByRole('tab', { name: 'Wszystkie' }).click();
     const spotify = page.getByRole('switch', { name: /Spotify/ }).first();
@@ -260,7 +264,7 @@ const commands = {
   },
 
   'the monthly report downloads a csv': async (page) => {
-    await open(page, '/reports/');
+    await open(page, APP_ROUTER.reports());
     await expect(page.getByTestId('reports:total')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -270,7 +274,7 @@ const commands = {
   },
 
   'i update my profile name': async (page) => {
-    await open(page, '/settings/');
+    await open(page, APP_ROUTER.settings());
     await page.getByTestId('settings:edit-profile').click();
     await page.getByTestId('settings:profile-name').fill('Anna Testowa');
     await page.getByTestId('settings:save-profile').click();
@@ -278,7 +282,7 @@ const commands = {
   },
 
   'financial data exports as csv': async (page) => {
-    await open(page, '/data-export/');
+    await open(page, APP_ROUTER.dataExport());
     const [download] = await Promise.all([
       page.waitForEvent('download'),
       page.getByTestId('data-export:run').click(),

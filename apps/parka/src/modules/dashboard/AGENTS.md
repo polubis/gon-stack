@@ -1,7 +1,8 @@
 ---
-version: 2.6
-hash: 24f14332c5059d2469a17beed386fc8252825730a3da19510909f1bf6e47080a
+version: 2.8
+hash: 2a25b83f2c344b585fbe0c74bf68ceb24d9e36b0f91f9032e321db4dae6879e7
 ---
+
 
 # Dashboard
 
@@ -27,7 +28,7 @@ or overview features.
    (wires handlers to the bus), `facade.ts` (actions + `use*` selectors),
    `mediator.ts` (composes store + registry + facade).
 4. "integration" — backend boundary. `repository.ts` calls
-   `apiRoutes.dashboard({ month })` from `@/shared/router` (`GET
+   `API_ROUTER.dashboard({ month })` from `@/shared/router` (`GET
 /api/dashboard`, private, session-scoped); `mappers.ts` converts
    the response DTO into the domain `Summary` shape. Nothing else fetches.
 5. "presentation" — React only. `context.tsx` provides the facade via
@@ -53,14 +54,20 @@ or overview features.
    with it; dashboard does not read `@/modules/shared/data`.
 7. On mount and on every month change, the view triggers `facade.load(month)`,
    which fetches the summary from the backend. There is no local/offline
-   fallback — an anonymous session gets a 401 and the view renders the error
-   state (`$error`) inside the boundary described below.
-8. No module-owned `AppShell`/bottom nav: `pages/dashboard.astro` wraps `Main`
+   fallback — an anonymous session gets a 401 and the view renders the shared
+   `ErrorState` (title : `ERROR_CODES` tech-code : description : retry : back)
+   for `$error`; `Main` wraps the view in an `ErrorBoundary` with the same
+   component. First load shows `Skeleton` placeholders mirroring the layout
+   (`$initializing`); later loads keep current data and show `LoadingBanner`
+   (`$isLoading`) — `load` never clears `$data`.
+8. No module-owned `AppShell`/bottom nav: `pages/app/index.astro` (route `/app/`) wraps `Main`
    in `core/layouts/app-layout.astro` (`client:only="react"`), which renders
    the mobile frame and the persisted `shared/navigation/app-nav`
    `SyncedAppNav`. `Main` renders page content only. Presentation uses the
    local `Card` (`./layout`), shared charts, and formatting helpers from
-   `@/modules/shared/*`; styling via design tokens and `cn`.
+   `@/modules/shared/*` (incl. `ui`: `Skeleton`, `LoadingBanner`, `ErrorState`);
+   styling via theme tokens only (`core/style/index.css`: `bg-card`,
+   `text-danger`, `z-(--z-modal)` ...) and `cn` — no raw colors/px.
 9. E2e selectors use `dashboard:*` prefix on interactive/readout elements.
 10. Imports: `@/` alias for app-root modules; relative paths within this
     module.

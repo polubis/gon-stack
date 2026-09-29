@@ -1,4 +1,9 @@
-export { apiRoutes, moreSectionPaths, normalizePath, routes } from './routes';
+export {
+  API_ROUTER,
+  moreSectionPaths,
+  normalizePath,
+  APP_ROUTER,
+} from './routes';
 export type {
   ApiRouteKey,
   DashboardQuery,

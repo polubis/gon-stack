@@ -12,19 +12,18 @@ export const BarChart = ({
   highlightLast?: boolean;
 }) => {
   const max = Math.max(1, ...data.map((d) => d.value));
-  const H = 128;
   return (
     <figure className="m-0">
       <figcaption className="sr-only">{caption}</figcaption>
-      <div className="flex items-end gap-1.5" style={{ height: H }}>
+      <div className="flex h-32 items-end gap-1.5">
         {data.map((d, i) => {
-          const h = Math.max(3, (d.value / max) * H);
+          const pct = (d.value / max) * 100;
           const isLast = highlightLast && i === data.length - 1;
           return (
             <div
               key={d.label}
-              className={`flex-1 rounded-t-md ${isLast ? 'bg-brand' : 'bg-brand-soft'}`}
-              style={{ height: h }}
+              className={`min-h-0.75 flex-1 rounded-t-md ${isLast ? 'bg-brand' : 'bg-brand-soft'}`}
+              style={{ height: `${pct}%` }}
               title={`${d.label}: ${money(d.value)}`}
             />
           );
@@ -34,7 +33,7 @@ export const BarChart = ({
         {data.map((d) => (
           <span
             key={d.label}
-            className="flex-1 text-center text-[10px] text-ink-soft"
+            className="flex-1 text-center text-micro text-ink-soft"
           >
             {d.label}
           </span>

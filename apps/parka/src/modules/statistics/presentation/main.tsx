@@ -83,8 +83,8 @@ export const Main = () => {
                   className={cn(
                     'shrink-0 rounded-full px-3 py-1.5 text-sm font-medium',
                     r === range
-                      ? 'bg-brand text-white'
-                      : 'bg-white text-ink-soft border border-black/10',
+                      ? 'bg-brand text-on-brand'
+                      : 'bg-card text-ink-soft border border-line-strong',
                   )}
                 >
                   {RANGE_LABEL[r]}
@@ -157,7 +157,7 @@ export const Main = () => {
                 <p
                   className={cn(
                     'ml-auto inline-flex items-center gap-1 text-sm font-semibold',
-                    monthChange <= 0 ? 'text-brand-dark' : 'text-rose-600',
+                    monthChange <= 0 ? 'text-brand-dark' : 'text-danger-strong',
                   )}
                 >
                   {monthChange <= 0 ? (
@@ -187,7 +187,9 @@ export const Main = () => {
                     <span
                       className={cn(
                         'font-semibold tabular-nums',
-                        changePct <= 0 ? 'text-brand-dark' : 'text-rose-600',
+                        changePct <= 0
+                          ? 'text-brand-dark'
+                          : 'text-danger-strong',
                       )}
                     >
                       {percent(changePct)}

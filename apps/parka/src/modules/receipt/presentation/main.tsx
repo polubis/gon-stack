@@ -18,7 +18,7 @@ import {
   money,
   type ReceiptItem,
 } from '@/modules/shared/data';
-import { navigateTo, routes } from '@/shared/router';
+import { navigateTo, APP_ROUTER } from '@/shared/router';
 
 type Draft = {
   merchant: string;
@@ -138,7 +138,7 @@ export const Main = () => {
         ageDays: 0,
       }),
     ]);
-    navigateTo(routes.expenses());
+    navigateTo(APP_ROUTER.expenses());
   };
 
   if (step !== 'review') {
@@ -146,7 +146,7 @@ export const Main = () => {
       <AppShell e2e="receipt:main">
         <ScreenHeader
           title="Zrób zdjęcie paragonu"
-          backHref={routes.dashboard()}
+          backHref={APP_ROUTER.dashboard()}
         />
         <main className="flex flex-1 flex-col items-center justify-between px-6 pb-10 pt-4">
           <p className="text-center text-sm text-ink-soft">
@@ -199,7 +199,7 @@ export const Main = () => {
     <AppShell e2e="receipt:main">
       <ScreenHeader
         title="Paragon — edycja danych"
-        backHref={routes.dashboard()}
+        backHref={APP_ROUTER.dashboard()}
       />
       <main
         className="flex flex-1 flex-col gap-4 px-4 pb-28 pt-2"
@@ -291,7 +291,7 @@ export const Main = () => {
                   </button>
 
                   {open ? (
-                    <div className="grid grid-cols-2 gap-3 border-t border-black/5 pt-3">
+                    <div className="grid grid-cols-2 gap-3 border-t border-line pt-3">
                       <div className="col-span-2">
                         <Field label="Nazwa">
                           <input
@@ -373,7 +373,7 @@ export const Main = () => {
         </section>
       </main>
 
-      <div className="sticky bottom-0 flex items-center gap-3 border-t border-black/5 bg-white px-4 py-3">
+      <div className="sticky bottom-0 flex items-center gap-3 border-t border-line bg-card px-4 py-3">
         <div className="flex-1">
           <p className="text-xs text-ink-soft">Razem</p>
           <p

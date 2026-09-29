@@ -1,6 +1,6 @@
 import { ScanLine, Tags, TrendingUp, ShieldCheck } from 'lucide-react';
 import { AppShell, Card, ScreenHeader } from '@/modules/shared/ui';
-import { routes } from '@/shared/router';
+import { APP_ROUTER } from '@/shared/router';
 
 const STEPS = [
   {
@@ -27,7 +27,7 @@ const STEPS = [
 
 export const AiInfoMain = () => (
   <AppShell e2e="ai-info:main" nav="more">
-    <ScreenHeader title="AI — jak to działa" backHref={routes.settings()} />
+    <ScreenHeader title="AI — jak to działa" backHref={APP_ROUTER.settings()} />
     <main className="flex flex-1 flex-col gap-3 px-4 pb-6 pt-2">
       <p className="text-sm text-ink-soft">
         AI analizuje paragony i pomaga w kategoryzacji oraz wykrywaniu

@@ -40,7 +40,7 @@ const routeWithRequiredQuery =
     return (suffix ? `${path}?${suffix}` : path) as WithQuery<Path>;
   };
 
-/** Primitive: route with a required id segment, e.g. `/expenses/e-1/`. */
+/** Primitive: route with a required id segment, e.g. `/api/expenses/e-1/`. */
 const routeById =
   <Base extends string>(base: Base) =>
   (id: string): WithId<Base> =>
@@ -59,8 +59,8 @@ export type DashboardQuery = {
  */
 export const APP_ROUTER = {
   home: route('/'),
-  dashboard: routeWithQuery<'/dashboard/', DashboardQuery>('/dashboard/'),
-  expenses: route('/expenses/'),
+  dashboard: routeWithQuery<'/app/', DashboardQuery>('/app/'),
+  expenses: route('/app/expenses/'),
   statistics: route('/statistics/'),
   settings: route('/settings/'),
   categories: route('/categories/'),
@@ -78,9 +78,6 @@ export const APP_ROUTER = {
 };
 
 export type PageRouteKey = keyof typeof APP_ROUTER;
-
-/** Public alias for page route builders (see `APP_ROUTER`). */
-export const routes = APP_ROUTER;
 
 /** Union of every literal URL the page route builders can produce. */
 export type PageUrl = ReturnType<(typeof APP_ROUTER)[PageRouteKey]>;
@@ -128,9 +125,6 @@ export const API_ROUTER = {
 };
 
 export type ApiRouteKey = keyof typeof API_ROUTER;
-
-/** Public alias for API route builders (see `API_ROUTER`). */
-export const apiRoutes = API_ROUTER;
 
 export const normalizePath = (path: string): string => {
   if (!path || path === '/') return '/';

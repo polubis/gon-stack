@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
 import { registerAndConfirm } from './mailbox';
+import { API_ROUTER, APP_ROUTER } from '@/shared/router';
 
 /**
  * End-to-end verification that every Parka feature works against the real
@@ -45,7 +46,7 @@ const commands = {
   'the dashboard shows april demo totals': async (page) => {
     // Demo data is always seeded for April 2025, regardless of signup date —
     // the dashboard otherwise defaults to the current calendar month.
-    await open(page, '/dashboard/?month=2025-04');
+    await open(page, APP_ROUTER.dashboard({ month: '2025-04' }));
     await expect(page.getByTestId('dashboard:month-label')).toHaveText(
       /kwiecień 2025/i,
     );
@@ -63,11 +64,11 @@ const commands = {
   },
 
   'i create a category and it survives a reload': async (page) => {
-    await open(page, '/categories/');
+    await open(page, APP_ROUTER.categories());
     await page.getByTestId('categories:new').click();
     await page.getByTestId('categories:form-name').fill('Kultura');
     await Promise.all([
-      synced(page, 'POST', '/api/categories', 201),
+      synced(page, 'POST', API_ROUTER.categories(), 201),
       page.getByTestId('categories:form-save').click(),
     ]);
     await expect(page.getByText('Kultura')).toBeVisible();
@@ -76,7 +77,7 @@ const commands = {
   },
 
   'i scan a receipt and save it as an expense': async (page) => {
-    await open(page, '/receipt-scan/');
+    await open(page, APP_ROUTER.receiptScan());
     await page.getByTestId('receipt:capture').click();
     await expect(page.getByTestId('receipt:review')).toBeVisible();
     await page.getByTestId('receipt:merchant').fill('Sklep E2E Backend');
@@ -84,7 +85,7 @@ const commands = {
     await page.getByTestId(/^receipt:item-name:/).fill('Chleb razowy');
     await page.getByTestId(/^receipt:item-price:/).fill('3.20');
     await page.getByTestId('receipt:save').click();
-    await page.waitForURL('**/expenses/');
+    await page.waitForURL(`**${APP_ROUTER.expenses()}`);
     await expect(page.getByText('Sklep E2E Backend')).toBeVisible();
     await reload(page);
     await expect(page.getByText('Sklep E2E Backend')).toBeVisible();
@@ -106,7 +107,7 @@ const commands = {
       .getByTestId('expenses:edit-merchant')
       .fill('Kino Nowe Horyzonty');
     await Promise.all([
-      synced(page, 'PUT', '/api/expenses/'),
+      synced(page, 'PUT', API_ROUTER.expenses()),
       page.getByTestId('expenses:save').click(),
     ]);
     await expect(page.getByText('Kino Nowe Horyzonty')).toBeVisible();
@@ -115,7 +116,7 @@ const commands = {
 
     await page.getByRole('button', { name: /Kino Nowe Horyzonty/ }).click();
     await Promise.all([
-      synced(page, 'DELETE', '/api/expenses/'),
+      synced(page, 'DELETE', API_ROUTER.expenses()),
       page.getByTestId('expenses:delete').click(),
     ]);
     await expect(page.getByText('Kino Nowe Horyzonty')).toHaveCount(0);
@@ -124,7 +125,7 @@ const commands = {
   },
 
   'statistics expose year and comparison views': async (page) => {
-    await open(page, '/statistics/');
+    await open(page, APP_ROUTER.statistics());
     await page.getByRole('tab', { name: 'Rok' }).click();
     await expect(page.getByTestId('statistics:total')).toContainText('zł');
     await page.getByRole('tab', { name: 'Porównanie' }).click();
@@ -132,7 +133,7 @@ const commands = {
     await expect(page.getByTestId('statistics:changes')).toBeVisible();
   },
   'the report totals and downloads a csv': async (page) => {
-    await open(page, '/reports/');
+    await open(page, APP_ROUTER.reports());
     await expect(page.getByTestId('reports:total')).toContainText('zł');
     const [csv] = await Promise.all([
       page.waitForEvent('download'),
@@ -142,13 +143,13 @@ const commands = {
   },
 
   'i create a category limit': async (page) => {
-    await open(page, '/limits/');
+    await open(page, APP_ROUTER.limits());
     await expect(page.getByTestId('limits:total')).toBeVisible();
     await page.getByRole('tab', { name: 'Kategorie' }).click();
     await page.getByTestId('limits:new').click();
     await page.getByTestId('limits:form-amount').fill('450');
     await Promise.all([
-      synced(page, 'POST', '/api/limits', 201),
+      synced(page, 'POST', API_ROUTER.limits(), 201),
       page.getByTestId('limits:form-save').click(),
     ]);
     await expect(page.getByTestId('limits:form')).toHaveCount(0);
@@ -160,12 +161,12 @@ const commands = {
   },
 
   'i toggle a recurring expense off': async (page) => {
-    await open(page, '/recurring/');
+    await open(page, APP_ROUTER.recurring());
     await page.getByRole('tab', { name: 'Wszystkie' }).click();
     const spotify = page.getByRole('switch', { name: /Spotify/ }).first();
     await expect(spotify).toHaveAttribute('aria-checked', 'true');
     await Promise.all([
-      synced(page, 'PUT', '/api/recurring/'),
+      synced(page, 'PUT', API_ROUTER.recurring()),
       spotify.click(),
     ]);
     await expect(spotify).toHaveAttribute('aria-checked', 'false');
@@ -177,18 +178,18 @@ const commands = {
   },
 
   'notifications list renders': async (page) => {
-    await open(page, '/notifications/');
+    await open(page, APP_ROUTER.notifications());
     await expect(
       page.getByTestId('notifications:list').getByRole('listitem').first(),
     ).toBeVisible();
   },
 
   'i update my settings profile': async (page) => {
-    await open(page, '/settings/');
+    await open(page, APP_ROUTER.settings());
     await page.getByTestId('settings:edit-profile').click();
     await page.getByTestId('settings:profile-name').fill('Anna Backendowa');
     await Promise.all([
-      synced(page, 'PUT', '/api/settings'),
+      synced(page, 'PUT', API_ROUTER.settings()),
       page.getByTestId('settings:save-profile').click(),
     ]);
     await expect(page.getByTestId('settings:name')).toHaveText(
@@ -201,7 +202,7 @@ const commands = {
   },
 
   'data export downloads a csv': async (page) => {
-    await open(page, '/data-export/');
+    await open(page, APP_ROUTER.dataExport());
     const [dump] = await Promise.all([
       page.waitForEvent('download'),
       page.getByTestId('data-export:run').click(),
@@ -211,24 +212,24 @@ const commands = {
   },
 
   'i sign out and sign back in': async (page) => {
-    await open(page, '/settings/');
+    await open(page, APP_ROUTER.settings());
     await Promise.all([
-      page.waitForURL('**/sign-in/'),
+      page.waitForURL(`**${APP_ROUTER.signIn()}`),
       page.getByTestId('settings:sign-out').click(),
     ]);
     await page.getByTestId('auth:email').fill(EMAIL);
     await page.getByTestId('auth:password').fill(PASSWORD);
     await page.getByTestId('auth:submit').click();
-    await page.waitForURL('**/dashboard/');
+    await page.waitForURL(`**${APP_ROUTER.dashboard()}`);
   },
   'data persisted in postgres after sign back in': async (page) => {
-    await open(page, '/settings/');
+    await open(page, APP_ROUTER.settings());
     await expect(page.getByTestId('settings:name')).toHaveText(
       'Anna Backendowa',
     );
-    await open(page, '/categories/');
+    await open(page, APP_ROUTER.categories());
     await expect(page.getByText('Kultura')).toBeVisible();
-    await open(page, '/expenses/');
+    await open(page, APP_ROUTER.expenses());
     await expect(page.getByText('Sklep E2E Backend')).toBeVisible();
     await expect(page.getByText('Kino Nowe Horyzonty')).toHaveCount(0);
   },

@@ -3,7 +3,7 @@ import { FileText, FileDown, Check } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { AppShell, Card, ScreenHeader, Button } from '@/modules/shared/ui';
 import { useParkaState, dateLabel } from '@/modules/shared/data';
-import { routes } from '@/shared/router';
+import { APP_ROUTER } from '@/shared/router';
 
 type Format = 'csv' | 'pdf';
 
@@ -58,7 +58,7 @@ export const DataExportMain = () => {
 
   return (
     <AppShell e2e="data-export:main" nav="more">
-      <ScreenHeader title="Eksport danych" backHref={routes.privacy()} />
+      <ScreenHeader title="Eksport danych" backHref={APP_ROUTER.privacy()} />
       <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2">
         <p className="text-sm text-ink-soft">
           Pobierz swoje dane finansowe w formacie CSV lub PDF. Masz pełną

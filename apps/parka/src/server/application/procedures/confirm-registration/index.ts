@@ -1,5 +1,5 @@
 import { schema } from '@schemas/confirm-registration';
-import { routes } from '@/shared/router';
+import { APP_ROUTER } from '@/shared/router';
 import { InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { publicProcedure } from '../../core/procedure';
@@ -16,7 +16,7 @@ export const confirmRegistration = publicProcedure({
 
     return {
       code: 303,
-      location: routes.dashboard(),
+      location: APP_ROUTER.dashboard(),
     };
   },
 });

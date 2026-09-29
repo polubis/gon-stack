@@ -24,26 +24,26 @@ import {
   updateSettings,
   whenSynced,
 } from '@/modules/shared/data';
-import { apiRoutes, navigateTo, routes } from '@/shared/router';
+import { API_ROUTER, navigateTo, APP_ROUTER } from '@/shared/router';
 
 const signOut = async () => {
   await whenSynced();
-  await fetch(apiRoutes.authLogout(), {
+  await fetch(API_ROUTER.authLogout(), {
     method: 'POST',
     redirect: 'manual',
   }).catch(() => undefined);
-  navigateTo(routes.signIn());
+  navigateTo(APP_ROUTER.signIn());
 };
 
 const LINKS: { label: string; href: string; icon: LucideIcon }[] = [
-  { label: 'RODO — Twoje dane', href: routes.privacy(), icon: ShieldCheck },
-  { label: 'AI — jak to działa', href: routes.aiInfo(), icon: Sparkles },
-  { label: 'Kategorie', href: routes.categories(), icon: LayoutGrid },
-  { label: 'Limity i budżet', href: routes.limits(), icon: Target },
-  { label: 'Cykliczne wydatki', href: routes.recurring(), icon: Repeat },
-  { label: 'Powiadomienia', href: routes.notifications(), icon: Bell },
-  { label: 'Raport miesięczny', href: routes.reports(), icon: FileText },
-  { label: 'Eksport danych', href: routes.dataExport(), icon: FileText },
+  { label: 'RODO — Twoje dane', href: APP_ROUTER.privacy(), icon: ShieldCheck },
+  { label: 'AI — jak to działa', href: APP_ROUTER.aiInfo(), icon: Sparkles },
+  { label: 'Kategorie', href: APP_ROUTER.categories(), icon: LayoutGrid },
+  { label: 'Limity i budżet', href: APP_ROUTER.limits(), icon: Target },
+  { label: 'Cykliczne wydatki', href: APP_ROUTER.recurring(), icon: Repeat },
+  { label: 'Powiadomienia', href: APP_ROUTER.notifications(), icon: Bell },
+  { label: 'Raport miesięczny', href: APP_ROUTER.reports(), icon: FileText },
+  { label: 'Eksport danych', href: APP_ROUTER.dataExport(), icon: FileText },
 ];
 
 const NOTIF_KEYS = [
@@ -158,9 +158,9 @@ export const Main = () => {
         </Card>
 
         <nav aria-label="Ustawienia szczegółowe">
-          <ul className="overflow-hidden rounded-2xl border border-black/5 bg-white">
+          <ul className="overflow-hidden rounded-2xl border border-line bg-card">
             {LINKS.map(({ label, href, icon: Icon }) => (
-              <li key={href} className="border-b border-black/5 last:border-0">
+              <li key={href} className="border-b border-line last:border-0">
                 <a
                   href={href}
                   className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-black/[0.02]"

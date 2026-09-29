@@ -2,7 +2,7 @@
 export const prerender = true;
 
 import MainLayout from '@/core/layouts/main-layout.astro';
-import { routes } from '@/shared/router';
+import { APP_ROUTER } from '@/shared/router';
 
 const domain = Astro.locals.siteDomain;
 const imageUrl = `${domain}/og.svg`;
@@ -10,7 +10,7 @@ const imageUrl = `${domain}/og.svg`;
 
 <MainLayout
   siteName="Parka"
-  url={routes.privacyPolicy()}
+  url={APP_ROUTER.privacyPolicy()}
   imageAlt="Parka"
   domain={domain}
   imageUrl={imageUrl}
@@ -22,7 +22,7 @@ const imageUrl = `${domain}/og.svg`;
     data-e2e="privacy:main"
     class="mx-auto flex min-h-screen w-full max-w-md flex-col gap-4 px-6 py-10"
   >
-    <a href={routes.settings()} class="text-sm font-semibold text-brand-dark underline">← Wróć</a>
+    <a href={APP_ROUTER.settings()} class="text-sm font-semibold text-brand-dark underline">← Wróć</a>
     <h1 class="text-2xl font-semibold tracking-tight">Polityka prywatności</h1>
     <p class="text-sm text-ink-soft">
       Parka przetwarza dane finansowe wyłącznie w celu świadczenia usługi zarządzania

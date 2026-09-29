@@ -3,7 +3,7 @@ export const prerender = true;
 
 import AppLayout from '@/core/layouts/app-layout.astro';
 import { Main } from '@/modules/expenses';
-import { routes } from '@/shared/router';
+import { APP_ROUTER } from '@/shared/router';
 
 const domain = Astro.locals.siteDomain;
 const imageUrl = `${domain}/og.svg`;
@@ -11,7 +11,7 @@ const imageUrl = `${domain}/og.svg`;
 
 <AppLayout
   siteName="Parka"
-  url={routes.expenses()}
+  url={APP_ROUTER.expenses()}
   imageAlt="Parka"
   domain={domain}
   imageUrl={imageUrl}

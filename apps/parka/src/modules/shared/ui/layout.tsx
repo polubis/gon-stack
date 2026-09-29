@@ -45,7 +45,7 @@ export const ScreenHeader = ({
       <a
         href={backHref}
         aria-label="Wróć"
-        className="grid h-9 w-9 place-items-center rounded-full text-ink-soft hover:bg-black/5"
+        className="grid h-9 w-9 place-items-center rounded-full text-ink-soft hover:bg-hover"
       >
         <ArrowLeft className="h-5 w-5" aria-hidden="true" />
       </a>
@@ -67,7 +67,7 @@ export const Card = ({
 } & Record<string, unknown>) => (
   <As
     className={cn(
-      'rounded-2xl border border-black/5 bg-white p-4 shadow-[0_1px_2px_rgba(16,36,27,0.04)]',
+      'rounded-2xl border border-line bg-card p-4 shadow-card',
       className,
     )}
     {...rest}

@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test';
+import { APP_ROUTER } from '@/shared/router';
 
 /** Local Supabase mail server (Mailpit) web/API port from `supabase/config.toml`. */
 const MAILBOX_URL = 'http://localhost:54324';
@@ -28,14 +29,14 @@ const findConfirmLink = async (
 /**
  * Registers `email` through the sign-up form, then follows the confirmation
  * link from the local mailbox in the same browser context (the PKCE verifier
- * cookie lives there) so the session lands on `/dashboard/`.
+ * cookie lives there) so the session lands on `/app/`.
  */
 export const registerAndConfirm = async (
   page: Page,
   email: string,
   password: string,
 ): Promise<void> => {
-  await page.goto('/sign-up/');
+  await page.goto(APP_ROUTER.signUp());
   await page.waitForLoadState('networkidle');
   await page.getByTestId('auth:email').fill(email);
   await page.getByTestId('auth:password').fill(password);
@@ -53,5 +54,5 @@ export const registerAndConfirm = async (
     .not.toBeNull();
 
   await page.goto(link!);
-  await page.waitForURL('**/dashboard/');
+  await page.waitForURL(`**${APP_ROUTER.dashboard()}`);
 };

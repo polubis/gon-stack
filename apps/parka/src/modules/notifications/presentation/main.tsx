@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { AppShell, Card, ScreenHeader } from '@/modules/shared/ui';
 import { useParkaState, type NotificationKind } from '@/modules/shared/data';
-import { routes } from '@/shared/router';
+import { APP_ROUTER } from '@/shared/router';
 
 const ICON: Record<NotificationKind, LucideIcon> = {
   'limit-warning': TriangleAlert,
@@ -24,7 +24,7 @@ export const Main = () => {
 
   return (
     <AppShell e2e="notifications:main" nav="more">
-      <ScreenHeader title="Powiadomienia" backHref={routes.settings()} />
+      <ScreenHeader title="Powiadomienia" backHref={APP_ROUTER.settings()} />
       <main className="flex flex-1 flex-col gap-2 px-4 pb-6 pt-2">
         <ul className="space-y-2" data-e2e="notifications:list">
           {state.notifications.map((n) => {

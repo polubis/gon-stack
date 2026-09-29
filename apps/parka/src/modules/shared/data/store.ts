@@ -9,7 +9,7 @@ import type {
   Settings,
 } from './types';
 import { createSeedState } from './seed';
-import { apiRoutes } from '@/shared/router';
+import { API_ROUTER } from '@/shared/router';
 
 let state: ParkaState = createSeedState();
 const listeners = new Set<() => void>();
@@ -53,34 +53,34 @@ type EntityPath = (typeof ENTITY_ENDPOINTS)[number];
 const collectionUrl = (path: EntityPath): string => {
   switch (path) {
     case 'categories':
-      return apiRoutes.categories();
+      return API_ROUTER.categories();
     case 'expenses':
-      return apiRoutes.expenses();
+      return API_ROUTER.expenses();
     case 'limits':
-      return apiRoutes.limits();
+      return API_ROUTER.limits();
     case 'goals':
-      return apiRoutes.goals();
+      return API_ROUTER.goals();
     case 'recurring':
-      return apiRoutes.recurring();
+      return API_ROUTER.recurring();
     case 'notifications':
-      return apiRoutes.notifications();
+      return API_ROUTER.notifications();
   }
 };
 
 const entityUrl = (path: EntityPath, id: string): string => {
   switch (path) {
     case 'categories':
-      return apiRoutes.categoryById(id);
+      return API_ROUTER.categoryById(id);
     case 'expenses':
-      return apiRoutes.expenseById(id);
+      return API_ROUTER.expenseById(id);
     case 'limits':
-      return apiRoutes.limitById(id);
+      return API_ROUTER.limitById(id);
     case 'goals':
-      return apiRoutes.goalById(id);
+      return API_ROUTER.goalById(id);
     case 'recurring':
-      return apiRoutes.recurringById(id);
+      return API_ROUTER.recurringById(id);
     case 'notifications':
-      return apiRoutes.notificationById(id);
+      return API_ROUTER.notificationById(id);
   }
 };
 
@@ -130,7 +130,7 @@ export const bootstrap = (): Promise<void> => {
             headers: { Accept: 'application/json' },
           }),
         ),
-        fetch(apiRoutes.settings(), {
+        fetch(API_ROUTER.settings(), {
           headers: { Accept: 'application/json' },
         }),
       ]);
@@ -270,7 +270,7 @@ export const updateSettings = (settings: Settings): void => {
   setState((p) => ({ ...p, settings }));
   if (mode !== 'backend') return;
   void track(
-    fetch(apiRoutes.settings(), {
+    fetch(API_ROUTER.settings(), {
       method: 'PUT',
       headers: jsonHeaders,
       body: JSON.stringify(settings),

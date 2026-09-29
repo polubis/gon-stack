@@ -31,7 +31,7 @@ export const Segmented = <T extends string>({
           className={cn(
             'flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
             selected
-              ? 'bg-white text-brand-dark shadow-sm'
+              ? 'bg-card text-brand-dark shadow-sm'
               : 'text-ink-soft hover:text-ink',
           )}
         >
@@ -57,12 +57,12 @@ export const Toggle = ({ checked, onChange, label }: ToggleProps) => (
     onClick={() => onChange(!checked)}
     className={cn(
       'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors',
-      checked ? 'bg-brand' : 'bg-black/15',
+      checked ? 'bg-brand' : 'bg-track-strong',
     )}
   >
     <span
       className={cn(
-        'inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform',
+        'inline-block h-5 w-5 transform rounded-full bg-card shadow transition-transform',
         checked ? 'translate-x-5' : 'translate-x-0.5',
       )}
     />
@@ -79,9 +79,9 @@ export const ProgressBar = ({ pct, label, tone = 'brand' }: ProgressProps) => {
   const clamped = Math.max(0, Math.min(100, Math.round(pct)));
   const bar =
     tone === 'danger'
-      ? 'bg-rose-600'
+      ? 'bg-danger-strong'
       : tone === 'warn'
-        ? 'bg-orange-500'
+        ? 'bg-warn'
         : 'bg-brand';
   return (
     <div
@@ -90,7 +90,7 @@ export const ProgressBar = ({ pct, label, tone = 'brand' }: ProgressProps) => {
       aria-valuemin={0}
       aria-valuemax={100}
       aria-label={label}
-      className="h-2 w-full overflow-hidden rounded-full bg-black/10"
+      className="h-2 w-full overflow-hidden rounded-full bg-track"
     >
       <div
         className={cn('h-full rounded-full', bar)}
@@ -125,10 +125,10 @@ export const Button = ({
     'inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-colors';
   const styles =
     variant === 'primary'
-      ? 'bg-brand text-white hover:bg-brand-dark'
+      ? 'bg-brand text-on-brand hover:bg-brand-dark'
       : variant === 'danger'
-        ? 'bg-white text-rose-700 border border-rose-200 hover:bg-rose-50'
-        : 'bg-white text-brand-dark border border-black/10 hover:bg-brand-softer';
+        ? 'bg-card text-danger border border-danger-line hover:bg-danger-faint'
+        : 'bg-card text-brand-dark border border-line-strong hover:bg-brand-softer';
   if (href) {
     return (
       <a
@@ -175,4 +175,4 @@ export const Field = ({
 );
 
 export const inputClass =
-  'w-full rounded-xl border border-black/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand';
+  'w-full rounded-xl border border-line-strong bg-card px-3 py-2.5 text-sm outline-none focus:border-brand';

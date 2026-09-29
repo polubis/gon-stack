@@ -1,3 +1,9 @@
+import type { Brand } from '@repo/type-beast/brand';
+
+export type ExpenseId = Brand<string, 'ExpenseId'>;
+export type CategoryId = Brand<string, 'CategoryId'>;
+export type ReceiptItemId = Brand<string, 'ReceiptItemId'>;
+
 export type CategoryIconId =
   | 'cart'
   | 'car'
@@ -10,28 +16,28 @@ export type CategoryIconId =
   | 'sparkles';
 
 export type Category = {
-  id: string;
+  id: CategoryId;
   name: string;
   icon: CategoryIconId;
   color: string;
 };
 
 export type ReceiptItem = {
-  id: string;
+  id: ReceiptItemId;
   name: string;
   unitPrice: number;
   quantity: number;
   discount: number;
-  categoryId: string;
+  categoryId: CategoryId;
 };
 
 export type Expense = {
-  id: string;
+  id: ExpenseId;
   merchant: string;
   /** ISO date-time string. */
   date: string;
   amount: number;
-  categoryId: string;
+  categoryId: CategoryId;
   paymentMethod: string;
   isBill: boolean;
   source: 'receipt' | 'manual';
@@ -39,3 +45,9 @@ export type Expense = {
 };
 
 export type Filter = 'all' | 'category' | 'bills';
+
+export type Notice = {
+  id: number;
+  tone: 'success' | 'error';
+  message: string;
+};
