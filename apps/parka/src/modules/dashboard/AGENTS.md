@@ -1,8 +1,7 @@
 ---
-version: 2.9
-hash: 0bb405faec440edcc290bea95c400893324f3cf2cfce93a42e40f8eeb686cc34
+version: 2.11
+hash: cd4545c72fbef8db91b0633708a4386b35003ce7bac92d5016d7031d7c0e3d56
 ---
-
 
 
 # Dashboard
@@ -52,7 +51,7 @@ or overview features.
 6. Presentation reaches core only through the facade (actions + selectors).
    The selected month is the view's own state, seeded from the `month` URL
    query param (falling back to the current calendar month) and kept in sync
-   with it; dashboard does not read `@/modules/shared/data`.
+   with it; dashboard imports no other module.
 7. On mount and on every month change, the view triggers `facade.load(month)`,
    which fetches the summary from the backend. There is no local/offline
    fallback — an anonymous session gets a 401 and the view renders the shared
@@ -66,7 +65,7 @@ or overview features.
    the mobile frame and the persisted `shared/navigation/app-nav`
    `SyncedAppNav`. `Main` renders page content only. Presentation uses the
    local `Card` (`./layout`), shared charts, and formatting helpers from
-   `@/modules/shared/*` (incl. `ui`: `Skeleton`, `LoadingBanner`, `ErrorState`);
+   `@/shared/*` (incl. `ui`: `Skeleton`, `LoadingBanner`, `ErrorState`);
    styling via theme tokens only (`core/style/index.css`: `bg-card`,
    `text-danger`, `z-(--z-modal)` ...) and `cn` — no raw colors/px.
 9. E2e selectors use `dashboard:*` prefix on interactive/readout elements.

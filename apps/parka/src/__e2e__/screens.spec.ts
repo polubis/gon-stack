@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
 import { API_ROUTER, APP_ROUTER } from '@/shared/router';
 import { expectNoA11yViolations } from './axe';
+import { signInAsTestUser } from './session';
 
 type Screen = { path: string; root: string; heading: RegExp };
 
@@ -78,6 +79,8 @@ const commands = {
     page: Page,
     screen: Screen,
   ) => {
+    if (screen.path.startsWith(APP_ROUTER.dashboard()))
+      await signInAsTestUser(page);
     await page.goto(screen.path);
     await expect(page.getByTestId(screen.root)).toBeVisible();
     await expect(

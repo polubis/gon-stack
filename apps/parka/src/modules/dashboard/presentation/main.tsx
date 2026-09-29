@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
-import { ErrorState, LoadingBanner, Skeleton } from '@/modules/shared/ui';
+import { ErrorState, LoadingBanner, Skeleton } from '@/shared/ui';
 import { ERROR_CODES } from '../configuration/constraints';
 import { readQueryParam, APP_ROUTER, writeQueryParam } from '@/shared/router';
 import {

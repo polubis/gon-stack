@@ -7,6 +7,8 @@ export const SETTINGS_E2E_IDS = [
   'settings:save-profile',
   'settings:notifications',
   'settings:sign-out',
+  'settings:load-error',
+  'settings:toast',
 ] as const;
 
 export type SettingsE2eId = (typeof SETTINGS_E2E_IDS)[number];

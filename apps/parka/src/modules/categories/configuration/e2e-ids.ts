@@ -8,6 +8,8 @@ export const CATEGORIES_E2E_IDS = [
   'categories:form-color',
   'categories:form-save',
   'categories:add-defaults',
+  'categories:load-error',
+  'categories:toast',
 ] as const;
 
 export type CategoriesE2eDynamicId =

@@ -1,4 +1,4 @@
-import { Skeleton } from '@/modules/shared/ui';
+import { Skeleton } from '@/shared/ui';
 import { Card } from './layout';
 
 const ROWS = 3;

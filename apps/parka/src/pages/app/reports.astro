@@ -1,0 +1,23 @@
+---
+export const prerender = true;
+
+import AppLayout from '@/core/layouts/app-layout.astro';
+import { Main } from '@/modules/reports';
+import { APP_ROUTER } from '@/shared/router';
+
+const domain = Astro.locals.siteDomain;
+const imageUrl = `${domain}/og.svg`;
+---
+
+<AppLayout
+  siteName="Parka"
+  url={APP_ROUTER.reports()}
+  imageAlt="Parka"
+  domain={domain}
+  imageUrl={imageUrl}
+  keywords="parka, budżet, wydatki, finanse osobiste"
+  title="Raport | Parka"
+  description="Miesięczny raport wydatków."
+>
+  <Main client:only="react" />
+</AppLayout>

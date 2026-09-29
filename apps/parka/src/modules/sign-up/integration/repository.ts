@@ -1,31 +1,20 @@
 import type { Schema } from '@schemas/register-user';
 import { API_ROUTER } from '@/shared/router';
-
-export type SignUpResult =
-  | { status: 'redirected' }
-  | { status: 'pending-confirmation' }
-  | { status: 'rejected'; message: string };
+import type { Credentials, SignUpResult } from '../domain/models';
+import { toSignUpResult } from './mappers';
 
 /** Nothing else in this module fetches. */
 export const signUp = async (
-  email: string,
-  password: string,
+  credentials: Credentials,
 ): Promise<SignUpResult> => {
   const res = await fetch(API_ROUTER.authRegister(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify(credentials),
     redirect: 'manual',
   });
 
   if (res.type === 'opaqueredirect') return { status: 'redirected' };
 
-  const body = (await res.json()) as Schema['out'];
-
-  if (body.code === 200) return { status: 'pending-confirmation' };
-
-  return {
-    status: 'rejected',
-    message: 'message' in body ? body.message : 'Sign-up failed. Try again.',
-  };
+  return toSignUpResult((await res.json()) as Schema['out']);
 };

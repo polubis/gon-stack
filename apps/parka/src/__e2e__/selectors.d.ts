@@ -4,11 +4,9 @@ import type { CategoriesE2eId } from '@/modules/categories/configuration/e2e-ids
 import type { DashboardE2eId } from '@/modules/dashboard/configuration/e2e-ids';
 import type { ExpensesE2eId } from '@/modules/expenses/configuration/e2e-ids';
 import type { HomeE2eId } from '@/modules/home/configuration/e2e-ids';
-import type {
-  AiInfoE2eId,
-  DataExportE2eId,
-  PrivacyE2eId,
-} from '@/modules/info/configuration/e2e-ids';
+import type { AiInfoE2eId } from '@/modules/ai-info/configuration/e2e-ids';
+import type { DataExportE2eId } from '@/modules/data-export/configuration/e2e-ids';
+import type { PrivacyE2eId } from '@/modules/privacy/configuration/e2e-ids';
 import type {
   GoalsE2eId,
   LimitsE2eId,

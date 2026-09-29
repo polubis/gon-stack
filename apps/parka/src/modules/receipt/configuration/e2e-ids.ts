@@ -9,6 +9,8 @@ export const RECEIPT_E2E_IDS = [
   'receipt:total',
   'receipt:save',
   'receipt:no-categories',
+  'receipt:load-error',
+  'receipt:toast',
 ] as const;
 
 export type ReceiptE2eDynamicId =

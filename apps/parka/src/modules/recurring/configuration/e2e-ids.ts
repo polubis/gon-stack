@@ -2,6 +2,8 @@ export const RECURRING_E2E_IDS = [
   'recurring:main',
   'recurring:list',
   'recurring:detail',
+  'recurring:load-error',
+  'recurring:toast',
 ] as const;
 
 export type RecurringE2eDynamicId = `recurring:row:${string | number}`;

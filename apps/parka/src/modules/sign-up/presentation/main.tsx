@@ -1,48 +1,34 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { SubmitEvent } from 'react';
 import { Leaf } from 'lucide-react';
-import { Button, Field, inputClass } from '@/modules/shared/ui';
+import { ErrorBoundary } from '@repo/react-kit/error-boundary';
+import { Button, ErrorState, Field, inputClass } from '@/shared/ui';
 import { navigateTo, APP_ROUTER } from '@/shared/router';
-import { signUp } from '../integration/repository';
+import { ERROR_CODES, MESSAGES } from '../configuration/constraints';
+import { Provider, useContext } from './context';
+import { selectCredentials, selectErrorMessage } from './selectors';
+import { SocialButtons } from './social-buttons';
 
-export const Main = () => {
+const SignUpView = () => {
+  const ctx = useContext();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [info, setInfo] = useState('');
-  const [pending, setPending] = useState(false);
+  const [invalidInput, setInvalidInput] = useState(false);
+  const pending = ctx.usePending();
+  const submitError = ctx.useError();
+  const redirected = ctx.useRedirected();
+  const awaitingConfirmation = ctx.useAwaitingConfirmation();
+  const error = selectErrorMessage(invalidInput, submitError);
 
-  const submit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    if (redirected) navigateTo(APP_ROUTER.dashboard());
+  }, [redirected]);
+
+  const submit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!email.includes('@') || password.length < 6) {
-      setError('Enter a valid email and password (min. 6 characters).');
-      return;
-    }
-
-    setPending(true);
-    setError('');
-    setInfo('');
-    try {
-      const result = await signUp(email, password);
-      switch (result.status) {
-        case 'redirected':
-          navigateTo(APP_ROUTER.dashboard());
-          return;
-        case 'pending-confirmation':
-          setInfo('Sprawdź skrzynkę e-mail i potwierdź rejestrację.');
-          return;
-        case 'rejected':
-          setError(result.message);
-          return;
-        default: {
-          const exhaustive: never = result;
-          return exhaustive;
-        }
-      }
-    } catch {
-      setError('Could not reach the server. Try again.');
-    } finally {
-      setPending(false);
-    }
+    const credentials = selectCredentials(email, password);
+    setInvalidInput(credentials === null);
+    if (credentials) ctx.submit(credentials);
   };
 
   return (
@@ -89,9 +75,9 @@ export const Main = () => {
             {error}
           </p>
         ) : null}
-        {info ? (
+        {awaitingConfirmation ? (
           <p role="status" className="text-sm text-brand-dark">
-            {info}
+            {MESSAGES.confirmation}
           </p>
         ) : null}
 
@@ -100,24 +86,7 @@ export const Main = () => {
         </Button>
       </form>
 
-      <div className="mt-6 space-y-2">
-        <Button
-          variant="ghost"
-          disabled
-          aria-disabled="true"
-          data-e2e="auth:google"
-        >
-          Zaloguj przez Google (wkrótce)
-        </Button>
-        <Button
-          variant="ghost"
-          disabled
-          aria-disabled="true"
-          data-e2e="auth:apple"
-        >
-          Zaloguj przez Apple (wkrótce)
-        </Button>
-      </div>
+      <SocialButtons />
 
       <p className="mt-6 text-center text-sm text-ink-soft">
         Masz już konto?{' '}
@@ -131,3 +100,21 @@ export const Main = () => {
     </div>
   );
 };
+
+export const Main = () => (
+  <ErrorBoundary
+    fallback={({ reset }) => (
+      <ErrorState
+        title="Wystąpił błąd widoku rejestracji"
+        code={ERROR_CODES.render}
+        description="Nie udało się wyświetlić formularza. Spróbuj ponownie."
+        onRetry={reset}
+        backHref={APP_ROUTER.home()}
+      />
+    )}
+  >
+    <Provider>
+      <SignUpView />
+    </Provider>
+  </ErrorBoundary>
+);

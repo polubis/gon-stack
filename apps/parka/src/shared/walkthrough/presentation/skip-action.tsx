@@ -1,4 +1,4 @@
-import { Button } from '@/modules/shared/ui';
+import { Button } from '@/shared/ui';
 import { useContext } from './context';
 
 type SkipActionProps = {

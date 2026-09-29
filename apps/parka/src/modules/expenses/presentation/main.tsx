@@ -8,14 +8,14 @@ import {
   LoadingBanner,
   Segmented,
   Toast,
-} from '@/modules/shared/ui';
+} from '@/shared/ui';
 import {
   ERROR_CODES,
   FILTER_OPTIONS,
   UNCATEGORIZED,
 } from '../configuration/constraints';
 import { dateTimeLabel, money, monthLabel } from '../domain/format';
-import { groupByMonth, sortByDateDesc, sumAmount } from '../domain/grouping';
+import { groupByMonth, sortByDateDesc, sumAmount } from './selectors';
 import type { Expense, ExpenseId, Filter } from '../domain/models';
 import { Provider, useContext } from './context';
 import { ExpenseDetail } from './expense-detail';

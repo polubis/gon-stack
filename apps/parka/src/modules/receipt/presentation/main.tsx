@@ -1,364 +1,138 @@
-import { categoryLabel } from '@/shared/i18n/category-label';
-import { useMemo, useState } from 'react';
-import { Camera, Check, ChevronDown, Plus, Sparkles } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ErrorBoundary } from '@repo/react-kit/error-boundary';
+import { APP_ROUTER, navigateTo } from '@/shared/router';
+import { ErrorState, LoadingBanner, Toast } from '@/shared/ui';
 import {
-  AppShell,
-  Card,
-  ScreenHeader,
-  Button,
-  Field,
-  NumberInput,
-  inputClass,
-} from '@/modules/shared/ui';
-import { CategoryAvatar } from '@/modules/shared/ui';
-import {
-  useParkaState,
-  resolveCategory,
-  createExpense,
-  createNotification,
-  genId,
-  itemTotal,
-  money,
-  type ReceiptItem,
-} from '@/modules/shared/data';
-import { navigateTo, APP_ROUTER } from '@/shared/router';
+  CAPTURE_DELAY_MS,
+  DEFAULT_ITEM_NAME,
+  ERROR_CODES,
+  NO_CATEGORY,
+  NOTIFICATION_TITLE,
+  PAYMENT_METHOD,
+} from '../configuration/constraints';
+import { money } from '../domain/format';
+import type { Draft } from '../domain/models';
+import { emptyDraft, toReceipt } from '../domain/receipt';
+import { defaultCategoryId, draftTotal } from './selectors';
+import { Provider, useContext } from './context';
+import { ReviewStep } from './review-step';
+import { ScanSkeleton } from './scan-skeleton';
+import { ScanStep } from './scan-step';
 
-type Draft = {
-  merchant: string;
-  date: string;
-  items: ReceiptItem[];
+type Step =
+  { type: 'scan' } | { type: 'processing' } | { type: 'review'; draft: Draft };
+
+const buildReceipt = (draft: Draft) => {
+  const amount = draftTotal(draft);
+  return toReceipt(draft, {
+    amount,
+    notificationTitle: NOTIFICATION_TITLE,
+    notificationBody: `${draft.merchant} · ${money(amount)}`,
+    paymentMethod: PAYMENT_METHOD,
+    fallbackCategoryId: NO_CATEGORY,
+  });
 };
 
-const emptyDraft = (categoryId: string): Draft => ({
-  merchant: '',
-  date: new Date().toISOString().slice(0, 10),
-  items: [
-    {
-      id: genId('ri'),
-      name: 'Nowy produkt',
-      unitPrice: 0,
-      quantity: 1,
-      discount: 0,
-      categoryId,
-    },
-  ],
-});
+const ReceiptView = () => {
+  const ctx = useContext();
+  const categories = ctx.useCategories();
+  const error = ctx.useError();
+  const notice = ctx.useNotice();
+  const initializing = ctx.useInitializing();
+  const isLoading = ctx.useIsLoading();
+  const saving = ctx.useSaving();
+  const saved = ctx.useSaved();
+  const [step, setStep] = useState<Step>({ type: 'scan' });
+  const processing = step.type === 'processing';
 
-export const Main = () => {
-  const state = useParkaState();
-  const defaultCategoryId = state.categories[0]?.id ?? '';
-  const [step, setStep] = useState<'scan' | 'processing' | 'review'>('scan');
-  const [draft, setDraft] = useState<Draft | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  useEffect(() => {
+    ctx.load();
+  }, [ctx]);
 
-  const total = useMemo(
-    () => (draft ? draft.items.reduce((s, i) => s + itemTotal(i), 0) : 0),
-    [draft],
-  );
+  useEffect(() => {
+    if (saved) navigateTo(APP_ROUTER.expenses());
+  }, [saved]);
 
-  const capture = () => {
-    setStep('processing');
-    window.setTimeout(() => {
-      setDraft(emptyDraft(defaultCategoryId));
-      setStep('review');
-    }, 600);
-  };
-
-  const startManual = () => {
-    setDraft(emptyDraft(defaultCategoryId));
-    setStep('review');
-  };
-
-  const patchItem = (id: string, patch: Partial<ReceiptItem>) =>
-    setDraft((d) =>
-      d
-        ? {
-            ...d,
-            items: d.items.map((i) => (i.id === id ? { ...i, ...patch } : i)),
-          }
-        : d,
+  useEffect(() => {
+    if (!processing) return;
+    const timer = window.setTimeout(
+      () =>
+        setStep({
+          type: 'review',
+          draft: emptyDraft(defaultCategoryId(categories), DEFAULT_ITEM_NAME),
+        }),
+      CAPTURE_DELAY_MS,
     );
+    return () => window.clearTimeout(timer);
+  }, [processing, categories]);
 
-  const persist = async () => {
-    if (!draft || draft.items.some((i) => !i.categoryId)) return;
-    const primary = draft.items[0]?.categoryId ?? defaultCategoryId;
-    await Promise.all([
-      createExpense({
-        id: genId('exp'),
-        merchant: draft.merchant,
-        date: `${draft.date}T12:00:00`,
-        amount: Number(total.toFixed(2)),
-        categoryId: primary,
-        paymentMethod: 'Karta **** 4213',
-        isBill: false,
-        source: 'receipt',
-        items: draft.items,
-      }),
-      createNotification({
-        id: genId('ntf'),
-        kind: 'receipt-confirmation',
-        title: 'Nowy paragon',
-        body: `${draft.merchant} · ${money(Number(total.toFixed(2)))}`,
-        ageDays: 0,
-      }),
-    ]);
-    navigateTo(APP_ROUTER.expenses());
-  };
-
-  if (step !== 'review') {
-    return (
-      <AppShell e2e="receipt:main">
-        <ScreenHeader
-          title="Zrób zdjęcie paragonu"
-          backHref={APP_ROUTER.dashboard()}
-        />
-        <main className="flex flex-1 flex-col items-center justify-between px-6 pb-10 pt-4">
-          <p className="text-center text-sm text-ink-soft">
-            Automatyczne odczytywanie danych. Ustaw paragon w kadrze i zrób
-            zdjęcie.
-          </p>
-          <div className="my-8 grid aspect-[3/4] w-full max-w-xs place-items-center rounded-3xl border-2 border-dashed border-brand/40 bg-brand-softer text-brand">
-            {step === 'processing' ? (
-              <span
-                className="flex flex-col items-center gap-2 text-sm font-medium"
-                role="status"
-              >
-                <Sparkles
-                  className="h-8 w-8 animate-pulse"
-                  aria-hidden="true"
-                />
-                Analizuję paragon…
-              </span>
-            ) : (
-              <Camera className="h-12 w-12" aria-hidden="true" />
-            )}
-          </div>
-          <div className="flex w-full max-w-xs flex-col gap-3">
-            <Button
-              variant="ghost"
-              data-e2e="receipt:manual"
-              onClick={startManual}
-              disabled={step === 'processing'}
-            >
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              Wprowadź ręcznie
-            </Button>
-            <Button
-              data-e2e="receipt:capture"
-              onClick={capture}
-              disabled={step === 'processing'}
-            >
-              <Camera className="h-4 w-4" aria-hidden="true" />
-              {step === 'processing' ? 'Przetwarzanie…' : 'Zrób zdjęcie'}
-            </Button>
-          </div>
-        </main>
-      </AppShell>
-    );
-  }
-
-  const d = draft as Draft;
+  const startManual = () =>
+    setStep({
+      type: 'review',
+      draft: emptyDraft(defaultCategoryId(categories), DEFAULT_ITEM_NAME),
+    });
 
   return (
-    <AppShell e2e="receipt:main">
-      <ScreenHeader
-        title="Paragon — edycja danych"
-        backHref={APP_ROUTER.dashboard()}
-      />
-      <main
-        className="flex flex-1 flex-col gap-4 px-4 pb-28 pt-2"
-        data-e2e="receipt:review"
-      >
-        {state.categories.length === 0 ? (
-          <Card data-e2e="receipt:no-categories" role="status">
-            <p className="text-sm text-ink-soft">
-              Aby zapisać paragon, dodaj najpierw kategorię (np. sugerowane).
-            </p>
-            <a
-              href={APP_ROUTER.categories()}
-              className="text-sm font-medium underline"
-            >
-              Dodaj kategorię
-            </a>
-          </Card>
-        ) : null}
-        <Card className="space-y-3">
-          <Field label="Sklep">
-            <input
-              className={inputClass}
-              value={d.merchant}
-              data-e2e="receipt:merchant"
-              onChange={(e) => setDraft({ ...d, merchant: e.target.value })}
-            />
-          </Field>
-          <Field label="Data zakupu">
-            <input
-              type="date"
-              className={inputClass}
-              value={d.date}
-              data-e2e="receipt:date"
-              onChange={(e) => setDraft({ ...d, date: e.target.value })}
-            />
-          </Field>
-        </Card>
-
-        <section aria-labelledby="items-heading" className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h2
-              id="items-heading"
-              className="text-sm font-semibold text-ink-soft"
-            >
-              Produkty ({d.items.length})
-            </h2>
-            <button
-              type="button"
-              data-e2e="receipt:add-item"
-              onClick={() =>
-                setDraft({
-                  ...d,
-                  items: [
-                    ...d.items,
-                    {
-                      id: genId('ri'),
-                      name: 'Nowy produkt',
-                      unitPrice: 0,
-                      quantity: 1,
-                      discount: 0,
-                      categoryId: defaultCategoryId,
-                    },
-                  ],
-                })
-              }
-              className="inline-flex items-center gap-1 text-sm font-medium text-brand-dark"
-            >
-              <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj produkt
-            </button>
-          </div>
-
-          <ul className="space-y-2">
-            {d.items.map((item) => {
-              const category = resolveCategory(
-                state.categories,
-                item.categoryId,
-              );
-              const open = editingId === item.id;
-              return (
-                <Card as="li" key={item.id} className="space-y-3">
-                  <button
-                    type="button"
-                    onClick={() => setEditingId(open ? null : item.id)}
-                    aria-expanded={open}
-                    className="flex w-full items-center gap-3 text-left"
-                  >
-                    <CategoryAvatar category={category} />
-                    <span className="flex-1">
-                      <span className="block text-sm font-medium">
-                        {item.name}
-                      </span>
-                      <span className="block text-xs text-ink-soft">
-                        {categoryLabel(category.name)}
-                      </span>
-                    </span>
-                    <span className="text-sm font-semibold tabular-nums">
-                      {money(itemTotal(item))}
-                    </span>
-                    <ChevronDown
-                      className={`h-4 w-4 text-ink-soft transition-transform ${open ? 'rotate-180' : ''}`}
-                      aria-hidden="true"
-                    />
-                  </button>
-
-                  {open ? (
-                    <div className="grid grid-cols-2 gap-3 border-t border-line pt-3">
-                      <div className="col-span-2">
-                        <Field label="Nazwa">
-                          <input
-                            className={inputClass}
-                            value={item.name}
-                            data-e2e={`receipt:item-name:${item.id}`}
-                            onChange={(e) =>
-                              patchItem(item.id, { name: e.target.value })
-                            }
-                          />
-                        </Field>
-                      </div>
-                      <Field label="Cena">
-                        <NumberInput
-                          value={item.unitPrice}
-                          data-e2e={`receipt:item-price:${item.id}`}
-                          onValueChange={(unitPrice) =>
-                            patchItem(item.id, { unitPrice })
-                          }
-                        />
-                      </Field>
-                      <Field label="Ilość">
-                        <NumberInput
-                          integer
-                          value={item.quantity}
-                          data-e2e={`receipt:item-qty:${item.id}`}
-                          onValueChange={(quantity) =>
-                            patchItem(item.id, { quantity })
-                          }
-                        />
-                      </Field>
-                      <Field label="Rabat">
-                        <NumberInput
-                          value={item.discount}
-                          data-e2e={`receipt:item-discount:${item.id}`}
-                          onValueChange={(discount) =>
-                            patchItem(item.id, { discount })
-                          }
-                        />
-                      </Field>
-                      <Field label="Kategoria">
-                        <select
-                          className={inputClass}
-                          value={item.categoryId}
-                          data-e2e={`receipt:item-category:${item.id}`}
-                          onChange={(e) =>
-                            patchItem(item.id, { categoryId: e.target.value })
-                          }
-                        >
-                          {state.categories.length === 0 ? (
-                            <option value="">Bez kategorii</option>
-                          ) : null}
-                          {state.categories.map((c) => (
-                            <option key={c.id} value={c.id}>
-                              {categoryLabel(c.name)}
-                            </option>
-                          ))}
-                        </select>
-                      </Field>
-                    </div>
-                  ) : null}
-                </Card>
-              );
-            })}
-          </ul>
-        </section>
-      </main>
-
-      <div className="sticky bottom-0 flex items-center gap-3 border-t border-line bg-card px-4 py-3">
-        <div className="flex-1">
-          <p className="text-xs text-ink-soft">Razem</p>
-          <p
-            className="text-lg font-bold tabular-nums"
-            data-e2e="receipt:total"
-          >
-            {money(Number(total.toFixed(2)))}
-          </p>
+    <div data-e2e="receipt:main" className="relative flex flex-1 flex-col">
+      <LoadingBanner active={isLoading && !initializing} />
+      {error ? (
+        <div className="px-4 pt-4">
+          <ErrorState
+            data-e2e="receipt:load-error"
+            title="Nie udało się wczytać kategorii"
+            code={ERROR_CODES.load}
+            description={error}
+            onRetry={ctx.load}
+            backHref={APP_ROUTER.dashboard()}
+          />
         </div>
-        <Button
-          className="w-auto px-6"
-          data-e2e="receipt:save"
-          disabled={
-            state.categories.length === 0 || d.items.some((i) => !i.categoryId)
-          }
-          onClick={persist}
-        >
-          <Check className="h-4 w-4" aria-hidden="true" /> Zapisz
-        </Button>
-      </div>
-    </AppShell>
+      ) : null}
+
+      {initializing ? (
+        <ScanSkeleton />
+      ) : step.type === 'review' ? (
+        <ReviewStep
+          draft={step.draft}
+          categories={categories}
+          saving={saving}
+          onChange={(draft) => setStep({ type: 'review', draft })}
+          onSave={() => ctx.save(buildReceipt(step.draft))}
+        />
+      ) : (
+        <ScanStep
+          processing={processing}
+          onCapture={() => setStep({ type: 'processing' })}
+          onManual={startManual}
+        />
+      )}
+
+      {notice ? (
+        <Toast
+          key={notice.id}
+          data-e2e="receipt:toast"
+          tone={notice.tone}
+          message={notice.message}
+          onDismiss={ctx.dismissNotice}
+        />
+      ) : null}
+    </div>
   );
 };
+
+export const Main = () => (
+  <ErrorBoundary
+    fallback={({ reset }) => (
+      <ErrorState
+        title="Wystąpił błąd widoku paragonu"
+        code={ERROR_CODES.render}
+        description="Nie udało się wyświetlić formularza. Spróbuj ponownie."
+        onRetry={reset}
+        backHref={APP_ROUTER.dashboard()}
+      />
+    )}
+  >
+    <Provider>
+      <ReceiptView />
+    </Provider>
+  </ErrorBoundary>
+);

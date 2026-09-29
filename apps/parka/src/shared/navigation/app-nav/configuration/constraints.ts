@@ -29,5 +29,5 @@ export const NAV_ITEMS: {
   },
 ];
 
-/** Routes that highlight the “Więcej” tab (href still `/settings/`). */
+/** Routes that highlight the “Więcej” tab (href still `/app/settings/`). */
 export const MORE_SECTION_PATHS = moreSectionPaths();

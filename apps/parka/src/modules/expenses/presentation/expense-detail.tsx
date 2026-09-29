@@ -8,7 +8,7 @@ import {
   inputClass,
   NumberInput,
   CategoryAvatar,
-} from '@/modules/shared/ui';
+} from '@/shared/ui';
 import { UNCATEGORIZED } from '../configuration/constraints';
 import { itemTotal, dateTimeLabel, money } from '../domain/format';
 import type { CategoryId, Expense } from '../domain/models';

@@ -1,12 +1,14 @@
 import { expect, test, type Page } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
 import { API_ROUTER, APP_ROUTER } from '@/shared/router';
+import { signInAsTestUser } from './session';
 
 /**
  * Navigate and wait for the Astro islands on the page to hydrate before the
  * test starts clicking — `client:load` handlers attach a task after `load`.
  */
 const open = async (page: Page, path: string): Promise<void> => {
+  if (path.startsWith(APP_ROUTER.dashboard())) await signInAsTestUser(page);
   await page.goto(path);
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(200);
@@ -28,8 +30,8 @@ const CATEGORY = {
 };
 
 /**
- * Stubs every store bootstrap endpoint (empty unless overridden) so the app
- * boots in backend mode with deterministic rows and no real session.
+ * Stubs every entity endpoint (empty unless overridden) so each module loads
+ * deterministic rows through its own repository, without a real backend.
  */
 const mockState = async (
   page: Page,
@@ -45,13 +47,20 @@ const mockState = async (
   ];
   for (const [url, data] of collections) {
     await page.route(`**${url}**`, async (route) => {
+      const request = route.request();
+      const method = request.method();
+      const body =
+        method === 'GET'
+          ? { code: 200, data }
+          : method === 'POST'
+            ? { code: 201, data: request.postDataJSON() }
+            : method === 'PUT'
+              ? { code: 200, data: request.postDataJSON() }
+              : { code: 200, ok: true };
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({
-          code: 200,
-          data: route.request().method() === 'GET' ? data : {},
-        }),
+        body: JSON.stringify(body),
       });
     });
   }
@@ -324,6 +333,7 @@ const commands = {
   },
 
   'statistics show the yearly total': async (page) => {
+    await mockState(page);
     await open(page, APP_ROUTER.statistics());
     await page.getByRole('tab', { name: 'Rok' }).click();
     await expect(page.getByTestId('statistics:total')).toBeVisible();
@@ -346,6 +356,7 @@ const commands = {
   },
 
   'a new category appears in the list': async (page) => {
+    await mockState(page);
     await open(page, APP_ROUTER.categories());
     await page.getByTestId('categories:new').click();
     await page.getByTestId('categories:form-name').fill('Kultura');
@@ -378,6 +389,7 @@ const commands = {
   },
 
   'the monthly report downloads a csv': async (page) => {
+    await mockState(page);
     await open(page, APP_ROUTER.reports());
     await expect(page.getByTestId('reports:total')).toBeVisible();
     const [download] = await Promise.all([
@@ -388,6 +400,7 @@ const commands = {
   },
 
   'i update my profile name': async (page) => {
+    await mockState(page);
     await open(page, APP_ROUTER.settings());
     await page.getByTestId('settings:edit-profile').click();
     await page.getByTestId('settings:profile-name').fill('Anna Testowa');
@@ -396,6 +409,7 @@ const commands = {
   },
 
   'financial data exports as csv': async (page) => {
+    await mockState(page);
     await open(page, APP_ROUTER.dataExport());
     const [download] = await Promise.all([
       page.waitForEvent('download'),

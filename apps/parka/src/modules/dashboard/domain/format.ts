@@ -14,6 +14,9 @@ const plMonth = new Intl.DateTimeFormat('pl-PL', {
   year: 'numeric',
 });
 
+const toYearMonth = (month: Month): [number, number] =>
+  month.split('-').map(Number) as [number, number];
+
 export const money = (value: number): string => plMoney.format(value);
 
 export const percent = (value: number): string =>
@@ -26,9 +29,6 @@ export const toMonth = (value: string): Month => {
   }
   return value as Month;
 };
-
-const toYearMonth = (month: Month): [number, number] =>
-  month.split('-').map(Number) as [number, number];
 
 /** `2025-04` → `kwiecień 2025`. */
 export const monthLabel = (month: Month): string => {

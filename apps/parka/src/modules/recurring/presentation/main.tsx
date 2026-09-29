@@ -1,113 +1,140 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { ErrorBoundary } from '@repo/react-kit/error-boundary';
+import { APP_ROUTER } from '@/shared/router';
 import {
-  AppShell,
   Card,
-  Segmented,
-  Toggle,
   CategoryAvatar,
-} from '@/modules/shared/ui';
-import {
-  useParkaState,
-  resolveCategory,
-  updateRecurring,
-  dateLabel,
-  money,
-  type Recurring,
-} from '@/modules/shared/data';
+  ErrorState,
+  LoadingBanner,
+  ScreenHeader,
+  Segmented,
+  Toast,
+  Toggle,
+} from '@/shared/ui';
+import { ERROR_CODES, TAB_OPTIONS } from '../configuration/constraints';
+import { dateLabel, money } from '../domain/format';
+import type { RecurringId, Tab } from '../domain/models';
+import { filterByTab, resolveCategory } from './selectors';
+import { Provider, useContext } from './context';
+import { ListSkeleton } from './list-skeleton';
+import { RecurringDetail } from './recurring-detail';
 
-type Tab = 'active' | 'all';
-
-export const Main = () => {
-  const state = useParkaState();
+const RecurringView = () => {
+  const ctx = useContext();
+  const recurring = ctx.useRecurring();
+  const categories = ctx.useCategories();
+  const error = ctx.useError();
+  const notice = ctx.useNotice();
+  const initializing = ctx.useInitializing();
+  const isLoading = ctx.useIsLoading();
   const [tab, setTab] = useState<Tab>('active');
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<RecurringId | null>(null);
 
-  const list =
-    tab === 'active'
-      ? state.recurring.filter((r) => r.active)
-      : state.recurring;
+  useEffect(() => {
+    ctx.load();
+  }, [ctx]);
 
-  const toggle = (id: string, active: boolean) => {
-    const item = state.recurring.find((r) => r.id === id);
-    if (item) updateRecurring({ ...item, active });
-  };
+  const list = filterByTab(recurring, tab);
 
   return (
-    <AppShell e2e="recurring:main" nav="more" title="Wydatki cykliczne">
+    <div data-e2e="recurring:main" className="relative flex flex-1 flex-col">
+      <LoadingBanner active={isLoading && !initializing} />
+      <ScreenHeader
+        title="Wydatki cykliczne"
+        backHref={APP_ROUTER.settings()}
+      />
       <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2">
+        {error ? (
+          <ErrorState
+            data-e2e="recurring:load-error"
+            title="Nie udało się wczytać wydatków cyklicznych"
+            code={ERROR_CODES.load}
+            description={error}
+            onRetry={ctx.load}
+            backHref={APP_ROUTER.settings()}
+          />
+        ) : null}
+
         <Segmented<Tab>
           label="Filtr wydatków cyklicznych"
           value={tab}
           onChange={setTab}
-          options={[
-            { value: 'active', label: 'Aktywne' },
-            { value: 'all', label: 'Wszystkie' },
-          ]}
+          options={TAB_OPTIONS}
         />
 
-        <ul className="space-y-2" data-e2e="recurring:list">
-          {list.map((r) => {
-            const category = resolveCategory(state.categories, r.categoryId);
-            const open = openId === r.id;
-            return (
-              <Card as="li" key={r.id} className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <CategoryAvatar category={category} />
-                  <button
-                    type="button"
-                    className="flex-1 text-left"
-                    aria-expanded={open}
-                    data-e2e={`recurring:row:${r.id}`}
-                    onClick={() => setOpenId(open ? null : r.id)}
-                  >
-                    <span className="block text-sm font-medium">{r.name}</span>
-                    <span className="block text-xs text-ink-soft">
-                      Co miesiąc · {money(r.cost)} · następny{' '}
-                      {dateLabel(r.nextPaymentDate)}
-                    </span>
-                  </button>
-                  <Toggle
-                    checked={r.active}
-                    onChange={(v) => toggle(r.id, v)}
-                    label={`Śledzenie: ${r.name}`}
-                  />
-                </div>
+        {initializing ? (
+          <ListSkeleton />
+        ) : (
+          <ul className="space-y-2" data-e2e="recurring:list">
+            {list.map((r) => {
+              const category = resolveCategory(categories, r.categoryId);
+              const open = openId === r.id;
+              return (
+                <Card as="li" key={r.id} className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <CategoryAvatar category={category} />
+                    <button
+                      type="button"
+                      className="flex-1 text-left"
+                      aria-expanded={open}
+                      data-e2e={`recurring:row:${r.id}`}
+                      onClick={() => setOpenId(open ? null : r.id)}
+                    >
+                      <span className="block text-sm font-medium">
+                        {r.name}
+                      </span>
+                      <span className="block text-xs text-ink-soft">
+                        Co miesiąc · {money(r.cost)} · następny{' '}
+                        {dateLabel(r.nextPaymentDate)}
+                      </span>
+                    </button>
+                    <Toggle
+                      checked={r.active}
+                      onChange={(active) => ctx.update({ ...r, active })}
+                      label={`Śledzenie: ${r.name}`}
+                    />
+                  </div>
 
-                {open ? <RecurringDetail recurring={r} /> : null}
-              </Card>
-            );
-          })}
-          {list.length === 0 ? (
-            <li className="text-sm text-ink-soft">
-              Brak wydatków cyklicznych.
-            </li>
-          ) : null}
-        </ul>
+                  {open ? <RecurringDetail recurring={r} /> : null}
+                </Card>
+              );
+            })}
+            {list.length === 0 && !error ? (
+              <li className="text-sm text-ink-soft">
+                Brak wydatków cyklicznych.
+              </li>
+            ) : null}
+          </ul>
+        )}
       </main>
-    </AppShell>
+
+      {notice ? (
+        <Toast
+          key={notice.id}
+          data-e2e="recurring:toast"
+          tone={notice.tone}
+          message={notice.message}
+          onDismiss={ctx.dismissNotice}
+        />
+      ) : null}
+    </div>
   );
 };
 
-const RecurringDetail = ({ recurring }: { recurring: Recurring }) => (
-  <div className="border-t border-line pt-3" data-e2e="recurring:detail">
-    <dl className="space-y-1 text-sm">
-      <div className="flex justify-between">
-        <dt className="text-ink-soft">Metoda płatności</dt>
-        <dd>{recurring.paymentMethod}</dd>
-      </div>
-      <div className="flex justify-between">
-        <dt className="text-ink-soft">Koszt</dt>
-        <dd className="tabular-nums">{money(recurring.cost)}</dd>
-      </div>
-    </dl>
-    <p className="mb-1 mt-3 text-sm font-semibold">Historia płatności</p>
-    <ul className="space-y-1 text-sm">
-      {recurring.history.map((h) => (
-        <li key={h.date} className="flex justify-between">
-          <span className="text-ink-soft">{dateLabel(h.date)}</span>
-          <span className="tabular-nums">{money(h.amount)}</span>
-        </li>
-      ))}
-    </ul>
-  </div>
+export const Main = () => (
+  <ErrorBoundary
+    fallback={({ reset }) => (
+      <ErrorState
+        title="Wystąpił błąd widoku wydatków cyklicznych"
+        code={ERROR_CODES.render}
+        description="Nie udało się wyświetlić listy. Spróbuj ponownie."
+        onRetry={reset}
+        backHref={APP_ROUTER.settings()}
+      />
+    )}
+  >
+    <Provider>
+      <RecurringView />
+    </Provider>
+  </ErrorBoundary>
 );

@@ -1,6 +1,9 @@
+import { cn } from '@repo/react-kit/cn';
 import { money } from '../domain/format';
 
 type BarDatum = { label: string; value: number };
+
+type Slice = { label: string; value: number; color: string };
 
 export const BarChart = ({
   data,
@@ -22,7 +25,10 @@ export const BarChart = ({
           return (
             <div
               key={d.label}
-              className={`min-h-0.75 flex-1 rounded-t-md ${isLast ? 'bg-brand' : 'bg-brand-soft'}`}
+              className={cn(
+                'min-h-0.75 flex-1 rounded-t-md',
+                isLast ? 'bg-brand' : 'bg-brand-soft',
+              )}
               style={{ height: `${pct}%` }}
               title={`${d.label}: ${money(d.value)}`}
             />
@@ -42,8 +48,6 @@ export const BarChart = ({
     </figure>
   );
 };
-
-type Slice = { label: string; value: number; color: string };
 
 export const Donut = ({
   slices,

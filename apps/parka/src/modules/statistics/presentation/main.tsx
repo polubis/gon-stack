@@ -1,60 +1,53 @@
-import { categoryLabel } from '@/shared/i18n/category-label';
-import { useState } from 'react';
-import { TrendingDown, TrendingUp } from 'lucide-react';
-import { cn } from '@repo/react-kit/cn';
+import { useEffect, useState } from 'react';
+import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import {
-  AppShell,
-  Card,
+  ErrorState,
+  LoadingBanner,
+  ScreenHeader,
   Segmented,
-  BarChart,
-  Donut,
-} from '@/modules/shared/ui';
+} from '@/shared/ui';
+import { APP_ROUTER } from '@/shared/router';
 import {
-  useParkaState,
-  monthTotal,
-  changeVsPrevMonth,
-  categoryBreakdown,
+  DEFAULT_RANGE,
+  DEFAULT_TAB,
+  ERROR_CODES,
+} from '../configuration/constraints';
+import { currentMonth, monthsEndingAt, prevMonth } from '../domain/format';
+import type { Range, Tab } from '../domain/models';
+import {
   biggestChanges,
+  categoryBreakdown,
+  changeVsPrevMonth,
+  monthTotal,
   trend,
-  monthsEndingAt,
-  monthLabel,
-  prevMonth,
-  money,
-  percent,
-} from '@/modules/shared/data';
+} from './selectors';
+import { Provider, useContext } from './context';
+import { Spending } from './spending';
+import { Comparison } from './comparison';
+import { StatisticsSkeleton } from './skeleton';
 
-type Range = '1' | '3' | '6' | '12';
-type Tab = 'spending' | 'comparison';
+const StatisticsView = () => {
+  const ctx = useContext();
+  const expenses = ctx.useExpenses();
+  const categories = ctx.useCategories();
+  const error = ctx.useError();
+  const initializing = ctx.useInitializing();
+  const isLoading = ctx.useIsLoading();
+  const [month] = useState(currentMonth);
+  const [tab, setTab] = useState<Tab>(DEFAULT_TAB);
+  const [range, setRange] = useState<Range>(DEFAULT_RANGE);
 
-const RANGE_LABEL: Record<Range, string> = {
-  '1': 'Miesiąc',
-  '3': '3 miesiące',
-  '6': '6 miesięcy',
-  '12': 'Rok',
-};
+  useEffect(() => {
+    ctx.load();
+  }, [ctx]);
 
-export const Main = () => {
-  const state = useParkaState();
-  const month = state.selectedMonth;
-  const [tab, setTab] = useState<Tab>('spending');
-  const [range, setRange] = useState<Range>('3');
-
-  const count = Number(range);
-  const months = monthsEndingAt(month, count);
-  const rangeTotal = months.reduce((s, m) => s + monthTotal(state, m), 0);
-  const slices = categoryBreakdown(state, months);
-  const bars = trend(state, month, count).map((t) => ({
-    label: monthLabel(t.month).slice(0, 3),
-    value: t.total,
-  }));
-
-  const current = monthTotal(state, month);
-  const previous = monthTotal(state, prevMonth(month));
-  const monthChange = changeVsPrevMonth(state, month);
-  const changes = biggestChanges(state, month);
+  const months = monthsEndingAt(month, Number(range));
+  const rangeTotal = months.reduce((s, m) => s + monthTotal(expenses, m), 0);
 
   return (
-    <AppShell e2e="statistics:main" nav="stats" title="Statystyki">
+    <div data-e2e="statistics:main" className="relative flex flex-1 flex-col">
+      <LoadingBanner active={isLoading && !initializing} />
+      <ScreenHeader title="Statystyki" />
       <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2">
         <Segmented<Tab>
           label="Widok statystyk"
@@ -66,147 +59,52 @@ export const Main = () => {
           ]}
         />
 
-        {tab === 'spending' ? (
-          <>
-            <div
-              className="flex gap-1 overflow-x-auto"
-              role="tablist"
-              aria-label="Zakres czasu"
-            >
-              {(Object.keys(RANGE_LABEL) as Range[]).map((r) => (
-                <button
-                  key={r}
-                  type="button"
-                  role="tab"
-                  aria-selected={r === range}
-                  data-e2e={`statistics:range:${r}`}
-                  onClick={() => setRange(r)}
-                  className={cn(
-                    'shrink-0 rounded-full px-3 py-1.5 text-sm font-medium',
-                    r === range
-                      ? 'bg-brand text-on-brand'
-                      : 'bg-card text-ink-soft border border-line-strong',
-                  )}
-                >
-                  {RANGE_LABEL[r]}
-                </button>
-              ))}
-            </div>
-
-            <Card className="space-y-3">
-              <div>
-                <p className="text-sm text-ink-soft">
-                  Wydatki całkowite ({RANGE_LABEL[range]})
-                </p>
-                <p
-                  className="text-3xl font-bold tracking-tight"
-                  data-e2e="statistics:total"
-                >
-                  {money(rangeTotal)}
-                </p>
-              </div>
-              <BarChart
-                data={bars}
-                caption="Trend wydatków w wybranym zakresie"
-              />
-            </Card>
-
-            <Card className="space-y-3">
-              <h2 className="text-sm font-semibold text-ink-soft">Kategorie</h2>
-              {slices.length > 0 ? (
-                <Donut
-                  caption="Udział kategorii w wydatkach"
-                  slices={slices.map((s) => ({
-                    label: categoryLabel(s.category.name),
-                    value: s.amount,
-                    color: s.category.color,
-                  }))}
-                />
-              ) : (
-                <p className="text-sm text-ink-soft">
-                  Brak danych w tym zakresie.
-                </p>
-              )}
-            </Card>
-          </>
+        {error ? (
+          <ErrorState
+            title="Nie udało się wczytać statystyk"
+            code={ERROR_CODES.load}
+            description={error}
+            onRetry={ctx.load}
+            backHref={APP_ROUTER.dashboard()}
+          />
+        ) : initializing ? (
+          <StatisticsSkeleton />
+        ) : tab === 'spending' ? (
+          <Spending
+            range={range}
+            onRangeChange={setRange}
+            total={rangeTotal}
+            points={trend(expenses, month, Number(range))}
+            slices={categoryBreakdown(expenses, categories, months)}
+          />
         ) : (
-          <>
-            <Card className="space-y-3">
-              <h2 className="text-sm font-semibold text-ink-soft">
-                Wydatki całkowite
-              </h2>
-              <div className="flex items-end gap-4">
-                <div>
-                  <p
-                    className="text-2xl font-bold tabular-nums"
-                    data-e2e="statistics:current"
-                  >
-                    {money(current)}
-                  </p>
-                  <p className="text-xs capitalize text-ink-soft">
-                    {monthLabel(month)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold tabular-nums text-ink-soft">
-                    {money(previous)}
-                  </p>
-                  <p className="text-xs capitalize text-ink-soft">
-                    {monthLabel(prevMonth(month))}
-                  </p>
-                </div>
-                <p
-                  className={cn(
-                    'ml-auto inline-flex items-center gap-1 text-sm font-semibold',
-                    monthChange <= 0 ? 'text-brand-dark' : 'text-danger-strong',
-                  )}
-                >
-                  {monthChange <= 0 ? (
-                    <TrendingDown className="h-4 w-4" aria-hidden="true" />
-                  ) : (
-                    <TrendingUp className="h-4 w-4" aria-hidden="true" />
-                  )}
-                  {percent(monthChange)}
-                </p>
-              </div>
-            </Card>
-
-            <Card className="space-y-2">
-              <h2 className="text-sm font-semibold text-ink-soft">
-                Największe zmiany
-              </h2>
-              <ul
-                className="divide-y divide-black/5"
-                data-e2e="statistics:changes"
-              >
-                {changes.map(({ category, changePct }) => (
-                  <li
-                    key={category.id}
-                    className="flex items-center justify-between py-2 text-sm"
-                  >
-                    <span>{categoryLabel(category.name)}</span>
-                    <span
-                      className={cn(
-                        'font-semibold tabular-nums',
-                        changePct <= 0
-                          ? 'text-brand-dark'
-                          : 'text-danger-strong',
-                      )}
-                    >
-                      {percent(changePct)}
-                    </span>
-                  </li>
-                ))}
-                {changes.length === 0 ? (
-                  <li className="py-2 text-sm text-ink-soft">
-                    Brak istotnych zmian.
-                  </li>
-                ) : null}
-              </ul>
-            </Card>
-          </>
+          <Comparison
+            month={month}
+            current={monthTotal(expenses, month)}
+            previous={monthTotal(expenses, prevMonth(month))}
+            monthChange={changeVsPrevMonth(expenses, month)}
+            changes={biggestChanges(expenses, categories, month)}
+          />
         )}
       </main>
-    </AppShell>
+    </div>
   );
 };
+
+export const Main = () => (
+  <ErrorBoundary
+    fallback={({ reset }) => (
+      <ErrorState
+        title="Wystąpił błąd widoku statystyk"
+        code={ERROR_CODES.render}
+        description="Nie udało się wyświetlić statystyk. Spróbuj ponownie."
+        onRetry={reset}
+        backHref={APP_ROUTER.dashboard()}
+      />
+    )}
+  >
+    <Provider>
+      <StatisticsView />
+    </Provider>
+  </ErrorBoundary>
+);
