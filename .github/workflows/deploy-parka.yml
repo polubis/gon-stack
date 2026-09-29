@@ -76,8 +76,18 @@ jobs:
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
-      - name: Deploy Worker (affected)
+      # DB first: new code never runs against an old schema.
+      - name: Migrate DB
+        working-directory: apps/parka
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.PARKA_SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.PARKA_SUPABASE_DB_PASSWORD }}
+        run: |
+          pnpm exec supabase link --project-ref "${{ secrets.PARKA_SUPABASE_PROJECT_REF }}"
+          pnpm exec supabase db push
+
+      - name: Deploy Worker
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.PARKA_CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.PARKA_CLOUDFLARE_ACCOUNT_ID }}
-        run: pnpm exec turbo run deploy --affected --filter=parka...
+        run: pnpm exec turbo run deploy --filter=parka
