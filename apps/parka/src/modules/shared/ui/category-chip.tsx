@@ -1,3 +1,4 @@
+import { categoryLabel } from '@/shared/i18n/category-label';
 import { cn } from '@repo/react-kit/cn';
 import type { Category } from '@/modules/shared/data';
 import { CategoryIcon } from './icon';
@@ -26,6 +27,6 @@ export const CategoryTag = ({ category }: { category: Category }) => (
     style={{ backgroundColor: `${category.color}1a`, color: category.color }}
   >
     <CategoryIcon id={category.icon} className="h-3 w-3" />
-    {category.name}
+    {categoryLabel(category.name)}
   </span>
 );

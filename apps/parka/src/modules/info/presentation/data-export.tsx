@@ -1,3 +1,4 @@
+import { categoryLabel } from '@/shared/i18n/category-label';
 import { useState } from 'react';
 import { FileText, FileDown, Check } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
@@ -29,7 +30,9 @@ export const DataExportMain = () => {
     ...state.expenses.map((e) => [
       dateLabel(e.date),
       e.merchant,
-      state.categories.find((c) => c.id === e.categoryId)?.name ?? '',
+      categoryLabel(
+        state.categories.find((c) => c.id === e.categoryId)?.name ?? '',
+      ),
       e.amount.toFixed(2),
       e.paymentMethod,
     ]),

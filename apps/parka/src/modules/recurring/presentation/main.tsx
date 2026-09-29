@@ -8,6 +8,7 @@ import {
 } from '@/modules/shared/ui';
 import {
   useParkaState,
+  resolveCategory,
   updateRecurring,
   dateLabel,
   money,
@@ -46,9 +47,7 @@ export const Main = () => {
 
         <ul className="space-y-2" data-e2e="recurring:list">
           {list.map((r) => {
-            const category =
-              state.categories.find((c) => c.id === r.categoryId) ??
-              state.categories[0];
+            const category = resolveCategory(state.categories, r.categoryId);
             const open = openId === r.id;
             return (
               <Card as="li" key={r.id} className="space-y-3">

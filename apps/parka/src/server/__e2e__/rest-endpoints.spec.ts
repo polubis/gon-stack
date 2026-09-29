@@ -7,7 +7,7 @@ import { API_ROUTER } from '@/shared/router';
  * Integration coverage for the per-entity REST endpoints (categories,
  * expenses, limits, goals, recurring, notifications, settings) added to
  * replace the aggregate `/api/state` GET/PUT. Registers a fresh Supabase user
- * (seeded with demo data via a Postgres trigger) then drives each endpoint
+ * (starting with no data) then drives each endpoint
  * directly through `page.request`, which shares the browser's auth cookies.
  */
 
@@ -30,12 +30,10 @@ const commands = {
     await registerAndConfirm(page, EMAIL, PASSWORD);
   },
 
-  'seeded categories are listed': async (page) => {
+  'a new account has no categories': async (page) => {
     const res = await page.request.get(API_ROUTER.categories());
     expect(res.ok()).toBe(true);
-    const data = (await res.json()).data;
-    expect(data.length).toBeGreaterThan(0);
-    categoryIdByPage.set(page, data[0].id);
+    expect((await res.json()).data).toEqual([]);
   },
   'i create a category': async (page) => {
     const res = await page.request.post(API_ROUTER.categories(), {
@@ -48,6 +46,7 @@ const commands = {
     });
     expect(res.status()).toBe(201);
     expect((await res.json()).data.name).toBe('Kultura');
+    categoryIdByPage.set(page, 'e2e-cat-1');
   },
   'i rename the category': async (page) => {
     const res = await page.request.put(API_ROUTER.categoryById('e2e-cat-1'), {
@@ -274,7 +273,7 @@ test('REST endpoints CRUD each finance entity through Postgres', async ({
 }) => {
   await interpreter(commands, page)(
     ['i register and sign in'],
-    ['seeded categories are listed'],
+    ['a new account has no categories'],
     ['i create a category'],
     ['i rename the category'],
     ['i create an expense with items'],

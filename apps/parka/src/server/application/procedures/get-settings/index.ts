@@ -18,7 +18,7 @@ export const getSettings = privateProcedure({
       code: 200 as const,
       data: {
         profile: {
-          name: profile.data?.name ?? 'Anna Kowalska',
+          name: profile.data?.name ?? '',
           email: profile.data?.email ?? '',
         },
         notifications: {

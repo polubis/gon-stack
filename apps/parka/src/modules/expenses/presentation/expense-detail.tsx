@@ -1,7 +1,15 @@
+import { categoryLabel } from '@/shared/i18n/category-label';
 import { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Trash2, Pencil } from 'lucide-react';
-import { Button, Field, inputClass, CategoryAvatar } from '@/modules/shared/ui';
+import {
+  Button,
+  Field,
+  inputClass,
+  NumberInput,
+  CategoryAvatar,
+} from '@/modules/shared/ui';
+import { UNCATEGORIZED } from '../configuration/constraints';
 import { itemTotal, dateTimeLabel, money } from '../domain/format';
 import type { CategoryId, Expense } from '../domain/models';
 import { useContext } from './context';
@@ -20,16 +28,18 @@ export const ExpenseDetail = ({
   const ctx = useContext();
   const categories = ctx.useCategories();
   const category =
-    categories.find((c) => c.id === expense.categoryId) ?? categories[0];
+    categories.find((c) => c.id === expense.categoryId) ??
+    categories[0] ??
+    UNCATEGORIZED;
   const [merchant, setMerchant] = useState(expense.merchant);
-  const [amount, setAmount] = useState(String(expense.amount));
+  const [amount, setAmount] = useState(expense.amount);
   const [categoryId, setCategoryId] = useState<CategoryId>(expense.categoryId);
 
   const save = () => {
     ctx.update({
       ...expense,
       merchant,
-      amount: Number(amount) || 0,
+      amount,
       categoryId,
     });
     onClose();
@@ -79,13 +89,10 @@ export const ExpenseDetail = ({
                 />
               </Field>
               <Field label="Kwota">
-                <input
-                  type="number"
-                  step="0.01"
-                  className={inputClass}
+                <NumberInput
                   value={amount}
                   data-e2e="expenses:edit-amount"
-                  onChange={(e) => setAmount(e.target.value)}
+                  onValueChange={setAmount}
                 />
               </Field>
               <Field label="Kategoria">
@@ -102,7 +109,7 @@ export const ExpenseDetail = ({
                 >
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.name}
+                      {categoryLabel(c.name)}
                     </option>
                   ))}
                 </select>
@@ -122,7 +129,7 @@ export const ExpenseDetail = ({
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-ink-soft">Kategoria</dt>
-                  <dd>{category.name}</dd>
+                  <dd>{categoryLabel(category.name)}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-ink-soft">Metoda płatności</dt>

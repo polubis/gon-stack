@@ -10,6 +10,7 @@ export {
 export { BarChart, Donut } from './charts';
 export { CategoryAvatar, CategoryTag } from './category-chip';
 export { CategoryIcon, CATEGORY_ICON_OPTIONS } from './icon';
+export { NumberInput } from './number-input';
 export { Skeleton } from './skeleton';
 export { LoadingBanner } from './loading-banner';
 export { ErrorState } from './error-state';

@@ -1,3 +1,4 @@
+import { categoryLabel } from '@/shared/i18n/category-label';
 import { useMemo, useState } from 'react';
 import { Camera, Check, ChevronDown, Plus, Sparkles } from 'lucide-react';
 import {
@@ -6,11 +7,13 @@ import {
   ScreenHeader,
   Button,
   Field,
+  NumberInput,
   inputClass,
 } from '@/modules/shared/ui';
 import { CategoryAvatar } from '@/modules/shared/ui';
 import {
   useParkaState,
+  resolveCategory,
   createExpense,
   createNotification,
   genId,
@@ -26,7 +29,7 @@ type Draft = {
   items: ReceiptItem[];
 };
 
-const emptyDraft = (): Draft => ({
+const emptyDraft = (categoryId: string): Draft => ({
   merchant: '',
   date: new Date().toISOString().slice(0, 10),
   items: [
@@ -36,53 +39,14 @@ const emptyDraft = (): Draft => ({
       unitPrice: 0,
       quantity: 1,
       discount: 0,
-      categoryId: 'other',
-    },
-  ],
-});
-
-/** Simulated AI extraction — deterministic sample so review always has data. */
-const extract = (): Draft => ({
-  merchant: 'Biedronka',
-  date: '2025-04-12',
-  items: [
-    {
-      id: genId('ri'),
-      name: 'Chleb pszenny',
-      unitPrice: 1.99,
-      quantity: 1,
-      discount: 0,
-      categoryId: 'groceries',
-    },
-    {
-      id: genId('ri'),
-      name: 'Mleko 2% 1 l',
-      unitPrice: 2.99,
-      quantity: 2,
-      discount: 0,
-      categoryId: 'groceries',
-    },
-    {
-      id: genId('ri'),
-      name: 'Ser twarogowy',
-      unitPrice: 4.49,
-      quantity: 1,
-      discount: 0.5,
-      categoryId: 'groceries',
-    },
-    {
-      id: genId('ri'),
-      name: 'Bilet MPK',
-      unitPrice: 4.9,
-      quantity: 1,
-      discount: 0,
-      categoryId: 'transport',
+      categoryId,
     },
   ],
 });
 
 export const Main = () => {
   const state = useParkaState();
+  const defaultCategoryId = state.categories[0]?.id ?? '';
   const [step, setStep] = useState<'scan' | 'processing' | 'review'>('scan');
   const [draft, setDraft] = useState<Draft | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -95,13 +59,13 @@ export const Main = () => {
   const capture = () => {
     setStep('processing');
     window.setTimeout(() => {
-      setDraft(extract());
+      setDraft(emptyDraft(defaultCategoryId));
       setStep('review');
     }, 600);
   };
 
   const startManual = () => {
-    setDraft(emptyDraft());
+    setDraft(emptyDraft(defaultCategoryId));
     setStep('review');
   };
 
@@ -116,8 +80,8 @@ export const Main = () => {
     );
 
   const persist = async () => {
-    if (!draft) return;
-    const primary = draft.items[0]?.categoryId ?? 'other';
+    if (!draft || draft.items.some((i) => !i.categoryId)) return;
+    const primary = draft.items[0]?.categoryId ?? defaultCategoryId;
     await Promise.all([
       createExpense({
         id: genId('exp'),
@@ -205,6 +169,19 @@ export const Main = () => {
         className="flex flex-1 flex-col gap-4 px-4 pb-28 pt-2"
         data-e2e="receipt:review"
       >
+        {state.categories.length === 0 ? (
+          <Card data-e2e="receipt:no-categories" role="status">
+            <p className="text-sm text-ink-soft">
+              Aby zapisać paragon, dodaj najpierw kategorię (np. sugerowane).
+            </p>
+            <a
+              href={APP_ROUTER.categories()}
+              className="text-sm font-medium underline"
+            >
+              Dodaj kategorię
+            </a>
+          </Card>
+        ) : null}
         <Card className="space-y-3">
           <Field label="Sklep">
             <input
@@ -247,7 +224,7 @@ export const Main = () => {
                       unitPrice: 0,
                       quantity: 1,
                       discount: 0,
-                      categoryId: 'other',
+                      categoryId: defaultCategoryId,
                     },
                   ],
                 })
@@ -260,9 +237,10 @@ export const Main = () => {
 
           <ul className="space-y-2">
             {d.items.map((item) => {
-              const category =
-                state.categories.find((c) => c.id === item.categoryId) ??
-                state.categories[0];
+              const category = resolveCategory(
+                state.categories,
+                item.categoryId,
+              );
               const open = editingId === item.id;
               return (
                 <Card as="li" key={item.id} className="space-y-3">
@@ -278,7 +256,7 @@ export const Main = () => {
                         {item.name}
                       </span>
                       <span className="block text-xs text-ink-soft">
-                        {category.name}
+                        {categoryLabel(category.name)}
                       </span>
                     </span>
                     <span className="text-sm font-semibold tabular-nums">
@@ -305,46 +283,30 @@ export const Main = () => {
                         </Field>
                       </div>
                       <Field label="Cena">
-                        <input
-                          type="number"
-                          step="0.01"
-                          className={inputClass}
+                        <NumberInput
                           value={item.unitPrice}
                           data-e2e={`receipt:item-price:${item.id}`}
-                          onChange={(e) =>
-                            patchItem(item.id, {
-                              unitPrice: Number(e.target.value),
-                            })
+                          onValueChange={(unitPrice) =>
+                            patchItem(item.id, { unitPrice })
                           }
                         />
                       </Field>
                       <Field label="Ilość">
-                        <input
-                          type="number"
-                          step="1"
-                          min="1"
-                          className={inputClass}
+                        <NumberInput
+                          integer
                           value={item.quantity}
                           data-e2e={`receipt:item-qty:${item.id}`}
-                          onChange={(e) =>
-                            patchItem(item.id, {
-                              quantity: Number(e.target.value),
-                            })
+                          onValueChange={(quantity) =>
+                            patchItem(item.id, { quantity })
                           }
                         />
                       </Field>
                       <Field label="Rabat">
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          className={inputClass}
+                        <NumberInput
                           value={item.discount}
                           data-e2e={`receipt:item-discount:${item.id}`}
-                          onChange={(e) =>
-                            patchItem(item.id, {
-                              discount: Number(e.target.value),
-                            })
+                          onValueChange={(discount) =>
+                            patchItem(item.id, { discount })
                           }
                         />
                       </Field>
@@ -357,9 +319,12 @@ export const Main = () => {
                             patchItem(item.id, { categoryId: e.target.value })
                           }
                         >
+                          {state.categories.length === 0 ? (
+                            <option value="">Bez kategorii</option>
+                          ) : null}
                           {state.categories.map((c) => (
                             <option key={c.id} value={c.id}>
-                              {c.name}
+                              {categoryLabel(c.name)}
                             </option>
                           ))}
                         </select>
@@ -386,6 +351,9 @@ export const Main = () => {
         <Button
           className="w-auto px-6"
           data-e2e="receipt:save"
+          disabled={
+            state.categories.length === 0 || d.items.some((i) => !i.categoryId)
+          }
           onClick={persist}
         >
           <Check className="h-4 w-4" aria-hidden="true" /> Zapisz

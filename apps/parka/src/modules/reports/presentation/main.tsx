@@ -1,3 +1,4 @@
+import { categoryLabel } from '@/shared/i18n/category-label';
 import { FileText, Download } from 'lucide-react';
 import { AppShell, Card, ScreenHeader, Button } from '@/modules/shared/ui';
 import { APP_ROUTER } from '@/shared/router';
@@ -36,7 +37,9 @@ export const Main = () => {
       ...expenses.map((e) => [
         dateLabel(e.date),
         e.merchant,
-        state.categories.find((c) => c.id === e.categoryId)?.name ?? '',
+        categoryLabel(
+          state.categories.find((c) => c.id === e.categoryId)?.name ?? '',
+        ),
         e.amount.toFixed(2),
         e.isBill ? 'Rachunek' : 'Zakup',
       ]),

@@ -1,3 +1,4 @@
+import { categoryLabel } from '@/shared/i18n/category-label';
 import { useState } from 'react';
 import { Plus, Check } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
@@ -21,6 +22,7 @@ import {
   type CategoryIconId,
 } from '@/modules/shared/data';
 import { APP_ROUTER } from '@/shared/router';
+import { DEFAULT_CATEGORIES } from '../configuration/defaults';
 
 const COLORS = [
   '#0f7a4f',
@@ -33,11 +35,22 @@ const COLORS = [
   '#4b5a52',
 ];
 
+const addDefault = (d: (typeof DEFAULT_CATEGORIES)[number]) =>
+  createCategory({
+    id: d.slug,
+    name: `category.${d.slug}`,
+    icon: d.icon,
+    color: d.color,
+  });
+
 type Editing = { mode: 'new' } | { mode: 'edit'; category: Category } | null;
 
 export const Main = () => {
   const state = useParkaState();
   const [editing, setEditing] = useState<Editing>(null);
+  const missingDefaults = DEFAULT_CATEGORIES.filter(
+    (d) => !state.categories.some((c) => c.id === d.slug),
+  );
 
   return (
     <AppShell e2e="categories:main" nav="more">
@@ -70,11 +83,42 @@ export const Main = () => {
                 className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-black/[0.02]"
               >
                 <CategoryAvatar category={c} />
-                <span className="flex-1 text-sm font-medium">{c.name}</span>
+                <span className="flex-1 text-sm font-medium">
+                  {categoryLabel(c.name)}
+                </span>
               </button>
             </li>
           ))}
         </ul>
+
+        {missingDefaults.length > 0 ? (
+          <Card className="space-y-3">
+            <h2 className="text-sm font-semibold">Sugerowane kategorie</h2>
+            <ul className="flex flex-wrap gap-2">
+              {missingDefaults.map((d) => (
+                <li key={d.slug}>
+                  <button
+                    type="button"
+                    data-e2e={`categories:add-default:${d.slug}`}
+                    onClick={() => addDefault(d)}
+                    className="inline-flex items-center gap-2 rounded-full border border-line px-3 py-1.5 text-sm"
+                  >
+                    <CategoryIcon id={d.icon} className="h-4 w-4" />
+                    {categoryLabel(`category.${d.slug}`)}
+                    <Plus className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <Button
+              variant="ghost"
+              data-e2e="categories:add-defaults"
+              onClick={() => missingDefaults.forEach(addDefault)}
+            >
+              Dodaj wszystkie
+            </Button>
+          </Card>
+        ) : null}
 
         {editing ? (
           <CategoryForm
@@ -96,7 +140,7 @@ const CategoryForm = ({
   onDone: () => void;
 }) => {
   const base = editing.mode === 'edit' ? editing.category : null;
-  const [name, setName] = useState(base?.name ?? '');
+  const [name, setName] = useState(base ? categoryLabel(base.name) : '');
   const [icon, setIcon] = useState<CategoryIconId>(base?.icon ?? 'cart');
   const [color, setColor] = useState(base?.color ?? COLORS[0]);
 
@@ -111,7 +155,10 @@ const CategoryForm = ({
     } else {
       updateCategory({
         ...editing.category,
-        name: name || editing.category.name,
+        name:
+          !name || name === categoryLabel(editing.category.name)
+            ? editing.category.name
+            : name,
         icon,
         color,
       });

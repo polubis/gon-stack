@@ -1,3 +1,4 @@
+import { categoryLabel } from '@/shared/i18n/category-label';
 import { useEffect, useState } from 'react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import { APP_ROUTER } from '@/shared/router';
@@ -8,7 +9,11 @@ import {
   Segmented,
   Toast,
 } from '@/modules/shared/ui';
-import { ERROR_CODES, FILTER_OPTIONS } from '../configuration/constraints';
+import {
+  ERROR_CODES,
+  FILTER_OPTIONS,
+  UNCATEGORIZED,
+} from '../configuration/constraints';
 import { dateTimeLabel, money, monthLabel } from '../domain/format';
 import { groupByMonth, sortByDateDesc, sumAmount } from '../domain/grouping';
 import type { Expense, ExpenseId, Filter } from '../domain/models';
@@ -40,7 +45,9 @@ const ExpensesView = () => {
 
   const row = (e: Expense) => {
     const category =
-      categories.find((c) => c.id === e.categoryId) ?? categories[0];
+      categories.find((c) => c.id === e.categoryId) ??
+      categories[0] ??
+      UNCATEGORIZED;
     return (
       <li key={e.id}>
         <button
@@ -100,10 +107,13 @@ const ExpensesView = () => {
               const items = visible.filter((e) => e.categoryId === category.id);
               if (items.length === 0) return null;
               return (
-                <section key={category.id} aria-label={category.name}>
+                <section
+                  key={category.id}
+                  aria-label={categoryLabel(category.name)}
+                >
                   <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold">
                     <CategoryAvatar category={category} className="h-6 w-6" />
-                    {category.name}
+                    {categoryLabel(category.name)}
                     <span className="ml-auto text-ink-soft">
                       {money(sumAmount(items))}
                     </span>

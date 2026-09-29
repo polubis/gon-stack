@@ -1,6 +1,17 @@
 import type { Category, Expense, ParkaState } from './types';
 import { monthOf, prevMonth } from './format';
 
+export const UNCATEGORIZED: Category = {
+  id: '',
+  name: 'Bez kategorii',
+  icon: 'sparkles',
+  color: '#4b5a52',
+};
+
+/** Matching category, else the first one, else a placeholder (no categories yet). */
+export const resolveCategory = (categories: Category[], id: string): Category =>
+  categories.find((c) => c.id === id) ?? categories[0] ?? UNCATEGORIZED;
+
 export const itemTotal = (i: {
   unitPrice: number;
   quantity: number;

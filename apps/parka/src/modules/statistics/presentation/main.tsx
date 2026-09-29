@@ -1,3 +1,4 @@
+import { categoryLabel } from '@/shared/i18n/category-label';
 import { useState } from 'react';
 import { TrendingDown, TrendingUp } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
@@ -116,7 +117,7 @@ export const Main = () => {
                 <Donut
                   caption="Udział kategorii w wydatkach"
                   slices={slices.map((s) => ({
-                    label: s.category.name,
+                    label: categoryLabel(s.category.name),
                     value: s.amount,
                     color: s.category.color,
                   }))}
@@ -183,7 +184,7 @@ export const Main = () => {
                     key={category.id}
                     className="flex items-center justify-between py-2 text-sm"
                   >
-                    <span>{category.name}</span>
+                    <span>{categoryLabel(category.name)}</span>
                     <span
                       className={cn(
                         'font-semibold tabular-nums',

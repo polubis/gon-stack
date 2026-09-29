@@ -1,3 +1,4 @@
+import { categoryLabel } from '@/shared/i18n/category-label';
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import {
@@ -8,11 +9,13 @@ import {
   Toggle,
   Button,
   Field,
+  NumberInput,
   inputClass,
   CategoryAvatar,
 } from '@/modules/shared/ui';
 import {
   useParkaState,
+  resolveCategory,
   updateLimit,
   createLimit,
   createGoal,
@@ -55,15 +58,16 @@ export const Main = () => {
           <>
             <ul className="space-y-2" data-e2e="limits:category-list">
               {progress.categories.map((c) => {
-                const category =
-                  state.categories.find((x) => x.id === c.categoryId) ??
-                  state.categories[0];
+                const category = resolveCategory(
+                  state.categories,
+                  c.categoryId,
+                );
                 return (
                   <Card as="li" key={c.categoryId} className="space-y-2">
                     <div className="flex items-center gap-3">
                       <CategoryAvatar category={category} />
                       <span className="flex-1 text-sm font-medium">
-                        {category.name}
+                        {categoryLabel(category.name)}
                       </span>
                       <span className="text-sm tabular-nums">
                         {money(c.spent)} / {money(c.amount)}
@@ -72,7 +76,7 @@ export const Main = () => {
                     <ProgressBar
                       pct={c.pct}
                       tone={tone(c.pct)}
-                      label={`${category.name}: ${Math.round(c.pct)}% limitu`}
+                      label={`${categoryLabel(category.name)}: ${Math.round(c.pct)}% limitu`}
                     />
                     <p className="text-xs text-ink-soft">
                       {Math.round(c.pct)}% limitu
@@ -145,15 +149,14 @@ const TotalLimit = ({
 }) => {
   const state = useParkaState();
   const [editing, setEditing] = useState(false);
-  const [amount, setAmount] = useState(String(progress?.amount ?? 3500));
+  const [amount, setAmount] = useState(progress?.amount ?? 3500);
 
   if (!progress)
     return <p className="text-sm text-ink-soft">Brak zdefiniowanego limitu.</p>;
 
   const save = () => {
     const total = state.limits.find((l) => l.scope === 'total');
-    if (total)
-      updateLimit({ ...total, amount: Number(amount) || total.amount });
+    if (total) updateLimit({ ...total, amount: amount || total.amount });
     setEditing(false);
   };
 
@@ -179,12 +182,10 @@ const TotalLimit = ({
       {editing ? (
         <div className="space-y-2">
           <Field label="Nowy limit miesięczny">
-            <input
-              type="number"
-              className={inputClass}
+            <NumberInput
               value={amount}
               data-e2e="limits:total-amount"
-              onChange={(e) => setAmount(e.target.value)}
+              onValueChange={setAmount}
             />
           </Field>
           <Button data-e2e="limits:total-save" onClick={save}>
@@ -211,9 +212,9 @@ const NewLimitForm = ({ onDone }: { onDone: () => void }) => {
     (c) => !state.limits.some((l) => l.categoryId === c.id),
   );
   const [categoryId, setCategoryId] = useState(
-    withoutLimit[0]?.id ?? state.categories[0].id,
+    withoutLimit[0]?.id ?? state.categories[0]?.id ?? '',
   );
-  const [amount, setAmount] = useState('300');
+  const [amount, setAmount] = useState(300);
   const [alertAt80, setAlertAt80] = useState(true);
   const [delivery, setDelivery] = useState<'push' | 'email'>('push');
 
@@ -222,7 +223,7 @@ const NewLimitForm = ({ onDone }: { onDone: () => void }) => {
       id: genId('limit'),
       scope: 'category',
       categoryId,
-      amount: Number(amount) || 0,
+      amount,
       alertAt80,
       delivery,
     });
@@ -241,18 +242,16 @@ const NewLimitForm = ({ onDone }: { onDone: () => void }) => {
         >
           {state.categories.map((c) => (
             <option key={c.id} value={c.id}>
-              {c.name}
+              {categoryLabel(c.name)}
             </option>
           ))}
         </select>
       </Field>
       <Field label="Limit miesięczny">
-        <input
-          type="number"
-          className={inputClass}
+        <NumberInput
           value={amount}
           data-e2e="limits:form-amount"
-          onChange={(e) => setAmount(e.target.value)}
+          onValueChange={setAmount}
         />
       </Field>
       <div className="flex items-center justify-between">
@@ -302,16 +301,16 @@ const NewLimitForm = ({ onDone }: { onDone: () => void }) => {
 
 const NewGoalForm = ({ onDone }: { onDone: () => void }) => {
   const [name, setName] = useState('');
-  const [target, setTarget] = useState('2000');
-  const [months, setMonths] = useState('6');
+  const [target, setTarget] = useState(2000);
+  const [months, setMonths] = useState(6);
 
   const save = () => {
     createGoal({
       id: genId('goal'),
       name: name || 'Nowy cel',
-      target: Number(target) || 0,
+      target,
       saved: 0,
-      months: Number(months) || 1,
+      months: months || 1,
     });
     onDone();
   };
@@ -329,21 +328,18 @@ const NewGoalForm = ({ onDone }: { onDone: () => void }) => {
         />
       </Field>
       <Field label="Kwota docelowa">
-        <input
-          type="number"
-          className={inputClass}
+        <NumberInput
           value={target}
           data-e2e="goals:form-target"
-          onChange={(e) => setTarget(e.target.value)}
+          onValueChange={setTarget}
         />
       </Field>
       <Field label="Horyzont (miesiące)">
-        <input
-          type="number"
-          className={inputClass}
+        <NumberInput
+          integer
           value={months}
           data-e2e="goals:form-months"
-          onChange={(e) => setMonths(e.target.value)}
+          onValueChange={setMonths}
         />
       </Field>
       <div className="flex gap-2">

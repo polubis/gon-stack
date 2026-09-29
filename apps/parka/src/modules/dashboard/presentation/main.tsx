@@ -1,3 +1,4 @@
+import { categoryLabel } from '@/shared/i18n/category-label';
 import { useEffect, useState } from 'react';
 import {
   ChevronLeft,
@@ -200,7 +201,7 @@ const DashboardView = () => {
             <Donut
               caption={`Rozkład wydatków wg kategorii w ${monthLabel(month)}`}
               slices={summary.categories.map((c) => ({
-                label: c.name,
+                label: categoryLabel(c.name),
                 value: c.amount,
                 color: c.color,
               }))}

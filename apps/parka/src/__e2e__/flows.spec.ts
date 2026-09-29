@@ -20,6 +20,62 @@ const plMonthLabel = (year: number, month: number): string =>
 const yearMonth = (date: Date): string =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
+const CATEGORY = {
+  id: 'cat-1',
+  name: 'Spożywcze',
+  icon: 'cart',
+  color: '#0f7a4f',
+};
+
+/**
+ * Stubs every store bootstrap endpoint (empty unless overridden) so the app
+ * boots in backend mode with deterministic rows and no real session.
+ */
+const mockState = async (
+  page: Page,
+  rows: { recurring?: unknown[]; categories?: unknown[] } = {},
+): Promise<void> => {
+  const collections: [string, unknown[]][] = [
+    [API_ROUTER.categories(), rows.categories ?? [CATEGORY]],
+    [API_ROUTER.expenses(), []],
+    [API_ROUTER.limits(), []],
+    [API_ROUTER.goals(), []],
+    [API_ROUTER.recurring(), rows.recurring ?? []],
+    [API_ROUTER.notifications(), []],
+  ];
+  for (const [url, data] of collections) {
+    await page.route(`**${url}**`, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          code: 200,
+          data: route.request().method() === 'GET' ? data : {},
+        }),
+      });
+    });
+  }
+  await page.route(`**${API_ROUTER.settings()}**`, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        code: 200,
+        data: {
+          profile: { name: '', email: '' },
+          notifications: {
+            push: true,
+            email: false,
+            limitWarnings: true,
+            receiptConfirmations: true,
+            limitAlerts: true,
+          },
+        },
+      }),
+    });
+  });
+};
+
 const currentTotalByPage = new WeakMap<Page, string>();
 
 const commands = {
@@ -105,6 +161,7 @@ const commands = {
   },
 
   'i scan and save a receipt as an expense': async (page) => {
+    await mockState(page);
     await open(page, APP_ROUTER.receiptScan());
     await page.getByTestId('receipt:capture').click();
 
@@ -112,9 +169,52 @@ const commands = {
     await page.getByTestId('receipt:merchant').fill('Testowy Sklep E2E');
 
     // Correct the first item.
-    await page.getByRole('button', { name: /Chleb pszenny/ }).click();
+    await page.getByRole('button', { name: /Nowy produkt/ }).click();
     await page.getByTestId(/^receipt:item-name:/).fill('Chleb razowy');
     await page.getByTestId(/^receipt:item-price:/).fill('3.20');
+
+    await page.getByTestId('receipt:save').click();
+    await page.waitForURL(`**${APP_ROUTER.expenses()}`);
+  },
+
+  'i cannot save a receipt before any category exists': async (page) => {
+    await mockState(page, { categories: [] });
+    await open(page, APP_ROUTER.receiptScan());
+    await page.getByTestId('receipt:manual').click();
+
+    await expect(page.getByTestId('receipt:review')).toBeVisible();
+    await expect(page.getByTestId('receipt:no-categories')).toBeVisible();
+    await expect(page.getByTestId('receipt:save')).toBeDisabled();
+  },
+
+  'i add a suggested category': async (page) => {
+    await mockState(page, { categories: [] });
+    await open(page, APP_ROUTER.categories());
+    await page.getByTestId('categories:add-default:groceries').click();
+    await expect(page.getByTestId('categories:row:groceries')).toContainText(
+      'Spożywcze',
+    );
+    await expect(
+      page.getByTestId('categories:add-default:groceries'),
+    ).toHaveCount(0);
+  },
+
+  'i add a receipt manually': async (page) => {
+    await mockState(page);
+    await open(page, APP_ROUTER.receiptScan());
+    await page.getByTestId('receipt:manual').click();
+
+    await expect(page.getByTestId('receipt:review')).toBeVisible();
+    await page.getByTestId('receipt:merchant').fill('Sklep Ręczny');
+    await page.getByRole('button', { name: /Nowy produkt/ }).click();
+    await page.getByTestId(/^receipt:item-name:/).fill('Chleb');
+    const price = page.getByTestId(/^receipt:item-price:/);
+    await price.pressSequentially('12,50');
+    await expect(price).toHaveValue('12,50');
+    await price.fill('');
+    await expect(price).toHaveValue('');
+    await price.pressSequentially('3,20');
+    await expect(price).toHaveValue('3,20');
 
     await page.getByTestId('receipt:save').click();
     await page.waitForURL(`**${APP_ROUTER.expenses()}`);
@@ -235,8 +335,8 @@ const commands = {
   },
 
   'i create an 80 percent category limit': async (page) => {
+    await mockState(page);
     await open(page, APP_ROUTER.limits());
-    await expect(page.getByTestId('limits:total')).toBeVisible();
 
     await page.getByRole('tab', { name: 'Kategorie' }).click();
     await page.getByTestId('limits:new').click();
@@ -254,6 +354,20 @@ const commands = {
   },
 
   'i toggle recurring tracking off': async (page) => {
+    await mockState(page, {
+      recurring: [
+        {
+          id: 'rec-1',
+          name: 'Spotify',
+          cost: 24.99,
+          nextPaymentDate: new Date().toISOString().slice(0, 10),
+          active: true,
+          paymentMethod: 'card',
+          categoryId: CATEGORY.id,
+          history: [],
+        },
+      ],
+    });
     await open(page, APP_ROUTER.recurring());
     // "Wszystkie" keeps disabled entries visible after toggling.
     await page.getByRole('tab', { name: 'Wszystkie' }).click();
@@ -327,6 +441,25 @@ test('a scanned receipt can be reviewed, corrected and saved as an expense', asy
     commands,
     page,
   )(['i scan and save a receipt as an expense']);
+});
+
+test('a suggested category can be added from the category list', async ({
+  page,
+}) => {
+  await interpreter(commands, page)(['i add a suggested category']);
+});
+
+test('a receipt can be added manually', async ({ page }) => {
+  await interpreter(commands, page)(['i add a receipt manually']);
+});
+
+test('a receipt cannot be saved before any category exists', async ({
+  page,
+}) => {
+  await interpreter(
+    commands,
+    page,
+  )(['i cannot save a receipt before any category exists']);
 });
 
 test('expenses can be filtered to bills only', async ({ page }) => {

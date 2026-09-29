@@ -7,10 +7,14 @@ import { API_ROUTER, APP_ROUTER } from '@/shared/router';
  * End-to-end verification that every Parka feature works against the real
  * Supabase (Postgres) backend.
  *
- * The flow registers a fresh account (which seeds per-user demo data through a
- * Postgres trigger), then exercises each feature and reloads the page to prove
+ * The flow registers a fresh account (which starts with no data), then exercises each feature and reloads the page to prove
  * the change round-tripped through the database under row-level security.
  */
+
+const plMonthLabel = (offset: number): string =>
+  new Intl.DateTimeFormat('pl-PL', { month: 'long', year: 'numeric' }).format(
+    new Date(new Date().getFullYear(), new Date().getMonth() + offset, 1),
+  );
 
 const EMAIL = `e2e-${Date.now()}@parka.test`;
 const PASSWORD = 'secret123';
@@ -43,26 +47,35 @@ const commands = {
     await page.waitForTimeout(150);
   },
 
-  'the dashboard shows april demo totals': async (page) => {
-    // Demo data is always seeded for April 2025, regardless of signup date —
-    // the dashboard otherwise defaults to the current calendar month.
-    await open(page, APP_ROUTER.dashboard({ month: '2025-04' }));
+  'the dashboard opens on the current month': async (page) => {
+    await open(page, APP_ROUTER.dashboard());
     await expect(page.getByTestId('dashboard:month-label')).toHaveText(
-      /kwiecień 2025/i,
+      new RegExp(plMonthLabel(0), 'i'),
     );
     await expect(page.getByTestId('dashboard:total')).toContainText('zł');
   },
   'month navigation reads other months from the db': async (page) => {
     await page.getByTestId('dashboard:prev-month').click();
     await expect(page.getByTestId('dashboard:month-label')).toHaveText(
-      /marzec 2025/i,
+      new RegExp(plMonthLabel(-1), 'i'),
     );
     await page.getByTestId('dashboard:next-month').click();
     await expect(page.getByTestId('dashboard:month-label')).toHaveText(
-      /kwiecień 2025/i,
+      new RegExp(plMonthLabel(0), 'i'),
     );
   },
 
+  'i add suggested categories and they survive a reload': async (page) => {
+    await open(page, APP_ROUTER.categories());
+    await page.getByTestId('categories:add-default:groceries').click();
+    await expect(page.getByTestId('categories:row:groceries')).toContainText(
+      'Spożywcze',
+    );
+    await reload(page);
+    await expect(page.getByTestId('categories:row:groceries')).toContainText(
+      'Spożywcze',
+    );
+  },
   'i create a category and it survives a reload': async (page) => {
     await open(page, APP_ROUTER.categories());
     await page.getByTestId('categories:new').click();
@@ -81,7 +94,7 @@ const commands = {
     await page.getByTestId('receipt:capture').click();
     await expect(page.getByTestId('receipt:review')).toBeVisible();
     await page.getByTestId('receipt:merchant').fill('Sklep E2E Backend');
-    await page.getByRole('button', { name: /Chleb pszenny/ }).click();
+    await page.getByRole('button', { name: /Nowy produkt/ }).click();
     await page.getByTestId(/^receipt:item-name:/).fill('Chleb razowy');
     await page.getByTestId(/^receipt:item-price:/).fill('3.20');
     await page.getByTestId('receipt:save').click();
@@ -91,37 +104,28 @@ const commands = {
     await expect(page.getByText('Sklep E2E Backend')).toBeVisible();
   },
 
-  'bills filter shows only bill expenses': async (page) => {
-    await page.getByRole('tab', { name: 'Rachunki' }).click();
-    await expect(page.getByRole('button', { name: /Tauron/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Kino Helios/ })).toHaveCount(
-      0,
-    );
-    await page.getByRole('tab', { name: 'Wszystkie' }).click();
-  },
   'i update and delete an expense': async (page) => {
-    await page.getByRole('button', { name: /Kino Helios/ }).click();
+    await open(page, APP_ROUTER.expenses());
+    await page.getByRole('button', { name: /Sklep E2E Backend/ }).click();
     await expect(page.getByTestId('expenses:detail')).toBeVisible();
     await page.getByTestId('expenses:edit').click();
-    await page
-      .getByTestId('expenses:edit-merchant')
-      .fill('Kino Nowe Horyzonty');
+    await page.getByTestId('expenses:edit-merchant').fill('Sklep Nowy');
     await Promise.all([
       synced(page, 'PUT', API_ROUTER.expenses()),
       page.getByTestId('expenses:save').click(),
     ]);
-    await expect(page.getByText('Kino Nowe Horyzonty')).toBeVisible();
+    await expect(page.getByText('Sklep Nowy')).toBeVisible();
     await reload(page);
-    await expect(page.getByText('Kino Nowe Horyzonty')).toBeVisible();
+    await expect(page.getByText('Sklep Nowy')).toBeVisible();
 
-    await page.getByRole('button', { name: /Kino Nowe Horyzonty/ }).click();
+    await page.getByRole('button', { name: /Sklep Nowy/ }).click();
     await Promise.all([
       synced(page, 'DELETE', API_ROUTER.expenses()),
       page.getByTestId('expenses:delete').click(),
     ]);
-    await expect(page.getByText('Kino Nowe Horyzonty')).toHaveCount(0);
+    await expect(page.getByText('Sklep Nowy')).toHaveCount(0);
     await reload(page);
-    await expect(page.getByText('Kino Nowe Horyzonty')).toHaveCount(0);
+    await expect(page.getByText('Sklep Nowy')).toHaveCount(0);
   },
 
   'statistics expose year and comparison views': async (page) => {
@@ -144,7 +148,6 @@ const commands = {
 
   'i create a category limit': async (page) => {
     await open(page, APP_ROUTER.limits());
-    await expect(page.getByTestId('limits:total')).toBeVisible();
     await page.getByRole('tab', { name: 'Kategorie' }).click();
     await page.getByTestId('limits:new').click();
     await page.getByTestId('limits:form-amount').fill('450');
@@ -156,31 +159,7 @@ const commands = {
     await reload(page);
     await page.getByRole('tab', { name: 'Kategorie' }).click();
     await expect(
-      page.getByTestId('limits:category-list').getByText('Rachunki'),
-    ).toBeVisible();
-  },
-
-  'i toggle a recurring expense off': async (page) => {
-    await open(page, APP_ROUTER.recurring());
-    await page.getByRole('tab', { name: 'Wszystkie' }).click();
-    const spotify = page.getByRole('switch', { name: /Spotify/ }).first();
-    await expect(spotify).toHaveAttribute('aria-checked', 'true');
-    await Promise.all([
-      synced(page, 'PUT', API_ROUTER.recurring()),
-      spotify.click(),
-    ]);
-    await expect(spotify).toHaveAttribute('aria-checked', 'false');
-    await reload(page);
-    await page.getByRole('tab', { name: 'Wszystkie' }).click();
-    await expect(
-      page.getByRole('switch', { name: /Spotify/ }).first(),
-    ).toHaveAttribute('aria-checked', 'false');
-  },
-
-  'notifications list renders': async (page) => {
-    await open(page, APP_ROUTER.notifications());
-    await expect(
-      page.getByTestId('notifications:list').getByRole('listitem').first(),
+      page.getByTestId('limits:category-list').getByText('Spożywcze'),
     ).toBeVisible();
   },
 
@@ -230,8 +209,7 @@ const commands = {
     await open(page, APP_ROUTER.categories());
     await expect(page.getByText('Kultura')).toBeVisible();
     await open(page, APP_ROUTER.expenses());
-    await expect(page.getByText('Sklep E2E Backend')).toBeVisible();
-    await expect(page.getByText('Kino Nowe Horyzonty')).toHaveCount(0);
+    await expect(page.getByText('Sklep Nowy')).toHaveCount(0);
   },
 } satisfies CommandRegistry<Page>;
 
@@ -240,17 +218,15 @@ test('every feature works against the real Supabase backend', async ({
 }) => {
   await interpreter(commands, page)(
     ['i register a new account'],
-    ['the dashboard shows april demo totals'],
+    ['the dashboard opens on the current month'],
     ['month navigation reads other months from the db'],
+    ['i add suggested categories and they survive a reload'],
     ['i create a category and it survives a reload'],
     ['i scan a receipt and save it as an expense'],
-    ['bills filter shows only bill expenses'],
     ['i update and delete an expense'],
     ['statistics expose year and comparison views'],
     ['the report totals and downloads a csv'],
     ['i create a category limit'],
-    ['i toggle a recurring expense off'],
-    ['notifications list renders'],
     ['i update my settings profile'],
     ['data export downloads a csv'],
     ['i sign out and sign back in'],

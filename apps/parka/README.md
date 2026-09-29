@@ -17,14 +17,13 @@ running.
 
 ```bash
 pnpm db:start          # boot Postgres + Auth + Studio
-pnpm db:reset          # apply migrations in supabase/migrations + per-user demo seed
+pnpm db:reset          # apply supabase/migrations (single `init`, no seed data)
 pnpm db:gen-types      # regenerate src/shared/data-sources/db-schema.ts
 ```
 
-Every table lives under row-level security keyed to the session user. A Postgres
-trigger (`handle_new_user`) seeds a fresh demo dataset for each account on
-sign-up. The React store hydrates from `GET /api/state` and writes the whole
-per-user graph back through `PUT /api/state`.
+Every table lives under row-level security keyed to the session user, with
+explicit grants for the `authenticated` role. New accounts start empty: there is
+no seed data in the database or the frontend store.
 
 ## Development
 

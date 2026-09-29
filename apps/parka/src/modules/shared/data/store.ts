@@ -8,10 +8,10 @@ import type {
   AppNotification,
   Settings,
 } from './types';
-import { createSeedState } from './seed';
+import { createInitialState } from './initial-state';
 import { API_ROUTER } from '@/shared/router';
 
-let state: ParkaState = createSeedState();
+let state: ParkaState = createInitialState();
 const listeners = new Set<() => void>();
 
 const isBrowser = typeof window !== 'undefined';
@@ -153,7 +153,7 @@ export const bootstrap = (): Promise<void> => {
         }
 
         state = {
-          ...createSeedState(),
+          ...createInitialState(),
           ...patch,
           authed: true,
           selectedMonth: state.selectedMonth,
@@ -190,7 +190,7 @@ export const setState = (updater: (prev: ParkaState) => ParkaState): void => {
 };
 
 export const resetState = (): void => {
-  state = createSeedState();
+  state = createInitialState();
   notify();
 };
 
