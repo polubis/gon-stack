@@ -2,6 +2,21 @@ packages:
   - apps/*
   - packages/*
 
+# Fail install when a dependency does not support current Node
+engineStrict: true
+# Pin exact versions on add (no ^)
+saveExact: true
+# Workspace packages only via explicit workspace:*
+linkWorkspacePackages: false
+# Fail when pnpm differs from "packageManager"
+pmOnFail: error
+# Fail when a package loses provenance/trusted publisher
+trustPolicy: no-downgrade
+# Reviewed: older releases published without provenance
+trustPolicyExclude:
+  - chokidar@4.0.3
+  - semver@6.3.1
+
 allowBuilds:
   '@parcel/watcher': true
   esbuild: true
