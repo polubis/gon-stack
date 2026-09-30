@@ -18,7 +18,10 @@ export const CategoryLimits = ({
 
   return (
     <>
-      <ul className="space-y-2" data-e2e="limits:category-list">
+      <ul
+        className="grid gap-2 md:grid-cols-2 md:gap-4 xl:grid-cols-3"
+        data-e2e="limits:category-list"
+      >
         {progress.map((c) => {
           const category = resolveCategory(categories, c.categoryId);
           return (
@@ -49,7 +52,11 @@ export const CategoryLimits = ({
       {showForm ? (
         <NewLimitForm onDone={() => setShowForm(false)} />
       ) : (
-        <Button data-e2e="limits:new" onClick={() => setShowForm(true)}>
+        <Button
+          className="md:max-w-xs"
+          data-e2e="limits:new"
+          onClick={() => setShowForm(true)}
+        >
           <Plus className="h-4 w-4" aria-hidden="true" /> Ustaw nowy limit
         </Button>
       )}

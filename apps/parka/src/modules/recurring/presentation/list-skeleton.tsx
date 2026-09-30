@@ -4,7 +4,10 @@ const ROWS = 3;
 
 /** Mirrors the recurring rows: avatar, two text lines, toggle. */
 export const ListSkeleton = () => (
-  <ul className="space-y-2" aria-hidden="true">
+  <ul
+    className="space-y-2 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 xl:grid-cols-3"
+    aria-hidden="true"
+  >
     {Array.from({ length: ROWS }, (_, i) => (
       <Card as="li" key={i} className="flex items-center gap-3">
         <Skeleton className="h-9 w-9 shrink-0 rounded-full" />

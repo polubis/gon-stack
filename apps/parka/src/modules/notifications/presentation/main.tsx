@@ -24,8 +24,10 @@ const NotificationsView = () => {
       className="relative flex flex-1 flex-col"
     >
       <LoadingBanner active={isLoading && !initializing} />
-      <ScreenHeader title="Powiadomienia" backHref={APP_ROUTER.settings()} />
-      <main className="flex flex-1 flex-col gap-2 px-4 pb-6 pt-2">
+      <div className="md:px-4 lg:px-6 xl:px-12">
+        <ScreenHeader title="Powiadomienia" backHref={APP_ROUTER.settings()} />
+      </div>
+      <main className="flex flex-1 flex-col gap-2 px-4 pb-6 pt-2 md:gap-4 md:px-8 lg:px-10 xl:px-16">
         {error ? (
           <ErrorState
             data-e2e="notifications:load-error"
@@ -39,12 +41,17 @@ const NotificationsView = () => {
         {initializing ? (
           <ListSkeleton />
         ) : (
-          <ul className="space-y-2" data-e2e="notifications:list">
+          <ul
+            className="grid gap-2 md:gap-4 lg:grid-cols-2"
+            data-e2e="notifications:list"
+          >
             {notifications.map((n) => (
               <NotificationRow key={n.id} notification={n} />
             ))}
             {notifications.length === 0 && !error ? (
-              <li className="text-sm text-ink-soft">Brak powiadomień.</li>
+              <li className="text-sm text-ink-soft lg:col-span-2">
+                Brak powiadomień.
+              </li>
             ) : null}
           </ul>
         )}

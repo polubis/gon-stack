@@ -25,14 +25,20 @@ const props: Props = Astro.props;
     <AuthGuard mode="protected" client:only="react" />
   </div>
   <div class="min-h-screen w-full bg-surface">
-    <div
-      class="mx-auto flex min-h-screen w-full max-w-md flex-col bg-surface shadow-sm"
-    >
-      <div class="flex min-h-0 flex-1 flex-col">
+    <div class="flex min-h-screen w-full flex-col bg-surface">
+      <div
+        transition:persist="app-top-nav"
+        class="sticky top-0 z-(--z-nav) hidden lg:block lg:min-h-14"
+      >
+        <SyncedAppNav placement="top" client:only="react" />
+      </div>
+      <div
+        class="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col"
+      >
         <slot />
       </div>
       <div transition:persist="app-bottom-nav">
-        <SyncedAppNav client:only="react" />
+        <SyncedAppNav placement="bottom" client:only="react" />
       </div>
     </div>
   </div>

@@ -39,11 +39,13 @@ const RecurringView = () => {
   return (
     <div data-e2e="recurring:main" className="relative flex flex-1 flex-col">
       <LoadingBanner active={isLoading && !initializing} />
-      <ScreenHeader
-        title="Wydatki cykliczne"
-        backHref={APP_ROUTER.settings()}
-      />
-      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2">
+      <div className="md:px-4 lg:px-6 xl:px-12">
+        <ScreenHeader
+          title="Wydatki cykliczne"
+          backHref={APP_ROUTER.settings()}
+        />
+      </div>
+      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2 md:gap-6 md:px-8 lg:px-10 xl:px-16">
         {error ? (
           <ErrorState
             data-e2e="recurring:load-error"
@@ -55,17 +57,22 @@ const RecurringView = () => {
           />
         ) : null}
 
-        <Segmented<Tab>
-          label="Filtr wydatków cyklicznych"
-          value={tab}
-          onChange={setTab}
-          options={TAB_OPTIONS}
-        />
+        <div className="md:max-w-sm">
+          <Segmented<Tab>
+            label="Filtr wydatków cyklicznych"
+            value={tab}
+            onChange={setTab}
+            options={TAB_OPTIONS}
+          />
+        </div>
 
         {initializing ? (
           <ListSkeleton />
         ) : (
-          <ul className="space-y-2" data-e2e="recurring:list">
+          <ul
+            className="space-y-2 md:grid md:grid-cols-2 md:items-start md:gap-4 md:space-y-0 xl:grid-cols-3"
+            data-e2e="recurring:list"
+          >
             {list.map((r) => {
               const category = resolveCategory(categories, r.categoryId);
               const open = openId === r.id;
@@ -100,7 +107,7 @@ const RecurringView = () => {
               );
             })}
             {list.length === 0 && !error ? (
-              <li className="text-sm text-ink-soft">
+              <li className="text-sm text-ink-soft md:col-span-full">
                 Brak wydatków cyklicznych.
               </li>
             ) : null}

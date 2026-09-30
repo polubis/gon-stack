@@ -47,8 +47,8 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
     });
 
   return (
-    <>
-      <Card className="space-y-3">
+    <div className="flex flex-col gap-4 md:gap-6 lg:grid lg:grid-cols-3">
+      <Card className="space-y-3 lg:col-span-2">
         <div className="flex items-center gap-3">
           <span className="grid h-12 w-12 place-items-center rounded-full bg-brand-soft text-brand">
             <CircleUser className="h-6 w-6" aria-hidden="true" />
@@ -107,7 +107,7 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
         </p>
       </Card>
 
-      <Card as="section" className="space-y-2">
+      <Card as="section" className="space-y-2 lg:col-span-2">
         <h2 className="text-sm font-semibold text-ink-soft">Powiadomienia</h2>
         <ul className="divide-y divide-line" data-e2e="settings:notifications">
           {NOTIFICATION_OPTIONS.map(({ key, label }) => (
@@ -148,13 +148,14 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
 
       <Button
         variant="ghost"
+        className="lg:col-start-3"
         data-e2e="settings:sign-out"
         disabled={isSigningOut}
         onClick={ctx.signOut}
       >
         Wyloguj się
       </Button>
-    </>
+    </div>
   );
 };
 
@@ -173,8 +174,10 @@ const SettingsView = () => {
   return (
     <div data-e2e="settings:main" className="relative flex flex-1 flex-col">
       <LoadingBanner active={isLoading && !initializing} />
-      <ScreenHeader title="Ustawienia" />
-      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2">
+      <div className="md:px-4 lg:px-6 xl:px-12">
+        <ScreenHeader title="Ustawienia" />
+      </div>
+      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2 md:gap-6 md:px-8 lg:px-10 xl:px-16">
         {error ? (
           <ErrorState
             data-e2e="settings:load-error"

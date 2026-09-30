@@ -77,10 +77,10 @@ const ExpensesView = () => {
   return (
     <div data-e2e="expenses:main" className="relative flex flex-1 flex-col">
       <LoadingBanner active={isLoading && !initializing} />
-      <header className="flex items-center gap-3 px-5 pb-2 pt-6">
+      <header className="flex items-center gap-3 px-5 pb-2 pt-6 md:px-8 lg:px-10 lg:pt-8 xl:px-16">
         <h1 className="text-2xl font-semibold tracking-tight">Wydatki</h1>
       </header>
-      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2">
+      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2 md:gap-6 md:px-8 lg:px-10 xl:px-16">
         {error ? (
           <ErrorState
             data-e2e="expenses:load-error"
@@ -92,17 +92,19 @@ const ExpensesView = () => {
           />
         ) : null}
 
-        <Segmented<Filter>
-          label="Filtruj wydatki"
-          value={filter}
-          onChange={setFilter}
-          options={FILTER_OPTIONS}
-        />
+        <div className="md:max-w-md">
+          <Segmented<Filter>
+            label="Filtruj wydatki"
+            value={filter}
+            onChange={setFilter}
+            options={FILTER_OPTIONS}
+          />
+        </div>
 
         {initializing ? (
           <ListSkeleton />
         ) : filter === 'category' ? (
-          <div className="space-y-4">
+          <div className="grid gap-4 md:gap-6 lg:grid-cols-2 lg:items-start">
             {categories.map((category) => {
               const items = visible.filter((e) => e.categoryId === category.id);
               if (items.length === 0) return null;
@@ -126,7 +128,7 @@ const ExpensesView = () => {
             })}
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid gap-4 md:gap-6 lg:grid-cols-2 lg:items-start">
             {groupByMonth(visible).map(([m, items]) => (
               <section key={m} aria-label={monthLabel(m)}>
                 <h2 className="mb-1 flex items-center justify-between text-sm font-semibold capitalize">

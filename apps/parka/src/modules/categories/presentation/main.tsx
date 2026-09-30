@@ -48,60 +48,66 @@ const CategoriesView = () => {
   return (
     <div data-e2e="categories:main" className="relative flex flex-1 flex-col">
       <LoadingBanner active={isLoading && !initializing} />
-      <ScreenHeader
-        title="Kategorie"
-        backHref={APP_ROUTER.settings()}
-        action={
-          <button
-            type="button"
-            aria-label="Dodaj kategorię"
-            data-e2e="categories:new"
-            onClick={() => setEditing({ mode: 'new' })}
-            className="grid h-9 w-9 place-items-center rounded-full bg-brand text-on-brand"
-          >
-            <Plus className="h-5 w-5" aria-hidden="true" />
-          </button>
-        }
-      />
-      <main className="flex flex-1 flex-col gap-2 px-4 pb-6 pt-2">
+      <div className="md:px-4 lg:px-6 xl:px-12">
+        <ScreenHeader
+          title="Kategorie"
+          backHref={APP_ROUTER.settings()}
+          action={
+            <button
+              type="button"
+              aria-label="Dodaj kategorię"
+              data-e2e="categories:new"
+              onClick={() => setEditing({ mode: 'new' })}
+              className="grid h-9 w-9 place-items-center rounded-full bg-brand text-on-brand"
+            >
+              <Plus className="h-5 w-5" aria-hidden="true" />
+            </button>
+          }
+        />
+      </div>
+      <main className="flex flex-1 flex-col gap-2 px-4 pb-6 pt-2 md:gap-4 md:px-8 lg:grid lg:grid-cols-3 lg:content-start lg:items-start lg:px-10 xl:px-16">
         {error ? (
-          <ErrorState
-            data-e2e="categories:load-error"
-            title="Nie udało się wczytać kategorii"
-            code={ERROR_CODES.load}
-            description={error}
-            onRetry={ctx.load}
-            backHref={APP_ROUTER.settings()}
-          />
+          <div className="lg:col-span-3">
+            <ErrorState
+              data-e2e="categories:load-error"
+              title="Nie udało się wczytać kategorii"
+              code={ERROR_CODES.load}
+              description={error}
+              onRetry={ctx.load}
+              backHref={APP_ROUTER.settings()}
+            />
+          </div>
         ) : null}
 
-        {initializing ? (
-          <ListSkeleton />
-        ) : (
-          <ul
-            className="overflow-hidden rounded-2xl border border-line bg-card"
-            data-e2e="categories:list"
-          >
-            {categories.map((c) => (
-              <li key={c.id} className="border-b border-line last:border-0">
-                <button
-                  type="button"
-                  data-e2e={`categories:row:${c.id}`}
-                  onClick={() => setEditing({ mode: 'edit', category: c })}
-                  className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-hover-soft"
-                >
-                  <CategoryAvatar category={c} />
-                  <span className="flex-1 text-sm font-medium">
-                    {categoryLabel(c.name)}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+        <div className="lg:col-span-2 lg:row-span-2">
+          {initializing ? (
+            <ListSkeleton />
+          ) : (
+            <ul
+              className="overflow-hidden rounded-2xl border border-line bg-card"
+              data-e2e="categories:list"
+            >
+              {categories.map((c) => (
+                <li key={c.id} className="border-b border-line last:border-0">
+                  <button
+                    type="button"
+                    data-e2e={`categories:row:${c.id}`}
+                    onClick={() => setEditing({ mode: 'edit', category: c })}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-hover-soft"
+                  >
+                    <CategoryAvatar category={c} />
+                    <span className="flex-1 text-sm font-medium">
+                      {categoryLabel(c.name)}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
         {!initializing && !error && missingDefaults.length > 0 ? (
-          <Card className="space-y-3">
+          <Card className="space-y-3 lg:col-start-3">
             <h2 className="text-sm font-semibold">Sugerowane kategorie</h2>
             <ul className="flex flex-wrap gap-2">
               {missingDefaults.map((d) => (

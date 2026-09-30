@@ -76,8 +76,8 @@ const DashboardView = () => {
   return (
     <div data-e2e="dashboard:main" className="relative flex flex-1 flex-col">
       <LoadingBanner active={isLoading && !initializing} />
-      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-4">
-        <div>
+      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-4 md:gap-6 md:px-8 lg:grid lg:grid-cols-3 lg:content-start lg:px-10 lg:pt-8 xl:px-16">
+        <div className="lg:col-span-3">
           <h1 className="text-2xl font-semibold tracking-tight">Cześć 👋</h1>
           <p className="mt-1 text-sm text-ink-soft">
             Oto Twoje wydatki w tym miesiącu.
@@ -85,17 +85,19 @@ const DashboardView = () => {
         </div>
 
         {error && (
-          <ErrorState
-            data-e2e="dashboard:summary-error"
-            title="Nie udało się wczytać podsumowania"
-            code={ERROR_CODES.load}
-            description={error}
-            onRetry={() => ctx.load(month)}
-            backHref={APP_ROUTER.home()}
-          />
+          <div className="lg:col-span-3">
+            <ErrorState
+              data-e2e="dashboard:summary-error"
+              title="Nie udało się wczytać podsumowania"
+              code={ERROR_CODES.load}
+              description={error}
+              onRetry={() => ctx.load(month)}
+              backHref={APP_ROUTER.home()}
+            />
+          </div>
         )}
 
-        <Card className="space-y-3">
+        <Card className="space-y-3 lg:col-span-2 lg:row-span-2">
           <div className="flex items-center justify-between">
             <button
               type="button"
@@ -174,7 +176,7 @@ const DashboardView = () => {
           >
             Szybkie akcje
           </h2>
-          <ul className="grid grid-cols-4 gap-2">
+          <ul className="grid grid-cols-4 gap-2 md:gap-4 lg:grid-cols-2">
             {QUICK_ACTIONS.map(({ label, href, iconId }) => (
               <li key={label}>
                 <a

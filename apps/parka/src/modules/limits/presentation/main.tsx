@@ -58,10 +58,10 @@ const LimitsView = () => {
   return (
     <div data-e2e="limits:main" className="relative flex flex-1 flex-col">
       <LoadingBanner active={isLoading && !initializing} />
-      <header className="flex items-center gap-3 px-5 pb-2 pt-6">
+      <header className="flex items-center gap-3 px-5 pb-2 pt-6 md:px-8 lg:px-10 lg:pt-8 xl:px-16">
         <h1 className="text-2xl font-semibold tracking-tight">Limity i cele</h1>
       </header>
-      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2">
+      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2 md:gap-6 md:px-8 lg:px-10 xl:px-16">
         {error ? (
           <ErrorState
             title="Nie udało się wczytać limitów"
@@ -72,12 +72,14 @@ const LimitsView = () => {
           />
         ) : null}
 
-        <Segmented<Tab>
-          label="Widok limitów"
-          value={tab}
-          onChange={setTab}
-          options={TAB_OPTIONS}
-        />
+        <div className="md:max-w-md">
+          <Segmented<Tab>
+            label="Widok limitów"
+            value={tab}
+            onChange={setTab}
+            options={TAB_OPTIONS}
+          />
+        </div>
 
         {initializing ? <LimitsSkeleton /> : renderTab(tab)}
       </main>

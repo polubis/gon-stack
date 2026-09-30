@@ -61,7 +61,7 @@ export const ExpenseDetail = ({
         <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-overlay" />
         <Dialog.Content
           data-e2e="expenses:detail"
-          className="fixed inset-x-4 bottom-4 z-(--z-modal) mx-auto max-w-md rounded-2xl bg-card p-4 focus:outline-none"
+          className="fixed inset-x-4 bottom-4 z-(--z-modal) mx-auto max-w-md rounded-2xl lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 bg-card p-4 focus:outline-none"
         >
           <div className="mb-3 flex items-center gap-3">
             <CategoryAvatar category={category} />

@@ -1,4 +1,5 @@
 ---
+import { PublicNav } from '@/shared/navigation/public-nav';
 import type { PageUrl } from '@/shared/router';
 import Seo from './seo.astro';
 
@@ -17,5 +18,10 @@ const props: Props = Astro.props;
 ---
 
 <Seo {...props}>
-  <slot />
+  <div class="flex min-h-screen w-full flex-col">
+    <div class="min-h-14 border-b border-line bg-card">
+      <PublicNav client:only="react" />
+    </div>
+    <slot />
+  </div>
 </Seo>

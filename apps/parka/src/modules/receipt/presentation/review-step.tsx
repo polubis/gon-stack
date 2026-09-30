@@ -28,16 +28,22 @@ export const ReviewStep = ({
 
   return (
     <>
-      <ScreenHeader
-        title="Paragon — edycja danych"
-        backHref={APP_ROUTER.dashboard()}
-      />
+      <div className="md:px-4 lg:px-6 xl:px-12">
+        <ScreenHeader
+          title="Paragon — edycja danych"
+          backHref={APP_ROUTER.dashboard()}
+        />
+      </div>
       <main
-        className="flex flex-1 flex-col gap-4 px-4 pb-28 pt-2"
+        className="flex flex-1 flex-col gap-4 px-4 pb-28 pt-2 md:gap-6 md:px-8 lg:grid lg:grid-cols-3 lg:content-start lg:items-start lg:px-10 lg:pb-8 xl:px-16"
         data-e2e="receipt:review"
       >
         {categories.length === 0 ? (
-          <Card data-e2e="receipt:no-categories" role="status">
+          <Card
+            data-e2e="receipt:no-categories"
+            role="status"
+            className="lg:col-span-3"
+          >
             <p className="text-sm text-ink-soft">
               Aby zapisać paragon, dodaj najpierw kategorię (np. sugerowane).
             </p>
@@ -49,7 +55,7 @@ export const ReviewStep = ({
             </a>
           </Card>
         ) : null}
-        <Card className="space-y-3">
+        <Card className="space-y-3 lg:sticky lg:top-20">
           <Field label="Sklep">
             <input
               className={inputClass}
@@ -69,7 +75,10 @@ export const ReviewStep = ({
           </Field>
         </Card>
 
-        <section aria-labelledby="items-heading" className="space-y-2">
+        <section
+          aria-labelledby="items-heading"
+          className="space-y-2 lg:col-span-2"
+        >
           <div className="flex items-center justify-between">
             <h2
               id="items-heading"
@@ -95,7 +104,7 @@ export const ReviewStep = ({
             </button>
           </div>
 
-          <ul className="space-y-2">
+          <ul className="space-y-2 md:grid md:grid-cols-2 md:items-start md:gap-4 md:space-y-0">
             {draft.items.map((item) => (
               <ItemCard
                 key={item.id}
@@ -112,7 +121,7 @@ export const ReviewStep = ({
         </section>
       </main>
 
-      <div className="sticky bottom-0 flex items-center gap-3 border-t border-line bg-card px-4 py-3">
+      <div className="sticky bottom-0 flex items-center gap-3 border-t border-line bg-card px-4 py-3 md:px-8 lg:px-10 xl:px-16">
         <div className="flex-1">
           <p className="text-xs text-ink-soft">Razem</p>
           <p

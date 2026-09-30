@@ -1,7 +1,8 @@
 ---
-version: 1.6
-hash: 290a143ba8c81cd38bcdbaf8b71dbc7b7efec4e376a190cc165541a1a2083ece
+version: 1.7
+hash: 341efe66eed012c8927256715bc50635fe04f130a38c73c1d86ebb9418dfdd8c
 ---
+
 
 
 # Expenses

@@ -10,7 +10,7 @@ type Props = {
 export const AppNav = ({ active }: Props) => (
   <nav
     aria-label="Nawigacja główna"
-    className="sticky bottom-0 z-(--z-nav) mt-auto flex items-stretch justify-around border-t border-line bg-card px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2"
+    className="sticky bottom-0 z-(--z-nav) mt-auto flex lg:hidden items-stretch justify-around border-t border-line bg-card px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2"
   >
     {NAV_ITEMS.map(({ key, label, href, icon: Icon }) => {
       const isActive = key === active;

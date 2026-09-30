@@ -16,7 +16,10 @@ const RowSkeleton = () => (
 
 /** Mirrors a month group: heading line + card with rows. */
 export const ListSkeleton = () => (
-  <div className="space-y-4" aria-hidden="true">
+  <div
+    className="grid gap-4 md:gap-6 lg:grid-cols-2 lg:items-start"
+    aria-hidden="true"
+  >
     {[0, 1].map((group) => (
       <section key={group}>
         <div className="mb-1 flex items-center justify-between">

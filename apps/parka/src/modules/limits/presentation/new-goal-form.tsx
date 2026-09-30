@@ -26,7 +26,7 @@ export const NewGoalForm = ({ onDone }: { onDone: () => void }) => {
   };
 
   return (
-    <Card className="space-y-3" data-e2e="goals:form">
+    <Card className="space-y-3 md:max-w-xl" data-e2e="goals:form">
       <h2 className="text-sm font-semibold">Nowy cel oszczędnościowy</h2>
       <Field label="Nazwa">
         <input

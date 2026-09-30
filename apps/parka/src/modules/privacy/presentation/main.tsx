@@ -6,9 +6,14 @@ import { ERROR_CODES, POINTS } from '../configuration/constraints';
 
 const PrivacyView = () => (
   <div data-e2e="privacy:main" className="relative flex flex-1 flex-col">
-    <ScreenHeader title="RODO / Prywatność" backHref={APP_ROUTER.settings()} />
-    <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2">
-      <Card as="section" className="space-y-3">
+    <div className="md:px-4 lg:px-6 xl:px-12">
+      <ScreenHeader
+        title="RODO / Prywatność"
+        backHref={APP_ROUTER.settings()}
+      />
+    </div>
+    <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2 md:gap-6 md:px-8 lg:grid lg:grid-cols-3 lg:content-start lg:items-start lg:px-10 xl:px-16">
+      <Card as="section" className="space-y-3 lg:col-span-2 lg:row-span-2">
         <h2 className="text-sm font-semibold">Twoje dane</h2>
         <ul className="space-y-3" data-e2e="privacy:points">
           {POINTS.map(({ icon: Icon, text }) => (
@@ -22,7 +27,7 @@ const PrivacyView = () => (
         </ul>
       </Card>
 
-      <Card as="section" className="space-y-2">
+      <Card as="section" className="space-y-2 lg:col-start-3">
         <h2 className="text-sm font-semibold">Polityka prywatności</h2>
         <p className="text-sm text-ink-soft">
           Opisuje, jakie dane przetwarzamy, w jakim celu i jak długo.
@@ -36,7 +41,7 @@ const PrivacyView = () => (
         </a>
       </Card>
 
-      <div className="space-y-2">
+      <div className="space-y-2 lg:col-start-3">
         <Button href={APP_ROUTER.dataExport()} data-e2e="privacy:manage-data">
           <Download className="h-4 w-4" aria-hidden="true" /> Zarządzaj danymi
         </Button>

@@ -1,6 +1,6 @@
 import { Card, Skeleton } from '@/shared/ui';
 
-const ROWS = 4;
+const ROWS = 6;
 
 const RowSkeleton = () => (
   <Card as="li" className="flex items-start gap-3">
@@ -15,7 +15,7 @@ const RowSkeleton = () => (
 
 /** Mirrors the notification list: icon + two lines + age. */
 export const ListSkeleton = () => (
-  <ul className="space-y-2" aria-hidden="true">
+  <ul className="grid gap-2 md:gap-4 lg:grid-cols-2" aria-hidden="true">
     {Array.from({ length: ROWS }, (_, i) => (
       <RowSkeleton key={i} />
     ))}

@@ -1,9 +1,10 @@
 ---
-version: 1.1
-hash: 7cbcd3375c349ab7ac993ba37793a4b11da318cc7efe619ea6d22a74f0d185d0
+version: 1.2
+hash: e407729fc03a5019aabb823adb65b918334b660464a1870290ea9652d2869211
 name: notifications
 description: Read-only notifications list module. Use for list-only Parka screens fed by one endpoint.
 ---
+
 
 
 # Notifications

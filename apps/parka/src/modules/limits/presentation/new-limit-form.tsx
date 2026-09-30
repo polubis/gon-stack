@@ -45,7 +45,7 @@ export const NewLimitForm = ({ onDone }: { onDone: () => void }) => {
   };
 
   return (
-    <Card className="space-y-3" data-e2e="limits:form">
+    <Card className="space-y-3 md:max-w-xl" data-e2e="limits:form">
       <h2 className="text-sm font-semibold">Nowy limit</h2>
       <Field label="Kategoria">
         <select

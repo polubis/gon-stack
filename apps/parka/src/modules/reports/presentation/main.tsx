@@ -56,21 +56,27 @@ const ReportsView = () => {
   return (
     <div data-e2e="reports:main" className="relative flex flex-1 flex-col">
       <LoadingBanner active={isLoading && !initializing} />
-      <ScreenHeader title="Raport" backHref={APP_ROUTER.settings()} />
-      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2">
-        <p className="text-sm capitalize text-ink-soft">{monthLabel(month)}</p>
+      <div className="md:px-4 lg:px-6 xl:px-12">
+        <ScreenHeader title="Raport" backHref={APP_ROUTER.settings()} />
+      </div>
+      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2 md:gap-6 md:px-8 lg:grid lg:grid-cols-3 lg:content-start lg:items-start lg:px-10 xl:px-16">
+        <p className="text-sm capitalize text-ink-soft lg:col-span-3">
+          {monthLabel(month)}
+        </p>
 
         {error && (
-          <ErrorState
-            title="Nie udało się wczytać raportu"
-            code={ERROR_CODES.load}
-            description={error}
-            onRetry={ctx.load}
-            backHref={APP_ROUTER.settings()}
-          />
+          <div className="lg:col-span-3">
+            <ErrorState
+              title="Nie udało się wczytać raportu"
+              code={ERROR_CODES.load}
+              description={error}
+              onRetry={ctx.load}
+              backHref={APP_ROUTER.settings()}
+            />
+          </div>
         )}
 
-        <Card className="space-y-4">
+        <Card className="space-y-4 lg:col-span-2 lg:p-6">
           <div>
             <p className="text-sm text-ink-soft">Twój miesiąc w liczbach</p>
             {initializing ? (
@@ -109,7 +115,7 @@ const ReportsView = () => {
           </div>
         </Card>
 
-        <div className="space-y-2">
+        <div className="space-y-2 md:max-w-sm lg:max-w-none">
           <Button
             data-e2e="reports:download-csv"
             disabled={disabled}

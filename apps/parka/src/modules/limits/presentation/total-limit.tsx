@@ -27,7 +27,10 @@ export const TotalLimit = ({
   };
 
   return (
-    <Card className="space-y-3" data-e2e="limits:total">
+    <Card
+      className="space-y-3 md:max-w-2xl md:space-y-4 md:p-6"
+      data-e2e="limits:total"
+    >
       <div>
         <p className="text-sm text-ink-soft">
           Limit miesięczny · {monthLabel(month)}

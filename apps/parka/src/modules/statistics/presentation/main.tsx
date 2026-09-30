@@ -47,17 +47,21 @@ const StatisticsView = () => {
   return (
     <div data-e2e="statistics:main" className="relative flex flex-1 flex-col">
       <LoadingBanner active={isLoading && !initializing} />
-      <ScreenHeader title="Statystyki" />
-      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2">
-        <Segmented<Tab>
-          label="Widok statystyk"
-          value={tab}
-          onChange={setTab}
-          options={[
-            { value: 'spending', label: 'Wydatki' },
-            { value: 'comparison', label: 'Porównanie' },
-          ]}
-        />
+      <div className="md:px-4 lg:px-6 xl:px-12">
+        <ScreenHeader title="Statystyki" />
+      </div>
+      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2 md:gap-6 md:px-8 lg:px-10 xl:px-16">
+        <div className="md:max-w-sm">
+          <Segmented<Tab>
+            label="Widok statystyk"
+            value={tab}
+            onChange={setTab}
+            options={[
+              { value: 'spending', label: 'Wydatki' },
+              { value: 'comparison', label: 'Porównanie' },
+            ]}
+          />
+        </div>
 
         {error ? (
           <ErrorState

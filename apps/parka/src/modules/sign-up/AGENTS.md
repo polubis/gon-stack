@@ -1,7 +1,8 @@
 ---
-version: 1.2
-hash: ab4ef713534ec2ff256e3076d843eb33f4804a0f1d26ea2990949a1306fc7209
+version: 1.3
+hash: dd6d7fd987424d50aac32c82fcf5b35f5866b8dea388e62b1334969feb72ea9f
 ---
+
 
 
 # Sign up

@@ -1,7 +1,8 @@
 ---
-version: 1.1
-hash: c4a7324b9ef50bd098877361d3e44a32a293ff88ac372b4411371e9a522232ad
+version: 1.2
+hash: 02d41c3797a6ca3dfe2f30a6bc976fb4e2ff737ada55ff838e7a960c2c8e7eeb
 ---
+
 
 
 # AI info

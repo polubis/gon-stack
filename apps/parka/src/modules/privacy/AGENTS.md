@@ -1,7 +1,8 @@
 ---
-version: 1.1
-hash: 12b29ff190f45ff2312c2b8f96d343a8b9d3eb6c0337b0fbb25154f7f6559980
+version: 1.2
+hash: 4541bd85373d802bbfe26ffa99d52c5c0f1aa19f82a484a0788146bc4e344a2c
 ---
+
 
 
 # Privacy

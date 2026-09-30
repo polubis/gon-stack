@@ -11,7 +11,10 @@ export const GoalsTab = ({ goals }: { goals: Goal[] }) => {
 
   return (
     <>
-      <ul className="space-y-2" data-e2e="goals:list">
+      <ul
+        className="grid gap-2 md:grid-cols-2 md:gap-4 xl:grid-cols-3"
+        data-e2e="goals:list"
+      >
         {goals.map((g) => {
           const pct = goalPct(g);
           return (
@@ -34,7 +37,11 @@ export const GoalsTab = ({ goals }: { goals: Goal[] }) => {
       {showForm ? (
         <NewGoalForm onDone={() => setShowForm(false)} />
       ) : (
-        <Button data-e2e="goals:new" onClick={() => setShowForm(true)}>
+        <Button
+          className="md:max-w-xs"
+          data-e2e="goals:new"
+          onClick={() => setShowForm(true)}
+        >
           <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj cel
         </Button>
       )}

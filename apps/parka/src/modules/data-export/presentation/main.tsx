@@ -38,9 +38,11 @@ const DataExportView = () => {
   return (
     <div data-e2e="data-export:main" className="relative flex flex-1 flex-col">
       <LoadingBanner active={isLoading && !initializing} />
-      <ScreenHeader title="Eksport danych" backHref={APP_ROUTER.privacy()} />
-      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2">
-        <p className="text-sm text-ink-soft">
+      <div className="md:px-4 lg:px-6 xl:px-12">
+        <ScreenHeader title="Eksport danych" backHref={APP_ROUTER.privacy()} />
+      </div>
+      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2 md:gap-6 md:px-8 lg:px-10 xl:px-16">
+        <p className="max-w-3xl text-sm text-ink-soft md:text-base">
           Pobierz swoje dane finansowe w formacie CSV lub PDF. Masz pełną
           kontrolę nad danymi i możesz je usunąć w każdej chwili.
         </p>
@@ -56,8 +58,8 @@ const DataExportView = () => {
           />
         ) : null}
 
-        <fieldset className="space-y-2">
-          <legend className="text-sm font-semibold">Format</legend>
+        <fieldset className="grid gap-2 md:max-w-2xl md:grid-cols-2 md:gap-4">
+          <legend className="mb-2 text-sm font-semibold">Format</legend>
           {FORMATS.map((f) => (
             <Card
               as="label"
@@ -90,6 +92,7 @@ const DataExportView = () => {
 
         <Button
           data-e2e="data-export:run"
+          className="md:max-w-xs"
           disabled={initializing || error !== null}
           onClick={exportNow}
         >

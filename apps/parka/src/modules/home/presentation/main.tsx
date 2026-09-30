@@ -17,7 +17,7 @@ const enterApp = () => {
 const HomeView = () => (
   <div
     data-e2e="home:main"
-    className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-between px-6 py-12"
+    className="mx-auto flex flex-1 w-full max-w-7xl flex-col justify-between px-6 py-12 md:px-8 lg:px-10 lg:py-16 xl:px-16"
   >
     <Walkthrough
       steps={STEPS}

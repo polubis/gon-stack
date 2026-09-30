@@ -18,9 +18,9 @@ export const Spending = ({
   points: TrendPoint[];
   slices: CategorySlice[];
 }) => (
-  <>
+  <div className="flex flex-col gap-4 md:gap-6 lg:grid lg:grid-cols-3 lg:items-start">
     <div
-      className="flex gap-1 overflow-x-auto"
+      className="flex gap-1 overflow-x-auto lg:col-span-3"
       role="tablist"
       aria-label="Zakres czasu"
     >
@@ -44,7 +44,7 @@ export const Spending = ({
       ))}
     </div>
 
-    <Card className="space-y-3">
+    <Card className="space-y-3 lg:col-span-2">
       <div>
         <p className="text-sm text-ink-soft">
           Wydatki całkowite ({RANGE_LABEL[range]})
@@ -81,5 +81,5 @@ export const Spending = ({
         <p className="text-sm text-ink-soft">Brak danych w tym zakresie.</p>
       )}
     </Card>
-  </>
+  </div>
 );

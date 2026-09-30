@@ -49,7 +49,10 @@ export const CategoryForm = ({ editing, onSave, onDone }: Props) => {
   };
 
   return (
-    <Card className="mt-2 space-y-4" data-e2e="categories:form">
+    <Card
+      className="mt-2 space-y-4 lg:col-start-3 lg:mt-0"
+      data-e2e="categories:form"
+    >
       <h2 className="text-sm font-semibold">
         {editing.mode === 'new' ? 'Nowa kategoria' : 'Edycja kategorii'}
       </h2>

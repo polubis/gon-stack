@@ -25,7 +25,7 @@ export const Router = ({ skipLabel, lastStepFooter }: RouterProps) => {
         <StepView />
         <ProgressDots />
       </div>
-      <div className="space-y-3">
+      <div className="w-full space-y-3 md:mx-auto md:max-w-sm">
         <PrimaryAction />
         {isLastStep && lastStepFooter ? (
           lastStepFooter

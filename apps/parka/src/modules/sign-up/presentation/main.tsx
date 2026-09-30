@@ -34,69 +34,71 @@ const SignUpView = () => {
   return (
     <div
       data-e2e="auth:main"
-      className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-12"
+      className="flex flex-1 w-full flex-col justify-center md:items-center md:bg-brand-softer md:px-8 md:py-16"
     >
-      <span className="mb-6 grid h-14 w-14 place-items-center rounded-2xl bg-brand-soft text-brand">
-        <Leaf className="h-7 w-7" aria-hidden="true" />
-      </span>
-      <h1 className="text-2xl font-semibold tracking-tight">Załóż konto</h1>
-      <p className="mt-1 text-sm text-ink-soft">
-        Zaloguj się, aby kontynuować.
-      </p>
+      <div className="mx-auto w-full max-w-md px-6 py-12 md:rounded-3xl md:border md:border-line md:bg-card md:p-10 md:shadow-card lg:p-12">
+        <span className="mb-6 grid h-14 w-14 place-items-center rounded-2xl bg-brand-soft text-brand">
+          <Leaf className="h-7 w-7" aria-hidden="true" />
+        </span>
+        <h1 className="text-2xl font-semibold tracking-tight">Załóż konto</h1>
+        <p className="mt-1 text-sm text-ink-soft">
+          Zaloguj się, aby kontynuować.
+        </p>
 
-      <form className="mt-6 space-y-4" onSubmit={submit} noValidate>
-        <Field label="E-mail">
-          <input
-            type="email"
-            name="email"
-            autoComplete="email"
-            className={inputClass}
-            value={email}
-            data-e2e="auth:email"
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="twoj@email.com"
-          />
-        </Field>
-        <Field label="Hasło">
-          <input
-            type="password"
-            name="password"
-            autoComplete="new-password"
-            className={inputClass}
-            value={password}
-            data-e2e="auth:password"
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-          />
-        </Field>
+        <form className="mt-6 space-y-4" onSubmit={submit} noValidate>
+          <Field label="E-mail">
+            <input
+              type="email"
+              name="email"
+              autoComplete="email"
+              className={inputClass}
+              value={email}
+              data-e2e="auth:email"
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="twoj@email.com"
+            />
+          </Field>
+          <Field label="Hasło">
+            <input
+              type="password"
+              name="password"
+              autoComplete="new-password"
+              className={inputClass}
+              value={password}
+              data-e2e="auth:password"
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+            />
+          </Field>
 
-        {error ? (
-          <p role="alert" className="text-sm text-danger">
-            {error}
-          </p>
-        ) : null}
-        {awaitingConfirmation ? (
-          <p role="status" className="text-sm text-brand-dark">
-            {MESSAGES.confirmation}
-          </p>
-        ) : null}
+          {error ? (
+            <p role="alert" className="text-sm text-danger">
+              {error}
+            </p>
+          ) : null}
+          {awaitingConfirmation ? (
+            <p role="status" className="text-sm text-brand-dark">
+              {MESSAGES.confirmation}
+            </p>
+          ) : null}
 
-        <Button type="submit" data-e2e="auth:submit" disabled={pending}>
-          {pending ? 'Chwila…' : 'Utwórz konto'}
-        </Button>
-      </form>
+          <Button type="submit" data-e2e="auth:submit" disabled={pending}>
+            {pending ? 'Chwila…' : 'Utwórz konto'}
+          </Button>
+        </form>
 
-      <SocialButtons />
+        <SocialButtons />
 
-      <p className="mt-6 text-center text-sm text-ink-soft">
-        Masz już konto?{' '}
-        <a
-          href={APP_ROUTER.signIn()}
-          className="font-semibold text-brand-dark underline"
-        >
-          Zaloguj się
-        </a>
-      </p>
+        <p className="mt-6 text-center text-sm text-ink-soft">
+          Masz już konto?{' '}
+          <a
+            href={APP_ROUTER.signIn()}
+            className="font-semibold text-brand-dark underline"
+          >
+            Zaloguj się
+          </a>
+        </p>
+      </div>
     </div>
   );
 };

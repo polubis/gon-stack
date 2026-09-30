@@ -18,6 +18,7 @@ import type { ReportsE2eId } from '@/modules/reports/configuration/e2e-ids';
 import type { SettingsE2eId } from '@/modules/settings/configuration/e2e-ids';
 import type { StatisticsE2eId } from '@/modules/statistics/configuration/e2e-ids';
 import type { CookiesE2eId } from '@/shared/cookies/configuration/e2e-ids';
+import type { PublicNavE2eId } from '@/shared/navigation/public-nav/configuration/e2e-ids';
 import type { WalkthroughE2eId } from '@/shared/walkthrough/configuration/e2e-ids';
 
 // Combines every module's own `data-e2e` id union into one type used for
@@ -44,7 +45,8 @@ export type E2eId =
   | PrivacyE2eId
   | AiInfoE2eId
   | DataExportE2eId
-  | CookiesE2eId;
+  | CookiesE2eId
+  | PublicNavE2eId;
 
 declare module 'react' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

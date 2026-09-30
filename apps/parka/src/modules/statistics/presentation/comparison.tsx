@@ -18,10 +18,10 @@ export const Comparison = ({
   monthChange: number;
   changes: CategoryChange[];
 }) => (
-  <>
-    <Card className="space-y-3">
+  <div className="flex flex-col gap-4 md:gap-6 lg:grid lg:grid-cols-3 lg:items-start">
+    <Card className="space-y-3 lg:col-span-2">
       <h2 className="text-sm font-semibold text-ink-soft">Wydatki całkowite</h2>
-      <div className="flex items-end gap-4">
+      <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
         <div>
           <p
             className="text-2xl font-bold tabular-nums"
@@ -81,5 +81,5 @@ export const Comparison = ({
         ) : null}
       </ul>
     </Card>
-  </>
+  </div>
 );
