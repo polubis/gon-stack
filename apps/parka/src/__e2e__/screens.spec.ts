@@ -59,7 +59,7 @@ const SCREENS: Screen[] = [
 
 const commands = {
   'i mock the dashboard': async (page) => {
-    // Dashboard is backend-only (see modules/dashboard/AGENTS.md) — stub the
+    // Dashboard is backend-only — stub the
     // response so the a11y check doesn't depend on an authenticated session.
     await page.route(
       `**${API_ROUTER.dashboard({ month: '' })}**`,
