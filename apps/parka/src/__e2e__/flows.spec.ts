@@ -1,5 +1,6 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
+import { test, type Ctx } from './test';
 import { API_ROUTER, APP_ROUTER } from '@/shared/router';
 import { signInAsTestUser } from './session';
 
@@ -88,21 +89,21 @@ const mockState = async (
 const currentTotalByPage = new WeakMap<Page, string>();
 
 const commands = {
-  'i complete onboarding and reach sign-up': async (page) => {
+  'i complete onboarding and reach sign-up': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.home());
     // The cookie banner sits at the bottom, over the walkthrough actions.
-    await page.getByTestId('cookies:accept-all').click();
-    await expect(page.getByTestId('cookies:banner')).toBeHidden();
+    await getByE2e('cookies:accept-all').click();
+    await expect(getByE2e('cookies:banner')).toBeHidden();
     // Step through the product introduction, then hand off to sign-up.
-    await page.getByTestId('walkthrough:primary').click();
-    await page.getByTestId('walkthrough:primary').click();
-    await page.getByTestId('walkthrough:primary').click();
-    await page.getByTestId('walkthrough:primary').click();
+    await getByE2e('walkthrough:primary').click();
+    await getByE2e('walkthrough:primary').click();
+    await getByE2e('walkthrough:primary').click();
+    await getByE2e('walkthrough:primary').click();
     await page.waitForURL(`**${APP_ROUTER.signUp()}`);
-    await expect(page.getByTestId('auth:main')).toBeVisible();
+    await expect(getByE2e('auth:main')).toBeVisible();
   },
 
-  'i mock the dashboard totals': async (page) => {
+  'i mock the dashboard totals': async ({ page }) => {
     // Dashboard is backend-only (see modules/dashboard/AGENTS.md) — stub the
     // response so the view has deterministic per-month totals to assert
     // against.
@@ -132,95 +133,103 @@ const commands = {
       },
     );
   },
-  'the dashboard shows the current month totals': async (page) => {
+  'the dashboard shows the current month totals': async ({
+    page,
+    getByE2e,
+  }) => {
     const current = new Date();
     await open(page, APP_ROUTER.dashboard());
-    await expect(page.getByTestId('dashboard:month-label')).toHaveText(
+    await expect(getByE2e('dashboard:month-label')).toHaveText(
       new RegExp(
         plMonthLabel(current.getFullYear(), current.getMonth() + 1),
         'i',
       ),
     );
-    const total = await page.getByTestId('dashboard:total').textContent();
+    const total = await getByE2e('dashboard:total').textContent();
     currentTotalByPage.set(page, total ?? '');
   },
-  'the previous month shows a different total': async (page) => {
+  'the previous month shows a different total': async ({ page, getByE2e }) => {
     const current = new Date();
     const previous = new Date(current.getFullYear(), current.getMonth() - 1, 1);
-    await page.getByTestId('dashboard:prev-month').click();
-    await expect(page.getByTestId('dashboard:month-label')).toHaveText(
+    await getByE2e('dashboard:prev-month').click();
+    await expect(getByE2e('dashboard:month-label')).toHaveText(
       new RegExp(
         plMonthLabel(previous.getFullYear(), previous.getMonth() + 1),
         'i',
       ),
     );
-    await expect(page.getByTestId('dashboard:total')).not.toHaveText(
+    await expect(getByE2e('dashboard:total')).not.toHaveText(
       currentTotalByPage.get(page) ?? '',
     );
   },
 
-  'the dashboard links to limits': async (page) => {
+  'the dashboard links to limits': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.dashboard());
     await page.getByRole('link', { name: 'Limity' }).click();
     await page.waitForURL(`**${APP_ROUTER.limits()}`);
-    await expect(page.getByTestId('limits:main')).toBeVisible();
+    await expect(getByE2e('limits:main')).toBeVisible();
   },
-  'the dashboard links to recurring': async (page) => {
+  'the dashboard links to recurring': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.dashboard());
     await page.getByRole('link', { name: 'Cykliczne' }).click();
     await page.waitForURL(`**${APP_ROUTER.recurring()}`);
-    await expect(page.getByTestId('recurring:main')).toBeVisible();
+    await expect(getByE2e('recurring:main')).toBeVisible();
   },
 
-  'i scan and save a receipt as an expense': async (page) => {
+  'i scan and save a receipt as an expense': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
     await mockState(page);
     await open(page, APP_ROUTER.receiptScan());
-    await page.getByTestId('receipt:capture').click();
+    await getByE2e('receipt:capture').click();
 
-    await expect(page.getByTestId('receipt:review')).toBeVisible();
-    await page.getByTestId('receipt:merchant').fill('Testowy Sklep E2E');
+    await expect(getByE2e('receipt:review')).toBeVisible();
+    await getByE2e('receipt:merchant').fill('Testowy Sklep E2E');
 
     // Correct the first item.
     await page.getByRole('button', { name: /Nowy produkt/ }).click();
-    await page.getByTestId(/^receipt:item-name:/).fill('Chleb razowy');
-    await page.getByTestId(/^receipt:item-price:/).fill('3.20');
+    await getByE2ePrefix('receipt:item-name:').fill('Chleb razowy');
+    await getByE2ePrefix('receipt:item-price:').fill('3.20');
 
-    await page.getByTestId('receipt:save').click();
+    await getByE2e('receipt:save').click();
     await page.waitForURL(`**${APP_ROUTER.expenses()}`);
   },
 
-  'i cannot save a receipt before any category exists': async (page) => {
+  'i cannot save a receipt before any category exists': async ({
+    page,
+    getByE2e,
+  }) => {
     await mockState(page, { categories: [] });
     await open(page, APP_ROUTER.receiptScan());
-    await page.getByTestId('receipt:manual').click();
+    await getByE2e('receipt:manual').click();
 
-    await expect(page.getByTestId('receipt:review')).toBeVisible();
-    await expect(page.getByTestId('receipt:no-categories')).toBeVisible();
-    await expect(page.getByTestId('receipt:save')).toBeDisabled();
+    await expect(getByE2e('receipt:review')).toBeVisible();
+    await expect(getByE2e('receipt:no-categories')).toBeVisible();
+    await expect(getByE2e('receipt:save')).toBeDisabled();
   },
 
-  'i add a suggested category': async (page) => {
+  'i add a suggested category': async ({ page, getByE2e }) => {
     await mockState(page, { categories: [] });
     await open(page, APP_ROUTER.categories());
-    await page.getByTestId('categories:add-default:groceries').click();
-    await expect(page.getByTestId('categories:row:groceries')).toContainText(
+    await getByE2e('categories:add-default:groceries').click();
+    await expect(getByE2e('categories:row:groceries')).toContainText(
       'Spożywcze',
     );
-    await expect(
-      page.getByTestId('categories:add-default:groceries'),
-    ).toHaveCount(0);
+    await expect(getByE2e('categories:add-default:groceries')).toHaveCount(0);
   },
 
-  'i add a receipt manually': async (page) => {
+  'i add a receipt manually': async ({ page, getByE2e, getByE2ePrefix }) => {
     await mockState(page);
     await open(page, APP_ROUTER.receiptScan());
-    await page.getByTestId('receipt:manual').click();
+    await getByE2e('receipt:manual').click();
 
-    await expect(page.getByTestId('receipt:review')).toBeVisible();
-    await page.getByTestId('receipt:merchant').fill('Sklep Ręczny');
+    await expect(getByE2e('receipt:review')).toBeVisible();
+    await getByE2e('receipt:merchant').fill('Sklep Ręczny');
     await page.getByRole('button', { name: /Nowy produkt/ }).click();
-    await page.getByTestId(/^receipt:item-name:/).fill('Chleb');
-    const price = page.getByTestId(/^receipt:item-price:/);
+    await getByE2ePrefix('receipt:item-name:').fill('Chleb');
+    const price = getByE2ePrefix('receipt:item-price:');
     await price.pressSequentially('12,50');
     await expect(price).toHaveValue('12,50');
     await price.fill('');
@@ -228,11 +237,11 @@ const commands = {
     await price.pressSequentially('3,20');
     await expect(price).toHaveValue('3,20');
 
-    await page.getByTestId('receipt:save').click();
+    await getByE2e('receipt:save').click();
     await page.waitForURL(`**${APP_ROUTER.expenses()}`);
   },
 
-  'i mock the expenses list': async (page) => {
+  'i mock the expenses list': async ({ page }) => {
     // Expenses is backend-only, same as dashboard (see modules/expenses core/
     // facade) — stub categories/expenses so the view has deterministic rows
     // to assert against instead of relying on the removed local demo mode.
@@ -308,7 +317,7 @@ const commands = {
     });
   },
 
-  'expenses can be filtered to bills only': async (page) => {
+  'expenses can be filtered to bills only': async ({ page }) => {
     await open(page, APP_ROUTER.expenses());
     await page.getByRole('tab', { name: 'Rachunki' }).click();
     await expect(page.getByRole('button', { name: /Tauron/ })).toBeVisible();
@@ -317,57 +326,54 @@ const commands = {
     );
   },
 
-  'i update an expense merchant name': async (page) => {
+  'i update an expense merchant name': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.expenses());
     await page.getByRole('button', { name: /Kino Helios/ }).click();
-    await expect(page.getByTestId('expenses:detail')).toBeVisible();
+    await expect(getByE2e('expenses:detail')).toBeVisible();
 
-    await page.getByTestId('expenses:edit').click();
-    await page
-      .getByTestId('expenses:edit-merchant')
-      .fill('Kino Nowe Horyzonty');
-    await page.getByTestId('expenses:save').click();
+    await getByE2e('expenses:edit').click();
+    await getByE2e('expenses:edit-merchant').fill('Kino Nowe Horyzonty');
+    await getByE2e('expenses:save').click();
     await expect(page.getByText('Kino Nowe Horyzonty')).toBeVisible();
   },
-  'i delete the updated expense': async (page) => {
+  'i delete the updated expense': async ({ page, getByE2e }) => {
     await page.getByRole('button', { name: /Kino Nowe Horyzonty/ }).click();
-    await page.getByTestId('expenses:delete').click();
+    await getByE2e('expenses:delete').click();
     await expect(page.getByText('Kino Nowe Horyzonty')).toHaveCount(0);
   },
 
-  'statistics show the yearly total': async (page) => {
+  'statistics show the yearly total': async ({ page, getByE2e }) => {
     await mockState(page);
     await open(page, APP_ROUTER.statistics());
     await page.getByRole('tab', { name: 'Rok' }).click();
-    await expect(page.getByTestId('statistics:total')).toBeVisible();
+    await expect(getByE2e('statistics:total')).toBeVisible();
   },
-  'statistics show month comparison': async (page) => {
+  'statistics show month comparison': async ({ page, getByE2e }) => {
     await page.getByRole('tab', { name: 'Porównanie' }).click();
-    await expect(page.getByTestId('statistics:current')).toBeVisible();
-    await expect(page.getByTestId('statistics:changes')).toBeVisible();
+    await expect(getByE2e('statistics:current')).toBeVisible();
+    await expect(getByE2e('statistics:changes')).toBeVisible();
   },
 
-  'i create an 80 percent category limit': async (page) => {
+  'i create an 80 percent category limit': async ({ page, getByE2e }) => {
     await mockState(page);
     await open(page, APP_ROUTER.limits());
 
     await page.getByRole('tab', { name: 'Kategorie' }).click();
-    await page.getByTestId('limits:new').click();
-    await page.getByTestId('limits:form-amount').fill('450');
-    await page.getByTestId('limits:form-save').click();
-    await expect(page.getByTestId('limits:form')).toHaveCount(0);
+    await getByE2e('limits:new').click();
+    await getByE2e('limits:form-amount').fill('450');
+    await getByE2e('limits:form-save').click();
+    await expect(getByE2e('limits:form')).toHaveCount(0);
   },
 
-  'a new category appears in the list': async (page) => {
+  'a new category appears in the list': async ({ page, getByE2e }) => {
     await mockState(page);
     await open(page, APP_ROUTER.categories());
-    await page.getByTestId('categories:new').click();
-    await page.getByTestId('categories:form-name').fill('Kultura');
-    await page.getByTestId('categories:form-save').click();
+    await getByE2e('categories:form-name').fill('Kultura');
+    await getByE2e('categories:form-save').click();
     await expect(page.getByText('Kultura')).toBeVisible();
   },
 
-  'i toggle recurring tracking off': async (page) => {
+  'i toggle recurring tracking off': async ({ page }) => {
     await mockState(page, {
       recurring: [
         {
@@ -391,51 +397,48 @@ const commands = {
     await expect(spotify).toHaveAttribute('aria-checked', 'false');
   },
 
-  'the monthly report downloads a csv': async (page) => {
+  'the monthly report downloads a csv': async ({ page, getByE2e }) => {
     await mockState(page);
     await open(page, APP_ROUTER.reports());
-    await expect(page.getByTestId('reports:total')).toBeVisible();
+    await expect(getByE2e('reports:total')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('reports:download-csv').click(),
+      getByE2e('reports:download-csv').click(),
     ]);
     expect(download.suggestedFilename()).toMatch(/\.csv$/);
   },
 
-  'i update my profile name': async (page) => {
+  'i update my profile name': async ({ page, getByE2e }) => {
     await mockState(page);
     await open(page, APP_ROUTER.settings());
-    await page.getByTestId('settings:edit-profile').click();
-    await page.getByTestId('settings:profile-name').fill('Anna Testowa');
-    await page.getByTestId('settings:save-profile').click();
-    await expect(page.getByTestId('settings:name')).toHaveText('Anna Testowa');
+    await getByE2e('settings:edit-profile').click();
+    await getByE2e('settings:profile-name').fill('Anna Testowa');
+    await getByE2e('settings:save-profile').click();
+    await expect(getByE2e('settings:name')).toHaveText('Anna Testowa');
   },
 
-  'financial data exports as csv': async (page) => {
+  'financial data exports as csv': async ({ page, getByE2e }) => {
     await mockState(page);
     await open(page, APP_ROUTER.dataExport());
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('data-export:run').click(),
+      getByE2e('data-export:run').click(),
     ]);
     expect(download.suggestedFilename()).toMatch(/\.csv$/);
-    await expect(page.getByTestId('data-export:done')).toBeVisible();
+    await expect(getByE2e('data-export:done')).toBeVisible();
   },
-} satisfies CommandRegistry<Page>;
+} satisfies CommandRegistry<Ctx>;
 
 test('onboarding leads an anonymous visitor to registration', async ({
-  page,
+  e2e,
 }) => {
-  await interpreter(
-    commands,
-    page,
-  )(['i complete onboarding and reach sign-up']);
+  await interpreter(commands, e2e)(['i complete onboarding and reach sign-up']);
 });
 
 test('month selection changes the spending overview period', async ({
-  page,
+  e2e,
 }) => {
-  await interpreter(commands, page)(
+  await interpreter(commands, e2e)(
     ['i mock the dashboard totals'],
     ['the dashboard shows the current month totals'],
     ['the previous month shows a different total'],
@@ -443,51 +446,48 @@ test('month selection changes the spending overview period', async ({
 });
 
 test('spending overview links to receipt, limits and recurring flows', async ({
-  page,
+  e2e,
 }) => {
-  await interpreter(commands, page)(
+  await interpreter(commands, e2e)(
     ['the dashboard links to limits'],
     ['the dashboard links to recurring'],
   );
 });
 
 test('a scanned receipt can be reviewed, corrected and saved as an expense', async ({
-  page,
+  e2e,
 }) => {
-  await interpreter(
-    commands,
-    page,
-  )(['i scan and save a receipt as an expense']);
+  await interpreter(commands, e2e)(['i scan and save a receipt as an expense']);
 });
 
 test('a suggested category can be added from the category list', async ({
-  page,
+  e2e,
 }) => {
-  await interpreter(commands, page)(['i add a suggested category']);
+  await interpreter(commands, e2e)(['i add a suggested category']);
 });
 
-test('a receipt can be added manually', async ({ page }) => {
-  await interpreter(commands, page)(['i add a receipt manually']);
+test('a receipt can be added manually', async ({ e2e }) => {
+  await interpreter(commands, e2e)(['i add a receipt manually']);
 });
 
 test('a receipt cannot be saved before any category exists', async ({
-  page,
+  e2e,
 }) => {
   await interpreter(
     commands,
-    page,
+    e2e,
   )(['i cannot save a receipt before any category exists']);
 });
 
-test('expenses can be filtered to bills only', async ({ page }) => {
-  await interpreter(commands, page)(
+test('expenses can be filtered to bills only', async ({ e2e }) => {
+  await interpreter(commands, e2e)(
     ['i mock the expenses list'],
     ['expenses can be filtered to bills only'],
   );
 });
 
-test('an expense can be updated and removed', async ({ page }) => {
-  await interpreter(commands, page)(
+test('an expense can be updated and removed', async ({ e2e }) => {
+  await interpreter(commands, e2e)(
     ['i mock the expenses list'],
     ['i update an expense merchant name'],
     ['i delete the updated expense'],
@@ -495,36 +495,36 @@ test('an expense can be updated and removed', async ({ page }) => {
 });
 
 test('statistics expose selectable ranges and month comparison', async ({
-  page,
+  e2e,
 }) => {
-  await interpreter(commands, page)(
+  await interpreter(commands, e2e)(
     ['statistics show the yearly total'],
     ['statistics show month comparison'],
   );
 });
 
 test('a category spending limit with an 80% alert can be created', async ({
-  page,
+  e2e,
 }) => {
-  await interpreter(commands, page)(['i create an 80 percent category limit']);
+  await interpreter(commands, e2e)(['i create an 80 percent category limit']);
 });
 
-test('a new category appears in the category list', async ({ page }) => {
-  await interpreter(commands, page)(['a new category appears in the list']);
+test('a new category appears in the category list', async ({ e2e }) => {
+  await interpreter(commands, e2e)(['a new category appears in the list']);
 });
 
-test('recurring expense tracking can be toggled off', async ({ page }) => {
-  await interpreter(commands, page)(['i toggle recurring tracking off']);
+test('recurring expense tracking can be toggled off', async ({ e2e }) => {
+  await interpreter(commands, e2e)(['i toggle recurring tracking off']);
 });
 
-test('the monthly report is downloadable', async ({ page }) => {
-  await interpreter(commands, page)(['the monthly report downloads a csv']);
+test('the monthly report is downloadable', async ({ e2e }) => {
+  await interpreter(commands, e2e)(['the monthly report downloads a csv']);
 });
 
-test('profile information can be managed from settings', async ({ page }) => {
-  await interpreter(commands, page)(['i update my profile name']);
+test('profile information can be managed from settings', async ({ e2e }) => {
+  await interpreter(commands, e2e)(['i update my profile name']);
 });
 
-test('financial data can be exported as CSV', async ({ page }) => {
-  await interpreter(commands, page)(['financial data exports as csv']);
+test('financial data can be exported as CSV', async ({ e2e }) => {
+  await interpreter(commands, e2e)(['financial data exports as csv']);
 });

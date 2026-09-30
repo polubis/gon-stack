@@ -3,19 +3,10 @@ import type { Brand } from '@repo/type-beast/brand';
 export type RecurringId = Brand<string, 'RecurringId'>;
 export type CategoryId = Brand<string, 'CategoryId'>;
 
-export const CATEGORY_ICON_IDS = [
-  'cart',
-  'car',
-  'receipt',
-  'popcorn',
-  'heart',
-  'dumbbell',
-  'home',
-  'gift',
-  'sparkles',
-] as const;
+import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
 
-export type CategoryIconId = (typeof CATEGORY_ICON_IDS)[number];
+export { CATEGORY_ICON_IDS } from '@/shared/ui/category-icon-ids';
+export type { CategoryIconId };
 
 export type Category = {
   id: CategoryId;

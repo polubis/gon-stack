@@ -1,10 +1,12 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
+import { test, type Ctx } from './test';
 import { API_ROUTER, APP_ROUTER } from '@/shared/router';
 import { expectNoA11yViolations } from './axe';
 import { signInAsTestUser } from './session';
+import type { E2eId } from './selectors';
 
-type Screen = { path: string; root: string; heading: RegExp };
+type Screen = { path: string; root: E2eId; heading: RegExp };
 
 const SCREENS: Screen[] = [
   { path: APP_ROUTER.home(), root: 'home:main', heading: /Parka/ },
@@ -58,7 +60,7 @@ const SCREENS: Screen[] = [
 ];
 
 const commands = {
-  'i mock the dashboard': async (page) => {
+  'i mock the dashboard': async ({ page }) => {
     // Dashboard is backend-only (see modules/dashboard/AGENTS.md) — stub the
     // response so the a11y check doesn't depend on an authenticated session.
     await page.route(
@@ -76,25 +78,23 @@ const commands = {
     );
   },
   'the screen renders with no wcag violations': async (
-    page: Page,
+    { page, getByE2e }: Ctx,
     screen: Screen,
   ) => {
     if (screen.path.startsWith(APP_ROUTER.dashboard()))
       await signInAsTestUser(page);
     await page.goto(screen.path);
-    await expect(page.getByTestId(screen.root)).toBeVisible();
+    await expect(getByE2e(screen.root)).toBeVisible();
     await expect(
       page.getByRole('heading', { name: screen.heading }).first(),
     ).toBeVisible();
     await expectNoA11yViolations(page);
   },
-} satisfies CommandRegistry<Page>;
+} satisfies CommandRegistry<Ctx>;
 
 for (const screen of SCREENS) {
-  test(`${screen.path} renders and has no WCAG violations`, async ({
-    page,
-  }) => {
-    const run = interpreter(commands, page);
+  test(`${screen.path} renders and has no WCAG violations`, async ({ e2e }) => {
+    const run = interpreter(commands, e2e);
     if (screen.path === APP_ROUTER.dashboard())
       await run(['i mock the dashboard']);
     await run(['the screen renders with no wcag violations', screen]);

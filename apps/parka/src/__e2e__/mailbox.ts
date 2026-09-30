@@ -1,5 +1,6 @@
 import { expect, type Page } from '@playwright/test';
 import { APP_ROUTER } from '@/shared/router';
+import type { Ctx } from './test';
 
 /** Local Supabase mail server (Mailpit) web/API port from `supabase/config.toml`. */
 const MAILBOX_URL = 'http://localhost:54324';
@@ -32,15 +33,15 @@ const findConfirmLink = async (
  * cookie lives there) so the session lands on `/app/`.
  */
 export const registerAndConfirm = async (
-  page: Page,
+  { page, getByE2e }: Ctx,
   email: string,
   password: string,
 ): Promise<void> => {
   await page.goto(APP_ROUTER.signUp());
   await page.waitForLoadState('networkidle');
-  await page.getByTestId('auth:email').fill(email);
-  await page.getByTestId('auth:password').fill(password);
-  await page.getByTestId('auth:submit').click();
+  await getByE2e('auth:email').fill(email);
+  await getByE2e('auth:password').fill(password);
+  await getByE2e('auth:submit').click();
   await expect(page.getByRole('status')).toContainText(
     /potwierdź rejestrację/i,
   );

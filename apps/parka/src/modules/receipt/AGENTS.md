@@ -1,9 +1,10 @@
 ---
-version: 1.5
-hash: 6c3bed20866b5fd88922a145f3e18d102cf2fbfde6a4fc665a991a718eb3b1b5
+version: 1.6
+hash: efee73e332ca4e6bf6da5c62e5713003c3719c9fee0ed28448f17dfcea49ca9b
 name: receipt
 description: Receipt entry module (scan/manual draft, review, save). Use for create flows writing two entities.
 ---
+
 
 
 

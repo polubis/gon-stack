@@ -13,6 +13,17 @@ export const COLORS = [
   '#0891b2',
   '#a16207',
   '#4b5a52',
+  '#dc2626',
+  '#ea580c',
+  '#ca8a04',
+  '#65a30d',
+  '#0d9488',
+  '#0284c7',
+  '#4f46e5',
+  '#c026d3',
+  '#db2777',
+  '#57534e',
+  '#0f172a',
 ] as const;
 
 /** Suggested categories; `name` is stored as the `category.<slug>` symbol. */

@@ -8,18 +8,52 @@ import {
   Home,
   Gift,
   Sparkles,
+  Utensils,
+  Coffee,
+  Pizza,
+  Wine,
+  Beer,
+  Apple,
+  Cake,
+  Bus,
+  Train,
+  Plane,
+  Bike,
+  Fuel,
+  Shirt,
+  Baby,
+  Dog,
+  PawPrint,
+  GraduationCap,
+  Book,
+  Gamepad2,
+  Music,
+  Film,
+  Ticket,
+  Camera,
+  Smartphone,
+  Laptop,
+  Wifi,
+  Zap,
+  Droplets,
+  Flame,
+  Wrench,
+  Hammer,
+  Scissors,
+  Pill,
+  Stethoscope,
+  Briefcase,
+  Wallet,
+  PiggyBank,
+  Landmark,
+  Umbrella,
+  Palette,
+  TreeDeciduous,
   type LucideIcon,
 } from 'lucide-react';
-export type CategoryIconId =
-  | 'cart'
-  | 'car'
-  | 'receipt'
-  | 'popcorn'
-  | 'heart'
-  | 'dumbbell'
-  | 'home'
-  | 'gift'
-  | 'sparkles';
+import { CATEGORY_ICON_IDS, type CategoryIconId } from './category-icon-ids';
+
+export type { CategoryIconId };
 
 const MAP: Record<CategoryIconId, LucideIcon> = {
   cart: ShoppingCart,
@@ -31,6 +65,47 @@ const MAP: Record<CategoryIconId, LucideIcon> = {
   home: Home,
   gift: Gift,
   sparkles: Sparkles,
+  utensils: Utensils,
+  coffee: Coffee,
+  pizza: Pizza,
+  wine: Wine,
+  beer: Beer,
+  apple: Apple,
+  cake: Cake,
+  bus: Bus,
+  train: Train,
+  plane: Plane,
+  bike: Bike,
+  fuel: Fuel,
+  shirt: Shirt,
+  baby: Baby,
+  dog: Dog,
+  paw: PawPrint,
+  graduation: GraduationCap,
+  book: Book,
+  gamepad: Gamepad2,
+  music: Music,
+  film: Film,
+  ticket: Ticket,
+  camera: Camera,
+  phone: Smartphone,
+  laptop: Laptop,
+  wifi: Wifi,
+  zap: Zap,
+  droplet: Droplets,
+  flame: Flame,
+  wrench: Wrench,
+  hammer: Hammer,
+  scissors: Scissors,
+  pill: Pill,
+  stethoscope: Stethoscope,
+  briefcase: Briefcase,
+  wallet: Wallet,
+  piggy: PiggyBank,
+  landmark: Landmark,
+  umbrella: Umbrella,
+  palette: Palette,
+  tree: TreeDeciduous,
 };
 
 type Props = {
@@ -43,14 +118,5 @@ export const CategoryIcon = ({ id, className }: Props) => {
   return <Cmp className={className} aria-hidden="true" />;
 };
 
-export const CATEGORY_ICON_OPTIONS: CategoryIconId[] = [
-  'cart',
-  'car',
-  'receipt',
-  'popcorn',
-  'heart',
-  'dumbbell',
-  'home',
-  'gift',
-  'sparkles',
-];
+export const CATEGORY_ICON_OPTIONS: readonly CategoryIconId[] =
+  CATEGORY_ICON_IDS;

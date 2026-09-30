@@ -1,5 +1,6 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
+import { test, type Ctx } from './test';
 import { registerAndConfirm } from './mailbox';
 import { API_ROUTER, APP_ROUTER } from '@/shared/router';
 
@@ -41,81 +42,90 @@ const reload = async (page: Page): Promise<void> => {
 };
 
 const commands = {
-  'i register a new account': async (page) => {
-    await registerAndConfirm(page, EMAIL, PASSWORD);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(150);
+  'i register a new account': async (ctx) => {
+    await registerAndConfirm(ctx, EMAIL, PASSWORD);
+    await ctx.page.waitForLoadState('networkidle');
+    await ctx.page.waitForTimeout(150);
   },
 
-  'the dashboard opens on the current month': async (page) => {
+  'the dashboard opens on the current month': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.dashboard());
-    await expect(page.getByTestId('dashboard:month-label')).toHaveText(
+    await expect(getByE2e('dashboard:month-label')).toHaveText(
       new RegExp(plMonthLabel(0), 'i'),
     );
-    await expect(page.getByTestId('dashboard:total')).toContainText('zł');
+    await expect(getByE2e('dashboard:total')).toContainText('zł');
   },
-  'month navigation reads other months from the db': async (page) => {
-    await page.getByTestId('dashboard:prev-month').click();
-    await expect(page.getByTestId('dashboard:month-label')).toHaveText(
+  'month navigation reads other months from the db': async ({ getByE2e }) => {
+    await getByE2e('dashboard:prev-month').click();
+    await expect(getByE2e('dashboard:month-label')).toHaveText(
       new RegExp(plMonthLabel(-1), 'i'),
     );
-    await page.getByTestId('dashboard:next-month').click();
-    await expect(page.getByTestId('dashboard:month-label')).toHaveText(
+    await getByE2e('dashboard:next-month').click();
+    await expect(getByE2e('dashboard:month-label')).toHaveText(
       new RegExp(plMonthLabel(0), 'i'),
     );
   },
 
-  'i add suggested categories and they survive a reload': async (page) => {
+  'i add suggested categories and they survive a reload': async ({
+    page,
+    getByE2e,
+  }) => {
     await open(page, APP_ROUTER.categories());
     await Promise.all([
       synced(page, 'POST', API_ROUTER.categories(), 201),
-      page.getByTestId('categories:add-default:groceries').click(),
+      getByE2e('categories:add-default:groceries').click(),
     ]);
-    await expect(page.getByTestId('categories:row:groceries')).toContainText(
+    await expect(getByE2e('categories:row:groceries')).toContainText(
       'Spożywcze',
     );
     await reload(page);
-    await expect(page.getByTestId('categories:row:groceries')).toContainText(
+    await expect(getByE2e('categories:row:groceries')).toContainText(
       'Spożywcze',
     );
   },
-  'i create a category and it survives a reload': async (page) => {
+  'i create a category and it survives a reload': async ({
+    page,
+    getByE2e,
+  }) => {
     await open(page, APP_ROUTER.categories());
-    await page.getByTestId('categories:new').click();
-    await page.getByTestId('categories:form-name').fill('Kultura');
+    await getByE2e('categories:form-name').fill('Kultura');
     await Promise.all([
       synced(page, 'POST', API_ROUTER.categories(), 201),
-      page.getByTestId('categories:form-save').click(),
+      getByE2e('categories:form-save').click(),
     ]);
     await expect(page.getByText('Kultura')).toBeVisible();
     await reload(page);
     await expect(page.getByText('Kultura')).toBeVisible();
   },
 
-  'i scan a receipt and save it as an expense': async (page) => {
+  'i scan a receipt and save it as an expense': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
     await open(page, APP_ROUTER.receiptScan());
-    await page.getByTestId('receipt:capture').click();
-    await expect(page.getByTestId('receipt:review')).toBeVisible();
-    await page.getByTestId('receipt:merchant').fill('Sklep E2E Backend');
+    await getByE2e('receipt:capture').click();
+    await expect(getByE2e('receipt:review')).toBeVisible();
+    await getByE2e('receipt:merchant').fill('Sklep E2E Backend');
     await page.getByRole('button', { name: /Nowy produkt/ }).click();
-    await page.getByTestId(/^receipt:item-name:/).fill('Chleb razowy');
-    await page.getByTestId(/^receipt:item-price:/).fill('3.20');
-    await page.getByTestId('receipt:save').click();
+    await getByE2ePrefix('receipt:item-name:').fill('Chleb razowy');
+    await getByE2ePrefix('receipt:item-price:').fill('3.20');
+    await getByE2e('receipt:save').click();
     await page.waitForURL(`**${APP_ROUTER.expenses()}`);
     await expect(page.getByText('Sklep E2E Backend')).toBeVisible();
     await reload(page);
     await expect(page.getByText('Sklep E2E Backend')).toBeVisible();
   },
 
-  'i update and delete an expense': async (page) => {
+  'i update and delete an expense': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.expenses());
     await page.getByRole('button', { name: /Sklep E2E Backend/ }).click();
-    await expect(page.getByTestId('expenses:detail')).toBeVisible();
-    await page.getByTestId('expenses:edit').click();
-    await page.getByTestId('expenses:edit-merchant').fill('Sklep Nowy');
+    await expect(getByE2e('expenses:detail')).toBeVisible();
+    await getByE2e('expenses:edit').click();
+    await getByE2e('expenses:edit-merchant').fill('Sklep Nowy');
     await Promise.all([
       synced(page, 'PUT', API_ROUTER.expenses()),
-      page.getByTestId('expenses:save').click(),
+      getByE2e('expenses:save').click(),
     ]);
     await expect(page.getByText('Sklep Nowy')).toBeVisible();
     await reload(page);
@@ -124,102 +134,99 @@ const commands = {
     await page.getByRole('button', { name: /Sklep Nowy/ }).click();
     await Promise.all([
       synced(page, 'DELETE', API_ROUTER.expenses()),
-      page.getByTestId('expenses:delete').click(),
+      getByE2e('expenses:delete').click(),
     ]);
     await expect(page.getByText('Sklep Nowy')).toHaveCount(0);
     await reload(page);
     await expect(page.getByText('Sklep Nowy')).toHaveCount(0);
   },
 
-  'statistics expose year and comparison views': async (page) => {
+  'statistics expose year and comparison views': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.statistics());
     await page.getByRole('tab', { name: 'Rok' }).click();
-    await expect(page.getByTestId('statistics:total')).toContainText('zł');
+    await expect(getByE2e('statistics:total')).toContainText('zł');
     await page.getByRole('tab', { name: 'Porównanie' }).click();
-    await expect(page.getByTestId('statistics:current')).toBeVisible();
-    await expect(page.getByTestId('statistics:changes')).toBeVisible();
+    await expect(getByE2e('statistics:current')).toBeVisible();
+    await expect(getByE2e('statistics:changes')).toBeVisible();
   },
-  'the report totals and downloads a csv': async (page) => {
+  'the report totals and downloads a csv': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.reports());
-    await expect(page.getByTestId('reports:total')).toContainText('zł');
+    await expect(getByE2e('reports:total')).toContainText('zł');
     const [csv] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('reports:download-csv').click(),
+      getByE2e('reports:download-csv').click(),
     ]);
     expect(csv.suggestedFilename()).toMatch(/\.csv$/);
   },
 
-  'i create a category limit': async (page) => {
+  'i create a category limit': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.limits());
     await page.getByRole('tab', { name: 'Kategorie' }).click();
-    await page.getByTestId('limits:new').click();
-    await page.getByTestId('limits:form-amount').fill('450');
+    await getByE2e('limits:new').click();
+    await getByE2e('limits:form-amount').fill('450');
     await Promise.all([
       synced(page, 'POST', API_ROUTER.limits(), 201),
-      page.getByTestId('limits:form-save').click(),
+      getByE2e('limits:form-save').click(),
     ]);
-    await expect(page.getByTestId('limits:form')).toHaveCount(0);
+    await expect(getByE2e('limits:form')).toHaveCount(0);
     await reload(page);
     await page.getByRole('tab', { name: 'Kategorie' }).click();
     await expect(
-      page.getByTestId('limits:category-list').getByText('Spożywcze'),
+      getByE2e('limits:category-list').getByText('Spożywcze'),
     ).toBeVisible();
   },
 
-  'i update my settings profile': async (page) => {
+  'i update my settings profile': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.settings());
-    await page.getByTestId('settings:edit-profile').click();
-    await page.getByTestId('settings:profile-name').fill('Anna Backendowa');
+    await getByE2e('settings:edit-profile').click();
+    await getByE2e('settings:profile-name').fill('Anna Backendowa');
     await Promise.all([
       synced(page, 'PUT', API_ROUTER.settings()),
-      page.getByTestId('settings:save-profile').click(),
+      getByE2e('settings:save-profile').click(),
     ]);
-    await expect(page.getByTestId('settings:name')).toHaveText(
-      'Anna Backendowa',
-    );
+    await expect(getByE2e('settings:name')).toHaveText('Anna Backendowa');
     await reload(page);
-    await expect(page.getByTestId('settings:name')).toHaveText(
-      'Anna Backendowa',
-    );
+    await expect(getByE2e('settings:name')).toHaveText('Anna Backendowa');
   },
 
-  'data export downloads a csv': async (page) => {
+  'data export downloads a csv': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.dataExport());
     const [dump] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('data-export:run').click(),
+      getByE2e('data-export:run').click(),
     ]);
     expect(dump.suggestedFilename()).toMatch(/\.csv$/);
-    await expect(page.getByTestId('data-export:done')).toBeVisible();
+    await expect(getByE2e('data-export:done')).toBeVisible();
   },
 
-  'i sign out and sign back in': async (page) => {
+  'i sign out and sign back in': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.settings());
     await Promise.all([
       page.waitForURL(`**${APP_ROUTER.signIn()}`),
-      page.getByTestId('settings:sign-out').click(),
+      getByE2e('settings:sign-out').click(),
     ]);
-    await page.getByTestId('auth:email').fill(EMAIL);
-    await page.getByTestId('auth:password').fill(PASSWORD);
-    await page.getByTestId('auth:submit').click();
+    await getByE2e('auth:email').fill(EMAIL);
+    await getByE2e('auth:password').fill(PASSWORD);
+    await getByE2e('auth:submit').click();
     await page.waitForURL(`**${APP_ROUTER.dashboard()}`);
   },
-  'data persisted in postgres after sign back in': async (page) => {
+  'data persisted in postgres after sign back in': async ({
+    page,
+    getByE2e,
+  }) => {
     await open(page, APP_ROUTER.settings());
-    await expect(page.getByTestId('settings:name')).toHaveText(
-      'Anna Backendowa',
-    );
+    await expect(getByE2e('settings:name')).toHaveText('Anna Backendowa');
     await open(page, APP_ROUTER.categories());
     await expect(page.getByText('Kultura')).toBeVisible();
     await open(page, APP_ROUTER.expenses());
     await expect(page.getByText('Sklep Nowy')).toHaveCount(0);
   },
-} satisfies CommandRegistry<Page>;
+} satisfies CommandRegistry<Ctx>;
 
 test('every feature works against the real Supabase backend', async ({
-  page,
+  e2e,
 }) => {
-  await interpreter(commands, page)(
+  await interpreter(commands, e2e)(
     ['i register a new account'],
     ['the dashboard opens on the current month'],
     ['month navigation reads other months from the db'],

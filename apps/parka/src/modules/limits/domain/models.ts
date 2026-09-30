@@ -7,16 +7,9 @@ export type ExpenseId = Brand<string, 'ExpenseId'>;
 /** `YYYY-MM`. */
 export type Month = Brand<string, 'Month'>;
 
-export type CategoryIconId =
-  | 'cart'
-  | 'car'
-  | 'receipt'
-  | 'popcorn'
-  | 'heart'
-  | 'dumbbell'
-  | 'home'
-  | 'gift'
-  | 'sparkles';
+import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
+
+export type { CategoryIconId };
 
 export type Category = {
   id: CategoryId;

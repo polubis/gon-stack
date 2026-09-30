@@ -19,6 +19,8 @@ import { Provider, useContext } from './context';
 import { Card } from './layout';
 import { ListSkeleton } from './list-skeleton';
 
+const NEW: Editing = { mode: 'new' };
+
 type Default = (typeof DEFAULT_CATEGORIES)[number];
 
 const toCategory = (d: Default): Category => ({
@@ -35,7 +37,13 @@ const CategoriesView = () => {
   const notice = ctx.useNotice();
   const initializing = ctx.useInitializing();
   const isLoading = ctx.useIsLoading();
-  const [editing, setEditing] = useState<Editing>(null);
+  const [editing, setEditing] = useState<Editing>(NEW);
+  const [formKey, setFormKey] = useState(0);
+
+  const resetForm = () => {
+    setEditing(NEW);
+    setFormKey((n) => n + 1);
+  };
 
   useEffect(() => {
     ctx.load();
@@ -49,21 +57,7 @@ const CategoriesView = () => {
     <div data-e2e="categories:main" className="relative flex flex-1 flex-col">
       <LoadingBanner active={isLoading && !initializing} />
       <div className="md:px-4 lg:px-6 xl:px-12">
-        <ScreenHeader
-          title="Kategorie"
-          backHref={APP_ROUTER.settings()}
-          action={
-            <button
-              type="button"
-              aria-label="Dodaj kategorię"
-              data-e2e="categories:new"
-              onClick={() => setEditing({ mode: 'new' })}
-              className="grid h-9 w-9 place-items-center rounded-full bg-brand text-on-brand"
-            >
-              <Plus className="h-5 w-5" aria-hidden="true" />
-            </button>
-          }
-        />
+        <ScreenHeader title="Kategorie" backHref={APP_ROUTER.settings()} />
       </div>
       <main className="flex flex-1 flex-col gap-2 px-4 pb-6 pt-2 md:gap-4 md:px-8 lg:grid lg:grid-cols-3 lg:content-start lg:items-start lg:px-10 xl:px-16">
         {error ? (
@@ -137,14 +131,12 @@ const CategoriesView = () => {
           </Card>
         ) : null}
 
-        {editing ? (
-          <CategoryForm
-            key={editing.mode === 'edit' ? editing.category.id : 'new'}
-            editing={editing}
-            onSave={editing.mode === 'new' ? ctx.create : ctx.update}
-            onDone={() => setEditing(null)}
-          />
-        ) : null}
+        <CategoryForm
+          key={editing.mode === 'edit' ? editing.category.id : `new-${formKey}`}
+          editing={editing}
+          onSave={editing.mode === 'new' ? ctx.create : ctx.update}
+          onDone={resetForm}
+        />
       </main>
 
       {notice ? (
