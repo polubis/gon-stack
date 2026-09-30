@@ -90,6 +90,9 @@ const currentTotalByPage = new WeakMap<Page, string>();
 const commands = {
   'i complete onboarding and reach sign-up': async (page) => {
     await open(page, APP_ROUTER.home());
+    // The cookie banner sits at the bottom, over the walkthrough actions.
+    await page.getByTestId('cookies:accept-all').click();
+    await expect(page.getByTestId('cookies:banner')).toBeHidden();
     // Step through the product introduction, then hand off to sign-up.
     await page.getByTestId('walkthrough:primary').click();
     await page.getByTestId('walkthrough:primary').click();

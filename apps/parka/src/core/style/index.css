@@ -35,6 +35,8 @@
   --warn: #c2410c;
 
   --shadow-card-value: 0 1px 2px rgb(16 36 27 / 0.04);
+  --shadow-popover-value:
+    0 8px 24px rgb(16 36 27 / 0.16), 0 2px 6px rgb(16 36 27 / 0.08);
   --z-nav: 10;
   --z-modal: 20;
 }
@@ -66,6 +68,8 @@
   --warn: #fb923c;
 
   --shadow-card-value: none;
+  --shadow-popover-value:
+    0 8px 24px rgb(0 0 0 / 0.5), 0 2px 6px rgb(0 0 0 / 0.3);
 }
 
 @theme inline {
@@ -97,6 +101,7 @@
   --color-warn: var(--warn);
 
   --shadow-card: var(--shadow-card-value);
+  --shadow-popover: var(--shadow-popover-value);
 
   /* Exact former sizes (10px / 11px at the default root size), in rem. */
   --text-micro: 0.625rem;

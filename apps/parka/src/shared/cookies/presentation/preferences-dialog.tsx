@@ -26,34 +26,34 @@ export const PreferencesDialog = ({
 }: Props) => (
   <Dialog.Root open={open} onOpenChange={onOpenChange}>
     <Dialog.Portal>
-      <Dialog.Overlay className="fixed inset-0 z-50 bg-black/70" />
+      <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-overlay" />
       <Dialog.Content
         data-e2e="cookies:preferences"
-        className="fixed inset-0 z-50 flex flex-col bg-slate-900 focus:outline-none sm:inset-auto sm:left-1/2 sm:top-1/2 sm:h-auto sm:max-h-[85vh] sm:w-full sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:border sm:border-slate-800 sm:shadow-2xl"
+        className="fixed inset-0 z-(--z-modal) flex flex-col bg-card focus:outline-none sm:inset-auto sm:left-1/2 sm:top-1/2 sm:h-auto sm:max-h-[85vh] sm:w-full sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:border sm:border-line sm:shadow-card"
       >
-        <div className="flex items-center justify-between gap-4 border-b border-slate-800 p-5 sm:p-6">
+        <div className="flex items-center justify-between gap-4 border-b border-line p-5 sm:p-6">
           <div className="flex items-center gap-2">
             <Dialog.Close
               aria-label={copy.preferences.backLabel}
               data-e2e="cookies:back"
-              className="-ml-1 rounded-full p-1 text-white sm:hidden"
+              className="-ml-1 rounded-full p-1 text-ink sm:hidden"
             >
               <ChevronLeft className="h-5 w-5" aria-hidden="true" />
             </Dialog.Close>
-            <Dialog.Title className="text-lg font-semibold text-white sm:text-xl">
+            <Dialog.Title className="text-lg font-semibold text-ink sm:text-xl">
               {copy.preferences.title}
             </Dialog.Title>
           </div>
           <Dialog.Close
             aria-label={copy.preferences.closeLabel}
             data-e2e="cookies:close"
-            className="hidden rounded-full p-1 text-slate-400 hover:text-white sm:block"
+            className="hidden rounded-full p-1 text-ink-soft hover:text-ink sm:block"
           >
             <X className="h-5 w-5" aria-hidden="true" />
           </Dialog.Close>
         </div>
 
-        <Dialog.Description className="px-5 pt-4 text-sm leading-relaxed text-slate-400 sm:px-6">
+        <Dialog.Description className="px-5 pt-4 text-sm leading-relaxed text-ink-soft sm:px-6">
           {copy.preferences.description}
         </Dialog.Description>
 
@@ -67,28 +67,28 @@ export const PreferencesDialog = ({
             return (
               <div
                 key={id}
-                className="flex items-start justify-between gap-4 border-b border-slate-800 py-4 last:border-b-0"
+                className="flex items-start justify-between gap-4 border-b border-line py-4 last:border-b-0"
               >
                 <div className="flex items-start gap-3">
                   <span
                     className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
                       isEssential
-                        ? 'bg-emerald-500/10 text-emerald-400'
-                        : 'bg-slate-800 text-slate-300'
+                        ? 'bg-brand-soft text-brand'
+                        : 'bg-hover text-ink-soft'
                     }`}
                   >
                     <Icon className="h-4 w-4" />
                   </span>
                   <div>
-                    <p className="font-semibold text-white">{category.title}</p>
-                    <p className="mt-1 text-sm leading-relaxed text-slate-400">
+                    <p className="font-semibold text-ink">{category.title}</p>
+                    <p className="mt-1 text-sm leading-relaxed text-ink-soft">
                       {category.description}
                     </p>
                   </div>
                 </div>
 
                 {isEssential ? (
-                  <div className="flex shrink-0 items-center gap-2 pt-1 text-xs font-semibold text-emerald-400">
+                  <div className="flex shrink-0 items-center gap-2 pt-1 text-xs font-semibold text-brand">
                     <span>{copy.preferences.alwaysActive}</span>
                     <Lock className="h-3.5 w-3.5" aria-hidden="true" />
                   </div>
@@ -101,11 +101,11 @@ export const PreferencesDialog = ({
                     onClick={() => onToggleCategory(id)}
                     data-category={id}
                     className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-                      checked ? 'bg-orange-500' : 'bg-slate-700'
+                      checked ? 'bg-brand' : 'bg-track-strong'
                     }`}
                   >
                     <span
-                      className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
+                      className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-card shadow-sm transition-transform ${
                         checked ? 'translate-x-5' : ''
                       }`}
                     />
@@ -116,12 +116,12 @@ export const PreferencesDialog = ({
           })}
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-slate-800 p-5 sm:flex-row sm:justify-end sm:p-6">
+        <div className="flex flex-col gap-3 border-t border-line p-5 sm:flex-row sm:justify-end sm:p-6">
           <button
             type="button"
             onClick={onRejectOptional}
             data-e2e="cookies:reject-optional"
-            className="rounded-lg border border-slate-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+            className="rounded-lg border border-line-strong px-5 py-2.5 text-sm font-semibold text-ink hover:bg-hover"
           >
             {copy.preferences.rejectOptional}
           </button>
@@ -129,7 +129,7 @@ export const PreferencesDialog = ({
             type="button"
             onClick={onSavePreferences}
             data-e2e="cookies:save-preferences"
-            className="rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-400 sm:border sm:border-orange-500 sm:bg-transparent sm:text-orange-400 sm:hover:bg-orange-500/10"
+            className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand hover:bg-brand-dark sm:border sm:border-brand sm:bg-transparent sm:text-brand sm:hover:bg-brand-soft"
           >
             {copy.preferences.savePreferences}
           </button>
@@ -137,7 +137,7 @@ export const PreferencesDialog = ({
             type="button"
             onClick={onAcceptAll}
             data-e2e="cookies:accept-all"
-            className="rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-400"
+            className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand hover:bg-brand-dark"
           >
             {copy.preferences.acceptAll}
           </button>

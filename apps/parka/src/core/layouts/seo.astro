@@ -4,6 +4,11 @@ import { CookieConsent } from '@/shared/cookies';
 import { APP_ROUTER, type PageUrl } from '@/shared/router';
 
 const PRIVACY_POLICY_URL = APP_ROUTER.privacyPolicy();
+const COOKIE_CONSENT_PAGES: readonly PageUrl[] = [
+  APP_ROUTER.home(),
+  APP_ROUTER.signIn(),
+  APP_ROUTER.signUp(),
+];
 
 type Props = {
   description: string;
@@ -28,6 +33,7 @@ const {
 }: Props = Astro.props;
 
 const siteUrl = `${domain}${url}`;
+const showCookieConsent = COOKIE_CONSENT_PAGES.includes(url);
 ---
 
 <!doctype html>
@@ -66,6 +72,10 @@ const siteUrl = `${domain}${url}`;
   </head>
   <body>
     <slot />
-    <CookieConsent client:load privacyPolicyUrl={PRIVACY_POLICY_URL} />
+    {
+      showCookieConsent && (
+        <CookieConsent client:load privacyPolicyUrl={PRIVACY_POLICY_URL} />
+      )
+    }
   </body>
 </html>
