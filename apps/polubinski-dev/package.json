@@ -34,7 +34,7 @@
     "astro": "^7.3.5",
     "embla-carousel-auto-scroll": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
-    "lucide-react": "^1.48.0",
+    "lucide-react": "^1.49.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "tailwindcss": "^4.3.3",
@@ -57,6 +57,6 @@
     "sharp": "^0.35.5",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.11",
-    "wrangler": "^4.143.0"
+    "wrangler": "^4.144.0"
   }
 }

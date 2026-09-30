@@ -25,75 +25,14 @@ allowBuilds:
   workerd: true
 
 minimumReleaseAgeExclude:
-  - '@turbo/darwin-64@2.10.11'
-  - '@turbo/darwin-arm64@2.10.11'
-  - '@turbo/linux-64@2.10.11'
-  - '@turbo/linux-arm64@2.10.11'
-  - '@turbo/windows-64@2.10.11'
-  - '@turbo/windows-arm64@2.10.11'
-  - turbo@2.10.11
-  - '@astrojs/cloudflare@14.2.2 || 14.2.3'
-  - '@astrojs/internal-helpers@0.10.3 || 0.10.4'
-  - '@astrojs/markdown-satteri@0.3.6 || 0.3.7'
-  - '@astrojs/react@6.0.3 || 6.0.4'
-  - '@supabase/cli-darwin-arm64@2.115.0'
-  - '@supabase/cli-darwin-x64@2.115.0'
-  - '@supabase/cli-linux-arm64-musl@2.115.0'
-  - '@supabase/cli-linux-arm64@2.115.0'
-  - '@supabase/cli-linux-x64-musl@2.115.0'
-  - '@supabase/cli-linux-x64@2.115.0'
-  - '@supabase/cli-windows-arm64@2.115.0'
-  - '@supabase/cli-windows-x64@2.115.0'
-  - '@vitest/coverage-v8@4.1.11'
-  - '@vitest/expect@4.1.11'
-  - '@vitest/mocker@4.1.11'
-  - '@vitest/pretty-format@4.1.11'
-  - '@vitest/runner@4.1.11'
-  - '@vitest/snapshot@4.1.11'
-  - '@vitest/spy@4.1.11'
-  - '@vitest/utils@4.1.11'
-  - astro@7.2.3 || 7.2.4
-  - eslint-plugin-turbo@2.10.11
-  - lucide-react@1.32.0 || 1.33.0
-  - miniflare@5.20260815.0-alpha || 5.20260831.0-alpha
-  - supabase@2.115.0
-  - vitest@4.1.11
-  - wrangler@4.124.0 || 4.128.0 || 4.143.0
-  - '@vitejs/plugin-react@6.1.0'
-  - react-hook-form@7.87.0
-  - zod@4.5.4
-  - '@supabase/auth-js@2.114.0'
-  - '@supabase/functions-js@2.114.0'
-  - '@supabase/postgrest-js@2.114.0'
-  - '@supabase/realtime-js@2.114.0'
-  - '@supabase/storage-js@2.114.0'
-  - '@supabase/supabase-js@2.114.0'
-  - '@testing-library/user-event@14.6.7'
-  - '@types/node@26.4.1'
-  - nanostores@1.5.3
-  - '@mdxeditor/editor@4.3.1'
-  - '@next/env@16.3.7'
-  - '@next/eslint-plugin-next@16.3.7'
-  - '@next/swc-darwin-arm64@16.3.7'
-  - '@next/swc-darwin-x64@16.3.7'
-  - '@next/swc-linux-arm64-gnu@16.3.7'
-  - '@next/swc-linux-arm64-musl@16.3.7'
-  - '@next/swc-linux-x64-gnu@16.3.7'
-  - '@next/swc-linux-x64-musl@16.3.7'
-  - '@next/swc-win32-arm64-msvc@16.3.7'
-  - '@next/swc-win32-x64-msvc@16.3.7'
-  - '@typescript-eslint/eslint-plugin@8.71.0'
-  - '@typescript-eslint/parser@8.71.0'
-  - '@typescript-eslint/project-service@8.71.0'
-  - '@typescript-eslint/scope-manager@8.71.0'
-  - '@typescript-eslint/tsconfig-utils@8.71.0'
-  - '@typescript-eslint/type-utils@8.71.0'
-  - '@typescript-eslint/types@8.71.0'
-  - '@typescript-eslint/typescript-estree@8.71.0'
-  - '@typescript-eslint/utils@8.71.0'
-  - '@typescript-eslint/visitor-keys@8.71.0'
-  - next@16.3.7
-  - typescript-eslint@8.71.0
+  - '@cloudflare/vite-plugin@1.62.2'
+  - lucide-react@1.49.0
+  - miniflare@5.20260926.1-alpha
+  - wrangler@4.144.0
 
 onlyBuiltDependencies:
   - supabase
+
+# Transitive fixes until @astrojs/cloudflare bumps its own range
+overrides:
+  '@cloudflare/vite-plugin': 1.62.2
