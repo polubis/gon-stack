@@ -1,11 +1,11 @@
 {
   "skill_name": "user-profile-setup",
-  "rules_source": "../AGENTS.md",
+  "rules_source": "../../../../../../../.claude/references/frontend-architecture.md",
   "evals": [
     {
       "id": 1,
       "name": "review-domain-layer-violations",
-      "prompt": "Review the attached domain models against @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md (Architecture + Code sections). List every violation. Audit only — do not rewrite yet.",
+      "prompt": "Review the attached domain models against @.claude/references/frontend-architecture.md and the user-profile-setup module tree (Architecture + Code sections). List every violation. Audit only — do not rewrite yet.",
       "files": ["fixtures/violating-domain-models.ts"],
       "assertions": [
         "Flags interface usage (Step) — module requires type aliases only",
@@ -19,7 +19,7 @@
     {
       "id": 2,
       "name": "review-events-violations",
-      "prompt": "Review the attached events file against @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md. List violations in event naming and shape.",
+      "prompt": "Review the attached events file against @.claude/references/frontend-architecture.md and the user-profile-setup module tree. List violations in event naming and shape.",
       "files": ["fixtures/violating-events.ts"],
       "assertions": [
         "Flags events not using TriggerEvent<'[TRIGGER]_NAME'> from @/libs/eda",
@@ -31,7 +31,7 @@
     {
       "id": 3,
       "name": "review-handler-violations",
-      "prompt": "Review the attached handler against @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md and core/handlers/next.ts. List violations. Audit only.",
+      "prompt": "Review the attached handler against @.claude/references/frontend-architecture.md and the user-profile-setup module tree and core/handlers/next.ts. List violations. Audit only.",
       "files": ["fixtures/violating-handler.ts"],
       "assertions": [
         "Flags function declaration (handleNext) — arrow functions only",
@@ -44,7 +44,7 @@
     {
       "id": 4,
       "name": "review-presentation-layer-violations",
-      "prompt": "Review the attached presentation component against @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md. List every architecture and code violation.",
+      "prompt": "Review the attached presentation component against @.claude/references/frontend-architecture.md and the user-profile-setup module tree. List every architecture and code violation.",
       "files": ["fixtures/violating-step.tsx"],
       "assertions": [
         "Flags default export — named exports only",
@@ -58,7 +58,7 @@
     {
       "id": 5,
       "name": "review-integration-mapper-violations",
-      "prompt": "Review the attached mappers against @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md and integration/mappers.ts. List violations.",
+      "prompt": "Review the attached mappers against @.claude/references/frontend-architecture.md and the user-profile-setup module tree and integration/mappers.ts. List violations.",
       "files": ["fixtures/violating-mappers.ts"],
       "assertions": [
         "Flags toStep using any — mappers must map backend DTOs to domain models explicitly",
@@ -71,7 +71,7 @@
     {
       "id": 6,
       "name": "review-black-box-test-violations",
-      "prompt": "Review the attached tests against @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md and __tests__/main.test.tsx conventions. List violations.",
+      "prompt": "Review the attached tests against @.claude/references/frontend-architecture.md and the user-profile-setup module tree and __tests__/main.test.tsx conventions. List violations.",
       "files": ["fixtures/violating-main.test.tsx"],
       "assertions": [
         "Flags describe name referencing internals ('createFacade internals')",
@@ -84,7 +84,7 @@
     {
       "id": 7,
       "name": "review-e2e-spec-violations",
-      "prompt": "Review the attached e2e spec against @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md and __e2e__/main-flow.spec.ts. List violations.",
+      "prompt": "Review the attached e2e spec against @.claude/references/frontend-architecture.md and the user-profile-setup module tree and __e2e__/main-flow.spec.ts. List violations.",
       "files": ["fixtures/violating-e2e.spec.ts"],
       "assertions": [
         "Flags test names referencing handlers/atoms (next handler, init handler, $steps atom, $activeStepIndex)",
@@ -97,7 +97,7 @@
     {
       "id": 8,
       "name": "clone-feature-module-scaffold",
-      "prompt": "Clone the user-profile-setup module conventions from @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md to scaffold `account-deletion` — a multi-step flow: confirm intent, enter password, see confirmation. Show folder tree and skeleton for each layer (configuration, domain, core, integration, presentation). No full implementation.",
+      "prompt": "Clone the user-profile-setup module conventions from @.claude/references/frontend-architecture.md and the user-profile-setup module tree to scaffold `account-deletion` — a multi-step flow: confirm intent, enter password, see confirmation. Show folder tree and skeleton for each layer (configuration, domain, core, integration, presentation). No full implementation.",
       "files": [],
       "assertions": [
         "Layers: configuration/, domain/, core/handlers/, integration/, presentation/, __tests__/, __e2e__/",
@@ -112,7 +112,7 @@
     {
       "id": 9,
       "name": "fix-handler-to-module-pattern",
-      "prompt": "Rewrite fixtures/violating-handler.ts as a compliant core/handlers/next.ts-style handler per @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md. Return the complete fixed file.",
+      "prompt": "Rewrite fixtures/violating-handler.ts as a compliant core/handlers/next.ts-style handler per @.claude/references/frontend-architecture.md and the user-profile-setup module tree. Return the complete fixed file.",
       "files": ["fixtures/violating-handler.ts"],
       "assertions": [
         "Exported as const arrow: export const next = (store, { ofType }) => ...",
@@ -125,14 +125,14 @@
     {
       "id": 10,
       "name": "reject-wrong-layer-placement",
-      "prompt": "A teammate wants to add profile validation logic and API fetch for steps inside configuration/validation.ts, and expose $activeStepIndex directly from presentation/header.tsx. Explain why this violates @apps/romantic-app/src/modules/user-profile-setup/AGENTS.md and where each concern belongs.",
+      "prompt": "A teammate wants to add profile validation logic and API fetch for steps inside configuration/validation.ts, and expose $activeStepIndex directly from presentation/header.tsx. Explain why this violates @.claude/references/frontend-architecture.md and the user-profile-setup module tree and where each concern belongs.",
       "files": [],
       "assertions": [
         "configuration/ holds static config + react-hook-form field builder only — no fetch, no business state transitions",
         "Fetch belongs in integration/repository.ts; loading steps belongs in core/handlers/init.ts",
         "Validation error map/builder OK in configuration/validation.ts; step transition rules belong in core/handlers/",
         "presentation/header.tsx reads facade use* selectors only — never store atoms directly",
-        "Cites correct reference files from AGENTS.md References section when pointing to patterns"
+        "Cites correct reference files from reference files in the ideal module when pointing to patterns"
       ]
     }
   ]

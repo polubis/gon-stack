@@ -898,24 +898,6 @@ importers:
         specifier: ^8.71.0
         version: 8.71.0(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
 
-  packages/hashy:
-    devDependencies:
-      '@repo/eslint-config':
-        specifier: workspace:*
-        version: link:../eslint-config
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
-      '@types/node':
-        specifier: ^26.6.3
-        version: 26.6.3
-      eslint:
-        specifier: ^9.39.5
-        version: 9.39.5(jiti@2.7.0)(supports-color@10.2.2)
-      typescript:
-        specifier: 6.0.3
-        version: 6.0.3
-
   packages/react-kit:
     dependencies:
       '@nanostores/react':

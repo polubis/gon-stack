@@ -27,12 +27,13 @@ given code style. Always require both.
 
 1. Always read and fully understand the requirements first.
 2. Then learn the code style:
-   - If the example is a **directory** → look for `AGENTS.md` in it and read it.
+   - If the example is a **directory** → read `references/frontend-architecture.md`
+     and scan the module tree (layers, naming, file layout) to infer conventions.
    - If the example is a **single file** → infer conventions and style directly
      from that file.
-3. If `AGENTS.md` contains extra references, use them **only when you do not
-   understand an idea**. If something explains a concept well enough, do not open
-   the referenced file; if you do not understand the idea, read it.
+3. Open files inside the example module **only when you do not understand an
+   idea** from the architecture guide and folder layout. Prefer the smallest
+   reference read that resolves the confusion.
 4. The implemented functionality must be 100% compliant with the requirements
    and must match exactly the style you inferred from the ideal example.
 
@@ -41,7 +42,7 @@ given code style. Always require both.
 1. Resolve requirements + ideal example + target path (ask for any missing).
 2. Read requirements fully.
 3. Learn style:
-   - directory → read its `AGENTS.md` (architecture rules, conventions, links);
+   - directory → `frontend-architecture.md` + scan the module (layers, idioms);
    - file → infer style from the file.
 4. Map requirements onto the example's layer/folder structure.
 5. Implement at the target path, mirroring naming, layering, file layout, and
@@ -52,8 +53,8 @@ given code style. Always require both.
 
 1. Require both requirements and a style source; never proceed on one alone.
 2. Requirements drive _what_; the ideal example drives _how it looks_.
-3. Directory example → `AGENTS.md` is the primary style contract.
-4. Open `AGENTS.md` references only to resolve genuine confusion, not by default.
+3. Directory example → module layout + observed code is the style contract.
+4. Open example source files only to resolve genuine confusion, not by default.
 5. Match the example's structure exactly: folders, file names, layering, idioms.
 6. Do not invent new conventions, abstractions, or architecture.
 7. Implementation must satisfy 100% of the requirements.

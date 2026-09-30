@@ -100,7 +100,7 @@ const commands = {
   },
 
   'i mock the dashboard totals': async (page) => {
-    // Dashboard is backend-only (see modules/dashboard/AGENTS.md) — stub the
+    // Dashboard is backend-only — stub the
     // response so the view has deterministic per-month totals to assert
     // against.
     const current = new Date();

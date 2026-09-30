@@ -50,9 +50,6 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
-      - name: Hash check
-        run: pnpm hash:check
-
       - name: Verify (lint, types, tests) - parka and its deps
         run: pnpm exec turbo run lint check-types test --filter=parka... --ui=stream
 

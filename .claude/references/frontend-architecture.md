@@ -29,7 +29,6 @@ src/
 └── `{id}-{summary}.md` — template `templates/task-log.md`
 `__tests__/` — unit/integration tests
 └── `*.test.*`
-`AGENTS.md` — module conventions + references via `templates/AGENTS.md`
 `configuration/` — static config; no business logic, no state
 ├── `constraints.ts` — `FEATURE_NAME`, constants
 └── `validation.ts` — form/error config (when needed)

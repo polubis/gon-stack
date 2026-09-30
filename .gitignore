@@ -40,3 +40,6 @@ playwright-report/
 test-results/
 
 .playwright-mcp/
+
+# git worktrees (local checkouts)
+.worktrees/
