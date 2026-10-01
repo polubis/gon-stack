@@ -43,7 +43,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@playwright/test": "^1.63.0",
+    "@playwright/test": "1.63.0",
     "@repo/astro-config": "workspace:*",
     "@repo/eslint-config": "workspace:*",
     "@repo/vibe-test": "workspace:*",

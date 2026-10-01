@@ -1,9 +1,9 @@
 {
-  "name": "@repo/hashy",
+  "name": "@repo/nitpick",
   "version": "0.0.0",
   "type": "module",
   "bin": {
-    "hashy": "./dist/cli.js"
+    "nitpick": "./dist/cli.js"
   },
   "files": [
     "dist"

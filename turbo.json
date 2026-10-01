@@ -1,6 +1,7 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
+  "agentGuidance": false,
   "globalEnv": [
     "CI",
     "PUBLIC_SUPABASE_URL",
@@ -10,7 +11,21 @@
     "PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY"
   ],
   "tasks": {
-    "format:check": {},
+    "//#format:check": {
+      "inputs": [
+        "$TURBO_ROOT$/**",
+        "!$TURBO_ROOT$/**/node_modules/**",
+        "!$TURBO_ROOT$/**/dist/**",
+        "!$TURBO_ROOT$/**/.turbo/**",
+        "!$TURBO_ROOT$/**/.next/**",
+        "!$TURBO_ROOT$/.worktrees/**"
+      ],
+      "outputs": []
+    },
+    "//#nitpick": {
+      "dependsOn": ["@repo/nitpick#build"],
+      "cache": false
+    },
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],

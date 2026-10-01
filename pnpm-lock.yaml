@@ -19,6 +19,9 @@ importers:
       '@playwright/test':
         specifier: 1.63.0
         version: 1.63.0
+      '@repo/nitpick':
+        specifier: workspace:*
+        version: link:packages/nitpick
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -102,7 +105,7 @@ importers:
         version: 4.6.5
     devDependencies:
       '@playwright/test':
-        specifier: ^1.63.0
+        specifier: 1.63.0
         version: 1.63.0
       '@repo/astro-config':
         specifier: workspace:*
@@ -254,7 +257,7 @@ importers:
         specifier: ^4.13.0
         version: 4.13.0(playwright-core@1.63.0)
       '@playwright/test':
-        specifier: ^1.63.0
+        specifier: 1.63.0
         version: 1.63.0
       '@repo/astro-config':
         specifier: workspace:*
@@ -369,7 +372,7 @@ importers:
         specifier: ^4.13.0
         version: 4.13.0(playwright-core@1.63.0)
       '@playwright/test':
-        specifier: ^1.63.0
+        specifier: 1.63.0
         version: 1.63.0
       '@repo/astro-config':
         specifier: workspace:*
@@ -481,7 +484,7 @@ importers:
         version: 1.4.0
     devDependencies:
       '@playwright/test':
-        specifier: ^1.63.0
+        specifier: 1.63.0
         version: 1.63.0
       '@repo/astro-config':
         specifier: workspace:*
@@ -605,7 +608,7 @@ importers:
         version: 4.6.5
     devDependencies:
       '@playwright/test':
-        specifier: ^1.63.0
+        specifier: 1.63.0
         version: 1.63.0
       '@repo/astro-config':
         specifier: workspace:*
@@ -720,7 +723,7 @@ importers:
         specifier: ^4.13.0
         version: 4.13.0(playwright-core@1.63.0)
       '@playwright/test':
-        specifier: ^1.63.0
+        specifier: 1.63.0
         version: 1.63.0
       '@repo/astro-config':
         specifier: workspace:*
@@ -895,13 +898,13 @@ importers:
         specifier: ^17.12.0
         version: 17.12.0
       typescript:
-        specifier: ^6.0.3
+        specifier: 6.0.3
         version: 6.0.3
       typescript-eslint:
         specifier: ^8.71.0
         version: 8.71.0(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
 
-  packages/hashy:
+  packages/nitpick:
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
@@ -1040,7 +1043,7 @@ importers:
   packages/vibe-test:
     devDependencies:
       '@playwright/test':
-        specifier: ^1.63.0
+        specifier: 1.63.0
         version: 1.63.0
       '@repo/eslint-config':
         specifier: workspace:*
@@ -11062,7 +11065,7 @@ snapshots:
 
   '@astrojs/yaml2ts@0.2.4':
     dependencies:
-      yaml: 2.9.1
+      yaml: 2.8.3
 
   '@axe-core/playwright@4.13.0(playwright-core@1.63.0)':
     dependencies:
@@ -17370,7 +17373,8 @@ snapshots:
 
   yaml@2.8.3: {}
 
-  yaml@2.9.1: {}
+  yaml@2.9.1:
+    optional: true
 
   yargs-parser@21.1.1: {}
 

@@ -1,8 +1,8 @@
 ---
 name: document-module
-description: Scan an ideal-example module and write an AGENTS.md describing its architecture rules and code conventions, with links and a hashy-stamped version. Trigger on "document module", "create AGENTS.md", "describe conventions", "scan module and list rules", "make ideal-example doc". This is the step-b generator for ideal examples.
+description: Scan an ideal-example module and write an AGENTS.md describing its architecture rules and code conventions, with links and a hash in frontmatter. Trigger on "document module", "create AGENTS.md", "describe conventions", "scan module and list rules", "make ideal-example doc". This is the step-b generator for ideal examples.
 deps:
-  hashy_skill: ../hashy/SKILL.md
+  hasher_skill: ../hasher/SKILL.md
 ---
 
 ## ROLE
@@ -41,18 +41,16 @@ Check before working. Missing required → ask once, then continue.
    - **Code conventions** — concrete, observed rules (e.g. always `const`, always
      arrow functions, branded types, `$`-prefixed atoms, named exports only).
 3. Write `AGENTS.md` in the scanned directory using OUTPUT SHAPE.
-4. Stamp version + hash once on this first scan: invoke the `/hashy` skill on the
-   module dir + doc name (see `deps.hashy_skill`). Do this once at first creation.
-5. Add the module to `hashy.modules.txt` (repo root) if not already listed.
-6. Present the rules to the user and iterate to "perfection" on confirmation or
-   rejection. Re-stamp via `/hashy` only after content changes are accepted.
+4. Add the module to `nitpick.config.mts` (`hash.targets`), then stamp: `nitpick hash <dir> --write`.
+5. Present the rules to the user and iterate to "perfection" on confirmation or
+   rejection. Re-stamp via `/hasher` only after content changes are accepted.
 
 ## OUTPUT SHAPE
 
 `AGENTS.md` written into the scanned directory:
 
 ```md
-<!-- frontmatter version/hash added by /hashy -->
+<!-- frontmatter hash added by nitpick -->
 
 # <Module Name>
 
@@ -86,7 +84,7 @@ Rules for the doc:
 1. Scan only the target module; write the doc inside it.
 2. Describe the general style/architecture, not line-level detail.
 3. List only conventions you actually observed in the module.
-4. Stamp version/hash via `/hashy` once on first scan; re-stamp after accepted edits.
-5. Register the module in `hashy.modules.txt` so CI verifies it.
+4. Stamp hash via `nitpick hash --write` on first scan; re-stamp after accepted edits.
+5. Register the module in `nitpick.config.mts` so CI verifies it.
 6. Iterate with the user until the rules are correct; do not finalize unilaterally.
 7. Keep the doc minimal — fewer, denser markdown files is the goal.

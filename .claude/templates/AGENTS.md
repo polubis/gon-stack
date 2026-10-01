@@ -1,8 +1,7 @@
 ---
 name: {agent-name}
 description: {What it does. Use for {triggers}.}
-version: {major}.{minor}
-hash: {hash-from-hashy}
+hash: {hash-from-nitpick}
 ---
 
 # {Module Name}

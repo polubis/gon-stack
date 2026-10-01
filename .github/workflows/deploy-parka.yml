@@ -33,6 +33,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          # nitpick log needs history (a shallow clone would look like a root commit).
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
@@ -46,21 +49,9 @@ jobs:
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
-      - name: Audit (zero vulnerabilities)
-        run: pnpm deps:audit
-
-      - name: Outdated (no in-range updates)
-        run: pnpm deps:outdated
-
       # e2e stays local-only (pnpm test:e2e): CI webServer lacks Supabase fixtures.
-      - name: Format check
-        run: pnpm format:check
-
-      - name: Hash check
-        run: pnpm hash:check
-
-      - name: Verify (lint, types, tests) - parka and its deps
-        run: pnpm exec turbo run lint check-types test --filter=parka... --ui=stream
+      - name: Verify (nitpick, format, lint, types, tests) - parka and its deps
+        run: pnpm exec turbo run //#nitpick //#format:check lint check-types test --filter=parka... --ui=stream
 
   deploy:
     name: deploy
