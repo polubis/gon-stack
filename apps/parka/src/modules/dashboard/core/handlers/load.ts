@@ -8,11 +8,10 @@ export const load = (store: Store, { ofType }: Bus) =>
     tap(() => {
       store.$isLoading.set(true);
       store.$error.reset();
-      store.$data.reset();
     }),
-    map(({ month }) => ({ month, ctrl: new AbortController() })),
-    switchMap(({ month, ctrl }) =>
-      from(fetchSummary(month, ctrl.signal)).pipe(
+    map(({ month, range }) => ({ month, range, ctrl: new AbortController() })),
+    switchMap(({ month, range, ctrl }) =>
+      from(fetchSummary(month, range, ctrl.signal)).pipe(
         tap((summary) => {
           store.$data.set(summary);
         }),

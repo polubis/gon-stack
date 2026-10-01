@@ -141,13 +141,15 @@ const commands = {
     await expect(page.getByText('Sklep Nowy')).toHaveCount(0);
   },
 
-  'statistics expose year and comparison views': async ({ page, getByE2e }) => {
-    await open(page, APP_ROUTER.statistics());
+  'the dashboard exposes year and comparison views': async ({
+    page,
+    getByE2e,
+  }) => {
+    await open(page, APP_ROUTER.dashboard());
     await page.getByRole('tab', { name: 'Rok' }).click();
-    await expect(getByE2e('statistics:total')).toContainText('zł');
-    await page.getByRole('tab', { name: 'Porównanie' }).click();
-    await expect(getByE2e('statistics:current')).toBeVisible();
-    await expect(getByE2e('statistics:changes')).toBeVisible();
+    await expect(getByE2e('dashboard:range-total')).toContainText('zł');
+    await expect(getByE2e('dashboard:previous-total')).toContainText('zł');
+    await expect(getByE2e('dashboard:changes')).toBeVisible();
   },
   'the report totals and downloads a csv': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.reports());
@@ -234,7 +236,7 @@ test('every feature works against the real Supabase backend', async ({
     ['i create a category and it survives a reload'],
     ['i scan a receipt and save it as an expense'],
     ['i update and delete an expense'],
-    ['statistics expose year and comparison views'],
+    ['the dashboard exposes year and comparison views'],
     ['the report totals and downloads a csv'],
     ['i create a category limit'],
     ['i update my settings profile'],

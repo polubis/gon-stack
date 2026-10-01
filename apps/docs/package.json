@@ -12,12 +12,12 @@
   },
   "dependencies": {
     "@repo/ui": "workspace:*",
-    "next": "^16.3.7",
+    "next": "^16.3.8",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
-    "@next/eslint-plugin-next": "^16.3.7",
+    "@next/eslint-plugin-next": "^16.3.8",
     "@repo/eslint-config": "workspace:*",
     "@repo/tailwind-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",

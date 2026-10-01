@@ -15,12 +15,29 @@ export type DashboardCategorySlice = {
   pct: number;
 };
 
-export type DashboardSummary = {
-  total: number;
-  change: number;
-  trend: DashboardTrendPoint[];
-  categories: DashboardCategorySlice[];
+export type DashboardCategoryChange = {
+  categoryId: string;
+  name: string;
+  color: string;
+  changePct: number;
 };
+
+export type DashboardSummary = {
+  /** Selected month total. */
+  total: number;
+  /** Selected month vs previous month, in percent. */
+  change: number;
+  previousTotal: number;
+  /** Total across the trailing `trendMonths` window. */
+  rangeTotal: number;
+  trend: DashboardTrendPoint[];
+  /** Category breakdown across the trailing `trendMonths` window. */
+  categories: DashboardCategorySlice[];
+  /** Biggest category moves, selected month vs previous month. */
+  categoryChanges: DashboardCategoryChange[];
+};
+
+const MAX_CATEGORY_CHANGES = 5;
 
 const monthOf = (iso: string): string => iso.slice(0, 7);
 
@@ -46,10 +63,17 @@ export const monthsEndingAt = (month: string, count: number): string[] => {
   return out;
 };
 
+const sum = (expenses: DashboardExpense[]): number =>
+  expenses.reduce((total, e) => total + e.amount, 0);
+
+const inMonths = (
+  expenses: DashboardExpense[],
+  months: string[],
+): DashboardExpense[] =>
+  expenses.filter((e) => months.includes(monthOf(e.date)));
+
 const totalFor = (expenses: DashboardExpense[], month: string): number =>
-  expenses
-    .filter((e) => monthOf(e.date) === month)
-    .reduce((sum, e) => sum + e.amount, 0);
+  sum(inMonths(expenses, [month]));
 
 export const summarizeDashboard = ({
   expenses,
@@ -62,31 +86,60 @@ export const summarizeDashboard = ({
   month: string;
   trendMonths: number;
 }): DashboardSummary => {
+  const months = monthsEndingAt(month, trendMonths);
   const total = totalFor(expenses, month);
-  const previous = totalFor(expenses, prevMonthOf(month));
-  const change = previous === 0 ? 0 : ((total - previous) / previous) * 100;
+  const previousTotal = totalFor(expenses, prevMonthOf(month));
+  const change =
+    previousTotal === 0 ? 0 : ((total - previousTotal) / previousTotal) * 100;
 
-  const trend = monthsEndingAt(month, trendMonths).map((m) => ({
-    month: m,
-    total: totalFor(expenses, m),
-  }));
+  const trend = months.map((m) => ({ month: m, total: totalFor(expenses, m) }));
+  const rangeTotal = trend.reduce((s, t) => s + t.total, 0);
 
-  const scoped = expenses.filter((e) => monthOf(e.date) === month);
+  const scoped = inMonths(expenses, months);
   const categorySlices = categories
     .map((category) => {
-      const amount = scoped
-        .filter((e) => e.categoryId === category.id)
-        .reduce((sum, e) => sum + e.amount, 0);
+      const amount = sum(scoped.filter((e) => e.categoryId === category.id));
       return {
         categoryId: category.id,
         name: category.name,
         color: category.color,
         amount,
-        pct: total === 0 ? 0 : (amount / total) * 100,
+        pct: rangeTotal === 0 ? 0 : (amount / rangeTotal) * 100,
       };
     })
     .filter((s) => s.amount > 0)
     .sort((a, b) => b.amount - a.amount);
 
-  return { total, change, trend, categories: categorySlices };
+  const now = inMonths(expenses, [month]);
+  const before = inMonths(expenses, [prevMonthOf(month)]);
+  const categoryChanges = categories
+    .map((category) => {
+      const current = sum(now.filter((e) => e.categoryId === category.id));
+      const previous = sum(before.filter((e) => e.categoryId === category.id));
+      const changePct =
+        previous === 0
+          ? current === 0
+            ? 0
+            : 100
+          : ((current - previous) / previous) * 100;
+      return {
+        categoryId: category.id,
+        name: category.name,
+        color: category.color,
+        changePct,
+      };
+    })
+    .filter((c) => Math.abs(c.changePct) >= 1)
+    .sort((a, b) => Math.abs(b.changePct) - Math.abs(a.changePct))
+    .slice(0, MAX_CATEGORY_CHANGES);
+
+  return {
+    total,
+    change,
+    previousTotal,
+    rangeTotal,
+    trend,
+    categories: categorySlices,
+    categoryChanges,
+  };
 };

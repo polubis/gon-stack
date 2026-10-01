@@ -13,6 +13,14 @@ const categorySlice = () =>
     pct: z.number(),
   });
 
+const categoryChange = () =>
+  z.object({
+    categoryId: z.string().min(1),
+    name: z.string(),
+    color: z.string(),
+    changePct: z.number(),
+  });
+
 export const getDashboardSchema = () =>
   z.object({
     in: z.object({
@@ -25,8 +33,11 @@ export const getDashboardSchema = () =>
         data: z.object({
           total: z.number(),
           change: z.number(),
+          previousTotal: z.number(),
+          rangeTotal: z.number(),
           trend: z.array(trendPoint()),
           categories: z.array(categorySlice()),
+          categoryChanges: z.array(categoryChange()),
         }),
       }),
       errorOut(),

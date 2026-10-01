@@ -9,7 +9,12 @@ import {
 import { cn } from '@repo/react-kit/cn';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import { ErrorState, LoadingBanner, Skeleton } from '@/shared/ui';
-import { ERROR_CODES } from '../configuration/constraints';
+import {
+  DEFAULT_RANGE,
+  ERROR_CODES,
+  RANGES,
+  RANGE_LABEL,
+} from '../configuration/constraints';
 import { readQueryParam, APP_ROUTER, writeQueryParam } from '@/shared/router';
 import {
   money,
@@ -20,11 +25,13 @@ import {
   currentMonth,
   toMonth,
 } from '../domain/format';
-import type { Month } from '../domain/models';
+import type { Month, Range } from '../domain/models';
 import { Provider, useContext } from './context';
 import { QuickActionIcon } from './quick-action-icon';
 import { Card } from './layout';
 import { BarChart, Donut } from './charts';
+import { Comparison } from './comparison';
+import { RangePicker } from './range-picker';
 
 type IconId = 'add' | 'camera' | 'target' | 'repeat';
 
@@ -47,6 +54,16 @@ const setMonthParam = (month: Month) => {
   writeQueryParam(MONTH_PARAM, month);
 };
 
+const RANGE_PARAM = 'range';
+
+const isRange = (value: string | null): value is Range =>
+  RANGES.some((r) => r === value);
+
+const initialRange = (): Range => {
+  const fromUrl = readQueryParam(RANGE_PARAM);
+  return isRange(fromUrl) ? fromUrl : DEFAULT_RANGE;
+};
+
 const initialMonth = (): Month => {
   const fromUrl = readQueryParam(MONTH_PARAM);
   return toMonth(fromUrl ?? currentMonth());
@@ -55,18 +72,23 @@ const initialMonth = (): Month => {
 const DashboardView = () => {
   const ctx = useContext();
   const [month, setMonth] = useState(initialMonth);
+  const [range, setRange] = useState(initialRange);
   const summary = ctx.useData();
   const error = ctx.useError();
   const initializing = ctx.useInitializing();
   const isLoading = ctx.useIsLoading();
 
   useEffect(() => {
-    ctx.load(month);
-  }, [month, ctx]);
+    ctx.load(month, range);
+  }, [month, range, ctx]);
 
   const goToMonth = (next: Month) => {
     setMonthParam(next);
     setMonth(next);
+  };
+  const goToRange = (next: Range) => {
+    writeQueryParam(RANGE_PARAM, next);
+    setRange(next);
   };
   const goToPrevMonth = () => goToMonth(prevMonth(month));
   const goToNextMonth = () => goToMonth(nextMonth(month));
@@ -77,6 +99,8 @@ const DashboardView = () => {
     <div data-e2e="dashboard:main" className="relative flex flex-1 flex-col">
       <LoadingBanner active={isLoading && !initializing} />
       <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-4 md:gap-6 md:px-8 lg:grid lg:grid-cols-3 lg:content-start lg:px-10 lg:pt-8 xl:px-16">
+        <RangePicker range={range} onRangeChange={goToRange} />
+
         <div className="lg:col-span-3">
           <h1 className="text-2xl font-semibold tracking-tight">Cześć 👋</h1>
           <p className="mt-1 text-sm text-ink-soft">
@@ -91,7 +115,7 @@ const DashboardView = () => {
               title="Nie udało się wczytać podsumowania"
               code={ERROR_CODES.load}
               description={error}
-              onRetry={() => ctx.load(month)}
+              onRetry={() => ctx.load(month, range)}
               backHref={APP_ROUTER.home()}
             />
           </div>
@@ -156,6 +180,20 @@ const DashboardView = () => {
             )}
           </div>
 
+          <p className="text-sm text-ink-soft">
+            Razem ({RANGE_LABEL[range]}):{' '}
+            {initializing ? (
+              <Skeleton className="inline-block h-4 w-24 align-middle" />
+            ) : (
+              <span
+                className="font-semibold text-ink"
+                data-e2e="dashboard:range-total"
+              >
+                {money(summary?.rangeTotal ?? 0)}
+              </span>
+            )}
+          </p>
+
           {initializing ? (
             <Skeleton className="h-37" />
           ) : (
@@ -164,7 +202,7 @@ const DashboardView = () => {
                 label: monthLabel(t.month).slice(0, 3),
                 value: t.total,
               }))}
-              caption={`Wydatki w ostatnich miesiącach do ${monthLabel(month)}`}
+              caption={`Wydatki w zakresie ${RANGE_LABEL[range]} do ${monthLabel(month)}`}
             />
           )}
         </Card>
@@ -201,7 +239,7 @@ const DashboardView = () => {
             <Skeleton className="h-36 w-full" />
           ) : summary && summary.categories.length > 0 ? (
             <Donut
-              caption={`Rozkład wydatków wg kategorii w ${monthLabel(month)}`}
+              caption={`Rozkład wydatków wg kategorii w zakresie ${RANGE_LABEL[range]}`}
               slices={summary.categories.map((c) => ({
                 label: categoryLabel(c.name),
                 value: c.amount,
@@ -210,10 +248,25 @@ const DashboardView = () => {
             />
           ) : (
             <p className="text-sm text-ink-soft">
-              Brak wydatków w tym miesiącu.
+              Brak wydatków w tym zakresie.
             </p>
           )}
         </Card>
+
+        {summary ? (
+          <Comparison month={month} summary={summary} />
+        ) : (
+          <>
+            <Card className="space-y-3 lg:col-span-2">
+              <Skeleton className="h-4 w-48" />
+              <Skeleton className="h-8 w-56" />
+            </Card>
+            <Card className="space-y-3">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-16 w-full" />
+            </Card>
+          </>
+        )}
       </main>
     </div>
   );

@@ -17,7 +17,6 @@ apps/parka/src/modules/receipt AGENTS.md
 apps/parka/src/modules/recurring AGENTS.md
 apps/parka/src/modules/reports AGENTS.md
 apps/parka/src/modules/settings AGENTS.md
-apps/parka/src/modules/statistics AGENTS.md
 apps/parka/src/modules/home AGENTS.md
 apps/parka/src/modules/sign-in AGENTS.md
 apps/parka/src/modules/sign-up AGENTS.md

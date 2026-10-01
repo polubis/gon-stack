@@ -16,7 +16,6 @@ import type { ReceiptE2eId } from '@/modules/receipt/configuration/e2e-ids';
 import type { RecurringE2eId } from '@/modules/recurring/configuration/e2e-ids';
 import type { ReportsE2eId } from '@/modules/reports/configuration/e2e-ids';
 import type { SettingsE2eId } from '@/modules/settings/configuration/e2e-ids';
-import type { StatisticsE2eId } from '@/modules/statistics/configuration/e2e-ids';
 import type { CookiesE2eId } from '@/shared/cookies/configuration/e2e-ids';
 import type { PublicNavE2eId } from '@/shared/navigation/public-nav/configuration/e2e-ids';
 import type { WalkthroughE2eId } from '@/shared/walkthrough/configuration/e2e-ids';
@@ -34,7 +33,6 @@ export type E2eId =
   | DashboardE2eId
   | ReceiptE2eId
   | ExpensesE2eId
-  | StatisticsE2eId
   | LimitsE2eId
   | GoalsE2eId
   | RecurringE2eId

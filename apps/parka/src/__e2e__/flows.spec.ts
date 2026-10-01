@@ -125,8 +125,11 @@ const commands = {
             data: {
               total: (month && totals[month]) ?? 0,
               change: 0,
+              previousTotal: 0,
+              rangeTotal: (month && totals[month]) ?? 0,
               trend: [],
               categories: [],
+              categoryChanges: [],
             },
           }),
         });
@@ -342,16 +345,14 @@ const commands = {
     await expect(page.getByText('Kino Nowe Horyzonty')).toHaveCount(0);
   },
 
-  'statistics show the yearly total': async ({ page, getByE2e }) => {
-    await mockState(page);
-    await open(page, APP_ROUTER.statistics());
+  'the dashboard shows the yearly total': async ({ page, getByE2e }) => {
+    await open(page, APP_ROUTER.dashboard());
     await page.getByRole('tab', { name: 'Rok' }).click();
-    await expect(getByE2e('statistics:total')).toBeVisible();
+    await expect(getByE2e('dashboard:range-total')).toBeVisible();
   },
-  'statistics show month comparison': async ({ page, getByE2e }) => {
-    await page.getByRole('tab', { name: 'Porównanie' }).click();
-    await expect(getByE2e('statistics:current')).toBeVisible();
-    await expect(getByE2e('statistics:changes')).toBeVisible();
+  'the dashboard shows month comparison': async ({ getByE2e }) => {
+    await expect(getByE2e('dashboard:previous-total')).toBeVisible();
+    await expect(getByE2e('dashboard:changes')).toBeVisible();
   },
 
   'i create an 80 percent category limit': async ({ page, getByE2e }) => {
@@ -494,12 +495,13 @@ test('an expense can be updated and removed', async ({ e2e }) => {
   );
 });
 
-test('statistics expose selectable ranges and month comparison', async ({
+test('the dashboard exposes selectable ranges and month comparison', async ({
   e2e,
 }) => {
   await interpreter(commands, e2e)(
-    ['statistics show the yearly total'],
-    ['statistics show month comparison'],
+    ['i mock the dashboard totals'],
+    ['the dashboard shows the yearly total'],
+    ['the dashboard shows month comparison'],
   );
 });
 

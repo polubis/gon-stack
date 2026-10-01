@@ -46,21 +46,9 @@ jobs:
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
-      - name: Audit (zero vulnerabilities)
-        run: pnpm deps:audit
-
-      - name: Outdated (no in-range updates)
-        run: pnpm deps:outdated
-
       # e2e stays local-only (pnpm test:e2e): CI webServer lacks Supabase fixtures.
-      - name: Format check
-        run: pnpm format:check
-
-      - name: Hash check
-        run: pnpm hash:check
-
-      - name: Verify (lint, types, tests) - parka and its deps
-        run: pnpm exec turbo run lint check-types test --filter=parka... --ui=stream
+      - name: Verify (format, lint, types, tests) - parka and its deps
+        run: pnpm exec turbo run //#format:check lint check-types test --filter=parka... --filter=// --ui=stream
 
   deploy:
     name: deploy

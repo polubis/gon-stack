@@ -1,10 +1,11 @@
 import type { Registry } from './registry';
 import type { Store } from './store';
-import type { Month } from '../domain/models';
+import type { Month, Range } from '../domain/models';
 
 export const createFacade = (store: Store, trigger: Registry['trigger']) => {
   return {
-    load: (month: Month) => trigger('[TRIGGER]_LOAD', { month }),
+    load: (month: Month, range: Range) =>
+      trigger('[TRIGGER]_LOAD', { month, range }),
     useData: () => store.$data.use(),
     useInitializing: () => store.$initializing.use(),
     useIsLoading: () => store.$isLoading.use(),

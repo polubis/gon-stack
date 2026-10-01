@@ -19,11 +19,6 @@ const SCREENS: Screen[] = [
     heading: /Zrób zdjęcie paragonu/,
   },
   { path: APP_ROUTER.expenses(), root: 'expenses:main', heading: /Wydatki/ },
-  {
-    path: APP_ROUTER.statistics(),
-    root: 'statistics:main',
-    heading: /Statystyki/,
-  },
   { path: APP_ROUTER.limits(), root: 'limits:main', heading: /Limity i cele/ },
   {
     path: APP_ROUTER.recurring(),
@@ -71,7 +66,15 @@ const commands = {
           contentType: 'application/json',
           body: JSON.stringify({
             code: 200,
-            data: { total: 0, change: 0, trend: [], categories: [] },
+            data: {
+              total: 0,
+              change: 0,
+              previousTotal: 0,
+              rangeTotal: 0,
+              trend: [],
+              categories: [],
+              categoryChanges: [],
+            },
           }),
         });
       },

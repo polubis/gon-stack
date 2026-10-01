@@ -1,4 +1,4 @@
-import { Home, Wallet, ChartColumn, LayoutGrid } from 'lucide-react';
+import { Home, Wallet, LayoutGrid } from 'lucide-react';
 import { moreSectionPaths, APP_ROUTER } from '@/shared/router';
 import type { NavKey } from '../domain/models';
 
@@ -14,12 +14,6 @@ export const NAV_ITEMS: {
     label: 'Wydatki',
     href: APP_ROUTER.expenses(),
     icon: Wallet,
-  },
-  {
-    key: 'stats',
-    label: 'Statystyki',
-    href: APP_ROUTER.statistics(),
-    icon: ChartColumn,
   },
   {
     key: 'more',

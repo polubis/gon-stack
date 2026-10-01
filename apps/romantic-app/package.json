@@ -67,9 +67,9 @@
     "jsdom": "^29.1.1",
     "msw": "^2.15.0",
     "sharp": "^0.35.5",
-    "supabase": "^2.118.0",
+    "supabase": "^2.119.0",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.11",
-    "wrangler": "^4.144.0"
+    "wrangler": "^4.145.0"
   }
 }

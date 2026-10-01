@@ -27,8 +27,37 @@ allowBuilds:
 minimumReleaseAgeExclude:
   - '@cloudflare/vite-plugin@1.62.2'
   - lucide-react@1.49.0
-  - miniflare@5.20260926.1-alpha
-  - wrangler@4.144.0
+  - miniflare@5.20260926.1-alpha || 5.20260930.0-alpha
+  - wrangler@4.144.0 || 4.145.0
+  - '@next/env@16.3.8'
+  - '@next/eslint-plugin-next@16.3.8'
+  - '@next/swc-darwin-arm64@16.3.8'
+  - '@next/swc-darwin-x64@16.3.8'
+  - '@next/swc-linux-arm64-gnu@16.3.8'
+  - '@next/swc-linux-arm64-musl@16.3.8'
+  - '@next/swc-linux-x64-gnu@16.3.8'
+  - '@next/swc-linux-x64-musl@16.3.8'
+  - '@next/swc-win32-arm64-msvc@16.3.8'
+  - '@next/swc-win32-x64-msvc@16.3.8'
+  - '@supabase/cli-darwin-arm64@2.119.0'
+  - '@supabase/cli-darwin-x64@2.119.0'
+  - '@supabase/cli-linux-arm64-musl@2.119.0'
+  - '@supabase/cli-linux-arm64@2.119.0'
+  - '@supabase/cli-linux-x64-musl@2.119.0'
+  - '@supabase/cli-linux-x64@2.119.0'
+  - '@supabase/cli-windows-arm64@2.119.0'
+  - '@supabase/cli-windows-x64@2.119.0'
+  - '@turbo/darwin-64@2.11.6'
+  - '@turbo/darwin-arm64@2.11.6'
+  - '@turbo/linux-64@2.11.6'
+  - '@turbo/linux-arm64@2.11.6'
+  - '@turbo/windows-64@2.11.6'
+  - '@turbo/windows-arm64@2.11.6'
+  - eslint-plugin-turbo@2.11.6
+  - globals@17.13.0
+  - next@16.3.8
+  - supabase@2.119.0
+  - turbo@2.11.6
 
 onlyBuiltDependencies:
   - supabase

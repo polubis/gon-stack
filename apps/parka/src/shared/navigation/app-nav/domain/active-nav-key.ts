@@ -10,8 +10,6 @@ export const activeNavKeyFromPathname = (pathname: string): NavKey | null => {
   if (p === APP_ROUTER.dashboard()) return 'start';
   if (p === APP_ROUTER.expenses() || p.startsWith(APP_ROUTER.expenses()))
     return 'expenses';
-  if (p === APP_ROUTER.statistics() || p.startsWith(APP_ROUTER.statistics()))
-    return 'stats';
 
   if (MORE_SECTION_PATHS.some((m) => p === m || p.startsWith(m))) {
     return 'more';

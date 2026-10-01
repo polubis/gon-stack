@@ -1,1 +1,1 @@
-export type NavKey = 'start' | 'expenses' | 'stats' | 'more';
+export type NavKey = 'start' | 'expenses' | 'more';

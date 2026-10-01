@@ -1,15 +1,13 @@
 ---
-version: 2.12
-hash: 14d15ca3ec5d7338b0579f88d4a019f64c8ee5e2848230616b5e509ee57bbac2
+version: 2.13
+hash: 165ef37ede9e9353b2b28e533143801bb9a884f57c3023aa35edbcbf25a26267
 ---
-
-
 
 
 # Dashboard
 
 Ideal-example module for Parka read-only summary screens. A self-contained,
-layer-separated feature: month-scoped expense summary fetched from the
+layer-separated feature: month + range expense summary (range picker, trend, donut, month comparison) fetched from the
 backend, event-driven state, backend integration, and a state-driven UI.
 Requires an authenticated session — there is no local/offline data source.
 Clone this module's structure and conventions when building similar dashboard
@@ -18,7 +16,7 @@ or overview features.
 ## Architecture
 
 1. "configuration" — static, framework-facing config. `constraints.ts` holds
-   `FEATURE_NAME`, `TREND_MONTHS`, and `QUICK_ACTIONS` nav config; `e2e-ids.ts`
+   `FEATURE_NAME`, `DEFAULT_RANGE`, `RANGES`, `RANGE_LABEL`; `e2e-ids.ts`
    holds module e2e selector ids (combined at app root). No business logic,
    no state.
 2. "domain" — pure domain types. `models.ts` uses plain object shapes and

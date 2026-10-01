@@ -48,6 +48,7 @@ const routeById =
 
 export type DashboardQuery = {
   month?: string;
+  range?: string;
 };
 
 /**
@@ -61,7 +62,6 @@ export const APP_ROUTER = {
   home: route('/'),
   dashboard: routeWithQuery<'/app/', DashboardQuery>('/app/'),
   expenses: route('/app/expenses/'),
-  statistics: route('/app/statistics/'),
   settings: route('/app/settings/'),
   categories: route('/app/categories/'),
   limits: route('/app/limits/'),
@@ -101,9 +101,10 @@ export const moreSectionPaths = (): readonly string[] => [
  * origin suffixes, so client and server can never drift.
  */
 export const API_ROUTER = {
-  dashboard: routeWithRequiredQuery<'/api/dashboard/', { month: string }>(
+  dashboard: routeWithRequiredQuery<
     '/api/dashboard/',
-  ),
+    { month: string; trendMonths?: number }
+  >('/api/dashboard/'),
   expenses: route('/api/expenses/'),
   expenseById: routeById('/api/expenses/'),
   categories: route('/api/categories/'),
