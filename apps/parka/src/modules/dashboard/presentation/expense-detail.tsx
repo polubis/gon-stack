@@ -36,7 +36,7 @@ export const ExpenseDetail = ({
   const [categoryId, setCategoryId] = useState<CategoryId>(expense.categoryId);
 
   const save = () => {
-    ctx.update({
+    ctx.updateExpense({
       ...expense,
       merchant,
       amount,
@@ -46,7 +46,7 @@ export const ExpenseDetail = ({
   };
 
   const remove = () => {
-    ctx.remove(expense.id);
+    ctx.removeExpense(expense.id);
     onClose();
   };
 
@@ -60,7 +60,7 @@ export const ExpenseDetail = ({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-overlay" />
         <Dialog.Content
-          data-e2e="expenses:detail"
+          data-e2e="dashboard:detail"
           className="fixed inset-x-4 bottom-4 z-(--z-modal) mx-auto max-w-md rounded-2xl lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 bg-card p-4 focus:outline-none"
         >
           <div className="mb-3 flex items-center gap-3">
@@ -84,14 +84,14 @@ export const ExpenseDetail = ({
                 <input
                   className={inputClass}
                   value={merchant}
-                  data-e2e="expenses:edit-merchant"
+                  data-e2e="dashboard:edit-merchant"
                   onChange={(e) => setMerchant(e.target.value)}
                 />
               </Field>
               <Field label="Kwota">
                 <NumberInput
                   value={amount}
-                  data-e2e="expenses:edit-amount"
+                  data-e2e="dashboard:edit-amount"
                   onValueChange={setAmount}
                 />
               </Field>
@@ -99,7 +99,7 @@ export const ExpenseDetail = ({
                 <select
                   className={inputClass}
                   value={categoryId}
-                  data-e2e="expenses:edit-category"
+                  data-e2e="dashboard:edit-category"
                   onChange={(e) =>
                     setCategoryId(
                       categories.find((c) => c.id === e.target.value)?.id ??
@@ -114,7 +114,7 @@ export const ExpenseDetail = ({
                   ))}
                 </select>
               </Field>
-              <Button data-e2e="expenses:save" onClick={save}>
+              <Button data-e2e="dashboard:save" onClick={save}>
                 Zapisz zmiany
               </Button>
             </div>
@@ -165,14 +165,14 @@ export const ExpenseDetail = ({
               <div className="mt-4 flex gap-2">
                 <Button
                   variant="ghost"
-                  data-e2e="expenses:edit"
+                  data-e2e="dashboard:edit"
                   onClick={onEdit}
                 >
                   <Pencil className="h-4 w-4" aria-hidden="true" /> Edytuj
                 </Button>
                 <Button
                   variant="danger"
-                  data-e2e="expenses:delete"
+                  data-e2e="dashboard:delete"
                   onClick={remove}
                 >
                   <Trash2 className="h-4 w-4" aria-hidden="true" /> Usuń

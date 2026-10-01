@@ -8,9 +8,9 @@ Central route table for the Parka MPA at `src/shared/router`. Every page
 `href`, `Astro.redirect()`, server `location:`, and client `fetch()` URL is
 built here — no hardcoded paths outside this module, e2e specs included
 (they import `APP_ROUTER` / `API_ROUTER`). App pages live under `/app/`
-(`dashboard` = `/app/`, `expenses` = `/app/expenses/`), share
+(`dashboard` = `/app/`), share
 `core/layouts/app-layout.astro` (`ClientRouter` + persisted `SyncedAppNav`).
-Nav matching order matters: `/app/` is a prefix of `/app/expenses/`, so
+Nav matching order matters: `/app/` is a prefix of every other app page, so
 dashboard is an exact match in `activeNavKeyFromPathname`.
 
 ## Architecture

@@ -4,8 +4,8 @@ import type { Bus } from '../bus';
 import { notify } from '../actions/notify';
 import { putExpense } from '../../integration/repository';
 
-export const update = (store: Store, { ofType }: Bus) =>
-  ofType('[TRIGGER]_UPDATE').pipe(
+export const updateExpense = (store: Store, { ofType }: Bus) =>
+  ofType('[TRIGGER]_UPDATE_EXPENSE').pipe(
     map(({ expense }) => ({ expense, previous: store.$expenses.get() })),
     tap(({ expense }) => {
       store.$expenses.set(

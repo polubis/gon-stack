@@ -2,7 +2,6 @@ import type { SignInE2eId } from '@/modules/sign-in/configuration/e2e-ids';
 import type { SignUpE2eId } from '@/modules/sign-up/configuration/e2e-ids';
 import type { CategoriesE2eId } from '@/modules/categories/configuration/e2e-ids';
 import type { DashboardE2eId } from '@/modules/dashboard/configuration/e2e-ids';
-import type { ExpensesE2eId } from '@/modules/expenses/configuration/e2e-ids';
 import type { HomeE2eId } from '@/modules/home/configuration/e2e-ids';
 import type { AiInfoE2eId } from '@/modules/ai-info/configuration/e2e-ids';
 import type { DataExportE2eId } from '@/modules/data-export/configuration/e2e-ids';
@@ -32,7 +31,6 @@ export type E2eId =
   | SignUpE2eId
   | DashboardE2eId
   | ReceiptE2eId
-  | ExpensesE2eId
   | LimitsE2eId
   | GoalsE2eId
   | RecurringE2eId

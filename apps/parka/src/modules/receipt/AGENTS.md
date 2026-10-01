@@ -1,17 +1,13 @@
 ---
-version: 1.6
-hash: efee73e332ca4e6bf6da5c62e5713003c3719c9fee0ed28448f17dfcea49ca9b
+version: 1.7
+hash: f76516c1e6c99bbf54a3a17c11560ffc412010546f81e517c2791d053c7dd1e7
 name: receipt
 description: Receipt entry module (scan/manual draft, review, save). Use for create flows writing two entities.
 ---
 
-
-
-
-
 # Receipt
 
-Isolated module. Loads `/api/categories` on mount, user builds a draft (scan is a fake 600 ms delay, or manual), save POSTs an expense and a `receipt-confirmation` notification, then navigates to `APP_ROUTER.expenses()`. Imports nothing from other modules.
+Isolated module. Loads `/api/categories` on mount, user builds a draft (scan is a fake 600 ms delay, or manual), save POSTs an expense and a `receipt-confirmation` notification, then navigates to `APP_ROUTER.dashboard()`. Imports nothing from other modules.
 
 ## Architecture
 

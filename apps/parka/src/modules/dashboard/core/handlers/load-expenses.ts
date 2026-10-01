@@ -3,11 +3,11 @@ import type { Store } from '../store';
 import type { Bus } from '../bus';
 import { fetchCategories, fetchExpenses } from '../../integration/repository';
 
-export const load = (store: Store, { ofType }: Bus) =>
-  ofType('[TRIGGER]_LOAD').pipe(
+export const loadExpenses = (store: Store, { ofType }: Bus) =>
+  ofType('[TRIGGER]_LOAD_EXPENSES').pipe(
     tap(() => {
-      store.$isLoading.set(true);
-      store.$error.reset();
+      store.$expensesLoading.set(true);
+      store.$expensesError.reset();
     }),
     map(() => new AbortController()),
     switchMap((ctrl) =>
@@ -23,7 +23,7 @@ export const load = (store: Store, { ofType }: Bus) =>
             error instanceof DOMException && error.name === 'AbortError';
 
           if (!isAbort) {
-            store.$error.set(
+            store.$expensesError.set(
               error instanceof Error
                 ? error.message
                 : 'Failed to load expenses.',
@@ -33,8 +33,8 @@ export const load = (store: Store, { ofType }: Bus) =>
           return EMPTY;
         }),
         finalize(() => {
-          store.$initializing.set(false);
-          store.$isLoading.reset();
+          store.$expensesInitializing.set(false);
+          store.$expensesLoading.reset();
           ctrl.abort();
         }),
       ),

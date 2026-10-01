@@ -3,10 +3,9 @@ version: 1.3
 hash: ea66ddc2ea5b4bb197a8dd25cb0397f21cccd2b02139fdb443cd72792a7a54e0
 ---
 
-
 # Categories
 
-Category list + create/edit form + suggested defaults. Cloned from `../expenses` convention. Backend-only, session required. Isolated: imports no other module.
+Category list + create/edit form + suggested defaults. Cloned from `../dashboard` convention. Backend-only, session required. Isolated: imports no other module.
 
 ## Architecture
 
@@ -19,4 +18,4 @@ Category list + create/edit form + suggested defaults. Cloned from `../expenses`
 
 ## Code
 
-Same as dashboard/expenses. Mounted by `pages/app/categories.astro`. Load on mount; skeleton on first load, banner on reload.
+Same as dashboard. Mounted by `pages/app/categories.astro`. Load on mount; skeleton on first load, banner on reload.

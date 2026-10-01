@@ -3,8 +3,6 @@ version: 1.1
 hash: f6d4729f7a511e3a26e05312673b6f222800c82725f30aa175ce6f6b5525dd74
 ---
 
-
-
 # Home
 
 Public landing at `/` (prerendered by `pages/index.astro`). Wraps shared

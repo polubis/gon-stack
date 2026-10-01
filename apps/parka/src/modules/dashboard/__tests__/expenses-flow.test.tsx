@@ -45,19 +45,19 @@ const setup = async () => {
     },
     { wrapper },
   );
-  act(() => view.result.current.ctx.load());
+  act(() => view.result.current.ctx.loadExpenses());
   await waitFor(() => expect(view.result.current.expenses).toHaveLength(1));
   return view;
 };
 
-describe('expenses removal', () => {
+describe('dashboard expenses removal', () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it('removes the expense and confirms with a toast', async () => {
     stubApi({ code: 200, ok: true });
     const view = await setup();
 
-    act(() => view.result.current.ctx.remove('e-1' as ExpenseId));
+    act(() => view.result.current.ctx.removeExpense('e-1' as ExpenseId));
 
     expect(view.result.current.expenses).toHaveLength(0);
     await waitFor(() =>
@@ -69,7 +69,7 @@ describe('expenses removal', () => {
     stubApi({ code: 500, message: 'boom' });
     const view = await setup();
 
-    act(() => view.result.current.ctx.remove('e-1' as ExpenseId));
+    act(() => view.result.current.ctx.removeExpense('e-1' as ExpenseId));
 
     await waitFor(() => expect(view.result.current.notice?.tone).toBe('error'));
     expect(view.result.current.expenses).toHaveLength(1);

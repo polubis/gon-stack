@@ -111,21 +111,21 @@ const commands = {
     await getByE2ePrefix('receipt:item-name:').fill('Chleb razowy');
     await getByE2ePrefix('receipt:item-price:').fill('3.20');
     await getByE2e('receipt:save').click();
-    await page.waitForURL(`**${APP_ROUTER.expenses()}`);
+    await page.waitForURL(`**${APP_ROUTER.dashboard()}`);
     await expect(page.getByText('Sklep E2E Backend')).toBeVisible();
     await reload(page);
     await expect(page.getByText('Sklep E2E Backend')).toBeVisible();
   },
 
   'i update and delete an expense': async ({ page, getByE2e }) => {
-    await open(page, APP_ROUTER.expenses());
+    await open(page, APP_ROUTER.dashboard());
     await page.getByRole('button', { name: /Sklep E2E Backend/ }).click();
-    await expect(getByE2e('expenses:detail')).toBeVisible();
-    await getByE2e('expenses:edit').click();
-    await getByE2e('expenses:edit-merchant').fill('Sklep Nowy');
+    await expect(getByE2e('dashboard:detail')).toBeVisible();
+    await getByE2e('dashboard:edit').click();
+    await getByE2e('dashboard:edit-merchant').fill('Sklep Nowy');
     await Promise.all([
       synced(page, 'PUT', API_ROUTER.expenses()),
-      getByE2e('expenses:save').click(),
+      getByE2e('dashboard:save').click(),
     ]);
     await expect(page.getByText('Sklep Nowy')).toBeVisible();
     await reload(page);
@@ -134,7 +134,7 @@ const commands = {
     await page.getByRole('button', { name: /Sklep Nowy/ }).click();
     await Promise.all([
       synced(page, 'DELETE', API_ROUTER.expenses()),
-      getByE2e('expenses:delete').click(),
+      getByE2e('dashboard:delete').click(),
     ]);
     await expect(page.getByText('Sklep Nowy')).toHaveCount(0);
     await reload(page);
@@ -220,7 +220,7 @@ const commands = {
     await expect(getByE2e('settings:name')).toHaveText('Anna Backendowa');
     await open(page, APP_ROUTER.categories());
     await expect(page.getByText('Kultura')).toBeVisible();
-    await open(page, APP_ROUTER.expenses());
+    await open(page, APP_ROUTER.dashboard());
     await expect(page.getByText('Sklep Nowy')).toHaveCount(0);
   },
 } satisfies CommandRegistry<Ctx>;

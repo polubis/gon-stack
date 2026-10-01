@@ -1,4 +1,4 @@
-import { Home, Wallet, LayoutGrid } from 'lucide-react';
+import { Home, LayoutGrid } from 'lucide-react';
 import { moreSectionPaths, APP_ROUTER } from '@/shared/router';
 import type { NavKey } from '../domain/models';
 
@@ -9,12 +9,6 @@ export const NAV_ITEMS: {
   icon: typeof Home;
 }[] = [
   { key: 'start', label: 'Start', href: APP_ROUTER.dashboard(), icon: Home },
-  {
-    key: 'expenses',
-    label: 'Wydatki',
-    href: APP_ROUTER.expenses(),
-    icon: Wallet,
-  },
   {
     key: 'more',
     label: 'Więcej',

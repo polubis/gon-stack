@@ -3,12 +3,9 @@ version: 1.4
 hash: 1af9d95a40027d69dda248f93d758a85db05726eba9da725c0c3866c1948443b
 ---
 
-
-
-
 # Recurring
 
-Recurring expenses list, active/all filter, expandable detail, tracking toggle. Cloned from `../expenses` convention. Backend-only, session required. Isolated: fetches categories itself (display only).
+Recurring expenses list, active/all filter, expandable detail, tracking toggle. Cloned from `../dashboard` convention. Backend-only, session required. Isolated: fetches categories itself (display only).
 
 ## Architecture
 
@@ -21,4 +18,4 @@ Recurring expenses list, active/all filter, expandable detail, tracking toggle. 
 
 ## Code
 
-Same as dashboard/expenses. Mounted by `pages/app/recurring.astro`.
+Same as dashboard. Mounted by `pages/app/recurring.astro`.

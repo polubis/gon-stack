@@ -3,8 +3,6 @@ version: 1.3
 hash: dd6d7fd987424d50aac32c82fcf5b35f5866b8dea388e62b1334969feb72ea9f
 ---
 
-
-
 # Sign up
 
 Public registration page (not under /app, prerendered by `pages/sign-up.astro` with a guest `AuthGuard`). Layered, event-driven form: submit credentials to `/api/auth/register`, react to redirect / rejection or pending e-mail confirmation.

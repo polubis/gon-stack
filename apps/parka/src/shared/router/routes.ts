@@ -61,7 +61,6 @@ export type DashboardQuery = {
 export const APP_ROUTER = {
   home: route('/'),
   dashboard: routeWithQuery<'/app/', DashboardQuery>('/app/'),
-  expenses: route('/app/expenses/'),
   settings: route('/app/settings/'),
   categories: route('/app/categories/'),
   limits: route('/app/limits/'),

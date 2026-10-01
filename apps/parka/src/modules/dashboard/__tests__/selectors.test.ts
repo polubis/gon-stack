@@ -18,7 +18,7 @@ const expense = (id: string, date: string, amount: number): Expense => ({
   items: [],
 });
 
-describe('expenses grouping', () => {
+describe('dashboard expenses grouping', () => {
   const list = [
     expense('a', '2025-03-10T10:00:00Z', 10),
     expense('b', '2025-04-02T10:00:00Z', 20),

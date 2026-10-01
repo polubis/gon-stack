@@ -50,7 +50,7 @@ const ReceiptView = () => {
   }, [ctx]);
 
   useEffect(() => {
-    if (saved) navigateTo(APP_ROUTER.expenses());
+    if (saved) navigateTo(APP_ROUTER.dashboard());
   }, [saved]);
 
   useEffect(() => {

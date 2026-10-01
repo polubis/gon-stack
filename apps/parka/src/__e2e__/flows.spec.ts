@@ -197,7 +197,7 @@ const commands = {
     await getByE2ePrefix('receipt:item-price:').fill('3.20');
 
     await getByE2e('receipt:save').click();
-    await page.waitForURL(`**${APP_ROUTER.expenses()}`);
+    await page.waitForURL(`**${APP_ROUTER.dashboard()}`);
   },
 
   'i cannot save a receipt before any category exists': async ({
@@ -241,11 +241,11 @@ const commands = {
     await expect(price).toHaveValue('3,20');
 
     await getByE2e('receipt:save').click();
-    await page.waitForURL(`**${APP_ROUTER.expenses()}`);
+    await page.waitForURL(`**${APP_ROUTER.dashboard()}`);
   },
 
   'i mock the expenses list': async ({ page }) => {
-    // Expenses is backend-only, same as dashboard (see modules/expenses core/
+    // Expenses section of the dashboard is backend-only (see modules/dashboard core/
     // facade) — stub categories/expenses so the view has deterministic rows
     // to assert against instead of relying on the removed local demo mode.
     const category = {
@@ -321,7 +321,7 @@ const commands = {
   },
 
   'expenses can be filtered to bills only': async ({ page }) => {
-    await open(page, APP_ROUTER.expenses());
+    await open(page, APP_ROUTER.dashboard());
     await page.getByRole('tab', { name: 'Rachunki' }).click();
     await expect(page.getByRole('button', { name: /Tauron/ })).toBeVisible();
     await expect(page.getByRole('button', { name: /Kino Helios/ })).toHaveCount(
@@ -330,18 +330,18 @@ const commands = {
   },
 
   'i update an expense merchant name': async ({ page, getByE2e }) => {
-    await open(page, APP_ROUTER.expenses());
+    await open(page, APP_ROUTER.dashboard());
     await page.getByRole('button', { name: /Kino Helios/ }).click();
-    await expect(getByE2e('expenses:detail')).toBeVisible();
+    await expect(getByE2e('dashboard:detail')).toBeVisible();
 
-    await getByE2e('expenses:edit').click();
-    await getByE2e('expenses:edit-merchant').fill('Kino Nowe Horyzonty');
-    await getByE2e('expenses:save').click();
+    await getByE2e('dashboard:edit').click();
+    await getByE2e('dashboard:edit-merchant').fill('Kino Nowe Horyzonty');
+    await getByE2e('dashboard:save').click();
     await expect(page.getByText('Kino Nowe Horyzonty')).toBeVisible();
   },
   'i delete the updated expense': async ({ page, getByE2e }) => {
     await page.getByRole('button', { name: /Kino Nowe Horyzonty/ }).click();
-    await getByE2e('expenses:delete').click();
+    await getByE2e('dashboard:delete').click();
     await expect(page.getByText('Kino Nowe Horyzonty')).toHaveCount(0);
   },
 

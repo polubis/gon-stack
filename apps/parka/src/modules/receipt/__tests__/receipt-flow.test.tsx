@@ -50,9 +50,7 @@ describe('receipt entry', () => {
 
     await user.click(screen.getByRole('button', { name: /Zapisz/ }));
 
-    await waitFor(() =>
-      expect(navigateTo).toHaveBeenCalledWith('/app/expenses/'),
-    );
+    await waitFor(() => expect(navigateTo).toHaveBeenCalledWith('/app/'));
     expect(posts(fetchMock)).toHaveLength(2);
   });
 

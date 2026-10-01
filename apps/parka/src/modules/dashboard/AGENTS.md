@@ -1,14 +1,13 @@
 ---
-version: 2.13
-hash: 165ef37ede9e9353b2b28e533143801bb9a884f57c3023aa35edbcbf25a26267
+version: 2.14
+hash: 9747ec9f309aa33e96f3efc471587dbdfa87afb7d38a673614a36ea5abaeba62
 ---
-
 
 # Dashboard
 
 Ideal-example module for Parka read-only summary screens. A self-contained,
 layer-separated feature: month + range expense summary (range picker, trend, donut, month comparison) fetched from the
-backend, event-driven state, backend integration, and a state-driven UI.
+backend, plus an expenses section (list, filter, detail/edit/delete) with its own load lifecycle; event-driven state, backend integration, and a state-driven UI.
 Requires an authenticated session — there is no local/offline data source.
 Clone this module's structure and conventions when building similar dashboard
 or overview features.
@@ -16,7 +15,7 @@ or overview features.
 ## Architecture
 
 1. "configuration" — static, framework-facing config. `constraints.ts` holds
-   `FEATURE_NAME`, `DEFAULT_RANGE`, `RANGES`, `RANGE_LABEL`; `e2e-ids.ts`
+   `FEATURE_NAME`, `DEFAULT_RANGE`, `RANGES`, `RANGE_LABEL`, `FILTER_OPTIONS`, `UNCATEGORIZED`; `e2e-ids.ts`
    holds module e2e selector ids (combined at app root). No business logic,
    no state.
 2. "domain" — pure domain types. `models.ts` uses plain object shapes and
@@ -68,7 +67,8 @@ or overview features.
    `@/shared/*` (incl. `ui`: `Skeleton`, `LoadingBanner`, `ErrorState`);
    styling via theme tokens only (`core/style/index.css`: `bg-card`,
    `text-danger`, `z-(--z-modal)` ...) and `cn` — no raw colors/px.
-9. E2e selectors use `dashboard:*` prefix on interactive/readout elements.
+9. E2e selectors use `dashboard:*` prefix on interactive/readout elements (expenses section: `dashboard:expense:${id}`, `dashboard:detail`, `dashboard:save` ...).
+   The expenses section loads via `[TRIGGER]_LOAD_EXPENSES` into `$expenses`/`$categories`/`$expensesInitializing`/`$expensesLoading`/`$expensesError`; update/delete are optimistic (snapshot, rollback, toast via `$notice`). `presentation/expenses.tsx`, `expense-detail.tsx` (Radix Dialog), `expenses-skeleton.tsx`, `selectors.ts`.
 10. Imports: `@/` alias for app-root modules; relative paths within this
     module.
 

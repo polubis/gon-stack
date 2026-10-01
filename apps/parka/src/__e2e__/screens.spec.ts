@@ -18,7 +18,6 @@ const SCREENS: Screen[] = [
     root: 'receipt:main',
     heading: /Zrób zdjęcie paragonu/,
   },
-  { path: APP_ROUTER.expenses(), root: 'expenses:main', heading: /Wydatki/ },
   { path: APP_ROUTER.limits(), root: 'limits:main', heading: /Limity i cele/ },
   {
     path: APP_ROUTER.recurring(),

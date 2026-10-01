@@ -31,6 +31,7 @@ import { QuickActionIcon } from './quick-action-icon';
 import { Card } from './layout';
 import { BarChart, Donut } from './charts';
 import { Comparison } from './comparison';
+import { Expenses } from './expenses';
 import { RangePicker } from './range-picker';
 
 type IconId = 'add' | 'camera' | 'target' | 'repeat';
@@ -267,6 +268,8 @@ const DashboardView = () => {
             </Card>
           </>
         )}
+
+        <Expenses />
       </main>
     </div>
   );

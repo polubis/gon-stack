@@ -14,6 +14,14 @@ const plMonth = new Intl.DateTimeFormat('pl-PL', {
   year: 'numeric',
 });
 
+const plDateTime = new Intl.DateTimeFormat('pl-PL', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
 const toYearMonth = (month: Month): [number, number] =>
   month.split('-').map(Number) as [number, number];
 
@@ -57,3 +65,15 @@ export const nextMonth = (month: Month): Month => {
 /** Today's month, e.g. `2026-09`. */
 export const currentMonth = (): Month =>
   toMonth(new Date().toISOString().slice(0, 7));
+
+export const dateTimeLabel = (iso: string): string =>
+  plDateTime.format(new Date(iso));
+
+/** ISO date-time → `YYYY-MM`. */
+export const monthOf = (iso: string): Month => toMonth(iso.slice(0, 7));
+
+export const itemTotal = (item: {
+  unitPrice: number;
+  quantity: number;
+  discount: number;
+}): number => item.unitPrice * item.quantity - item.discount;

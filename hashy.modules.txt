@@ -6,7 +6,6 @@
 
 apps/romantic-app/src/modules/user-profile-setup AGENTS.md
 apps/parka/src/modules/dashboard AGENTS.md
-apps/parka/src/modules/expenses AGENTS.md
 apps/parka/src/modules/ai-info AGENTS.md
 apps/parka/src/modules/categories AGENTS.md
 apps/parka/src/modules/data-export AGENTS.md

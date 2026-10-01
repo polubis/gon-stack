@@ -3,14 +3,11 @@ version: 1.4
 hash: 3b753a8a2763f1056015a585742792ecdedb42ff2f89ee03db20ee785b50b8fb
 ---
 
-
-
-
 # Limits
 
 Isolated module: total/category limits + savings goals. Month-scoped progress
 (current month) from limits + expenses. Optimistic create/update, rollback,
-toast. Clone of dashboard/expenses conventions. Auth required (CSR).
+toast. Clone of dashboard conventions. Auth required (CSR).
 
 ## Architecture
 

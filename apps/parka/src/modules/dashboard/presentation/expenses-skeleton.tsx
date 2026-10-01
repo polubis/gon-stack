@@ -15,7 +15,7 @@ const RowSkeleton = () => (
 );
 
 /** Mirrors a month group: heading line + card with rows. */
-export const ListSkeleton = () => (
+export const ExpensesSkeleton = () => (
   <div
     className="grid gap-4 md:gap-6 lg:grid-cols-2 lg:items-start"
     aria-hidden="true"

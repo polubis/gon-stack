@@ -3,12 +3,9 @@ version: 1.3
 hash: bea490a6c78934264dca263e1a5c897a8ac5815f6fda4259ec542fcc33c8b433
 ---
 
-
-
-
 # Settings
 
-Profile edit, notification toggles, links to detail pages, sign-out. Cloned from `../expenses` convention. Backend-only, session required. Isolated: imports nothing from other modules.
+Profile edit, notification toggles, links to detail pages, sign-out. Cloned from `../dashboard` convention. Backend-only, session required. Isolated: imports nothing from other modules.
 
 ## Architecture
 

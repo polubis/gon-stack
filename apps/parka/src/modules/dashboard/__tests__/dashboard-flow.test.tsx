@@ -73,3 +73,44 @@ describe('dashboard screen', () => {
     expect(screen.getByText('DASHBOARD_LOAD')).toBeTruthy();
   });
 });
+
+describe('dashboard expenses section', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('lists expenses below the summary', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => ({
+        json: async () => ({
+          code: 200,
+          data: url.includes('/api/expenses')
+            ? [
+                {
+                  id: 'e-1',
+                  merchant: 'Sklep Testowy',
+                  date: '2026-09-02T10:00:00Z',
+                  amount: 12,
+                  categoryId: 'c-1',
+                  paymentMethod: 'card',
+                  isBill: false,
+                  source: 'manual',
+                  items: [],
+                },
+              ]
+            : url.includes('/api/categories')
+              ? []
+              : SUMMARY,
+        }),
+      })),
+    );
+
+    render(<Main />);
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: /Sklep Testowy/ }),
+      ).toBeTruthy(),
+    );
+    expect(screen.getByRole('heading', { name: 'Wydatki' })).toBeTruthy();
+  });
+});

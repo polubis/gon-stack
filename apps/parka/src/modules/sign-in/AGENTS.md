@@ -3,9 +3,6 @@ version: 1.4
 hash: 00e561392d08af990a4bd8bccbf9bfdaab2dbe2738eb96cf9363d4ed07408097
 ---
 
-
-
-
 # Sign in
 
 Public login page (not under /app, prerendered by `pages/sign-in.astro` with a guest `AuthGuard`). Layered, event-driven form: submit credentials to `/api/auth/login`, react to redirect / rejection.

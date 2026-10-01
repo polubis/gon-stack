@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { toCategory, toExpense } from '../integration/mappers';
 
-describe('expenses mappers', () => {
+describe('dashboard expense mappers', () => {
   it('maps an expense DTO with its receipt items', () => {
     const expense = toExpense({
       id: 'e-1',
