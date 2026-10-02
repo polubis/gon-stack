@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
-import { APP_ROUTER } from '@/shared/router';
-import { ErrorState, LoadingBanner, ScreenHeader } from '@/shared/ui';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { ErrorState } from '@/shared/ui/error-state';
+import { LoadingBanner } from '@/shared/ui/loading-banner';
+import { ScreenHeader } from '@/shared/ui/layout';
 import { ERROR_CODES } from '../configuration/constraints';
 import { Provider, useContext } from './context';
 import { ListSkeleton } from './list-skeleton';

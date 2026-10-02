@@ -1,15 +1,12 @@
 import { useEffect, useState } from 'react';
 import { FileText, Download } from 'lucide-react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
-import {
-  Button,
-  Card,
-  ErrorState,
-  LoadingBanner,
-  ScreenHeader,
-  Skeleton,
-} from '@/shared/ui';
-import { APP_ROUTER } from '@/shared/router';
+import { Button } from '@/shared/ui/controls';
+import { Card, ScreenHeader } from '@/shared/ui/layout';
+import { ErrorState } from '@/shared/ui/error-state';
+import { LoadingBanner } from '@/shared/ui/loading-banner';
+import { Skeleton } from '@/shared/ui/skeleton';
+import { APP_ROUTER } from '@/shared/router/routes';
 import { ERROR_CODES } from '../configuration/constraints';
 import { currentMonth, money, monthLabel } from '../domain/format';
 import {

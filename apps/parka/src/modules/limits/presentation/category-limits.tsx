@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { categoryLabel } from '@/shared/i18n/category-label';
-import { Button, CategoryAvatar, Card, ProgressBar } from '@/shared/ui';
+import { Button, ProgressBar } from '@/shared/ui/controls';
+import { CategoryAvatar } from '@/shared/ui/category-chip';
+import { Card } from '@/shared/ui/layout';
 import { money } from '../domain/format';
 import type { Category, CategoryProgress } from '../domain/models';
 import { resolveCategory, tone } from './selectors';

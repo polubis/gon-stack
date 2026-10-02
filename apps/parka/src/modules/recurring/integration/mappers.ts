@@ -4,8 +4,10 @@ import type { listCategoriesSchema } from '@schemas/categories';
 import type { InferOut } from '@/shared/server-contracts/extraction';
 import {
   CATEGORY_ICON_IDS,
-  type Category,
   type CategoryIconId,
+} from '@/shared/ui/category-icon-ids';
+import {
+  type Category,
   type CategoryId,
   type Recurring,
   type RecurringId,

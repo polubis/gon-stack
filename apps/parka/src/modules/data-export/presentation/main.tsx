@@ -2,14 +2,11 @@ import { useEffect, useState } from 'react';
 import { Check, FileDown, FileText } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
-import { APP_ROUTER } from '@/shared/router';
-import {
-  Button,
-  Card,
-  ErrorState,
-  LoadingBanner,
-  ScreenHeader,
-} from '@/shared/ui';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { Button } from '@/shared/ui/controls';
+import { Card, ScreenHeader } from '@/shared/ui/layout';
+import { ErrorState } from '@/shared/ui/error-state';
+import { LoadingBanner } from '@/shared/ui/loading-banner';
 import { ERROR_CODES, FORMATS } from '../configuration/constraints';
 import { toFile, toRows } from './selectors';
 import type { Format } from '../domain/models';

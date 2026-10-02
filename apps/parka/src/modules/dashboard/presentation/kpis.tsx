@@ -9,8 +9,9 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
-import { APP_ROUTER } from '@/shared/router';
-import { Card, Skeleton } from '@/shared/ui';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { Card } from '@/shared/ui/layout';
+import { Skeleton } from '@/shared/ui/skeleton';
 import { money, monthLabel, percent, prevMonth } from '../domain/format';
 import type { Month, Summary } from '../domain/models';
 

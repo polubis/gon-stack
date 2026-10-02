@@ -1,5 +1,5 @@
 import { schema } from '@schemas/auth-callback';
-import { APP_ROUTER } from '@/shared/router';
+import { APP_ROUTER } from '@/shared/router/routes';
 import { InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { publicProcedure } from '../../core/procedure';

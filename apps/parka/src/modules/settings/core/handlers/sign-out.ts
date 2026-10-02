@@ -1,5 +1,6 @@
 import { catchError, exhaustMap, finalize, from, of, tap } from 'rxjs';
-import { APP_ROUTER, navigateTo } from '@/shared/router';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { navigateTo } from '@/shared/router/navigation';
 import type { Store } from '../store';
 import type { Bus } from '../bus';
 import { logout } from '../../integration/repository';

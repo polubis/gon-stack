@@ -1,4 +1,5 @@
-import { Card, Skeleton } from '@/shared/ui';
+import { Card } from '@/shared/ui/layout';
+import { Skeleton } from '@/shared/ui/skeleton';
 
 /** Mirrors the total-limit card: amount, bar, spent line, action button. */
 export const LimitsSkeleton = () => (

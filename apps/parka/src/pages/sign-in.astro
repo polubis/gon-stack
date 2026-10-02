@@ -2,9 +2,9 @@
 export const prerender = true;
 
 import MainLayout from '@/core/layouts/main-layout.astro';
-import { Main } from '@/modules/sign-in';
-import { AuthGuard } from '@/shared/auth';
-import { APP_ROUTER } from '@/shared/router';
+import { Main } from '@/modules/sign-in/presentation/main';
+import { AuthGuard } from '@/shared/auth/guard';
+import { APP_ROUTER } from '@/shared/router/routes';
 
 const domain = Astro.locals.siteDomain;
 const imageUrl = `${domain}/og.svg`;

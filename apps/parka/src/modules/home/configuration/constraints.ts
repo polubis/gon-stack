@@ -1,5 +1,8 @@
 import { Leaf, ScanLine, Pencil, ChartColumn } from 'lucide-react';
-import type { WalkthroughStep, WalkthroughStepId } from '@/shared/walkthrough';
+import type {
+  WalkthroughStep,
+  WalkthroughStepId,
+} from '@/shared/walkthrough/domain/models';
 
 export const FEATURE_NAME = 'Home';
 export const PERSISTENCE_KEY = 'parka:onboarding-walkthrough';

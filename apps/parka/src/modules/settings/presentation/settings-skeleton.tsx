@@ -1,4 +1,5 @@
-import { Card, Skeleton } from '@/shared/ui';
+import { Card } from '@/shared/ui/layout';
+import { Skeleton } from '@/shared/ui/skeleton';
 import { LINKS, NOTIFICATION_OPTIONS } from '../configuration/constraints';
 
 /** Mirrors profile card, notifications card and links list. */

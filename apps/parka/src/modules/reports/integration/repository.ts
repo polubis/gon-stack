@@ -2,7 +2,7 @@ import type { z } from 'zod';
 import type { listExpensesSchema } from '@schemas/expenses';
 import type { listCategoriesSchema } from '@schemas/categories';
 import type { listRecurringSchema } from '@schemas/recurring';
-import { API_ROUTER } from '@/shared/router';
+import { API_ROUTER } from '@/shared/router/routes';
 import type { Category, Expense, Recurring } from '../domain/models';
 import { toCategory, toExpense, toRecurring } from './mappers';
 

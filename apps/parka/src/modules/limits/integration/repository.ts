@@ -7,7 +7,7 @@ import {
 import { createGoalSchema, listGoalsSchema } from '@schemas/goals';
 import { listCategoriesSchema } from '@schemas/categories';
 import { listExpensesSchema } from '@schemas/expenses';
-import { API_ROUTER } from '@/shared/router';
+import { API_ROUTER } from '@/shared/router/routes';
 import type { Category, Expense, Goal, Limit } from '../domain/models';
 import { toCategory, toExpense, toGoal, toLimit } from './mappers';
 

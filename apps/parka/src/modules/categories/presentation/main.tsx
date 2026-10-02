@@ -2,16 +2,14 @@ import { useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import { categoryLabel } from '@/shared/i18n/category-label';
-import { APP_ROUTER } from '@/shared/router';
-import {
-  Button,
-  CategoryAvatar,
-  CategoryIcon,
-  ErrorState,
-  LoadingBanner,
-  ScreenHeader,
-  Toast,
-} from '@/shared/ui';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { Button } from '@/shared/ui/controls';
+import { CategoryAvatar } from '@/shared/ui/category-chip';
+import { CategoryIcon } from '@/shared/ui/icon';
+import { ErrorState } from '@/shared/ui/error-state';
+import { LoadingBanner } from '@/shared/ui/loading-banner';
+import { ScreenHeader } from '@/shared/ui/layout';
+import { Toast } from '@/shared/ui/toast';
 import { DEFAULT_CATEGORIES, ERROR_CODES } from '../configuration/constraints';
 import type { Category, CategoryId, Editing } from '../domain/models';
 import { CategoryForm } from './category-form';

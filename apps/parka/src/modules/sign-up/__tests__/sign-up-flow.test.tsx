@@ -5,8 +5,8 @@ import { Main } from '../presentation/main';
 
 const navigateTo = vi.hoisted(() => vi.fn());
 
-vi.mock('@/shared/router', async (importActual) => ({
-  ...(await importActual<typeof import('@/shared/router')>()),
+vi.mock('@/shared/router/navigation', async (importActual) => ({
+  ...(await importActual<typeof import('@/shared/router/navigation')>()),
   navigateTo,
 }));
 

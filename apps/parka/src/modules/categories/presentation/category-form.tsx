@@ -2,16 +2,12 @@ import { useState } from 'react';
 import { Check, Plus } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { categoryLabel } from '@/shared/i18n/category-label';
-import {
-  Button,
-  CATEGORY_ICON_OPTIONS,
-  CategoryIcon,
-  Field,
-  inputClass,
-} from '@/shared/ui';
+import { Button, Field, inputClass } from '@/shared/ui/controls';
+import { CATEGORY_ICON_OPTIONS, CategoryIcon } from '@/shared/ui/icon';
 import { COLORS, NEW_CATEGORY_NAME } from '../configuration/constraints';
 import { newCategoryId } from '../domain/ids';
-import type { Category, CategoryIconId, Editing } from '../domain/models';
+import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
+import type { Category, Editing } from '../domain/models';
 import { Card } from './layout';
 
 type Props = {

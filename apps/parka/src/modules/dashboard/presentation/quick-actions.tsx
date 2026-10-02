@@ -1,4 +1,4 @@
-import { Card } from '@/shared/ui';
+import { Card } from '@/shared/ui/layout';
 import { QUICK_ACTIONS } from '../configuration/constraints';
 import { QuickActionIcon } from './quick-action-icon';
 

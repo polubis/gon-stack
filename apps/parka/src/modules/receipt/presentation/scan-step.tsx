@@ -1,6 +1,7 @@
 import { Camera, Plus, Sparkles } from 'lucide-react';
-import { APP_ROUTER } from '@/shared/router';
-import { Button, ScreenHeader } from '@/shared/ui';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { Button } from '@/shared/ui/controls';
+import { ScreenHeader } from '@/shared/ui/layout';
 
 type Props = {
   processing: boolean;

@@ -1,5 +1,5 @@
 import { MORE_SECTION_PATHS } from '../configuration/constraints';
-import { normalizePath, APP_ROUTER } from '@/shared/router';
+import { normalizePath, APP_ROUTER } from '@/shared/router/routes';
 import type { NavKey } from './models';
 
 export const activeNavKeyFromPathname = (pathname: string): NavKey | null => {

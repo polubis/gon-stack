@@ -1,4 +1,4 @@
-import { APP_ROUTER, type PageUrl } from '@/shared/router';
+import { APP_ROUTER, type PageUrl } from '@/shared/router/routes';
 
 export type AppPage = {
   url: PageUrl;

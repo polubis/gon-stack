@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { Button, Card, ProgressBar } from '@/shared/ui';
+import { Button, ProgressBar } from '@/shared/ui/controls';
+import { Card } from '@/shared/ui/layout';
 import { money } from '../domain/format';
 import type { Goal } from '../domain/models';
 import { goalPct } from './selectors';

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { Main } from '../index';
+import { Main } from '../presentation/main';
 
 describe('ai info page', () => {
   it('shows the heading and every AI step', () => {

@@ -1,7 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
 import { test, type Ctx } from './test';
-import { API_ROUTER, APP_ROUTER } from '@/shared/router';
+import { API_ROUTER, APP_ROUTER } from '@/shared/router/routes';
 import { signInAsTestUser } from './session';
 
 /**

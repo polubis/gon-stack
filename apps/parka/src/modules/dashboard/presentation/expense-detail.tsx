@@ -2,13 +2,9 @@ import { categoryLabel } from '@/shared/i18n/category-label';
 import { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Trash2, Pencil } from 'lucide-react';
-import {
-  Button,
-  Field,
-  inputClass,
-  NumberInput,
-  CategoryAvatar,
-} from '@/shared/ui';
+import { Button, Field, inputClass } from '@/shared/ui/controls';
+import { NumberInput } from '@/shared/ui/number-input';
+import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { UNCATEGORIZED } from '../configuration/constraints';
 import { itemTotal, dateTimeLabel, money } from '../domain/format';
 import type { CategoryId, Expense } from '../domain/models';

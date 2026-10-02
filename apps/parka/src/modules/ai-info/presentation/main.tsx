@@ -1,6 +1,7 @@
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
-import { APP_ROUTER } from '@/shared/router';
-import { Card, ErrorState, ScreenHeader } from '@/shared/ui';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { Card, ScreenHeader } from '@/shared/ui/layout';
+import { ErrorState } from '@/shared/ui/error-state';
 import { ERROR_CODES, STEPS } from '../configuration/constraints';
 
 const AiInfoView = () => (

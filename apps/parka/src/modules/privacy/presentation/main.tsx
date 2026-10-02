@@ -1,7 +1,9 @@
 import { Download } from 'lucide-react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
-import { APP_ROUTER } from '@/shared/router';
-import { Button, Card, ErrorState, ScreenHeader } from '@/shared/ui';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { Button } from '@/shared/ui/controls';
+import { Card, ScreenHeader } from '@/shared/ui/layout';
+import { ErrorState } from '@/shared/ui/error-state';
 import { ERROR_CODES, POINTS } from '../configuration/constraints';
 
 const PrivacyView = () => (

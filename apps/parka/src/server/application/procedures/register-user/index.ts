@@ -1,5 +1,5 @@
 import { schema } from '@schemas/register-user';
-import { API_ROUTER, APP_ROUTER } from '@/shared/router';
+import { API_ROUTER, APP_ROUTER } from '@/shared/router/routes';
 import { InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { publicProcedure } from '../../core/procedure';

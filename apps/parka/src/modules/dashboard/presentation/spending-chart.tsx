@@ -1,4 +1,5 @@
-import { Card, Skeleton } from '@/shared/ui';
+import { Card } from '@/shared/ui/layout';
+import { Skeleton } from '@/shared/ui/skeleton';
 import { CHART_LABEL_DAYS, CHART_TICKS } from '../configuration/constraints';
 import { dayLabel, money, monthTitle, prevMonth } from '../domain/format';
 import type { Month, Summary } from '../domain/models';

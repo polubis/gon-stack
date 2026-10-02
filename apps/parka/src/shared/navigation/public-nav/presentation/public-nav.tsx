@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Leaf } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { supabaseBrowser } from '@/shared/data-sources/supabase-browser';
-import { APP_ROUTER } from '@/shared/router';
+import { APP_ROUTER } from '@/shared/router/routes';
 
 type Session = 'unknown' | 'signed-in' | 'signed-out';
 

@@ -4,7 +4,7 @@ import {
   listCategoriesSchema,
   updateCategorySchema,
 } from '@schemas/categories';
-import { API_ROUTER } from '@/shared/router';
+import { API_ROUTER } from '@/shared/router/routes';
 import type { Category } from '../domain/models';
 import { toCategory } from './mappers';
 

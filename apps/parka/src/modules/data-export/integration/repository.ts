@@ -1,7 +1,7 @@
 import type { z } from 'zod';
 import type { listExpensesSchema } from '@schemas/expenses';
 import type { listCategoriesSchema } from '@schemas/categories';
-import { API_ROUTER } from '@/shared/router';
+import { API_ROUTER } from '@/shared/router/routes';
 import type { Category, Expense } from '../domain/models';
 import { toCategory, toExpense } from './mappers';
 

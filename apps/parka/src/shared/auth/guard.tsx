@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { supabaseBrowser } from '@/shared/data-sources/supabase-browser';
-import { APP_ROUTER, navigateTo } from '@/shared/router';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { navigateTo } from '@/shared/router/navigation';
 
 type AuthGuardProps = {
   /** `protected`: signed-in only. `guest`: signed-out only. */

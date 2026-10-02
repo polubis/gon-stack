@@ -1,4 +1,4 @@
-import type { CategoryIconId } from '../domain/models';
+import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
 
 export const FEATURE_NAME = 'Categories';
 

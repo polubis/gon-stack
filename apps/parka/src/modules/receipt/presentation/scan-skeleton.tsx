@@ -1,5 +1,6 @@
-import { APP_ROUTER } from '@/shared/router';
-import { ScreenHeader, Skeleton } from '@/shared/ui';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { ScreenHeader } from '@/shared/ui/layout';
+import { Skeleton } from '@/shared/ui/skeleton';
 
 /** Mirrors the scan step: intro line, camera frame, two buttons. */
 export const ScanSkeleton = () => (

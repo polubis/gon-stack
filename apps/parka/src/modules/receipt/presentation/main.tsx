@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
-import { APP_ROUTER, navigateTo } from '@/shared/router';
-import { ErrorState, LoadingBanner, Toast } from '@/shared/ui';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { navigateTo } from '@/shared/router/navigation';
+import { ErrorState } from '@/shared/ui/error-state';
+import { LoadingBanner } from '@/shared/ui/loading-banner';
+import { Toast } from '@/shared/ui/toast';
 import {
   CAPTURE_DELAY_MS,
   DEFAULT_ITEM_NAME,

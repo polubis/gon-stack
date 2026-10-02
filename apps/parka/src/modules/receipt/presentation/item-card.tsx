@@ -1,13 +1,10 @@
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { categoryLabel } from '@/shared/i18n/category-label';
-import {
-  CategoryAvatar,
-  Card,
-  Field,
-  NumberInput,
-  inputClass,
-} from '@/shared/ui';
+import { CategoryAvatar } from '@/shared/ui/category-chip';
+import { Card } from '@/shared/ui/layout';
+import { Field, inputClass } from '@/shared/ui/controls';
+import { NumberInput } from '@/shared/ui/number-input';
 import { money } from '../domain/format';
 import type { Category, ReceiptItem } from '../domain/models';
 import { itemTotal, resolveCategory } from './selectors';

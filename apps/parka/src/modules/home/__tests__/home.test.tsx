@@ -6,8 +6,8 @@ import { PERSISTENCE_KEY, STEPS } from '../configuration/constraints';
 
 const navigateTo = vi.hoisted(() => vi.fn());
 
-vi.mock('@/shared/router', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/shared/router')>()),
+vi.mock('@/shared/router/navigation', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/router/navigation')>()),
   navigateTo,
 }));
 

@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test';
-import { APP_ROUTER } from '@/shared/router';
+import { APP_ROUTER } from '@/shared/router/routes';
 import type { Ctx } from './test';
 
 /** Local Supabase mail server (Mailpit) web/API port from `supabase/config.toml`. */

@@ -2,7 +2,7 @@ import { expect, type Page } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
 import { test, type Ctx } from '@/__e2e__/test';
 import { registerAndConfirm } from '@/__e2e__/mailbox';
-import { API_ROUTER } from '@/shared/router';
+import { API_ROUTER } from '@/shared/router/routes';
 
 /**
  * Integration coverage for the per-entity REST endpoints (categories,

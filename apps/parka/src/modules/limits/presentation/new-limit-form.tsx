@@ -1,13 +1,8 @@
 import { useState } from 'react';
 import { categoryLabel } from '@/shared/i18n/category-label';
-import {
-  Button,
-  Card,
-  Field,
-  inputClass,
-  NumberInput,
-  Toggle,
-} from '@/shared/ui';
+import { Button, Field, inputClass, Toggle } from '@/shared/ui/controls';
+import { Card } from '@/shared/ui/layout';
+import { NumberInput } from '@/shared/ui/number-input';
 import { DEFAULT_CATEGORY_LIMIT } from '../configuration/constraints';
 import { newLimitId } from '../domain/ids';
 import type { CategoryId, Delivery } from '../domain/models';

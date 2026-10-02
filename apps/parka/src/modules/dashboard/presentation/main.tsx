@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
-import { ErrorState, LoadingBanner, Toast } from '@/shared/ui';
-import { readQueryParam, APP_ROUTER, writeQueryParam } from '@/shared/router';
+import { ErrorState } from '@/shared/ui/error-state';
+import { LoadingBanner } from '@/shared/ui/loading-banner';
+import { Toast } from '@/shared/ui/toast';
+import { readQueryParam, writeQueryParam } from '@/shared/router/navigation';
+import { APP_ROUTER } from '@/shared/router/routes';
 import { ERROR_CODES } from '../configuration/constraints';
 import { currentMonth, toMonth } from '../domain/format';
 import type { ExpenseId, Month } from '../domain/models';

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Check, LoaderCircle, Plus } from 'lucide-react';
-import { APP_ROUTER } from '@/shared/router';
-import { Button, Card, Field, ScreenHeader, inputClass } from '@/shared/ui';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { Button, Field, inputClass } from '@/shared/ui/controls';
+import { Card, ScreenHeader } from '@/shared/ui/layout';
 import { DEFAULT_ITEM_NAME } from '../configuration/constraints';
 import { money } from '../domain/format';
 import type { Category, Draft, ReceiptItemId } from '../domain/models';

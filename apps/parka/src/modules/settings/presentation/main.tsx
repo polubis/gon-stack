@@ -1,18 +1,12 @@
 import { useEffect, useState } from 'react';
 import { ChevronRight, CircleUser } from 'lucide-react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
-import { APP_ROUTER } from '@/shared/router';
-import {
-  Button,
-  Card,
-  ErrorState,
-  Field,
-  inputClass,
-  LoadingBanner,
-  ScreenHeader,
-  Toast,
-  Toggle,
-} from '@/shared/ui';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { Button, Field, inputClass, Toggle } from '@/shared/ui/controls';
+import { Card, ScreenHeader } from '@/shared/ui/layout';
+import { ErrorState } from '@/shared/ui/error-state';
+import { LoadingBanner } from '@/shared/ui/loading-banner';
+import { Toast } from '@/shared/ui/toast';
 import {
   ERROR_CODES,
   LINKS,

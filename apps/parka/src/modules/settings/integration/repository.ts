@@ -1,6 +1,6 @@
 import type { z } from 'zod';
 import { getSettingsSchema, updateSettingsSchema } from '@schemas/settings';
-import { API_ROUTER } from '@/shared/router';
+import { API_ROUTER } from '@/shared/router/routes';
 import type { Settings } from '../domain/models';
 import { toSettings, toSettingsDto } from './mappers';
 

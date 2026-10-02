@@ -8,7 +8,7 @@ import {
   Target,
   type LucideIcon,
 } from 'lucide-react';
-import { APP_ROUTER } from '@/shared/router';
+import { APP_ROUTER } from '@/shared/router/routes';
 import type { NotificationKey } from '../domain/models';
 
 export const FEATURE_NAME = 'Settings';

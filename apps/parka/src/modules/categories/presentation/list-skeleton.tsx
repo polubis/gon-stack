@@ -1,4 +1,4 @@
-import { Skeleton } from '@/shared/ui';
+import { Skeleton } from '@/shared/ui/skeleton';
 
 const ROWS = 4;
 

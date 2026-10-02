@@ -5,9 +5,6 @@ export type CategoryId = Brand<string, 'CategoryId'>;
 
 import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
 
-export { CATEGORY_ICON_IDS } from '@/shared/ui/category-icon-ids';
-export type { CategoryIconId };
-
 export type Category = {
   id: CategoryId;
   name: string;

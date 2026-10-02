@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Button, Card, Field, NumberInput, ProgressBar } from '@/shared/ui';
+import { Button, Field, ProgressBar } from '@/shared/ui/controls';
+import { Card } from '@/shared/ui/layout';
+import { NumberInput } from '@/shared/ui/number-input';
 import { money, monthLabel } from '../domain/format';
 import type { Limit, Month, TotalProgress } from '../domain/models';
 import { tone } from './selectors';

@@ -1,9 +1,10 @@
 ---
 export const prerender = true;
 
-import { APP_PAGES, AppRouter } from '@/core/app-router';
+import { Main as AppRouter } from '@/core/app-router/main';
+import { APP_PAGES } from '@/core/app-router/pages';
 import Seo from '@/core/layouts/seo.astro';
-import { APP_ROUTER } from '@/shared/router';
+import { APP_ROUTER } from '@/shared/router/routes';
 
 export const getStaticPaths = () =>
   APP_PAGES.map((page) => ({

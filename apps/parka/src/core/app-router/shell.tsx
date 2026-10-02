@@ -1,8 +1,9 @@
 import { Outlet, useRouter, useRouterState } from '@tanstack/react-router';
 import { useEffect } from 'react';
-import { AuthGuard } from '@/shared/auth';
-import { SyncedAppNav } from '@/shared/navigation/app-nav';
-import { navigateTo, normalizePath, registerNavigator } from '@/shared/router';
+import { AuthGuard } from '@/shared/auth/guard';
+import { SyncedAppNav } from '@/shared/navigation/app-nav/presentation/synced-app-nav';
+import { navigateTo, registerNavigator } from '@/shared/router/navigation';
+import { normalizePath } from '@/shared/router/routes';
 import { APP_PAGES } from './pages';
 
 const pathOf = (url: string): string => url.split('?')[0];

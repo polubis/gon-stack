@@ -1,4 +1,4 @@
-import { APP_ROUTER } from '@/shared/router';
+import { APP_ROUTER } from '@/shared/router/routes';
 import type { Category, CategoryId, QuickAction } from '../domain/models';
 
 export const FEATURE_NAME = 'Dashboard';

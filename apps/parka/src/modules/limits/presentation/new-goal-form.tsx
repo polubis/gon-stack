@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Button, Card, Field, inputClass, NumberInput } from '@/shared/ui';
+import { Button, Field, inputClass } from '@/shared/ui/controls';
+import { Card } from '@/shared/ui/layout';
+import { NumberInput } from '@/shared/ui/number-input';
 import {
   DEFAULT_GOAL_MONTHS,
   DEFAULT_GOAL_NAME,

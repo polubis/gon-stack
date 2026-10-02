@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { categoryLabel } from '@/shared/i18n/category-label';
-import { APP_ROUTER } from '@/shared/router';
-import { CategoryAvatar, Card, ErrorState, Skeleton } from '@/shared/ui';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { CategoryAvatar } from '@/shared/ui/category-chip';
+import { Card } from '@/shared/ui/layout';
+import { ErrorState } from '@/shared/ui/error-state';
+import { Skeleton } from '@/shared/ui/skeleton';
 import { cn } from '@repo/react-kit/cn';
 import { ERROR_CODES } from '../configuration/constraints';
 import { money, shortDateLabel } from '../domain/format';

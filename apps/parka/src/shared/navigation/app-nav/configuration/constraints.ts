@@ -1,5 +1,5 @@
 import { Home, LayoutGrid, RefreshCw, Target } from 'lucide-react';
-import { moreSectionPaths, APP_ROUTER } from '@/shared/router';
+import { moreSectionPaths, APP_ROUTER } from '@/shared/router/routes';
 import type { NavKey } from '../domain/models';
 
 type NavItem = {

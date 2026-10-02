@@ -1,7 +1,7 @@
 ---
 import '../style/index.css';
-import { CookieConsent } from '@/shared/cookies';
-import { APP_ROUTER, type PageUrl } from '@/shared/router';
+import { CookieConsent } from '@/shared/cookies/presentation/cookie-consent';
+import { APP_ROUTER, type PageUrl } from '@/shared/router/routes';
 
 const PRIVACY_POLICY_URL = APP_ROUTER.privacyPolicy();
 const COOKIE_CONSENT_PAGES: readonly PageUrl[] = [

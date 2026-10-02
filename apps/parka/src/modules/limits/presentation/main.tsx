@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
-import { APP_ROUTER } from '@/shared/router';
-import { ErrorState, LoadingBanner, Segmented, Toast } from '@/shared/ui';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { ErrorState } from '@/shared/ui/error-state';
+import { LoadingBanner } from '@/shared/ui/loading-banner';
+import { Segmented } from '@/shared/ui/controls';
+import { Toast } from '@/shared/ui/toast';
 import { ERROR_CODES, TAB_OPTIONS } from '../configuration/constraints';
 import { currentMonth } from '../domain/format';
 import type { Tab } from '../domain/models';

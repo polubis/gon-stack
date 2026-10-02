@@ -1,6 +1,7 @@
 import { TrendingDown, TrendingUp } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
-import { Card, Skeleton } from '@/shared/ui';
+import { Card } from '@/shared/ui/layout';
+import { Skeleton } from '@/shared/ui/skeleton';
 import { money, monthTitle, percent, prevMonth } from '../domain/format';
 import type { Month, Summary } from '../domain/models';
 

@@ -1,16 +1,12 @@
 import { useEffect, useState } from 'react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
-import { APP_ROUTER } from '@/shared/router';
-import {
-  Card,
-  CategoryAvatar,
-  ErrorState,
-  LoadingBanner,
-  ScreenHeader,
-  Segmented,
-  Toast,
-  Toggle,
-} from '@/shared/ui';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { Card, ScreenHeader } from '@/shared/ui/layout';
+import { CategoryAvatar } from '@/shared/ui/category-chip';
+import { ErrorState } from '@/shared/ui/error-state';
+import { LoadingBanner } from '@/shared/ui/loading-banner';
+import { Segmented, Toggle } from '@/shared/ui/controls';
+import { Toast } from '@/shared/ui/toast';
 import { ERROR_CODES, TAB_OPTIONS } from '../configuration/constraints';
 import { dateLabel, money } from '../domain/format';
 import type { RecurringId, Tab } from '../domain/models';

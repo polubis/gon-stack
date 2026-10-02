@@ -1,7 +1,8 @@
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
-import { ErrorState } from '@/shared/ui';
-import { Main as Walkthrough } from '@/shared/walkthrough';
-import { navigateTo, APP_ROUTER } from '@/shared/router';
+import { ErrorState } from '@/shared/ui/error-state';
+import { Main as Walkthrough } from '@/shared/walkthrough/presentation/main';
+import { navigateTo } from '@/shared/router/navigation';
+import { APP_ROUTER } from '@/shared/router/routes';
 import {
   ERROR_CODES,
   PERSISTENCE_KEY,

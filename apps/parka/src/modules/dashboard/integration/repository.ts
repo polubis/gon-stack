@@ -6,7 +6,7 @@ import {
   updateExpenseSchema,
 } from '@schemas/expenses';
 import { listCategoriesSchema } from '@schemas/categories';
-import { API_ROUTER } from '@/shared/router';
+import { API_ROUTER } from '@/shared/router/routes';
 import type {
   Category,
   Expense,

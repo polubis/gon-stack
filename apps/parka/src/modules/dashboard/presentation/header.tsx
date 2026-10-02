@@ -1,6 +1,7 @@
 import { ChevronDown, Plus, User } from 'lucide-react';
-import { APP_ROUTER } from '@/shared/router';
-import { Button, Skeleton } from '@/shared/ui';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { Button } from '@/shared/ui/controls';
+import { Skeleton } from '@/shared/ui/skeleton';
 import { MONTH_OPTIONS_COUNT } from '../configuration/constraints';
 import { currentMonth, monthTitle, toMonth } from '../domain/format';
 import type { Month } from '../domain/models';

@@ -1,7 +1,7 @@
 import type { z } from 'zod';
 import type { createExpenseSchema } from '@schemas/expenses';
 import type { listCategoriesSchema } from '@schemas/categories';
-import { API_ROUTER } from '@/shared/router';
+import { API_ROUTER } from '@/shared/router/routes';
 import type { Category, NewReceipt } from '../domain/models';
 import { toCategory, toExpenseBody, toNotificationBody } from './mappers';
 

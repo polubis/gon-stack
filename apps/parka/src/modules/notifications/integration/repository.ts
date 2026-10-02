@@ -1,6 +1,6 @@
 import type { z } from 'zod';
 import type { listNotificationsSchema } from '@schemas/notifications';
-import { API_ROUTER } from '@/shared/router';
+import { API_ROUTER } from '@/shared/router/routes';
 import type { Notification } from '../domain/models';
 import { toNotification } from './mappers';
 

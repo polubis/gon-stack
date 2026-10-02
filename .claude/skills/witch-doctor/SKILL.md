@@ -121,7 +121,7 @@ Examples:
       "line": 42,
       "summary": "Service reaches into 12 unrelated modules directly",
       "story": "Imagine Josh changes the internals of PaymentService — three unrelated components break overnight because they imported past its public API straight into internals.",
-      "fix": "Route external access through a single public index.ts instead of deep imports."
+      "fix": "Expose a narrow public file per module and import it directly. No index.ts barrels."
     }
   ],
   "autoFix": {

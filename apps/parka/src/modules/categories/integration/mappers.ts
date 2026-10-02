@@ -3,10 +3,9 @@ import type { listCategoriesSchema } from '@schemas/categories';
 import type { InferOut } from '@/shared/server-contracts/extraction';
 import {
   CATEGORY_ICON_IDS,
-  type Category,
   type CategoryIconId,
-  type CategoryId,
-} from '../domain/models';
+} from '@/shared/ui/category-icon-ids';
+import { type Category, type CategoryId } from '../domain/models';
 
 type CategoryDto = InferOut<
   z.infer<ReturnType<typeof listCategoriesSchema>>['out'],

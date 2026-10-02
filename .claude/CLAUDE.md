@@ -25,7 +25,7 @@ Read `references/aodi-framework.md` for tag legend (`A` / `O` / `D` / `I`). Appl
 | Path                     | What                                                  |
 | ------------------------ | ----------------------------------------------------- |
 | `rules/general.md`       | Communication, AI, session logging                    |
-| `rules/coding.md`        | Minimal code, inline export order                     |
+| `rules/coding.md`        | Minimal code, inline export order, never barrel export |
 | `rules/typescript.md`    | TypeScript strictness, exhaustive checks              |
 | `rules/react.md`         | React patterns (Context, useEffectEvent, props)       |
 | `rules/astro.md`         | Astro backend endpoints + validation                  |

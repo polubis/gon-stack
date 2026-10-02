@@ -1,5 +1,5 @@
 import type { Schema } from '@schemas/register-user';
-import { API_ROUTER } from '@/shared/router';
+import { API_ROUTER } from '@/shared/router/routes';
 import type { Credentials, SignUpResult } from '../domain/models';
 import { toSignUpResult } from './mappers';
 

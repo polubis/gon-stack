@@ -4,8 +4,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const { navigateTo } = vi.hoisted(() => ({ navigateTo: vi.fn() }));
 
-vi.mock('@/shared/router', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/shared/router')>()),
+vi.mock('@/shared/router/navigation', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/router/navigation')>()),
   navigateTo,
 }));
 

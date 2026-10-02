@@ -5,7 +5,7 @@ import {
   TriangleAlert,
   type LucideIcon,
 } from 'lucide-react';
-import { Card } from '@/shared/ui';
+import { Card } from '@/shared/ui/layout';
 import { ageLabel } from '../domain/format';
 import type { Notification, NotificationKind } from '../domain/models';
 
