@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import type { SubmitEvent } from 'react';
 import { Leaf } from 'lucide-react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
-import { AuthGuard } from '@/shared/auth/presentation/auth-guard';
-import { AuthProvider } from '@/shared/auth/presentation/context';
 import { Button, Field, inputClass } from '@/shared/ui/controls';
 import { ErrorState } from '@/shared/ui/error-state';
 import { navigateTo } from '@/shared/router/navigation';
@@ -119,11 +117,6 @@ export const Main = () => (
       />
     )}
   >
-    <AuthProvider>
-      <AuthGuard
-        redirect={{ authenticated: () => navigateTo(APP_ROUTER.dashboard()) }}
-      />
-    </AuthProvider>
     <Provider>
       <SignUpView />
     </Provider>
