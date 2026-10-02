@@ -14,11 +14,20 @@ const SCREENS: Screen[] = [
   { path: APP_ROUTER.signUp(), root: 'auth:main', heading: /Załóż konto/ },
   { path: APP_ROUTER.dashboard(), root: 'dashboard:main', heading: /Cześć/ },
   {
+    path: APP_ROUTER.dashboard(),
+    root: 'dashboard:limits',
+    heading: /Limity/,
+  },
+  {
+    path: APP_ROUTER.dashboard(),
+    root: 'dashboard:goals',
+    heading: /Cele/,
+  },
+  {
     path: APP_ROUTER.receiptScan(),
     root: 'receipt:main',
     heading: /Zrób zdjęcie paragonu/,
   },
-  { path: APP_ROUTER.limits(), root: 'limits:main', heading: /Limity i cele/ },
   {
     path: APP_ROUTER.recurring(),
     root: 'recurring:main',
@@ -98,7 +107,9 @@ const commands = {
 } satisfies CommandRegistry<Ctx>;
 
 for (const screen of SCREENS) {
-  test(`${screen.path} renders and has no WCAG violations`, async ({ e2e }) => {
+  test(`${screen.path} ${screen.root} renders and has no WCAG violations`, async ({
+    e2e,
+  }) => {
     const run = interpreter(commands, e2e);
     if (screen.path === APP_ROUTER.dashboard())
       await run(['i mock the dashboard']);

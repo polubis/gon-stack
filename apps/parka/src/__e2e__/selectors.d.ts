@@ -6,10 +6,6 @@ import type { HomeE2eId } from '@/modules/home/configuration/e2e-ids';
 import type { AiInfoE2eId } from '@/modules/ai-info/configuration/e2e-ids';
 import type { DataExportE2eId } from '@/modules/data-export/configuration/e2e-ids';
 import type { PrivacyE2eId } from '@/modules/privacy/configuration/e2e-ids';
-import type {
-  GoalsE2eId,
-  LimitsE2eId,
-} from '@/modules/limits/configuration/e2e-ids';
 import type { NotificationsE2eId } from '@/modules/notifications/configuration/e2e-ids';
 import type { ReceiptE2eId } from '@/modules/receipt/configuration/e2e-ids';
 import type { RecurringE2eId } from '@/modules/recurring/configuration/e2e-ids';
@@ -31,8 +27,6 @@ export type E2eId =
   | SignUpE2eId
   | DashboardE2eId
   | ReceiptE2eId
-  | LimitsE2eId
-  | GoalsE2eId
   | RecurringE2eId
   | ReportsE2eId
   | NotificationsE2eId

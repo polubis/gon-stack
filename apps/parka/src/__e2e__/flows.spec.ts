@@ -31,12 +31,16 @@ const CATEGORY = {
  */
 const mockState = async (
   page: Page,
-  rows: { recurring?: unknown[]; categories?: unknown[] } = {},
+  rows: {
+    recurring?: unknown[];
+    categories?: unknown[];
+    limits?: unknown[];
+  } = {},
 ): Promise<void> => {
   const collections: [string, unknown[]][] = [
     [API_ROUTER.categories(), rows.categories ?? [CATEGORY]],
     [API_ROUTER.expenses(), []],
-    [API_ROUTER.limits(), []],
+    [API_ROUTER.limits(), rows.limits ?? []],
     [API_ROUTER.goals(), []],
     [API_ROUTER.recurring(), rows.recurring ?? []],
     [API_ROUTER.notifications(), []],
@@ -164,8 +168,8 @@ const commands = {
     await getByE2e('dashboard:main')
       .getByRole('link', { name: 'Limity' })
       .click();
-    await page.waitForURL(`**${APP_ROUTER.limits()}`);
-    await expect(getByE2e('limits:main')).toBeVisible();
+    await expect(getByE2e('dashboard:limits')).toBeInViewport();
+    await expect(getByE2e('dashboard:limits')).toBeFocused();
     expect(
       await page.evaluate(() => 'spaMarker' in window),
       'navigation stays client-side',
@@ -362,15 +366,42 @@ const commands = {
 
   'i create an 80 percent category limit': async ({ page, getByE2e }) => {
     await mockState(page);
-    await open(page, APP_ROUTER.limits());
+    await open(page, APP_ROUTER.dashboard());
 
-    await page.getByRole('tab', { name: 'Kategorie' }).click();
-    await getByE2e('limits:new').click();
-    await getByE2e('limits:form-amount').fill('450');
-    await getByE2e('limits:form-save').click();
-    await expect(getByE2e('limits:form')).toHaveCount(0);
+    await getByE2e('dashboard:limit-new').click();
+    await getByE2e('dashboard:limit-form-amount').fill('450');
+    await getByE2e('dashboard:limit-form-save').click();
+    await expect(getByE2e('dashboard:limit-form')).toHaveCount(0);
   },
 
+  'i open a dashboard with a category limit': async ({ page }) => {
+    await mockState(page, {
+      limits: [
+        {
+          id: 'limit-1',
+          scope: 'category',
+          categoryId: CATEGORY.id,
+          amount: 300,
+          alertAt80: true,
+          delivery: 'push',
+        },
+      ],
+    });
+    await open(page, APP_ROUTER.dashboard());
+  },
+  'i raise the category limit': async ({ getByE2e }) => {
+    await getByE2e('dashboard:limit-edit:limit-1').click();
+    await getByE2e('dashboard:limit-form-amount').fill('900');
+    await getByE2e('dashboard:limit-form-save').click();
+    await expect(getByE2e('dashboard:limit-form')).toHaveCount(0);
+    await expect(getByE2e('dashboard:limit-list')).toContainText('900,00');
+  },
+  'i remove the category limit': async ({ page, getByE2e }) => {
+    await getByE2e('dashboard:limit-edit:limit-1').click();
+    await getByE2e('dashboard:limit-delete').click();
+    await expect(getByE2e('dashboard:limit-form')).toHaveCount(0);
+    await expect(page.getByText('Brak limitów kategorii.')).toBeVisible();
+  },
   'a new category appears in the list': async ({ page, getByE2e }) => {
     await mockState(page);
     await open(page, APP_ROUTER.categories());
@@ -512,6 +543,14 @@ test('a category spending limit with an 80% alert can be created', async ({
   e2e,
 }) => {
   await interpreter(commands, e2e)(['i create an 80 percent category limit']);
+});
+
+test('a category limit can be raised and then removed', async ({ e2e }) => {
+  await interpreter(commands, e2e)(
+    ['i open a dashboard with a category limit'],
+    ['i raise the category limit'],
+    ['i remove the category limit'],
+  );
 });
 
 test('a new category appears in the category list', async ({ e2e }) => {

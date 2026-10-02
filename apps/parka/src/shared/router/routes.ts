@@ -63,7 +63,6 @@ export const APP_ROUTER = {
   dashboard: routeWithQuery<'/app/', DashboardQuery>('/app/'),
   settings: route('/app/settings/'),
   categories: route('/app/categories/'),
-  limits: route('/app/limits/'),
   recurring: route('/app/recurring/'),
   reports: route('/app/reports/'),
   notifications: route('/app/notifications/'),
@@ -85,7 +84,6 @@ export type PageUrl = ReturnType<(typeof APP_ROUTER)[PageRouteKey]>;
 export const moreSectionPaths = (): readonly string[] => [
   APP_ROUTER.settings(),
   APP_ROUTER.categories(),
-  APP_ROUTER.limits(),
   APP_ROUTER.recurring(),
   APP_ROUTER.reports(),
   APP_ROUTER.notifications(),

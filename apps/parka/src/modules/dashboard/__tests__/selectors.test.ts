@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import {
+  categoryProgress,
   categoryTabs,
   expensesInMonth,
   foldSlices,
+  limitTone,
   monthOptions,
   niceStep,
   sortByDateDesc,
   sumAmount,
+  totalProgress,
+  withoutLimit,
 } from '../presentation/selectors';
 import { toMonth } from '../domain/format';
 import type {
@@ -14,6 +18,8 @@ import type {
   CategoryId,
   Expense,
   ExpenseId,
+  Limit,
+  LimitId,
   Month,
 } from '../domain/models';
 
@@ -163,5 +169,80 @@ describe('dashboard chart axis step', () => {
     [999, 500],
   ])('fits %s on four rows with step %s', (max, step) => {
     expect(niceStep(max, 4)).toBe(step);
+  });
+});
+
+describe('dashboard limit progress', () => {
+  const MONTH = '2025-04' as Month;
+  const FOOD = 'c-food' as CategoryId;
+  const OTHER = 'c-other' as CategoryId;
+
+  const spend = (id: string, date: string, amount: number, c = FOOD) => ({
+    ...expense(id, date, amount),
+    categoryId: c,
+  });
+
+  const TOTAL: Limit = {
+    id: 'l-1' as LimitId,
+    scope: 'total',
+    amount: 1000,
+    alertAt80: true,
+    delivery: 'push',
+  };
+  const FOOD_LIMIT: Limit = {
+    id: 'l-2' as LimitId,
+    scope: 'category',
+    categoryId: FOOD,
+    amount: 100,
+    alertAt80: false,
+    delivery: 'email',
+  };
+
+  const EXPENSES = [
+    spend('e-1', '2025-04-02T10:00:00Z', 50),
+    spend('e-2', '2025-04-20T10:00:00Z', 150, OTHER),
+    spend('e-3', '2025-03-30T10:00:00Z', 900),
+  ];
+
+  it('counts only expenses from the chosen month toward the total limit', () => {
+    expect(totalProgress([TOTAL], EXPENSES, MONTH)).toEqual({
+      spent: 200,
+      amount: 1000,
+      pct: 20,
+    });
+  });
+
+  it('has no total progress without a total limit', () => {
+    expect(totalProgress([FOOD_LIMIT], EXPENSES, MONTH)).toBeNull();
+  });
+
+  it('counts only the limited category toward a category limit', () => {
+    const [progress] = categoryProgress([TOTAL, FOOD_LIMIT], EXPENSES, MONTH);
+
+    expect(progress).toMatchObject({
+      id: 'l-2',
+      categoryId: FOOD,
+      spent: 50,
+      pct: 50,
+    });
+  });
+
+  it('warns at 80 percent and turns dangerous at 100', () => {
+    expect([limitTone(79), limitTone(80), limitTone(100)]).toEqual([
+      'brand',
+      'warn',
+      'danger',
+    ]);
+  });
+
+  it('offers only categories that have no limit yet', () => {
+    const categories = [
+      { id: FOOD, name: 'a', icon: 'cart' as const, color: '#000' },
+      { id: OTHER, name: 'b', icon: 'car' as const, color: '#000' },
+    ];
+
+    expect(withoutLimit(categories, [FOOD_LIMIT]).map((c) => c.id)).toEqual([
+      OTHER,
+    ]);
   });
 });

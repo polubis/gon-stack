@@ -1,12 +1,11 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { Button, Field, inputClass, Toggle } from '@/shared/ui/controls';
-import { Card } from '@/shared/ui/layout';
 import { NumberInput } from '@/shared/ui/number-input';
 import { DEFAULT_CATEGORY_LIMIT } from '../configuration/constraints';
 import { newLimitId } from '../domain/ids';
-import type { CategoryId, Delivery } from '../domain/models';
-import { withoutLimit } from './selectors';
+import type { CategoryId, CategoryLimit, Delivery } from '../domain/models';
+import { categoryOf, withoutLimit } from './selectors';
 import { useContext } from './context';
 
 const DELIVERY_OPTIONS: { value: Delivery; label: string }[] = [
@@ -14,42 +13,66 @@ const DELIVERY_OPTIONS: { value: Delivery; label: string }[] = [
   { value: 'email', label: 'Email' },
 ];
 
-export const NewLimitForm = ({ onDone }: { onDone: () => void }) => {
+/** Creates a category limit, or edits `limit` (category fixed, can be removed). */
+export const LimitForm = ({
+  limit,
+  onDone,
+}: {
+  limit?: CategoryLimit;
+  onDone: () => void;
+}) => {
   const ctx = useContext();
   const categories = ctx.useCategories();
   const limits = ctx.useLimits();
   const [categoryId, setCategoryId] = useState<CategoryId | null>(null);
-  const [amount, setAmount] = useState(DEFAULT_CATEGORY_LIMIT);
-  const [alertAt80, setAlertAt80] = useState(true);
-  const [delivery, setDelivery] = useState<Delivery>('push');
+  const [amount, setAmount] = useState(limit?.amount ?? DEFAULT_CATEGORY_LIMIT);
+  const [alertAt80, setAlertAt80] = useState(limit?.alertAt80 ?? true);
+  const [delivery, setDelivery] = useState<Delivery>(limit?.delivery ?? 'push');
 
-  const selected =
-    categoryId ?? withoutLimit(categories, limits)[0]?.id ?? categories[0]?.id;
+  const available = limit
+    ? [categoryOf(categories, limit.categoryId)]
+    : withoutLimit(categories, limits);
+  const selected = available.some((c) => c.id === categoryId)
+    ? categoryId
+    : available[0]?.id;
 
-  const save = () => {
-    if (!selected) return;
-    ctx.createLimit({
-      id: newLimitId(),
-      scope: 'category',
-      categoryId: selected,
-      amount,
-      alertAt80,
-      delivery,
-    });
+  const save = (event: FormEvent) => {
+    event.preventDefault();
+    if (limit) {
+      ctx.updateLimit({ ...limit, amount, alertAt80, delivery });
+    } else if (selected) {
+      ctx.createLimit({
+        id: newLimitId(),
+        scope: 'category',
+        categoryId: selected,
+        amount,
+        alertAt80,
+        delivery,
+      });
+    } else {
+      return;
+    }
+    onDone();
+  };
+
+  const remove = () => {
+    if (!limit) return;
+    ctx.removeLimit(limit.id);
     onDone();
   };
 
   return (
-    <Card className="space-y-3 md:max-w-xl" data-e2e="limits:form">
-      <h2 className="text-sm font-semibold">Nowy limit</h2>
+    <form onSubmit={save} className="space-y-3" data-e2e="dashboard:limit-form">
       <Field label="Kategoria">
         <select
           className={inputClass}
+          required
+          disabled={Boolean(limit)}
           value={selected ?? ''}
-          data-e2e="limits:form-category"
+          data-e2e="dashboard:limit-form-category"
           onChange={(e) => setCategoryId(e.target.value as CategoryId)}
         >
-          {categories.map((c) => (
+          {available.map((c) => (
             <option key={c.id} value={c.id}>
               {categoryLabel(c.name)}
             </option>
@@ -58,8 +81,9 @@ export const NewLimitForm = ({ onDone }: { onDone: () => void }) => {
       </Field>
       <Field label="Limit miesięczny">
         <NumberInput
+          required
           value={amount}
-          data-e2e="limits:form-amount"
+          data-e2e="dashboard:limit-form-amount"
           onValueChange={setAmount}
         />
       </Field>
@@ -94,10 +118,23 @@ export const NewLimitForm = ({ onDone }: { onDone: () => void }) => {
         <Button variant="ghost" onClick={onDone}>
           Anuluj
         </Button>
-        <Button data-e2e="limits:form-save" onClick={save} disabled={!selected}>
+        <Button
+          type="submit"
+          data-e2e="dashboard:limit-form-save"
+          disabled={!selected}
+        >
           Zapisz
         </Button>
       </div>
-    </Card>
+      {limit ? (
+        <Button
+          variant="danger"
+          data-e2e="dashboard:limit-delete"
+          onClick={remove}
+        >
+          Usuń limit
+        </Button>
+      ) : null}
+    </form>
   );
 };

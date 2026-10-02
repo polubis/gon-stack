@@ -5,6 +5,8 @@ export type Month = Brand<string, 'Month'>;
 export type CategoryId = Brand<string, 'CategoryId'>;
 export type ExpenseId = Brand<string, 'ExpenseId'>;
 export type ReceiptItemId = Brand<string, 'ReceiptItemId'>;
+export type LimitId = Brand<string, 'LimitId'>;
+export type GoalId = Brand<string, 'GoalId'>;
 
 export type DayPoint = { day: number; total: number };
 
@@ -79,4 +81,43 @@ export type Notice = {
   id: number;
   tone: 'success' | 'error';
   message: string;
+};
+
+export type Delivery = 'push' | 'email';
+
+export type Limit =
+  | {
+      id: LimitId;
+      scope: 'total';
+      amount: number;
+      alertAt80: boolean;
+      delivery: Delivery;
+    }
+  | {
+      id: LimitId;
+      scope: 'category';
+      categoryId: CategoryId;
+      amount: number;
+      alertAt80: boolean;
+      delivery: Delivery;
+    };
+
+export type CategoryLimit = Extract<Limit, { scope: 'category' }>;
+
+export type Goal = {
+  id: GoalId;
+  name: string;
+  target: number;
+  saved: number;
+  months: number;
+};
+
+export type ProgressTone = 'brand' | 'warn' | 'danger';
+
+export type TotalProgress = { spent: number; amount: number; pct: number };
+
+export type CategoryProgress = TotalProgress & {
+  id: LimitId;
+  categoryId: CategoryId;
+  alertAt80: boolean;
 };

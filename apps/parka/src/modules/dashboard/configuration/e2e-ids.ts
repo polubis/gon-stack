@@ -9,6 +9,29 @@ export const DASHBOARD_E2E_IDS = [
   'dashboard:expenses',
   'dashboard:summary-error',
   'dashboard:expenses-error',
+  'dashboard:limits',
+  'dashboard:limits-error',
+  'dashboard:goals',
+  'dashboard:goals-error',
+  'dashboard:limit-total',
+  'dashboard:limit-total-amount',
+  'dashboard:limit-total-save',
+  'dashboard:limit-total-edit',
+  'dashboard:limit-list',
+  'dashboard:limit-new',
+  'dashboard:limit-new-hint',
+  'dashboard:limit-form',
+  'dashboard:limit-form-category',
+  'dashboard:limit-form-amount',
+  'dashboard:limit-form-save',
+  'dashboard:limit-delete',
+  'dashboard:goal-list',
+  'dashboard:goal-new',
+  'dashboard:goal-form',
+  'dashboard:goal-form-name',
+  'dashboard:goal-form-target',
+  'dashboard:goal-form-months',
+  'dashboard:goal-form-save',
   'dashboard:toast',
   'dashboard:detail',
   'dashboard:edit-merchant',
@@ -21,6 +44,7 @@ export const DASHBOARD_E2E_IDS = [
 
 export type DashboardDynamicE2eId =
   | `dashboard:expense:${string | number}`
+  | `dashboard:limit-edit:${string | number}`
   | `dashboard:filter:${string | number}`;
 
 export type DashboardE2eId =

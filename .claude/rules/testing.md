@@ -21,3 +21,7 @@
 3. (A) Selectors per "module" and combined in single place
 4. (A) Disable animations/images when testing visuals
 5. (A) Partial type-safe selectors for dynamic content `range:name:${string|number}`
+
+### Mocking
+
+1. (A) Backend mocks via msw in frontend unit/integration tests

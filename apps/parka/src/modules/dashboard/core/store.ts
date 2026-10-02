@@ -1,5 +1,12 @@
 import { atom } from '@repo/react-kit/supa-store';
-import type { Category, Expense, Notice, Summary } from '../domain/models';
+import type {
+  Category,
+  Expense,
+  Goal,
+  Limit,
+  Notice,
+  Summary,
+} from '../domain/models';
 
 export const createStore = () => {
   const $data = atom<Summary | null>(null);
@@ -11,6 +18,11 @@ export const createStore = () => {
   const $expensesInitializing = atom(true);
   const $expensesLoading = atom(false);
   const $expensesError = atom<string | null>(null);
+  const $limits = atom<Limit[]>([]);
+  const $goals = atom<Goal[]>([]);
+  const $limitsInitializing = atom(true);
+  const $limitsLoading = atom(false);
+  const $limitsError = atom<string | null>(null);
   const $notice = atom<Notice | null>(null);
 
   return {
@@ -23,6 +35,11 @@ export const createStore = () => {
     $expensesInitializing,
     $expensesLoading,
     $expensesError,
+    $limits,
+    $goals,
+    $limitsInitializing,
+    $limitsLoading,
+    $limitsError,
     $notice,
   };
 };

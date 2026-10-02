@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Button, Field, inputClass } from '@/shared/ui/controls';
-import { Card } from '@/shared/ui/layout';
 import { NumberInput } from '@/shared/ui/number-input';
 import {
   DEFAULT_GOAL_MONTHS,
@@ -16,7 +15,8 @@ export const NewGoalForm = ({ onDone }: { onDone: () => void }) => {
   const [target, setTarget] = useState(DEFAULT_GOAL_TARGET);
   const [months, setMonths] = useState(DEFAULT_GOAL_MONTHS);
 
-  const save = () => {
+  const save = (event: FormEvent) => {
+    event.preventDefault();
     ctx.createGoal({
       id: newGoalId(),
       name: name || DEFAULT_GOAL_NAME,
@@ -28,29 +28,30 @@ export const NewGoalForm = ({ onDone }: { onDone: () => void }) => {
   };
 
   return (
-    <Card className="space-y-3 md:max-w-xl" data-e2e="goals:form">
-      <h2 className="text-sm font-semibold">Nowy cel oszczędnościowy</h2>
+    <form onSubmit={save} className="space-y-3" data-e2e="dashboard:goal-form">
       <Field label="Nazwa">
         <input
           className={inputClass}
           value={name}
-          data-e2e="goals:form-name"
+          data-e2e="dashboard:goal-form-name"
           onChange={(e) => setName(e.target.value)}
           placeholder="np. Wakacje"
         />
       </Field>
       <Field label="Kwota docelowa">
         <NumberInput
+          required
           value={target}
-          data-e2e="goals:form-target"
+          data-e2e="dashboard:goal-form-target"
           onValueChange={setTarget}
         />
       </Field>
       <Field label="Horyzont (miesiące)">
         <NumberInput
           integer
+          required
           value={months}
-          data-e2e="goals:form-months"
+          data-e2e="dashboard:goal-form-months"
           onValueChange={setMonths}
         />
       </Field>
@@ -58,10 +59,10 @@ export const NewGoalForm = ({ onDone }: { onDone: () => void }) => {
         <Button variant="ghost" onClick={onDone}>
           Anuluj
         </Button>
-        <Button data-e2e="goals:form-save" onClick={save}>
+        <Button type="submit" data-e2e="dashboard:goal-form-save">
           Zapisz
         </Button>
       </div>
-    </Card>
+    </form>
   );
 };

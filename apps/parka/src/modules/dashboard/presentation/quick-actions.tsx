@@ -1,5 +1,6 @@
 import { Card } from '@/shared/ui/layout';
 import { QUICK_ACTIONS } from '../configuration/constraints';
+import { focusSection } from './focus-section';
 import { QuickActionIcon } from './quick-action-icon';
 
 export const QuickActions = () => (
@@ -12,6 +13,7 @@ export const QuickActions = () => (
         <li key={label}>
           <a
             href={href}
+            onClick={href.startsWith('#') ? focusSection : undefined}
             className="flex h-full flex-col items-center gap-1.5 rounded-xl bg-brand-softer p-2 text-center text-caption font-medium text-ink-soft hover:bg-brand-soft md:text-xs xl:py-4"
           >
             <span className="grid h-9 w-9 place-items-center rounded-full text-brand">

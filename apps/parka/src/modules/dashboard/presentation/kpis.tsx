@@ -9,11 +9,12 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
-import { APP_ROUTER } from '@/shared/router/routes';
 import { Card } from '@/shared/ui/layout';
 import { Skeleton } from '@/shared/ui/skeleton';
+import { LIMITS_SECTION_ID } from '../configuration/constraints';
 import { money, monthLabel, percent, prevMonth } from '../domain/format';
 import type { Month, Summary } from '../domain/models';
+import { focusSection } from './focus-section';
 
 const Kpi = ({
   icon: Icon,
@@ -59,7 +60,7 @@ export const Kpis = ({
     : null;
 
   return (
-    <ul className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
+    <ul className="grid grid-cols-2 gap-3 md:gap-4 xl:h-full xl:grid-cols-1 xl:grid-rows-4">
       <li>
         <Kpi
           icon={Wallet}
@@ -100,7 +101,8 @@ export const Kpis = ({
         <Kpi icon={Target} label="Pozostało do limitu" loading={loading}>
           {left === null ? (
             <a
-              href={APP_ROUTER.limits()}
+              href={`#${LIMITS_SECTION_ID}`}
+              onClick={focusSection}
               className="text-sm font-semibold text-brand-dark underline"
             >
               Ustaw limit

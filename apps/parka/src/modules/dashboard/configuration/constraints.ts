@@ -20,10 +20,23 @@ export const OTHER_CATEGORY_NAME = 'category.other';
 
 export const OTHER_CATEGORY_LABEL = 'Inne';
 
+/** Anchor of the limits widget; the quick action and KPI link scroll to it. */
+export const LIMITS_SECTION_ID = 'limits';
+
+export const DEFAULT_CATEGORY_LIMIT = 300;
+export const DEFAULT_GOAL_TARGET = 2000;
+export const DEFAULT_GOAL_MONTHS = 6;
+export const DEFAULT_GOAL_NAME = 'Nowy cel';
+
+/** Progress at which a limit turns from brand to warning. */
+export const WARN_PCT = 80;
+
+export const GOALS_SECTION_ID = 'goals';
+
 export const QUICK_ACTIONS: QuickAction[] = [
   { label: 'Dodaj paragon', href: APP_ROUTER.receiptScan(), iconId: 'add' },
   { label: 'Zrób zdjęcie', href: APP_ROUTER.receiptScan(), iconId: 'camera' },
-  { label: 'Limity', href: APP_ROUTER.limits(), iconId: 'target' },
+  { label: 'Limity', href: `#${LIMITS_SECTION_ID}`, iconId: 'target' },
   { label: 'Cykliczne', href: APP_ROUTER.recurring(), iconId: 'repeat' },
 ];
 
@@ -38,5 +51,7 @@ export const UNCATEGORIZED: Category = {
 export const ERROR_CODES = {
   load: 'DASHBOARD_LOAD',
   loadExpenses: 'DASHBOARD_EXPENSES_LOAD',
+  loadLimits: 'DASHBOARD_LIMITS_LOAD',
+  loadGoals: 'DASHBOARD_GOALS_LOAD',
   render: 'DASHBOARD_RENDER',
 } as const;

@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { toCategory, toExpense, toSummary } from '../integration/mappers';
+import {
+  toCategory,
+  toExpense,
+  toGoal,
+  toLimit,
+  toSummary,
+} from '../integration/mappers';
 
 describe('dashboard expense mappers', () => {
   it('maps an expense DTO with its receipt items', () => {
@@ -68,6 +74,51 @@ describe('dashboard expense mappers', () => {
       categories: [
         { id: 'c-1', name: 'Food', color: 'green', amount: 6, pct: 60 },
       ],
+    });
+  });
+});
+
+describe('dashboard limit mappers', () => {
+  it('maps a category limit with its category', () => {
+    const limit = toLimit({
+      id: 'l-1',
+      scope: 'category',
+      categoryId: 'c-1',
+      amount: 10,
+      alertAt80: true,
+      delivery: 'push',
+    });
+
+    expect(limit).toMatchObject({ scope: 'category', categoryId: 'c-1' });
+  });
+
+  it('maps a total limit without a category', () => {
+    const limit = toLimit({
+      id: 'l-1',
+      scope: 'total',
+      amount: 10,
+      alertAt80: false,
+      delivery: 'email',
+    });
+
+    expect(limit).not.toHaveProperty('categoryId');
+  });
+
+  it('maps a goal as is', () => {
+    const goal = toGoal({
+      id: 'g-1',
+      name: 'Trip',
+      target: 5,
+      saved: 1,
+      months: 3,
+    });
+
+    expect(goal).toEqual({
+      id: 'g-1',
+      name: 'Trip',
+      target: 5,
+      saved: 1,
+      months: 3,
     });
   });
 });

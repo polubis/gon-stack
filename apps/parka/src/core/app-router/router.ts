@@ -32,10 +32,6 @@ export const router = createRouter({
       () => import('@/modules/categories/presentation/main'),
     ),
     page(
-      APP_ROUTER.limits(),
-      () => import('@/modules/limits/presentation/main'),
-    ),
-    page(
       APP_ROUTER.recurring(),
       () => import('@/modules/recurring/presentation/main'),
     ),

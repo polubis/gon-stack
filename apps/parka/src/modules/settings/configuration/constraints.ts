@@ -5,7 +5,6 @@ import {
   Repeat,
   ShieldCheck,
   Sparkles,
-  Target,
   type LucideIcon,
 } from 'lucide-react';
 import { APP_ROUTER } from '@/shared/router/routes';
@@ -22,7 +21,6 @@ export const LINKS: { label: string; href: string; icon: LucideIcon }[] = [
   { label: 'RODO — Twoje dane', href: APP_ROUTER.privacy(), icon: ShieldCheck },
   { label: 'AI — jak to działa', href: APP_ROUTER.aiInfo(), icon: Sparkles },
   { label: 'Kategorie', href: APP_ROUTER.categories(), icon: LayoutGrid },
-  { label: 'Limity i budżet', href: APP_ROUTER.limits(), icon: Target },
   { label: 'Cykliczne wydatki', href: APP_ROUTER.recurring(), icon: Repeat },
   { label: 'Powiadomienia', href: APP_ROUTER.notifications(), icon: Bell },
   { label: 'Raport miesięczny', href: APP_ROUTER.reports(), icon: FileText },

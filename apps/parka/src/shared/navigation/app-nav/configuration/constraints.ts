@@ -1,4 +1,4 @@
-import { Home, LayoutGrid, RefreshCw, Target } from 'lucide-react';
+import { Home, LayoutGrid, RefreshCw } from 'lucide-react';
 import { moreSectionPaths, APP_ROUTER } from '@/shared/router/routes';
 import type { NavKey } from '../domain/models';
 
@@ -18,13 +18,6 @@ export const NAV_ITEMS: NavItem[] = [
     href: APP_ROUTER.dashboard(),
     icon: Home,
     mobile: true,
-  },
-  {
-    key: 'limits',
-    label: 'Limity i budżet',
-    href: APP_ROUTER.limits(),
-    icon: Target,
-    mobile: false,
   },
   {
     key: 'recurring',

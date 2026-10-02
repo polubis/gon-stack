@@ -41,7 +41,7 @@ const setup = async () => {
     },
     { wrapper },
   );
-  act(() => view.result.current.ctx.load());
+  act(() => view.result.current.ctx.loadLimits());
   await waitFor(() => expect(view.result.current.limits).toHaveLength(1));
   return view;
 };
@@ -62,7 +62,7 @@ const GOAL: Goal = {
   months: 3,
 };
 
-describe('limits changes', () => {
+describe('dashboard limits changes', () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it('raises the limit and confirms with a toast', async () => {

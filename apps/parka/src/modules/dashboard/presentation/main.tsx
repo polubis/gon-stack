@@ -12,6 +12,8 @@ import { CategoriesCard } from './categories-card';
 import { Comparison } from './comparison';
 import { Provider, useContext } from './context';
 import { ExpenseDetail } from './expense-detail';
+import { GoalsCard } from './goals-card';
+import { LimitsCard } from './limits-card';
 import { MonthExpenses } from './month-expenses';
 import { Header } from './header';
 import { Kpis } from './kpis';
@@ -45,6 +47,7 @@ const DashboardView = () => {
 
   useEffect(() => {
     ctx.loadExpenses();
+    ctx.loadLimits();
   }, [ctx]);
 
   const goToMonth = (next: Month) => {
@@ -109,9 +112,12 @@ const DashboardView = () => {
           </div>
         )}
 
+        <LimitsCard month={month} />
+        <GoalsCard />
+
         {failed ? null : (
           <>
-            <div className="xl:col-span-12">
+            <div className="xl:col-span-4">
               <Kpis month={month} summary={summary} />
             </div>
             <SpendingChart month={month} summary={summary} />

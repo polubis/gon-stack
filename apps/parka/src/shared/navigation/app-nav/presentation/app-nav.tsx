@@ -6,9 +6,9 @@ type Props = {
   active: NavKey;
 };
 
-/** Bottom bar has no limits/recurring tabs, so they highlight “Więcej”. */
+/** Bottom bar has no recurring tab, so it highlights “Więcej”. */
 const toMobileKey = (key: NavKey): NavKey =>
-  key === 'limits' || key === 'recurring' ? 'more' : key;
+  key === 'recurring' ? 'more' : key;
 
 /** Bottom nav for signed-in app routes. Stickiness comes from its wrapper. */
 export const AppNav = ({ active }: Props) => {
