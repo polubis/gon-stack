@@ -18,4 +18,4 @@ Recurring expenses list, active/all filter, expandable detail, tracking toggle. 
 
 ## Code
 
-Same as dashboard. Mounted by `pages/app/recurring.astro`.
+Same as dashboard. Routed by `core/app-router`.

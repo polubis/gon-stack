@@ -1,0 +1,33 @@
+---
+export const prerender = true;
+
+import { APP_PAGES, AppRouter } from '@/core/app-router';
+import Seo from '@/core/layouts/seo.astro';
+import { APP_ROUTER } from '@/shared/router';
+
+export const getStaticPaths = () =>
+  APP_PAGES.map((page) => ({
+    params: {
+      path:
+        page.url.slice(APP_ROUTER.dashboard().length).replace(/\/$/, '') ||
+        undefined,
+    },
+    props: page,
+  }));
+
+const { url, title, description } = Astro.props;
+const domain = Astro.locals.siteDomain;
+---
+
+<Seo
+  siteName="Parka"
+  url={url}
+  imageAlt="Parka"
+  domain={domain}
+  imageUrl={`${domain}/og.svg`}
+  keywords="parka, budżet, wydatki, finanse osobiste"
+  title={title}
+  description={description}
+>
+  <AppRouter client:only="react" />
+</Seo>

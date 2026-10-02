@@ -59,9 +59,9 @@ or overview features.
    component. First load shows `Skeleton` placeholders mirroring the layout
    (`$initializing`); later loads keep current data and show `LoadingBanner`
    (`$isLoading`) — `load` never clears `$data`.
-8. No module-owned `AppShell`/bottom nav: `pages/app/index.astro` (route `/app/`) wraps `Main`
-   in `core/layouts/app-layout.astro` (`client:only="react"`), which renders
-   the mobile frame and the persisted `shared/navigation/app-nav`
+8. No module-owned `AppShell`/bottom nav: `core/app-router` (TanStack Router, route `/app/`) renders `Main`
+   inside its shell (`client:only="react"`), which renders
+   the sidebar/bottom frame and `shared/navigation/app-nav`
    `SyncedAppNav`. `Main` renders page content only. Presentation uses the
    local `Card` (`./layout`), shared charts, and formatting helpers from
    `@/shared/*` (incl. `ui`: `Skeleton`, `LoadingBanner`, `ErrorState`);

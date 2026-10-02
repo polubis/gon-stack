@@ -18,4 +18,4 @@ Category list + create/edit form + suggested defaults. Cloned from `../dashboard
 
 ## Code
 
-Same as dashboard. Mounted by `pages/app/categories.astro`. Load on mount; skeleton on first load, banner on reload.
+Same as dashboard. Routed by `core/app-router`. Load on mount; skeleton on first load, banner on reload.

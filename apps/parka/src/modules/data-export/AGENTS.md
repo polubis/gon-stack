@@ -18,4 +18,4 @@ Download expenses as CSV or text-PDF placeholder. Cloned from `../dashboard` con
 
 ## Code
 
-`const` + arrows, named exports, `type` aliases, `createX` factories. Loads on mount via `facade.load()`. Mounted by `pages/app/data-export.astro`; no module shell/nav.
+`const` + arrows, named exports, `type` aliases, `createX` factories. Loads on mount via `facade.load()`. Routed by `core/app-router`; no module shell/nav.

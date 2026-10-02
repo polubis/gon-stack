@@ -168,13 +168,22 @@ const commands = {
 
   'the dashboard links to limits': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.dashboard());
-    await page.getByRole('link', { name: 'Limity' }).click();
+    await page.evaluate(() => Object.assign(window, { spaMarker: true }));
+    await getByE2e('dashboard:main')
+      .getByRole('link', { name: 'Limity' })
+      .click();
     await page.waitForURL(`**${APP_ROUTER.limits()}`);
     await expect(getByE2e('limits:main')).toBeVisible();
+    expect(
+      await page.evaluate(() => 'spaMarker' in window),
+      'navigation stays client-side',
+    ).toBe(true);
   },
   'the dashboard links to recurring': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.dashboard());
-    await page.getByRole('link', { name: 'Cykliczne' }).click();
+    await getByE2e('dashboard:main')
+      .getByRole('link', { name: 'Cykliczne' })
+      .click();
     await page.waitForURL(`**${APP_ROUTER.recurring()}`);
     await expect(getByE2e('recurring:main')).toBeVisible();
   },

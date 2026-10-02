@@ -32,7 +32,7 @@ CSV and full-text downloads. Auth required. Isolated module.
    data + `LoadingBanner`; failure: shared `ErrorState` (`REPORTS_LOAD`).
 3. Downloads disabled while initializing or on error.
 4. Month = current month (no navigation).
-5. Tokens + `cn` only. Shell from `pages/app/reports.astro`.
+5. Tokens + `cn` only. Shell from `core/app-router`.
 
 ## References
 

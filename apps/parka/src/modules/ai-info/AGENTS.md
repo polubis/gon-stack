@@ -15,4 +15,4 @@ Static "how AI works" page. No data, no state: only configuration + presentation
 
 ## Code
 
-`const` + arrows, named exports, tokens only. Mounted by `pages/app/ai-info.astro`; no module shell/nav.
+`const` + arrows, named exports, tokens only. Routed by `core/app-router`; no module shell/nav.

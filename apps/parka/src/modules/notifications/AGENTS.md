@@ -24,7 +24,7 @@ Isolated module. List of user notifications from `/api/notifications`. Auth requ
 2. Events `[TRIGGER]_LOAD`; handler RxJS `ofType(...).pipe(...)`.
 3. `facade.load()` on mount. `load` never clears data.
 4. First load `Skeleton` (`$initializing`); reload `LoadingBanner`; error `ErrorState` (`NOTIFICATIONS_LOAD`).
-5. `Main` = content only; page shell in `pages/app/notifications.astro`.
+5. `Main` = content only; page shell in `core/app-router`.
 6. Tokens + `cn` only; no raw px/colors.
 
 ## References

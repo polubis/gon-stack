@@ -18,4 +18,4 @@ Profile edit, notification toggles, links to detail pages, sign-out. Cloned from
 
 ## Code
 
-`const` + arrows, named exports, `type` aliases, `createX` factories. Presentation reaches core via facade only. Loads on mount via `facade.load()`. Mounted by `pages/app/settings.astro`; no module shell/nav.
+`const` + arrows, named exports, `type` aliases, `createX` factories. Presentation reaches core via facade only. Loads on mount via `facade.load()`. Routed by `core/app-router`; no module shell/nav.

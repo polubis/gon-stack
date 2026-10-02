@@ -12,6 +12,7 @@ export type {
 } from './routes';
 export {
   navigateTo,
+  registerNavigator,
   readQueryParam,
   replaceUrl,
   writeQueryParam,

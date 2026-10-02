@@ -15,4 +15,4 @@ Static RODO / privacy info page. No data, no state: only configuration + present
 
 ## Code
 
-`const` + arrows, named exports, tokens only. Mounted by `pages/app/privacy.astro`; no module shell/nav.
+`const` + arrows, named exports, tokens only. Routed by `core/app-router`; no module shell/nav.

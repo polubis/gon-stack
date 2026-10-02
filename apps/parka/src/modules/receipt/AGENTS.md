@@ -25,7 +25,7 @@ Isolated module. Loads `/api/categories` on mount, user builds a draft (scan is 
 3. Draft = view state (`Step` union in `main`); pure ops in `domain/receipt.ts` (args, not constants), view selectors in `presentation/selectors.ts`.
 4. Save: no optimistic entity (page navigates away); `$saving` -> button spinner; success -> `$saved` -> navigate; failure -> error `Toast`, draft kept.
 5. First load `Skeleton`; reload `LoadingBanner`; load error `ErrorState` (`RECEIPT_LOAD`).
-6. `Main` = content only; page shell in `pages/app/receipt-scan.astro`.
+6. `Main` = content only; page shell in `core/app-router`.
 7. Tokens + `cn` only; no raw px/colors (category colors from data).
 
 ## References
