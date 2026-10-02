@@ -1,6 +1,7 @@
 import { Outlet, useRouter, useRouterState } from '@tanstack/react-router';
 import { useEffect } from 'react';
-import { AuthGuard } from '@/shared/auth/guard';
+import { ProtectedScreen } from '@/shared/auth/presentation/protected-screen';
+import { withAuth } from '@/shared/auth/presentation/with-auth';
 import { SyncedAppNav } from '@/shared/navigation/app-nav/presentation/synced-app-nav';
 import { navigateTo, registerNavigator } from '@/shared/router/navigation';
 import { normalizePath } from '@/shared/router/routes';
@@ -30,7 +31,7 @@ const onDocumentClick = (event: MouseEvent) => {
   navigateTo(url.pathname + url.search + url.hash);
 };
 
-export const AppShell = () => {
+const Shell = () => {
   const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -55,7 +56,6 @@ export const AppShell = () => {
 
   return (
     <div className="flex h-dvh w-full flex-col overflow-hidden bg-surface lg:flex-row">
-      <AuthGuard mode="protected" />
       <div className="z-(--z-nav) hidden h-full w-64 shrink-0 lg:block xl:w-72">
         <SyncedAppNav placement="side" />
       </div>
@@ -70,3 +70,8 @@ export const AppShell = () => {
     </div>
   );
 };
+
+/** Renders the app only when signed in; signed-out users see a protected screen. */
+export const AppShell = withAuth(Shell, {
+  fallback: <ProtectedScreen />,
+});
