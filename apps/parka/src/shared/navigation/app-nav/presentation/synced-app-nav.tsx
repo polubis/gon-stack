@@ -1,16 +1,16 @@
 import { AppNav } from './app-nav';
-import { TopNav } from './top-nav';
+import { SidebarNav } from './sidebar-nav';
 import { useSyncedNavKey } from './use-synced-nav-key';
 
 type Props = {
-  placement: 'top' | 'bottom';
+  placement: 'side' | 'bottom';
 };
 
 /** App layout nav: active tab follows URL + Astro view transitions. */
 export const SyncedAppNav = ({ placement }: Props) => {
   const active = useSyncedNavKey();
-  return placement === 'top' ? (
-    <TopNav active={active} />
+  return placement === 'side' ? (
+    <SidebarNav active={active} />
   ) : (
     <AppNav active={active} />
   );
