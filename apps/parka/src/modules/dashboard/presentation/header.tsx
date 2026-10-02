@@ -61,7 +61,7 @@ export const Header = ({
 
       <Button
         href={APP_ROUTER.receiptScan()}
-        className="hidden h-11 w-auto py-0 md:inline-flex"
+        className="h-11 w-auto shrink-0 py-0"
       >
         <Plus className="h-4 w-4" aria-hidden="true" />
         Dodaj wydatek
