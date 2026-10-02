@@ -29,8 +29,8 @@ export const AuthGuard = ({ mode }: AuthGuardProps) => {
     };
 
     supabaseBrowser.auth.getUser().then(({ data }) => enforce(!!data.user));
-    const { data } = supabaseBrowser.auth.onAuthStateChange((_, session) =>
-      enforce(!!session?.user),
+    const { data } = supabaseBrowser.auth.onAuthStateChange((_, data) =>
+      enforce(!!data?.user),
     );
 
     return () => data.subscription.unsubscribe();

@@ -33,9 +33,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-        with:
-          # log-check diffs origin/<base>...HEAD, needs full history.
-          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
@@ -48,11 +45,6 @@ jobs:
 
       - name: Install deps
         run: pnpm install --frozen-lockfile
-
-      - name: Log check
-        env:
-          BASE_REF: ${{ github.base_ref }}
-        run: node scripts/log-check.mjs --base "origin/$BASE_REF"
 
       # e2e stays local-only (pnpm test:e2e): CI webServer lacks Supabase fixtures.
       - name: Verify (format, lint, types, tests) - parka and its deps

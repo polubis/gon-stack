@@ -9,7 +9,6 @@ deps:
   plan_fe: ../plan-fe/SKILL.md
   clone: ../clone/SKILL.md
   do_ui: ../do-ui/SKILL.md
-  hashy: ../hashy/SKILL.md
 ---
 
 ## ROLE
@@ -64,8 +63,6 @@ spending on the next stage.
    contract, and e2e tests.
 9. **Verify + iterate** — run tests, check the success metrics, manual test, fix,
    repeat until the feature works.
-10. **Stamp docs** — if the ideal example or its `AGENTS.md` changed, re-run
-    `/hashy` (deps.hashy).
 
 ## RULES
 

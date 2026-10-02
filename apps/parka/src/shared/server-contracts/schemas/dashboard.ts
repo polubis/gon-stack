@@ -21,6 +21,8 @@ const categoryChange = () =>
     changePct: z.number(),
   });
 
+const dayPoint = () => z.object({ day: z.number(), total: z.number() });
+
 export const getDashboardSchema = () =>
   z.object({
     in: z.object({
@@ -34,6 +36,12 @@ export const getDashboardSchema = () =>
           total: z.number(),
           change: z.number(),
           previousTotal: z.number(),
+          userName: z.string(),
+          transactions: z.number(),
+          dailyAverage: z.number(),
+          daily: z.array(dayPoint()),
+          previousDaily: z.array(dayPoint()),
+          monthlyLimit: z.number().nullable(),
           rangeTotal: z.number(),
           trend: z.array(trendPoint()),
           categories: z.array(categorySlice()),

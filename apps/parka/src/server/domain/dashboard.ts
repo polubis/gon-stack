@@ -22,12 +22,24 @@ export type DashboardCategoryChange = {
   changePct: number;
 };
 
+export type DashboardDayPoint = { day: number; total: number };
+
 export type DashboardSummary = {
   /** Selected month total. */
   total: number;
   /** Selected month vs previous month, in percent. */
   change: number;
   previousTotal: number;
+  /** Number of expenses in the selected month. */
+  transactions: number;
+  /** Selected month total per elapsed day. */
+  dailyAverage: number;
+  /** Per-day totals of the selected month, day 1 first. */
+  daily: DashboardDayPoint[];
+  /** Per-day totals of the previous month, day 1 first. */
+  previousDaily: DashboardDayPoint[];
+  /** Total monthly limit, `null` when none is set. */
+  monthlyLimit: number | null;
   /** Total across the trailing `trendMonths` window. */
   rangeTotal: number;
   trend: DashboardTrendPoint[];
@@ -72,6 +84,32 @@ const inMonths = (
 ): DashboardExpense[] =>
   expenses.filter((e) => months.includes(monthOf(e.date)));
 
+const daysIn = (month: string): number => {
+  const [y, m] = month.split('-').map(Number);
+  return new Date(y, m, 0).getDate();
+};
+
+const dayOf = (iso: string): number => Number(iso.slice(8, 10));
+
+const dailyTotals = (
+  expenses: DashboardExpense[],
+  month: string,
+): DashboardDayPoint[] => {
+  const scoped = inMonths(expenses, [month]);
+  return Array.from({ length: daysIn(month) }, (_, i) => ({
+    day: i + 1,
+    total: sum(scoped.filter((e) => dayOf(e.date) === i + 1)),
+  }));
+};
+
+/** Days of `month` that have passed as of `today` (`YYYY-MM-DD`). */
+const elapsedDays = (month: string, today: string): number => {
+  const current = monthOf(today);
+  if (month < current) return daysIn(month);
+  if (month > current) return 0;
+  return dayOf(today);
+};
+
 const totalFor = (expenses: DashboardExpense[], month: string): number =>
   sum(inMonths(expenses, [month]));
 
@@ -80,17 +118,25 @@ export const summarizeDashboard = ({
   categories,
   month,
   trendMonths,
+  today,
+  monthlyLimit,
 }: {
   expenses: DashboardExpense[];
   categories: DashboardCategory[];
   month: string;
   trendMonths: number;
+  /** `YYYY-MM-DD`; injected so the summary stays pure. */
+  today: string;
+  monthlyLimit: number | null;
 }): DashboardSummary => {
   const months = monthsEndingAt(month, trendMonths);
   const total = totalFor(expenses, month);
   const previousTotal = totalFor(expenses, prevMonthOf(month));
   const change =
     previousTotal === 0 ? 0 : ((total - previousTotal) / previousTotal) * 100;
+
+  const elapsed = elapsedDays(month, today);
+  const dailyAverage = elapsed === 0 ? 0 : total / elapsed;
 
   const trend = months.map((m) => ({ month: m, total: totalFor(expenses, m) }));
   const rangeTotal = trend.reduce((s, t) => s + t.total, 0);
@@ -137,6 +183,11 @@ export const summarizeDashboard = ({
     total,
     change,
     previousTotal,
+    transactions: inMonths(expenses, [month]).length,
+    dailyAverage,
+    daily: dailyTotals(expenses, month),
+    previousDaily: dailyTotals(expenses, prevMonthOf(month)),
+    monthlyLimit,
     rangeTotal,
     trend,
     categories: categorySlices,

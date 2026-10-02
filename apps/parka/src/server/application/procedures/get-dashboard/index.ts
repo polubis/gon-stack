@@ -22,16 +22,20 @@ export const getDashboard = privateProcedure({
     }-01`;
     const rangeEnd = `${nextMonthOf(input.month)}-01`;
 
-    const [expenses, categories] = await Promise.all([
+    const [expenses, categories, limits, profile] = await Promise.all([
       db
         .from('expenses')
         .select('date, amount, category_id')
         .gte('date', rangeStart)
         .lt('date', rangeEnd),
       db.from('categories').select('id, name, color'),
+      db.from('limits').select('amount').eq('scope', 'total'),
+      db.from('profiles').select('name').maybeSingle(),
     ]);
     if (expenses.error) throw new InternalServer(expenses.error.message);
     if (categories.error) throw new InternalServer(categories.error.message);
+    if (limits.error) throw new InternalServer(limits.error.message);
+    if (profile.error) throw new InternalServer(profile.error.message);
 
     const data = summarizeDashboard({
       expenses: expenses.data.map((e) => ({
@@ -46,8 +50,13 @@ export const getDashboard = privateProcedure({
       })),
       month: input.month,
       trendMonths,
+      today: new Date().toISOString().slice(0, 10),
+      monthlyLimit: limits.data[0] ? Number(limits.data[0].amount) : null,
     });
 
-    return { code: 200 as const, data };
+    return {
+      code: 200 as const,
+      data: { ...data, userName: profile.data?.name ?? '' },
+    };
   },
 });

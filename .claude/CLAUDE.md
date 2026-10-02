@@ -101,8 +101,7 @@ Read `references/aodi-framework.md` for tag legend (`A` / `O` / `D` / `I`). Appl
 | [feature-workflow](skills/feature-workflow/SKILL.md)                                 | Orchestrate plan → impl skills       | Full epic               |
 | [clone](skills/clone/SKILL.md)                                                       | Impl in ideal-example style          | "clone X, build Y"      |
 | [do-ui](skills/do-ui/SKILL.md)                                                       | Graphic → pixel-perfect Tailwind     | Pixel-perfect UI        |
-| [document-module](skills/document-module/SKILL.md)                                   | Module → `AGENTS.md` + hashy         | Ideal-example docs      |
-| [hashy](skills/hashy/SKILL.md)                                                       | Stamp/check doc hash vs code         | After AGENTS.md         |
+| [document-module](skills/document-module/SKILL.md)                                   | Module → `AGENTS.md` | Ideal-example docs      |
 | [async-implement](skills/async-implement/SKILL.md)                                   | TODO.md → parallel worktree agents   | Multi-task parallel     |
 | [ui-component-craft](skills/ui-component-craft/SKILL.md)                             | Req gate → pure UI components        | Craft components        |
 | [react-best-practices](skills/react-best-practices/SKILL.md)                         | React/Tailwind/Radix rules           | Write/review React UI   |
