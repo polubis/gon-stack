@@ -8,18 +8,14 @@ import {
   summarizeDashboard,
 } from '@/server/domain/dashboard';
 
-const DEFAULT_TREND_MONTHS = 6;
-// The previous month is always needed for the month-over-month comparison.
-const MIN_FETCH_MONTHS = 2;
+// The previous month is needed for the month-over-month comparison.
+const FETCH_MONTHS = 2;
 
 export const getDashboard = privateProcedure({
   schema: withZodSchema({ schema: getDashboardSchema }),
 })({
   handler: async (input, { db }) => {
-    const trendMonths = input.trendMonths ?? DEFAULT_TREND_MONTHS;
-    const rangeStart = `${
-      monthsEndingAt(input.month, Math.max(trendMonths, MIN_FETCH_MONTHS))[0]
-    }-01`;
+    const rangeStart = `${monthsEndingAt(input.month, FETCH_MONTHS)[0]}-01`;
     const rangeEnd = `${nextMonthOf(input.month)}-01`;
 
     const [expenses, categories, limits, profile] = await Promise.all([
@@ -49,7 +45,6 @@ export const getDashboard = privateProcedure({
         color: c.color,
       })),
       month: input.month,
-      trendMonths,
       today: new Date().toISOString().slice(0, 10),
       monthlyLimit: limits.data[0] ? Number(limits.data[0].amount) : null,
     });

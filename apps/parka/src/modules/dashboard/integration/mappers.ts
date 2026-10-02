@@ -12,7 +12,6 @@ import type {
   ReceiptItemId,
   Summary,
 } from '../domain/models';
-import { toMonth } from '../domain/format';
 
 type ExpenseDto = InferOut<
   z.infer<ReturnType<typeof listExpensesSchema>>['out'],
@@ -27,23 +26,21 @@ type CategoryDto = InferOut<
 export const toSummary = (
   dto: InferOut<Schema['out'], 200>['data'],
 ): Summary => ({
+  userName: dto.userName,
   total: dto.total,
   change: dto.change,
   previousTotal: dto.previousTotal,
-  rangeTotal: dto.rangeTotal,
-  trend: dto.trend.map((t) => ({ month: toMonth(t.month), total: t.total })),
+  transactions: dto.transactions,
+  dailyAverage: dto.dailyAverage,
+  daily: dto.daily,
+  previousDaily: dto.previousDaily,
+  monthlyLimit: dto.monthlyLimit,
   categories: dto.categories.map((c) => ({
     id: c.categoryId as CategoryId,
     name: c.name,
     color: c.color,
     amount: c.amount,
     pct: c.pct,
-  })),
-  categoryChanges: dto.categoryChanges.map((c) => ({
-    id: c.categoryId as CategoryId,
-    name: c.name,
-    color: c.color,
-    changePct: c.changePct,
   })),
 });
 

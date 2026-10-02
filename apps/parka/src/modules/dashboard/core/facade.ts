@@ -1,11 +1,10 @@
 import type { Registry } from './registry';
 import type { Store } from './store';
-import type { Expense, ExpenseId, Month, Range } from '../domain/models';
+import type { Expense, ExpenseId, Month } from '../domain/models';
 
 export const createFacade = (store: Store, trigger: Registry['trigger']) => {
   return {
-    load: (month: Month, range: Range) =>
-      trigger('[TRIGGER]_LOAD', { month, range }),
+    load: (month: Month) => trigger('[TRIGGER]_LOAD', { month }),
     loadExpenses: () => trigger('[TRIGGER]_LOAD_EXPENSES'),
     updateExpense: (expense: Expense) =>
       trigger('[TRIGGER]_UPDATE_EXPENSE', { expense }),

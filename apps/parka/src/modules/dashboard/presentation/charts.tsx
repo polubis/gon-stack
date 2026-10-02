@@ -1,53 +1,4 @@
-import { cn } from '@repo/react-kit/cn';
-import { money } from '../domain/format';
-
-type BarDatum = { label: string; value: number };
-
 type Slice = { label: string; value: number; color: string };
-
-export const BarChart = ({
-  data,
-  caption,
-  highlightLast = true,
-}: {
-  data: BarDatum[];
-  caption: string;
-  highlightLast?: boolean;
-}) => {
-  const max = Math.max(1, ...data.map((d) => d.value));
-  return (
-    <figure className="m-0">
-      <figcaption className="sr-only">{caption}</figcaption>
-      <div className="flex h-32 items-end gap-1.5">
-        {data.map((d, i) => {
-          const pct = (d.value / max) * 100;
-          const isLast = highlightLast && i === data.length - 1;
-          return (
-            <div
-              key={d.label}
-              className={cn(
-                'min-h-0.75 flex-1 rounded-t-md',
-                isLast ? 'bg-brand' : 'bg-brand-soft',
-              )}
-              style={{ height: `${pct}%` }}
-              title={`${d.label}: ${money(d.value)}`}
-            />
-          );
-        })}
-      </div>
-      <div className="mt-1 flex gap-1.5">
-        {data.map((d) => (
-          <span
-            key={d.label}
-            className="flex-1 text-center text-micro text-ink-soft"
-          >
-            {d.label}
-          </span>
-        ))}
-      </div>
-    </figure>
-  );
-};
 
 export const Donut = ({
   slices,
@@ -74,10 +25,10 @@ export const Donut = ({
   );
 
   return (
-    <figure className="m-0 flex items-center gap-5">
+    <figure className="m-0 flex flex-col items-center gap-4 sm:flex-row xl:flex-col 2xl:flex-row">
       <svg
         viewBox="0 0 160 160"
-        className="h-36 w-36 shrink-0"
+        className="h-40 w-40 shrink-0 xl:h-36 xl:w-36"
         role="img"
         aria-label={caption}
       >
@@ -97,11 +48,11 @@ export const Donut = ({
           ))}
         </g>
       </svg>
-      <ul className="flex-1 space-y-1.5 text-sm">
+      <ul className="w-full min-w-0 flex-1 space-y-1.5 text-sm">
         {slices.map((s) => (
           <li key={s.label} className="flex items-center gap-2">
             <span
-              className="h-2.5 w-2.5 rounded-full"
+              className="h-2.5 w-2.5 shrink-0 rounded-full"
               style={{ backgroundColor: s.color }}
               aria-hidden="true"
             />

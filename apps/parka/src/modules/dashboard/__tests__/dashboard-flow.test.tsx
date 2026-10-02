@@ -1,14 +1,25 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { currentMonth, monthTitle, prevMonth } from '../domain/format';
 import { Main } from '../presentation/main';
 
 const SUMMARY = {
+  userName: 'Anna Kowalska',
   total: 10,
   change: 25,
   previousTotal: 8,
-  rangeTotal: 42,
-  trend: [{ month: '2026-09', total: 10 }],
+  transactions: 3,
+  dailyAverage: 1.5,
+  daily: [
+    { day: 1, total: 4 },
+    { day: 2, total: 6 },
+  ],
+  previousDaily: [
+    { day: 1, total: 8 },
+    { day: 2, total: 0 },
+  ],
+  monthlyLimit: 100,
   categories: [
     {
       categoryId: 'c-1',
@@ -17,9 +28,6 @@ const SUMMARY = {
       amount: 42,
       pct: 100,
     },
-  ],
-  categoryChanges: [
-    { categoryId: 'c-1', name: 'Jedzenie', color: 'green', changePct: 25 },
   ],
 };
 
@@ -32,30 +40,58 @@ const stubApi = (failing = false) => {
   return fetchMock;
 };
 
+const kpi = (label: string) => {
+  const card = screen.getByText(label).closest('li');
+  if (!card) throw new Error(`No KPI card for "${label}".`);
+  return within(card);
+};
+
 describe('dashboard screen', () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it('shows range total, breakdown and month comparison together', async () => {
+  it('greets the user and shows the month kpis', async () => {
     stubApi();
 
     render(<Main />);
 
-    await waitFor(() => expect(screen.getByText(/42,00/)).toBeTruthy());
-    expect(screen.getByText('Rozkład wydatków')).toBeTruthy();
-    expect(screen.getByText('Największe zmiany')).toBeTruthy();
-    expect(screen.getByText(/8,00/)).toBeTruthy();
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: /Cześć, Anna/ })).toBeTruthy(),
+    );
+    expect(kpi('Liczba transakcji').getByText('3')).toBeTruthy();
+    expect(kpi('Średnio dziennie').getByText(/1,50/)).toBeTruthy();
+    expect(kpi('Pozostało do limitu').getByText(/90,00/)).toBeTruthy();
   });
 
-  it('asks the backend for the chosen range', async () => {
+  it('shows breakdown and month comparison together', async () => {
+    stubApi();
+
+    render(<Main />);
+
+    await waitFor(() =>
+      expect(screen.getByText('Kategorie wydatków')).toBeTruthy(),
+    );
+    expect(screen.getByText('Porównanie miesięcy')).toBeTruthy();
+    const card = screen.getByRole('heading', {
+      name: 'Porównanie miesięcy',
+    }).parentElement;
+    if (!card) throw new Error('No comparison card.');
+    expect(within(card).getByText(/8,00/)).toBeTruthy();
+  });
+
+  it('asks the backend for the chosen month', async () => {
     const fetchMock = stubApi();
     render(<Main />);
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    const previous = prevMonth(currentMonth());
 
-    await userEvent.click(screen.getByRole('tab', { name: 'Rok' }));
+    await userEvent.selectOptions(
+      screen.getByRole('combobox', { name: 'Miesiąc' }),
+      monthTitle(previous),
+    );
 
     await waitFor(() =>
       expect(String(fetchMock.mock.calls.at(-1)?.[0])).toContain(
-        'trendMonths=12',
+        `month=${previous}`,
       ),
     );
   });
@@ -74,10 +110,22 @@ describe('dashboard screen', () => {
   });
 });
 
-describe('dashboard expenses section', () => {
+describe('dashboard month expenses', () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it('lists expenses below the summary', async () => {
+  const expense = (id: string, merchant: string, categoryId: string) => ({
+    id,
+    merchant,
+    date: '2026-09-02T10:00:00Z',
+    amount: 12,
+    categoryId,
+    paymentMethod: 'card',
+    isBill: false,
+    source: 'manual',
+    items: [],
+  });
+
+  const stubWithExpenses = () =>
     vi.stubGlobal(
       'fetch',
       vi.fn(async (url: string) => ({
@@ -85,32 +133,56 @@ describe('dashboard expenses section', () => {
           code: 200,
           data: url.includes('/api/expenses')
             ? [
+                expense('e-1', 'Sklep Testowy', 'c-1'),
+                expense('e-2', 'Kino Testowe', 'c-2'),
                 {
-                  id: 'e-1',
-                  merchant: 'Sklep Testowy',
-                  date: '2026-09-02T10:00:00Z',
-                  amount: 12,
-                  categoryId: 'c-1',
-                  paymentMethod: 'card',
-                  isBill: false,
-                  source: 'manual',
-                  items: [],
+                  ...expense('e-3', 'Stary Sklep', 'c-1'),
+                  date: '2026-08-02T10:00:00Z',
                 },
               ]
             : url.includes('/api/categories')
-              ? []
+              ? [
+                  { id: 'c-1', name: 'Jedzenie', icon: 'cart', color: 'green' },
+                  {
+                    id: 'c-2',
+                    name: 'Rozrywka',
+                    icon: 'popcorn',
+                    color: 'red',
+                  },
+                ]
               : SUMMARY,
         }),
       })),
     );
 
+  const openSeptember = async () => {
     render(<Main />);
+    const select = await screen.findByRole('combobox', { name: 'Miesiąc' });
+    await userEvent.selectOptions(select, '2026-09');
+  };
 
-    await waitFor(() =>
-      expect(
-        screen.getByRole('button', { name: /Sklep Testowy/ }),
-      ).toBeTruthy(),
-    );
-    expect(screen.getByRole('heading', { name: 'Wydatki' })).toBeTruthy();
+  it('lists only the expenses of the selected month', async () => {
+    stubWithExpenses();
+
+    await openSeptember();
+
+    await screen.findByRole('button', { name: /Sklep Testowy/ });
+    expect(screen.getByRole('button', { name: /Kino Testowe/ })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Stary Sklep/ })).toBeNull();
+  });
+
+  it('narrows the list to the chosen category', async () => {
+    stubWithExpenses();
+    await openSeptember();
+    await screen.findByRole('button', { name: /Sklep Testowy/ });
+
+    await userEvent.click(screen.getByRole('button', { name: /^Rozrywka 1/ }));
+
+    expect(screen.getByRole('button', { name: /Kino Testowe/ })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Sklep Testowy/ })).toBeNull();
+
+    await userEvent.click(screen.getByRole('button', { name: /^Wszystkie 2/ }));
+
+    expect(screen.getByRole('button', { name: /Sklep Testowy/ })).toBeTruthy();
   });
 });

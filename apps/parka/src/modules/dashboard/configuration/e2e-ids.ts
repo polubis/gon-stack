@@ -1,12 +1,12 @@
 export const DASHBOARD_E2E_IDS = [
   'dashboard:main',
-  'dashboard:prev-month',
-  'dashboard:month-label',
-  'dashboard:next-month',
+  'dashboard:month-select',
   'dashboard:total',
-  'dashboard:range-total',
+  'dashboard:transactions',
+  'dashboard:daily-average',
+  'dashboard:limit-left',
   'dashboard:previous-total',
-  'dashboard:changes',
+  'dashboard:expenses',
   'dashboard:summary-error',
   'dashboard:expenses-error',
   'dashboard:toast',
@@ -20,7 +20,8 @@ export const DASHBOARD_E2E_IDS = [
 ] as const;
 
 export type DashboardDynamicE2eId =
-  `dashboard:range:${string | number}` | `dashboard:expense:${string | number}`;
+  | `dashboard:expense:${string | number}`
+  | `dashboard:filter:${string | number}`;
 
 export type DashboardE2eId =
   (typeof DASHBOARD_E2E_IDS)[number] | DashboardDynamicE2eId;

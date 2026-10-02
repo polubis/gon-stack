@@ -12,7 +12,6 @@ import type {
   Expense,
   ExpenseId,
   Month,
-  Range,
   Summary,
 } from '../domain/models';
 import { toCategory, toExpense, toSummary } from './mappers';
@@ -27,16 +26,12 @@ type ListCategoriesOut = z.infer<
 /** Nothing else in this module fetches. */
 export const fetchSummary = async (
   month: Month,
-  range: Range,
   signal: AbortSignal,
 ): Promise<Summary> => {
-  const response = await fetch(
-    API_ROUTER.dashboard({ month, trendMonths: Number(range) }),
-    {
-      headers: { Accept: 'application/json' },
-      signal,
-    },
-  );
+  const response = await fetch(API_ROUTER.dashboard({ month }), {
+    headers: { Accept: 'application/json' },
+    signal,
+  });
 
   const json = (await response.json()) as Schema['out'];
 

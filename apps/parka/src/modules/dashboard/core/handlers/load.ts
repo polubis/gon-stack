@@ -9,9 +9,9 @@ export const load = (store: Store, { ofType }: Bus) =>
       store.$isLoading.set(true);
       store.$error.reset();
     }),
-    map(({ month, range }) => ({ month, range, ctrl: new AbortController() })),
-    switchMap(({ month, range, ctrl }) =>
-      from(fetchSummary(month, range, ctrl.signal)).pipe(
+    map(({ month }) => ({ month, ctrl: new AbortController() })),
+    switchMap(({ month, ctrl }) =>
+      from(fetchSummary(month, ctrl.signal)).pipe(
         tap((summary) => {
           store.$data.set(summary);
         }),

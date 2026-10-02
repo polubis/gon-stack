@@ -53,16 +53,16 @@ export const AppShell = () => {
   }, [pathname]);
 
   return (
-    <div className="min-h-screen w-full bg-surface lg:flex">
+    <div className="flex h-dvh w-full flex-col overflow-hidden bg-surface lg:flex-row">
       <AuthGuard mode="protected" />
-      <div className="sticky top-0 z-(--z-nav) hidden h-screen w-64 shrink-0 lg:block xl:w-72">
+      <div className="z-(--z-nav) hidden h-full w-64 shrink-0 lg:block xl:w-72">
         <SyncedAppNav placement="side" />
       </div>
-      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <div className="flex min-h-0 w-full flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto">
           <Outlet />
         </div>
-        <div className="sticky bottom-0 z-(--z-nav) mt-auto lg:hidden">
+        <div className="z-(--z-nav) shrink-0 lg:hidden">
           <SyncedAppNav placement="bottom" />
         </div>
       </div>

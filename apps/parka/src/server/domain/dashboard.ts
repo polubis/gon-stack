@@ -5,21 +5,12 @@ export type DashboardExpense = {
 };
 export type DashboardCategory = { id: string; name: string; color: string };
 
-export type DashboardTrendPoint = { month: string; total: number };
-
 export type DashboardCategorySlice = {
   categoryId: string;
   name: string;
   color: string;
   amount: number;
   pct: number;
-};
-
-export type DashboardCategoryChange = {
-  categoryId: string;
-  name: string;
-  color: string;
-  changePct: number;
 };
 
 export type DashboardDayPoint = { day: number; total: number };
@@ -40,16 +31,9 @@ export type DashboardSummary = {
   previousDaily: DashboardDayPoint[];
   /** Total monthly limit, `null` when none is set. */
   monthlyLimit: number | null;
-  /** Total across the trailing `trendMonths` window. */
-  rangeTotal: number;
-  trend: DashboardTrendPoint[];
-  /** Category breakdown across the trailing `trendMonths` window. */
+  /** Category breakdown of the selected month. */
   categories: DashboardCategorySlice[];
-  /** Biggest category moves, selected month vs previous month. */
-  categoryChanges: DashboardCategoryChange[];
 };
-
-const MAX_CATEGORY_CHANGES = 5;
 
 const monthOf = (iso: string): string => iso.slice(0, 7);
 
@@ -117,19 +101,16 @@ export const summarizeDashboard = ({
   expenses,
   categories,
   month,
-  trendMonths,
   today,
   monthlyLimit,
 }: {
   expenses: DashboardExpense[];
   categories: DashboardCategory[];
   month: string;
-  trendMonths: number;
   /** `YYYY-MM-DD`; injected so the summary stays pure. */
   today: string;
   monthlyLimit: number | null;
 }): DashboardSummary => {
-  const months = monthsEndingAt(month, trendMonths);
   const total = totalFor(expenses, month);
   const previousTotal = totalFor(expenses, prevMonthOf(month));
   const change =
@@ -138,10 +119,7 @@ export const summarizeDashboard = ({
   const elapsed = elapsedDays(month, today);
   const dailyAverage = elapsed === 0 ? 0 : total / elapsed;
 
-  const trend = months.map((m) => ({ month: m, total: totalFor(expenses, m) }));
-  const rangeTotal = trend.reduce((s, t) => s + t.total, 0);
-
-  const scoped = inMonths(expenses, months);
+  const scoped = inMonths(expenses, [month]);
   const categorySlices = categories
     .map((category) => {
       const amount = sum(scoped.filter((e) => e.categoryId === category.id));
@@ -150,47 +128,21 @@ export const summarizeDashboard = ({
         name: category.name,
         color: category.color,
         amount,
-        pct: rangeTotal === 0 ? 0 : (amount / rangeTotal) * 100,
+        pct: total === 0 ? 0 : (amount / total) * 100,
       };
     })
     .filter((s) => s.amount > 0)
     .sort((a, b) => b.amount - a.amount);
 
-  const now = inMonths(expenses, [month]);
-  const before = inMonths(expenses, [prevMonthOf(month)]);
-  const categoryChanges = categories
-    .map((category) => {
-      const current = sum(now.filter((e) => e.categoryId === category.id));
-      const previous = sum(before.filter((e) => e.categoryId === category.id));
-      const changePct =
-        previous === 0
-          ? current === 0
-            ? 0
-            : 100
-          : ((current - previous) / previous) * 100;
-      return {
-        categoryId: category.id,
-        name: category.name,
-        color: category.color,
-        changePct,
-      };
-    })
-    .filter((c) => Math.abs(c.changePct) >= 1)
-    .sort((a, b) => Math.abs(b.changePct) - Math.abs(a.changePct))
-    .slice(0, MAX_CATEGORY_CHANGES);
-
   return {
     total,
     change,
     previousTotal,
-    transactions: inMonths(expenses, [month]).length,
+    transactions: scoped.length,
     dailyAverage,
     daily: dailyTotals(expenses, month),
     previousDaily: dailyTotals(expenses, prevMonthOf(month)),
     monthlyLimit,
-    rangeTotal,
-    trend,
     categories: categorySlices,
-    categoryChanges,
   };
 };

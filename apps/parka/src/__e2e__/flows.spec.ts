@@ -15,11 +15,6 @@ const open = async (page: Page, path: string): Promise<void> => {
   await page.waitForTimeout(200);
 };
 
-const plMonthLabel = (year: number, month: number): string =>
-  new Intl.DateTimeFormat('pl-PL', { month: 'long', year: 'numeric' }).format(
-    new Date(year, month - 1, 1),
-  );
-
 const yearMonth = (date: Date): string =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
@@ -126,10 +121,13 @@ const commands = {
               total: (month && totals[month]) ?? 0,
               change: 0,
               previousTotal: 0,
-              rangeTotal: (month && totals[month]) ?? 0,
-              trend: [],
+              userName: 'Anna',
+              transactions: 0,
+              dailyAverage: 0,
+              daily: [],
+              previousDaily: [],
+              monthlyLimit: null,
               categories: [],
-              categoryChanges: [],
             },
           }),
         });
@@ -142,11 +140,8 @@ const commands = {
   }) => {
     const current = new Date();
     await open(page, APP_ROUTER.dashboard());
-    await expect(getByE2e('dashboard:month-label')).toHaveText(
-      new RegExp(
-        plMonthLabel(current.getFullYear(), current.getMonth() + 1),
-        'i',
-      ),
+    await expect(getByE2e('dashboard:month-select')).toHaveValue(
+      yearMonth(current),
     );
     const total = await getByE2e('dashboard:total').textContent();
     currentTotalByPage.set(page, total ?? '');
@@ -154,12 +149,9 @@ const commands = {
   'the previous month shows a different total': async ({ page, getByE2e }) => {
     const current = new Date();
     const previous = new Date(current.getFullYear(), current.getMonth() - 1, 1);
-    await getByE2e('dashboard:prev-month').click();
-    await expect(getByE2e('dashboard:month-label')).toHaveText(
-      new RegExp(
-        plMonthLabel(previous.getFullYear(), previous.getMonth() + 1),
-        'i',
-      ),
+    await getByE2e('dashboard:month-select').selectOption(yearMonth(previous));
+    await expect(getByE2e('dashboard:month-select')).toHaveValue(
+      yearMonth(previous),
     );
     await expect(getByE2e('dashboard:total')).not.toHaveText(
       currentTotalByPage.get(page) ?? '',
@@ -274,12 +266,18 @@ const commands = {
       source: 'manual',
       items: [],
     };
+    const funCategory = {
+      id: 'cat-2',
+      name: 'Rozrywka',
+      icon: 'popcorn',
+      color: '#c2410c',
+    };
     const purchaseExpense = {
       id: 'exp-purchase-1',
       merchant: 'Kino Helios',
       date: new Date().toISOString(),
       amount: 45,
-      categoryId: category.id,
+      categoryId: funCategory.id,
       paymentMethod: 'card',
       isBill: false,
       source: 'manual',
@@ -290,7 +288,7 @@ const commands = {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ code: 200, data: [category] }),
+        body: JSON.stringify({ code: 200, data: [category, funCategory] }),
       });
     });
     await page.route(`**${API_ROUTER.expenses()}**`, async (route) => {
@@ -329,9 +327,9 @@ const commands = {
     });
   },
 
-  'expenses can be filtered to bills only': async ({ page }) => {
+  'expenses can be filtered by category': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.dashboard());
-    await page.getByRole('tab', { name: 'Rachunki' }).click();
+    await getByE2e('dashboard:filter:cat-1').click();
     await expect(page.getByRole('button', { name: /Tauron/ })).toBeVisible();
     await expect(page.getByRole('button', { name: /Kino Helios/ })).toHaveCount(
       0,
@@ -354,14 +352,12 @@ const commands = {
     await expect(page.getByText('Kino Nowe Horyzonty')).toHaveCount(0);
   },
 
-  'the dashboard shows the yearly total': async ({ page, getByE2e }) => {
+  'the dashboard shows the kpis': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.dashboard());
-    await page.getByRole('tab', { name: 'Rok' }).click();
-    await expect(getByE2e('dashboard:range-total')).toBeVisible();
+    await expect(getByE2e('dashboard:transactions')).toBeVisible();
   },
   'the dashboard shows month comparison': async ({ getByE2e }) => {
     await expect(getByE2e('dashboard:previous-total')).toBeVisible();
-    await expect(getByE2e('dashboard:changes')).toBeVisible();
   },
 
   'i create an 80 percent category limit': async ({ page, getByE2e }) => {
@@ -489,10 +485,10 @@ test('a receipt cannot be saved before any category exists', async ({
   )(['i cannot save a receipt before any category exists']);
 });
 
-test('expenses can be filtered to bills only', async ({ e2e }) => {
+test('expenses can be filtered by category', async ({ e2e }) => {
   await interpreter(commands, e2e)(
     ['i mock the expenses list'],
-    ['expenses can be filtered to bills only'],
+    ['expenses can be filtered by category'],
   );
 });
 
@@ -504,12 +500,10 @@ test('an expense can be updated and removed', async ({ e2e }) => {
   );
 });
 
-test('the dashboard exposes selectable ranges and month comparison', async ({
-  e2e,
-}) => {
+test('the dashboard exposes kpis and month comparison', async ({ e2e }) => {
   await interpreter(commands, e2e)(
     ['i mock the dashboard totals'],
-    ['the dashboard shows the yearly total'],
+    ['the dashboard shows the kpis'],
     ['the dashboard shows month comparison'],
   );
 });

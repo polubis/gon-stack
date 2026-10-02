@@ -6,9 +6,7 @@ export type CategoryId = Brand<string, 'CategoryId'>;
 export type ExpenseId = Brand<string, 'ExpenseId'>;
 export type ReceiptItemId = Brand<string, 'ReceiptItemId'>;
 
-export type Range = '1' | '3' | '6' | '12';
-
-export type TrendPoint = { month: Month; total: number };
+export type DayPoint = { day: number; total: number };
 
 export type CategorySlice = {
   id: CategoryId;
@@ -18,26 +16,24 @@ export type CategorySlice = {
   pct: number;
 };
 
-export type CategoryChange = {
-  id: CategoryId;
-  name: string;
-  color: string;
-  changePct: number;
-};
-
 export type Summary = {
+  userName: string;
   /** Selected month total. */
   total: number;
   /** Selected month vs previous month, in percent. */
   change: number;
   previousTotal: number;
-  /** Total across the selected range. */
-  rangeTotal: number;
-  trend: TrendPoint[];
-  /** Breakdown across the selected range. */
+  transactions: number;
+  /** Selected month total per elapsed day. */
+  dailyAverage: number;
+  /** Per-day totals of the selected month, day 1 first. */
+  daily: DayPoint[];
+  /** Per-day totals of the previous month, day 1 first. */
+  previousDaily: DayPoint[];
+  /** Total monthly limit, `null` when none is set. */
+  monthlyLimit: number | null;
+  /** Breakdown of the selected month. */
   categories: CategorySlice[];
-  /** Biggest category moves, selected month vs previous month. */
-  categoryChanges: CategoryChange[];
 };
 
 export type QuickActionIconId = 'add' | 'camera' | 'target' | 'repeat';
@@ -78,8 +74,6 @@ export type Expense = {
   source: 'receipt' | 'manual';
   items: ReceiptItem[];
 };
-
-export type ExpenseFilter = 'all' | 'category' | 'bills';
 
 export type Notice = {
   id: number;

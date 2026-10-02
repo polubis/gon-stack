@@ -100,10 +100,9 @@ export const moreSectionPaths = (): readonly string[] => [
  * origin suffixes, so client and server can never drift.
  */
 export const API_ROUTER = {
-  dashboard: routeWithRequiredQuery<
+  dashboard: routeWithRequiredQuery<'/api/dashboard/', { month: string }>(
     '/api/dashboard/',
-    { month: string; trendMonths?: number }
-  >('/api/dashboard/'),
+  ),
   expenses: route('/api/expenses/'),
   expenseById: routeById('/api/expenses/'),
   categories: route('/api/categories/'),

@@ -39,6 +39,7 @@
     0 8px 24px rgb(16 36 27 / 0.16), 0 2px 6px rgb(16 36 27 / 0.08);
   --z-nav: 10;
   --z-modal: 20;
+  --z-tooltip: 30;
 }
 
 :root[data-theme='dark'] {

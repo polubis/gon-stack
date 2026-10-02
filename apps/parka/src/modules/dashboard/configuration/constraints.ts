@@ -1,36 +1,39 @@
-import type {
-  Category,
-  CategoryId,
-  ExpenseFilter,
-  Range,
-} from '../domain/models';
+import { APP_ROUTER } from '@/shared/router';
+import type { Category, CategoryId, QuickAction } from '../domain/models';
 
 export const FEATURE_NAME = 'Dashboard';
 
-export const DEFAULT_RANGE: Range = '6';
+/** Months offered by the month picker, newest first. */
+export const MONTH_OPTIONS_COUNT = 12;
 
-export const RANGES: Range[] = ['1', '3', '6', '12'];
+/** Largest category slices shown; the rest collapses into "Inne". */
+export const MAX_CATEGORY_SLICES = 5;
 
-export const RANGE_LABEL: Record<Range, string> = {
-  '1': 'Miesiąc',
-  '3': '3 miesiące',
-  '6': '6 miesięcy',
-  '12': 'Rok',
-};
+/** Y-axis rows of the spending chart. */
+export const CHART_TICKS = 4;
+
+/** Day numbers labelled on the spending chart's X axis. */
+export const CHART_LABEL_DAYS = [1, 7, 14, 21, 28];
+
+/** Name of the default "other" category; the donut folds into it. */
+export const OTHER_CATEGORY_NAME = 'category.other';
+
+export const OTHER_CATEGORY_LABEL = 'Inne';
+
+export const QUICK_ACTIONS: QuickAction[] = [
+  { label: 'Dodaj paragon', href: APP_ROUTER.receiptScan(), iconId: 'add' },
+  { label: 'Zrób zdjęcie', href: APP_ROUTER.receiptScan(), iconId: 'camera' },
+  { label: 'Limity', href: APP_ROUTER.limits(), iconId: 'target' },
+  { label: 'Cykliczne', href: APP_ROUTER.recurring(), iconId: 'repeat' },
+];
 
 /** Shown for expenses when the user has no matching category. */
 export const UNCATEGORIZED: Category = {
   id: '' as CategoryId,
   name: 'Bez kategorii',
   icon: 'sparkles',
-  color: '#4b5a52',
+  color: 'var(--track-strong)',
 };
-
-export const FILTER_OPTIONS: { value: ExpenseFilter; label: string }[] = [
-  { value: 'all', label: 'Wszystkie' },
-  { value: 'category', label: 'Kategorie' },
-  { value: 'bills', label: 'Rachunki' },
-];
 
 export const ERROR_CODES = {
   load: 'DASHBOARD_LOAD',

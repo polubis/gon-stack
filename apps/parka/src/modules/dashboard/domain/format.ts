@@ -22,6 +22,11 @@ const plDateTime = new Intl.DateTimeFormat('pl-PL', {
   minute: '2-digit',
 });
 
+const plShortMonth = new Intl.DateTimeFormat('pl-PL', { month: 'short' });
+
+const capitalize = (value: string): string =>
+  value.charAt(0).toUpperCase() + value.slice(1);
+
 const toYearMonth = (month: Month): [number, number] =>
   month.split('-').map(Number) as [number, number];
 
@@ -44,19 +49,26 @@ export const monthLabel = (month: Month): string => {
   return plMonth.format(new Date(y, m - 1, 1));
 };
 
+/** `2025-04` → `Kwiecień 2025`. */
+export const monthTitle = (month: Month): string =>
+  capitalize(monthLabel(month));
+
+/** `2025-04`, 14 → `14 Kwi`. */
+export const dayLabel = (month: Month, day: number): string => {
+  const [y, m] = toYearMonth(month);
+  return `${day} ${capitalize(plShortMonth.format(new Date(y, m - 1, day)))}`;
+};
+
+/** ISO date-time → `14 Kwi 2025`. */
+export const shortDateLabel = (iso: string): string => {
+  const date = new Date(iso);
+  return `${date.getDate()} ${capitalize(plShortMonth.format(date))} ${date.getFullYear()}`;
+};
+
 /** `2025-04` → `2025-03`. */
 export const prevMonth = (month: Month): Month => {
   const [y, m] = toYearMonth(month);
   const d = new Date(y, m - 2, 1);
-  return toMonth(
-    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
-  );
-};
-
-/** `2025-04` → `2025-05`. */
-export const nextMonth = (month: Month): Month => {
-  const [y, m] = toYearMonth(month);
-  const d = new Date(y, m, 1);
   return toMonth(
     `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
   );

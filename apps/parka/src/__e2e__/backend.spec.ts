@@ -12,10 +12,14 @@ import { API_ROUTER, APP_ROUTER } from '@/shared/router';
  * the change round-tripped through the database under row-level security.
  */
 
-const plMonthLabel = (offset: number): string =>
-  new Intl.DateTimeFormat('pl-PL', { month: 'long', year: 'numeric' }).format(
-    new Date(new Date().getFullYear(), new Date().getMonth() + offset, 1),
+const monthValue = (offset: number): string => {
+  const date = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth() + offset,
+    1,
   );
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+};
 
 const EMAIL = `e2e-${Date.now()}@parka.test`;
 const PASSWORD = 'secret123';
@@ -50,20 +54,16 @@ const commands = {
 
   'the dashboard opens on the current month': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.dashboard());
-    await expect(getByE2e('dashboard:month-label')).toHaveText(
-      new RegExp(plMonthLabel(0), 'i'),
-    );
+    await expect(getByE2e('dashboard:month-select')).toHaveValue(monthValue(0));
     await expect(getByE2e('dashboard:total')).toContainText('zł');
   },
   'month navigation reads other months from the db': async ({ getByE2e }) => {
-    await getByE2e('dashboard:prev-month').click();
-    await expect(getByE2e('dashboard:month-label')).toHaveText(
-      new RegExp(plMonthLabel(-1), 'i'),
+    await getByE2e('dashboard:month-select').selectOption(monthValue(-1));
+    await expect(getByE2e('dashboard:month-select')).toHaveValue(
+      monthValue(-1),
     );
-    await getByE2e('dashboard:next-month').click();
-    await expect(getByE2e('dashboard:month-label')).toHaveText(
-      new RegExp(plMonthLabel(0), 'i'),
-    );
+    await getByE2e('dashboard:month-select').selectOption(monthValue(0));
+    await expect(getByE2e('dashboard:month-select')).toHaveValue(monthValue(0));
   },
 
   'i add suggested categories and they survive a reload': async ({
@@ -141,15 +141,14 @@ const commands = {
     await expect(page.getByText('Sklep Nowy')).toHaveCount(0);
   },
 
-  'the dashboard exposes year and comparison views': async ({
+  'the dashboard exposes kpis and comparison views': async ({
     page,
     getByE2e,
   }) => {
     await open(page, APP_ROUTER.dashboard());
-    await page.getByRole('tab', { name: 'Rok' }).click();
-    await expect(getByE2e('dashboard:range-total')).toContainText('zł');
+    await expect(getByE2e('dashboard:transactions')).toBeVisible();
+    await expect(getByE2e('dashboard:daily-average')).toContainText('zł');
     await expect(getByE2e('dashboard:previous-total')).toContainText('zł');
-    await expect(getByE2e('dashboard:changes')).toBeVisible();
   },
   'the report totals and downloads a csv': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.reports());
@@ -236,7 +235,7 @@ test('every feature works against the real Supabase backend', async ({
     ['i create a category and it survives a reload'],
     ['i scan a receipt and save it as an expense'],
     ['i update and delete an expense'],
-    ['the dashboard exposes year and comparison views'],
+    ['the dashboard exposes kpis and comparison views'],
     ['the report totals and downloads a csv'],
     ['i create a category limit'],
     ['i update my settings profile'],
