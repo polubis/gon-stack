@@ -112,8 +112,11 @@ export const LimitsCard = ({ month }: { month: Month }) => {
         )}
       </div>
 
-      {sheet === 'total' && total ? (
-        <Sheet title="Zmień limit miesięczny" onClose={close}>
+      {sheet === 'total' ? (
+        <Sheet
+          title={total ? 'Zmień limit miesięczny' : 'Ustaw limit miesięczny'}
+          onClose={close}
+        >
           <TotalLimitForm limit={total} onDone={close} />
         </Sheet>
       ) : null}

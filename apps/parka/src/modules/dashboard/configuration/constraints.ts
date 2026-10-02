@@ -23,6 +23,7 @@ export const OTHER_CATEGORY_LABEL = 'Inne';
 export const LIMITS_SECTION_ID = 'limits';
 
 export const DEFAULT_CATEGORY_LIMIT = 300;
+export const DEFAULT_TOTAL_LIMIT = 3000;
 export const DEFAULT_GOAL_TARGET = 2000;
 export const DEFAULT_GOAL_MONTHS = 6;
 export const DEFAULT_GOAL_NAME = 'Nowy cel';

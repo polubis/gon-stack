@@ -87,6 +87,19 @@ describe('dashboard limits changes', () => {
     expect(view.result.current.limits[0].amount).toBe(1000);
   });
 
+  it('sets a monthly limit when none exists yet', async () => {
+    const created: Limit = { ...raised, id: 'l-2' as LimitId, amount: 3000 };
+    stubApi({ code: 201, data: created });
+    const view = await setup();
+
+    act(() => view.result.current.ctx.createLimit(created));
+
+    expect(view.result.current.limits).toHaveLength(2);
+    await waitFor(() =>
+      expect(view.result.current.notice?.tone).toBe('success'),
+    );
+  });
+
   it('adds a goal right away and keeps it when the server accepts', async () => {
     stubApi({ code: 201, data: GOAL });
     const view = await setup();

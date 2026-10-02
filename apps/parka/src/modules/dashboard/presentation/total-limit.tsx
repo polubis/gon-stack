@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from 'react';
-import { Pencil } from 'lucide-react';
+import { Pencil, Plus } from 'lucide-react';
 import { Button, Field, ProgressBar } from '@/shared/ui/controls';
 import { NumberInput } from '@/shared/ui/number-input';
+import { DEFAULT_TOTAL_LIMIT } from '../configuration/constraints';
+import { newLimitId } from '../domain/ids';
 import { money, monthLabel } from '../domain/format';
 import type { Limit, Month, TotalProgress } from '../domain/models';
 import { limitTone } from './selectors';
@@ -18,7 +20,23 @@ export const TotalLimit = ({
   onEdit: () => void;
 }) => {
   if (!progress)
-    return <p className="text-sm text-ink-soft">Brak zdefiniowanego limitu.</p>;
+    return (
+      <div
+        className="flex flex-wrap items-center justify-between gap-3"
+        data-e2e="dashboard:limit-total"
+      >
+        <p className="text-sm text-ink-soft">Brak zdefiniowanego limitu.</p>
+        <Button
+          variant="ghost"
+          className="w-auto px-3 py-1.5"
+          data-e2e="dashboard:limit-total-new"
+          onClick={onEdit}
+        >
+          <Plus className="h-4 w-4 shrink-0" aria-hidden="true" /> Ustaw limit
+          miesięczny
+        </Button>
+      </div>
+    );
 
   return (
     <div className="space-y-2" data-e2e="dashboard:limit-total">
@@ -54,15 +72,27 @@ export const TotalLimitForm = ({
   limit,
   onDone,
 }: {
-  limit: Limit;
+  limit?: Limit;
   onDone: () => void;
 }) => {
   const ctx = useContext();
-  const [amount, setAmount] = useState(limit.amount);
+  const [amount, setAmount] = useState(limit?.amount ?? DEFAULT_TOTAL_LIMIT);
 
   const save = (event: FormEvent) => {
     event.preventDefault();
-    ctx.updateLimit({ ...limit, amount: amount || limit.amount });
+    if (limit) {
+      ctx.updateLimit({ ...limit, amount: amount || limit.amount });
+    } else if (amount > 0) {
+      ctx.createLimit({
+        id: newLimitId(),
+        scope: 'total',
+        amount,
+        alertAt80: true,
+        delivery: 'push',
+      });
+    } else {
+      return;
+    }
     onDone();
   };
 
