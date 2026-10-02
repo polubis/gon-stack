@@ -24,14 +24,14 @@ const SCREENS: Screen[] = [
     heading: /Cele/,
   },
   {
+    path: APP_ROUTER.dashboard(),
+    root: 'dashboard:recurring',
+    heading: /Wydatki cykliczne/,
+  },
+  {
     path: APP_ROUTER.receiptScan(),
     root: 'receipt:main',
     heading: /Zrób zdjęcie paragonu/,
-  },
-  {
-    path: APP_ROUTER.recurring(),
-    root: 'recurring:main',
-    heading: /Wydatki cykliczne/,
   },
   { path: APP_ROUTER.reports(), root: 'reports:main', heading: /Raport/ },
   {

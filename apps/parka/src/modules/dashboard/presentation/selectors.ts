@@ -1,3 +1,4 @@
+import { occurrencesInMonth } from '@/shared/recurring/occurrences';
 import { UNCATEGORIZED, WARN_PCT } from '../configuration/constraints';
 import { monthOf, prevMonth } from '../domain/format';
 import type {
@@ -6,12 +7,38 @@ import type {
   CategoryLimit,
   CategoryProgress,
   Expense,
+  ExpenseId,
   Goal,
   Limit,
   Month,
   ProgressTone,
+  Recurring,
   TotalProgress,
 } from '../domain/models';
+
+/**
+ * Stored expenses plus `month`'s charges of the recurring ones, so every
+ * total and limit counts them. Those charges are derived, never stored.
+ */
+export const withRecurring = (
+  expenses: Expense[],
+  recurring: Recurring[],
+  month: Month,
+): Expense[] => [
+  ...expenses,
+  ...occurrencesInMonth(recurring, month).map((o) => ({
+    id: `recurring:${o.recurringId}:${month}` as ExpenseId,
+    merchant: o.name,
+    date: `${o.date}T00:00:00.000Z`,
+    amount: o.amount,
+    categoryId: o.categoryId as CategoryId,
+    paymentMethod:
+      recurring.find((r) => r.id === o.recurringId)?.paymentMethod ?? '',
+    isBill: true,
+    source: 'recurring' as const,
+    items: [],
+  })),
+];
 
 export const sortByDateDesc = (list: Expense[]): Expense[] =>
   [...list].sort((a, b) => (a.date < b.date ? 1 : -1));

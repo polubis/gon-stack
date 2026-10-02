@@ -1,4 +1,4 @@
-import { Home, LayoutGrid, RefreshCw } from 'lucide-react';
+import { Home, LayoutGrid } from 'lucide-react';
 import { moreSectionPaths, APP_ROUTER } from '@/shared/router/routes';
 import type { NavKey } from '../domain/models';
 
@@ -18,13 +18,6 @@ export const NAV_ITEMS: NavItem[] = [
     href: APP_ROUTER.dashboard(),
     icon: Home,
     mobile: true,
-  },
-  {
-    key: 'recurring',
-    label: 'Cykliczne',
-    href: APP_ROUTER.recurring(),
-    icon: RefreshCw,
-    mobile: false,
   },
   {
     key: 'more',

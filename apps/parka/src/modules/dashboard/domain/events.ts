@@ -1,5 +1,14 @@
 import type { TriggerEvent } from '@/libs/eda';
-import type { Expense, ExpenseId, Goal, Limit, LimitId, Month } from './models';
+import type {
+  Expense,
+  ExpenseId,
+  Goal,
+  Limit,
+  LimitId,
+  Month,
+  Recurring,
+  RecurringId,
+} from './models';
 
 export type Event =
   | TriggerEvent<'[TRIGGER]_LOAD', { month: Month }>
@@ -11,4 +20,8 @@ export type Event =
   | TriggerEvent<'[TRIGGER]_UPDATE_LIMIT', { limit: Limit }>
   | TriggerEvent<'[TRIGGER]_DELETE_LIMIT', { id: LimitId }>
   | TriggerEvent<'[TRIGGER]_CREATE_GOAL', { goal: Goal }>
+  | TriggerEvent<'[TRIGGER]_LOAD_RECURRING'>
+  | TriggerEvent<'[TRIGGER]_CREATE_RECURRING', { recurring: Recurring }>
+  | TriggerEvent<'[TRIGGER]_UPDATE_RECURRING', { recurring: Recurring }>
+  | TriggerEvent<'[TRIGGER]_DELETE_RECURRING', { id: RecurringId }>
   | TriggerEvent<'[TRIGGER]_DISMISS_NOTICE'>;

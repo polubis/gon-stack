@@ -7,18 +7,19 @@ import type { Month } from '../domain/models';
 import { AddLimitButton } from './add-limit-button';
 import { CategoryLimits } from './category-limits';
 import { useContext } from './context';
-import { LimitsSheet } from './limits-sheet';
+import { Sheet } from '@/shared/ui/sheet';
 import { LimitForm } from './limit-form';
 import {
   categoryProgress,
   isCategoryLimit,
   totalProgress,
   withoutLimit,
+  withRecurring,
 } from './selectors';
 import { TotalLimit, TotalLimitForm } from './total-limit';
-import { useSheet } from './use-sheet';
+import { useSheet } from '@/shared/ui/use-sheet';
 
-type Sheet = 'total' | 'limit' | `edit:${string}`;
+type SheetKind = 'total' | 'limit' | `edit:${string}`;
 
 /** Mirrors the loaded card: headline, then list rows. */
 const LimitsSkeleton = () => (
@@ -41,11 +42,11 @@ export const LimitsCard = ({ month }: { month: Month }) => {
   const ctx = useContext();
   const limits = ctx.useLimits();
   const categories = ctx.useCategories();
-  const expenses = ctx.useExpenses();
+  const expenses = withRecurring(ctx.useExpenses(), ctx.useRecurring(), month);
   const error = ctx.useLimitsError();
   const limitsInitializing = ctx.useLimitsInitializing();
   const expensesInitializing = ctx.useExpensesInitializing();
-  const { sheet, open, close } = useSheet<Sheet>();
+  const { sheet, open, close } = useSheet<SheetKind>();
   const initializing = limitsInitializing || expensesInitializing;
   const total = limits.find((l) => l.scope === 'total');
   const editing = sheet?.startsWith('edit:')
@@ -112,19 +113,19 @@ export const LimitsCard = ({ month }: { month: Month }) => {
       </div>
 
       {sheet === 'total' && total ? (
-        <LimitsSheet title="Zmień limit miesięczny" onClose={close}>
+        <Sheet title="Zmień limit miesięczny" onClose={close}>
           <TotalLimitForm limit={total} onDone={close} />
-        </LimitsSheet>
+        </Sheet>
       ) : null}
       {sheet === 'limit' ? (
-        <LimitsSheet title="Nowy limit" onClose={close}>
+        <Sheet title="Nowy limit" onClose={close}>
           <LimitForm onDone={close} />
-        </LimitsSheet>
+        </Sheet>
       ) : null}
       {editing && isCategoryLimit(editing) ? (
-        <LimitsSheet title="Edytuj limit" onClose={close}>
+        <Sheet title="Edytuj limit" onClose={close}>
           <LimitForm limit={editing} onDone={close} />
-        </LimitsSheet>
+        </Sheet>
       ) : null}
     </Card>
   );

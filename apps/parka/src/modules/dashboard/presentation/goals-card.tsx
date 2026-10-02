@@ -7,9 +7,9 @@ import { Skeleton } from '@/shared/ui/skeleton';
 import { ERROR_CODES, GOALS_SECTION_ID } from '../configuration/constraints';
 import { useContext } from './context';
 import { GoalsTab } from './goals-tab';
-import { LimitsSheet } from './limits-sheet';
+import { Sheet } from '@/shared/ui/sheet';
 import { NewGoalForm } from './new-goal-form';
-import { useSheet } from './use-sheet';
+import { useSheet } from '@/shared/ui/use-sheet';
 
 const GoalsSkeleton = () => (
   <div aria-hidden="true" className="space-y-3">
@@ -71,9 +71,9 @@ export const GoalsCard = () => {
       </div>
 
       {sheet ? (
-        <LimitsSheet title="Nowy cel oszczędnościowy" onClose={close}>
+        <Sheet title="Nowy cel oszczędnościowy" onClose={close}>
           <NewGoalForm onDone={close} />
-        </LimitsSheet>
+        </Sheet>
       ) : null}
     </Card>
   );

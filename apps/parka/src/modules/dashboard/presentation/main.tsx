@@ -18,6 +18,7 @@ import { MonthExpenses } from './month-expenses';
 import { Header } from './header';
 import { Kpis } from './kpis';
 import { QuickActions } from './quick-actions';
+import { RecurringCard } from './recurring-card';
 import { SpendingChart } from './spending-chart';
 
 const MONTH_PARAM = 'month';
@@ -48,6 +49,7 @@ const DashboardView = () => {
   useEffect(() => {
     ctx.loadExpenses();
     ctx.loadLimits();
+    ctx.loadRecurring();
   }, [ctx]);
 
   const goToMonth = (next: Month) => {
@@ -114,10 +116,11 @@ const DashboardView = () => {
 
         <LimitsCard month={month} />
         <GoalsCard />
+        <RecurringCard />
 
         {failed ? null : (
           <>
-            <div className="xl:col-span-4">
+            <div className="xl:col-span-12">
               <Kpis month={month} summary={summary} />
             </div>
             <SpendingChart month={month} summary={summary} />

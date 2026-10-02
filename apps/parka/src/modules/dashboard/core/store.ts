@@ -4,7 +4,9 @@ import type {
   Expense,
   Goal,
   Limit,
+  Month,
   Notice,
+  Recurring,
   Summary,
 } from '../domain/models';
 
@@ -23,6 +25,11 @@ export const createStore = () => {
   const $limitsInitializing = atom(true);
   const $limitsLoading = atom(false);
   const $limitsError = atom<string | null>(null);
+  const $recurring = atom<Recurring[]>([]);
+  const $recurringInitializing = atom(true);
+  const $recurringError = atom<string | null>(null);
+  /** Month the summary was last asked for; re-asked after recurring edits. */
+  const $month = atom<Month | null>(null);
   const $notice = atom<Notice | null>(null);
 
   return {
@@ -40,6 +47,10 @@ export const createStore = () => {
     $limitsInitializing,
     $limitsLoading,
     $limitsError,
+    $recurring,
+    $recurringInitializing,
+    $recurringError,
+    $month,
     $notice,
   };
 };

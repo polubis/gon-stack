@@ -60,7 +60,7 @@ export const Kpis = ({
     : null;
 
   return (
-    <ul className="grid grid-cols-2 gap-3 md:gap-4 xl:h-full xl:grid-cols-1 xl:grid-rows-4">
+    <ul className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
       <li>
         <Kpi
           icon={Wallet}

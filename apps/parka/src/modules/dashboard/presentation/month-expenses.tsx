@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
@@ -15,6 +15,7 @@ import {
   categoryTabs,
   expensesInMonth,
   sumAmount,
+  withRecurring,
 } from './selectors';
 
 const Chip = ({
@@ -68,6 +69,34 @@ const ListSkeleton = () => (
   </ul>
 );
 
+const ROW_CLASS =
+  'flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left';
+
+/** Derived (recurring) charges have no detail to open, so they are not buttons. */
+const Row = ({
+  derived,
+  id,
+  onSelect,
+  children,
+}: {
+  derived: boolean;
+  id: ExpenseId;
+  onSelect: (id: ExpenseId) => void;
+  children: ReactNode;
+}) =>
+  derived ? (
+    <div className={ROW_CLASS}>{children}</div>
+  ) : (
+    <button
+      type="button"
+      onClick={() => onSelect(id)}
+      data-e2e={`dashboard:expense:${id}`}
+      className={cn(ROW_CLASS, 'hover:bg-hover-soft')}
+    >
+      {children}
+    </button>
+  );
+
 /** All expenses of the selected month, filterable by category. */
 export const MonthExpenses = ({
   month,
@@ -77,7 +106,7 @@ export const MonthExpenses = ({
   onSelect: (id: ExpenseId) => void;
 }) => {
   const ctx = useContext();
-  const expenses = ctx.useExpenses();
+  const expenses = withRecurring(ctx.useExpenses(), ctx.useRecurring(), month);
   const categories = ctx.useCategories();
   const error = ctx.useExpensesError();
   const initializing = ctx.useExpensesInitializing();
@@ -161,11 +190,10 @@ export const MonthExpenses = ({
             const category = categoryOf(categories, e.categoryId);
             return (
               <li key={e.id}>
-                <button
-                  type="button"
-                  onClick={() => onSelect(e.id)}
-                  data-e2e={`dashboard:expense:${e.id}`}
-                  className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left hover:bg-hover-soft"
+                <Row
+                  derived={e.source === 'recurring'}
+                  id={e.id}
+                  onSelect={onSelect}
                 >
                   <CategoryAvatar category={category} className="h-10 w-10" />
                   <span className="min-w-0 flex-1">
@@ -174,6 +202,7 @@ export const MonthExpenses = ({
                     </span>
                     <span className="block text-xs text-ink-soft">
                       {shortDateLabel(e.date)}
+                      {e.source === 'recurring' ? ' · cykliczny' : ''}
                     </span>
                   </span>
                   <span className="text-sm font-semibold tabular-nums">
@@ -182,7 +211,7 @@ export const MonthExpenses = ({
                   <span className="hidden rounded-full bg-brand-soft px-3 py-1 text-xs font-medium text-brand-dark md:inline">
                     {categoryLabel(category.name)}
                   </span>
-                </button>
+                </Row>
               </li>
             );
           })}

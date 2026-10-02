@@ -22,6 +22,12 @@ const plDateTime = new Intl.DateTimeFormat('pl-PL', {
   minute: '2-digit',
 });
 
+const plDate = new Intl.DateTimeFormat('pl-PL', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+});
+
 const plShortMonth = new Intl.DateTimeFormat('pl-PL', { month: 'short' });
 
 const capitalize = (value: string): string =>
@@ -77,6 +83,15 @@ export const prevMonth = (month: Month): Month => {
 /** Today's month, e.g. `2026-09`. */
 export const currentMonth = (): Month =>
   toMonth(new Date().toISOString().slice(0, 7));
+
+/** ISO date(-time) → `14.04.2025`. */
+export const dateLabel = (iso: string): string => plDate.format(new Date(iso));
+
+/** `YYYY-MM-DD` for a date input. */
+export const toDateInput = (iso: string): string => iso.slice(0, 10);
+
+export const fromDateInput = (value: string): string =>
+  `${value}T00:00:00.000Z`;
 
 export const dateTimeLabel = (iso: string): string =>
   plDateTime.format(new Date(iso));

@@ -32,10 +32,6 @@ export const router = createRouter({
       () => import('@/modules/categories/presentation/main'),
     ),
     page(
-      APP_ROUTER.recurring(),
-      () => import('@/modules/recurring/presentation/main'),
-    ),
-    page(
       APP_ROUTER.reports(),
       () => import('@/modules/reports/presentation/main'),
     ),

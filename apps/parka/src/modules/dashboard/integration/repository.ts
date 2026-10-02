@@ -13,6 +13,12 @@ import {
   updateLimitSchema,
 } from '@schemas/limits';
 import { createGoalSchema, listGoalsSchema } from '@schemas/goals';
+import {
+  createRecurringSchema,
+  deleteRecurringSchema,
+  listRecurringSchema,
+  updateRecurringSchema,
+} from '@schemas/recurring';
 import { API_ROUTER } from '@/shared/router/routes';
 import type {
   Category,
@@ -22,9 +28,18 @@ import type {
   Limit,
   LimitId,
   Month,
+  Recurring,
+  RecurringId,
   Summary,
 } from '../domain/models';
-import { toCategory, toExpense, toGoal, toLimit, toSummary } from './mappers';
+import {
+  toCategory,
+  toExpense,
+  toGoal,
+  toLimit,
+  toRecurring,
+  toSummary,
+} from './mappers';
 
 type ListExpensesOut = z.infer<ReturnType<typeof listExpensesSchema>>['out'];
 type UpdateExpenseOut = z.infer<ReturnType<typeof updateExpenseSchema>>['out'];
@@ -38,6 +53,16 @@ type UpdateLimitOut = z.infer<ReturnType<typeof updateLimitSchema>>['out'];
 type DeleteLimitOut = z.infer<ReturnType<typeof deleteLimitSchema>>['out'];
 type ListGoalsOut = z.infer<ReturnType<typeof listGoalsSchema>>['out'];
 type CreateGoalOut = z.infer<ReturnType<typeof createGoalSchema>>['out'];
+type ListRecurringOut = z.infer<ReturnType<typeof listRecurringSchema>>['out'];
+type CreateRecurringOut = z.infer<
+  ReturnType<typeof createRecurringSchema>
+>['out'];
+type UpdateRecurringOut = z.infer<
+  ReturnType<typeof updateRecurringSchema>
+>['out'];
+type DeleteRecurringOut = z.infer<
+  ReturnType<typeof deleteRecurringSchema>
+>['out'];
 
 /** Nothing else in this module fetches. */
 export const fetchSummary = async (
@@ -157,5 +182,51 @@ export const postGoal = async (goal: Goal): Promise<Goal> => {
 export const deleteLimit = async (id: LimitId): Promise<void> => {
   const response = await fetch(API_ROUTER.limitById(id), { method: 'DELETE' });
   const json = (await response.json()) as DeleteLimitOut;
+  if (json.code !== 200) throw new Error(json.message);
+};
+
+export const fetchRecurring = async (
+  signal: AbortSignal,
+): Promise<Recurring[]> => {
+  const response = await fetch(API_ROUTER.recurring(), {
+    headers: { Accept: 'application/json' },
+    signal,
+  });
+  const json = (await response.json()) as ListRecurringOut;
+  if (json.code !== 200) throw new Error(json.message);
+  return json.data.map(toRecurring);
+};
+
+export const postRecurring = async (
+  recurring: Recurring,
+): Promise<Recurring> => {
+  const response = await fetch(API_ROUTER.recurring(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(recurring),
+  });
+  const json = (await response.json()) as CreateRecurringOut;
+  if (json.code !== 201) throw new Error(json.message);
+  return toRecurring(json.data);
+};
+
+export const putRecurring = async (
+  recurring: Recurring,
+): Promise<Recurring> => {
+  const response = await fetch(API_ROUTER.recurringById(recurring.id), {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(recurring),
+  });
+  const json = (await response.json()) as UpdateRecurringOut;
+  if (json.code !== 200) throw new Error(json.message);
+  return toRecurring(json.data);
+};
+
+export const deleteRecurring = async (id: RecurringId): Promise<void> => {
+  const response = await fetch(API_ROUTER.recurringById(id), {
+    method: 'DELETE',
+  });
+  const json = (await response.json()) as DeleteRecurringOut;
   if (json.code !== 200) throw new Error(json.message);
 };

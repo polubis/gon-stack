@@ -4,6 +4,7 @@ import type { listExpensesSchema } from '@schemas/expenses';
 import type { listCategoriesSchema } from '@schemas/categories';
 import type { listLimitsSchema } from '@schemas/limits';
 import type { listGoalsSchema } from '@schemas/goals';
+import type { listRecurringSchema } from '@schemas/recurring';
 import type { InferOut } from '@/shared/server-contracts/extraction';
 import type {
   Category,
@@ -16,6 +17,8 @@ import type {
   Limit,
   LimitId,
   ReceiptItemId,
+  Recurring,
+  RecurringId,
   Summary,
 } from '../domain/models';
 
@@ -36,6 +39,11 @@ type LimitDto = InferOut<
 
 type GoalDto = InferOut<
   z.infer<ReturnType<typeof listGoalsSchema>>['out'],
+  200
+>['data'][number];
+
+type RecurringDto = InferOut<
+  z.infer<ReturnType<typeof listRecurringSchema>>['out'],
   200
 >['data'][number];
 
@@ -105,4 +113,15 @@ export const toGoal = (dto: GoalDto): Goal => ({
   target: dto.target,
   saved: dto.saved,
   months: dto.months,
+});
+
+export const toRecurring = (dto: RecurringDto): Recurring => ({
+  id: dto.id as RecurringId,
+  name: dto.name,
+  cost: dto.cost,
+  nextPaymentDate: dto.nextPaymentDate,
+  active: dto.active,
+  paymentMethod: dto.paymentMethod,
+  categoryId: dto.categoryId as CategoryId,
+  history: dto.history.map((h) => ({ date: h.date, amount: h.amount })),
 });

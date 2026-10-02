@@ -2,7 +2,10 @@ import { dateLabel, money } from '../domain/format';
 import type { Recurring } from '../domain/models';
 
 export const RecurringDetail = ({ recurring }: { recurring: Recurring }) => (
-  <div className="border-t border-line pt-3" data-e2e="recurring:detail">
+  <div
+    className="border-t border-line pt-3"
+    data-e2e="dashboard:recurring-detail"
+  >
     <dl className="space-y-1 text-sm">
       <div className="flex justify-between">
         <dt className="text-ink-soft">Metoda płatności</dt>

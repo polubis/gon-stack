@@ -23,11 +23,6 @@ export const APP_PAGES: readonly AppPage[] = [
     description: 'Zarządzaj kategoriami wydatków.',
   },
   {
-    url: APP_ROUTER.recurring(),
-    title: 'Wydatki cykliczne | Parka',
-    description: 'Zarządzaj subskrypcjami i rachunkami.',
-  },
-  {
     url: APP_ROUTER.reports(),
     title: 'Raport | Parka',
     description: 'Miesięczny raport wydatków.',

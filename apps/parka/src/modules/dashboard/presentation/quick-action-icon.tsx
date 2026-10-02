@@ -1,11 +1,10 @@
-import { Plus, Camera, Target, Repeat, type LucideIcon } from 'lucide-react';
+import { Plus, Camera, Target, type LucideIcon } from 'lucide-react';
 import type { QuickActionIconId } from '../domain/models';
 
 const MAP: Record<QuickActionIconId, LucideIcon> = {
   add: Plus,
   camera: Camera,
   target: Target,
-  repeat: Repeat,
 };
 
 type Props = {

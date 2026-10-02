@@ -1,1 +1,1 @@
-export type NavKey = 'start' | 'recurring' | 'more';
+export type NavKey = 'start' | 'more';

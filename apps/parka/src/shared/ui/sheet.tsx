@@ -20,10 +20,10 @@ const trapFocus = (event: KeyboardEvent, dialog: HTMLElement | null) => {
 };
 
 /**
- * Panel laid over the limits card, same footprint: opening a form never
+ * Panel laid over a widget card, same footprint: opening a form never
  * changes the card's height, so nothing around it moves.
  */
-export const LimitsSheet = ({
+export const Sheet = ({
   title,
   onClose,
   children,

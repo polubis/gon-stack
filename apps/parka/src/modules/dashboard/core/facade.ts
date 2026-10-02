@@ -7,6 +7,8 @@ import type {
   Limit,
   LimitId,
   Month,
+  Recurring,
+  RecurringId,
 } from '../domain/models';
 
 export const createFacade = (store: Store, trigger: Registry['trigger']) => {
@@ -22,6 +24,13 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
     updateLimit: (limit: Limit) => trigger('[TRIGGER]_UPDATE_LIMIT', { limit }),
     removeLimit: (id: LimitId) => trigger('[TRIGGER]_DELETE_LIMIT', { id }),
     createGoal: (goal: Goal) => trigger('[TRIGGER]_CREATE_GOAL', { goal }),
+    loadRecurring: () => trigger('[TRIGGER]_LOAD_RECURRING'),
+    createRecurring: (recurring: Recurring) =>
+      trigger('[TRIGGER]_CREATE_RECURRING', { recurring }),
+    updateRecurring: (recurring: Recurring) =>
+      trigger('[TRIGGER]_UPDATE_RECURRING', { recurring }),
+    removeRecurring: (id: RecurringId) =>
+      trigger('[TRIGGER]_DELETE_RECURRING', { id }),
     dismissNotice: () => trigger('[TRIGGER]_DISMISS_NOTICE'),
     useData: () => store.$data.use(),
     useInitializing: () => store.$initializing.use(),
@@ -37,6 +46,9 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
     useLimitsInitializing: () => store.$limitsInitializing.use(),
     useLimitsLoading: () => store.$limitsLoading.use(),
     useLimitsError: () => store.$limitsError.use(),
+    useRecurring: () => store.$recurring.use(),
+    useRecurringInitializing: () => store.$recurringInitializing.use(),
+    useRecurringError: () => store.$recurringError.use(),
     useNotice: () => store.$notice.use(),
   };
 };

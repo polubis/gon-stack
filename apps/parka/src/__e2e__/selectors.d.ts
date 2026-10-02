@@ -8,7 +8,6 @@ import type { DataExportE2eId } from '@/modules/data-export/configuration/e2e-id
 import type { PrivacyE2eId } from '@/modules/privacy/configuration/e2e-ids';
 import type { NotificationsE2eId } from '@/modules/notifications/configuration/e2e-ids';
 import type { ReceiptE2eId } from '@/modules/receipt/configuration/e2e-ids';
-import type { RecurringE2eId } from '@/modules/recurring/configuration/e2e-ids';
 import type { ReportsE2eId } from '@/modules/reports/configuration/e2e-ids';
 import type { SettingsE2eId } from '@/modules/settings/configuration/e2e-ids';
 import type { CookiesE2eId } from '@/shared/cookies/configuration/e2e-ids';
@@ -27,7 +26,6 @@ export type E2eId =
   | SignUpE2eId
   | DashboardE2eId
   | ReceiptE2eId
-  | RecurringE2eId
   | ReportsE2eId
   | NotificationsE2eId
   | SettingsE2eId

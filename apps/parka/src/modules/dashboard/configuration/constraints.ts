@@ -37,7 +37,6 @@ export const QUICK_ACTIONS: QuickAction[] = [
   { label: 'Dodaj paragon', href: APP_ROUTER.receiptScan(), iconId: 'add' },
   { label: 'Zrób zdjęcie', href: APP_ROUTER.receiptScan(), iconId: 'camera' },
   { label: 'Limity', href: `#${LIMITS_SECTION_ID}`, iconId: 'target' },
-  { label: 'Cykliczne', href: APP_ROUTER.recurring(), iconId: 'repeat' },
 ];
 
 /** Shown for expenses when the user has no matching category. */
@@ -53,5 +52,6 @@ export const ERROR_CODES = {
   loadExpenses: 'DASHBOARD_EXPENSES_LOAD',
   loadLimits: 'DASHBOARD_LIMITS_LOAD',
   loadGoals: 'DASHBOARD_GOALS_LOAD',
+  loadRecurring: 'DASHBOARD_RECURRING_LOAD',
   render: 'DASHBOARD_RENDER',
 } as const;

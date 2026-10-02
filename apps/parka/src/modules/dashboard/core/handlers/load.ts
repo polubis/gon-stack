@@ -5,7 +5,8 @@ import { fetchSummary } from '../../integration/repository';
 
 export const load = (store: Store, { ofType }: Bus) =>
   ofType('[TRIGGER]_LOAD').pipe(
-    tap(() => {
+    tap(({ month }) => {
+      store.$month.set(month);
       store.$isLoading.set(true);
       store.$error.reset();
     }),

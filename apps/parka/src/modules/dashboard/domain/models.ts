@@ -7,6 +7,7 @@ export type ExpenseId = Brand<string, 'ExpenseId'>;
 export type ReceiptItemId = Brand<string, 'ReceiptItemId'>;
 export type LimitId = Brand<string, 'LimitId'>;
 export type GoalId = Brand<string, 'GoalId'>;
+export type RecurringId = Brand<string, 'RecurringId'>;
 
 export type DayPoint = { day: number; total: number };
 
@@ -38,7 +39,7 @@ export type Summary = {
   categories: CategorySlice[];
 };
 
-export type QuickActionIconId = 'add' | 'camera' | 'target' | 'repeat';
+export type QuickActionIconId = 'add' | 'camera' | 'target';
 
 export type QuickAction = {
   label: string;
@@ -73,8 +74,27 @@ export type Expense = {
   categoryId: CategoryId;
   paymentMethod: string;
   isBill: boolean;
-  source: 'receipt' | 'manual';
+  /** `recurring`: derived from a recurring expense, never stored. */
+  source: 'receipt' | 'manual' | 'recurring';
   items: ReceiptItem[];
+};
+
+export type Payment = {
+  /** ISO date-time string. */
+  date: string;
+  amount: number;
+};
+
+export type Recurring = {
+  id: RecurringId;
+  name: string;
+  cost: number;
+  /** ISO date-time string. */
+  nextPaymentDate: string;
+  active: boolean;
+  paymentMethod: string;
+  categoryId: CategoryId;
+  history: Payment[];
 };
 
 export type Notice = {

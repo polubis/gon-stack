@@ -175,14 +175,6 @@ const commands = {
       'navigation stays client-side',
     ).toBe(true);
   },
-  'the dashboard links to recurring': async ({ page, getByE2e }) => {
-    await open(page, APP_ROUTER.dashboard());
-    await getByE2e('dashboard:main')
-      .getByRole('link', { name: 'Cykliczne' })
-      .click();
-    await page.waitForURL(`**${APP_ROUTER.recurring()}`);
-    await expect(getByE2e('recurring:main')).toBeVisible();
-  },
 
   'i scan and save a receipt as an expense': async ({
     page,
@@ -425,13 +417,53 @@ const commands = {
         },
       ],
     });
-    await open(page, APP_ROUTER.recurring());
-    // "Wszystkie" keeps disabled entries visible after toggling.
-    await page.getByRole('tab', { name: 'Wszystkie' }).click();
+    await open(page, APP_ROUTER.dashboard());
     const spotify = page.getByRole('switch', { name: /Spotify/ }).first();
     await expect(spotify).toHaveAttribute('aria-checked', 'true');
     await spotify.click();
     await expect(spotify).toHaveAttribute('aria-checked', 'false');
+  },
+
+  'i add and remove a recurring expense': async ({ page, getByE2e }) => {
+    await mockState(page);
+    await open(page, APP_ROUTER.dashboard());
+    await getByE2e('dashboard:recurring-new').click();
+    await getByE2e('dashboard:recurring-form-name').fill('Siłownia');
+    await getByE2e('dashboard:recurring-form-cost').fill('99');
+    await getByE2e('dashboard:recurring-form-save').click();
+    await expect(getByE2e('dashboard:recurring-form')).toHaveCount(0);
+    await expect(
+      getByE2e('dashboard:recurring').getByText('Siłownia'),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Edytuj: Siłownia' }).click();
+    await getByE2e('dashboard:recurring-delete').click();
+    await expect(page.getByText('Brak wydatków cyklicznych.')).toBeVisible();
+  },
+  'a recurring expense counts in this month': async ({ page, getByE2e }) => {
+    await mockState(page, {
+      recurring: [
+        {
+          id: 'rec-2',
+          name: 'Spotify',
+          cost: 24.99,
+          nextPaymentDate: new Date().toISOString().slice(0, 10),
+          active: true,
+          paymentMethod: 'card',
+          categoryId: CATEGORY.id,
+          history: [],
+        },
+      ],
+    });
+    await open(page, APP_ROUTER.dashboard());
+    await expect(
+      getByE2e('dashboard:expenses').getByText('Spotify'),
+    ).toBeVisible();
+  },
+  'the dashboard shows the recurring widget': async ({ page, getByE2e }) => {
+    await mockState(page);
+    await open(page, APP_ROUTER.dashboard());
+    await getByE2e('dashboard:recurring-new').click();
+    await expect(getByE2e('dashboard:recurring-form')).toBeVisible();
   },
 
   'the monthly report downloads a csv': async ({ page, getByE2e }) => {
@@ -482,13 +514,8 @@ test('month selection changes the spending overview period', async ({
   );
 });
 
-test('spending overview links to receipt, limits and recurring flows', async ({
-  e2e,
-}) => {
-  await interpreter(commands, e2e)(
-    ['the dashboard links to limits'],
-    ['the dashboard links to recurring'],
-  );
+test('spending overview links to receipt and limits flows', async ({ e2e }) => {
+  await interpreter(commands, e2e)(['the dashboard links to limits']);
 });
 
 test('a scanned receipt can be reviewed, corrected and saved as an expense', async ({
@@ -559,6 +586,24 @@ test('a new category appears in the category list', async ({ e2e }) => {
 
 test('recurring expense tracking can be toggled off', async ({ e2e }) => {
   await interpreter(commands, e2e)(['i toggle recurring tracking off']);
+});
+
+test('recurring expenses can be added and removed', async ({ e2e }) => {
+  await interpreter(commands, e2e)(['i add and remove a recurring expense']);
+});
+
+test('a recurring expense is counted in its months', async ({ e2e }) => {
+  await interpreter(
+    commands,
+    e2e,
+  )(['a recurring expense counts in this month']);
+});
+
+test('the dashboard hosts the recurring widget', async ({ e2e }) => {
+  await interpreter(
+    commands,
+    e2e,
+  )(['the dashboard shows the recurring widget']);
 });
 
 test('the monthly report is downloadable', async ({ e2e }) => {
