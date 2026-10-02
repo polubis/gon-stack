@@ -25,6 +25,10 @@ export type DashboardSummary = {
   transactions: number;
   /** Selected month total per elapsed day. */
   dailyAverage: number;
+  /** Number of expenses in the previous month. */
+  previousTransactions: number;
+  /** Previous month total per day (it is over, so all its days count). */
+  previousDailyAverage: number;
   /** Per-day totals of the selected month, day 1 first. */
   daily: DashboardDayPoint[];
   /** Per-day totals of the previous month, day 1 first. */
@@ -119,6 +123,7 @@ export const summarizeDashboard = ({
   const elapsed = elapsedDays(month, today);
   const dailyAverage = elapsed === 0 ? 0 : total / elapsed;
 
+  const previous = prevMonthOf(month);
   const scoped = inMonths(expenses, [month]);
   const categorySlices = categories
     .map((category) => {
@@ -140,6 +145,8 @@ export const summarizeDashboard = ({
     previousTotal,
     transactions: scoped.length,
     dailyAverage,
+    previousTransactions: inMonths(expenses, [previous]).length,
+    previousDailyAverage: previousTotal / daysIn(previous),
     daily: dailyTotals(expenses, month),
     previousDaily: dailyTotals(expenses, prevMonthOf(month)),
     monthlyLimit,

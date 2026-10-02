@@ -128,6 +128,8 @@ const commands = {
               userName: 'Anna',
               transactions: 0,
               dailyAverage: 0,
+              previousTransactions: 0,
+              previousDailyAverage: 0,
               daily: [],
               previousDaily: [],
               monthlyLimit: null,
@@ -166,7 +168,7 @@ const commands = {
     await open(page, APP_ROUTER.dashboard());
     await page.evaluate(() => Object.assign(window, { spaMarker: true }));
     await getByE2e('dashboard:main')
-      .getByRole('link', { name: 'Limity' })
+      .getByRole('link', { name: 'Ustaw limit' })
       .click();
     await expect(getByE2e('dashboard:limits')).toBeInViewport();
     await expect(getByE2e('dashboard:limits')).toBeFocused();
@@ -514,8 +516,11 @@ test('month selection changes the spending overview period', async ({
   );
 });
 
-test('spending overview links to receipt and limits flows', async ({ e2e }) => {
-  await interpreter(commands, e2e)(['the dashboard links to limits']);
+test('spending overview links to the limits section', async ({ e2e }) => {
+  await interpreter(commands, e2e)(
+    ['i mock the dashboard totals'],
+    ['the dashboard links to limits'],
+  );
 });
 
 test('a scanned receipt can be reviewed, corrected and saved as an expense', async ({

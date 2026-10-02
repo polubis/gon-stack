@@ -1,4 +1,7 @@
+import { Plus } from 'lucide-react';
 import { categoryLabel } from '@/shared/i18n/category-label';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { Button } from '@/shared/ui/controls';
 import { Card } from '@/shared/ui/layout';
 import { Skeleton } from '@/shared/ui/skeleton';
 import {
@@ -19,7 +22,17 @@ export const CategoriesCard = ({
   summary: Summary | null;
 }) => (
   <Card className="space-y-4 xl:col-span-4">
-    <h2 className="text-base font-semibold">Kategorie wydatków</h2>
+    <div className="flex items-center justify-between gap-2">
+      <h2 className="text-base font-semibold">Kategorie wydatków</h2>
+      <Button
+        variant="ghost"
+        href={APP_ROUTER.categories()}
+        className="w-auto px-3 py-1.5"
+        data-e2e="dashboard:category-new"
+      >
+        <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj kategorię
+      </Button>
+    </div>
     {!summary ? (
       <Skeleton className="h-40 w-full" />
     ) : summary.categories.length > 0 ? (

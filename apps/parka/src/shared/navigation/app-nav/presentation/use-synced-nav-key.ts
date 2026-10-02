@@ -5,5 +5,5 @@ import type { NavKey } from '../domain/models';
 /** Keeps nav in sync with the client-side router location. */
 export const useSyncedNavKey = (): NavKey => {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  return activeNavKeyFromPathname(pathname) ?? 'start';
+  return activeNavKeyFromPathname(pathname) ?? 'finances';
 };

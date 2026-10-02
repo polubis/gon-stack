@@ -19,6 +19,7 @@ export const DASHBOARD_E2E_IDS = [
   'dashboard:limit-total-edit',
   'dashboard:limit-list',
   'dashboard:limit-new',
+  'dashboard:category-new',
   'dashboard:limit-new-hint',
   'dashboard:limit-form',
   'dashboard:limit-form-category',

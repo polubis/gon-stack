@@ -56,6 +56,8 @@ export const toSummary = (
   previousTotal: dto.previousTotal,
   transactions: dto.transactions,
   dailyAverage: dto.dailyAverage,
+  previousTransactions: dto.previousTransactions,
+  previousDailyAverage: dto.previousDailyAverage,
   daily: dto.daily,
   previousDaily: dto.previousDaily,
   monthlyLimit: dto.monthlyLimit,

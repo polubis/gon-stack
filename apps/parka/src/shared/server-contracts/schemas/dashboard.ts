@@ -27,6 +27,8 @@ export const getDashboardSchema = () =>
           userName: z.string(),
           transactions: z.number(),
           dailyAverage: z.number(),
+          previousTransactions: z.number(),
+          previousDailyAverage: z.number(),
           daily: z.array(dayPoint()),
           previousDaily: z.array(dayPoint()),
           monthlyLimit: z.number().nullable(),

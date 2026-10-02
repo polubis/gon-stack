@@ -11,6 +11,8 @@ const SUMMARY = {
   previousTotal: 8,
   transactions: 3,
   dailyAverage: 1.5,
+  previousTransactions: 2,
+  previousDailyAverage: 0.5,
   daily: [
     { day: 1, total: 4 },
     { day: 2, total: 6 },
@@ -62,7 +64,7 @@ describe('dashboard screen', () => {
     expect(kpi('Pozostało do limitu').getByText(/90,00/)).toBeTruthy();
   });
 
-  it('shows breakdown and month comparison together', async () => {
+  it('shows the breakdown and the previous month total in the spending kpi', async () => {
     stubApi();
 
     render(<Main />);
@@ -70,12 +72,23 @@ describe('dashboard screen', () => {
     await waitFor(() =>
       expect(screen.getByText('Kategorie wydatków')).toBeTruthy(),
     );
-    expect(screen.getByText('Porównanie miesięcy')).toBeTruthy();
-    const card = screen.getByRole('heading', {
-      name: 'Porównanie miesięcy',
-    }).parentElement;
-    if (!card) throw new Error('No comparison card.');
-    expect(within(card).getByText(/8,00/)).toBeTruthy();
+    expect(kpi('Wydatki w tym miesiącu').getByText(/8,00/)).toBeTruthy();
+  });
+
+  it('lists each category with its amount and share', async () => {
+    stubApi();
+
+    render(<Main />);
+
+    const donut = await screen.findByRole('img', {
+      name: /Rozkład wydatków wg kategorii/,
+    });
+    const figure = donut.closest('figure');
+    if (!figure) throw new Error('No category figure.');
+    const legend = within(figure);
+    expect(legend.getByText('Jedzenie')).toBeTruthy();
+    expect(legend.getByText(/42,00/)).toBeTruthy();
+    expect(legend.getByText('100%')).toBeTruthy();
   });
 
   it('asks the backend for the chosen month', async () => {

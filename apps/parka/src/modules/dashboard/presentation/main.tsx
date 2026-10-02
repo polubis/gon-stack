@@ -9,7 +9,6 @@ import { ERROR_CODES } from '../configuration/constraints';
 import { currentMonth, toMonth } from '../domain/format';
 import type { ExpenseId, Month } from '../domain/models';
 import { CategoriesCard } from './categories-card';
-import { Comparison } from './comparison';
 import { Provider, useContext } from './context';
 import { ExpenseDetail } from './expense-detail';
 import { GoalsCard } from './goals-card';
@@ -17,7 +16,6 @@ import { LimitsCard } from './limits-card';
 import { MonthExpenses } from './month-expenses';
 import { Header } from './header';
 import { Kpis } from './kpis';
-import { QuickActions } from './quick-actions';
 import { RecurringCard } from './recurring-card';
 import { SpendingChart } from './spending-chart';
 
@@ -114,10 +112,6 @@ const DashboardView = () => {
           </div>
         )}
 
-        <LimitsCard month={month} />
-        <GoalsCard />
-        <RecurringCard />
-
         {failed ? null : (
           <>
             <div className="xl:col-span-12">
@@ -128,10 +122,9 @@ const DashboardView = () => {
           </>
         )}
         <MonthExpenses month={month} onSelect={select} />
-        <div className="flex flex-col gap-4 md:gap-6 xl:col-span-4">
-          {failed ? null : <Comparison month={month} summary={summary} />}
-          <QuickActions />
-        </div>
+        <LimitsCard month={month} />
+        <GoalsCard />
+        <RecurringCard />
         {overlays}
       </main>
     </div>

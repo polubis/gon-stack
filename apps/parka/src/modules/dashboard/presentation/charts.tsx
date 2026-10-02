@@ -1,3 +1,5 @@
+import { money } from '../domain/format';
+
 type Slice = { label: string; value: number; color: string };
 
 export const Donut = ({
@@ -57,7 +59,8 @@ export const Donut = ({
               aria-hidden="true"
             />
             <span className="flex-1 text-ink-soft">{s.label}</span>
-            <span className="font-medium tabular-nums">
+            <span className="font-medium tabular-nums">{money(s.value)}</span>
+            <span className="w-10 text-right text-ink-soft tabular-nums">
               {Math.round((s.value / total) * 100)}%
             </span>
           </li>

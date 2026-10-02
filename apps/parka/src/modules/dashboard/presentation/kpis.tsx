@@ -46,6 +46,44 @@ const Kpi = ({
   </Card>
 );
 
+/** Relative change vs a previous value; the base's sign is ignored. */
+const changeFrom = (current: number, previous: number): number =>
+  previous === 0 ? 0 : ((current - previous) / Math.abs(previous)) * 100;
+
+/** Arrow, percent change and the previous month's value. */
+const Trend = ({
+  month,
+  change,
+  previous,
+  higherIsBetter = false,
+  'data-e2e': dataE2e,
+}: {
+  month: Month;
+  change: number;
+  previous: string;
+  higherIsBetter?: boolean;
+  'data-e2e'?: 'dashboard:previous-total';
+}) => {
+  const down = change <= 0;
+  const good = higherIsBetter ? change >= 0 : down;
+  return (
+    <p
+      className={cn(
+        'flex items-center gap-1 text-xs font-medium md:text-sm',
+        good ? 'text-brand-dark' : 'text-danger-strong',
+      )}
+    >
+      {down ? (
+        <TrendingDown className="h-4 w-4" aria-hidden="true" />
+      ) : (
+        <TrendingUp className="h-4 w-4" aria-hidden="true" />
+      )}
+      {percent(change)} vs {monthLabel(prevMonth(month)).split(' ')[0]}:{' '}
+      <span data-e2e={dataE2e}>{previous}</span>
+    </p>
+  );
+};
+
 export const Kpis = ({
   month,
   summary,
@@ -54,9 +92,11 @@ export const Kpis = ({
   summary: Summary | null;
 }) => {
   const loading = !summary;
-  const down = (summary?.change ?? 0) <= 0;
   const left = summary?.monthlyLimit
     ? summary.monthlyLimit - summary.total
+    : null;
+  const previousLeft = summary?.monthlyLimit
+    ? summary.monthlyLimit - summary.previousTotal
     : null;
 
   return (
@@ -69,25 +109,25 @@ export const Kpis = ({
           skeletonClassName="h-10 sm:h-11 md:h-12 xl:h-13"
         >
           <p data-e2e="dashboard:total">{money(summary?.total ?? 0)}</p>
-          <p
-            className={cn(
-              'flex items-center gap-1 text-xs font-medium md:text-sm',
-              down ? 'text-brand-dark' : 'text-danger-strong',
-            )}
-          >
-            {down ? (
-              <TrendingDown className="h-4 w-4" aria-hidden="true" />
-            ) : (
-              <TrendingUp className="h-4 w-4" aria-hidden="true" />
-            )}
-            {percent(summary?.change ?? 0)} vs{' '}
-            {monthLabel(prevMonth(month)).split(' ')[0]}
-          </p>
+          <Trend
+            month={month}
+            change={summary?.change ?? 0}
+            previous={money(summary?.previousTotal ?? 0)}
+            data-e2e="dashboard:previous-total"
+          />
         </Kpi>
       </li>
       <li>
         <Kpi icon={ReceiptText} label="Liczba transakcji" loading={loading}>
           <p data-e2e="dashboard:transactions">{summary?.transactions}</p>
+          <Trend
+            month={month}
+            change={changeFrom(
+              summary?.transactions ?? 0,
+              summary?.previousTransactions ?? 0,
+            )}
+            previous={String(summary?.previousTransactions ?? 0)}
+          />
         </Kpi>
       </li>
       <li>
@@ -95,6 +135,14 @@ export const Kpis = ({
           <p data-e2e="dashboard:daily-average">
             {money(summary?.dailyAverage ?? 0)}
           </p>
+          <Trend
+            month={month}
+            change={changeFrom(
+              summary?.dailyAverage ?? 0,
+              summary?.previousDailyAverage ?? 0,
+            )}
+            previous={money(summary?.previousDailyAverage ?? 0)}
+          />
         </Kpi>
       </li>
       <li>
@@ -115,6 +163,14 @@ export const Kpis = ({
               {money(left)}
             </p>
           )}
+          {left !== null && previousLeft !== null ? (
+            <Trend
+              month={month}
+              change={changeFrom(left, previousLeft)}
+              previous={money(previousLeft)}
+              higherIsBetter
+            />
+          ) : null}
         </Kpi>
       </li>
     </ul>

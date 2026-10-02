@@ -54,9 +54,15 @@ const Chip = ({
   </button>
 );
 
+/** Rows the list shows before it scrolls. */
+const LIST_ROWS = 8;
+
+/** Fixed so filters/loading never shift the layout: 8 rows of 3.5rem + 7 dividers (1px each). */
+const LIST_HEIGHT = 'h-[calc(8*3.5rem+0.4375rem)]';
+
 const ListSkeleton = () => (
   <ul aria-hidden="true" className="divide-y divide-line">
-    {Array.from({ length: 4 }, (_, i) => (
+    {Array.from({ length: LIST_ROWS }, (_, i) => (
       <li key={i} className="flex items-center gap-3 py-2">
         <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
         <span className="flex flex-1 flex-col gap-1.5">
@@ -124,7 +130,7 @@ export const MonthExpenses = ({
     <Card
       as="section"
       aria-labelledby="month-expenses"
-      className="space-y-3 xl:col-span-8"
+      className="space-y-3 xl:col-span-12"
       data-e2e="dashboard:expenses"
     >
       <div className="flex items-baseline justify-between gap-3">
@@ -178,45 +184,47 @@ export const MonthExpenses = ({
         </div>
       ) : null}
 
-      {initializing ? (
-        <ListSkeleton />
-      ) : visible.length === 0 ? (
-        <p className="py-2 text-sm text-ink-soft">
-          Brak wydatków w tym miesiącu.
-        </p>
-      ) : (
-        <ul className="max-h-96 divide-y divide-line overflow-y-auto pr-2">
-          {visible.map((e) => {
-            const category = categoryOf(categories, e.categoryId);
-            return (
-              <li key={e.id}>
-                <Row
-                  derived={e.source === 'recurring'}
-                  id={e.id}
-                  onSelect={onSelect}
-                >
-                  <CategoryAvatar category={category} className="h-10 w-10" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-semibold">
-                      {e.merchant}
+      <div className={cn(LIST_HEIGHT, 'overflow-y-auto')}>
+        {initializing ? (
+          <ListSkeleton />
+        ) : visible.length === 0 ? (
+          <p className="py-2 text-sm text-ink-soft">
+            Brak wydatków w tym miesiącu.
+          </p>
+        ) : (
+          <ul className="divide-y divide-line pr-2">
+            {visible.map((e) => {
+              const category = categoryOf(categories, e.categoryId);
+              return (
+                <li key={e.id}>
+                  <Row
+                    derived={e.source === 'recurring'}
+                    id={e.id}
+                    onSelect={onSelect}
+                  >
+                    <CategoryAvatar category={category} className="h-10 w-10" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold">
+                        {e.merchant}
+                      </span>
+                      <span className="block text-xs text-ink-soft">
+                        {shortDateLabel(e.date)}
+                        {e.source === 'recurring' ? ' · cykliczny' : ''}
+                      </span>
                     </span>
-                    <span className="block text-xs text-ink-soft">
-                      {shortDateLabel(e.date)}
-                      {e.source === 'recurring' ? ' · cykliczny' : ''}
+                    <span className="text-sm font-semibold tabular-nums">
+                      {money(e.amount)}
                     </span>
-                  </span>
-                  <span className="text-sm font-semibold tabular-nums">
-                    {money(e.amount)}
-                  </span>
-                  <span className="hidden rounded-full bg-brand-soft px-3 py-1 text-xs font-medium text-brand-dark md:inline">
-                    {categoryLabel(category.name)}
-                  </span>
-                </Row>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                    <span className="hidden rounded-full bg-brand-soft px-3 py-1 text-xs font-medium text-brand-dark md:inline">
+                      {categoryLabel(category.name)}
+                    </span>
+                  </Row>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
     </Card>
   );
 };

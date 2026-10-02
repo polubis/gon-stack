@@ -37,6 +37,13 @@ describe('dashboard summary', () => {
     expect(summary.dailyAverage).toBe(90 / 30);
   });
 
+  it('reports the previous month transactions and daily average', () => {
+    const summary = summarize('2026-09', '2026-09-10', expenses);
+
+    expect(summary.previousTransactions).toBe(1);
+    expect(summary.previousDailyAverage).toBe(40 / 31);
+  });
+
   it('averages the current month over the days elapsed so far', () => {
     const summary = summarize('2026-09', '2026-09-10', expenses);
 

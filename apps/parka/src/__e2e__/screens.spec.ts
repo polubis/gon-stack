@@ -81,6 +81,8 @@ const commands = {
               userName: 'Anna',
               transactions: 0,
               dailyAverage: 0,
+              previousTransactions: 0,
+              previousDailyAverage: 0,
               daily: [],
               previousDaily: [],
               monthlyLimit: null,

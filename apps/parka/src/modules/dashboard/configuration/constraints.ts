@@ -1,5 +1,4 @@
-import { APP_ROUTER } from '@/shared/router/routes';
-import type { Category, CategoryId, QuickAction } from '../domain/models';
+import type { Category, CategoryId } from '../domain/models';
 
 export const FEATURE_NAME = 'Dashboard';
 
@@ -20,7 +19,7 @@ export const OTHER_CATEGORY_NAME = 'category.other';
 
 export const OTHER_CATEGORY_LABEL = 'Inne';
 
-/** Anchor of the limits widget; the quick action and KPI link scroll to it. */
+/** Anchor of the limits widget; the KPI link scrolls to it. */
 export const LIMITS_SECTION_ID = 'limits';
 
 export const DEFAULT_CATEGORY_LIMIT = 300;
@@ -32,12 +31,6 @@ export const DEFAULT_GOAL_NAME = 'Nowy cel';
 export const WARN_PCT = 80;
 
 export const GOALS_SECTION_ID = 'goals';
-
-export const QUICK_ACTIONS: QuickAction[] = [
-  { label: 'Dodaj paragon', href: APP_ROUTER.receiptScan(), iconId: 'add' },
-  { label: 'Zrób zdjęcie', href: APP_ROUTER.receiptScan(), iconId: 'camera' },
-  { label: 'Limity', href: `#${LIMITS_SECTION_ID}`, iconId: 'target' },
-];
 
 /** Shown for expenses when the user has no matching category. */
 export const UNCATEGORIZED: Category = {

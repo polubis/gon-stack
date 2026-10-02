@@ -7,7 +7,7 @@ export const activeNavKeyFromPathname = (pathname: string): NavKey | null => {
 
   // Dashboard lives at the `/app/` root, so it must match exactly — every
   // other `/app/*` page is a prefix-match of it.
-  if (p === APP_ROUTER.dashboard()) return 'start';
+  if (p === APP_ROUTER.dashboard()) return 'finances';
 
   if (MORE_SECTION_PATHS.some((m) => p === m || p.startsWith(m))) {
     return 'more';

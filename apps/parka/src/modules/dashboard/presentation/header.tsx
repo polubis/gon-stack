@@ -45,7 +45,7 @@ export const Header = ({
           data-e2e="dashboard:month-select"
           value={month}
           onChange={(e) => onMonthChange(toMonth(e.target.value))}
-          className="w-full cursor-pointer appearance-none rounded-xl border border-line-strong bg-card py-2.5 pl-4 pr-10 text-sm font-medium text-ink"
+          className="w-full cursor-pointer appearance-none rounded-xl border border-line-strong bg-card h-11 pl-4 pr-10 text-sm font-medium text-ink"
         >
           {monthOptions(month, currentMonth(), MONTH_OPTIONS_COUNT).map((m) => (
             <option key={m} value={m}>
@@ -61,10 +61,10 @@ export const Header = ({
 
       <Button
         href={APP_ROUTER.receiptScan()}
-        className="hidden w-auto md:inline-flex"
+        className="hidden h-11 w-auto py-0 md:inline-flex"
       >
         <Plus className="h-4 w-4" aria-hidden="true" />
-        Dodaj paragon
+        Dodaj wydatek
       </Button>
 
       <a
