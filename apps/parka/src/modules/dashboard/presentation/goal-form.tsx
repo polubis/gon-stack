@@ -7,23 +7,42 @@ import {
   DEFAULT_GOAL_TARGET,
 } from '../configuration/constraints';
 import { newGoalId } from '../domain/ids';
+import type { Goal } from '../domain/models';
 import { useContext } from './context';
 
-export const NewGoalForm = ({ onDone }: { onDone: () => void }) => {
+/** Creates a goal, or edits `goal` (can be removed). */
+export const GoalForm = ({
+  goal,
+  onDone,
+}: {
+  goal?: Goal;
+  onDone: () => void;
+}) => {
   const ctx = useContext();
-  const [name, setName] = useState('');
-  const [target, setTarget] = useState(DEFAULT_GOAL_TARGET);
-  const [months, setMonths] = useState(DEFAULT_GOAL_MONTHS);
+  const [name, setName] = useState(goal?.name ?? '');
+  const [target, setTarget] = useState(goal?.target ?? DEFAULT_GOAL_TARGET);
+  const [saved, setSaved] = useState(goal?.saved ?? 0);
+  const [months, setMonths] = useState(goal?.months ?? DEFAULT_GOAL_MONTHS);
 
   const save = (event: FormEvent) => {
     event.preventDefault();
-    ctx.createGoal({
-      id: newGoalId(),
+    const next = {
       name: name || DEFAULT_GOAL_NAME,
       target,
-      saved: 0,
+      saved,
       months: months || 1,
-    });
+    };
+    if (goal) {
+      ctx.updateGoal({ ...goal, ...next });
+    } else {
+      ctx.createGoal({ id: newGoalId(), ...next });
+    }
+    onDone();
+  };
+
+  const remove = () => {
+    if (!goal) return;
+    ctx.removeGoal(goal.id);
     onDone();
   };
 
@@ -35,7 +54,7 @@ export const NewGoalForm = ({ onDone }: { onDone: () => void }) => {
           value={name}
           data-e2e="dashboard:goal-form-name"
           onChange={(e) => setName(e.target.value)}
-          placeholder="np. Wakacje"
+          placeholder="np. Wakacje w Grecji"
         />
       </Field>
       <Field label="Kwota docelowa">
@@ -44,6 +63,13 @@ export const NewGoalForm = ({ onDone }: { onDone: () => void }) => {
           value={target}
           data-e2e="dashboard:goal-form-target"
           onValueChange={setTarget}
+        />
+      </Field>
+      <Field label="Odłożono">
+        <NumberInput
+          value={saved}
+          data-e2e="dashboard:goal-form-saved"
+          onValueChange={setSaved}
         />
       </Field>
       <Field label="Horyzont (miesiące)">
@@ -63,6 +89,15 @@ export const NewGoalForm = ({ onDone }: { onDone: () => void }) => {
           Zapisz
         </Button>
       </div>
+      {goal ? (
+        <Button
+          variant="danger"
+          data-e2e="dashboard:goal-delete"
+          onClick={remove}
+        >
+          Usuń cel
+        </Button>
+      ) : null}
     </form>
   );
 };

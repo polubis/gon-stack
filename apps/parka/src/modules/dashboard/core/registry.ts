@@ -8,6 +8,8 @@ import { createLimit } from './handlers/create-limit';
 import { updateLimit } from './handlers/update-limit';
 import { removeLimit } from './handlers/delete-limit';
 import { createGoal } from './handlers/create-goal';
+import { updateGoal } from './handlers/update-goal';
+import { removeGoal } from './handlers/delete-goal';
 import { loadRecurring } from './handlers/load-recurring';
 import { createRecurring } from './handlers/create-recurring';
 import { updateRecurring } from './handlers/update-recurring';
@@ -28,6 +30,8 @@ export const createRegistry = (store: Store) => {
     updateLimit(store, bus),
     removeLimit(store, bus),
     createGoal(store, bus),
+    updateGoal(store, bus),
+    removeGoal(store, bus),
     loadRecurring(store, bus),
     createRecurring(store, bus),
     updateRecurring(store, bus),

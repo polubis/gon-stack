@@ -8,7 +8,7 @@ import { ERROR_CODES, GOALS_SECTION_ID } from '../configuration/constraints';
 import { useContext } from './context';
 import { GoalsTab } from './goals-tab';
 import { Sheet } from '@/shared/ui/sheet';
-import { NewGoalForm } from './new-goal-form';
+import { GoalForm } from './goal-form';
 import { useSheet } from '@/shared/ui/use-sheet';
 
 const GoalsSkeleton = () => (
@@ -19,13 +19,16 @@ const GoalsSkeleton = () => (
   </div>
 );
 
-/** Savings goals. Fixed height, form opens as a sheet over the card. */
+/** Vacation goals (CRUD). Fixed height, form opens as a sheet over the card. */
 export const GoalsCard = () => {
   const ctx = useContext();
   const goals = ctx.useGoals();
   const error = ctx.useLimitsError();
   const initializing = ctx.useLimitsInitializing();
-  const { sheet, open, close } = useSheet<'goal'>();
+  const { sheet, open, close } = useSheet<'goal' | `edit:${string}`>();
+  const editing = sheet?.startsWith('edit:')
+    ? goals.find((g) => `edit:${g.id}` === sheet)
+    : undefined;
 
   return (
     <Card
@@ -41,7 +44,7 @@ export const GoalsCard = () => {
       >
         <div className="flex items-center justify-between gap-3">
           <h2 id="goals-title" className="text-base font-semibold">
-            Cele
+            Cele wakacyjne
           </h2>
           <Button
             variant="ghost"
@@ -57,7 +60,7 @@ export const GoalsCard = () => {
         {error ? (
           <ErrorState
             data-e2e="dashboard:goals-error"
-            title="Nie udało się wczytać celów"
+            title="Nie udało się wczytać celów wakacyjnych"
             code={ERROR_CODES.loadGoals}
             description={error}
             onRetry={ctx.loadLimits}
@@ -66,13 +69,22 @@ export const GoalsCard = () => {
         ) : null}
 
         <div className="min-h-0 flex-1 overflow-y-auto pr-2">
-          {initializing ? <GoalsSkeleton /> : <GoalsTab goals={goals} />}
+          {initializing ? (
+            <GoalsSkeleton />
+          ) : (
+            <GoalsTab goals={goals} onEdit={(id) => open(`edit:${id}`)} />
+          )}
         </div>
       </div>
 
-      {sheet ? (
-        <Sheet title="Nowy cel oszczędnościowy" onClose={close}>
-          <NewGoalForm onDone={close} />
+      {sheet === 'goal' ? (
+        <Sheet title="Nowy cel wakacyjny" onClose={close}>
+          <GoalForm onDone={close} />
+        </Sheet>
+      ) : null}
+      {editing ? (
+        <Sheet title="Edytuj cel wakacyjny" onClose={close}>
+          <GoalForm goal={editing} onDone={close} />
         </Sheet>
       ) : null}
     </Card>

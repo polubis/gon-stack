@@ -4,6 +4,7 @@ import type {
   Expense,
   ExpenseId,
   Goal,
+  GoalId,
   Limit,
   LimitId,
   Month,
@@ -24,6 +25,8 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
     updateLimit: (limit: Limit) => trigger('[TRIGGER]_UPDATE_LIMIT', { limit }),
     removeLimit: (id: LimitId) => trigger('[TRIGGER]_DELETE_LIMIT', { id }),
     createGoal: (goal: Goal) => trigger('[TRIGGER]_CREATE_GOAL', { goal }),
+    updateGoal: (goal: Goal) => trigger('[TRIGGER]_UPDATE_GOAL', { goal }),
+    removeGoal: (id: GoalId) => trigger('[TRIGGER]_DELETE_GOAL', { id }),
     loadRecurring: () => trigger('[TRIGGER]_LOAD_RECURRING'),
     createRecurring: (recurring: Recurring) =>
       trigger('[TRIGGER]_CREATE_RECURRING', { recurring }),
