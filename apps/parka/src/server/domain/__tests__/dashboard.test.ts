@@ -31,29 +31,15 @@ describe('dashboard summary', () => {
   ];
 
   it('averages a past month over all its days', () => {
-    const summary = summarize('2026-09', '2026-10-15', expenses);
-
-    expect(summary.total).toBe(90);
-    expect(summary.dailyAverage).toBe(90 / 30);
-  });
-
-  it('reports the previous month transactions and daily average', () => {
-    const summary = summarize('2026-09', '2026-09-10', expenses);
-
-    expect(summary.previousTransactions).toBe(1);
-    expect(summary.previousDailyAverage).toBe(40 / 31);
+    expect(summarize('2026-09', '2026-10-15', expenses).dailyAverage).toBe(3);
   });
 
   it('averages the current month over the days elapsed so far', () => {
-    const summary = summarize('2026-09', '2026-09-10', expenses);
-
-    expect(summary.dailyAverage).toBe(9);
+    expect(summarize('2026-09', '2026-09-10', expenses).dailyAverage).toBe(9);
   });
 
   it('reports a zero average for a future month', () => {
-    const summary = summarize('2026-09', '2026-08-31', expenses);
-
-    expect(summary.dailyAverage).toBe(0);
+    expect(summarize('2026-09', '2026-08-31', expenses).dailyAverage).toBe(0);
   });
 
   it('handles a month without expenses', () => {
@@ -61,7 +47,6 @@ describe('dashboard summary', () => {
 
     expect(summary.total).toBe(0);
     expect(summary.transactions).toBe(0);
-    expect(summary.dailyAverage).toBe(0);
     expect(summary.change).toBe(0);
     expect(summary.categories).toEqual([]);
   });

@@ -29,8 +29,6 @@ export type Summary = {
   transactions: number;
   /** Selected month total per elapsed day. */
   dailyAverage: number;
-  previousTransactions: number;
-  previousDailyAverage: number;
   /** Per-day totals of the selected month, day 1 first. */
   daily: DayPoint[];
   /** Per-day totals of the previous month, day 1 first. */

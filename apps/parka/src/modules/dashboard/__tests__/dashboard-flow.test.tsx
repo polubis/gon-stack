@@ -11,8 +11,6 @@ const SUMMARY = {
   previousTotal: 8,
   transactions: 3,
   dailyAverage: 1.5,
-  previousTransactions: 2,
-  previousDailyAverage: 0.5,
   daily: [
     { day: 1, total: 4 },
     { day: 2, total: 6 },
@@ -33,25 +31,21 @@ const SUMMARY = {
   ],
 };
 
-const stubApi = (failing = false) => {
+const stubApi = (failing = false, overrides: Partial<typeof SUMMARY> = {}) => {
   const fetchMock = vi.fn(async (_url: string) => ({
     json: async () =>
-      failing ? { code: 500, message: 'boom' } : { code: 200, data: SUMMARY },
+      failing
+        ? { code: 500, message: 'boom' }
+        : { code: 200, data: { ...SUMMARY, ...overrides } },
   }));
   vi.stubGlobal('fetch', fetchMock);
   return fetchMock;
 };
 
-const kpi = (label: string) => {
-  const card = screen.getByText(label).closest('li');
-  if (!card) throw new Error(`No KPI card for "${label}".`);
-  return within(card);
-};
-
 describe('dashboard screen', () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it('greets the user and shows the month kpis', async () => {
+  it('greets the user and shows the month total with its change', async () => {
     stubApi();
 
     render(<Main />);
@@ -59,20 +53,42 @@ describe('dashboard screen', () => {
     await waitFor(() =>
       expect(screen.getByRole('heading', { name: /Cześć, Anna/ })).toBeTruthy(),
     );
-    expect(kpi('Liczba transakcji').getByText('3')).toBeTruthy();
-    expect(kpi('Średnio dziennie').getByText(/1,50/)).toBeTruthy();
-    expect(kpi('Pozostało do limitu').getByText(/90,00/)).toBeTruthy();
+    expect(screen.getByText(/10,00/)).toBeTruthy();
+    expect(screen.getByText('+25%')).toBeTruthy();
+    expect(screen.getByText('Średnio dziennie')).toBeTruthy();
+    expect(screen.getByText(/1,50/)).toBeTruthy();
+    expect(screen.getByText('3')).toBeTruthy();
+    expect(screen.getByText(/90,00/)).toBeTruthy();
+    expect(
+      screen.getByRole('progressbar', { name: 'Wykorzystano 10% limitu' }),
+    ).toBeTruthy();
   });
 
-  it('shows the breakdown and the previous month total in the spending kpi', async () => {
-    stubApi();
+  it('says how far over the limit spending went', async () => {
+    stubApi(false, { total: 130 });
 
     render(<Main />);
 
-    await waitFor(() =>
-      expect(screen.getByText('Kategorie wydatków')).toBeTruthy(),
-    );
-    expect(kpi('Wydatki w tym miesiącu').getByText(/8,00/)).toBeTruthy();
+    expect(await screen.findByText('Ponad limit')).toBeTruthy();
+    expect(screen.getByText(/^30,00/)).toBeTruthy();
+  });
+
+  it('warns when spending is close to the limit', async () => {
+    stubApi(false, { total: 85 });
+
+    render(<Main />);
+
+    expect(await screen.findByText('Blisko limitu')).toBeTruthy();
+    expect(screen.getByText(/^15,00/)).toBeTruthy();
+  });
+
+  it('hides the change when spending did not move', async () => {
+    stubApi(false, { change: 0 });
+
+    render(<Main />);
+
+    await screen.findByText('Kategorie wydatków');
+    expect(screen.queryByText(/^[+-]d+%$/)).toBeNull();
   });
 
   it('lists each category with its amount and share', async () => {

@@ -15,7 +15,7 @@ import { GoalsCard } from './goals-card';
 import { LimitsCard } from './limits-card';
 import { MonthExpenses } from './month-expenses';
 import { Header } from './header';
-import { Kpis } from './kpis';
+import { TotalHero } from './total-hero';
 import { RecurringCard } from './recurring-card';
 import { SpendingChart } from './spending-chart';
 
@@ -115,7 +115,7 @@ const DashboardView = () => {
         {failed ? null : (
           <>
             <div className="xl:col-span-12">
-              <Kpis month={month} summary={summary} />
+              <TotalHero summary={summary} />
             </div>
             <SpendingChart month={month} summary={summary} />
             <CategoriesCard month={month} summary={summary} />
