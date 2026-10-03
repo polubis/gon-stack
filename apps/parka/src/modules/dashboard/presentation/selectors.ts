@@ -12,8 +12,15 @@ import type {
   Month,
   ProgressTone,
   Recurring,
+  RecurringId,
   TotalProgress,
 } from '../domain/models';
+
+/** Id of the derived charge `recurringId` makes in `month`. */
+export const recurringChargeId = (
+  recurringId: RecurringId,
+  month: Month,
+): ExpenseId => `recurring:${recurringId}:${month}` as ExpenseId;
 
 /**
  * Stored expenses plus `month`'s charges of the recurring ones, so every
@@ -26,7 +33,7 @@ export const withRecurring = (
 ): Expense[] => [
   ...expenses,
   ...occurrencesInMonth(recurring, month).map((o) => ({
-    id: `recurring:${o.recurringId}:${month}` as ExpenseId,
+    id: recurringChargeId(o.recurringId as RecurringId, month),
     merchant: o.name,
     date: `${o.date}T00:00:00.000Z`,
     amount: o.amount,

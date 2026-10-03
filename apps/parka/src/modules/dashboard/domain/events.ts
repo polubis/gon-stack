@@ -11,6 +11,7 @@ import type {
 
 export type Event =
   | TriggerEvent<'[TRIGGER]_LOAD', { month: Month }>
+  | TriggerEvent<'[TRIGGER]_CREATE_EXPENSE', { expense: Expense; month: Month }>
   | TriggerEvent<'[TRIGGER]_UPDATE_EXPENSE', { expense: Expense; month: Month }>
   | TriggerEvent<'[TRIGGER]_DELETE_EXPENSE', { id: ExpenseId; month: Month }>
   | TriggerEvent<'[TRIGGER]_CREATE_LIMIT', { limit: Limit }>

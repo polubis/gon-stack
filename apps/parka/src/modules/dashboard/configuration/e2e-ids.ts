@@ -23,10 +23,17 @@ export const DASHBOARD_E2E_IDS = [
   'dashboard:limit-form-amount',
   'dashboard:limit-form-save',
   'dashboard:limit-delete',
-  'dashboard:recurring',
-  'dashboard:recurring-list',
+  'dashboard:recurring-dialog',
   'dashboard:recurring-detail',
-  'dashboard:recurring-new',
+  'dashboard:expense-new',
+  'dashboard:new-dialog',
+  'dashboard:new-expense-form',
+  'dashboard:new-merchant',
+  'dashboard:new-amount',
+  'dashboard:new-date',
+  'dashboard:new-category',
+  'dashboard:new-method',
+  'dashboard:new-save',
   'dashboard:recurring-form',
   'dashboard:recurring-form-name',
   'dashboard:recurring-form-cost',
@@ -41,16 +48,13 @@ export const DASHBOARD_E2E_IDS = [
   'dashboard:edit-amount',
   'dashboard:edit-category',
   'dashboard:save',
-  'dashboard:edit',
   'dashboard:delete',
 ] as const;
 
 export type DashboardDynamicE2eId =
   | `dashboard:expense:${string | number}`
   | `dashboard:limit-edit:${string | number}`
-  | `dashboard:filter:${string | number}`
-  | `dashboard:recurring-row:${string | number}`
-  | `dashboard:recurring-edit:${string | number}`;
+  | `dashboard:filter:${string | number}`;
 
 export type DashboardE2eId =
   (typeof DASHBOARD_E2E_IDS)[number] | DashboardDynamicE2eId;

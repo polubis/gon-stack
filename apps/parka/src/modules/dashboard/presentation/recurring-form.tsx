@@ -1,21 +1,26 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, type ReactNode } from 'react';
 import { categoryLabel } from '@/shared/i18n/category-label';
+import { Trash2 } from 'lucide-react';
 import { Button, Field, inputClass } from '@/shared/ui/controls';
 import { NumberInput } from '@/shared/ui/number-input';
 import { fromDateInput, toDateInput } from '../domain/format';
 import { newRecurringId } from '../domain/ids';
 import type { CategoryId, Month, Recurring } from '../domain/models';
 import { useContext } from './context';
+import { DialogActions } from './detail-dialog';
 
 /** Creates a recurring expense, or edits `recurring` (history kept, can be removed). */
 export const RecurringForm = ({
   recurring,
   month,
   onDone,
+  children,
 }: {
   recurring?: Recurring;
   month: Month;
   onDone: () => void;
+  /** Rendered between the fields and the buttons. */
+  children?: ReactNode;
 }) => {
   const ctx = useContext();
   const categories = ctx.useCategories();
@@ -126,27 +131,33 @@ export const RecurringForm = ({
           onChange={(e) => setMethod(e.target.value)}
         />
       </Field>
-      <div className="flex gap-2">
-        <Button variant="ghost" onClick={onDone}>
+      {children}
+      <DialogActions
+        danger={
+          recurring ? (
+            <Button
+              variant="danger"
+              className="w-auto"
+              data-e2e="dashboard:recurring-delete"
+              onClick={remove}
+            >
+              <Trash2 className="h-4 w-4" aria-hidden="true" /> Usuń
+            </Button>
+          ) : undefined
+        }
+      >
+        <Button variant="ghost" className="w-auto" onClick={onDone}>
           Anuluj
         </Button>
         <Button
           type="submit"
+          className="w-auto"
           data-e2e="dashboard:recurring-form-save"
           disabled={!selected}
         >
-          Zapisz
+          {recurring ? 'Zapisz zmiany' : 'Dodaj'}
         </Button>
-      </div>
-      {recurring ? (
-        <Button
-          variant="danger"
-          data-e2e="dashboard:recurring-delete"
-          onClick={remove}
-        >
-          Usuń wydatek
-        </Button>
-      ) : null}
+      </DialogActions>
     </form>
   );
 };

@@ -126,7 +126,6 @@ const commands = {
 
   'i change the amount of the first expense to 150': async ({ getByE2e }) => {
     await getByE2e('dashboard:expense:e-1').click();
-    await getByE2e('dashboard:edit').click();
     await getByE2e('dashboard:edit-amount').fill('150');
     await getByE2e('dashboard:save').click();
     await expect(getByE2e('dashboard:detail')).toHaveCount(0);
@@ -146,23 +145,28 @@ const commands = {
     await expect(getByE2e('dashboard:transactions')).toHaveText('1');
   },
 
-  'i add a recurring expense of 50': async ({ getByE2e }) => {
-    await getByE2e('dashboard:recurring-new').click();
+  'i add a recurring expense of 50': async ({ page, getByE2e }) => {
+    await getByE2e('dashboard:expense-new').click();
+    await page.getByRole('tab', { name: 'Cykliczny' }).click();
     await getByE2e('dashboard:recurring-form-name').fill('Siłownia');
     await getByE2e('dashboard:recurring-form-cost').fill('50');
     await getByE2e('dashboard:recurring-form-save').click();
     await expect(getByE2e('dashboard:recurring-form')).toHaveCount(0);
+  },
+  'i add a normal expense of 25': async ({ getByE2e }) => {
+    await getByE2e('dashboard:expense-new').click();
+    await getByE2e('dashboard:new-merchant').fill('Piekarnia');
+    await getByE2e('dashboard:new-amount').fill('25');
+    await getByE2e('dashboard:new-save').click();
+    await expect(getByE2e('dashboard:new-dialog')).toHaveCount(0);
   },
   'the month shows 150,00 over 3 charges': async ({ getByE2e }) => {
     await expect(getByE2e('dashboard:total')).toContainText('150,00');
     await expect(getByE2e('dashboard:transactions')).toHaveText('3');
   },
 
-  'i pause the recurring expense': async ({ page }) => {
-    await page.getByRole('switch', { name: 'Śledzenie: Netflix' }).click();
-  },
-  'i change the recurring expense cost to 45': async ({ getByE2e }) => {
-    await getByE2e('dashboard:recurring-edit:r-1').click();
+  'i change the recurring expense cost to 45': async ({ page, getByE2e }) => {
+    await page.getByRole('button', { name: /Netflix/ }).click();
     await getByE2e('dashboard:recurring-form-cost').fill('45');
     await getByE2e('dashboard:recurring-form-save').click();
     await expect(getByE2e('dashboard:recurring-form')).toHaveCount(0);
@@ -171,8 +175,8 @@ const commands = {
     await expect(getByE2e('dashboard:total')).toContainText('145,00');
     await expect(getByE2e('dashboard:transactions')).toHaveText('3');
   },
-  'i delete the recurring expense': async ({ getByE2e }) => {
-    await getByE2e('dashboard:recurring-edit:r-1').click();
+  'i delete the recurring expense': async ({ page, getByE2e }) => {
+    await page.getByRole('button', { name: /Netflix/ }).click();
     await getByE2e('dashboard:recurring-delete').click();
     await expect(getByE2e('dashboard:recurring-form')).toHaveCount(0);
   },
@@ -259,12 +263,11 @@ test.describe('dashboard values after changes', () => {
     );
   });
 
-  test('pausing a recurring expense takes its charge out', async ({ e2e }) => {
+  test('a new normal expense is added to the month total', async ({ e2e }) => {
     await interpreter(commands, e2e)(
-      ['i open a dashboard with a recurring expense'],
-      ['the month shows 130,00 over 3 charges'],
-      ['i pause the recurring expense'],
-      ['the month shows 100,00 over 2 expenses'],
+      ['i open a dashboard with expenses of two months'],
+      ['i add a normal expense of 25'],
+      ['the month shows 125,00 over 3 expenses'],
     );
   });
 

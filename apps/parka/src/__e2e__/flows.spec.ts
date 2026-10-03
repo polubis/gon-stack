@@ -364,7 +364,6 @@ const commands = {
     await page.getByRole('button', { name: /Kino Helios/ }).click();
     await expect(getByE2e('dashboard:detail')).toBeVisible();
 
-    await getByE2e('dashboard:edit').click();
     await getByE2e('dashboard:edit-merchant').fill('Kino Nowe Horyzonty');
     await getByE2e('dashboard:save').click();
     await expect(page.getByText('Kino Nowe Horyzonty')).toBeVisible();
@@ -426,28 +425,6 @@ const commands = {
     await expect(page.getByText('Kultura')).toBeVisible();
   },
 
-  'i toggle recurring tracking off': async ({ page }) => {
-    await mockState(page, {
-      recurring: [
-        {
-          id: 'rec-1',
-          name: 'Spotify',
-          cost: 24.99,
-          nextPaymentDate: new Date().toISOString().slice(0, 10),
-          active: true,
-          paymentMethod: 'card',
-          categoryId: CATEGORY.id,
-          history: [],
-        },
-      ],
-    });
-    await open(page, APP_ROUTER.dashboard());
-    const spotify = page.getByRole('switch', { name: /Spotify/ }).first();
-    await expect(spotify).toHaveAttribute('aria-checked', 'true');
-    await spotify.click();
-    await expect(spotify).toHaveAttribute('aria-checked', 'false');
-  },
-
   'i add and remove a recurring expense': async ({ page, getByE2e }) => {
     // Stateful: a recurring change reloads the dashboard, which must read the
     // new item back.
@@ -459,17 +436,18 @@ const commands = {
       recurring: [],
     });
     await open(page, APP_ROUTER.dashboard());
-    await getByE2e('dashboard:recurring-new').click();
+    await getByE2e('dashboard:expense-new').click();
+    await page.getByRole('tab', { name: 'Cykliczny' }).click();
     await getByE2e('dashboard:recurring-form-name').fill('Siłownia');
     await getByE2e('dashboard:recurring-form-cost').fill('99');
     await getByE2e('dashboard:recurring-form-save').click();
     await expect(getByE2e('dashboard:recurring-form')).toHaveCount(0);
     await expect(
-      getByE2e('dashboard:recurring').getByText('Siłownia'),
+      getByE2e('dashboard:expenses').getByText('Siłownia'),
     ).toBeVisible();
-    await page.getByRole('button', { name: 'Edytuj: Siłownia' }).click();
+    await page.getByRole('button', { name: /Siłownia/ }).click();
     await getByE2e('dashboard:recurring-delete').click();
-    await expect(page.getByText('Brak wydatków cyklicznych.')).toBeVisible();
+    await expect(page.getByText('Siłownia')).toHaveCount(0);
   },
   'a recurring expense counts in this month': async ({ page, getByE2e }) => {
     await mockState(page, {
@@ -491,10 +469,14 @@ const commands = {
       getByE2e('dashboard:expenses').getByText('Spotify'),
     ).toBeVisible();
   },
-  'the dashboard shows the recurring widget': async ({ page, getByE2e }) => {
+  'the expenses list offers adding a recurring expense': async ({
+    page,
+    getByE2e,
+  }) => {
     await mockState(page);
     await open(page, APP_ROUTER.dashboard());
-    await getByE2e('dashboard:recurring-new').click();
+    await getByE2e('dashboard:expense-new').click();
+    await page.getByRole('tab', { name: 'Cykliczny' }).click();
     await expect(getByE2e('dashboard:recurring-form')).toBeVisible();
   },
 
@@ -618,10 +600,6 @@ test('a new category appears in the category list', async ({ e2e }) => {
   await interpreter(commands, e2e)(['a new category appears in the list']);
 });
 
-test('recurring expense tracking can be toggled off', async ({ e2e }) => {
-  await interpreter(commands, e2e)(['i toggle recurring tracking off']);
-});
-
 test('recurring expenses can be added and removed', async ({ e2e }) => {
   await interpreter(commands, e2e)(['i add and remove a recurring expense']);
 });
@@ -633,11 +611,11 @@ test('a recurring expense is counted in its months', async ({ e2e }) => {
   )(['a recurring expense counts in this month']);
 });
 
-test('the dashboard hosts the recurring widget', async ({ e2e }) => {
+test('the expenses list hosts the recurring add button', async ({ e2e }) => {
   await interpreter(
     commands,
     e2e,
-  )(['the dashboard shows the recurring widget']);
+  )(['the expenses list offers adding a recurring expense']);
 });
 
 test('the monthly report is downloadable', async ({ e2e }) => {

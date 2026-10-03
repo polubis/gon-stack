@@ -2,7 +2,6 @@ import { Card } from '@/shared/ui/layout';
 import { Skeleton } from '@/shared/ui/skeleton';
 
 const LIST_ROWS = 8;
-const RECURRING_ROWS = 4;
 
 const Rows = ({ count, className }: { count: number; className: string }) => (
   <>
@@ -38,7 +37,7 @@ export const DashboardSkeleton = () => (
       <Skeleton className="h-40 w-full" />
     </Card>
 
-    <Card className="space-y-3 xl:col-span-12" aria-hidden="true">
+    <Card className="space-y-3 xl:col-span-8" aria-hidden="true">
       <div className="flex items-baseline justify-between gap-3">
         <Skeleton className="h-6 w-24" />
         <Skeleton className="h-5 w-24" />
@@ -76,28 +75,6 @@ export const DashboardSkeleton = () => (
     >
       <Skeleton className="h-6 w-32" />
       <Rows count={3} className="h-20 w-full rounded-xl" />
-    </Card>
-
-    <Card
-      className="flex h-112 flex-col gap-4 md:h-128 xl:col-span-4"
-      aria-hidden="true"
-    >
-      <Skeleton className="h-6 w-40" />
-      <ul className="space-y-2">
-        {Array.from({ length: RECURRING_ROWS }, (_, i) => (
-          <li
-            key={i}
-            className="flex items-center gap-3 rounded-xl border border-line p-3"
-          >
-            <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
-            <span className="flex flex-1 flex-col gap-1.5">
-              <Skeleton className="h-4 w-1/2" />
-              <Skeleton className="h-3 w-3/4" />
-            </span>
-            <Skeleton className="h-6 w-11 rounded-full" />
-          </li>
-        ))}
-      </ul>
     </Card>
   </>
 );

@@ -139,7 +139,7 @@ describe('dashboard screen', () => {
 
     expect(screen.queryByText('Wydatki w tym miesiącu')).toBeNull();
     expect(await screen.findByText('Wydatki w tym miesiącu')).toBeTruthy();
-    expect(screen.getByText('Wydatki cykliczne')).toBeTruthy();
+    expect(screen.getByText('Limity')).toBeTruthy();
   });
 
   it('loads everything in one go, once', async () => {
@@ -147,7 +147,7 @@ describe('dashboard screen', () => {
 
     render(<Main />);
 
-    await screen.findByText('Wydatki cykliczne');
+    await screen.findByText('Limity');
     expect(fetchMock).toHaveBeenCalledTimes(5);
   });
 
@@ -171,7 +171,7 @@ describe('dashboard screen', () => {
       await screen.findByText('Nie udało się wczytać podsumowania'),
     ).toBeTruthy();
     expect(screen.queryByText('Wydatki w tym miesiącu')).toBeNull();
-    expect(screen.queryByText('Wydatki cykliczne')).toBeNull();
+    expect(screen.queryByText('Limity')).toBeNull();
   });
 
   it('offers a retry when loading fails', async () => {

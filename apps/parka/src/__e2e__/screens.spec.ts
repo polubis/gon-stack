@@ -19,11 +19,6 @@ const SCREENS: Screen[] = [
     heading: /Limity/,
   },
   {
-    path: APP_ROUTER.dashboard(),
-    root: 'dashboard:recurring',
-    heading: /Wydatki cykliczne/,
-  },
-  {
     path: APP_ROUTER.receiptScan(),
     root: 'receipt:main',
     heading: /Zrób zdjęcie paragonu/,

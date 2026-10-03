@@ -1,6 +1,7 @@
 import type { z } from 'zod';
 import type { Schema } from '@schemas/dashboard';
 import {
+  createExpenseSchema,
   deleteExpenseSchema,
   listExpensesSchema,
   updateExpenseSchema,
@@ -40,6 +41,7 @@ import {
 } from './mappers';
 
 type ListExpensesOut = z.infer<ReturnType<typeof listExpensesSchema>>['out'];
+type CreateExpenseOut = z.infer<ReturnType<typeof createExpenseSchema>>['out'];
 type UpdateExpenseOut = z.infer<ReturnType<typeof updateExpenseSchema>>['out'];
 type DeleteExpenseOut = z.infer<ReturnType<typeof deleteExpenseSchema>>['out'];
 type ListCategoriesOut = z.infer<
@@ -100,6 +102,17 @@ export const fetchCategories = async (
   const json = (await response.json()) as ListCategoriesOut;
   if (json.code !== 200) throw new Error(json.message);
   return json.data.map(toCategory);
+};
+
+export const postExpense = async (expense: Expense): Promise<Expense> => {
+  const response = await fetch(API_ROUTER.expenses(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(expense),
+  });
+  const json = (await response.json()) as CreateExpenseOut;
+  if (json.code !== 201) throw new Error(json.message);
+  return toExpense(json.data);
 };
 
 export const putExpense = async (expense: Expense): Promise<Expense> => {

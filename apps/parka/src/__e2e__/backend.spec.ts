@@ -121,7 +121,6 @@ const commands = {
     await open(page, APP_ROUTER.dashboard());
     await page.getByRole('button', { name: /Sklep E2E Backend/ }).click();
     await expect(getByE2e('dashboard:detail')).toBeVisible();
-    await getByE2e('dashboard:edit').click();
     await getByE2e('dashboard:edit-merchant').fill('Sklep Nowy');
     await Promise.all([
       synced(page, 'PUT', API_ROUTER.expenses()),

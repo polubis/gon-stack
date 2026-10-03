@@ -60,27 +60,27 @@ describe('recurring expenses', () => {
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
 
-  it('pauses tracking right away and confirms with a toast', async () => {
-    mockBackend({ code: 200, data: { ...NETFLIX, active: false } });
+  it('saves an edit right away and confirms with a toast', async () => {
+    mockBackend({ code: 200, data: { ...NETFLIX, cost: 45 } });
     const view = await setup();
 
     act(() =>
       view.result.current.ctx.updateRecurring(
         {
           ...view.result.current.recurring[0]!,
-          active: false,
+          cost: 45,
         },
         TEST_MONTH,
       ),
     );
 
-    expect(view.result.current.recurring[0]!.active).toBe(false);
+    expect(view.result.current.recurring[0]!.cost).toBe(45);
     await waitFor(() =>
       expect(view.result.current.notice?.tone).toBe('success'),
     );
   });
 
-  it('resumes tracking and reports an error when saving fails', async () => {
+  it('reverts an edit and reports an error when saving fails', async () => {
     mockBackend({ code: 500, message: 'boom' });
     const view = await setup();
 
@@ -88,14 +88,14 @@ describe('recurring expenses', () => {
       view.result.current.ctx.updateRecurring(
         {
           ...view.result.current.recurring[0]!,
-          active: false,
+          cost: 45,
         },
         TEST_MONTH,
       ),
     );
 
     await waitFor(() => expect(view.result.current.notice?.tone).toBe('error'));
-    expect(view.result.current.recurring[0]!.active).toBe(true);
+    expect(view.result.current.recurring[0]!.cost).toBe(30);
   });
 
   it('adds an item right away and confirms with a toast', async () => {

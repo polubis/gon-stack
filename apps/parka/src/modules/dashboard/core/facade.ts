@@ -13,6 +13,8 @@ import type {
 export const createFacade = (store: Store, trigger: Registry['trigger']) => {
   return {
     load: (month: Month) => trigger('[TRIGGER]_LOAD', { month }),
+    createExpense: (expense: Expense, month: Month) =>
+      trigger('[TRIGGER]_CREATE_EXPENSE', { expense, month }),
     updateExpense: (expense: Expense, month: Month) =>
       trigger('[TRIGGER]_UPDATE_EXPENSE', { expense, month }),
     removeExpense: (id: ExpenseId, month: Month) =>

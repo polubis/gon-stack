@@ -15,7 +15,9 @@ import { LimitsCard } from './limits-card';
 import { MonthExpenses } from './month-expenses';
 import { Header } from './header';
 import { TotalHero } from './total-hero';
-import { RecurringCard } from './recurring-card';
+import { NewExpense } from './new-expense';
+import { RecurringDetail } from './recurring-detail';
+import { recurringChargeId, withRecurring } from './selectors';
 import { DashboardSkeleton } from './skeleton';
 import { SpendingChart } from './spending-chart';
 
@@ -30,12 +32,13 @@ const DashboardView = () => {
   const ctx = useContext();
   const [month, setMonth] = useState(initialMonth);
   const [selectedId, setSelectedId] = useState<ExpenseId | null>(null);
-  const [editing, setEditing] = useState(false);
+  const [creating, setCreating] = useState(false);
   const initialized = ctx.useInitialized();
   const loading = ctx.useLoading();
   const error = ctx.useError();
   const summary = ctx.useData();
-  const expenses = ctx.useExpenses();
+  const recurring = ctx.useRecurring();
+  const expenses = withRecurring(ctx.useExpenses(), recurring, month);
   const notice = ctx.useNotice();
 
   useEffect(() => {
@@ -47,11 +50,10 @@ const DashboardView = () => {
     setMonth(next);
   };
 
-  const select = (id: ExpenseId) => {
-    setSelectedId(id);
-    setEditing(false);
-  };
   const selected = expenses.find((e) => e.id === selectedId) ?? null;
+  const selectedRecurring =
+    recurring.find((r) => recurringChargeId(r.id, month) === selectedId) ??
+    null;
 
   // One failure screen for the whole dashboard: all or nothing.
   if (error) {
@@ -75,17 +77,24 @@ const DashboardView = () => {
 
   const overlays = (
     <>
-      {selected ? (
+      {selected && !selectedRecurring ? (
         <ExpenseDetail
+          key={selected.id}
           expense={selected}
           month={month}
-          editing={editing}
-          onEdit={() => setEditing(true)}
-          onClose={() => {
-            setSelectedId(null);
-            setEditing(false);
-          }}
+          onClose={() => setSelectedId(null)}
         />
+      ) : null}
+      {selectedRecurring ? (
+        <RecurringDetail
+          key={selectedRecurring.id}
+          recurring={selectedRecurring}
+          month={month}
+          onClose={() => setSelectedId(null)}
+        />
+      ) : null}
+      {creating ? (
+        <NewExpense month={month} onClose={() => setCreating(false)} />
       ) : null}
       {notice ? (
         <Toast
@@ -119,9 +128,12 @@ const DashboardView = () => {
             </div>
             <SpendingChart month={month} summary={summary} />
             <CategoriesCard month={month} summary={summary} />
-            <MonthExpenses month={month} onSelect={select} />
+            <MonthExpenses
+              month={month}
+              onSelect={setSelectedId}
+              onAdd={() => setCreating(true)}
+            />
             <LimitsCard month={month} />
-            <RecurringCard month={month} />
             {overlays}
           </>
         ) : (

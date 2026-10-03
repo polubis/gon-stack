@@ -1,4 +1,6 @@
 import { useState, type ReactNode } from 'react';
+import { Plus } from 'lucide-react';
+import { Button } from '@/shared/ui/controls';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { Card } from '@/shared/ui/layout';
@@ -6,6 +8,7 @@ import { cn } from '@repo/react-kit/cn';
 import { money, shortDateLabel } from '../domain/format';
 import type { CategoryId, ExpenseId, Month } from '../domain/models';
 import { useContext } from './context';
+import { RecurringBadge } from './recurring-badge';
 import {
   categoryOf,
   categoryTabs,
@@ -57,38 +60,35 @@ const LIST_HEIGHT = 'h-[calc(8*3.5rem+0.4375rem)]';
 const ROW_CLASS =
   'flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left';
 
-/** Derived (recurring) charges have no detail to open, so they are not buttons. */
+/** Every row, stored or recurring, opens its edit popup. */
 const Row = ({
-  derived,
   id,
   onSelect,
   children,
 }: {
-  derived: boolean;
   id: ExpenseId;
   onSelect: (id: ExpenseId) => void;
   children: ReactNode;
-}) =>
-  derived ? (
-    <div className={ROW_CLASS}>{children}</div>
-  ) : (
-    <button
-      type="button"
-      onClick={() => onSelect(id)}
-      data-e2e={`dashboard:expense:${id}`}
-      className={cn(ROW_CLASS, 'hover:bg-hover-soft')}
-    >
-      {children}
-    </button>
-  );
+}) => (
+  <button
+    type="button"
+    onClick={() => onSelect(id)}
+    data-e2e={`dashboard:expense:${id}`}
+    className={cn(ROW_CLASS, 'hover:bg-hover-soft')}
+  >
+    {children}
+  </button>
+);
 
-/** All expenses of the selected month, filterable by category. */
+/** All expenses of the selected month, recurring ones included, filterable by category. */
 export const MonthExpenses = ({
   month,
   onSelect,
+  onAdd,
 }: {
   month: Month;
   onSelect: (id: ExpenseId) => void;
+  onAdd: () => void;
 }) => {
   const ctx = useContext();
   const expenses = withRecurring(ctx.useExpenses(), ctx.useRecurring(), month);
@@ -107,7 +107,7 @@ export const MonthExpenses = ({
     <Card
       as="section"
       aria-labelledby="month-expenses"
-      className="space-y-3 xl:col-span-12"
+      className="space-y-3 xl:col-span-8"
       data-e2e="dashboard:expenses"
     >
       <div className="flex items-baseline justify-between gap-3">
@@ -117,6 +117,14 @@ export const MonthExpenses = ({
         <p className="text-sm text-ink-soft">
           {`${visible.length} · ${money(sumAmount(visible))}`}
         </p>
+        <Button
+          variant="ghost"
+          className="ml-auto w-auto px-3 py-1.5"
+          data-e2e="dashboard:expense-new"
+          onClick={onAdd}
+        >
+          <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj wydatek
+        </Button>
       </div>
 
       {tabs.length > 1 ? (
@@ -157,19 +165,17 @@ export const MonthExpenses = ({
               const category = categoryOf(categories, e.categoryId);
               return (
                 <li key={e.id}>
-                  <Row
-                    derived={e.source === 'recurring'}
-                    id={e.id}
-                    onSelect={onSelect}
-                  >
+                  <Row id={e.id} onSelect={onSelect}>
                     <CategoryAvatar category={category} className="h-10 w-10" />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-semibold">
-                        {e.merchant}
+                      <span className="flex items-center gap-2">
+                        <span className="truncate text-sm font-semibold">
+                          {e.merchant}
+                        </span>
+                        {e.source === 'recurring' ? <RecurringBadge /> : null}
                       </span>
                       <span className="block text-xs text-ink-soft">
                         {shortDateLabel(e.date)}
-                        {e.source === 'recurring' ? ' · cykliczny' : ''}
                       </span>
                     </span>
                     <span className="text-sm font-semibold tabular-nums">
