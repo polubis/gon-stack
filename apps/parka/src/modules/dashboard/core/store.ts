@@ -2,7 +2,6 @@ import { atom } from '@repo/react-kit/supa-store';
 import type {
   Category,
   Expense,
-  Goal,
   Limit,
   Notice,
   Recurring,
@@ -19,7 +18,6 @@ export const createStore = () => {
   const $expenses = atom<Expense[]>([]);
   const $categories = atom<Category[]>([]);
   const $limits = atom<Limit[]>([]);
-  const $goals = atom<Goal[]>([]);
   const $recurring = atom<Recurring[]>([]);
   const $notice = atom<Notice | null>(null);
 
@@ -31,7 +29,6 @@ export const createStore = () => {
     $expenses,
     $categories,
     $limits,
-    $goals,
     $recurring,
     $notice,
   };

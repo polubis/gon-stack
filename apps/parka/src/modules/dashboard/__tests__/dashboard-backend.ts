@@ -4,7 +4,6 @@ type Reads = {
   expenses?: object[];
   categories?: object[];
   limits?: object[];
-  goals?: object[];
   recurring?: object[];
 };
 
@@ -31,17 +30,14 @@ export const readBody = (url: string, reads: Reads = {}) => {
         ? (reads.categories ?? [])
         : url.includes('limits')
           ? (reads.limits ?? [])
-          : url.includes('goals')
-            ? (reads.goals ?? [])
-            : (reads.recurring ?? []);
+          : (reads.recurring ?? []);
   return { code: 200, data };
 };
 
 /** msw handlers for all reads of the dashboard load. */
 export const readHandlers = (reads: Reads = {}) =>
-  ['dashboard', 'expenses', 'categories', 'limits', 'goals', 'recurring'].map(
-    (name) =>
-      http.get(`/api/${name}/`, ({ request }) =>
-        HttpResponse.json(readBody(request.url, reads)),
-      ),
+  ['dashboard', 'expenses', 'categories', 'limits', 'recurring'].map((name) =>
+    http.get(`/api/${name}/`, ({ request }) =>
+      HttpResponse.json(readBody(request.url, reads)),
+    ),
   );

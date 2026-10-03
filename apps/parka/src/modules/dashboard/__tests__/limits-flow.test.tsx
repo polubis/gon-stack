@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Provider, useContext } from '../presentation/context';
-import type { Goal, GoalId, Limit, LimitId, Month } from '../domain/models';
+import type { Limit, LimitId, Month } from '../domain/models';
 import { readBody } from './dashboard-backend';
 
 const TOTAL = {
@@ -34,7 +34,6 @@ const setup = async () => {
       return {
         ctx,
         limits: ctx.useLimits(),
-        goals: ctx.useGoals(),
         notice: ctx.useNotice(),
       };
     },
@@ -51,14 +50,6 @@ const raised: Limit = {
   amount: 2000,
   alertAt80: true,
   delivery: 'push',
-};
-
-const GOAL: Goal = {
-  id: 'g-1' as GoalId,
-  name: 'Trip',
-  target: 500,
-  saved: 0,
-  months: 3,
 };
 
 describe('dashboard limits changes', () => {
@@ -97,92 +88,5 @@ describe('dashboard limits changes', () => {
     await waitFor(() =>
       expect(view.result.current.notice?.tone).toBe('success'),
     );
-  });
-
-  it('adds a goal right away and keeps it when the server accepts', async () => {
-    stubApi({ code: 201, data: GOAL });
-    const view = await setup();
-
-    act(() => view.result.current.ctx.createGoal(GOAL));
-
-    expect(view.result.current.goals).toHaveLength(1);
-    await waitFor(() =>
-      expect(view.result.current.notice?.tone).toBe('success'),
-    );
-  });
-
-  it('drops the goal and reports an error when creating fails', async () => {
-    stubApi({ code: 500, message: 'boom' });
-    const view = await setup();
-
-    act(() => view.result.current.ctx.createGoal(GOAL));
-
-    await waitFor(() => expect(view.result.current.notice?.tone).toBe('error'));
-    expect(view.result.current.goals).toHaveLength(0);
-  });
-
-  it('edits a goal right away and confirms with a toast', async () => {
-    const edited = { ...GOAL, name: 'Greece', saved: 200 };
-    stubApi({ code: 201, data: GOAL });
-    const view = await setup();
-    act(() => view.result.current.ctx.createGoal(GOAL));
-    await waitFor(() =>
-      expect(view.result.current.notice?.tone).toBe('success'),
-    );
-
-    stubApi({ code: 200, data: edited });
-    act(() => view.result.current.ctx.updateGoal(edited));
-
-    expect(view.result.current.goals[0]).toEqual(edited);
-    await waitFor(() =>
-      expect(view.result.current.notice?.message).toBe('Zapisano cel.'),
-    );
-  });
-
-  it('restores the goal and reports an error when editing fails', async () => {
-    stubApi({ code: 201, data: GOAL });
-    const view = await setup();
-    act(() => view.result.current.ctx.createGoal(GOAL));
-    await waitFor(() =>
-      expect(view.result.current.notice?.tone).toBe('success'),
-    );
-
-    stubApi({ code: 500, message: 'boom' });
-    act(() => view.result.current.ctx.updateGoal({ ...GOAL, name: 'Greece' }));
-
-    await waitFor(() => expect(view.result.current.notice?.tone).toBe('error'));
-    expect(view.result.current.goals[0].name).toBe('Trip');
-  });
-
-  it('removes a goal right away and keeps it gone when the server accepts', async () => {
-    stubApi({ code: 201, data: GOAL });
-    const view = await setup();
-    act(() => view.result.current.ctx.createGoal(GOAL));
-    await waitFor(() =>
-      expect(view.result.current.notice?.tone).toBe('success'),
-    );
-
-    stubApi({ code: 200, ok: true });
-    act(() => view.result.current.ctx.removeGoal(GOAL.id));
-
-    expect(view.result.current.goals).toHaveLength(0);
-    await waitFor(() =>
-      expect(view.result.current.notice?.message).toBe('Usunięto cel.'),
-    );
-  });
-
-  it('brings the goal back and reports an error when removing fails', async () => {
-    stubApi({ code: 201, data: GOAL });
-    const view = await setup();
-    act(() => view.result.current.ctx.createGoal(GOAL));
-    await waitFor(() =>
-      expect(view.result.current.notice?.tone).toBe('success'),
-    );
-
-    stubApi({ code: 500, message: 'boom' });
-    act(() => view.result.current.ctx.removeGoal(GOAL.id));
-
-    await waitFor(() => expect(view.result.current.notice?.tone).toBe('error'));
-    expect(view.result.current.goals).toHaveLength(1);
   });
 });

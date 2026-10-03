@@ -6,7 +6,7 @@ import { API_ROUTER } from '@/shared/router/routes';
 
 /**
  * Integration coverage for the per-entity REST endpoints (categories,
- * expenses, limits, goals, recurring, notifications, settings) added to
+ * expenses, limits, recurring, notifications, settings) added to
  * replace the aggregate `/api/state` GET/PUT. Registers a fresh Supabase user
  * (starting with no data) then drives each endpoint
  * directly through `page.request`, which shares the browser's auth cookies.
@@ -155,36 +155,6 @@ const commands = {
     expect(res.status()).toBe(404);
   },
 
-  'i create a savings goal': async ({ page }) => {
-    const res = await page.request.post(API_ROUTER.goals(), {
-      data: {
-        id: 'e2e-goal-1',
-        name: 'Wakacje',
-        target: 5000,
-        saved: 100,
-        months: 12,
-      },
-    });
-    expect(res.status()).toBe(201);
-  },
-  'i add savings to the goal': async ({ page }) => {
-    const res = await page.request.put(API_ROUTER.goalById('e2e-goal-1'), {
-      data: {
-        id: 'e2e-goal-1',
-        name: 'Wakacje',
-        target: 5000,
-        saved: 500,
-        months: 12,
-      },
-    });
-    expect(res.ok()).toBe(true);
-    expect((await res.json()).data.saved).toBe(500);
-  },
-  'i delete the goal': async ({ page }) => {
-    const res = await del(page, API_ROUTER.goalById('e2e-goal-1'));
-    expect(res.ok()).toBe(true);
-  },
-
   'i create a recurring expense with history': async ({ page }) => {
     const categoryId = categoryIdByPage.get(page)!;
     const res = await page.request.post(API_ROUTER.recurring(), {
@@ -286,9 +256,6 @@ test('REST endpoints CRUD each finance entity through Postgres', async ({
     ['i raise the limit amount'],
     ['i delete the limit'],
     ['deleting the limit again is not found'],
-    ['i create a savings goal'],
-    ['i add savings to the goal'],
-    ['i delete the goal'],
     ['i create a recurring expense with history'],
     ['i deactivate the recurring expense and clear history'],
     ['i delete the recurring expense'],

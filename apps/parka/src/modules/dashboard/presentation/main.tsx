@@ -11,7 +11,6 @@ import type { ExpenseId, Month } from '../domain/models';
 import { CategoriesCard } from './categories-card';
 import { Provider, useContext } from './context';
 import { ExpenseDetail } from './expense-detail';
-import { GoalsCard } from './goals-card';
 import { LimitsCard } from './limits-card';
 import { MonthExpenses } from './month-expenses';
 import { Header } from './header';
@@ -122,7 +121,6 @@ const DashboardView = () => {
             <CategoriesCard month={month} summary={summary} />
             <MonthExpenses month={month} onSelect={select} />
             <LimitsCard month={month} />
-            <GoalsCard />
             <RecurringCard month={month} />
             {overlays}
           </>

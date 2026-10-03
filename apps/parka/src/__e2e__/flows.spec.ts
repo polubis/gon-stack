@@ -42,7 +42,6 @@ const mockState = async (
     [API_ROUTER.categories(), rows.categories ?? [CATEGORY]],
     [API_ROUTER.expenses(), []],
     [API_ROUTER.limits(), rows.limits ?? []],
-    [API_ROUTER.goals(), []],
     [API_ROUTER.recurring(), rows.recurring ?? []],
     [API_ROUTER.notifications(), []],
   ];

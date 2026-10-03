@@ -305,33 +305,6 @@ export type Database = {
           },
         ];
       };
-      savings_goals: {
-        Row: {
-          id: string;
-          months: number;
-          name: string;
-          saved: number;
-          target: number;
-          user_id: string;
-        };
-        Insert: {
-          id: string;
-          months?: number;
-          name: string;
-          saved?: number;
-          target?: number;
-          user_id: string;
-        };
-        Update: {
-          id?: string;
-          months?: number;
-          name?: string;
-          saved?: number;
-          target?: number;
-          user_id?: string;
-        };
-        Relationships: [];
-      };
     };
     Views: {
       [_ in never]: never;

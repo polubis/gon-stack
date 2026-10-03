@@ -3,7 +3,6 @@ import type { Schema } from '@schemas/dashboard';
 import type { listExpensesSchema } from '@schemas/expenses';
 import type { listCategoriesSchema } from '@schemas/categories';
 import type { listLimitsSchema } from '@schemas/limits';
-import type { listGoalsSchema } from '@schemas/goals';
 import type { listRecurringSchema } from '@schemas/recurring';
 import type { InferOut } from '@/shared/server-contracts/extraction';
 import type {
@@ -12,8 +11,6 @@ import type {
   CategoryId,
   Expense,
   ExpenseId,
-  Goal,
-  GoalId,
   Limit,
   LimitId,
   ReceiptItemId,
@@ -34,11 +31,6 @@ type CategoryDto = InferOut<
 
 type LimitDto = InferOut<
   z.infer<ReturnType<typeof listLimitsSchema>>['out'],
-  200
->['data'][number];
-
-type GoalDto = InferOut<
-  z.infer<ReturnType<typeof listGoalsSchema>>['out'],
   200
 >['data'][number];
 
@@ -106,14 +98,6 @@ export const toLimit = (dto: LimitDto): Limit => {
     ? { ...base, scope: 'category', categoryId: dto.categoryId as CategoryId }
     : { ...base, scope: 'total' };
 };
-
-export const toGoal = (dto: GoalDto): Goal => ({
-  id: dto.id as GoalId,
-  name: dto.name,
-  target: dto.target,
-  saved: dto.saved,
-  months: dto.months,
-});
 
 export const toRecurring = (dto: RecurringDto): Recurring => ({
   id: dto.id as RecurringId,

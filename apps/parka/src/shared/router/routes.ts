@@ -103,8 +103,6 @@ export const API_ROUTER = {
   expenseById: routeById('/api/expenses/'),
   categories: route('/api/categories/'),
   categoryById: routeById('/api/categories/'),
-  goals: route('/api/goals/'),
-  goalById: routeById('/api/goals/'),
   limits: route('/api/limits/'),
   limitById: routeById('/api/limits/'),
   notifications: route('/api/notifications/'),

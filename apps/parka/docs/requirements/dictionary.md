@@ -25,7 +25,6 @@ deps:
 ## Budgeting
 
 - **[spending_limit]** - Monthly spending cap for the total budget or a specific **[category]**.
-- **[savings_goal]** - Target amount and timeline for a planned purchase or savings objective.
 
 ## Recurring
 

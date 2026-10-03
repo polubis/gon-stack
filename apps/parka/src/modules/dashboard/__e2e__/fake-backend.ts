@@ -90,7 +90,7 @@ export const installBackend = async (
       });
     }
 
-    if (collection === 'goals' || collection === 'notifications') {
+    if (collection === 'notifications') {
       return json(route, { code: 200, data: [] });
     }
 

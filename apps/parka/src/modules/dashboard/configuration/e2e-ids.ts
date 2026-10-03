@@ -9,7 +9,6 @@ export const DASHBOARD_E2E_IDS = [
   'dashboard:expenses',
   'dashboard:summary-error',
   'dashboard:limits',
-  'dashboard:goals',
   'dashboard:limit-total',
   'dashboard:limit-total-amount',
   'dashboard:limit-total-save',
@@ -24,15 +23,6 @@ export const DASHBOARD_E2E_IDS = [
   'dashboard:limit-form-amount',
   'dashboard:limit-form-save',
   'dashboard:limit-delete',
-  'dashboard:goal-list',
-  'dashboard:goal-new',
-  'dashboard:goal-form',
-  'dashboard:goal-form-name',
-  'dashboard:goal-form-target',
-  'dashboard:goal-form-months',
-  'dashboard:goal-form-saved',
-  'dashboard:goal-form-save',
-  'dashboard:goal-delete',
   'dashboard:recurring',
   'dashboard:recurring-list',
   'dashboard:recurring-detail',
@@ -58,7 +48,6 @@ export const DASHBOARD_E2E_IDS = [
 export type DashboardDynamicE2eId =
   | `dashboard:expense:${string | number}`
   | `dashboard:limit-edit:${string | number}`
-  | `dashboard:goal-edit:${string | number}`
   | `dashboard:filter:${string | number}`
   | `dashboard:recurring-row:${string | number}`
   | `dashboard:recurring-edit:${string | number}`;

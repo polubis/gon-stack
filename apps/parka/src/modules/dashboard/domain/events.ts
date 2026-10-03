@@ -2,8 +2,6 @@ import type { FactEvent, TaskEvent, TriggerEvent } from '@/libs/eda';
 import type {
   Expense,
   ExpenseId,
-  Goal,
-  GoalId,
   Limit,
   LimitId,
   Month,
@@ -18,9 +16,6 @@ export type Event =
   | TriggerEvent<'[TRIGGER]_CREATE_LIMIT', { limit: Limit }>
   | TriggerEvent<'[TRIGGER]_UPDATE_LIMIT', { limit: Limit }>
   | TriggerEvent<'[TRIGGER]_DELETE_LIMIT', { id: LimitId }>
-  | TriggerEvent<'[TRIGGER]_CREATE_GOAL', { goal: Goal }>
-  | TriggerEvent<'[TRIGGER]_UPDATE_GOAL', { goal: Goal }>
-  | TriggerEvent<'[TRIGGER]_DELETE_GOAL', { id: GoalId }>
   | TriggerEvent<
       '[TRIGGER]_CREATE_RECURRING',
       { recurring: Recurring; month: Month }

@@ -31,7 +31,6 @@ export const load = (store: Store, { ofType }: Bus) =>
           store.$expenses.set(data.expenses);
           store.$categories.set(data.categories);
           store.$limits.set(data.limits);
-          store.$goals.set(data.goals);
           store.$recurring.set(data.recurring);
         }),
         catchError((error) => {

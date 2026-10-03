@@ -24,14 +24,9 @@ export const LIMITS_SECTION_ID = 'limits';
 
 export const DEFAULT_CATEGORY_LIMIT = 300;
 export const DEFAULT_TOTAL_LIMIT = 3000;
-export const DEFAULT_GOAL_TARGET = 2000;
-export const DEFAULT_GOAL_MONTHS = 6;
-export const DEFAULT_GOAL_NAME = 'Nowy cel';
 
 /** Progress at which a limit turns from brand to warning. */
 export const WARN_PCT = 80;
-
-export const GOALS_SECTION_ID = 'goals';
 
 /** Shown for expenses when the user has no matching category. */
 export const UNCATEGORIZED: Category = {

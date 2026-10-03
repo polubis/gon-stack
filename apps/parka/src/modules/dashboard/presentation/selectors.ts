@@ -8,7 +8,6 @@ import type {
   CategoryProgress,
   Expense,
   ExpenseId,
-  Goal,
   Limit,
   Month,
   ProgressTone,
@@ -154,8 +153,6 @@ export const categoryProgress = (
     };
   });
 };
-
-export const goalPct = (goal: Goal): number => pctOf(goal.saved, goal.target);
 
 /** Categories that do not have a category limit yet. */
 export const withoutLimit = (

@@ -20,11 +20,6 @@ const SCREENS: Screen[] = [
   },
   {
     path: APP_ROUTER.dashboard(),
-    root: 'dashboard:goals',
-    heading: /Cele/,
-  },
-  {
-    path: APP_ROUTER.dashboard(),
     root: 'dashboard:recurring',
     heading: /Wydatki cykliczne/,
   },
@@ -69,7 +64,6 @@ const commands = {
       API_ROUTER.expenses(),
       API_ROUTER.categories(),
       API_ROUTER.limits(),
-      API_ROUTER.goals(),
       API_ROUTER.recurring(),
     ])
       await page.route(`**${url}**`, (route) =>

@@ -3,8 +3,6 @@ import type { Store } from './store';
 import type {
   Expense,
   ExpenseId,
-  Goal,
-  GoalId,
   Limit,
   LimitId,
   Month,
@@ -22,9 +20,6 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
     createLimit: (limit: Limit) => trigger('[TRIGGER]_CREATE_LIMIT', { limit }),
     updateLimit: (limit: Limit) => trigger('[TRIGGER]_UPDATE_LIMIT', { limit }),
     removeLimit: (id: LimitId) => trigger('[TRIGGER]_DELETE_LIMIT', { id }),
-    createGoal: (goal: Goal) => trigger('[TRIGGER]_CREATE_GOAL', { goal }),
-    updateGoal: (goal: Goal) => trigger('[TRIGGER]_UPDATE_GOAL', { goal }),
-    removeGoal: (id: GoalId) => trigger('[TRIGGER]_DELETE_GOAL', { id }),
     createRecurring: (recurring: Recurring, month: Month) =>
       trigger('[TRIGGER]_CREATE_RECURRING', { recurring, month }),
     updateRecurring: (recurring: Recurring, month: Month) =>
@@ -39,7 +34,6 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
     useExpenses: () => store.$expenses.use(),
     useCategories: () => store.$categories.use(),
     useLimits: () => store.$limits.use(),
-    useGoals: () => store.$goals.use(),
     useRecurring: () => store.$recurring.use(),
     useNotice: () => store.$notice.use(),
   };

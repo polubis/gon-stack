@@ -47,15 +47,6 @@ export const limit = () =>
     delivery: z.enum(['push', 'email']),
   });
 
-export const goal = () =>
-  z.object({
-    id: z.string().min(1),
-    name: z.string(),
-    target: z.coerce.number(),
-    saved: z.coerce.number(),
-    months: z.coerce.number(),
-  });
-
 export const recurring = () =>
   z.object({
     id: z.string().min(1),

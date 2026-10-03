@@ -204,7 +204,6 @@ const commands = {
       '/api/expenses/',
       '/api/categories/',
       '/api/limits/',
-      '/api/goals/',
       '/api/recurring/',
     ];
     for (const path of paths)

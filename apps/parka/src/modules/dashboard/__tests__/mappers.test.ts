@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   toCategory,
   toExpense,
-  toGoal,
   toLimit,
   toSummary,
 } from '../integration/mappers';
@@ -102,23 +101,5 @@ describe('dashboard limit mappers', () => {
     });
 
     expect(limit).not.toHaveProperty('categoryId');
-  });
-
-  it('maps a goal as is', () => {
-    const goal = toGoal({
-      id: 'g-1',
-      name: 'Trip',
-      target: 5,
-      saved: 1,
-      months: 3,
-    });
-
-    expect(goal).toEqual({
-      id: 'g-1',
-      name: 'Trip',
-      target: 5,
-      saved: 1,
-      months: 3,
-    });
   });
 });

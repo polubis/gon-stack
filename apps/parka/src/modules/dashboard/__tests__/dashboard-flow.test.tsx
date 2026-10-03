@@ -139,7 +139,7 @@ describe('dashboard screen', () => {
 
     expect(screen.queryByText('Wydatki w tym miesiącu')).toBeNull();
     expect(await screen.findByText('Wydatki w tym miesiącu')).toBeTruthy();
-    expect(screen.getByText('Cele wakacyjne')).toBeTruthy();
+    expect(screen.getByText('Wydatki cykliczne')).toBeTruthy();
   });
 
   it('loads everything in one go, once', async () => {
@@ -147,8 +147,8 @@ describe('dashboard screen', () => {
 
     render(<Main />);
 
-    await screen.findByText('Cele wakacyjne');
-    expect(fetchMock).toHaveBeenCalledTimes(6);
+    await screen.findByText('Wydatki cykliczne');
+    expect(fetchMock).toHaveBeenCalledTimes(5);
   });
 
   it('shows only the failure screen when any part fails to load', async () => {
@@ -156,7 +156,7 @@ describe('dashboard screen', () => {
       'fetch',
       vi.fn(async (url: string) => ({
         json: async () =>
-          url.includes('/api/goals')
+          url.includes('/api/limits')
             ? { code: 500, message: 'boom' }
             : {
                 code: 200,
@@ -171,7 +171,7 @@ describe('dashboard screen', () => {
       await screen.findByText('Nie udało się wczytać podsumowania'),
     ).toBeTruthy();
     expect(screen.queryByText('Wydatki w tym miesiącu')).toBeNull();
-    expect(screen.queryByText('Cele wakacyjne')).toBeNull();
+    expect(screen.queryByText('Wydatki cykliczne')).toBeNull();
   });
 
   it('offers a retry when loading fails', async () => {

@@ -13,12 +13,6 @@ import {
   updateLimitSchema,
 } from '@schemas/limits';
 import {
-  createGoalSchema,
-  deleteGoalSchema,
-  listGoalsSchema,
-  updateGoalSchema,
-} from '@schemas/goals';
-import {
   createRecurringSchema,
   deleteRecurringSchema,
   listRecurringSchema,
@@ -30,8 +24,6 @@ import type {
   DashboardData,
   Expense,
   ExpenseId,
-  Goal,
-  GoalId,
   Limit,
   LimitId,
   Month,
@@ -42,7 +34,6 @@ import type {
 import {
   toCategory,
   toExpense,
-  toGoal,
   toLimit,
   toRecurring,
   toSummary,
@@ -58,10 +49,6 @@ type ListLimitsOut = z.infer<ReturnType<typeof listLimitsSchema>>['out'];
 type CreateLimitOut = z.infer<ReturnType<typeof createLimitSchema>>['out'];
 type UpdateLimitOut = z.infer<ReturnType<typeof updateLimitSchema>>['out'];
 type DeleteLimitOut = z.infer<ReturnType<typeof deleteLimitSchema>>['out'];
-type ListGoalsOut = z.infer<ReturnType<typeof listGoalsSchema>>['out'];
-type CreateGoalOut = z.infer<ReturnType<typeof createGoalSchema>>['out'];
-type UpdateGoalOut = z.infer<ReturnType<typeof updateGoalSchema>>['out'];
-type DeleteGoalOut = z.infer<ReturnType<typeof deleteGoalSchema>>['out'];
 type ListRecurringOut = z.infer<ReturnType<typeof listRecurringSchema>>['out'];
 type CreateRecurringOut = z.infer<
   ReturnType<typeof createRecurringSchema>
@@ -144,16 +131,6 @@ export const fetchLimits = async (signal: AbortSignal): Promise<Limit[]> => {
   return json.data.map(toLimit);
 };
 
-export const fetchGoals = async (signal: AbortSignal): Promise<Goal[]> => {
-  const response = await fetch(API_ROUTER.goals(), {
-    headers: { Accept: 'application/json' },
-    signal,
-  });
-  const json = (await response.json()) as ListGoalsOut;
-  if (json.code !== 200) throw new Error(json.message);
-  return json.data.map(toGoal);
-};
-
 export const postLimit = async (limit: Limit): Promise<Limit> => {
   const response = await fetch(API_ROUTER.limits(), {
     method: 'POST',
@@ -174,34 +151,6 @@ export const putLimit = async (limit: Limit): Promise<Limit> => {
   const json = (await response.json()) as UpdateLimitOut;
   if (json.code !== 200) throw new Error(json.message);
   return toLimit(json.data);
-};
-
-export const postGoal = async (goal: Goal): Promise<Goal> => {
-  const response = await fetch(API_ROUTER.goals(), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(goal),
-  });
-  const json = (await response.json()) as CreateGoalOut;
-  if (json.code !== 201) throw new Error(json.message);
-  return toGoal(json.data);
-};
-
-export const putGoal = async (goal: Goal): Promise<Goal> => {
-  const response = await fetch(API_ROUTER.goalById(goal.id), {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(goal),
-  });
-  const json = (await response.json()) as UpdateGoalOut;
-  if (json.code !== 200) throw new Error(json.message);
-  return toGoal(json.data);
-};
-
-export const deleteGoal = async (id: GoalId): Promise<void> => {
-  const response = await fetch(API_ROUTER.goalById(id), { method: 'DELETE' });
-  const json = (await response.json()) as DeleteGoalOut;
-  if (json.code !== 200) throw new Error(json.message);
 };
 
 export const deleteLimit = async (id: LimitId): Promise<void> => {
@@ -261,15 +210,13 @@ export const fetchDashboard = async (
   month: Month,
   signal: AbortSignal,
 ): Promise<DashboardData> => {
-  const [summary, expenses, categories, limits, goals, recurring] =
-    await Promise.all([
-      fetchSummary(month, signal),
-      fetchExpenses(signal),
-      fetchCategories(signal),
-      fetchLimits(signal),
-      fetchGoals(signal),
-      fetchRecurring(signal),
-    ]);
+  const [summary, expenses, categories, limits, recurring] = await Promise.all([
+    fetchSummary(month, signal),
+    fetchExpenses(signal),
+    fetchCategories(signal),
+    fetchLimits(signal),
+    fetchRecurring(signal),
+  ]);
 
-  return { summary, expenses, categories, limits, goals, recurring };
+  return { summary, expenses, categories, limits, recurring };
 };

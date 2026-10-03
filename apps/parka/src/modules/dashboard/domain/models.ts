@@ -6,7 +6,6 @@ export type CategoryId = Brand<string, 'CategoryId'>;
 export type ExpenseId = Brand<string, 'ExpenseId'>;
 export type ReceiptItemId = Brand<string, 'ReceiptItemId'>;
 export type LimitId = Brand<string, 'LimitId'>;
-export type GoalId = Brand<string, 'GoalId'>;
 export type RecurringId = Brand<string, 'RecurringId'>;
 
 export type DayPoint = { day: number; total: number };
@@ -116,14 +115,6 @@ export type Limit =
 
 export type CategoryLimit = Extract<Limit, { scope: 'category' }>;
 
-export type Goal = {
-  id: GoalId;
-  name: string;
-  target: number;
-  saved: number;
-  months: number;
-};
-
 export type ProgressTone = 'brand' | 'warn' | 'danger';
 
 export type TotalProgress = { spent: number; amount: number; pct: number };
@@ -140,6 +131,5 @@ export type DashboardData = {
   expenses: Expense[];
   categories: Category[];
   limits: Limit[];
-  goals: Goal[];
   recurring: Recurring[];
 };
