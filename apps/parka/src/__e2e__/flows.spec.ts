@@ -128,8 +128,6 @@ const commands = {
               userName: 'Anna',
               transactions: 0,
               dailyAverage: 0,
-              previousTransactions: 0,
-              previousDailyAverage: 0,
               daily: [],
               previousDaily: [],
               monthlyLimit: null,
@@ -350,12 +348,9 @@ const commands = {
     await expect(page.getByText('Kino Nowe Horyzonty')).toHaveCount(0);
   },
 
-  'the dashboard shows the kpis': async ({ page, getByE2e }) => {
+  'the dashboard shows the month summary': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.dashboard());
-    await expect(getByE2e('dashboard:transactions')).toBeVisible();
-  },
-  'the dashboard shows month comparison': async ({ getByE2e }) => {
-    await expect(getByE2e('dashboard:previous-total')).toBeVisible();
+    await expect(getByE2e('dashboard:total')).toBeVisible();
   },
 
   'i create an 80 percent category limit': async ({ page, getByE2e }) => {
@@ -563,11 +558,10 @@ test('an expense can be updated and removed', async ({ e2e }) => {
   );
 });
 
-test('the dashboard exposes kpis and month comparison', async ({ e2e }) => {
+test('the dashboard exposes the month summary', async ({ e2e }) => {
   await interpreter(commands, e2e)(
     ['i mock the dashboard totals'],
-    ['the dashboard shows the kpis'],
-    ['the dashboard shows month comparison'],
+    ['the dashboard shows the month summary'],
   );
 });
 
