@@ -3,6 +3,7 @@ import type {
   Expense,
   ExpenseId,
   Goal,
+  GoalId,
   Limit,
   LimitId,
   Month,
@@ -20,6 +21,8 @@ export type Event =
   | TriggerEvent<'[TRIGGER]_UPDATE_LIMIT', { limit: Limit }>
   | TriggerEvent<'[TRIGGER]_DELETE_LIMIT', { id: LimitId }>
   | TriggerEvent<'[TRIGGER]_CREATE_GOAL', { goal: Goal }>
+  | TriggerEvent<'[TRIGGER]_UPDATE_GOAL', { goal: Goal }>
+  | TriggerEvent<'[TRIGGER]_DELETE_GOAL', { id: GoalId }>
   | TriggerEvent<'[TRIGGER]_LOAD_RECURRING'>
   | TriggerEvent<'[TRIGGER]_CREATE_RECURRING', { recurring: Recurring }>
   | TriggerEvent<'[TRIGGER]_UPDATE_RECURRING', { recurring: Recurring }>

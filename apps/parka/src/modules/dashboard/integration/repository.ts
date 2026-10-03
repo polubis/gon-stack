@@ -12,7 +12,12 @@ import {
   listLimitsSchema,
   updateLimitSchema,
 } from '@schemas/limits';
-import { createGoalSchema, listGoalsSchema } from '@schemas/goals';
+import {
+  createGoalSchema,
+  deleteGoalSchema,
+  listGoalsSchema,
+  updateGoalSchema,
+} from '@schemas/goals';
 import {
   createRecurringSchema,
   deleteRecurringSchema,
@@ -25,6 +30,7 @@ import type {
   Expense,
   ExpenseId,
   Goal,
+  GoalId,
   Limit,
   LimitId,
   Month,
@@ -53,6 +59,8 @@ type UpdateLimitOut = z.infer<ReturnType<typeof updateLimitSchema>>['out'];
 type DeleteLimitOut = z.infer<ReturnType<typeof deleteLimitSchema>>['out'];
 type ListGoalsOut = z.infer<ReturnType<typeof listGoalsSchema>>['out'];
 type CreateGoalOut = z.infer<ReturnType<typeof createGoalSchema>>['out'];
+type UpdateGoalOut = z.infer<ReturnType<typeof updateGoalSchema>>['out'];
+type DeleteGoalOut = z.infer<ReturnType<typeof deleteGoalSchema>>['out'];
 type ListRecurringOut = z.infer<ReturnType<typeof listRecurringSchema>>['out'];
 type CreateRecurringOut = z.infer<
   ReturnType<typeof createRecurringSchema>
@@ -177,6 +185,23 @@ export const postGoal = async (goal: Goal): Promise<Goal> => {
   const json = (await response.json()) as CreateGoalOut;
   if (json.code !== 201) throw new Error(json.message);
   return toGoal(json.data);
+};
+
+export const putGoal = async (goal: Goal): Promise<Goal> => {
+  const response = await fetch(API_ROUTER.goalById(goal.id), {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(goal),
+  });
+  const json = (await response.json()) as UpdateGoalOut;
+  if (json.code !== 200) throw new Error(json.message);
+  return toGoal(json.data);
+};
+
+export const deleteGoal = async (id: GoalId): Promise<void> => {
+  const response = await fetch(API_ROUTER.goalById(id), { method: 'DELETE' });
+  const json = (await response.json()) as DeleteGoalOut;
+  if (json.code !== 200) throw new Error(json.message);
 };
 
 export const deleteLimit = async (id: LimitId): Promise<void> => {
