@@ -1,12 +1,8 @@
 import { useState, type ReactNode } from 'react';
 import { categoryLabel } from '@/shared/i18n/category-label';
-import { APP_ROUTER } from '@/shared/router/routes';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { Card } from '@/shared/ui/layout';
-import { ErrorState } from '@/shared/ui/error-state';
-import { Skeleton } from '@/shared/ui/skeleton';
 import { cn } from '@repo/react-kit/cn';
-import { ERROR_CODES } from '../configuration/constraints';
 import { money, shortDateLabel } from '../domain/format';
 import type { CategoryId, ExpenseId, Month } from '../domain/models';
 import { useContext } from './context';
@@ -55,25 +51,8 @@ const Chip = ({
 );
 
 /** Rows the list shows before it scrolls. */
-const LIST_ROWS = 8;
-
 /** Fixed so filters/loading never shift the layout: 8 rows of 3.5rem + 7 dividers (1px each). */
 const LIST_HEIGHT = 'h-[calc(8*3.5rem+0.4375rem)]';
-
-const ListSkeleton = () => (
-  <ul aria-hidden="true" className="divide-y divide-line">
-    {Array.from({ length: LIST_ROWS }, (_, i) => (
-      <li key={i} className="flex items-center gap-3 py-2">
-        <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
-        <span className="flex flex-1 flex-col gap-1.5">
-          <Skeleton className="h-4 w-1/2" />
-          <Skeleton className="h-3 w-1/3" />
-        </span>
-        <Skeleton className="h-4 w-16" />
-      </li>
-    ))}
-  </ul>
-);
 
 const ROW_CLASS =
   'flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left';
@@ -114,8 +93,6 @@ export const MonthExpenses = ({
   const ctx = useContext();
   const expenses = withRecurring(ctx.useExpenses(), ctx.useRecurring(), month);
   const categories = ctx.useCategories();
-  const error = ctx.useExpensesError();
-  const initializing = ctx.useExpensesInitializing();
   const [filter, setFilter] = useState<CategoryId | null>(null);
 
   const inMonth = expensesInMonth(expenses, month);
@@ -138,24 +115,9 @@ export const MonthExpenses = ({
           Wydatki
         </h2>
         <p className="text-sm text-ink-soft">
-          {initializing ? (
-            <Skeleton className="h-5 w-24" />
-          ) : (
-            `${visible.length} · ${money(sumAmount(visible))}`
-          )}
+          {`${visible.length} · ${money(sumAmount(visible))}`}
         </p>
       </div>
-
-      {error ? (
-        <ErrorState
-          data-e2e="dashboard:expenses-error"
-          title="Nie udało się wczytać wydatków"
-          code={ERROR_CODES.loadExpenses}
-          description={error}
-          onRetry={ctx.loadExpenses}
-          backHref={APP_ROUTER.home()}
-        />
-      ) : null}
 
       {tabs.length > 1 ? (
         <div
@@ -185,9 +147,7 @@ export const MonthExpenses = ({
       ) : null}
 
       <div className={cn(LIST_HEIGHT, 'overflow-y-auto')}>
-        {initializing ? (
-          <ListSkeleton />
-        ) : visible.length === 0 ? (
+        {visible.length === 0 ? (
           <p className="py-2 text-sm text-ink-soft">
             Brak wydatków w tym miesiącu.
           </p>

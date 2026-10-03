@@ -133,3 +133,13 @@ export type CategoryProgress = TotalProgress & {
   categoryId: CategoryId;
   alertAt80: boolean;
 };
+
+/** Everything the dashboard shows, loaded together: all or nothing. */
+export type DashboardData = {
+  summary: Summary;
+  expenses: Expense[];
+  categories: Category[];
+  limits: Limit[];
+  goals: Goal[];
+  recurring: Recurring[];
+};

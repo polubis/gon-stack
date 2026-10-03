@@ -3,7 +3,6 @@ import { categoryLabel } from '@/shared/i18n/category-label';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { Button } from '@/shared/ui/controls';
 import { Card } from '@/shared/ui/layout';
-import { Skeleton } from '@/shared/ui/skeleton';
 import {
   MAX_CATEGORY_SLICES,
   OTHER_CATEGORY_LABEL,
@@ -19,7 +18,7 @@ export const CategoriesCard = ({
   summary,
 }: {
   month: Month;
-  summary: Summary | null;
+  summary: Summary;
 }) => (
   <Card className="space-y-4 xl:col-span-4">
     <div className="flex items-center justify-between gap-2">
@@ -33,9 +32,7 @@ export const CategoriesCard = ({
         <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj kategorię
       </Button>
     </div>
-    {!summary ? (
-      <Skeleton className="h-40 w-full" />
-    ) : summary.categories.length > 0 ? (
+    {summary.categories.length > 0 ? (
       <Donut
         caption={`Rozkład wydatków wg kategorii w ${monthTitle(month)}`}
         slices={foldSlices(

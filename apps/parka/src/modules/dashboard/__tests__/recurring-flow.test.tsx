@@ -6,6 +6,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { Provider, useContext } from '../presentation/context';
 import { totalProgress, withRecurring } from '../presentation/selectors';
 import type { CategoryId, Limit, Month, Recurring } from '../domain/models';
+import { readHandlers } from './dashboard-backend';
 
 const NETFLIX = {
   id: 'r-1',
@@ -23,15 +24,10 @@ const server = setupServer();
 /** Backend with one recurring item; every write answers with `writeResponse`. */
 const mockBackend = (writeResponse: object) =>
   server.use(
-    http.get('/api/recurring/', () =>
-      HttpResponse.json({ code: 200, data: [NETFLIX] }),
-    ),
+    ...readHandlers({ recurring: [NETFLIX] }),
     http.post('/api/recurring/', () => HttpResponse.json(writeResponse)),
     http.put('/api/recurring/:id/', () => HttpResponse.json(writeResponse)),
     http.delete('/api/recurring/:id/', () => HttpResponse.json(writeResponse)),
-    http.get('/api/dashboard/', () =>
-      HttpResponse.json({ code: 500, message: 'no summary here' }),
-    ),
   );
 
 const setup = async () => {
@@ -49,13 +45,15 @@ const setup = async () => {
     },
     { wrapper },
   );
-  act(() => view.result.current.ctx.loadRecurring());
+  act(() => view.result.current.ctx.load(TEST_MONTH));
   await waitFor(() => expect(view.result.current.recurring).toHaveLength(1));
   return view;
 };
 
 const asRecurring = (over: Partial<typeof NETFLIX> = {}) =>
   ({ ...NETFLIX, ...over }) as unknown as Recurring;
+
+const TEST_MONTH = '2025-06' as Month;
 
 describe('recurring expenses', () => {
   beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
@@ -67,10 +65,13 @@ describe('recurring expenses', () => {
     const view = await setup();
 
     act(() =>
-      view.result.current.ctx.updateRecurring({
-        ...view.result.current.recurring[0]!,
-        active: false,
-      }),
+      view.result.current.ctx.updateRecurring(
+        {
+          ...view.result.current.recurring[0]!,
+          active: false,
+        },
+        TEST_MONTH,
+      ),
     );
 
     expect(view.result.current.recurring[0]!.active).toBe(false);
@@ -84,10 +85,13 @@ describe('recurring expenses', () => {
     const view = await setup();
 
     act(() =>
-      view.result.current.ctx.updateRecurring({
-        ...view.result.current.recurring[0]!,
-        active: false,
-      }),
+      view.result.current.ctx.updateRecurring(
+        {
+          ...view.result.current.recurring[0]!,
+          active: false,
+        },
+        TEST_MONTH,
+      ),
     );
 
     await waitFor(() => expect(view.result.current.notice?.tone).toBe('error'));
@@ -99,7 +103,10 @@ describe('recurring expenses', () => {
     const view = await setup();
 
     act(() =>
-      view.result.current.ctx.createRecurring(asRecurring({ id: 'r-2' })),
+      view.result.current.ctx.createRecurring(
+        asRecurring({ id: 'r-2' }),
+        TEST_MONTH,
+      ),
     );
 
     expect(view.result.current.recurring).toHaveLength(2);
@@ -113,7 +120,10 @@ describe('recurring expenses', () => {
     const view = await setup();
 
     act(() =>
-      view.result.current.ctx.createRecurring(asRecurring({ id: 'r-2' })),
+      view.result.current.ctx.createRecurring(
+        asRecurring({ id: 'r-2' }),
+        TEST_MONTH,
+      ),
     );
 
     await waitFor(() => expect(view.result.current.notice?.tone).toBe('error'));
@@ -124,7 +134,9 @@ describe('recurring expenses', () => {
     mockBackend({ code: 200, ok: true });
     const view = await setup();
 
-    act(() => view.result.current.ctx.removeRecurring(NETFLIX.id as never));
+    act(() =>
+      view.result.current.ctx.removeRecurring(NETFLIX.id as never, TEST_MONTH),
+    );
 
     expect(view.result.current.recurring).toHaveLength(0);
     await waitFor(() =>
@@ -136,7 +148,9 @@ describe('recurring expenses', () => {
     mockBackend({ code: 500, message: 'boom' });
     const view = await setup();
 
-    act(() => view.result.current.ctx.removeRecurring(NETFLIX.id as never));
+    act(() =>
+      view.result.current.ctx.removeRecurring(NETFLIX.id as never, TEST_MONTH),
+    );
 
     await waitFor(() => expect(view.result.current.notice?.tone).toBe('error'));
     expect(view.result.current.recurring).toHaveLength(1);

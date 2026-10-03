@@ -3,7 +3,6 @@ import { TrendingDown, TrendingUp } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { Card } from '@/shared/ui/layout';
 import { ProgressBar } from '@/shared/ui/controls';
-import { Skeleton } from '@/shared/ui/skeleton';
 import { LIMITS_SECTION_ID } from '../configuration/constraints';
 import { money, percent } from '../domain/format';
 import type { Summary } from '../domain/models';
@@ -63,18 +62,7 @@ const Limit = ({ summary }: { summary: Summary }) => {
   );
 };
 
-export const TotalHero = ({ summary }: { summary: Summary | null }) => {
-  if (!summary) {
-    return (
-      <Card className="flex flex-col items-center gap-2 py-6">
-        <Skeleton className="h-4 w-40" />
-        <Skeleton className="h-12 w-56 md:h-14" />
-        <Skeleton className="h-5 w-24" />
-        <Skeleton className="h-4 w-52" />
-      </Card>
-    );
-  }
-
+export const TotalHero = ({ summary }: { summary: Summary }) => {
   const shown = Math.round(summary.change) !== 0;
   const up = summary.change > 0;
 

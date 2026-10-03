@@ -17,6 +17,7 @@ import { MonthExpenses } from './month-expenses';
 import { Header } from './header';
 import { TotalHero } from './total-hero';
 import { RecurringCard } from './recurring-card';
+import { DashboardSkeleton } from './skeleton';
 import { SpendingChart } from './spending-chart';
 
 const MONTH_PARAM = 'month';
@@ -31,24 +32,16 @@ const DashboardView = () => {
   const [month, setMonth] = useState(initialMonth);
   const [selectedId, setSelectedId] = useState<ExpenseId | null>(null);
   const [editing, setEditing] = useState(false);
-  const summary = ctx.useData();
+  const initialized = ctx.useInitialized();
+  const loading = ctx.useLoading();
   const error = ctx.useError();
-  const initializing = ctx.useInitializing();
-  const isLoading = ctx.useIsLoading();
+  const summary = ctx.useData();
   const expenses = ctx.useExpenses();
   const notice = ctx.useNotice();
-  // Failed first load: the ErrorState stands in for the summary cards.
-  const failed = Boolean(error) && !summary;
 
   useEffect(() => {
     ctx.load(month);
   }, [month, ctx]);
-
-  useEffect(() => {
-    ctx.loadExpenses();
-    ctx.loadLimits();
-    ctx.loadRecurring();
-  }, [ctx]);
 
   const goToMonth = (next: Month) => {
     writeQueryParam(MONTH_PARAM, next);
@@ -61,11 +54,32 @@ const DashboardView = () => {
   };
   const selected = expenses.find((e) => e.id === selectedId) ?? null;
 
+  // One failure screen for the whole dashboard: all or nothing.
+  if (error) {
+    return (
+      <div data-e2e="dashboard:main" className="flex flex-1 flex-col">
+        <main className="flex flex-1 flex-col px-4 pb-6 pt-4 md:px-8 lg:px-10 lg:pt-8 xl:px-16">
+          <ErrorState
+            data-e2e="dashboard:summary-error"
+            title="Nie udało się wczytać podsumowania"
+            code={ERROR_CODES.load}
+            description={error}
+            onRetry={() => ctx.load(month)}
+            backHref={APP_ROUTER.home()}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  const ready = initialized && summary !== null;
+
   const overlays = (
     <>
       {selected ? (
         <ExpenseDetail
           expense={selected}
+          month={month}
           editing={editing}
           onEdit={() => setEditing(true)}
           onClose={() => {
@@ -88,44 +102,33 @@ const DashboardView = () => {
 
   return (
     <div data-e2e="dashboard:main" className="relative flex flex-1 flex-col">
-      <LoadingBanner active={isLoading && !initializing} />
+      <LoadingBanner active={loading && ready} />
       <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-4 md:gap-6 md:px-8 lg:px-10 lg:pt-8 xl:grid xl:grid-cols-12 xl:content-start xl:px-16">
         <div className="xl:col-span-12">
           <Header
             month={month}
             userName={summary?.userName}
-            initializing={initializing}
+            initializing={!ready}
             onMonthChange={goToMonth}
           />
         </div>
 
-        {error && (
-          <div className="xl:col-span-12">
-            <ErrorState
-              data-e2e="dashboard:summary-error"
-              title="Nie udało się wczytać podsumowania"
-              code={ERROR_CODES.load}
-              description={error}
-              onRetry={() => ctx.load(month)}
-              backHref={APP_ROUTER.home()}
-            />
-          </div>
-        )}
-
-        {failed ? null : (
+        {ready ? (
           <>
             <div className="xl:col-span-12">
               <TotalHero summary={summary} />
             </div>
             <SpendingChart month={month} summary={summary} />
             <CategoriesCard month={month} summary={summary} />
+            <MonthExpenses month={month} onSelect={select} />
+            <LimitsCard month={month} />
+            <GoalsCard />
+            <RecurringCard month={month} />
+            {overlays}
           </>
+        ) : (
+          <DashboardSkeleton />
         )}
-        <MonthExpenses month={month} onSelect={select} />
-        <LimitsCard month={month} />
-        <GoalsCard />
-        <RecurringCard />
-        {overlays}
       </main>
     </div>
   );

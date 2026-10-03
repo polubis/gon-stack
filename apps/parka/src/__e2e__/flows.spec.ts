@@ -3,6 +3,7 @@ import { interpreter, type CommandRegistry } from '@repo/vibe-test';
 import { test, type Ctx } from './test';
 import { API_ROUTER, APP_ROUTER } from '@/shared/router/routes';
 import { signInAsTestUser } from './session';
+import { installBackend } from '@/modules/dashboard/__e2e__/fake-backend';
 
 /**
  * Navigate and wait for the Astro islands on the page to hydrate before the
@@ -64,6 +65,31 @@ const mockState = async (
       });
     });
   }
+  // The dashboard loads its summary together with every list: all or nothing.
+  await page.route(
+    `**${API_ROUTER.dashboard({ month: '' })}**`,
+    async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          code: 200,
+          data: {
+            total: 0,
+            change: 0,
+            previousTotal: 0,
+            userName: 'Anna',
+            transactions: 0,
+            dailyAverage: 0,
+            daily: [],
+            previousDaily: [],
+            monthlyLimit: null,
+            categories: [],
+          },
+        }),
+      });
+    },
+  );
   await page.route(`**${API_ROUTER.settings()}**`, async (route) => {
     await route.fulfill({
       status: 200,
@@ -103,6 +129,7 @@ const commands = {
   },
 
   'i mock the dashboard totals': async ({ page }) => {
+    await mockState(page);
     // Dashboard is backend-only (see modules/dashboard/AGENTS.md) — stub the
     // response so the view has deterministic per-month totals to assert
     // against.
@@ -242,6 +269,7 @@ const commands = {
   },
 
   'i mock the expenses list': async ({ page }) => {
+    await mockState(page);
     // Expenses section of the dashboard is backend-only (see modules/dashboard core/
     // facade) — stub categories/expenses so the view has deterministic rows
     // to assert against instead of relying on the removed local demo mode.
@@ -422,7 +450,15 @@ const commands = {
   },
 
   'i add and remove a recurring expense': async ({ page, getByE2e }) => {
+    // Stateful: a recurring change reloads the dashboard, which must read the
+    // new item back.
     await mockState(page);
+    await installBackend(page, {
+      categories: [CATEGORY],
+      expenses: [],
+      limits: [],
+      recurring: [],
+    });
     await open(page, APP_ROUTER.dashboard());
     await getByE2e('dashboard:recurring-new').click();
     await getByE2e('dashboard:recurring-form-name').fill('Siłownia');

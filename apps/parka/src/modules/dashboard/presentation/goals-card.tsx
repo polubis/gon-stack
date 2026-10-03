@@ -1,30 +1,17 @@
 import { Plus } from 'lucide-react';
-import { APP_ROUTER } from '@/shared/router/routes';
 import { Button } from '@/shared/ui/controls';
-import { ErrorState } from '@/shared/ui/error-state';
 import { Card } from '@/shared/ui/layout';
-import { Skeleton } from '@/shared/ui/skeleton';
-import { ERROR_CODES, GOALS_SECTION_ID } from '../configuration/constraints';
+import { GOALS_SECTION_ID } from '../configuration/constraints';
 import { useContext } from './context';
 import { GoalsTab } from './goals-tab';
 import { Sheet } from '@/shared/ui/sheet';
 import { GoalForm } from './goal-form';
 import { useSheet } from '@/shared/ui/use-sheet';
 
-const GoalsSkeleton = () => (
-  <div aria-hidden="true" className="space-y-3">
-    <Skeleton className="h-20 w-full rounded-xl" />
-    <Skeleton className="h-20 w-full rounded-xl" />
-    <Skeleton className="h-20 w-full rounded-xl" />
-  </div>
-);
-
 /** Vacation goals (CRUD). Fixed height, form opens as a sheet over the card. */
 export const GoalsCard = () => {
   const ctx = useContext();
   const goals = ctx.useGoals();
-  const error = ctx.useLimitsError();
-  const initializing = ctx.useLimitsInitializing();
   const { sheet, open, close } = useSheet<'goal' | `edit:${string}`>();
   const editing = sheet?.startsWith('edit:')
     ? goals.find((g) => `edit:${g.id}` === sheet)
@@ -49,7 +36,6 @@ export const GoalsCard = () => {
           <Button
             variant="ghost"
             className="w-auto px-3 py-1.5"
-            disabled={initializing}
             data-e2e="dashboard:goal-new"
             onClick={() => open('goal')}
           >
@@ -57,23 +43,8 @@ export const GoalsCard = () => {
           </Button>
         </div>
 
-        {error ? (
-          <ErrorState
-            data-e2e="dashboard:goals-error"
-            title="Nie udało się wczytać celów wakacyjnych"
-            code={ERROR_CODES.loadGoals}
-            description={error}
-            onRetry={ctx.loadLimits}
-            backHref={APP_ROUTER.home()}
-          />
-        ) : null}
-
         <div className="min-h-0 flex-1 overflow-y-auto pr-2">
-          {initializing ? (
-            <GoalsSkeleton />
-          ) : (
-            <GoalsTab goals={goals} onEdit={(id) => open(`edit:${id}`)} />
-          )}
+          <GoalsTab goals={goals} onEdit={(id) => open(`edit:${id}`)} />
         </div>
       </div>
 

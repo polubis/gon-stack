@@ -32,11 +32,16 @@ const SUMMARY = {
 };
 
 const stubApi = (failing = false, overrides: Partial<typeof SUMMARY> = {}) => {
-  const fetchMock = vi.fn(async (_url: string) => ({
+  const fetchMock = vi.fn(async (url: string) => ({
     json: async () =>
       failing
         ? { code: 500, message: 'boom' }
-        : { code: 200, data: { ...SUMMARY, ...overrides } },
+        : {
+            code: 200,
+            data: url.includes('/api/dashboard')
+              ? { ...SUMMARY, ...overrides }
+              : [],
+          },
   }));
   vi.stubGlobal('fetch', fetchMock);
   return fetchMock;
@@ -119,10 +124,54 @@ describe('dashboard screen', () => {
     );
 
     await waitFor(() =>
-      expect(String(fetchMock.mock.calls.at(-1)?.[0])).toContain(
-        `month=${previous}`,
-      ),
+      expect(
+        fetchMock.mock.calls.some(([url]) =>
+          String(url).includes(`month=${previous}`),
+        ),
+      ).toBe(true),
     );
+  });
+
+  it('shows a skeleton until all the data arrived', async () => {
+    stubApi();
+
+    render(<Main />);
+
+    expect(screen.queryByText('Wydatki w tym miesiącu')).toBeNull();
+    expect(await screen.findByText('Wydatki w tym miesiącu')).toBeTruthy();
+    expect(screen.getByText('Cele wakacyjne')).toBeTruthy();
+  });
+
+  it('loads everything in one go, once', async () => {
+    const fetchMock = stubApi();
+
+    render(<Main />);
+
+    await screen.findByText('Cele wakacyjne');
+    expect(fetchMock).toHaveBeenCalledTimes(6);
+  });
+
+  it('shows only the failure screen when any part fails to load', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => ({
+        json: async () =>
+          url.includes('/api/goals')
+            ? { code: 500, message: 'boom' }
+            : {
+                code: 200,
+                data: url.includes('/api/dashboard') ? SUMMARY : [],
+              },
+      })),
+    );
+
+    render(<Main />);
+
+    expect(
+      await screen.findByText('Nie udało się wczytać podsumowania'),
+    ).toBeTruthy();
+    expect(screen.queryByText('Wydatki w tym miesiącu')).toBeNull();
+    expect(screen.queryByText('Cele wakacyjne')).toBeNull();
   });
 
   it('offers a retry when loading fails', async () => {
@@ -179,7 +228,9 @@ describe('dashboard month expenses', () => {
                     color: 'red',
                   },
                 ]
-              : SUMMARY,
+              : url.includes('/api/dashboard')
+                ? SUMMARY
+                : [],
         }),
       })),
     );

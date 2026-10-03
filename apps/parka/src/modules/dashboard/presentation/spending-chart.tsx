@@ -1,5 +1,4 @@
 import { Card } from '@/shared/ui/layout';
-import { Skeleton } from '@/shared/ui/skeleton';
 import { CHART_LABEL_DAYS, CHART_TICKS } from '../configuration/constraints';
 import { dayLabel, money, monthTitle, prevMonth } from '../domain/format';
 import type { Month, Summary } from '../domain/models';
@@ -137,20 +136,13 @@ export const SpendingChart = ({
   summary,
 }: {
   month: Month;
-  summary: Summary | null;
+  summary: Summary;
 }) => (
   <Card className="space-y-4 xl:col-span-8">
     <div className="flex flex-wrap items-center justify-between gap-2">
       <h2 className="text-base font-semibold">Wydatki w czasie</h2>
       <Legend month={month} />
     </div>
-    {summary ? (
-      <Chart month={month} summary={summary} />
-    ) : (
-      <div aria-hidden="true">
-        <Skeleton className="h-48 w-full md:h-56" />
-        <Skeleton className="mt-1 h-4 w-full" />
-      </div>
-    )}
+    <Chart month={month} summary={summary} />
   </Card>
 );

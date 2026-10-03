@@ -9,11 +9,9 @@ import { Button } from '@/shared/ui/controls';
  */
 export const AddLimitButton = ({
   blocked,
-  loading,
   onClick,
 }: {
   blocked: boolean;
-  loading: boolean;
   onClick: () => void;
 }) => {
   const hintId = useId();
@@ -26,7 +24,6 @@ export const AddLimitButton = ({
           'w-auto px-3 py-1.5',
           blocked && 'cursor-not-allowed opacity-60',
         )}
-        disabled={loading}
         aria-disabled={blocked || undefined}
         aria-describedby={blocked ? hintId : undefined}
         data-e2e="dashboard:limit-new"

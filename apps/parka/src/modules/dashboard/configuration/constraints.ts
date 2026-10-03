@@ -43,9 +43,5 @@ export const UNCATEGORIZED: Category = {
 
 export const ERROR_CODES = {
   load: 'DASHBOARD_LOAD',
-  loadExpenses: 'DASHBOARD_EXPENSES_LOAD',
-  loadLimits: 'DASHBOARD_LIMITS_LOAD',
-  loadGoals: 'DASHBOARD_GOALS_LOAD',
-  loadRecurring: 'DASHBOARD_RECURRING_LOAD',
   render: 'DASHBOARD_RENDER',
 } as const;

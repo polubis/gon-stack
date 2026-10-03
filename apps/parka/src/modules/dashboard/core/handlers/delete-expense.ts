@@ -4,15 +4,18 @@ import type { Bus } from '../bus';
 import { notify } from '../actions/notify';
 import { deleteExpense } from '../../integration/repository';
 
-export const removeExpense = (store: Store, { ofType }: Bus) =>
+export const removeExpense = (store: Store, { ofType, emit }: Bus) =>
   ofType('[TRIGGER]_DELETE_EXPENSE').pipe(
-    map(({ id }) => ({ id, previous: store.$expenses.get() })),
+    map(({ id, month }) => ({ id, month, previous: store.$expenses.get() })),
     tap(({ id }) => {
       store.$expenses.set(store.$expenses.get().filter((e) => e.id !== id));
     }),
-    concatMap(({ id, previous }) =>
+    concatMap(({ id, month, previous }) =>
       from(deleteExpense(id)).pipe(
-        tap(() => notify(store, 'success', 'Usunięto wydatek.')),
+        tap(() => {
+          notify(store, 'success', 'Usunięto wydatek.');
+          emit('[FACT]_EXPENSE_CHANGED', { month });
+        }),
         catchError(() => {
           store.$expenses.set(previous);
           notify(store, 'error', 'Nie udało się usunąć wydatku.');

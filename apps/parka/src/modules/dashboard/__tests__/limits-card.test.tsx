@@ -7,6 +7,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { Provider, useContext } from '../presentation/context';
 import { LimitsCard } from '../presentation/limits-card';
 import type { Month } from '../domain/models';
+import { readHandlers } from './dashboard-backend';
 
 const MONTH = '2025-04' as Month;
 
@@ -32,16 +33,7 @@ const server = setupServer();
 /** Backend holding `limits` and one category; writes are accepted. */
 const mockBackend = (limits: object[]) =>
   server.use(
-    http.get('/api/limits/', () =>
-      HttpResponse.json({ code: 200, data: limits }),
-    ),
-    http.get('/api/categories/', () =>
-      HttpResponse.json({ code: 200, data: [CATEGORY] }),
-    ),
-    http.get('/api/expenses/', () =>
-      HttpResponse.json({ code: 200, data: [] }),
-    ),
-    http.get('/api/goals/', () => HttpResponse.json({ code: 200, data: [] })),
+    ...readHandlers({ limits, categories: [CATEGORY] }),
     http.post('/api/limits/', async ({ request }) =>
       HttpResponse.json({ code: 201, data: await request.json() }),
     ),
@@ -56,8 +48,7 @@ const mockBackend = (limits: object[]) =>
 const Harness = () => {
   const ctx = useContext();
   useEffect(() => {
-    ctx.loadLimits();
-    ctx.loadExpenses();
+    ctx.load(MONTH);
   }, [ctx]);
   return <LimitsCard month={MONTH} />;
 };

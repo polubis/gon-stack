@@ -64,6 +64,21 @@ const SCREENS: Screen[] = [
 
 const commands = {
   'i mock the dashboard': async ({ page }) => {
+    // The dashboard loads every list together with the summary.
+    for (const url of [
+      API_ROUTER.expenses(),
+      API_ROUTER.categories(),
+      API_ROUTER.limits(),
+      API_ROUTER.goals(),
+      API_ROUTER.recurring(),
+    ])
+      await page.route(`**${url}**`, (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ code: 200, data: [] }),
+        }),
+      );
     // Dashboard is backend-only (see modules/dashboard/AGENTS.md) — stub the
     // response so the a11y check doesn't depend on an authenticated session.
     await page.route(

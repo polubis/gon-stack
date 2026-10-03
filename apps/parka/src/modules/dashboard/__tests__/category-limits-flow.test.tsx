@@ -4,7 +4,8 @@ import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { Provider, useContext } from '../presentation/context';
-import type { CategoryLimit, LimitId } from '../domain/models';
+import type { CategoryLimit, LimitId, Month } from '../domain/models';
+import { readHandlers } from './dashboard-backend';
 
 const FOOD = {
   id: 'l-1',
@@ -27,10 +28,7 @@ const server = setupServer();
 /** Backend with both limits; every write answers with `writeResponse`. */
 const mockBackend = (writeResponse: object) =>
   server.use(
-    http.get('/api/limits/', () =>
-      HttpResponse.json({ code: 200, data: [TOTAL, FOOD] }),
-    ),
-    http.get('/api/goals/', () => HttpResponse.json({ code: 200, data: [] })),
+    ...readHandlers({ limits: [TOTAL, FOOD] }),
     http.put('/api/limits/:id/', () => HttpResponse.json(writeResponse)),
     http.delete('/api/limits/:id/', () => HttpResponse.json(writeResponse)),
   );
@@ -50,7 +48,7 @@ const setup = async () => {
     },
     { wrapper },
   );
-  act(() => view.result.current.ctx.loadLimits());
+  act(() => view.result.current.ctx.load('2025-04' as Month));
   await waitFor(() => expect(view.result.current.limits).toHaveLength(2));
   return view;
 };

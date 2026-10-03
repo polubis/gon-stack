@@ -15,43 +15,32 @@ import type {
 export const createFacade = (store: Store, trigger: Registry['trigger']) => {
   return {
     load: (month: Month) => trigger('[TRIGGER]_LOAD', { month }),
-    loadExpenses: () => trigger('[TRIGGER]_LOAD_EXPENSES'),
-    updateExpense: (expense: Expense) =>
-      trigger('[TRIGGER]_UPDATE_EXPENSE', { expense }),
-    removeExpense: (id: ExpenseId) =>
-      trigger('[TRIGGER]_DELETE_EXPENSE', { id }),
-    loadLimits: () => trigger('[TRIGGER]_LOAD_LIMITS'),
+    updateExpense: (expense: Expense, month: Month) =>
+      trigger('[TRIGGER]_UPDATE_EXPENSE', { expense, month }),
+    removeExpense: (id: ExpenseId, month: Month) =>
+      trigger('[TRIGGER]_DELETE_EXPENSE', { id, month }),
     createLimit: (limit: Limit) => trigger('[TRIGGER]_CREATE_LIMIT', { limit }),
     updateLimit: (limit: Limit) => trigger('[TRIGGER]_UPDATE_LIMIT', { limit }),
     removeLimit: (id: LimitId) => trigger('[TRIGGER]_DELETE_LIMIT', { id }),
     createGoal: (goal: Goal) => trigger('[TRIGGER]_CREATE_GOAL', { goal }),
     updateGoal: (goal: Goal) => trigger('[TRIGGER]_UPDATE_GOAL', { goal }),
     removeGoal: (id: GoalId) => trigger('[TRIGGER]_DELETE_GOAL', { id }),
-    loadRecurring: () => trigger('[TRIGGER]_LOAD_RECURRING'),
-    createRecurring: (recurring: Recurring) =>
-      trigger('[TRIGGER]_CREATE_RECURRING', { recurring }),
-    updateRecurring: (recurring: Recurring) =>
-      trigger('[TRIGGER]_UPDATE_RECURRING', { recurring }),
-    removeRecurring: (id: RecurringId) =>
-      trigger('[TRIGGER]_DELETE_RECURRING', { id }),
+    createRecurring: (recurring: Recurring, month: Month) =>
+      trigger('[TRIGGER]_CREATE_RECURRING', { recurring, month }),
+    updateRecurring: (recurring: Recurring, month: Month) =>
+      trigger('[TRIGGER]_UPDATE_RECURRING', { recurring, month }),
+    removeRecurring: (id: RecurringId, month: Month) =>
+      trigger('[TRIGGER]_DELETE_RECURRING', { id, month }),
     dismissNotice: () => trigger('[TRIGGER]_DISMISS_NOTICE'),
-    useData: () => store.$data.use(),
-    useInitializing: () => store.$initializing.use(),
-    useIsLoading: () => store.$isLoading.use(),
+    useInitialized: () => store.$initialized.use(),
+    useLoading: () => store.$loading.use(),
     useError: () => store.$error.use(),
+    useData: () => store.$data.use(),
     useExpenses: () => store.$expenses.use(),
     useCategories: () => store.$categories.use(),
-    useExpensesInitializing: () => store.$expensesInitializing.use(),
-    useExpensesLoading: () => store.$expensesLoading.use(),
-    useExpensesError: () => store.$expensesError.use(),
     useLimits: () => store.$limits.use(),
     useGoals: () => store.$goals.use(),
-    useLimitsInitializing: () => store.$limitsInitializing.use(),
-    useLimitsLoading: () => store.$limitsLoading.use(),
-    useLimitsError: () => store.$limitsError.use(),
     useRecurring: () => store.$recurring.use(),
-    useRecurringInitializing: () => store.$recurringInitializing.use(),
-    useRecurringError: () => store.$recurringError.use(),
     useNotice: () => store.$notice.use(),
   };
 };

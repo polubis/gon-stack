@@ -7,16 +7,18 @@ import { NumberInput } from '@/shared/ui/number-input';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { UNCATEGORIZED } from '../configuration/constraints';
 import { itemTotal, dateTimeLabel, money } from '../domain/format';
-import type { CategoryId, Expense } from '../domain/models';
+import type { CategoryId, Expense, Month } from '../domain/models';
 import { useContext } from './context';
 
 export const ExpenseDetail = ({
   expense,
+  month,
   editing,
   onEdit,
   onClose,
 }: {
   expense: Expense;
+  month: Month;
   editing: boolean;
   onEdit: () => void;
   onClose: () => void;
@@ -32,17 +34,12 @@ export const ExpenseDetail = ({
   const [categoryId, setCategoryId] = useState<CategoryId>(expense.categoryId);
 
   const save = () => {
-    ctx.updateExpense({
-      ...expense,
-      merchant,
-      amount,
-      categoryId,
-    });
+    ctx.updateExpense({ ...expense, merchant, amount, categoryId }, month);
     onClose();
   };
 
   const remove = () => {
-    ctx.removeExpense(expense.id);
+    ctx.removeExpense(expense.id, month);
     onClose();
   };
 

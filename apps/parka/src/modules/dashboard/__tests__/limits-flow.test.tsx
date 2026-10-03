@@ -2,7 +2,8 @@ import type { ReactNode } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Provider, useContext } from '../presentation/context';
-import type { Goal, GoalId, Limit, LimitId } from '../domain/models';
+import type { Goal, GoalId, Limit, LimitId, Month } from '../domain/models';
+import { readBody } from './dashboard-backend';
 
 const TOTAL = {
   id: 'l-1',
@@ -18,9 +19,7 @@ const stubApi = (writeResponse: object) =>
     vi.fn(async (url: string, init?: RequestInit) => {
       const body = init?.method
         ? writeResponse
-        : url.includes('limits')
-          ? { code: 200, data: [TOTAL] }
-          : { code: 200, data: [] };
+        : readBody(url, { limits: [TOTAL] });
       return { json: async () => body };
     }),
   );
@@ -41,7 +40,7 @@ const setup = async () => {
     },
     { wrapper },
   );
-  act(() => view.result.current.ctx.loadLimits());
+  act(() => view.result.current.ctx.load('2025-04' as Month));
   await waitFor(() => expect(view.result.current.limits).toHaveLength(1));
   return view;
 };
