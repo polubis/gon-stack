@@ -1,1 +1,2 @@
 pnpm ci:format
+pnpm ci:verify
