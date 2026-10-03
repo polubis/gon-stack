@@ -234,7 +234,7 @@ export const NewExpense = ({
       });
   };
 
-  const pick = (input: RefObject<HTMLInputElement | null>) => () =>
+  const pick = (input: RefObject<HTMLInputElement | null>) =>
     input.current?.click();
 
   const onPicked =

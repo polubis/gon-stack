@@ -96,6 +96,35 @@ describe('adding an expense from a receipt', () => {
     expect(screen.getByLabelText('Sklep')).toBeVisible();
   });
 
+  it.each([
+    ['Wgraj z pliku', 'Plik ze zdjęciem paragonu'],
+    ['Zrób zdjęcie', 'Zdjęcie paragonu z aparatu'],
+  ])('opens the file picker after clicking "%s"', async (button, input) => {
+    const user = await open();
+    const opened = vi.fn();
+    screen.getByLabelText(input).addEventListener('click', opened);
+
+    await user.click(screen.getByRole('button', { name: button }));
+
+    expect(opened).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens the file picker again after retrying a rejected file', async () => {
+    const user = await open();
+    await upload(user, photo('application/pdf'));
+    const alert = await screen.findByRole('alert');
+    const opened = vi.fn();
+    screen
+      .getByLabelText('Plik ze zdjęciem paragonu')
+      .addEventListener('click', opened);
+
+    await user.click(
+      within(alert).getByRole('button', { name: 'Spróbuj ponownie' }),
+    );
+
+    expect(opened).toHaveBeenCalledTimes(1);
+  });
+
   it('fills the form from an uploaded receipt', async () => {
     mockScan();
     const user = await open();
