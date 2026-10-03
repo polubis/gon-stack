@@ -52,8 +52,8 @@ export const router = createRouter({
       () => import('@/modules/data-export/presentation/main'),
     ),
     page(
-      APP_ROUTER.receiptScan(),
-      () => import('@/modules/receipt/presentation/main'),
+      APP_ROUTER.newExpense(),
+      () => import('@/modules/expenses-management/presentation/main'),
     ),
   ]),
   trailingSlash: 'always',

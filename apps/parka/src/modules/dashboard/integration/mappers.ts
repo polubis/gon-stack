@@ -4,7 +4,6 @@ import type { listExpensesSchema } from '@schemas/expenses';
 import type { listCategoriesSchema } from '@schemas/categories';
 import type { listLimitsSchema } from '@schemas/limits';
 import type { listRecurringSchema } from '@schemas/recurring';
-import type { scanReceiptSchema } from '@schemas/receipts';
 import type { InferOut } from '@/shared/server-contracts/extraction';
 import type {
   Category,
@@ -14,7 +13,6 @@ import type {
   ExpenseId,
   Limit,
   LimitId,
-  ReceiptDraft,
   ReceiptItemId,
   Recurring,
   RecurringId,
@@ -25,11 +23,6 @@ type ExpenseDto = InferOut<
   z.infer<ReturnType<typeof listExpensesSchema>>['out'],
   200
 >['data'][number];
-
-type ReceiptDraftDto = InferOut<
-  z.infer<ReturnType<typeof scanReceiptSchema>>['out'],
-  200
->['data'];
 
 type CategoryDto = InferOut<
   z.infer<ReturnType<typeof listCategoriesSchema>>['out'],
@@ -115,12 +108,4 @@ export const toRecurring = (dto: RecurringDto): Recurring => ({
   paymentMethod: dto.paymentMethod,
   categoryId: dto.categoryId as CategoryId,
   history: dto.history.map((h) => ({ date: h.date, amount: h.amount })),
-});
-
-export const toReceiptDraft = (dto: ReceiptDraftDto): ReceiptDraft => ({
-  merchant: dto.merchant,
-  date: dto.date,
-  amount: dto.amount,
-  paymentMethod: dto.paymentMethod,
-  items: dto.items.map((item) => ({ ...item })),
 });

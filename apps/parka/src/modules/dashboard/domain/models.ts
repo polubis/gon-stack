@@ -133,18 +133,3 @@ export type DashboardData = {
   limits: Limit[];
   recurring: Recurring[];
 };
-
-/** What a scanned receipt yields; still to be reviewed and saved by the user. */
-export type ReceiptDraft = {
-  merchant: string;
-  /** ISO date-time string. */
-  date: string;
-  amount: number;
-  paymentMethod: string;
-  items: {
-    name: string;
-    unitPrice: number;
-    quantity: number;
-    discount: number;
-  }[];
-};

@@ -98,20 +98,21 @@ const commands = {
     await expect(page.getByText('Kultura')).toBeVisible();
   },
 
-  'i scan a receipt and save it as an expense': async ({
+  'i add an expense with a product and save it': async ({
     page,
     getByE2e,
     getByE2ePrefix,
   }) => {
-    await open(page, APP_ROUTER.receiptScan());
-    await getByE2e('receipt:capture').click();
-    await expect(getByE2e('receipt:review')).toBeVisible();
-    await getByE2e('receipt:merchant').fill('Sklep E2E Backend');
-    await page.getByRole('button', { name: /Nowy produkt/ }).click();
-    await getByE2ePrefix('receipt:item-name:').fill('Chleb razowy');
-    await getByE2ePrefix('receipt:item-price:').fill('3.20');
-    await getByE2e('receipt:save').click();
-    await page.waitForURL(`**${APP_ROUTER.dashboard()}`);
+    await open(page, APP_ROUTER.newExpense());
+    await expect(getByE2e('expenses-management:expense-form')).toBeVisible();
+    await getByE2e('expenses-management:merchant').fill('Sklep E2E Backend');
+    await getByE2e('expenses-management:add-product').click();
+    await getByE2ePrefix('expenses-management:product-name:').fill(
+      'Chleb razowy',
+    );
+    await getByE2ePrefix('expenses-management:product-price:').fill('3.20');
+    await getByE2e('expenses-management:save').click();
+    await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
     await expect(page.getByText('Sklep E2E Backend')).toBeVisible();
     await reload(page);
     await expect(page.getByText('Sklep E2E Backend')).toBeVisible();
@@ -227,7 +228,7 @@ test.skip('every feature works against the real Supabase backend', async ({
     ['month navigation reads other months from the db'],
     ['i add suggested categories and they survive a reload'],
     ['i create a category and it survives a reload'],
-    ['i scan a receipt and save it as an expense'],
+    ['i add an expense with a product and save it'],
     ['i update and delete an expense'],
     ['the dashboard exposes the month summary'],
     ['the report totals and downloads a csv'],

@@ -4,19 +4,18 @@ import { Trash2 } from 'lucide-react';
 import { Button, Field, inputClass } from '@/shared/ui/controls';
 import { NumberInput } from '@/shared/ui/number-input';
 import { fromDateInput, toDateInput } from '../domain/format';
-import { newRecurringId } from '../domain/ids';
 import type { CategoryId, Month, Recurring } from '../domain/models';
 import { useContext } from './context';
 import { DialogActions } from './detail-dialog';
 
-/** Creates a recurring expense, or edits `recurring` (history kept, can be removed). */
+/** Edits `recurring` (history kept); it can also be removed. */
 export const RecurringForm = ({
   recurring,
   month,
   onDone,
   children,
 }: {
-  recurring?: Recurring;
+  recurring: Recurring;
   month: Month;
   onDone: () => void;
   /** Rendered between the fields and the buttons. */
@@ -24,14 +23,12 @@ export const RecurringForm = ({
 }) => {
   const ctx = useContext();
   const categories = ctx.useCategories();
-  const [name, setName] = useState(recurring?.name ?? '');
-  const [cost, setCost] = useState(recurring?.cost ?? 0);
-  const [date, setDate] = useState(
-    toDateInput(recurring?.nextPaymentDate ?? new Date().toISOString()),
-  );
-  const [method, setMethod] = useState(recurring?.paymentMethod ?? '');
+  const [name, setName] = useState(recurring.name);
+  const [cost, setCost] = useState(recurring.cost);
+  const [date, setDate] = useState(toDateInput(recurring.nextPaymentDate));
+  const [method, setMethod] = useState(recurring.paymentMethod);
   const [categoryId, setCategoryId] = useState<CategoryId | null>(
-    recurring?.categoryId ?? null,
+    recurring.categoryId,
   );
 
   const selected = categories.some((c) => c.id === categoryId)
@@ -48,24 +45,11 @@ export const RecurringForm = ({
       paymentMethod: method.trim(),
       categoryId: selected,
     };
-    if (recurring) {
-      ctx.updateRecurring({ ...recurring, ...values }, month);
-    } else {
-      ctx.createRecurring(
-        {
-          id: newRecurringId(),
-          active: true,
-          history: [],
-          ...values,
-        },
-        month,
-      );
-    }
+    ctx.updateRecurring({ ...recurring, ...values }, month);
     onDone();
   };
 
   const remove = () => {
-    if (!recurring) return;
     ctx.removeRecurring(recurring.id, month);
     onDone();
   };
@@ -134,16 +118,14 @@ export const RecurringForm = ({
       {children}
       <DialogActions
         danger={
-          recurring ? (
-            <Button
-              variant="danger"
-              className="w-auto"
-              data-e2e="dashboard:recurring-delete"
-              onClick={remove}
-            >
-              <Trash2 className="h-4 w-4" aria-hidden="true" /> Usuń
-            </Button>
-          ) : undefined
+          <Button
+            variant="danger"
+            className="w-auto"
+            data-e2e="dashboard:recurring-delete"
+            onClick={remove}
+          >
+            <Trash2 className="h-4 w-4" aria-hidden="true" /> Usuń
+          </Button>
         }
       >
         <Button variant="ghost" className="w-auto" onClick={onDone}>
@@ -155,7 +137,7 @@ export const RecurringForm = ({
           data-e2e="dashboard:recurring-form-save"
           disabled={!selected}
         >
-          {recurring ? 'Zapisz zmiany' : 'Dodaj'}
+          Zapisz zmiany
         </Button>
       </DialogActions>
     </form>

@@ -1,13 +1,11 @@
 import type { Store } from './store';
 import { requestLoad } from './handlers/request-load';
 import { load } from './handlers/load';
-import { createExpense } from './handlers/create-expense';
 import { updateExpense } from './handlers/update-expense';
 import { removeExpense } from './handlers/delete-expense';
 import { createLimit } from './handlers/create-limit';
 import { updateLimit } from './handlers/update-limit';
 import { removeLimit } from './handlers/delete-limit';
-import { createRecurring } from './handlers/create-recurring';
 import { updateRecurring } from './handlers/update-recurring';
 import { removeRecurring } from './handlers/delete-recurring';
 import { dismissNotice } from './handlers/dismiss-notice';
@@ -22,13 +20,11 @@ export const createRegistry = (store: Store) => {
   const register = bus.createRegistry(
     requestLoad(store, bus),
     load(store, bus),
-    createExpense(store, bus),
     updateExpense(store, bus),
     removeExpense(store, bus),
     createLimit(store, bus),
     updateLimit(store, bus),
     removeLimit(store, bus),
-    createRecurring(store, bus),
     updateRecurring(store, bus),
     removeRecurring(store, bus),
     dismissNotice(store, bus),

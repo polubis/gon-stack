@@ -48,8 +48,8 @@ export const APP_PAGES: readonly AppPage[] = [
     description: 'Pobierz swoje dane w CSV lub PDF.',
   },
   {
-    url: APP_ROUTER.receiptScan(),
-    title: 'Skanowanie paragonu | Parka',
-    description: 'Zeskanuj paragon i zapisz wydatek.',
+    url: APP_ROUTER.newExpense(),
+    title: 'Nowy wydatek | Parka',
+    description: 'Dodaj wydatek, wgraj paragon lub dodaj wydatek cykliczny.',
   },
 ];

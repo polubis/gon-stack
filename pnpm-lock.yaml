@@ -359,9 +359,6 @@ importers:
       react-dom:
         specifier: ^19.3.0
         version: 19.3.0(react@19.3.0)
-      react-image-crop:
-        specifier: 11.1.2
-        version: 11.1.2(react@19.3.0)
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
@@ -6140,11 +6137,6 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
-
-  react-image-crop@11.1.2:
-    resolution: {integrity: sha512-+0Pc2fxpwKL4u4oLmdKBw8XSwUceFbXbKEHvFOlsl/MGB1OVNic4uBlAPmEHGXYgoJIq+b63xHbc/aJMG0AVkA==}
-    peerDependencies:
-      react: '>=16.13.1'
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -12699,10 +12691,6 @@ snapshots:
       react: 19.3.0
     optionalDependencies:
       '@types/react': 19.3.0
-
-  react-image-crop@11.1.2(react@19.3.0):
-    dependencies:
-      react: 19.3.0
 
   react-is@16.13.1: {}
 

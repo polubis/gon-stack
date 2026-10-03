@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Plus } from 'lucide-react';
+import { APP_ROUTER } from '@/shared/router/routes';
 import { Button } from '@/shared/ui/controls';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
@@ -84,11 +85,9 @@ const Row = ({
 export const MonthExpenses = ({
   month,
   onSelect,
-  onAdd,
 }: {
   month: Month;
   onSelect: (id: ExpenseId) => void;
-  onAdd: () => void;
 }) => {
   const ctx = useContext();
   const expenses = withRecurring(ctx.useExpenses(), ctx.useRecurring(), month);
@@ -121,7 +120,7 @@ export const MonthExpenses = ({
           variant="ghost"
           className="ml-auto w-auto px-3 py-1.5"
           data-e2e="dashboard:expense-new"
-          onClick={onAdd}
+          href={APP_ROUTER.newExpense()}
         >
           <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj wydatek
         </Button>

@@ -19,9 +19,9 @@ const SCREENS: Screen[] = [
     heading: /Limity/,
   },
   {
-    path: APP_ROUTER.receiptScan(),
-    root: 'receipt:main',
-    heading: /Zrób zdjęcie paragonu/,
+    path: APP_ROUTER.newExpense(),
+    root: 'expenses-management:main',
+    heading: /Nowy wydatek/,
   },
   { path: APP_ROUTER.reports(), root: 'reports:main', heading: /Raport/ },
   {

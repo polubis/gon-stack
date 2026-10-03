@@ -51,6 +51,10 @@ export type DashboardQuery = {
   range?: string;
 };
 
+export type NewExpenseQuery = {
+  type?: 'normal' | 'recurring';
+};
+
 /**
  * Page routes for the Parka MPA. Single source of truth for every
  * `<a href>`, `Astro.redirect()`, and server `location:` string. Each
@@ -69,7 +73,9 @@ export const APP_ROUTER = {
   privacyPolicy: route('/privacy-policy/'),
   aiInfo: route('/app/ai-info/'),
   dataExport: route('/app/data-export/'),
-  receiptScan: route('/app/receipt-scan/'),
+  newExpense: routeWithQuery<'/app/expenses/new/', NewExpenseQuery>(
+    '/app/expenses/new/',
+  ),
   signIn: route('/sign-in/'),
   signUp: route('/sign-up/'),
 };

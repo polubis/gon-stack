@@ -202,38 +202,54 @@ const commands = {
     ).toBe(true);
   },
 
-  'i scan and save a receipt as an expense': async ({
-    page,
-    getByE2e,
-    getByE2ePrefix,
-  }) => {
+  'i add an expense from an uploaded receipt': async ({ page, getByE2e }) => {
     await mockState(page);
-    await open(page, APP_ROUTER.receiptScan());
-    await getByE2e('receipt:capture').click();
+    await page.route(`**${API_ROUTER.scanReceipt()}**`, (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          code: 200,
+          data: {
+            merchant: 'Testowy Sklep E2E',
+            date: new Date().toISOString(),
+            amount: 3.2,
+            paymentMethod: 'Karta',
+            items: [
+              { name: 'Chleb', unitPrice: 3.2, quantity: 1, discount: 0 },
+            ],
+          },
+        }),
+      }),
+    );
+    await open(page, APP_ROUTER.newExpense());
+    await getByE2e('expenses-management:upload-input').setInputFiles({
+      name: 'receipt.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+        'base64',
+      ),
+    });
 
-    await expect(getByE2e('receipt:review')).toBeVisible();
-    await getByE2e('receipt:merchant').fill('Testowy Sklep E2E');
-
-    // Correct the first item.
-    await page.getByRole('button', { name: /Nowy produkt/ }).click();
-    await getByE2ePrefix('receipt:item-name:').fill('Chleb razowy');
-    await getByE2ePrefix('receipt:item-price:').fill('3.20');
-
-    await getByE2e('receipt:save').click();
-    await page.waitForURL(`**${APP_ROUTER.dashboard()}`);
+    await expect(getByE2e('expenses-management:merchant')).toHaveValue(
+      'Testowy Sklep E2E',
+    );
+    await expect(getByE2e('expenses-management:total')).toContainText('3,20');
+    await getByE2e('expenses-management:save').click();
+    await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
   },
 
-  'i cannot save a receipt before any category exists': async ({
+  'i cannot save an expense before any category exists': async ({
     page,
     getByE2e,
   }) => {
     await mockState(page, { categories: [] });
-    await open(page, APP_ROUTER.receiptScan());
-    await getByE2e('receipt:manual').click();
+    await open(page, APP_ROUTER.newExpense());
 
-    await expect(getByE2e('receipt:review')).toBeVisible();
-    await expect(getByE2e('receipt:no-categories')).toBeVisible();
-    await expect(getByE2e('receipt:save')).toBeDisabled();
+    await expect(getByE2e('expenses-management:expense-form')).toBeVisible();
+    await expect(getByE2e('expenses-management:no-categories')).toBeVisible();
+    await expect(getByE2e('expenses-management:save')).toBeDisabled();
   },
 
   'i add a suggested category': async ({ page, getByE2e }) => {
@@ -246,25 +262,40 @@ const commands = {
     await expect(getByE2e('categories:add-default:groceries')).toHaveCount(0);
   },
 
-  'i add a receipt manually': async ({ page, getByE2e, getByE2ePrefix }) => {
+  'i add an expense manually with a product': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
     await mockState(page);
-    await open(page, APP_ROUTER.receiptScan());
-    await getByE2e('receipt:manual').click();
+    await open(page, APP_ROUTER.newExpense());
 
-    await expect(getByE2e('receipt:review')).toBeVisible();
-    await getByE2e('receipt:merchant').fill('Sklep Ręczny');
-    await page.getByRole('button', { name: /Nowy produkt/ }).click();
-    await getByE2ePrefix('receipt:item-name:').fill('Chleb');
-    const price = getByE2ePrefix('receipt:item-price:');
+    await expect(getByE2e('expenses-management:expense-form')).toBeVisible();
+    await getByE2e('expenses-management:merchant').fill('Sklep Ręczny');
+    await getByE2e('expenses-management:add-product').click();
+    await getByE2ePrefix('expenses-management:product-name:').fill('Chleb');
+    const price = getByE2ePrefix('expenses-management:product-price:');
     await price.pressSequentially('12,50');
     await expect(price).toHaveValue('12,50');
     await price.fill('');
     await expect(price).toHaveValue('');
     await price.pressSequentially('3,20');
     await expect(price).toHaveValue('3,20');
+    await expect(getByE2e('expenses-management:total')).toContainText('3,20');
 
-    await getByE2e('receipt:save').click();
-    await page.waitForURL(`**${APP_ROUTER.dashboard()}`);
+    await getByE2e('expenses-management:save').click();
+    await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
+  },
+
+  'i add a recurring expense': async ({ page, getByE2e }) => {
+    await mockState(page);
+    await open(page, APP_ROUTER.newExpense());
+    await page.getByRole('tab', { name: 'Cykliczny' }).click();
+
+    await getByE2e('expenses-management:recurring-name').fill('Netflix');
+    await getByE2e('expenses-management:recurring-cost').fill('30');
+    await getByE2e('expenses-management:recurring-save').click();
+    await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
   },
 
   'i mock the expenses list': async ({ page }) => {
@@ -438,10 +469,10 @@ const commands = {
     await open(page, APP_ROUTER.dashboard());
     await getByE2e('dashboard:expense-new').click();
     await page.getByRole('tab', { name: 'Cykliczny' }).click();
-    await getByE2e('dashboard:recurring-form-name').fill('Siłownia');
-    await getByE2e('dashboard:recurring-form-cost').fill('99');
-    await getByE2e('dashboard:recurring-form-save').click();
-    await expect(getByE2e('dashboard:recurring-form')).toHaveCount(0);
+    await getByE2e('expenses-management:recurring-name').fill('Siłownia');
+    await getByE2e('expenses-management:recurring-cost').fill('99');
+    await getByE2e('expenses-management:recurring-save').click();
+    await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
     await expect(
       getByE2e('dashboard:expenses').getByText('Siłownia'),
     ).toBeVisible();
@@ -469,7 +500,7 @@ const commands = {
       getByE2e('dashboard:expenses').getByText('Spotify'),
     ).toBeVisible();
   },
-  'the expenses list offers adding a recurring expense': async ({
+  'the expenses list links to adding a recurring expense': async ({
     page,
     getByE2e,
   }) => {
@@ -477,7 +508,7 @@ const commands = {
     await open(page, APP_ROUTER.dashboard());
     await getByE2e('dashboard:expense-new').click();
     await page.getByRole('tab', { name: 'Cykliczny' }).click();
-    await expect(getByE2e('dashboard:recurring-form')).toBeVisible();
+    await expect(getByE2e('expenses-management:recurring-form')).toBeVisible();
   },
 
   'the monthly report downloads a csv': async ({ page, getByE2e }) => {
@@ -535,10 +566,13 @@ test('spending overview links to the limits section', async ({ e2e }) => {
   );
 });
 
-test('a scanned receipt can be reviewed, corrected and saved as an expense', async ({
+test('an uploaded receipt fills the expense form and can be saved', async ({
   e2e,
 }) => {
-  await interpreter(commands, e2e)(['i scan and save a receipt as an expense']);
+  await interpreter(
+    commands,
+    e2e,
+  )(['i add an expense from an uploaded receipt']);
 });
 
 test('a suggested category can be added from the category list', async ({
@@ -547,17 +581,24 @@ test('a suggested category can be added from the category list', async ({
   await interpreter(commands, e2e)(['i add a suggested category']);
 });
 
-test('a receipt can be added manually', async ({ e2e }) => {
-  await interpreter(commands, e2e)(['i add a receipt manually']);
+test('an expense can be added manually with products', async ({ e2e }) => {
+  await interpreter(
+    commands,
+    e2e,
+  )(['i add an expense manually with a product']);
 });
 
-test('a receipt cannot be saved before any category exists', async ({
+test('a recurring expense can be added from the type tab', async ({ e2e }) => {
+  await interpreter(commands, e2e)(['i add a recurring expense']);
+});
+
+test('an expense cannot be saved before any category exists', async ({
   e2e,
 }) => {
   await interpreter(
     commands,
     e2e,
-  )(['i cannot save a receipt before any category exists']);
+  )(['i cannot save an expense before any category exists']);
 });
 
 test('expenses can be filtered by category', async ({ e2e }) => {
@@ -611,11 +652,13 @@ test('a recurring expense is counted in its months', async ({ e2e }) => {
   )(['a recurring expense counts in this month']);
 });
 
-test('the expenses list hosts the recurring add button', async ({ e2e }) => {
+test('the expenses list leads to the recurring expense form', async ({
+  e2e,
+}) => {
   await interpreter(
     commands,
     e2e,
-  )(['the expenses list offers adding a recurring expense']);
+  )(['the expenses list links to adding a recurring expense']);
 });
 
 test('the monthly report is downloadable', async ({ e2e }) => {

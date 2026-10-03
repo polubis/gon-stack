@@ -103,20 +103,19 @@ const commands = {
     await expect(getByE2e('dashboard:transactions')).toHaveText('3');
   },
 
-  'i save a new 25 expense from a receipt': async ({
+  'i add an expense of 25 with a product': async ({
     page,
     getByE2e,
     getByE2ePrefix,
   }) => {
-    await open(page, APP_ROUTER.receiptScan());
-    await getByE2e('receipt:manual').click();
-    await expect(getByE2e('receipt:review')).toBeVisible();
-    await getByE2e('receipt:merchant').fill('Piekarnia');
-    await page.getByRole('button', { name: /Nowy produkt/ }).click();
-    await getByE2ePrefix('receipt:item-name:').fill('Chleb');
-    await getByE2ePrefix('receipt:item-price:').fill('25');
-    await getByE2e('receipt:save').click();
-    await page.waitForURL(`**${APP_ROUTER.dashboard()}`);
+    await getByE2e('dashboard:expense-new').click();
+    await expect(getByE2e('expenses-management:main')).toBeVisible();
+    await getByE2e('expenses-management:merchant').fill('Piekarnia');
+    await getByE2e('expenses-management:add-product').click();
+    await getByE2ePrefix('expenses-management:product-name:').fill('Chleb');
+    await getByE2ePrefix('expenses-management:product-price:').fill('25');
+    await getByE2e('expenses-management:save').click();
+    await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
     await page.waitForLoadState('networkidle');
   },
   'the month shows 125,00 over 3 expenses': async ({ getByE2e }) => {
@@ -148,21 +147,21 @@ const commands = {
   'i add a recurring expense of 50': async ({ page, getByE2e }) => {
     await getByE2e('dashboard:expense-new').click();
     await page.getByRole('tab', { name: 'Cykliczny' }).click();
-    await getByE2e('dashboard:recurring-form-name').fill('Siłownia');
-    await getByE2e('dashboard:recurring-form-cost').fill('50');
-    await getByE2e('dashboard:recurring-form-save').click();
-    await expect(getByE2e('dashboard:recurring-form')).toHaveCount(0);
+    await getByE2e('expenses-management:recurring-name').fill('Siłownia');
+    await getByE2e('expenses-management:recurring-cost').fill('50');
+    await getByE2e('expenses-management:recurring-save').click();
+    await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
   },
-  'i add a normal expense of 25': async ({ getByE2e }) => {
+  'i add a normal expense of 25': async ({ page, getByE2e }) => {
     await getByE2e('dashboard:expense-new').click();
-    await getByE2e('dashboard:new-merchant').fill('Piekarnia');
-    await getByE2e('dashboard:new-amount').fill('25');
-    await getByE2e('dashboard:new-save').click();
-    await expect(getByE2e('dashboard:new-dialog')).toHaveCount(0);
+    await getByE2e('expenses-management:merchant').fill('Piekarnia');
+    await getByE2e('expenses-management:amount').fill('25');
+    await getByE2e('expenses-management:save').click();
+    await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
   },
-  'i add an expense from an uploaded receipt': async ({ getByE2e }) => {
+  'i add an expense from an uploaded receipt': async ({ page, getByE2e }) => {
     await getByE2e('dashboard:expense-new').click();
-    await getByE2e('dashboard:new-upload-input').setInputFiles({
+    await getByE2e('expenses-management:upload-input').setInputFiles({
       name: 'receipt.png',
       mimeType: 'image/png',
       buffer: Buffer.from(
@@ -170,10 +169,11 @@ const commands = {
         'base64',
       ),
     });
-    await getByE2e('dashboard:receipt-crop-confirm').click();
-    await expect(getByE2e('dashboard:new-merchant')).toHaveValue('Biedronka');
-    await getByE2e('dashboard:new-save').click();
-    await expect(getByE2e('dashboard:new-dialog')).toHaveCount(0);
+    await expect(getByE2e('expenses-management:merchant')).toHaveValue(
+      'Biedronka',
+    );
+    await getByE2e('expenses-management:save').click();
+    await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
   },
   'the month shows 142,50 over 3 expenses': async ({ getByE2e }) => {
     await expect(getByE2e('dashboard:total')).toContainText('142,50');
@@ -251,7 +251,7 @@ test.describe('dashboard values after changes', () => {
     await interpreter(commands, e2e)(
       ['i open a dashboard with expenses of two months'],
       ['the month shows 100,00 over 2 expenses'],
-      ['i save a new 25 expense from a receipt'],
+      ['i add an expense of 25 with a product'],
       ['the month shows 125,00 over 3 expenses'],
     );
   });

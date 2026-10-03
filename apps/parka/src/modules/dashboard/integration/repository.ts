@@ -1,13 +1,11 @@
 import type { z } from 'zod';
 import type { Schema } from '@schemas/dashboard';
 import {
-  createExpenseSchema,
   deleteExpenseSchema,
   listExpensesSchema,
   updateExpenseSchema,
 } from '@schemas/expenses';
 import { listCategoriesSchema } from '@schemas/categories';
-import { scanReceiptSchema } from '@schemas/receipts';
 import {
   createLimitSchema,
   deleteLimitSchema,
@@ -15,7 +13,6 @@ import {
   updateLimitSchema,
 } from '@schemas/limits';
 import {
-  createRecurringSchema,
   deleteRecurringSchema,
   listRecurringSchema,
   updateRecurringSchema,
@@ -29,7 +26,6 @@ import type {
   Limit,
   LimitId,
   Month,
-  ReceiptDraft,
   Recurring,
   RecurringId,
   Summary,
@@ -38,27 +34,21 @@ import {
   toCategory,
   toExpense,
   toLimit,
-  toReceiptDraft,
   toRecurring,
   toSummary,
 } from './mappers';
 
 type ListExpensesOut = z.infer<ReturnType<typeof listExpensesSchema>>['out'];
-type CreateExpenseOut = z.infer<ReturnType<typeof createExpenseSchema>>['out'];
 type UpdateExpenseOut = z.infer<ReturnType<typeof updateExpenseSchema>>['out'];
 type DeleteExpenseOut = z.infer<ReturnType<typeof deleteExpenseSchema>>['out'];
 type ListCategoriesOut = z.infer<
   ReturnType<typeof listCategoriesSchema>
 >['out'];
-type ScanReceiptOut = z.infer<ReturnType<typeof scanReceiptSchema>>['out'];
 type ListLimitsOut = z.infer<ReturnType<typeof listLimitsSchema>>['out'];
 type CreateLimitOut = z.infer<ReturnType<typeof createLimitSchema>>['out'];
 type UpdateLimitOut = z.infer<ReturnType<typeof updateLimitSchema>>['out'];
 type DeleteLimitOut = z.infer<ReturnType<typeof deleteLimitSchema>>['out'];
 type ListRecurringOut = z.infer<ReturnType<typeof listRecurringSchema>>['out'];
-type CreateRecurringOut = z.infer<
-  ReturnType<typeof createRecurringSchema>
->['out'];
 type UpdateRecurringOut = z.infer<
   ReturnType<typeof updateRecurringSchema>
 >['out'];
@@ -106,17 +96,6 @@ export const fetchCategories = async (
   const json = (await response.json()) as ListCategoriesOut;
   if (json.code !== 200) throw new Error(json.message);
   return json.data.map(toCategory);
-};
-
-export const postExpense = async (expense: Expense): Promise<Expense> => {
-  const response = await fetch(API_ROUTER.expenses(), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(expense),
-  });
-  const json = (await response.json()) as CreateExpenseOut;
-  if (json.code !== 201) throw new Error(json.message);
-  return toExpense(json.data);
 };
 
 export const putExpense = async (expense: Expense): Promise<Expense> => {
@@ -188,19 +167,6 @@ export const fetchRecurring = async (
   return json.data.map(toRecurring);
 };
 
-export const postRecurring = async (
-  recurring: Recurring,
-): Promise<Recurring> => {
-  const response = await fetch(API_ROUTER.recurring(), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(recurring),
-  });
-  const json = (await response.json()) as CreateRecurringOut;
-  if (json.code !== 201) throw new Error(json.message);
-  return toRecurring(json.data);
-};
-
 export const putRecurring = async (
   recurring: Recurring,
 ): Promise<Recurring> => {
@@ -236,16 +202,4 @@ export const fetchDashboard = async (
   ]);
 
   return { summary, expenses, categories, limits, recurring };
-};
-
-export const postReceiptScan = async (file: File): Promise<ReceiptDraft> => {
-  const body = new FormData();
-  body.append('file', file);
-  const response = await fetch(API_ROUTER.scanReceipt(), {
-    method: 'POST',
-    body,
-  });
-  const json = (await response.json()) as ScanReceiptOut;
-  if (json.code !== 200) throw new Error(json.message);
-  return toReceiptDraft(json.data);
 };

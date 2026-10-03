@@ -98,38 +98,6 @@ describe('recurring expenses', () => {
     expect(view.result.current.recurring[0]!.cost).toBe(30);
   });
 
-  it('adds an item right away and confirms with a toast', async () => {
-    mockBackend({ code: 201, data: { ...NETFLIX, id: 'r-2' } });
-    const view = await setup();
-
-    act(() =>
-      view.result.current.ctx.createRecurring(
-        asRecurring({ id: 'r-2' }),
-        TEST_MONTH,
-      ),
-    );
-
-    expect(view.result.current.recurring).toHaveLength(2);
-    await waitFor(() =>
-      expect(view.result.current.notice?.tone).toBe('success'),
-    );
-  });
-
-  it('drops an item that could not be saved and reports an error', async () => {
-    mockBackend({ code: 500, message: 'boom' });
-    const view = await setup();
-
-    act(() =>
-      view.result.current.ctx.createRecurring(
-        asRecurring({ id: 'r-2' }),
-        TEST_MONTH,
-      ),
-    );
-
-    await waitFor(() => expect(view.result.current.notice?.tone).toBe('error'));
-    expect(view.result.current.recurring).toHaveLength(1);
-  });
-
   it('removes an item right away and confirms with a toast', async () => {
     mockBackend({ code: 200, ok: true });
     const view = await setup();

@@ -7,7 +7,7 @@ import type { AiInfoE2eId } from '@/modules/ai-info/configuration/e2e-ids';
 import type { DataExportE2eId } from '@/modules/data-export/configuration/e2e-ids';
 import type { PrivacyE2eId } from '@/modules/privacy/configuration/e2e-ids';
 import type { NotificationsE2eId } from '@/modules/notifications/configuration/e2e-ids';
-import type { ReceiptE2eId } from '@/modules/receipt/configuration/e2e-ids';
+import type { ExpensesManagementE2eId } from '@/modules/expenses-management/configuration/e2e-ids';
 import type { ReportsE2eId } from '@/modules/reports/configuration/e2e-ids';
 import type { SettingsE2eId } from '@/modules/settings/configuration/e2e-ids';
 import type { CookiesE2eId } from '@/shared/cookies/configuration/e2e-ids';
@@ -25,7 +25,7 @@ export type E2eId =
   | SignInE2eId
   | SignUpE2eId
   | DashboardE2eId
-  | ReceiptE2eId
+  | ExpensesManagementE2eId
   | ReportsE2eId
   | NotificationsE2eId
   | SettingsE2eId
