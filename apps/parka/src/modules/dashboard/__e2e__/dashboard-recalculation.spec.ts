@@ -160,6 +160,25 @@ const commands = {
     await getByE2e('dashboard:new-save').click();
     await expect(getByE2e('dashboard:new-dialog')).toHaveCount(0);
   },
+  'i add an expense from an uploaded receipt': async ({ getByE2e }) => {
+    await getByE2e('dashboard:expense-new').click();
+    await getByE2e('dashboard:new-upload-input').setInputFiles({
+      name: 'receipt.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+        'base64',
+      ),
+    });
+    await getByE2e('dashboard:receipt-crop-confirm').click();
+    await expect(getByE2e('dashboard:new-merchant')).toHaveValue('Biedronka');
+    await getByE2e('dashboard:new-save').click();
+    await expect(getByE2e('dashboard:new-dialog')).toHaveCount(0);
+  },
+  'the month shows 142,50 over 3 expenses': async ({ getByE2e }) => {
+    await expect(getByE2e('dashboard:total')).toContainText('142,50');
+    await expect(getByE2e('dashboard:transactions')).toHaveText('3');
+  },
   'the month shows 150,00 over 3 charges': async ({ getByE2e }) => {
     await expect(getByE2e('dashboard:total')).toContainText('150,00');
     await expect(getByE2e('dashboard:transactions')).toHaveText('3');
@@ -234,6 +253,16 @@ test.describe('dashboard values after changes', () => {
       ['the month shows 100,00 over 2 expenses'],
       ['i save a new 25 expense from a receipt'],
       ['the month shows 125,00 over 3 expenses'],
+    );
+  });
+
+  test('the month total counts an expense read from a receipt photo', async ({
+    e2e,
+  }) => {
+    await interpreter(commands, e2e)(
+      ['i open a dashboard with expenses of two months'],
+      ['i add an expense from an uploaded receipt'],
+      ['the month shows 142,50 over 3 expenses'],
     );
   });
 

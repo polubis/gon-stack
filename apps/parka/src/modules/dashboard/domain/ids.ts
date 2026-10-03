@@ -1,4 +1,4 @@
-import type { ExpenseId, LimitId, RecurringId } from './models';
+import type { ExpenseId, LimitId, ReceiptItemId, RecurringId } from './models';
 
 const randomPart = (): string => crypto.randomUUID();
 
@@ -9,3 +9,6 @@ export const newRecurringId = (): RecurringId =>
 
 export const newExpenseId = (): ExpenseId =>
   `expense-${randomPart()}` as ExpenseId;
+
+export const newReceiptItemId = (): ReceiptItemId =>
+  `item-${randomPart()}` as ReceiptItemId;

@@ -23,6 +23,15 @@ export type Backend = {
   count: (method: string, path: string) => number;
 };
 
+/** What the scan endpoint answers for any photo. */
+const SCANNED_RECEIPT = {
+  merchant: 'Biedronka',
+  date: new Date().toISOString(),
+  amount: 42.5,
+  paymentMethod: 'Karta',
+  items: [{ name: 'Chleb', unitPrice: 42.5, quantity: 1, discount: 0 }],
+};
+
 // Same two-month window the real `get-dashboard` procedure reads.
 const FETCH_MONTHS = 2;
 
@@ -88,6 +97,10 @@ export const installBackend = async (
         code: 200,
         data: summary(url.searchParams.get('month') ?? ''),
       });
+    }
+
+    if (collection === 'receipts') {
+      return json(route, { code: 200, data: SCANNED_RECEIPT });
     }
 
     if (collection === 'notifications') {

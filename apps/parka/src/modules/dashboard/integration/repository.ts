@@ -7,6 +7,7 @@ import {
   updateExpenseSchema,
 } from '@schemas/expenses';
 import { listCategoriesSchema } from '@schemas/categories';
+import { scanReceiptSchema } from '@schemas/receipts';
 import {
   createLimitSchema,
   deleteLimitSchema,
@@ -28,6 +29,7 @@ import type {
   Limit,
   LimitId,
   Month,
+  ReceiptDraft,
   Recurring,
   RecurringId,
   Summary,
@@ -36,6 +38,7 @@ import {
   toCategory,
   toExpense,
   toLimit,
+  toReceiptDraft,
   toRecurring,
   toSummary,
 } from './mappers';
@@ -47,6 +50,7 @@ type DeleteExpenseOut = z.infer<ReturnType<typeof deleteExpenseSchema>>['out'];
 type ListCategoriesOut = z.infer<
   ReturnType<typeof listCategoriesSchema>
 >['out'];
+type ScanReceiptOut = z.infer<ReturnType<typeof scanReceiptSchema>>['out'];
 type ListLimitsOut = z.infer<ReturnType<typeof listLimitsSchema>>['out'];
 type CreateLimitOut = z.infer<ReturnType<typeof createLimitSchema>>['out'];
 type UpdateLimitOut = z.infer<ReturnType<typeof updateLimitSchema>>['out'];
@@ -232,4 +236,16 @@ export const fetchDashboard = async (
   ]);
 
   return { summary, expenses, categories, limits, recurring };
+};
+
+export const postReceiptScan = async (file: File): Promise<ReceiptDraft> => {
+  const body = new FormData();
+  body.append('file', file);
+  const response = await fetch(API_ROUTER.scanReceipt(), {
+    method: 'POST',
+    body,
+  });
+  const json = (await response.json()) as ScanReceiptOut;
+  if (json.code !== 200) throw new Error(json.message);
+  return toReceiptDraft(json.data);
 };

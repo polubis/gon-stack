@@ -101,6 +101,7 @@ export const API_ROUTER = {
   ),
   expenses: route('/api/expenses/'),
   expenseById: routeById('/api/expenses/'),
+  scanReceipt: route('/api/receipts/scan/'),
   categories: route('/api/categories/'),
   categoryById: routeById('/api/categories/'),
   limits: route('/api/limits/'),
