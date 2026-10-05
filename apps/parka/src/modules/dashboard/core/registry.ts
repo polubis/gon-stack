@@ -10,8 +10,7 @@ import { updateRecurring } from './handlers/update-recurring';
 import { removeRecurring } from './handlers/delete-recurring';
 import { dismissNotice } from './handlers/dismiss-notice';
 import { reloadOnRecurringChange } from './handlers/reload-on-recurring-change';
-import { requestSummaryRefresh } from './handlers/request-summary-refresh';
-import { refreshSummary } from './handlers/refresh-summary';
+import { reloadOnExpenseChange } from './handlers/reload-on-expense-change';
 import { createBus } from './bus';
 
 export const createRegistry = (store: Store) => {
@@ -29,8 +28,7 @@ export const createRegistry = (store: Store) => {
     removeRecurring(store, bus),
     dismissNotice(store, bus),
     reloadOnRecurringChange(store, bus),
-    requestSummaryRefresh(store, bus),
-    refreshSummary(store, bus),
+    reloadOnExpenseChange(store, bus),
   );
 
   return { trigger: bus.trigger, register };

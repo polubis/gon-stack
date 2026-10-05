@@ -26,6 +26,5 @@ export type Event =
     >
   | TriggerEvent<'[TRIGGER]_DISMISS_NOTICE'>
   | TaskEvent<'[TASK]_LOAD', { month: Month }>
-  | TaskEvent<'[TASK]_REFRESH_SUMMARY', { month: Month }>
   | FactEvent<'[FACT]_RECURRING_CHANGED', { month: Month }>
   | FactEvent<'[FACT]_EXPENSE_CHANGED', { month: Month }>;

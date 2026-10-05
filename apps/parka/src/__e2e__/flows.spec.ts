@@ -338,6 +338,9 @@ const commands = {
       items: [],
     };
 
+    // Stateful: a saved change reloads the dashboard, so reads must reflect it.
+    let expenses = [billExpense, purchaseExpense];
+
     await page.route(`**${API_ROUTER.categories()}**`, async (route) => {
       await route.fulfill({
         status: 200,
@@ -351,25 +354,26 @@ const commands = {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({
-            code: 200,
-            data: [billExpense, purchaseExpense],
-          }),
+          body: JSON.stringify({ code: 200, data: expenses }),
         });
         return;
       }
       if (method === 'PUT') {
+        const saved = route.request().postDataJSON();
+        expenses = expenses.map((e) => (e.id === saved.id ? saved : e));
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
           body: JSON.stringify({
             code: 200,
-            data: route.request().postDataJSON(),
+            data: saved,
           }),
         });
         return;
       }
       if (method === 'DELETE') {
+        const id = new URL(route.request().url()).pathname.split('/').pop();
+        expenses = expenses.filter((e) => e.id !== id);
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
