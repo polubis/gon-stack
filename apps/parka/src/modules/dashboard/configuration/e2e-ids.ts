@@ -26,6 +26,7 @@ export const DASHBOARD_E2E_IDS = [
   'dashboard:recurring-dialog',
   'dashboard:recurring-detail',
   'dashboard:expense-new',
+  'dashboard:expense-fab',
   'dashboard:recurring-form',
   'dashboard:recurring-form-name',
   'dashboard:recurring-form-cost',

@@ -20,8 +20,8 @@ export const Header = ({
 }) => {
   const firstName = userName?.trim().split(' ')[0];
   return (
-    <header className="flex flex-wrap items-center gap-x-4 gap-y-3 lg:flex-nowrap">
-      <div className="min-w-0 flex-1 basis-full md:basis-auto">
+    <header className="flex flex-wrap items-center gap-x-4 gap-y-3 md:flex-nowrap">
+      <div className="min-w-0 flex-1 basis-full md:basis-0">
         <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">
           {initializing ? (
             <>
@@ -39,7 +39,15 @@ export const Header = ({
         </p>
       </div>
 
-      <label className="relative block max-md:flex-1">
+      <a
+        href={APP_ROUTER.settings()}
+        aria-label="Profil i ustawienia"
+        className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-soft text-brand max-md:hidden"
+      >
+        <User className="h-5 w-5" aria-hidden="true" />
+      </a>
+
+      <label className="relative block w-full shrink-0 md:w-52">
         <span className="sr-only">Miesiąc</span>
         <select
           data-e2e="dashboard:month-select"
@@ -61,19 +69,11 @@ export const Header = ({
 
       <Button
         href={APP_ROUTER.newExpense()}
-        className="h-11 w-auto shrink-0 py-0"
+        className="h-11 w-auto shrink-0 py-0 max-md:hidden"
       >
         <Plus className="h-4 w-4" aria-hidden="true" />
         Dodaj wydatek
       </Button>
-
-      <a
-        href={APP_ROUTER.settings()}
-        aria-label="Profil i ustawienia"
-        className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-soft text-brand max-md:hidden"
-      >
-        <User className="h-5 w-5" aria-hidden="true" />
-      </a>
     </header>
   );
 };

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { Plus } from 'lucide-react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import { ErrorState } from '@/shared/ui/error-state';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
+import { Button } from '@/shared/ui/controls';
 import { Toast } from '@/shared/ui/toast';
 import { readQueryParam, writeQueryParam } from '@/shared/router/navigation';
 import { APP_ROUTER } from '@/shared/router/routes';
@@ -106,7 +108,7 @@ const DashboardView = () => {
   return (
     <div data-e2e="dashboard:main" className="relative flex flex-1 flex-col">
       <LoadingBanner active={loading && ready} />
-      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-4 md:gap-6 md:px-8 lg:px-10 lg:pt-8 xl:grid xl:grid-cols-12 xl:content-start xl:px-16">
+      <main className="flex flex-1 flex-col gap-4 px-4 pb-24 pt-4 md:gap-6 md:px-8 md:pb-6 lg:px-10 lg:pt-8 xl:grid xl:grid-cols-12 xl:content-start xl:px-16">
         <div className="xl:col-span-12">
           <Header
             month={month}
@@ -131,6 +133,18 @@ const DashboardView = () => {
           <DashboardSkeleton />
         )}
       </main>
+      {/* Zero-height sticky rail: the button floats above the content, which
+          scrolls clear of it thanks to the bottom padding of <main>. */}
+      <div className="pointer-events-none sticky bottom-4 z-(--z-nav) h-0 md:hidden">
+        <Button
+          href={APP_ROUTER.newExpense()}
+          data-e2e="dashboard:expense-fab"
+          aria-label="Dodaj wydatek"
+          className="pointer-events-auto absolute bottom-0 right-4 h-14 w-14 rounded-full p-0 shadow-popover"
+        >
+          <Plus className="h-6 w-6" aria-hidden="true" />
+        </Button>
+      </div>
     </div>
   );
 };

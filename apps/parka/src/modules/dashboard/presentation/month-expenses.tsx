@@ -118,7 +118,7 @@ export const MonthExpenses = ({
         </p>
         <Button
           variant="ghost"
-          className="ml-auto w-auto px-3 py-1.5"
+          className="ml-auto w-auto px-3 py-1.5 max-md:hidden"
           data-e2e="dashboard:expense-new"
           href={APP_ROUTER.newExpense()}
         >
