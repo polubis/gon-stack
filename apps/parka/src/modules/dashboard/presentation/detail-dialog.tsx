@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
+import { X } from 'lucide-react';
 
 /** Footer of every popup: delete on the left, cancel and confirm on the right. */
 export const DialogActions = ({
@@ -56,8 +57,11 @@ export const DetailDialog = ({
               {description}
             </Dialog.Description>
           </div>
-          <Dialog.Close className="rounded-full px-2 py-1 text-sm text-ink-soft hover:bg-hover">
-            Zamknij
+          <Dialog.Close
+            aria-label="Zamknij"
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink-soft hover:bg-hover"
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
           </Dialog.Close>
         </div>
         {children}
