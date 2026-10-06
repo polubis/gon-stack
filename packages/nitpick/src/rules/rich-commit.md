@@ -1,7 +1,5 @@
-## Git
+One decision/task/work means one commit. Never splitted accross many. Follow this conventional commit convention:
 
-1. (A) One decision/task/work means one commit 
-2. (A) Follow this conventional commit convention:
 ```md
 <!-- First option (no breaking change) -->
 fix(repo): prevent racing of requests
@@ -16,4 +14,3 @@ fix(repo)!: prevent racing of requests
   - Nested list...
 - Other points
 ```
-3. (A) No AI credits, refs, footer in commit message. Only title + description as nested list

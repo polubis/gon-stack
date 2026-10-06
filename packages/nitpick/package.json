@@ -6,22 +6,30 @@
     "dist"
   ],
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js"
     }
   },
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "tsc -p tsconfig.build.json && node -e \"require('fs').cpSync('src/rules','dist/rules',{recursive:true,filter:s=>!s.endsWith('.ts')})\"",
+    "dev": "tsc -p tsconfig.build.json --watch",
     "check-types": "tsc --noEmit",
-    "lint": "eslint src --max-warnings 0"
+    "lint": "eslint src --max-warnings 0",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage --coverage.reporter=text"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@types/node": "^26.6.3",
+    "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^9.39.5",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "^4.1.11"
+  },
+  "bin": {
+    "nitpick": "./dist/cli.js"
   }
 }

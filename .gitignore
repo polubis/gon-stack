@@ -44,3 +44,5 @@ playwright-report/
 test-results/
 
 .playwright-mcp/
+
+.ai/

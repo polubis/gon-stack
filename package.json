@@ -2,7 +2,6 @@
   "name": "with-tailwind",
   "private": true,
   "scripts": {
-    "skills:update": "pnpm dlx skills update -y",
     "build": "turbo run build",
     "deploy": "turbo run deploy",
     "dev": "turbo run dev",
@@ -19,8 +18,8 @@
     "test:e2e:update-snapshots": "turbo run test:e2e:update-snapshots --concurrency=1",
     "format": "prettier --write \"**/*.{ts,tsx,json,yaml,css,js,jsx}\"",
     "format:check": "prettier --check --end-of-line auto \"**/*.{ts,tsx,json,yaml,css,js,jsx}\"",
-    "ci:verify": "turbo run //#format:check lint check-types test build --ui=stream && turbo run test:e2e --concurrency=1 --ui=stream",
-    "ci:verify:dry": "turbo run //#format:check lint check-types test build --cache=local:,remote: --ui=stream && turbo run test:e2e --cache=local:,remote: --concurrency=1 --ui=stream",
+    "ci:verify": "turbo run //#format:check //#nitpick:check lint check-types test build --ui=stream && turbo run test:e2e --concurrency=1 --ui=stream",
+    "ci:verify:dry": "turbo run //#format:check //#nitpick:check lint check-types test build --cache=local:,remote: --ui=stream && turbo run test:e2e --cache=local:,remote: --concurrency=1 --ui=stream",
     "ci:e2e": "turbo run test:e2e --concurrency=1",
     "prepare": "husky",
     "check-deps": "ncu --workspaces",
@@ -33,24 +32,14 @@
     "db:gen-types": "turbo run db:gen-types",
     "db:reset": "turbo run db:reset",
     "clean:modules": "bash clean-modules.sh",
-    "clean:install": "bash clean-install.sh"
-  },
-  "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ],
-    "rules": {
-      "body-max-line-length": [
-        2,
-        "always",
-        1000
-      ]
-    }
+    "clean:install": "bash clean-install.sh",
+    "nitpick": "nitpick",
+    "nitpick:sync": "pnpm nitpick --sync",
+    "nitpick:check": "pnpm nitpick --check"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
-    "@commitlint/cli": "^21.2.3",
-    "@commitlint/config-conventional": "^21.2.3",
+    "@repo/nitpick": "workspace:*",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
     "npm-check-updates": "^23.1.0",
