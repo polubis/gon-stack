@@ -27,10 +27,10 @@ export const Donut = ({
   );
 
   return (
-    <figure className="m-0 flex flex-col items-center gap-4 sm:flex-row xl:flex-col 2xl:flex-row">
+    <figure className="m-0 flex flex-col items-center gap-4 sm:flex-row">
       <svg
         viewBox="0 0 160 160"
-        className="h-40 w-40 shrink-0 xl:h-36 xl:w-36"
+        className="h-40 w-40 shrink-0"
         role="img"
         aria-label={caption}
       >

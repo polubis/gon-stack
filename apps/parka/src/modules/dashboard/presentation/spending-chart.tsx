@@ -138,7 +138,7 @@ export const SpendingChart = ({
   month: Month;
   summary: Summary;
 }) => (
-  <Card className="space-y-4 xl:col-span-8">
+  <Card className="space-y-4 xl:col-span-12 xl:row-start-3">
     <div className="flex flex-wrap items-center justify-between gap-2">
       <h2 className="text-base font-semibold">Wydatki w czasie</h2>
       <Legend month={month} />

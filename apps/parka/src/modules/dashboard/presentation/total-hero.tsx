@@ -67,7 +67,7 @@ export const TotalHero = ({ summary }: { summary: Summary }) => {
   const up = summary.change > 0;
 
   return (
-    <Card className="flex flex-col items-center gap-1 py-6 text-center">
+    <Card className="flex flex-col items-center gap-1 py-6 text-center xl:h-full xl:justify-center">
       <p className="text-xs text-ink-soft md:text-sm">Wydatki w tym miesiącu</p>
       <p
         data-e2e="dashboard:total"

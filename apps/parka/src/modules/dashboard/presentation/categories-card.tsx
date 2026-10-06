@@ -20,16 +20,17 @@ export const CategoriesCard = ({
   month: Month;
   summary: Summary;
 }) => (
-  <Card className="space-y-4 xl:col-span-4">
+  <Card className="space-y-4 xl:col-span-6 xl:col-start-7 xl:row-start-2">
     <div className="flex items-center justify-between gap-2">
       <h2 className="text-base font-semibold">Kategorie wydatków</h2>
       <Button
         variant="ghost"
         href={APP_ROUTER.categories()}
-        className="w-auto px-3 py-1.5"
+        className="w-auto min-w-0 px-3 py-1.5"
         data-e2e="dashboard:category-new"
       >
-        <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj kategorię
+        <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
+        <span className="truncate">Dodaj kategorię</span>
       </Button>
     </div>
     {summary.categories.length > 0 ? (

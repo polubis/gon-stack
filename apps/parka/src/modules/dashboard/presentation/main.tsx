@@ -120,7 +120,7 @@ const DashboardView = () => {
 
         {ready ? (
           <>
-            <div className="xl:col-span-12">
+            <div className="xl:col-span-6 xl:col-start-1 xl:row-start-2">
               <TotalHero summary={summary} />
             </div>
             <SpendingChart month={month} summary={summary} />

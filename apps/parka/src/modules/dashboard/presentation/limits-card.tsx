@@ -41,7 +41,7 @@ export const LimitsCard = ({ month }: { month: Month }) => {
       id={LIMITS_SECTION_ID}
       aria-labelledby="limits-title"
       tabIndex={-1}
-      className="relative flex h-112 scroll-mt-4 flex-col md:h-128 outline-none xl:col-span-4"
+      className="relative flex h-112 scroll-mt-4 flex-col md:h-128 outline-none xl:col-span-4 xl:h-0 xl:min-h-full"
       data-e2e="dashboard:limits"
     >
       <div

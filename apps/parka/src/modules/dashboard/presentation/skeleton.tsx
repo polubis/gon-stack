@@ -17,8 +17,11 @@ const Rows = ({ count, className }: { count: number; className: string }) => (
  */
 export const DashboardSkeleton = () => (
   <>
-    <div className="xl:col-span-12" aria-hidden="true">
-      <Card className="flex flex-col items-center gap-2 py-6">
+    <div
+      className="xl:col-span-6 xl:col-start-1 xl:row-start-2"
+      aria-hidden="true"
+    >
+      <Card className="flex flex-col items-center gap-2 py-6 xl:h-full xl:justify-center">
         <Skeleton className="h-4 w-40" />
         <Skeleton className="h-12 w-56 md:h-14" />
         <Skeleton className="h-5 w-24" />
@@ -26,13 +29,19 @@ export const DashboardSkeleton = () => (
       </Card>
     </div>
 
-    <Card className="space-y-4 xl:col-span-8" aria-hidden="true">
+    <Card
+      className="space-y-4 xl:col-span-12 xl:row-start-3"
+      aria-hidden="true"
+    >
       <Skeleton className="h-6 w-40" />
       <Skeleton className="h-48 w-full md:h-56" />
       <Skeleton className="h-4 w-full" />
     </Card>
 
-    <Card className="space-y-4 xl:col-span-4" aria-hidden="true">
+    <Card
+      className="space-y-4 xl:col-span-6 xl:col-start-7 xl:row-start-2"
+      aria-hidden="true"
+    >
       <Skeleton className="h-6 w-40" />
       <Skeleton className="h-40 w-full" />
     </Card>
@@ -57,7 +66,7 @@ export const DashboardSkeleton = () => (
     </Card>
 
     <Card
-      className="flex h-112 flex-col gap-4 md:h-128 xl:col-span-4"
+      className="flex h-112 flex-col gap-4 md:h-128 xl:col-span-4 xl:h-0 xl:min-h-full"
       aria-hidden="true"
     >
       <Skeleton className="h-6 w-24" />
