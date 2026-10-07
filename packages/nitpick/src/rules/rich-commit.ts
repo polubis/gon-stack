@@ -14,7 +14,14 @@ const COMMIT_TYPES = [
   'chore',
   'revert',
 ];
-const BODY_LINE = /^(- \S|\s+\S|[A-Za-z][A-Za-z-]*: \S)/;
+const BULLET = /^\s*- \S/;
+const FOOTER =
+  /^(\s*- )?\s*(co-authored-by|signed-off-by|reviewed-by|acked-by|refs?|fixes|closes|resolves|breaking[ -]change|generated (with|by))\b|🤖/i;
+const FIX = `Rewrite the commit message as "type(scope): title", a blank line, then a "- " change list (nested "  - " items allowed). Nothing may follow the list: no footer, trailer, reference or credit. Example:
+fix(repo): prevent racing of requests
+
+- Introduce a request id and a reference to latest request
+  - Nested detail`;
 
 const validateRichCommit = (
   message: string,
@@ -41,9 +48,15 @@ const validateRichCommit = (
     problems.push('Body must contain a "- " change list');
   }
   for (const line of body) {
-    if (line !== '' && !BODY_LINE.test(line)) {
+    if (FOOTER.test(line)) {
       problems.push(
-        `Body line must be bullet, indented or "Key: value" trailer, found "${line}"`,
+        `Footer, trailer, reference or credit not allowed, found "${line}"`,
+      );
+    } else if (line === '') {
+      problems.push('Blank line not allowed inside the change list');
+    } else if (!BULLET.test(line)) {
+      problems.push(
+        `Only "- " list items are allowed after the subject, found "${line}"`,
       );
     }
   }
@@ -54,6 +67,7 @@ const validateRichCommit = (
 export const richCommit: Rule<never> = {
   id: 'rich-commit',
   group: 'git',
+  fix: FIX,
   instruction: {
     file: fileURLToPath(new URL('rich-commit.md', import.meta.url)),
   },

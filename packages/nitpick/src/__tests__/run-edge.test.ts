@@ -44,16 +44,18 @@ const project = async (
 };
 
 const rule = (body: string, extra = '') =>
-  `{ id: 'r', instruction: () => 'do r', ${extra} check: async (c) => { ${body} } }`;
+  `{ id: 'r', instruction: () => 'do r', ${extra} fix: 'f', check: async (c) => { ${body} } }`;
 
 const source = (...rules: string[]) =>
   `export default { rules: [${rules.join(',')}] };`;
 
 let errors: string[];
+let guidance: string[];
 beforeEach(() => {
   errors = [];
+  guidance = [];
   vi.spyOn(console, 'error').mockImplementation((message: string) => {
-    errors.push(message);
+    (/^(Violated rule|Fix): /.test(message) ? guidance : errors).push(message);
   });
 });
 afterEach(() => vi.restoreAllMocks());
@@ -243,8 +245,8 @@ describe('Check execution works when', () => {
   it('runs rules in config order and reports in that order', async () => {
     const root = await synced(
       source(
-        `{ id: 'one', instruction: () => '1', check: ({ report }) => report('a') }`,
-        `{ id: 'two', instruction: () => '2', check: ({ report }) => report('b') }`,
+        `{ id: 'one', instruction: () => '1', fix: 'f', check: ({ report }) => report('a') }`,
+        `{ id: 'two', instruction: () => '2', fix: 'f', check: ({ report }) => report('b') }`,
       ),
     );
     await run(['--check'], root);
@@ -276,7 +278,7 @@ describe('Check execution works when', () => {
     const root = await synced(
       source(
         rule('throw new Error("boom");'),
-        `{ id: 'next', instruction: () => 'n', check: ({ report }) => report('still ran') }`,
+        `{ id: 'next', instruction: () => 'n', fix: 'f', check: ({ report }) => report('still ran') }`,
       ),
     );
     expect(await run(['--check'], root)).toBe(EXIT_PROBLEMS);
@@ -287,7 +289,7 @@ describe('Check execution works when', () => {
     const root = await synced(
       source(
         rule('return Promise.reject(new Error("nope"));'),
-        `{ id: 's', instruction: () => 's', check: () => { throw 'text'; } }`,
+        `{ id: 's', instruction: () => 's', fix: 'f', check: () => { throw 'text'; } }`,
       ),
     );
     await run(['--check'], root);
@@ -314,7 +316,7 @@ describe('Check execution works when', () => {
   it('gives each rule its own id and the project root in meta', async () => {
     const root = await synced(
       source(
-        `{ id: 'x', instruction: () => '', check: ({ report, meta }) => report(meta.ruleId + '@' + meta.projectRoot) }`,
+        `{ id: 'x', instruction: () => '', fix: 'f', check: ({ report, meta }) => report(meta.ruleId + '@' + meta.projectRoot) }`,
       ),
     );
     await run(['--check'], root);
@@ -429,7 +431,7 @@ describe('Files snapshot works when', () => {
     const root = await synced(
       source(
         rule('c.report(c.files.join(","));', 'include: ["**/*.md"],'),
-        `{ id: 'dot', instruction: () => '', include: ['.ai/**'], check: ({ files, report }) => report(files.join()) }`,
+        `{ id: 'dot', instruction: () => '', include: ['.ai/**'], fix: 'f', check: ({ files, report }) => report(files.join()) }`,
       ),
       { 'docs/a.md': '' },
     );
@@ -440,8 +442,8 @@ describe('Files snapshot works when', () => {
   it('gives different rules different file lists', async () => {
     const root = await synced(
       source(
-        `{ id: 'ts', instruction: () => '', include: ['**/*.ts'], check: ({ files, report }) => report(files.join()) }`,
-        `{ id: 'md', instruction: () => '', include: ['docs/*.md'], check: ({ files, report }) => report(files.join()) }`,
+        `{ id: 'ts', instruction: () => '', include: ['**/*.ts'], fix: 'f', check: ({ files, report }) => report(files.join()) }`,
+        `{ id: 'md', instruction: () => '', include: ['docs/*.md'], fix: 'f', check: ({ files, report }) => report(files.join()) }`,
       ),
       { 'a.ts': '', 'docs/b.md': '' },
     );
@@ -486,6 +488,42 @@ describe('Commit messages work when', () => {
     expect(errors).toEqual([
       `[r] ${JSON.stringify('feat(app): add\n\n- one\n- two\n')}`,
     ]);
+  });
+
+  it('strips git comment lines from a commit message file', async () => {
+    const root = await synced(source(messages));
+    await writeFile(
+      join(root, 'm.txt'),
+      'feat(app): add\n\n- one\n\n# Please enter the commit message\n#\n# On branch main\n',
+    );
+    await run(['--check', '--commit-msg', 'm.txt'], root);
+    expect(errors).toEqual([
+      `[r] ${JSON.stringify('feat(app): add\n\n- one\n\n')}`,
+    ]);
+  });
+
+  it('drops everything after the scissors line of a verbose commit', async () => {
+    const root = await synced(source(messages));
+    await writeFile(
+      join(root, 'm.txt'),
+      'feat(app): add\n\n- one\n# ------------------------ >8 ------------------------\ndiff --git a/x b/x\n+added\n',
+    );
+    await run(['--check', '--commit-msg', 'm.txt'], root);
+    expect(errors).toEqual([
+      `[r] ${JSON.stringify('feat(app): add\n\n- one')}`,
+    ]);
+  });
+
+  it('accepts a real commit message file with git comments through rich-commit', async () => {
+    const root = await synced(
+      `import { richCommit } from '${richCommitPath}';
+       export default { rules: [richCommit] };`,
+    );
+    await writeFile(
+      join(root, 'm.txt'),
+      'feat(app): add\r\n\r\n- one\r\n\r\n# Please enter the commit message for your changes.\r\n# Lines starting with # will be ignored.\r\n',
+    );
+    expect(await run(['--check', '--commit-msg', 'm.txt'], root)).toBe(0);
   });
 
   it('exits 2 when the commit message file is missing', async () => {

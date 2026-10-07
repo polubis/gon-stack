@@ -19,10 +19,6 @@
         "!**/node_modules/**"
       ]
     },
-    "//#nitpick:check": {
-      "dependsOn": ["@repo/nitpick#build"],
-      "cache": false
-    },
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],

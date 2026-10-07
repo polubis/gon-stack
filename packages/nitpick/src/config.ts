@@ -11,7 +11,7 @@ export type CheckContext = {
   meta: { ruleId: string; projectRoot: string };
 };
 
-export type Rule<K extends string = string> = {
+type RuleBase<K extends string> = {
   id: string;
   group?: string;
   importance?: Importance;
@@ -19,8 +19,13 @@ export type Rule<K extends string = string> = {
   exclude?: string[];
   instruction:
     ((helpers: { ref: (key: K) => string }) => string) | { file: string };
-  check?: (context: CheckContext) => void | Promise<void>;
 };
+
+export type Rule<K extends string = string> = RuleBase<K> &
+  (
+    | { check: (context: CheckContext) => void | Promise<void>; fix: string }
+    | { check?: undefined; fix?: string }
+  );
 
 export type Config<K extends string = string> = {
   output?: { path: string; root: string }[];

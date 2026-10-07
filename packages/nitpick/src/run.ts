@@ -92,6 +92,7 @@ export const run = async (
     return print(EXIT_USAGE, [`Cannot read input: ${messageOf(error)}`]);
   }
   for (const rule of resolveRules(config)) {
+    const before = problems.length;
     try {
       await rule.check?.(
         snapshot.contextFor(rule, (message) => {
@@ -100,6 +101,12 @@ export const run = async (
       );
     } catch (error) {
       problems.push(`[${rule.id}] check failed: ${messageOf(error)}`);
+    }
+    if (problems.length > before) {
+      problems.push(
+        `Violated rule: ${rule.id}. Read ${docs.rulePaths.get(rule.id)}`,
+        `Fix: ${rule.fix}`,
+      );
     }
   }
 

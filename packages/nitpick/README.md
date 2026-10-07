@@ -27,6 +27,7 @@ A rule has an `id`, an `instruction` function returning Markdown, and an optiona
 
 - `group`: optional "area" of the root docs. Rules sharing a group are rendered under their own `## Rules for <Group>` heading (with the importance sections inside); ungrouped rules stay under `## Rules`, listed first. Groups appear in order of first use. It does not change where instruction files go (always `<path>/rules/<id>.md`).
 - `instruction`: a function returning Markdown, or `{ file: './path.md' }` pointing to a Markdown file (relative to `.nitpick/`, absolute paths allowed). A file instruction is written to `<path>/rules/<id>.md`, supports `{{ref:key}}`, and the root docs link to it: `- [id](rules/id.md)`. Missing file or unknown ref is a config error.
+- `fix`: text shown after the problems of this rule (`Fix: ...`). Required when the rule has a `check` (type error and config error otherwise). Tell the reader how to correct a violation; include an example.
 - `importance`: `A | O | D | I`. Only decides the docs section. Default `A`. Sections: (A) Always, (O) Optional, (D) When directly mentioned, (I) Infer during task. Empty sections are skipped.
 - `include` / `exclude`: globs (`path.matchesGlob`), rule level only. They filter `files` passed to `check`. No `include` means all files.
 - `id` must be unique.
@@ -114,6 +115,16 @@ Root scripts:
 | 2    | Usage error or unreadable input (bad flags, missing `--commit-msg` file, invalid `--range`, no git repository) |
 | 3    | Config error (import failure, validation, refs)                                                                |
 
+When a rule reports problems, `--check` prints them as `[id] message`, then guidance for an LLM, once per failing rule:
+
+```text
+[rich-commit] Footer, trailer, reference or credit not allowed, found "Refs: #1"
+Violated rule: rich-commit. Read .ai/rules/rich-commit.md
+Fix: Rewrite the commit message as ...
+```
+
+The path is the rule's instruction file under the first `output` entry (rules with a function instruction point to the root file). `Fix:` is the rule's `fix` text.
+
 Where to run it (commit hook, pre-push, CI) is up to the consumer.
 
 ## `richCommit` rule
@@ -123,7 +134,7 @@ Id `rich-commit`, importance `A`. Its instruction lives in the library (`src/rul
 - Subject `type(scope)!: title`; types: `feat fix docs style refactor perf test build ci chore revert`; scope required.
 - Blank line after the subject.
 - Body contains at least one `- ` change list item.
-- Body lines are `- ` items, indented lines, or `Key: value` trailers.
+- Body is only a `- ` list (nested `  - ` items allowed). Nothing may follow it: no blank lines, prose, footers, `Key: value` trailers, references (`Refs`, `Fixes`, `Closes`), `Co-authored-by`, `Signed-off-by` or AI credits.
 
 ## Flow
 

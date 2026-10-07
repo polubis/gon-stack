@@ -19,20 +19,19 @@ const valid = `fix(repo): prevent racing of requests
 
 - Introduce a request id
   - Nested list
-- Other points
-
-Reviewed-by: Z
-Refs: #123`;
+- Other points`;
 
 describe('Rule works when', () => {
   it('can be overridden by spread', async () => {
     expect(await commitProblems('oops')).not.toEqual([]);
-    expect(await run({ ...richCommit, check: () => {} }, 'oops')).toEqual([]);
+    expect(
+      await run({ ...richCommit, check: () => {}, fix: 'x' }, 'oops'),
+    ).toEqual([]);
   });
 });
 
 describe('Commit validation works when', () => {
-  it('accepts a conventional commit with change list and trailers', async () => {
+  it('accepts a conventional commit with a nested change list', async () => {
     expect(await commitProblems(valid)).toEqual([]);
   });
 
@@ -60,6 +59,27 @@ describe('Commit validation works when', () => {
     expect(
       await commitProblems(valid.replace('requests\n\n', 'requests\n')),
     ).toHaveLength(1);
+  });
+
+  it.each([
+    'Refs: #123',
+    'Reviewed-by: Z',
+    'Co-authored-by: A <a@b.c>',
+    'Generated with Claude Code',
+    '- Co-Authored-By: A',
+    '- Fixes #1',
+    '🤖 note',
+  ])('rejects footer %s', async (footer) => {
+    expect(await commitProblems(`${valid}\n${footer}`)).toEqual([
+      `Footer, trailer, reference or credit not allowed, found "${footer}"`,
+    ]);
+  });
+
+  it('rejects a footer separated by a blank line', async () => {
+    expect(await commitProblems(`${valid}\n\nRefs: #1`)).toEqual([
+      'Blank line not allowed inside the change list',
+      'Footer, trailer, reference or credit not allowed, found "Refs: #1"',
+    ]);
   });
 
   it('rejects prose in body', async () => {

@@ -33,17 +33,19 @@ const build = async (
   };
 };
 
-const inline = (id: string, extra: Partial<Rule> = {}): Rule => ({
-  id,
-  instruction: () => id,
-  ...extra,
-});
+const inline = (id: string, extra: Partial<Rule> = {}): Rule =>
+  ({
+    id,
+    instruction: () => id,
+    ...extra,
+  }) as Rule;
 
-const file = (id: string, path: string, extra: Partial<Rule> = {}): Rule => ({
-  id,
-  instruction: { file: path },
-  ...extra,
-});
+const file = (id: string, path: string, extra: Partial<Rule> = {}): Rule =>
+  ({
+    id,
+    instruction: { file: path },
+    ...extra,
+  }) as Rule;
 
 describe('Root docs layout works when', () => {
   const render = async (rules: Rule[]) =>
@@ -351,6 +353,29 @@ describe('Instruction files work when', () => {
       file('b', './f.md'),
     ]);
     expect(first).toContain('- `a`: a\n- [b](rules/b.md)');
+  });
+});
+
+describe('Line endings work when', () => {
+  it('normalizes CRLF in instruction and knowledge files to LF', async () => {
+    const { read, problems } = await build(
+      { 'r.md': 'a\r\nb\r\n{{ref:k}}', 'k.md': 'x\r\ny' },
+      config({
+        knowledge: { refs: { k: './k.md' } },
+        rules: [file('r', './r.md')],
+      }),
+    );
+    expect(problems).toEqual([]);
+    expect(read('.ai', 'rules', 'r.md')).toBe('a\nb\n[k](../references/k.md)');
+    expect(read('.ai', 'references', 'k.md')).toBe('x\ny');
+  });
+
+  it('keeps lone carriage returns', async () => {
+    const { read } = await build(
+      { 'r.md': 'a\rb' },
+      config({ rules: [file('r', './r.md')] }),
+    );
+    expect(read('.ai', 'rules', 'r.md')).toBe('a\rb');
   });
 });
 

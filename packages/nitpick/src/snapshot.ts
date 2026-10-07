@@ -12,6 +12,15 @@ const git = async (cwd: string, args: string[]): Promise<string> =>
   (await exec('git', args, { cwd, maxBuffer: 64 * 1024 * 1024 })).stdout;
 
 const SEPARATOR = '\u001e';
+const SCISSORS = '# ------------------------ >8 ------------------------';
+
+const stripComments = (message: string): string => {
+  const lines = message.split(/\r?\n/);
+  const cut = lines.indexOf(SCISSORS);
+  return (cut === -1 ? lines : lines.slice(0, cut))
+    .filter((line) => !line.startsWith('#'))
+    .join('\n');
+};
 
 export const createSnapshot = async (
   projectRoot: string,
@@ -51,7 +60,11 @@ export const createSnapshot = async (
       .map((message) => message.replace(/^\n/, ''))
       .filter((message) => message.trim() !== '');
   const commitMessages = commitMsgFile
-    ? [await readFile(resolve(projectRoot, commitMsgFile), 'utf8')]
+    ? [
+        stripComments(
+          await readFile(resolve(projectRoot, commitMsgFile), 'utf8'),
+        ),
+      ]
     : range
       ? await readLog([range], true)
       : await readLog(['-1']);

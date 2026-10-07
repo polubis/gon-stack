@@ -99,21 +99,31 @@ describe('Body validation works when', () => {
     ).toEqual([]);
   });
 
-  it('accepts blank lines between items and before trailers', async () => {
-    expect(
-      await check(`${subject}\n\n- One\n\n- Two\n\nRefs: #1\nReviewed-by: Z`),
-    ).toEqual([]);
+  it('rejects blank lines between items', async () => {
+    expect(await check(`${subject}\n\n- One\n\n- Two`)).toEqual([
+      'Blank line not allowed inside the change list',
+    ]);
   });
 
-  it('accepts trailers with dashes in the key', async () => {
-    expect(
-      await check(`${subject}${body}\n\nCo-authored-by: A <a@b.c>`),
-    ).toEqual([]);
+  it('rejects trailers with dashes in the key', async () => {
+    expect(await check(`${subject}${body}\nCo-authored-by: A <a@b.c>`)).toEqual(
+      [
+        'Footer, trailer, reference or credit not allowed, found "Co-authored-by: A <a@b.c>"',
+      ],
+    );
+  });
+
+  it('rejects a footer after a blank line and reports both problems', async () => {
+    expect(await check(`${subject}${body}\n\nRefs: #1`)).toEqual([
+      'Blank line not allowed inside the change list',
+      'Footer, trailer, reference or credit not allowed, found "Refs: #1"',
+    ]);
   });
 
   it('rejects a body without any change list item', async () => {
     expect(await check(`${subject}\n\nRefs: #1`)).toEqual([
       'Body must contain a "- " change list',
+      'Footer, trailer, reference or credit not allowed, found "Refs: #1"',
     ]);
   });
 
@@ -128,14 +138,14 @@ describe('Body validation works when', () => {
     ['star bullet', '* Item'],
     ['bare dash', '-'],
     ['numbered list', '1. Item'],
-    ['trailer without space', 'Refs:#1'],
-    ['trailer with empty value', 'Refs:'],
+    ['custom trailer', 'Key: value'],
     ['trailer key starting with a digit', '1Refs: x'],
+    ['indented trailer', '  Key: value'],
     ['plain prose', 'some prose'],
   ])('rejects %s', async (_name, line) => {
     const problems = await check(`${subject}${body}\n${line}`);
     expect(problems).toEqual([
-      `Body line must be bullet, indented or "Key: value" trailer, found "${line}"`,
+      `Only "- " list items are allowed after the subject, found "${line}"`,
     ]);
   });
 
@@ -143,7 +153,7 @@ describe('Body validation works when', () => {
     expect(await check(`${subject}\n- Change\nprose`)).toEqual([
       'Blank line required after subject',
       'Body must contain a "- " change list',
-      'Body line must be bullet, indented or "Key: value" trailer, found "prose"',
+      'Only "- " list items are allowed after the subject, found "prose"',
     ]);
   });
 
@@ -156,16 +166,16 @@ describe('Body validation works when', () => {
     expect(await check('oops\n\nprose')).toEqual([
       'Subject must be "type(scope)!: title", found "oops"',
       'Body must contain a "- " change list',
-      'Body line must be bullet, indented or "Key: value" trailer, found "prose"',
+      'Only "- " list items are allowed after the subject, found "prose"',
     ]);
   });
 });
 
 describe('Message handling works when', () => {
   it('accepts Windows line endings', async () => {
-    expect(
-      await check('fix(repo): title\r\n\r\n- One\r\n  - Two\r\nRefs: #1\r\n'),
-    ).toEqual([]);
+    expect(await check('fix(repo): title\r\n\r\n- One\r\n  - Two\r\n')).toEqual(
+      [],
+    );
   });
 
   it('rejects a message with a leading blank line', async () => {

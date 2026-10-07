@@ -1,0 +1,2 @@
+pnpm turbo run build --filter=@repo/nitpick --ui=stream
+pnpm nitpick --check --commit-msg "$1"

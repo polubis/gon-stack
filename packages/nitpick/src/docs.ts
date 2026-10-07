@@ -3,7 +3,11 @@ import { basename, dirname, join, posix, relative, resolve } from 'node:path';
 import { resolveRules } from './config.js';
 import type { Config, Importance, Rule } from './config.js';
 
-type Docs = { files: Map<string, string>; problems: string[] };
+type Docs = {
+  files: Map<string, string>;
+  problems: string[];
+  rulePaths: Map<string, string>;
+};
 
 type Output = { path: string; root: string };
 
@@ -16,6 +20,9 @@ const TITLES: Record<Importance, string> = {
   D: '(D) When directly mentioned',
   I: '(I) Infer during task',
 };
+
+const readSource = async (configDir: string, file: string): Promise<string> =>
+  (await readFile(resolve(configDir, file), 'utf8')).replaceAll('\r\n', '\n');
 
 const instructionPath = (id: string): string => posix.join('rules', `${id}.md`);
 
@@ -33,7 +40,7 @@ const readSources = async (
   const sources = new Map<string, string>();
   for (const [key, source] of Object.entries(refs)) {
     try {
-      sources.set(key, await readFile(resolve(configDir, source), 'utf8'));
+      sources.set(key, await readSource(configDir, source));
     } catch {
       problems.push(`Knowledge "${key}": missing file ${source}`);
     }
@@ -146,10 +153,13 @@ export const buildDocs = async <K extends string>(
   };
   const rules = resolveRules(config) as Rule[];
   const instructionFiles = new Map<string, string>();
-  for (const { id, instruction } of rules) {
+  for (const { id, instruction, check, fix } of rules) {
+    if (check && !fix) {
+      problems.push(`Rule "${id}": fix is required when check is defined`);
+    }
     if (typeof instruction === 'function') continue;
     try {
-      const text = await readFile(resolve(configDir, instruction.file), 'utf8');
+      const text = await readSource(configDir, instruction.file);
       for (const key of keysIn(text)) {
         if (!(key in refs)) problems.push(`Rule "${id}": unknown ref "${key}"`);
       }
@@ -194,5 +204,15 @@ export const buildDocs = async <K extends string>(
     );
   }
 
-  return { files, problems };
+  const rulePaths = new Map(
+    rules.map(({ id, instruction }) => [
+      id,
+      posix.join(
+        primary.path.replaceAll('\\', '/'),
+        typeof instruction === 'function' ? primary.root : instructionPath(id),
+      ),
+    ]),
+  );
+
+  return { files, problems, rulePaths };
 };

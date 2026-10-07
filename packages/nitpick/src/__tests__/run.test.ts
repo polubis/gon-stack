@@ -43,14 +43,16 @@ const project = async (
 const withRule = (check = '', extra = '') => `
 export default {
   ${extra}
-  rules: [{ id: 'r', instruction: () => 'do r', ${check} }],
+  rules: [{ id: 'r', instruction: () => 'do r', fix: 'fix r', ${check} }],
 };`;
 
 let errors: string[];
+let guidance: string[];
 beforeEach(() => {
   errors = [];
+  guidance = [];
   vi.spyOn(console, 'error').mockImplementation((message: string) => {
-    errors.push(message);
+    (/^(Violated rule|Fix): /.test(message) ? guidance : errors).push(message);
   });
 });
 afterEach(() => vi.restoreAllMocks());
@@ -80,6 +82,19 @@ describe('CLI config works when', () => {
     const root = await project('throw new Error("boom");');
     expect(await run(['--check'], root)).toBe(3);
     expect(errors[0]).toBe('Config error: boom');
+  });
+
+  it('exits 3 when a rule has a check but no fix', async () => {
+    const root = await project(
+      `export default { rules: [
+        { id: 'r', instruction: () => 'do r', check: () => {} },
+        { id: 'ok', instruction: () => 'ok' },
+      ] };`,
+    );
+    expect(await run(['--check'], root)).toBe(3);
+    expect(errors).toEqual([
+      '[config] Rule "r": fix is required when check is defined',
+    ]);
   });
 
   it('exits 3 when knowledge refs are invalid', async () => {
@@ -179,6 +194,7 @@ describe('CLI check works when', () => {
         include: ['src/**/*.ts'],
         exclude: ['**/*.test.ts'],
         instruction: () => 'x',
+        fix: 'f',
         check: async ({ files, readText, report, meta }) => {
           for (const file of files) {
             report(file + '=' + (await readText(file)) + ':' + meta.ruleId);
@@ -221,5 +237,67 @@ describe('CLI check works when', () => {
     expect(await run(['--check', '--commit-msg', 'good.txt'], root)).toBe(0);
     expect(await run(['--check', '--commit-msg', 'bad.txt'], root)).toBe(1);
     expect(errors[0]).toContain('[rich-commit] Subject must be');
+  });
+});
+
+describe('Violation guidance works when', () => {
+  it('points an LLM to the rule file and a fix for a file rule', async () => {
+    const root = await synced(
+      `import { richCommit } from '${richCommitPath}';
+       export default { rules: [richCommit] };`,
+    );
+    await writeFile(
+      join(root, 'bad.txt'),
+      'feat(app): add\n\n- one\n\nRefs: #1',
+    );
+    await run(['--check', '--commit-msg', 'bad.txt'], root);
+    expect(guidance).toHaveLength(2);
+    expect(guidance[0]).toBe(
+      'Violated rule: rich-commit. Read .ai/rules/rich-commit.md',
+    );
+    expect(guidance[1]).toMatch(/^Fix: Rewrite the commit message as /);
+    expect(guidance[1]).toContain('no footer, trailer, reference or credit');
+  });
+
+  it('points to the root file for a rule with a function instruction', async () => {
+    const root = await synced(withRule("check: (c) => c.report('bad'),"));
+    await run(['--check'], root);
+    expect(errors).toEqual(['[r] bad']);
+    expect(guidance).toEqual([
+      'Violated rule: r. Read .ai/AGENTS.md',
+      'Fix: fix r',
+    ]);
+  });
+
+  it('shows the fix of the rule and the configured output path', async () => {
+    const root = await synced(
+      withRule(
+        "fix: 'do it', check: (c) => c.report('bad'),",
+        "output: [{ path: 'docs/ai', root: 'RULES.md' }],",
+      ),
+    );
+    await run(['--check'], root);
+    expect(guidance).toEqual([
+      'Violated rule: r. Read docs/ai/RULES.md',
+      'Fix: do it',
+    ]);
+  });
+
+  it('adds guidance when a check throws', async () => {
+    const root = await synced(
+      withRule("check: () => { throw new Error('x') },"),
+    );
+    await run(['--check'], root);
+    expect(errors).toEqual(['[r] check failed: x']);
+    expect(guidance).toEqual([
+      'Violated rule: r. Read .ai/AGENTS.md',
+      'Fix: fix r',
+    ]);
+  });
+
+  it('stays silent for rules without problems', async () => {
+    const root = await synced(withRule('check: () => {},'));
+    expect(await run(['--check'], root)).toBe(0);
+    expect(guidance).toEqual([]);
   });
 });
