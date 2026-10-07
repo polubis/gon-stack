@@ -13,7 +13,7 @@ Implemented:
 - Check snapshot: `files`, `readText`, `git`, `meta`
 - Per-rule `include` / `exclude`
 - `rules` as an array or a function
-- Ready-made rule: `richCommit`
+- Ready-made rules: `richCommit`, `logEntry`
 
 Covered by tests: 100% statements, branches, functions and lines (enforced by `test:coverage`; `cli.ts` is excluded).
 
@@ -83,6 +83,7 @@ Override a ready-made rule by spreading it: `{ ...richCommit, importance: 'D' }`
 | `files`                     | Files from `git ls-files --cached --others --exclude-standard`, sorted, without tracked files deleted from disk, filtered by the rule's `include` / `exclude`. Globs follow `path.matchesGlob`, so `**` does not enter dot folders: use `.ai/**` explicitly |
 | `readText(file)`            | Reads UTF-8 text (path relative to project root), cached per run                                                                                                                                                                                            |
 | `git.commitMessages`        | Last commit by default; `--commit-msg <file>` uses file content; `--range <a..b>` uses commits in range (invalid range = exit 2)                                                                                                                            |
+| `git.stagedAddedFiles` | Files newly added to the index (`git diff --cached --diff-filter=A`), sorted, filtered by the rule's `include` / `exclude` |
 | `git.lastCommitMessages(n)` | Last `n` commit messages                                                                                                                                                                                                                                    |
 | `report(message)`           | Reports a problem as `[ruleId] message`                                                                                                                                                                                                                     |
 | `meta`                      | `{ ruleId, projectRoot }`                                                                                                                                                                                                                                   |
@@ -135,6 +136,14 @@ Id `rich-commit`, importance `A`. Its instruction lives in the library (`src/rul
 - Blank line after the subject.
 - Body contains at least one `- ` change list item.
 - Body is only a `- ` list (nested `  - ` items allowed). Nothing may follow it: no blank lines, prose, footers, `Key: value` trailers, references (`Refs`, `Fixes`, `Closes`), `Co-authored-by`, `Signed-off-by` or AI credits.
+
+## `logEntry` rule
+
+Id `log-entry`, group `general`, importance `A`. Instruction `src/rules/log-entry.md`. Validates `git.stagedAddedFiles` (works with `--commit-msg`, i.e. in the `commit-msg` hook):
+
+- At least one newly staged file `<...>/__log__/<NNNN>-<slug>.md`. Modified or unstaged logs do not count.
+- First line `# <NNNN> - <summary>` with the same number as the file name.
+- A json `"status"`: `done`, `failed` or `done-with-clarification`.
 
 ## Flow
 

@@ -36,6 +36,18 @@ export const createSnapshot = async (
   ]
     .filter((file) => !deleted.has(file))
     .sort();
+  const stagedAdded = (
+    await git(projectRoot, [
+      'diff',
+      '--cached',
+      '--name-only',
+      '--diff-filter=A',
+      '-z',
+    ])
+  )
+    .split('\0')
+    .filter(Boolean)
+    .sort();
   const texts = new Map<string, Promise<string>>();
   const readText = (file: string): Promise<string> => {
     const cached = texts.get(file);
@@ -73,20 +85,25 @@ export const createSnapshot = async (
     contextFor: (
       rule: { id: string; include?: string[]; exclude?: string[] },
       report: (message: string) => void,
-    ): CheckContext => ({
-      files: files.filter(
-        (file) =>
-          (!rule.include ||
-            rule.include.some((glob) => matchesGlob(file, glob))) &&
-          !(rule.exclude ?? []).some((glob) => matchesGlob(file, glob)),
-      ),
-      readText,
-      git: {
-        commitMessages,
-        lastCommitMessages: (count) => readLog([`-${count}`]),
-      },
-      report,
-      meta: { ruleId: rule.id, projectRoot },
-    }),
+    ): CheckContext => {
+      const scoped = (list: string[]): string[] =>
+        list.filter(
+          (file) =>
+            (!rule.include ||
+              rule.include.some((glob) => matchesGlob(file, glob))) &&
+            !(rule.exclude ?? []).some((glob) => matchesGlob(file, glob)),
+        );
+      return {
+        files: scoped(files),
+        readText,
+        git: {
+          commitMessages,
+          stagedAddedFiles: scoped(stagedAdded),
+          lastCommitMessages: (count) => readLog([`-${count}`]),
+        },
+        report,
+        meta: { ruleId: rule.id, projectRoot },
+      };
+    },
   };
 };

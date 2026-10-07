@@ -6,7 +6,11 @@ const check = async (...messages: string[]) => {
   await richCommit.check?.({
     files: [],
     readText: async () => '',
-    git: { commitMessages: messages, lastCommitMessages: async () => [] },
+    git: {
+      commitMessages: messages,
+      stagedAddedFiles: [],
+      lastCommitMessages: async () => [],
+    },
     report: (problem) => reports.push(problem),
     meta: { ruleId: richCommit.id, projectRoot: '' },
   });

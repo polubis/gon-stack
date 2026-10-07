@@ -7,7 +7,11 @@ const run = async (rule: typeof richCommit, message: string) => {
   await rule.check?.({
     files: [],
     readText: async () => '',
-    git: { commitMessages: [message], lastCommitMessages: async () => [] },
+    git: {
+      commitMessages: [message],
+      stagedAddedFiles: [],
+      lastCommitMessages: async () => [],
+    },
     report: (problem) => reports.push(problem),
     meta: { ruleId: rule.id, projectRoot: '' },
   });
