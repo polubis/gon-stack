@@ -2,7 +2,7 @@ import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
 
 export const FEATURE_NAME = 'Categories';
 
-export const NEW_CATEGORY_NAME = 'Nowa kategoria';
+export const NAME_MAX_LENGTH = 40;
 
 export const COLORS = [
   '#0f7a4f',
@@ -43,4 +43,5 @@ export const DEFAULT_CATEGORIES: readonly {
 export const ERROR_CODES = {
   load: 'CATEGORIES_LOAD',
   render: 'CATEGORIES_RENDER',
+  notFound: 'CATEGORY_NOT_FOUND',
 } as const;

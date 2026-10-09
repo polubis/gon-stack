@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
+import { onBackClick } from '@/shared/router/navigation';
 
 type ScreenHeaderProps = {
   title: string;
@@ -17,6 +18,7 @@ export const ScreenHeader = ({
     {backHref ? (
       <a
         href={backHref}
+        onClick={onBackClick}
         aria-label="Wróć"
         className="grid h-9 w-9 place-items-center rounded-full text-ink-soft hover:bg-hover"
       >

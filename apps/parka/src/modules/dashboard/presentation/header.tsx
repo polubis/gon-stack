@@ -26,7 +26,7 @@ export const Header = ({
           {initializing ? (
             <>
               <span className="sr-only">Cześć</span>
-              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-8 w-48 lg:h-9" />
             </>
           ) : firstName ? (
             `Cześć, ${firstName} 👋`

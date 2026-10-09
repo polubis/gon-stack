@@ -7,3 +7,6 @@
 5. (A) No data hide during reload, filters change. In that case loading banner
 6. (A) No jumping UI
 7. (A) Delete via confirmation
+8. (A) When filters applied and no data include normalized filters in message. F.e: `No results for "phrase"`
+9. (A) No needless duplicates on screen: same info/control shown once. F.e: no preview card repeating what fields already show
+10. (A) Each view entry is smoothly animated as a whole (fade + slight slide), disabled with `motion-reduce`

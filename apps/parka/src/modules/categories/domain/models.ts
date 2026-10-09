@@ -12,8 +12,6 @@ export type Category = {
   color: string;
 };
 
-export type Editing = { mode: 'new' } | { mode: 'edit'; category: Category };
-
 export type Notice = {
   id: number;
   tone: 'success' | 'error';

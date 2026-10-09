@@ -51,6 +51,10 @@ export type DashboardQuery = {
   range?: string;
 };
 
+export type CategoryEditQuery = {
+  id?: string;
+};
+
 export type NewExpenseQuery = {
   type?: 'normal' | 'recurring';
 };
@@ -67,6 +71,10 @@ export const APP_ROUTER = {
   dashboard: routeWithQuery<'/app/', DashboardQuery>('/app/'),
   settings: route('/app/settings/'),
   categories: route('/app/categories/'),
+  categoryNew: route('/app/categories/new/'),
+  categoryEdit: routeWithQuery<'/app/categories/edit/', CategoryEditQuery>(
+    '/app/categories/edit/',
+  ),
   reports: route('/app/reports/'),
   notifications: route('/app/notifications/'),
   privacy: route('/app/privacy/'),
@@ -89,6 +97,8 @@ export type PageUrl = ReturnType<(typeof APP_ROUTER)[PageRouteKey]>;
 export const moreSectionPaths = (): readonly string[] => [
   APP_ROUTER.settings(),
   APP_ROUTER.categories(),
+  APP_ROUTER.categoryNew(),
+  APP_ROUTER.categoryEdit(),
   APP_ROUTER.reports(),
   APP_ROUTER.notifications(),
   APP_ROUTER.privacy(),

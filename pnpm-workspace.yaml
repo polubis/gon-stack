@@ -65,3 +65,7 @@ onlyBuiltDependencies:
 # Transitive fixes until @astrojs/cloudflare bumps its own range
 overrides:
   '@cloudflare/vite-plugin': 1.62.2
+
+# Single version source for shared deps (use "catalog:" in package.json)
+catalog:
+  '@radix-ui/react-popover': 1.2.0

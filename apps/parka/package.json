@@ -33,6 +33,7 @@
     "@astrojs/react": "^6.0.6",
     "@astrojs/sitemap": "^3.7.4",
     "@radix-ui/react-dialog": "^1.1.23",
+    "@radix-ui/react-popover": "catalog:",
     "@repo/react-kit": "workspace:*",
     "@repo/type-beast": "workspace:*",
     "@supabase/ssr": "^0.12.7",

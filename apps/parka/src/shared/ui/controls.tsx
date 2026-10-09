@@ -113,7 +113,7 @@ export const Button = ({
   children: React.ReactNode;
   variant?: 'primary' | 'ghost' | 'danger';
   type?: 'button' | 'submit';
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
   href?: string;
   className?: string;
   // Named explicitly (not left to the `Record<string, unknown>` catch-all
@@ -133,6 +133,7 @@ export const Button = ({
     return (
       <a
         href={href}
+        onClick={onClick}
         className={cn(base, styles, className)}
         data-e2e={dataE2e}
         {...rest}

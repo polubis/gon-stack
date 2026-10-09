@@ -110,6 +110,23 @@
 
   /* WCAG AA with white text (default orange-500 #ff6900 is 2.88:1). */
   --color-orange-500: #c2410c;
+
+  /*
+   * Whole-view entrance; pair with `motion-reduce:animate-none`. Slides in
+   * from above on purpose: a downward offset adds scrollable overflow at the
+   * bottom for the duration, flashing a scrollbar in and out.
+   */
+  --animate-view-enter: view-enter 0.3s ease-out;
+  @keyframes view-enter {
+    from {
+      opacity: 0;
+      transform: translateY(-0.5rem);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
 @layer base {

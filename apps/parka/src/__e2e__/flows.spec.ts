@@ -511,9 +511,37 @@ const commands = {
   'a new category appears in the list': async ({ page, getByE2e }) => {
     await mockState(page);
     await open(page, APP_ROUTER.categories());
-    await getByE2e('categories:form-name').fill('Kultura');
+    await getByE2e('categories:add').click();
+    await expect(page).toHaveURL(/\/categories\/new\//);
     await getByE2e('categories:form-save').click();
+    await expect(getByE2e('categories:form-name-error')).toBeVisible();
+    await getByE2e('categories:form-name').fill('Kultura');
+    await getByE2e('categories:form-icons').click();
+    await getByE2e('categories:form-icon-search').fill('kino');
+    await page.getByRole('button', { name: 'Kino' }).click();
+    await getByE2e('categories:form-save').click();
+    await expect(page).toHaveURL(/\/app\/categories\/$/);
     await expect(page.getByText('Kultura')).toBeVisible();
+  },
+  'i edit a category on its own page': async ({ page, getByE2e }) => {
+    await mockState(page);
+    await open(page, APP_ROUTER.categories());
+    await getByE2e('categories:row:cat-1').click();
+    await expect(page).toHaveURL(/\/categories\/edit\/\?id=cat-1/);
+    await expect(
+      page.getByRole('heading', { name: 'Edytuj: Spożywcze' }),
+    ).toBeVisible();
+    await getByE2e('categories:form-name').fill('Jedzenie');
+    await getByE2e('categories:form-save').click();
+    await expect(getByE2e('categories:row:cat-1')).toContainText('Jedzenie');
+  },
+  'i delete a category on its own page': async ({ page, getByE2e }) => {
+    await mockState(page);
+    await open(page, APP_ROUTER.categoryEdit({ id: 'cat-1' }));
+    await getByE2e('categories:form-delete').click();
+    await getByE2e('categories:delete-confirm').click();
+    await expect(page).toHaveURL(/\/app\/categories\/$/);
+    await expect(getByE2e('categories:row:cat-1')).toHaveCount(0);
   },
 
   'i add and remove a recurring expense': async ({ page, getByE2e }) => {
@@ -705,6 +733,15 @@ test('a category limit can be raised and then removed', async ({ e2e }) => {
 
 test('a new category appears in the category list', async ({ e2e }) => {
   await interpreter(commands, e2e)(['a new category appears in the list']);
+});
+
+test('a category can be edited and deleted on its own page', async ({
+  e2e,
+}) => {
+  await interpreter(commands, e2e)(
+    ['i edit a category on its own page'],
+    ['i delete a category on its own page'],
+  );
 });
 
 test('recurring expenses can be added and removed', async ({ e2e }) => {

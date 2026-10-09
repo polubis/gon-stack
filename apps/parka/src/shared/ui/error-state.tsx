@@ -1,5 +1,6 @@
 import { TriangleAlert } from 'lucide-react';
 import type { E2eId } from '@/__e2e__/selectors';
+import { onBackClick } from '@/shared/router/navigation';
 import { Button } from './controls';
 
 type Props = {
@@ -36,7 +37,7 @@ export const ErrorState = ({
     <p className="text-sm text-ink-soft">{description}</p>
     <div className="flex w-full max-w-xs gap-2">
       <Button onClick={onRetry}>Spróbuj ponownie</Button>
-      <Button variant="ghost" href={backHref}>
+      <Button variant="ghost" href={backHref} onClick={onBackClick}>
         {backLabel}
       </Button>
     </div>

@@ -23,6 +23,16 @@ export const APP_PAGES: readonly AppPage[] = [
     description: 'Zarządzaj kategoriami wydatków.',
   },
   {
+    url: APP_ROUTER.categoryNew(),
+    title: 'Nowa kategoria | Parka',
+    description: 'Dodaj kategorię wydatków.',
+  },
+  {
+    url: APP_ROUTER.categoryEdit(),
+    title: 'Edycja kategorii | Parka',
+    description: 'Zmień lub usuń kategorię wydatków.',
+  },
+  {
     url: APP_ROUTER.reports(),
     title: 'Raport | Parka',
     description: 'Miesięczny raport wydatków.',

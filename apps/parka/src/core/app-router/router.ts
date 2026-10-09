@@ -17,6 +17,44 @@ const page = (path: string, load: () => Promise<{ Main: ComponentType }>) =>
     component: lazyRouteComponent(load, 'Main'),
   });
 
+/**
+ * Categories pages share one layout route so a single store survives the
+ * list -> editor navigation (optimistic updates and toasts keep working).
+ */
+const categoriesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: 'categories-layout',
+  component: lazyRouteComponent(
+    () => import('@/modules/categories/presentation/shell'),
+    'Main',
+  ),
+});
+
+const categoriesChild = (
+  path: string,
+  load: () => Promise<{ Main: ComponentType }>,
+) =>
+  createRoute({
+    getParentRoute: () => categoriesRoute,
+    path,
+    component: lazyRouteComponent(load, 'Main'),
+  });
+
+const categoriesTree = categoriesRoute.addChildren([
+  categoriesChild(
+    APP_ROUTER.categories(),
+    () => import('@/modules/categories/presentation/main'),
+  ),
+  categoriesChild(
+    APP_ROUTER.categoryNew(),
+    () => import('@/modules/categories/presentation/editor'),
+  ),
+  categoriesChild(
+    APP_ROUTER.categoryEdit(),
+    () => import('@/modules/categories/presentation/editor'),
+  ),
+]);
+
 export const router = createRouter({
   routeTree: rootRoute.addChildren([
     page(
@@ -27,10 +65,7 @@ export const router = createRouter({
       APP_ROUTER.settings(),
       () => import('@/modules/settings/presentation/main'),
     ),
-    page(
-      APP_ROUTER.categories(),
-      () => import('@/modules/categories/presentation/main'),
-    ),
+    categoriesTree,
     page(
       APP_ROUTER.reports(),
       () => import('@/modules/reports/presentation/main'),

@@ -24,6 +24,36 @@ export const navigateTo = (path: string): void => {
   window.location.href = path;
 };
 
+/**
+ * Click handler for "back" anchors: steps back in history when the user
+ * came from somewhere in this app, otherwise lets the anchor go to its
+ * fallback `href` (deep link, new tab).
+ */
+export const onBackClick = (event: {
+  preventDefault: () => void;
+  button: number;
+  metaKey: boolean;
+  ctrlKey: boolean;
+  shiftKey: boolean;
+  altKey: boolean;
+}): void => {
+  if (typeof window === 'undefined') return;
+  if (
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey
+  )
+    return;
+  const state = window.history.state as { __TSR_index?: number } | null;
+  const inApp = (state?.__TSR_index ?? 0) > 0;
+  const fromApp = document.referrer.startsWith(window.location.origin);
+  if (!inApp && !fromApp) return;
+  event.preventDefault();
+  window.history.back();
+};
+
 export const replaceUrl = (path: string): void => {
   if (typeof window === 'undefined') return;
   if (navigator) {
