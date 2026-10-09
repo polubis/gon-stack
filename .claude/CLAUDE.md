@@ -58,24 +58,11 @@ Read `references/aodi-framework.md` for tag legend (`A` / `O` / `D` / `I`). Appl
 
 ### Agents
 
-| Path                                                                     | What                                                         |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------ |
-| [agents/coord.md](agents/coord.md)                                       | Orchestrator: Planner → specialists → verifiers → dev report |
-| [agents/reviewer.md](agents/reviewer.md)                                 | Reviewer: verify work vs `rules/*.md`, report only, no fixes |
-| [agents/planner.md](agents/planner.md)                                   | Plan: scope → lane → ordered steps + checks                  |
-| [agents/solution-architect.md](agents/solution-architect.md)             | Design module layers, boundaries, data flow                  |
-| [agents/technical-leader.md](agents/technical-leader.md)                 | Pick approach, trade-offs, risks                             |
-| [agents/frontend-developer.md](agents/frontend-developer.md)             | Build frontend modules per architecture                      |
-| [agents/backend-developer.md](agents/backend-developer.md)               | Build Astro endpoints with typed validation                  |
-| [agents/database-developer.md](agents/database-developer.md)             | Schema, indexes, migrations                                  |
-| [agents/ux-specialist.md](agents/ux-specialist.md)                       | Error/loading/optimistic UI patterns                         |
-| [agents/accessibility-specialist.md](agents/accessibility-specialist.md) | WCAG 2.2, ARIA, keyboard support                             |
-| [agents/tech-seo.md](agents/tech-seo.md)                                 | Rendering mode + meta for public routes                      |
-| [agents/ui-designer.md](agents/ui-designer.md)                           | Mobile-first views, tokens, dark mode                        |
-| [agents/automation-tester.md](agents/automation-tester.md)               | Black-box tests via `vibe-test`                              |
-| [agents/tech-quality-verifier.md](agents/tech-quality-verifier.md)       | Code/layers/types sign-off or reject                         |
-| [agents/q-a.md](agents/q-a.md)                                           | Acceptance check vs plan, accept or reject                   |
-| [agents/scrum-master.md](agents/scrum-master.md)                         | Coverage, log entry, dev report                              |
+| Path                                 | What                                                              |
+| ------------------------------------ | ----------------------------------------------------------------- |
+| [agents/coord.md](agents/coord.md)   | Simple solo / complex plan + workers + checks → hand off to doctor |
+| [agents/worker.md](agents/worker.md) | Task + context → precise implementation, report, done             |
+| [agents/doctor.md](agents/doctor.md) | Rules audit (fix), proof, commit?, cleanup, close dev ports       |
 
 ### Worktrees
 
