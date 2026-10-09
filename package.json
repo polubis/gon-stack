@@ -38,14 +38,14 @@
     "nitpick:check": "pnpm nitpick --check"
   },
   "devDependencies": {
-    "@playwright/test": "1.63.0",
+    "@playwright/test": "catalog:",
     "@repo/nitpick": "workspace:*",
-    "husky": "^9.1.7",
-    "lint-staged": "^17.6.0",
-    "npm-check-updates": "^23.1.0",
-    "prettier": "^3.9.9",
-    "prettier-plugin-tailwindcss": "^0.8.1",
-    "turbo": "^2.11.6"
+    "husky": "catalog:",
+    "lint-staged": "catalog:",
+    "npm-check-updates": "catalog:",
+    "prettier": "catalog:",
+    "prettier-plugin-tailwindcss": "catalog:",
+    "turbo": "catalog:"
   },
   "packageManager": "pnpm@11.28.3",
   "engines": {

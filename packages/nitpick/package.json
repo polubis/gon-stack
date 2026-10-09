@@ -23,11 +23,11 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^26.6.3",
-    "@vitest/coverage-v8": "^4.1.11",
-    "eslint": "^9.39.5",
-    "typescript": "6.0.3",
-    "vitest": "^4.1.11"
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "bin": {
     "nitpick": "./dist/cli.js"

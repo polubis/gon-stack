@@ -22,24 +22,24 @@
     "lint": "eslint src --max-warnings 0"
   },
   "peerDependencies": {
-    "@astrojs/cloudflare": "^14.0.0",
-    "@astrojs/react": "^6.0.0",
-    "@astrojs/sitemap": "^3.7.3",
-    "@tailwindcss/vite": "^4.3.1",
-    "astro": "^7.0.2",
-    "sharp": "^0.34.0 || ^0.35.0"
+    "@astrojs/cloudflare": "catalog:",
+    "@astrojs/react": "catalog:",
+    "@astrojs/sitemap": "catalog:",
+    "@tailwindcss/vite": "catalog:",
+    "astro": "catalog:",
+    "sharp": "catalog:"
   },
   "devDependencies": {
-    "@astrojs/cloudflare": "^14.3.3",
-    "@astrojs/react": "^6.0.6",
-    "@astrojs/sitemap": "^3.7.4",
-    "@tailwindcss/vite": "^4.3.3",
+    "@astrojs/cloudflare": "catalog:",
+    "@astrojs/react": "catalog:",
+    "@astrojs/sitemap": "catalog:",
+    "@tailwindcss/vite": "catalog:",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^26.6.3",
-    "astro": "^7.3.5",
-    "eslint": "^9.39.5",
-    "sharp": "^0.35.5",
-    "typescript": "6.0.3"
+    "@types/node": "catalog:",
+    "astro": "catalog:",
+    "eslint": "catalog:",
+    "sharp": "catalog:",
+    "typescript": "catalog:"
   }
 }
