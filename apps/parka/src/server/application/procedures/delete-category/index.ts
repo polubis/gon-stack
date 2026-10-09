@@ -12,8 +12,9 @@ export const deleteCategory = privateProcedure({
       .delete()
       .eq('id', input.id)
       .select();
-    if (error) throw new InternalServer(error.message);
-    if (!data || data.length === 0) throw new NotFound('Category not found');
+    if (error) throw new InternalServer(error);
+    if (!data || data.length === 0)
+      throw new NotFound(undefined, 'Category not found');
 
     return { code: 200 as const, ok: true as const };
   },

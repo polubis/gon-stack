@@ -3,7 +3,10 @@ import type { Store } from '../store';
 import type { Bus } from '../bus';
 import { RECEIPT_FILE_ERRORS } from '../../configuration/constraints';
 import { receiptFileProblem } from '../../domain/receipt-file';
-import { postReceiptScan } from '../../integration/repository';
+import {
+  postReceiptScan,
+  ReceiptScanLimitError,
+} from '../../integration/repository';
 
 /** A newer photo replaces the one still being read. */
 export const scanReceipt = (store: Store, { ofType }: Bus) =>
@@ -33,7 +36,10 @@ export const scanReceipt = (store: Store, { ofType }: Bus) =>
           if (!isAbort) {
             store.$scan.set({
               status: 'failed',
-              message: RECEIPT_FILE_ERRORS.scan,
+              message:
+                error instanceof ReceiptScanLimitError
+                  ? RECEIPT_FILE_ERRORS.limit
+                  : RECEIPT_FILE_ERRORS.scan,
               file,
             });
           }

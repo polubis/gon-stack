@@ -8,7 +8,7 @@ export const listNotifications = privateProcedure({
 })({
   handler: async (_input, { db }) => {
     const { data, error } = await db.from('notifications').select('*');
-    if (error) throw new InternalServer(error.message);
+    if (error) throw new InternalServer(error);
 
     return {
       code: 200 as const,

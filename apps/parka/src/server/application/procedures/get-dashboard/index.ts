@@ -34,12 +34,12 @@ export const getDashboard = privateProcedure({
           .select('id, name, cost, next_payment_date, active, category_id'),
         db.from('recurring_payments').select('recurring_id, date'),
       ]);
-    if (expenses.error) throw new InternalServer(expenses.error.message);
-    if (categories.error) throw new InternalServer(categories.error.message);
-    if (limits.error) throw new InternalServer(limits.error.message);
-    if (profile.error) throw new InternalServer(profile.error.message);
-    if (recurring.error) throw new InternalServer(recurring.error.message);
-    if (payments.error) throw new InternalServer(payments.error.message);
+    if (expenses.error) throw new InternalServer(expenses.error);
+    if (categories.error) throw new InternalServer(categories.error);
+    if (limits.error) throw new InternalServer(limits.error);
+    if (profile.error) throw new InternalServer(profile.error);
+    if (recurring.error) throw new InternalServer(recurring.error);
+    if (payments.error) throw new InternalServer(payments.error);
 
     // Recurring payments are never stored as expenses: each month's charges
     // are derived from the schedule, so every total and limit sees them.

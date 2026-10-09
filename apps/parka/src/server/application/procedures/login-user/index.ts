@@ -2,6 +2,7 @@ import type { Provider } from '@supabase/supabase-js';
 import { schema } from '@schemas/login-user';
 import { API_ROUTER, APP_ROUTER } from '@/shared/router/routes';
 import { InternalServer } from '../../core/error-handling';
+import { fromSupabaseError } from '../../adapter/supabase';
 import { withZodSchema } from '../../adapter/zod';
 import { publicProcedure } from '../../core/procedure';
 
@@ -19,7 +20,7 @@ export const loginUser = publicProcedure({
       });
 
       if (oauthResult.error || !oauthResult.data.url) {
-        throw new InternalServer(oauthResult.error?.message);
+        throw new InternalServer(oauthResult.error);
       }
 
       return {
@@ -34,7 +35,7 @@ export const loginUser = publicProcedure({
     });
 
     if (signInResult.error) {
-      throw new InternalServer(signInResult.error.message);
+      throw fromSupabaseError(signInResult.error);
     }
 
     return {

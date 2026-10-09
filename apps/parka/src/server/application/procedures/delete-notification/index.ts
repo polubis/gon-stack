@@ -12,9 +12,9 @@ export const deleteNotification = privateProcedure({
       .delete()
       .eq('id', input.id)
       .select();
-    if (error) throw new InternalServer(error.message);
+    if (error) throw new InternalServer(error);
     if (!data || data.length === 0)
-      throw new NotFound('Notification not found');
+      throw new NotFound(undefined, 'Notification not found');
 
     return { code: 200 as const, ok: true as const };
   },

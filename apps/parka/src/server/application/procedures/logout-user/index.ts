@@ -11,7 +11,7 @@ export const logoutUser = publicProcedure({
     const { error } = await db.auth.signOut();
 
     if (error) {
-      throw new InternalServer(error.message);
+      throw new InternalServer(error);
     }
 
     return {

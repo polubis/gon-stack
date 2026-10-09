@@ -1,6 +1,6 @@
 import { schema } from '@schemas/register-user';
 import { API_ROUTER, APP_ROUTER } from '@/shared/router/routes';
-import { InternalServer } from '../../core/error-handling';
+import { fromSupabaseError } from '../../adapter/supabase';
 import { withZodSchema } from '../../adapter/zod';
 import { publicProcedure } from '../../core/procedure';
 
@@ -17,7 +17,7 @@ export const registerUser = publicProcedure({
     });
 
     if (signUpResult.error) {
-      throw new InternalServer(signUpResult.error.message);
+      throw fromSupabaseError(signUpResult.error);
     }
 
     if (!signUpResult.data.session) {

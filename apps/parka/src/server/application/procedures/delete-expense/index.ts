@@ -11,15 +11,16 @@ export const deleteExpense = privateProcedure({
       .from('receipt_items')
       .delete()
       .eq('expense_id', input.id);
-    if (itemsError) throw new InternalServer(itemsError.message);
+    if (itemsError) throw new InternalServer(itemsError);
 
     const { data, error } = await db
       .from('expenses')
       .delete()
       .eq('id', input.id)
       .select();
-    if (error) throw new InternalServer(error.message);
-    if (!data || data.length === 0) throw new NotFound('Expense not found');
+    if (error) throw new InternalServer(error);
+    if (!data || data.length === 0)
+      throw new NotFound(undefined, 'Expense not found');
 
     return { code: 200 as const, ok: true as const };
   },

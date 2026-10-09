@@ -13,8 +13,8 @@ export const updateCategory = privateProcedure({
       .eq('id', input.id)
       .select()
       .maybeSingle();
-    if (error) throw new InternalServer(error.message);
-    if (!data) throw new NotFound('Category not found');
+    if (error) throw new InternalServer(error);
+    if (!data) throw new NotFound(undefined, 'Category not found');
 
     return {
       code: 200 as const,

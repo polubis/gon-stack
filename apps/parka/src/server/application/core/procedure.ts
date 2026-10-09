@@ -19,7 +19,8 @@ export type ProcedureSchema<TIn, TOut> = {
 const getUser = async (db: SupabaseServer): Promise<KnownUser> => {
   const userResult = await db.auth.getUser();
 
-  if (userResult.error || !userResult.data.user) throw new Unauthorized();
+  if (userResult.error || !userResult.data.user)
+    throw new Unauthorized(userResult.error);
 
   const user = userResult.data.user;
   const email = user.email;
@@ -28,7 +29,7 @@ const getUser = async (db: SupabaseServer): Promise<KnownUser> => {
       ? user.user_metadata.username
       : undefined) ?? 'Anonymous';
 
-  if (!email) throw new Unauthorized();
+  if (!email) throw new Unauthorized(undefined);
 
   return new KnownUser(user.id as UserId, email as Email, username as Username);
 };
@@ -45,26 +46,37 @@ const createProcedureFactory = <TIn, TOut, TExtra>({
   }: {
     handler: (
       input: TIn,
-      extra: { db: SupabaseServer; origin: string } & TExtra,
+      extra: {
+        db: SupabaseServer;
+        origin: string;
+        signal: AbortSignal;
+      } & TExtra,
     ) => Promise<TOut>;
   }) => {
-    return async (input: unknown, context: APIContext): Promise<TOut> => {
+    return async (
+      readInput: () => Promise<unknown>,
+      context: APIContext,
+    ): Promise<TOut> => {
       try {
         const db = supabaseServer(context);
         const extra = await resolveExtra(db);
 
-        const parsedInput = await schema.parseInput(input);
+        const parsedInput = await schema.parseInput(await readInput());
         const result = await handler(parsedInput, {
           db,
           origin: new URL(context.request.url).origin,
+          signal: context.request.signal,
           ...extra,
         });
         return await schema.parseOutput(result);
       } catch (error) {
         if (APIError.is(error)) {
+          if (error.code >= 500) console.error(error);
+          else console.warn(error);
           return error.json() as TOut;
         } else {
-          return new InternalServer().json() as TOut;
+          console.error(error);
+          return new InternalServer(error).json() as TOut;
         }
       }
     };

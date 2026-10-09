@@ -42,7 +42,12 @@ export const toReceiptDraft = (dto: ReceiptDraftDto): ReceiptDraft => ({
   date: dto.date,
   amount: dto.amount,
   paymentMethod: dto.paymentMethod,
-  items: dto.items.map((item) => ({ ...item })),
+  items: dto.items.map(({ name, unitPrice, quantity, discount }) => ({
+    name,
+    unitPrice,
+    quantity,
+    discount,
+  })),
 });
 
 export const toExpenseBody = (expense: NewExpense): CreateExpenseBody => ({

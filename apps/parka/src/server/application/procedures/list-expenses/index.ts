@@ -13,8 +13,8 @@ export const listExpenses = privateProcedure({
       db.from('expenses').select('*'),
       db.from('receipt_items').select('*'),
     ]);
-    if (expenses.error) throw new InternalServer(expenses.error.message);
-    if (items.error) throw new InternalServer(items.error.message);
+    if (expenses.error) throw new InternalServer(expenses.error);
+    if (items.error) throw new InternalServer(items.error);
 
     const itemsByExpense = new Map<
       string,

@@ -13,7 +13,7 @@ export const updateSettings = privateProcedure({
       name: input.profile.name,
       email: input.profile.email,
     });
-    if (profileError) throw new InternalServer(profileError.message);
+    if (profileError) throw new InternalServer(profileError);
 
     const { error: prefsError } = await db
       .from('notification_preferences')
@@ -25,7 +25,7 @@ export const updateSettings = privateProcedure({
         receipt_confirmations: input.notifications.receiptConfirmations,
         limit_alerts: input.notifications.limitAlerts,
       });
-    if (prefsError) throw new InternalServer(prefsError.message);
+    if (prefsError) throw new InternalServer(prefsError);
 
     return { code: 200 as const, data: input };
   },

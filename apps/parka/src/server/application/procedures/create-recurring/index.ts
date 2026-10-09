@@ -22,7 +22,7 @@ export const createRecurring = privateProcedure({
       })
       .select()
       .single();
-    if (error) throw new InternalServer(error.message);
+    if (error) throw new InternalServer(error);
 
     if (input.history.length > 0) {
       const { error: historyError } = await db
@@ -35,7 +35,7 @@ export const createRecurring = privateProcedure({
             amount: h.amount,
           })),
         );
-      if (historyError) throw new InternalServer(historyError.message);
+      if (historyError) throw new InternalServer(historyError);
     }
 
     return {

@@ -11,16 +11,16 @@ export const deleteRecurring = privateProcedure({
       .from('recurring_payments')
       .delete()
       .eq('recurring_id', input.id);
-    if (paymentsError) throw new InternalServer(paymentsError.message);
+    if (paymentsError) throw new InternalServer(paymentsError);
 
     const { data, error } = await db
       .from('recurring_expenses')
       .delete()
       .eq('id', input.id)
       .select();
-    if (error) throw new InternalServer(error.message);
+    if (error) throw new InternalServer(error);
     if (!data || data.length === 0)
-      throw new NotFound('Recurring expense not found');
+      throw new NotFound(undefined, 'Recurring expense not found');
 
     return { code: 200 as const, ok: true as const };
   },

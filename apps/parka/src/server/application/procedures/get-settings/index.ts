@@ -11,8 +11,8 @@ export const getSettings = privateProcedure({
       db.from('profiles').select('*').maybeSingle(),
       db.from('notification_preferences').select('*').maybeSingle(),
     ]);
-    if (profile.error) throw new InternalServer(profile.error.message);
-    if (prefs.error) throw new InternalServer(prefs.error.message);
+    if (profile.error) throw new InternalServer(profile.error);
+    if (prefs.error) throw new InternalServer(prefs.error);
 
     return {
       code: 200 as const,

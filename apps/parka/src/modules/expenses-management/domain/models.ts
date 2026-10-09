@@ -33,7 +33,7 @@ export type ReceiptDraft = {
   /** ISO date-time string. */
   date: string;
   amount: number;
-  paymentMethod: string;
+  paymentMethod: string | null;
   items: Omit<Product, 'id' | 'categoryId'>[];
 };
 

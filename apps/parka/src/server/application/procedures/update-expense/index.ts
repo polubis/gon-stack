@@ -22,14 +22,14 @@ export const updateExpense = privateProcedure({
       .eq('id', input.id)
       .select()
       .maybeSingle();
-    if (error) throw new InternalServer(error.message);
-    if (!data) throw new NotFound('Expense not found');
+    if (error) throw new InternalServer(error);
+    if (!data) throw new NotFound(undefined, 'Expense not found');
 
     const { error: wipeError } = await db
       .from('receipt_items')
       .delete()
       .eq('expense_id', input.id);
-    if (wipeError) throw new InternalServer(wipeError.message);
+    if (wipeError) throw new InternalServer(wipeError);
 
     if (input.items.length > 0) {
       const { error: itemsError } = await db.from('receipt_items').insert(
@@ -44,7 +44,7 @@ export const updateExpense = privateProcedure({
           category_id: it.categoryId,
         })),
       );
-      if (itemsError) throw new InternalServer(itemsError.message);
+      if (itemsError) throw new InternalServer(itemsError);
     }
 
     return {

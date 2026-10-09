@@ -8,7 +8,7 @@ export const listLimits = privateProcedure({
 })({
   handler: async (_input, { db }) => {
     const { data, error } = await db.from('limits').select('*');
-    if (error) throw new InternalServer(error.message);
+    if (error) throw new InternalServer(error);
 
     return {
       code: 200 as const,

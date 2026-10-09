@@ -18,7 +18,7 @@ export const createCategory = privateProcedure({
       })
       .select()
       .single();
-    if (error) throw new InternalServer(error.message);
+    if (error) throw new InternalServer(error);
 
     return {
       code: 201 as const,

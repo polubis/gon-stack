@@ -19,6 +19,9 @@ export const DEFAULT_PRODUCT_NAME = 'Nowy produkt';
 /** Largest receipt photo the server accepts. */
 export const MAX_RECEIPT_BYTES = RECEIPT_MAX_BYTES;
 
+/** Receipt photos are shrunk before upload; small text stays readable at this size. */
+export const RECEIPT_UPLOAD = { maxEdge: 1600, quality: 0.8 } as const;
+
 /** Query param holding the expense type tab. */
 export const KIND_PARAM = 'type';
 
@@ -32,6 +35,7 @@ export const RECEIPT_FILE_ERRORS = {
   notImage: 'Wybierz plik ze zdjęciem paragonu.',
   tooLarge: 'Zdjęcie jest za duże. Maksymalny rozmiar to 10 MB.',
   scan: 'Nie udało się przetworzyć zdjęcia. Spróbuj ponownie.',
+  limit: 'Osiągnięto dzienny limit skanów paragonów. Spróbuj jutro.',
 } as const;
 
 export const NOTICES = {

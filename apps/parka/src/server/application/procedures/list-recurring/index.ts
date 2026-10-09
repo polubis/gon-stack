@@ -14,8 +14,8 @@ export const listRecurring = privateProcedure({
         .select('*')
         .order('date', { ascending: false }),
     ]);
-    if (recurring.error) throw new InternalServer(recurring.error.message);
-    if (payments.error) throw new InternalServer(payments.error.message);
+    if (recurring.error) throw new InternalServer(recurring.error);
+    if (payments.error) throw new InternalServer(payments.error);
 
     const historyByRecurring = new Map<
       string,

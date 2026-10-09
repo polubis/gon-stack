@@ -16,6 +16,7 @@ import {
   toReceiptDraft,
   toRecurringBody,
 } from './mappers';
+import { shrinkReceipt } from './receipt-image';
 
 type ListCategoriesOut = z.infer<
   ReturnType<typeof listCategoriesSchema>
@@ -61,18 +62,21 @@ export const postRecurring = async (recurring: NewRecurring): Promise<void> => {
   if (json.code !== 201) throw new Error(json.message);
 };
 
+export class ReceiptScanLimitError extends Error {}
+
 export const postReceiptScan = async (
   file: File,
   signal: AbortSignal,
 ): Promise<ReceiptDraft> => {
   const body = new FormData();
-  body.append('file', file);
+  body.append('file', await shrinkReceipt(file));
   const response = await fetch(API_ROUTER.scanReceipt(), {
     method: 'POST',
     body,
     signal,
   });
   const json = (await response.json()) as ScanReceiptOut;
+  if (json.code === 429) throw new ReceiptScanLimitError(json.message);
   if (json.code !== 200) throw new Error(json.message);
   return toReceiptDraft(json.data);
 };

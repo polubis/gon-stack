@@ -1,4 +1,5 @@
 import type { APIContext, APIRoute } from 'astro';
+import { BadRequest } from '../core/error-handling';
 
 type ProcedureResponse = { code: number };
 type RedirectResponse = ProcedureResponse & { location: string };
@@ -16,19 +17,22 @@ const isRedirectResponse = (
 
 export const astroAdapter =
   <TResponse extends ProcedureResponse>(
-    procedure: (input: unknown, context: APIContext) => Promise<TResponse>,
+    procedure: (
+      readInput: () => Promise<unknown>,
+      context: APIContext,
+    ) => Promise<TResponse>,
   ): APIRoute =>
   async (context: APIContext) => {
     const url = new URL(context.request.url);
     const search = Object.fromEntries(url.searchParams.entries());
     const payload = context.params;
-    const body = await readBody(context.request);
 
-    const input = {
+    // Lazy: the body is read only when the procedure asks, i.e. after auth.
+    const input = async () => ({
+      ...(await readBody(context.request)),
       ...search,
       ...payload,
-      ...body,
-    };
+    });
 
     const response = await procedure(input, context);
 
@@ -53,21 +57,6 @@ const readBody = async (request: Request): Promise<Record<string, unknown>> => {
   const contentType = request.headers.get('content-type') ?? '';
 
   try {
-    if (contentType.includes('application/json')) {
-      const parsed = await request.json();
-
-      if (isRecord(parsed)) {
-        return parsed;
-      }
-
-      return { body: parsed };
-    }
-
-    if (contentType.includes('application/x-www-form-urlencoded')) {
-      const raw = await request.text();
-      return Object.fromEntries(new URLSearchParams(raw).entries());
-    }
-
     if (contentType.includes('multipart/form-data')) {
       const form = await request.formData();
       const result: Record<string, unknown> = {};
@@ -77,26 +66,19 @@ const readBody = async (request: Request): Promise<Record<string, unknown>> => {
       return result;
     }
 
-    const raw = await request.text();
+    if (contentType.includes('application/json')) {
+      const raw = await request.text();
+      if (!raw) return {};
 
-    if (!raw) {
-      return {};
+      const parsed: unknown = JSON.parse(raw);
+
+      return isRecord(parsed) ? parsed : {};
     }
-
-    try {
-      const parsed = JSON.parse(raw);
-
-      if (isRecord(parsed)) {
-        return parsed;
-      }
-
-      return { body: parsed };
-    } catch {
-      return { body: raw };
-    }
-  } catch {
-    return {};
+  } catch (error) {
+    throw new BadRequest(error, 'Malformed request body');
   }
+
+  return {};
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {

@@ -240,6 +240,62 @@ const commands = {
     await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
   },
 
+  'i scan a receipt with several products': async ({ page, getByE2e }) => {
+    await mockState(page);
+    await page.route(`**${API_ROUTER.scanReceipt()}**`, (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          code: 200,
+          data: {
+            merchant: 'Biedronka',
+            date: '2026-09-15T12:00:00.000Z',
+            amount: 11.2,
+            paymentMethod: 'Karta',
+            items: [
+              {
+                name: 'Chleb',
+                unitPrice: 3.2,
+                quantity: 1,
+                discount: 0,
+                category: { status: 'assigned', categoryId: CATEGORY.id },
+              },
+              {
+                name: 'Mleko',
+                unitPrice: 4.5,
+                quantity: 2,
+                discount: 1,
+                category: { status: 'unknown', suggestion: 'Nabiał' },
+              },
+            ],
+          },
+        }),
+      }),
+    );
+    await open(page, APP_ROUTER.newExpense());
+    await getByE2e('expenses-management:upload-input').setInputFiles({
+      name: 'receipt.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+        'base64',
+      ),
+    });
+
+    await expect(getByE2e('expenses-management:merchant')).toHaveValue(
+      'Biedronka',
+    );
+    await expect(getByE2e('expenses-management:date')).toHaveValue(
+      '2026-09-15',
+    );
+    await expect(getByE2e('expenses-management:method')).toHaveValue('Karta');
+    await expect(page.getByText('Chleb')).toBeVisible();
+    await expect(page.getByText('Mleko')).toBeVisible();
+    // 3,20 + 2 * 4,50 - 1,00 discount
+    await expect(getByE2e('expenses-management:total')).toContainText('11,20');
+  },
+
   'i cannot save an expense before any category exists': async ({
     page,
     getByE2e,
@@ -577,6 +633,12 @@ test('an uploaded receipt fills the expense form and can be saved', async ({
     commands,
     e2e,
   )(['i add an expense from an uploaded receipt']);
+});
+
+test('a scanned receipt fills every field and product of the form', async ({
+  e2e,
+}) => {
+  await interpreter(commands, e2e)(['i scan a receipt with several products']);
 });
 
 test('a suggested category can be added from the category list', async ({

@@ -21,14 +21,14 @@ export const updateRecurring = privateProcedure({
       .eq('id', input.id)
       .select()
       .maybeSingle();
-    if (error) throw new InternalServer(error.message);
-    if (!data) throw new NotFound('Recurring expense not found');
+    if (error) throw new InternalServer(error);
+    if (!data) throw new NotFound(undefined, 'Recurring expense not found');
 
     const { error: wipeError } = await db
       .from('recurring_payments')
       .delete()
       .eq('recurring_id', input.id);
-    if (wipeError) throw new InternalServer(wipeError.message);
+    if (wipeError) throw new InternalServer(wipeError);
 
     if (input.history.length > 0) {
       const { error: historyError } = await db
@@ -41,7 +41,7 @@ export const updateRecurring = privateProcedure({
             amount: h.amount,
           })),
         );
-      if (historyError) throw new InternalServer(historyError.message);
+      if (historyError) throw new InternalServer(historyError);
     }
 
     return {

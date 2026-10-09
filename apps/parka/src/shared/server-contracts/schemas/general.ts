@@ -100,6 +100,11 @@ export const errorOut = () =>
       message: z.string(),
     }),
     z.object({
+      code: z.literal(429),
+      type: z.literal('too-many-requests'),
+      message: z.string(),
+    }),
+    z.object({
       code: z.literal(500),
       type: z.literal('internal-server'),
       message: z.string(),

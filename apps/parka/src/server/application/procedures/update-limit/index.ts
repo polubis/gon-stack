@@ -19,8 +19,8 @@ export const updateLimit = privateProcedure({
       .eq('id', input.id)
       .select()
       .maybeSingle();
-    if (error) throw new InternalServer(error.message);
-    if (!data) throw new NotFound('Limit not found');
+    if (error) throw new InternalServer(error);
+    if (!data) throw new NotFound(undefined, 'Limit not found');
 
     return {
       code: 200 as const,

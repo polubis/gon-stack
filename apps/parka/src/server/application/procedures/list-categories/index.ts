@@ -8,7 +8,7 @@ export const listCategories = privateProcedure({
 })({
   handler: async (_input, { db }) => {
     const { data, error } = await db.from('categories').select('*');
-    if (error) throw new InternalServer(error.message);
+    if (error) throw new InternalServer(error);
 
     return {
       code: 200 as const,

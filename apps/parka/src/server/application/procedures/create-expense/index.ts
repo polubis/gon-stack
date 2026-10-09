@@ -23,7 +23,7 @@ export const createExpense = privateProcedure({
       })
       .select()
       .single();
-    if (error) throw new InternalServer(error.message);
+    if (error) throw new InternalServer(error);
 
     if (input.items.length > 0) {
       const { error: itemsError } = await db.from('receipt_items').insert(
@@ -38,7 +38,7 @@ export const createExpense = privateProcedure({
           category_id: it.categoryId,
         })),
       );
-      if (itemsError) throw new InternalServer(itemsError.message);
+      if (itemsError) throw new InternalServer(itemsError);
     }
 
     return {

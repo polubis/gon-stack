@@ -199,6 +199,24 @@ export type Database = {
         };
         Relationships: [];
       };
+      receipt_scans: {
+        Row: {
+          created_at: string;
+          id: number;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: never;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: never;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       receipt_items: {
         Row: {
           category_id: string;
@@ -310,7 +328,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      claim_receipt_scan: {
+        Args: never;
+        Returns: boolean;
+      };
     };
     Enums: {
       [_ in never]: never;

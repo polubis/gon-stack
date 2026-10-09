@@ -1,5 +1,5 @@
 import { ZodError, type z } from 'zod';
-import { BadRequest } from '../core/error-handling';
+import { BadRequest, InternalServer } from '../core/error-handling';
 import type { ProcedureSchema } from '../core/procedure';
 
 type InOutSchema = z.ZodObject<{
@@ -37,6 +37,7 @@ export const withZodSchema = <TSchema extends InOutSchema>({
       } catch (error) {
         if (error instanceof ZodError) {
           throw new BadRequest(
+            error,
             `Invalid request payload: ${formatZodError(error)}`,
           );
         }
@@ -49,9 +50,7 @@ export const withZodSchema = <TSchema extends InOutSchema>({
         return await getSchema().shape.out.parseAsync(output);
       } catch (error) {
         if (error instanceof ZodError) {
-          throw new BadRequest(
-            `Invalid response payload: ${formatZodError(error)}`,
-          );
+          throw new InternalServer(error, 'Invalid response payload');
         }
 
         throw error;

@@ -11,7 +11,7 @@ export const confirmRegistration = publicProcedure({
     const { error } = await db.auth.exchangeCodeForSession(code);
 
     if (error) {
-      throw new InternalServer(error.message);
+      throw new InternalServer(error);
     }
 
     return {
