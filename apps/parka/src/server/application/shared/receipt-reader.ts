@@ -5,6 +5,8 @@ import { detectImageType } from '@/shared/image-processing/detect-image-type';
 import { InternalServer } from '../core/error-handling';
 
 const MODEL_TIMEOUT_MS = 45_000;
+const AI_BASE_URL = 'https://opencode.ai/zen/v1';
+const AI_MODEL = 'gpt-6-luna';
 
 // Loose shape sent to the model as structured output (nullable instead of optional).
 const modelOutput = z.object({
@@ -105,13 +107,9 @@ const createClient = () => {
   if (!apiKey)
     throw new InternalServer(new Error('PARKA_AI_API_KEY is not set'));
 
-  const baseURL = import.meta.env.PARKA_AI_BASE_URL;
-  if (!baseURL)
-    throw new InternalServer(new Error('PARKA_AI_BASE_URL is not set'));
-
   return new OpenAI({
     apiKey,
-    baseURL,
+    baseURL: AI_BASE_URL,
     maxRetries: 0,
     timeout: MODEL_TIMEOUT_MS,
   });
@@ -130,7 +128,7 @@ export const readReceipt = async ({
   try {
     const response = await createClient().responses.parse(
       {
-        model: import.meta.env.PARKA_AI_MODEL,
+        model: AI_MODEL,
         instructions: instructions(categoryNames),
         reasoning: { effort: 'none' },
         text: { format: zodTextFormat(modelOutput, 'receipt') },

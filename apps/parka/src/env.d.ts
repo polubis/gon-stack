@@ -6,8 +6,6 @@ interface ImportMetaEnv {
   readonly PARKA_SUPABASE_GOOGLE_CLIENT_SECRET: string;
   readonly PARKA_SUPABASE_GOOGLE_CLIENT_ID: string;
   readonly PARKA_AI_API_KEY: string;
-  readonly PARKA_AI_BASE_URL: string;
-  readonly PARKA_AI_MODEL: string;
 }
 
 interface ImportMeta {

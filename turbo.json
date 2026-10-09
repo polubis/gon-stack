@@ -9,9 +9,7 @@
     "AUTH_CALLBACK_URL",
     "PUBLIC_PARKA_SUPABASE_URL",
     "PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY",
-    "PARKA_AI_API_KEY",
-    "PARKA_AI_BASE_URL",
-    "PARKA_AI_MODEL"
+    "PARKA_AI_API_KEY"
   ],
   "tasks": {
     "//#format:check": {

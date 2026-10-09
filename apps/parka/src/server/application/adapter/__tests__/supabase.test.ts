@@ -6,7 +6,7 @@ import { fromSupabaseError } from '../supabase';
 const postgresError = (code: string) =>
   new PostgrestError({ message: 'db failure', details: '', hint: '', code });
 
-describe('fromSupabaseError', () => {
+describe('Supabase adapter', () => {
   it('reports a still referenced row as a conflict', () => {
     expect(fromSupabaseError(postgresError('23503'))).toBeInstanceOf(Conflict);
   });

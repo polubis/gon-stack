@@ -10,8 +10,6 @@ vi.mock('openai', () => ({
 }));
 
 vi.stubEnv('PARKA_AI_API_KEY', 'test-key');
-vi.stubEnv('PARKA_AI_BASE_URL', 'https://example.test/v1');
-vi.stubEnv('PARKA_AI_MODEL', 'test-model');
 
 const { readReceipt } = await import('../receipt-reader');
 

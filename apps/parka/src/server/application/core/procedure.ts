@@ -1,4 +1,5 @@
 import { APIError, InternalServer, Unauthorized } from './error-handling';
+import { logger } from './logger';
 import {
   supabaseServer,
   type SupabaseServer,
@@ -71,13 +72,12 @@ const createProcedureFactory = <TIn, TOut, TExtra>({
         return await schema.parseOutput(result);
       } catch (error) {
         if (APIError.is(error)) {
-          if (error.code >= 500) console.error(error);
-          else console.warn(error);
+          logger(error, error.code >= 500 ? 'error' : 'warn');
           return error.json() as TOut;
-        } else {
-          console.error(error);
-          return new InternalServer(error).json() as TOut;
         }
+
+        logger(error, 'error');
+        return new InternalServer(error).json() as TOut;
       }
     };
   };
