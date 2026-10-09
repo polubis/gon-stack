@@ -18,7 +18,9 @@ const stubApi = (writeResponse: object) =>
     'fetch',
     vi.fn(async (_url: string, init?: RequestInit) => ({
       json: async () =>
-        init?.method === 'POST' || init?.method === 'PUT'
+        init?.method === 'POST' ||
+        init?.method === 'PUT' ||
+        init?.method === 'DELETE'
           ? writeResponse
           : { code: 200, data: [FOOD] },
     })),
@@ -104,5 +106,43 @@ describe('categories update', () => {
 
     await waitFor(() => expect(view.result.current.notice?.tone).toBe('error'));
     expect(view.result.current.categories[0]!.name).toBe('Food');
+  });
+});
+
+describe('categories removal', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('removes the category and confirms with a toast', async () => {
+    stubApi({ code: 200, ok: true });
+    const view = await setup();
+
+    act(() => view.result.current.ctx.remove(FOOD.id as CategoryId));
+
+    expect(view.result.current.categories).toHaveLength(0);
+    await waitFor(() =>
+      expect(view.result.current.notice?.tone).toBe('success'),
+    );
+    expect(view.result.current.categories).toHaveLength(0);
+  });
+
+  it('keeps a category in use and explains why', async () => {
+    stubApi({ code: 409, type: 'conflict', message: 'in use' });
+    const view = await setup();
+
+    act(() => view.result.current.ctx.remove(FOOD.id as CategoryId));
+
+    await waitFor(() => expect(view.result.current.notice?.tone).toBe('error'));
+    expect(view.result.current.notice?.message).toContain('przepnij');
+    expect(view.result.current.categories).toHaveLength(1);
+  });
+
+  it('keeps the category when removal fails', async () => {
+    stubApi({ code: 500, message: 'boom' });
+    const view = await setup();
+
+    act(() => view.result.current.ctx.remove(FOOD.id as CategoryId));
+
+    await waitFor(() => expect(view.result.current.notice?.tone).toBe('error'));
+    expect(view.result.current.categories).toHaveLength(1);
   });
 });

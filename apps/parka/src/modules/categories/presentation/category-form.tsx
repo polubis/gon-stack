@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, Plus } from 'lucide-react';
+import { Check, Plus, Trash2 } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { Button, Field, inputClass } from '@/shared/ui/controls';
@@ -8,19 +8,22 @@ import { COLORS, NEW_CATEGORY_NAME } from '../configuration/constraints';
 import { newCategoryId } from '../domain/ids';
 import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
 import type { Category, Editing } from '../domain/models';
+import { DeleteDialog } from './delete-dialog';
 import { Card } from './layout';
 
 type Props = {
   editing: Editing;
   onSave: (category: Category) => void;
+  onDelete: (id: Category['id']) => void;
   onDone: () => void;
 };
 
 const isPreset = (value: string) =>
   COLORS.some((preset) => preset === value.toLowerCase());
 
-export const CategoryForm = ({ editing, onSave, onDone }: Props) => {
+export const CategoryForm = ({ editing, onSave, onDelete, onDone }: Props) => {
   const base = editing.mode === 'edit' ? editing.category : null;
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [name, setName] = useState(base ? categoryLabel(base.name) : '');
   const [icon, setIcon] = useState<CategoryIconId>(base?.icon ?? 'cart');
   const [color, setColor] = useState<string>(base?.color ?? COLORS[0]);
@@ -153,6 +156,27 @@ export const CategoryForm = ({ editing, onSave, onDone }: Props) => {
           Zapisz
         </Button>
       </div>
+
+      {editing.mode === 'edit' ? (
+        <Button
+          variant="danger"
+          data-e2e="categories:form-delete"
+          onClick={() => setConfirmingDelete(true)}
+        >
+          <Trash2 className="h-4 w-4" aria-hidden="true" /> Usuń kategorię
+        </Button>
+      ) : null}
+
+      {editing.mode === 'edit' && confirmingDelete ? (
+        <DeleteDialog
+          name={categoryLabel(editing.category.name)}
+          onClose={() => setConfirmingDelete(false)}
+          onConfirm={() => {
+            onDelete(editing.category.id);
+            onDone();
+          }}
+        />
+      ) : null}
     </Card>
   );
 };

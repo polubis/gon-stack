@@ -1,5 +1,6 @@
 import { deleteCategorySchema } from '@schemas/categories';
-import { InternalServer, NotFound } from '../../core/error-handling';
+import { NotFound } from '../../core/error-handling';
+import { fromSupabaseError } from '../../adapter/supabase';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 
@@ -12,7 +13,7 @@ export const deleteCategory = privateProcedure({
       .delete()
       .eq('id', input.id)
       .select();
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
     if (!data || data.length === 0)
       throw new NotFound(undefined, 'Category not found');
 

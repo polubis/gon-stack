@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
+import { cn } from '@repo/react-kit/cn';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { APP_ROUTER } from '@/shared/router/routes';
@@ -37,6 +38,8 @@ const CategoriesView = () => {
   const isLoading = ctx.useIsLoading();
   const [editing, setEditing] = useState<Editing>(NEW);
   const [formKey, setFormKey] = useState(0);
+
+  const editedId = editing.mode === 'edit' ? editing.category.id : null;
 
   const resetForm = () => {
     setEditing(NEW);
@@ -84,8 +87,13 @@ const CategoriesView = () => {
                   <button
                     type="button"
                     data-e2e={`categories:row:${c.id}`}
+                    aria-current={c.id === editedId ? 'true' : undefined}
                     onClick={() => setEditing({ mode: 'edit', category: c })}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-hover-soft"
+                    className={cn(
+                      'flex w-full items-center gap-3 border-l-4 border-transparent px-3 py-3 text-left hover:bg-hover-soft',
+                      c.id === editedId &&
+                        'border-brand bg-brand-softer text-brand',
+                    )}
                   >
                     <CategoryAvatar category={c} />
                     <span className="flex-1 text-sm font-medium">
@@ -133,6 +141,7 @@ const CategoriesView = () => {
           key={editing.mode === 'edit' ? editing.category.id : `new-${formKey}`}
           editing={editing}
           onSave={editing.mode === 'new' ? ctx.create : ctx.update}
+          onDelete={ctx.remove}
           onDone={resetForm}
         />
       </main>

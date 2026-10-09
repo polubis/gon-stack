@@ -6,3 +6,4 @@
 4. (A) Optimistic UI and toasts when create/update/delete happens
 5. (A) No data hide during reload, filters change. In that case loading banner
 6. (A) No jumping UI
+7. (A) Delete via confirmation

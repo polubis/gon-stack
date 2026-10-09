@@ -1,5 +1,5 @@
 import z from 'zod';
-import { category, errorOut, notFoundOut } from './general';
+import { category, conflictOut, errorOut, notFoundOut } from './general';
 
 const writeErrors = z.union([errorOut(), notFoundOut()]);
 
@@ -36,5 +36,6 @@ export const deleteCategorySchema = () =>
     out: z.union([
       z.object({ code: z.literal(200), ok: z.literal(true) }),
       writeErrors,
+      conflictOut(),
     ]),
   });

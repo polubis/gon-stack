@@ -98,6 +98,28 @@ export class NotFound extends BaseError {
   });
 }
 
+export class Conflict extends BaseError {
+  type = 'conflict' as const;
+  code = 409 as const;
+
+  constructor(
+    cause: unknown,
+    public message = 'Conflict',
+  ) {
+    super(message, { cause });
+  }
+
+  static is = (error: unknown): error is Conflict => {
+    return error instanceof Conflict;
+  };
+
+  json = () => ({
+    code: this.code,
+    type: this.type,
+    message: this.message,
+  });
+}
+
 export class TooManyRequests extends BaseError {
   type = 'too-many-requests' as const;
   code = 429 as const;
@@ -191,6 +213,7 @@ export type AllErrors =
   | Unauthorized
   | Forbidden
   | NotFound
+  | Conflict
   | TooManyRequests
   | InternalServer
   | ServiceUnavailable

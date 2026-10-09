@@ -1,6 +1,7 @@
-import type { AuthError } from '@supabase/supabase-js';
+import type { AuthError, PostgrestError } from '@supabase/supabase-js';
 import {
   BadRequest,
+  Conflict,
   InternalServer,
   TooManyRequests,
   Unauthorized,
@@ -9,6 +10,8 @@ import {
 
 const TOO_MANY_ATTEMPTS = 'Too many attempts. Try again in a few minutes';
 
+const FOREIGN_KEY_VIOLATION = '23503';
+
 const RATE_LIMITED = new Set([
   'over_request_rate_limit',
   'over_email_send_rate_limit',
@@ -16,17 +19,21 @@ const RATE_LIMITED = new Set([
 ]);
 
 /**
- * Single place that knows Supabase auth error codes. The original error always
+ * Single place that knows Supabase auth and Postgres error codes. The original error always
  * travels as `cause`; the client only gets the fixed message of the result.
  */
-export const fromSupabaseError = (error: AuthError): AllErrors => {
+export const fromSupabaseError = (
+  error: AuthError | PostgrestError,
+): AllErrors => {
   const code = error.code ?? '';
 
-  if (error.status === 429 || RATE_LIMITED.has(code)) {
+  if (('status' in error && error.status === 429) || RATE_LIMITED.has(code)) {
     return new TooManyRequests(error, TOO_MANY_ATTEMPTS);
   }
 
   switch (code) {
+    case FOREIGN_KEY_VIOLATION:
+      return new Conflict(error, 'Still referenced by other records');
     case 'invalid_credentials':
       return new Unauthorized(error, 'Invalid email or password');
     case 'email_not_confirmed':

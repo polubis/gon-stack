@@ -87,6 +87,13 @@ export const notFoundOut = () =>
     message: z.string(),
   });
 
+export const conflictOut = () =>
+  z.object({
+    code: z.literal(409),
+    type: z.literal('conflict'),
+    message: z.string(),
+  });
+
 export const errorOut = () =>
   z.union([
     z.object({

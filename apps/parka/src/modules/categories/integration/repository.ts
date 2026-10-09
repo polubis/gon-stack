@@ -1,16 +1,18 @@
 import type { z } from 'zod';
 import {
   createCategorySchema,
+  deleteCategorySchema,
   listCategoriesSchema,
   updateCategorySchema,
 } from '@schemas/categories';
 import { API_ROUTER } from '@/shared/router/routes';
-import type { Category } from '../domain/models';
+import type { Category, CategoryId } from '../domain/models';
 import { toCategory } from './mappers';
 
 type ListOut = z.infer<ReturnType<typeof listCategoriesSchema>>['out'];
 type CreateOut = z.infer<ReturnType<typeof createCategorySchema>>['out'];
 type UpdateOut = z.infer<ReturnType<typeof updateCategorySchema>>['out'];
+type DeleteOut = z.infer<ReturnType<typeof deleteCategorySchema>>['out'];
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
@@ -47,4 +49,16 @@ export const putCategory = async (category: Category): Promise<Category> => {
   const json = (await response.json()) as UpdateOut;
   if (json.code !== 200) throw new Error(json.message);
   return toCategory(json.data);
+};
+
+export class CategoryInUseError extends Error {}
+
+export const removeCategory = async (id: CategoryId): Promise<void> => {
+  const response = await fetch(API_ROUTER.categoryById(id), {
+    method: 'DELETE',
+    headers: JSON_HEADERS,
+  });
+  const json = (await response.json()) as DeleteOut;
+  if (json.code === 409) throw new CategoryInUseError(json.message);
+  if (json.code !== 200) throw new Error(json.message);
 };

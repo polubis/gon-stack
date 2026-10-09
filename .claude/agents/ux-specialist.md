@@ -25,13 +25,15 @@ Read before work:
 
 - No data hide on reload or filter change; use banner.
 - No jumping UI; skeletons mimic layout.
+- Delete only via confirmation.
 - Never speculate about code you did not inspect.
 
 ## Validation
 
 1. Every view has loading + error + empty handling.
 2. Mutations have optimistic UI + toast.
-3. Typecheck passes for touched files.
+3. Deletes ask for confirmation.
+4. Typecheck passes for touched files.
 
 ## Output
 
