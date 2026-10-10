@@ -1,3 +1,4 @@
+import { useSortedCategories } from '@/shared/expense-category/sorted';
 import type { Registry } from './registry';
 import type { Store } from './store';
 
@@ -5,7 +6,7 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
   return {
     load: () => trigger('[TRIGGER]_LOAD'),
     useExpenses: () => store.$expenses.use(),
-    useCategories: () => store.$categories.use(),
+    useCategories: () => useSortedCategories(store.$categories.use()),
     useRecurring: () => store.$recurring.use(),
     useInitializing: () => store.$initializing.use(),
     useIsLoading: () => store.$isLoading.use(),

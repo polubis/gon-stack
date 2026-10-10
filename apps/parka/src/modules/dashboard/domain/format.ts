@@ -28,6 +28,11 @@ const plDate = new Intl.DateTimeFormat('pl-PL', {
   year: 'numeric',
 });
 
+const plTime = new Intl.DateTimeFormat('pl-PL', {
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
 const plShortMonth = new Intl.DateTimeFormat('pl-PL', { month: 'short' });
 
 const capitalize = (value: string): string =>
@@ -70,6 +75,10 @@ export const shortDateLabel = (iso: string): string => {
   const date = new Date(iso);
   return `${date.getDate()} ${capitalize(plShortMonth.format(date))} ${date.getFullYear()}`;
 };
+
+/** ISO date-time → `14 Kwi 2025, 14:30` in the user's time zone. */
+export const shortDateTimeLabel = (iso: string): string =>
+  `${shortDateLabel(iso)}, ${plTime.format(new Date(iso))}`;
 
 /** `2025-04` → `2025-03`. */
 export const prevMonth = (month: Month): Month => {

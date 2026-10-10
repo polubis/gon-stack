@@ -4,6 +4,7 @@ import {
   monthTitle,
   prevMonth,
   shortDateLabel,
+  shortDateTimeLabel,
   toMonth,
 } from '../domain/format';
 
@@ -18,6 +19,12 @@ describe('dashboard formatting', () => {
 
   it('labels a date with day, short month and year', () => {
     expect(shortDateLabel('2025-04-14T12:00:00')).toBe('14 Kwi 2025');
+  });
+
+  it('labels a date with the local time', () => {
+    expect(shortDateTimeLabel('2025-04-14T12:05:00')).toBe(
+      '14 Kwi 2025, 12:05',
+    );
   });
 
   it('steps back over a year boundary', () => {

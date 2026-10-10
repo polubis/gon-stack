@@ -356,12 +356,12 @@ const commands = {
 
     await getByE2e('expenses-management:add-product').click();
     await expect(getByE2e('expenses-management:category')).toHaveText(
-      'Spożywcze',
+      'Rozrywka',
     );
     await getByE2e('expenses-management:add-product').click();
     await getByE2ePrefix('expenses-management:product-category:')
       .last()
-      .selectOption('cat-2');
+      .selectOption(CATEGORY.id);
 
     await expect(getByE2e('expenses-management:category')).toHaveText(
       'Wiele kategorii',

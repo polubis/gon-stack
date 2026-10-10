@@ -212,7 +212,7 @@ describe('adding an expense on its own page', () => {
         await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
         await user.selectOptions(
           screen.getAllByLabelText('Kategoria produktu')[0]!,
-          'Rozrywka',
+          'Spożywcze',
         );
         await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
 

@@ -1,3 +1,4 @@
+import { useSortedCategories } from '@/shared/expense-category/sorted';
 import type { Registry } from './registry';
 import type { Store } from './store';
 import type {
@@ -30,7 +31,7 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
     useError: () => store.$error.use(),
     useData: () => store.$data.use(),
     useExpenses: () => store.$expenses.use(),
-    useCategories: () => store.$categories.use(),
+    useCategories: () => useSortedCategories(store.$categories.use()),
     useLimits: () => store.$limits.use(),
     useRecurring: () => store.$recurring.use(),
     useNotice: () => store.$notice.use(),

@@ -6,7 +6,7 @@ import { categoryLabel } from '@/shared/i18n/category-label';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { Card } from '@/shared/ui/layout';
 import { cn } from '@repo/react-kit/cn';
-import { money, shortDateLabel } from '../domain/format';
+import { money, shortDateTimeLabel } from '../domain/format';
 import type { CategoryId, ExpenseId, Month } from '../domain/models';
 import { useContext } from './context';
 import { RecurringBadge } from './recurring-badge';
@@ -175,7 +175,7 @@ export const MonthExpenses = ({
                         {e.source === 'recurring' ? <RecurringBadge /> : null}
                       </span>
                       <span className="block text-xs text-ink-soft">
-                        {shortDateLabel(e.date)}
+                        {shortDateTimeLabel(e.date)}
                       </span>
                     </span>
                     <span className="text-sm font-semibold tabular-nums">

@@ -52,7 +52,7 @@ export const withRecurring = (
 ];
 
 export const sortByDateDesc = (list: Expense[]): Expense[] =>
-  [...list].sort((a, b) => (a.date < b.date ? 1 : -1));
+  [...list].sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
 
 export const expensesInMonth = (list: Expense[], month: Month): Expense[] =>
   sortByDateDesc(list.filter((e) => monthOf(e.date) === month));
