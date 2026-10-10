@@ -10,3 +10,5 @@ const DEFAULT_CATEGORY_LABELS: Record<string, string> = {
 /** Default categories store a `category.<slug>` symbol; user-made ones a plain name. */
 export const categoryLabel = (name: string): string =>
   DEFAULT_CATEGORY_LABELS[name] ?? name;
+
+export const MIXED_CATEGORY_LABEL = 'Wiele kategorii';

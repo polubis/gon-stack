@@ -92,6 +92,26 @@ describe('dashboard summary', () => {
     expect(summary.categories[0]?.pct).toBeCloseTo(66.67, 1);
   });
 
+  it('splits a multi-category expense across its product categories', () => {
+    const mixed: DashboardExpense = {
+      date: '2026-09-12',
+      amount: 50,
+      categoryId: null,
+      items: [
+        { categoryId: 'food', unitPrice: 20, quantity: 1, discount: 0 },
+        { categoryId: 'fun', unitPrice: 15, quantity: 2, discount: 0 },
+      ],
+    };
+    const summary = summarize('2026-09', '2026-10-15', [mixed]);
+
+    expect(summary.total).toBe(50);
+    expect(summary.transactions).toBe(1);
+    expect(summary.categories.map((c) => [c.categoryId, c.amount])).toEqual([
+      ['fun', 30],
+      ['food', 20],
+    ]);
+  });
+
   it('passes the monthly limit through', () => {
     expect(summarize('2026-09', '2026-10-15', [], 500).monthlyLimit).toBe(500);
     expect(summarize('2026-09', '2026-10-15', []).monthlyLimit).toBeNull();

@@ -227,6 +227,36 @@ describe('dashboard limit progress', () => {
     });
   });
 
+  it('counts the product share of a multi-category expense toward a limit', () => {
+    const mixed: Expense = {
+      ...EXPENSES[0]!,
+      id: 'mixed' as ExpenseId,
+      amount: 30,
+      categoryId: null,
+      items: [
+        {
+          id: 'i-1',
+          name: 'a',
+          unitPrice: 10,
+          quantity: 1,
+          discount: 0,
+          categoryId: FOOD,
+        },
+        {
+          id: 'i-2',
+          name: 'b',
+          unitPrice: 20,
+          quantity: 1,
+          discount: 0,
+          categoryId: OTHER,
+        },
+      ] as Expense['items'],
+    };
+    const [progress] = categoryProgress([FOOD_LIMIT], [mixed], MONTH);
+
+    expect(progress).toMatchObject({ categoryId: FOOD, spent: 10 });
+  });
+
   it('warns at 80 percent and turns dangerous at 100', () => {
     expect([limitTone(79), limitTone(80), limitTone(100)]).toEqual([
       'brand',

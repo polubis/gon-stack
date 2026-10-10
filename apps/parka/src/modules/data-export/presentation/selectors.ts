@@ -1,4 +1,7 @@
-import { categoryLabel } from '@/shared/i18n/category-label';
+import {
+  categoryLabel,
+  MIXED_CATEGORY_LABEL,
+} from '@/shared/i18n/category-label';
 import type { Category, Expense, ExportFile, Format } from '../domain/models';
 
 const plDate = new Intl.DateTimeFormat('pl-PL', {
@@ -19,7 +22,11 @@ export const toRows = (
   ...expenses.map((e) => [
     dateLabel(e.date),
     e.merchant,
-    categoryLabel(categories.find((c) => c.id === e.categoryId)?.name ?? ''),
+    e.categoryId === null
+      ? MIXED_CATEGORY_LABEL
+      : categoryLabel(
+          categories.find((c) => c.id === e.categoryId)?.name ?? '',
+        ),
     e.amount.toFixed(2),
     e.paymentMethod,
   ]),

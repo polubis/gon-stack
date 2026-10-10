@@ -1,3 +1,4 @@
+import { deriveExpenseCategory } from '@/shared/expense-category/category';
 import { NO_CATEGORY, UNCATEGORIZED } from '../configuration/constraints';
 import { newProductId } from './ids';
 import type {
@@ -38,6 +39,13 @@ export const patchProduct = (
   id: ProductId,
   patch: Partial<Omit<Product, 'id'>>,
 ): Product[] => products.map((p) => (p.id === id ? { ...p, ...patch } : p));
+
+/** Category the products share, `null` when they differ; `manual` without any. */
+export const expenseCategoryId = (
+  products: Product[],
+  manual: CategoryId | null | undefined,
+): CategoryId | null =>
+  deriveExpenseCategory(products, manual ?? null) as CategoryId | null;
 
 export const defaultCategoryId = (categories: Category[]): CategoryId =>
   categories[0]?.id ?? NO_CATEGORY;

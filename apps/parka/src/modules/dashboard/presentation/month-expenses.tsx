@@ -15,6 +15,7 @@ import {
   categoryTabs,
   expensesInMonth,
   sumAmount,
+  touchesCategory,
   withRecurring,
 } from './selectors';
 
@@ -99,7 +100,7 @@ export const MonthExpenses = ({
   // The chosen category may have no expenses in another month: show all then.
   const active = tabs.some((t) => t.category.id === filter) ? filter : null;
   const visible = active
-    ? inMonth.filter((e) => categoryOf(categories, e.categoryId).id === active)
+    ? inMonth.filter((e) => touchesCategory(e, categories, active))
     : inMonth;
 
   return (

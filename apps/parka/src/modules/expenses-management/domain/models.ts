@@ -43,7 +43,8 @@ export type NewExpense = {
   /** ISO date-time string. */
   date: string;
   amount: number;
-  categoryId: CategoryId;
+  /** `null` when the products come from different categories. */
+  categoryId: CategoryId | null;
   paymentMethod: string;
   isBill: false;
   source: 'receipt' | 'manual';

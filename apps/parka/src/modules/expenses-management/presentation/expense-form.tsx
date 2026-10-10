@@ -1,6 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import { Check, LoaderCircle, Plus } from 'lucide-react';
-import { categoryLabel } from '@/shared/i18n/category-label';
+import {
+  categoryLabel,
+  MIXED_CATEGORY_LABEL,
+} from '@/shared/i18n/category-label';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { Button, Field, inputClass } from '@/shared/ui/controls';
 import { Card } from '@/shared/ui/layout';
@@ -11,6 +14,7 @@ import { newExpenseId } from '../domain/ids';
 import {
   createProduct,
   defaultCategoryId,
+  expenseCategoryId,
   patchProduct,
   productsFromDraft,
   productsTotal,
@@ -46,6 +50,10 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
     : categories[0]?.id;
   const hasProducts = products.length > 0;
   const total = hasProducts ? productsTotal(products) : amount;
+  const derived = expenseCategoryId(products, selected);
+  const derivedName = derived
+    ? categoryLabel(categories.find((c) => c.id === derived)?.name ?? '')
+    : MIXED_CATEGORY_LABEL;
 
   const addProduct = () => {
     const product = createProduct(
@@ -64,7 +72,7 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
       merchant: merchant.trim(),
       date: fromDateInput(date),
       amount: total,
-      categoryId: selected,
+      categoryId: derived,
       paymentMethod: method.trim(),
       isBill: false,
       source: draft ? 'receipt' : 'manual',
@@ -130,20 +138,29 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
               onChange={(e) => setDate(e.target.value)}
             />
           </Field>
-          <Field label="Kategoria">
-            <select
-              className={inputClass}
-              required
-              value={selected ?? ''}
-              data-e2e="expenses-management:category"
-              onChange={(e) => setCategoryId(e.target.value as CategoryId)}
-            >
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {categoryLabel(c.name)}
-                </option>
-              ))}
-            </select>
+          <Field
+            label="Kategoria"
+            hint={hasProducts ? 'Wynika z kategorii produktów.' : undefined}
+          >
+            {hasProducts ? (
+              <p className={inputClass} data-e2e="expenses-management:category">
+                {derivedName}
+              </p>
+            ) : (
+              <select
+                className={inputClass}
+                required
+                value={selected ?? ''}
+                data-e2e="expenses-management:category"
+                onChange={(e) => setCategoryId(e.target.value as CategoryId)}
+              >
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {categoryLabel(c.name)}
+                  </option>
+                ))}
+              </select>
+            )}
           </Field>
           <Field label="Metoda płatności">
             <input

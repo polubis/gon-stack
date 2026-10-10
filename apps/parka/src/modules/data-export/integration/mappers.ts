@@ -24,7 +24,7 @@ export const toExpense = (dto: ExpenseDto): Expense => ({
   merchant: dto.merchant,
   date: dto.date,
   amount: dto.amount,
-  categoryId: dto.categoryId as CategoryId,
+  categoryId: dto.categoryId as CategoryId | null,
   paymentMethod: dto.paymentMethod,
 });
 

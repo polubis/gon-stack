@@ -30,7 +30,8 @@ export const expense = () =>
     merchant: z.string(),
     date: z.string().min(1),
     amount: z.coerce.number(),
-    categoryId: z.string().min(1),
+    /** `null` when products from different categories make up the expense. */
+    categoryId: z.string().min(1).nullable(),
     paymentMethod: z.string(),
     isBill: z.boolean(),
     source: z.enum(['receipt', 'manual']),

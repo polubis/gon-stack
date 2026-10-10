@@ -29,6 +29,7 @@ vi.mock('@/shared/router/navigation', async (importOriginal) => ({
 const { Main } = await import('../presentation/main');
 
 const CATEGORY = { id: 'c-1', name: 'Spożywcze', icon: 'cart', color: '#0a0' };
+const OTHER = { id: 'c-2', name: 'Rozrywka', icon: 'film', color: '#a0a' };
 const DRAFT = {
   merchant: 'Biedronka',
   date: '2025-04-10T10:00:00.000Z',
@@ -178,6 +179,63 @@ describe('adding an expense on its own page', () => {
 
       expect(screen.getByText('Produkty (0)')).toBeVisible();
       expect(screen.getByLabelText('Kwota')).not.toHaveAttribute('readonly');
+    });
+
+    describe('category', () => {
+      const saveWithProducts = async (
+        user: Awaited<ReturnType<typeof open>>,
+      ) => {
+        await user.type(screen.getByLabelText('Sklep'), 'Sklep');
+        await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+      };
+
+      it('takes the category of the only product', async () => {
+        const written = mockBackend([CATEGORY, OTHER]);
+        const user = await open();
+
+        await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+        await user.selectOptions(
+          screen.getByLabelText('Kategoria produktu'),
+          'Rozrywka',
+        );
+
+        expect(screen.getByText('Rozrywka', { selector: 'p' })).toBeVisible();
+        await saveWithProducts(user);
+        await waitFor(() => expect(written).toHaveLength(1));
+        expect(written[0]!.body).toMatchObject({ categoryId: 'c-2' });
+      });
+
+      it('has no category when products differ', async () => {
+        const written = mockBackend([CATEGORY, OTHER]);
+        const user = await open();
+
+        await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+        await user.selectOptions(
+          screen.getAllByLabelText('Kategoria produktu')[0]!,
+          'Rozrywka',
+        );
+        await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+
+        expect(screen.getByText('Wiele kategorii')).toBeVisible();
+        await saveWithProducts(user);
+        await waitFor(() => expect(written).toHaveLength(1));
+        expect(written[0]!.body).toMatchObject({ categoryId: null });
+      });
+
+      it('lets the user pick again after removing every product', async () => {
+        mockBackend([CATEGORY, OTHER]);
+        const user = await open();
+
+        await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+        expect(
+          screen.queryByRole('combobox', { name: 'Kategoria' }),
+        ).toBeNull();
+        await user.click(screen.getByRole('button', { name: 'Usuń produkt' }));
+
+        expect(
+          screen.getByRole('combobox', { name: 'Kategoria' }),
+        ).toBeVisible();
+      });
     });
 
     it('stays on the page and reports an error when saving fails', async () => {

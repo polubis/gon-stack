@@ -1,4 +1,7 @@
-import { categoryLabel } from '@/shared/i18n/category-label';
+import {
+  categoryLabel,
+  MIXED_CATEGORY_LABEL,
+} from '@/shared/i18n/category-label';
 import type {
   Category,
   Expense,
@@ -21,7 +24,7 @@ export const summarize = (
   recurring: Recurring[],
 ): ReportSummary => ({
   total: monthExpenses.reduce((sum, e) => sum + e.amount, 0),
-  categoryCount: new Set(monthExpenses.map((e) => e.categoryId)).size,
+  categoryCount: new Set(monthExpenses.flatMap((e) => e.categoryIds)).size,
   recurringCount: recurring.filter((r) => r.active).length,
 });
 
@@ -34,7 +37,11 @@ export const buildCsv = (
     ...monthExpenses.map((e) => [
       dateLabel(e.date),
       e.merchant,
-      categoryLabel(categories.find((c) => c.id === e.categoryId)?.name ?? ''),
+      e.categoryId === null
+        ? MIXED_CATEGORY_LABEL
+        : categoryLabel(
+            categories.find((c) => c.id === e.categoryId)?.name ?? '',
+          ),
       e.amount.toFixed(2),
       e.isBill ? 'Rachunek' : 'Zakup',
     ]),

@@ -19,13 +19,16 @@ export const getDashboard = privateProcedure({
     const rangeStart = `${monthsEndingAt(input.month, FETCH_MONTHS)[0]}-01`;
     const rangeEnd = `${nextMonthOf(input.month)}-01`;
 
-    const [expenses, categories, limits, profile, recurring, payments] =
+    const [expenses, items, categories, limits, profile, recurring, payments] =
       await Promise.all([
         db
           .from('expenses')
-          .select('date, amount, category_id')
+          .select('id, date, amount, category_id')
           .gte('date', rangeStart)
           .lt('date', rangeEnd),
+        db
+          .from('receipt_items')
+          .select('expense_id, unit_price, quantity, discount, category_id'),
         db.from('categories').select('id, name, color'),
         db.from('limits').select('amount').eq('scope', 'total'),
         db.from('profiles').select('name').maybeSingle(),
@@ -35,6 +38,7 @@ export const getDashboard = privateProcedure({
         db.from('recurring_payments').select('recurring_id, date'),
       ]);
     if (expenses.error) throw new InternalServer(expenses.error);
+    if (items.error) throw new InternalServer(items.error);
     if (categories.error) throw new InternalServer(categories.error);
     if (limits.error) throw new InternalServer(limits.error);
     if (profile.error) throw new InternalServer(profile.error);
@@ -66,6 +70,14 @@ export const getDashboard = privateProcedure({
           date: e.date,
           amount: Number(e.amount),
           categoryId: e.category_id,
+          items: items.data
+            .filter((it) => it.expense_id === e.id)
+            .map((it) => ({
+              categoryId: it.category_id,
+              unitPrice: Number(it.unit_price),
+              quantity: Number(it.quantity),
+              discount: Number(it.discount),
+            })),
         })),
         ...recurringExpenses,
       ],

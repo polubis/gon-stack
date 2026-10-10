@@ -1,3 +1,4 @@
+import { MIXED_CATEGORY_LABEL } from '@/shared/i18n/category-label';
 import type { Category, CategoryId } from '../domain/models';
 
 export const FEATURE_NAME = 'Dashboard';
@@ -33,6 +34,14 @@ export const UNCATEGORIZED: Category = {
   id: '' as CategoryId,
   name: 'Bez kategorii',
   icon: 'sparkles',
+  color: 'var(--track-strong)',
+};
+
+/** Shown for an expense whose products span several categories. */
+export const MIXED_CATEGORY: Category = {
+  id: '' as CategoryId,
+  name: MIXED_CATEGORY_LABEL,
+  icon: 'receipt',
   color: 'var(--track-strong)',
 };
 
