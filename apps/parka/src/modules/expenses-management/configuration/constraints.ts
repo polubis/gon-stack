@@ -14,8 +14,6 @@ export const UNCATEGORIZED: Category = {
   color: '#4b5a52',
 };
 
-export const DEFAULT_PRODUCT_NAME = 'Nowy produkt';
-
 /** Largest receipt photo the server accepts. */
 export const MAX_RECEIPT_BYTES = RECEIPT_MAX_BYTES;
 

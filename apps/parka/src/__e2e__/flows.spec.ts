@@ -352,6 +352,23 @@ const commands = {
     await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
   },
 
+  'i cannot save a product without a name': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
+    await mockState(page);
+    await open(page, APP_ROUTER.newExpense());
+    await getByE2e('expenses-management:merchant').fill('Sklep');
+    await getByE2e('expenses-management:add-product').click();
+
+    const name = getByE2ePrefix('expenses-management:product-name:');
+    await expect(name).toHaveValue('');
+    await getByE2e('expenses-management:save').click();
+    await expect(name).toHaveAttribute('aria-invalid', 'true');
+    await expect(page).toHaveURL(new RegExp(APP_ROUTER.newExpense()));
+  },
+
   'i add an expense with products from different categories': async ({
     page,
     getByE2e,
@@ -364,10 +381,12 @@ const commands = {
     await getByE2e('expenses-management:merchant').fill('Sklep Mieszany');
 
     await getByE2e('expenses-management:add-product').click();
+    await getByE2ePrefix('expenses-management:product-name:').fill('Bilet');
     await expect(getByE2e('expenses-management:category')).toHaveText(
       'Rozrywka',
     );
     await getByE2e('expenses-management:add-product').click();
+    await getByE2ePrefix('expenses-management:product-name:').fill('Chleb');
     await getByE2ePrefix('expenses-management:product-category:')
       .last()
       .selectOption(CATEGORY.id);

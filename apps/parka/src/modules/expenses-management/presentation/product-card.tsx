@@ -13,6 +13,7 @@ type Props = {
   product: Product;
   categories: Category[];
   open: boolean;
+  invalid: boolean;
   onToggle: () => void;
   onPatch: (patch: Partial<Omit<Product, 'id'>>) => void;
   onRemove: () => void;
@@ -22,6 +23,7 @@ export const ProductCard = ({
   product,
   categories,
   open,
+  invalid,
   onToggle,
   onPatch,
   onRemove,
@@ -39,7 +41,7 @@ export const ProductCard = ({
         <CategoryAvatar category={category} />
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm font-medium">
-            {product.name}
+            {product.name || 'Bez nazwy'}
           </span>
           <span className="block text-xs text-ink-soft">
             {categoryLabel(category.name)}
@@ -60,10 +62,16 @@ export const ProductCard = ({
       {open ? (
         <div className="grid grid-cols-2 gap-3 border-t border-line pt-3">
           <div className="col-span-2">
-            <Field label="Nazwa produktu">
+            <Field
+              label="Nazwa produktu"
+              hint={invalid ? 'Podaj nazwę produktu.' : undefined}
+            >
               <input
                 className={inputClass}
                 value={product.name}
+                required
+                aria-invalid={invalid}
+                autoFocus={invalid}
                 data-e2e={`expenses-management:product-name:${product.id}`}
                 onChange={(e) => onPatch({ name: e.target.value })}
               />

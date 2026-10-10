@@ -8,7 +8,6 @@ import { APP_ROUTER } from '@/shared/router/routes';
 import { Button, Field, inputClass } from '@/shared/ui/controls';
 import { Card } from '@/shared/ui/layout';
 import { NumberInput } from '@/shared/ui/number-input';
-import { DEFAULT_PRODUCT_NAME } from '../configuration/constraints';
 import { money, toLocalDateInput, toTimestamp } from '../domain/format';
 import { newExpenseId } from '../domain/ids';
 import {
@@ -44,6 +43,7 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
     draft ? productsFromDraft(draft, defaultCategoryId(categories)) : [],
   );
   const [openId, setOpenId] = useState<ProductId | null>(null);
+  const [submitted, setSubmitted] = useState(false);
 
   const selected = categories.some((c) => c.id === categoryId)
     ? categoryId
@@ -58,7 +58,7 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
   const addProduct = () => {
     const product = createProduct(
       selected ?? defaultCategoryId(categories),
-      DEFAULT_PRODUCT_NAME,
+      '',
     );
     setProducts([...products, product]);
     setOpenId(product.id);
@@ -67,6 +67,12 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
   const save = (event: FormEvent) => {
     event.preventDefault();
     if (!selected || saving) return;
+    const unnamed = products.find((p) => !p.name.trim());
+    if (unnamed) {
+      setSubmitted(true);
+      setOpenId(unnamed.id);
+      return;
+    }
     ctx.createExpense({
       id: newExpenseId(),
       merchant: merchant.trim(),
@@ -202,6 +208,7 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
                   product={product}
                   categories={categories}
                   open={openId === product.id}
+                  invalid={submitted && !product.name.trim()}
                   onToggle={() =>
                     setOpenId(openId === product.id ? null : product.id)
                   }

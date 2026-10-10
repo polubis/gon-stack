@@ -180,10 +180,12 @@ describe('adding an expense on its own page', () => {
 
       await user.type(screen.getByLabelText('Sklep'), 'Piekarnia');
       await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await user.type(screen.getByLabelText('Nazwa produktu'), 'Chleb');
       await user.type(screen.getByLabelText('Cena'), '3,20');
       await user.clear(screen.getByLabelText('Ilość'));
       await user.type(screen.getByLabelText('Ilość'), '2');
       await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await user.type(screen.getByLabelText('Nazwa produktu'), 'Bułka');
 
       expect(screen.getByLabelText(/^Kwota/)).toHaveAttribute('readonly');
       expect(screen.getByText('Produkty (2)')).toBeVisible();
@@ -219,6 +221,7 @@ describe('adding an expense on its own page', () => {
         const user = await open();
 
         await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+        await user.type(screen.getByLabelText('Nazwa produktu'), 'Kino');
         await user.selectOptions(
           screen.getByLabelText('Kategoria produktu'),
           'Rozrywka',
@@ -235,11 +238,13 @@ describe('adding an expense on its own page', () => {
         const user = await open();
 
         await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+        await user.type(screen.getByLabelText('Nazwa produktu'), 'Chleb');
         await user.selectOptions(
           screen.getAllByLabelText('Kategoria produktu')[0]!,
           'Spożywcze',
         );
         await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+        await user.type(screen.getByLabelText('Nazwa produktu'), 'Kino');
 
         expect(screen.getByText('Wiele kategorii')).toBeVisible();
         await saveWithProducts(user);
