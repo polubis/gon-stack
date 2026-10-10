@@ -1,13 +1,23 @@
+import { cn } from '@repo/react-kit/cn';
+import { Button } from '@/shared/ui/controls';
 import { money } from '../domain/format';
 
 type Slice = { label: string; value: number; color: string };
 
+/**
+ * Donut of every slice with its legend. `rows` caps the legend inside a
+ * fixed-height box; slices past it add a `onShowAll` button over a fade.
+ */
 export const Donut = ({
   slices,
   caption,
+  rows,
+  onShowAll,
 }: {
   slices: Slice[];
   caption: string;
+  rows?: number;
+  onShowAll?: () => void;
 }) => {
   const total = Math.max(
     1,
@@ -25,9 +35,10 @@ export const Donut = ({
     },
     [],
   );
+  const overflows = rows !== undefined && slices.length > rows;
 
   return (
-    <figure className="m-0 flex flex-col items-center gap-4 sm:flex-row">
+    <figure className="m-0 flex flex-col items-center gap-4 sm:flex-row sm:items-start">
       <svg
         viewBox="0 0 160 160"
         className="h-40 w-40 shrink-0"
@@ -50,22 +61,41 @@ export const Donut = ({
           ))}
         </g>
       </svg>
-      <ul className="w-full min-w-0 flex-1 space-y-1.5 text-sm">
-        {slices.map((s) => (
-          <li key={s.label} className="flex items-center gap-2">
-            <span
-              className="h-2.5 w-2.5 shrink-0 rounded-full"
-              style={{ backgroundColor: s.color }}
-              aria-hidden="true"
-            />
-            <span className="flex-1 text-ink-soft">{s.label}</span>
-            <span className="font-medium tabular-nums">{money(s.value)}</span>
-            <span className="w-10 text-right text-ink-soft tabular-nums">
-              {Math.round((s.value / total) * 100)}%
-            </span>
-          </li>
-        ))}
-      </ul>
+      <div
+        className={cn(
+          'relative w-full min-w-0 flex-1',
+          rows !== undefined && 'h-48 overflow-hidden',
+        )}
+      >
+        <ul className="space-y-1.5 text-sm">
+          {slices.slice(0, rows).map((s) => (
+            <li key={s.label} className="flex h-5 items-center gap-2">
+              <span
+                className="h-2.5 w-2.5 shrink-0 rounded-full"
+                style={{ backgroundColor: s.color }}
+                aria-hidden="true"
+              />
+              <span className="flex-1 truncate text-ink-soft">{s.label}</span>
+              <span className="font-medium tabular-nums">{money(s.value)}</span>
+              <span className="w-10 text-right text-ink-soft tabular-nums">
+                {Math.round((s.value / total) * 100)}%
+              </span>
+            </li>
+          ))}
+        </ul>
+        {overflows && onShowAll && (
+          <div className="absolute inset-x-0 bottom-0 flex h-16 items-end justify-center bg-linear-to-t from-card from-40% to-transparent">
+            <Button
+              variant="ghost"
+              className="w-auto px-3 py-1.5"
+              onClick={onShowAll}
+              data-e2e="dashboard:categories-toggle"
+            >
+              Pokaż wszystkie
+            </Button>
+          </div>
+        )}
+      </div>
     </figure>
   );
 };

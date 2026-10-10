@@ -119,25 +119,6 @@ export const monthOptions = (
   return months.includes(selected) ? months : [selected, ...months];
 };
 
-/**
- * Keeps the `max` biggest slices and folds the rest into one "other" slice,
- * merged with slices that already are "other" (`isOther`), always last.
- */
-export const foldSlices = <T extends { value: number; isOther?: boolean }>(
-  slices: T[],
-  max: number,
-  other: (rest: number) => T,
-): T[] => {
-  const named = slices.filter((s) => !s.isOther);
-  const existing = slices
-    .filter((s) => s.isOther)
-    .reduce((total, s) => total + s.value, 0);
-  if (named.length <= max && existing === 0) return named;
-  const sorted = [...named].sort((a, b) => b.value - a.value);
-  const rest = sorted.slice(max).reduce((total, s) => total + s.value, 0);
-  return [...sorted.slice(0, max), other(rest + existing)];
-};
-
 /** Smallest "round" step (1, 2, 5 × 10ⁿ) that fits `ticks` rows over `max`. */
 export const niceStep = (max: number, ticks: number): number => {
   const raw = Math.max(max, 1) / ticks;

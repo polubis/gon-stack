@@ -112,6 +112,27 @@ describe('dashboard screen', () => {
     expect(legend.getByText('100%')).toBeTruthy();
   });
 
+  it('shows six categories and lists all of them in a dialog', async () => {
+    const categories = Array.from({ length: 8 }, (_, i) => ({
+      categoryId: `c-${i}`,
+      name: `Kat ${i}`,
+      color: 'green',
+      amount: 10,
+      pct: 12,
+    }));
+    stubApi(false, { categories });
+    const user = userEvent.setup();
+
+    render(<Main />);
+
+    expect(await screen.findByText('Kat 5')).toBeTruthy();
+    expect(screen.queryByText('Kat 6')).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Pokaż wszystkie' }));
+    const dialog = within(await screen.findByRole('dialog'));
+    expect(dialog.getByText('Kat 7')).toBeTruthy();
+    expect(dialog.getByText('Kat 0')).toBeTruthy();
+  });
+
   it('asks the backend for the chosen month', async () => {
     const fetchMock = stubApi();
     render(<Main />);

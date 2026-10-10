@@ -3,7 +3,6 @@ import {
   categoryProgress,
   categoryTabs,
   expensesInMonth,
-  foldSlices,
   limitTone,
   monthOptions,
   niceStep,
@@ -105,59 +104,6 @@ describe('dashboard month options', () => {
       '2026-02',
       '2026-01',
     ]);
-  });
-});
-
-describe('dashboard slice folding', () => {
-  const slice = (label: string, value: number, isOther = false) => ({
-    label,
-    value,
-    isOther,
-  });
-  const other = (value: number) => slice('Inne', value, true);
-
-  it('keeps slices as they are when nothing overflows', () => {
-    const slices = [slice('A', 3), slice('B', 5)];
-
-    expect(foldSlices(slices, 3, other)).toEqual(slices);
-  });
-
-  it('folds the smallest slices into a trailing other slice', () => {
-    const folded = foldSlices(
-      [slice('A', 1), slice('B', 5), slice('C', 3), slice('D', 2)],
-      2,
-      other,
-    );
-
-    expect(folded.map((s) => [s.label, s.value])).toEqual([
-      ['B', 5],
-      ['C', 3],
-      ['Inne', 3],
-    ]);
-  });
-
-  it('merges an existing other slice, whatever its label', () => {
-    const folded = foldSlices(
-      [slice('A', 4), slice('Misc', 6, true), slice('B', 1), slice('C', 2)],
-      2,
-      other,
-    );
-
-    expect(folded.map((s) => [s.label, s.value])).toEqual([
-      ['A', 4],
-      ['C', 2],
-      ['Inne', 7],
-    ]);
-  });
-
-  it('keeps an existing other slice last even without overflow', () => {
-    const folded = foldSlices(
-      [slice('Misc', 6, true), slice('A', 4)],
-      3,
-      other,
-    );
-
-    expect(folded.map((s) => s.value)).toEqual([4, 6]);
   });
 });
 

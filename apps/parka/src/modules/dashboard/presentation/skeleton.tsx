@@ -59,12 +59,12 @@ export const DashboardSkeleton = () => (
     >
       <div className="flex items-center justify-between gap-2">
         <Skeleton className="h-6 w-44" />
-        <Skeleton className="h-8.5 w-36 rounded-xl" />
+        <Skeleton className="h-8.5 w-24 rounded-xl" />
       </div>
-      <div className="flex flex-col items-center gap-4 sm:flex-row">
+      <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
         <Skeleton className="h-40 w-40 shrink-0 rounded-full" />
-        <div className="w-full min-w-0 flex-1 space-y-1.5">
-          <Rows count={3} className="h-5 w-full" />
+        <div className="h-48 w-full min-w-0 flex-1 space-y-1.5">
+          <Rows count={6} className="h-5 w-full" />
         </div>
       </div>
     </Card>

@@ -32,7 +32,10 @@ export const DetailDialog = ({
   badge?: ReactNode;
   onClose: () => void;
   children: ReactNode;
-  'data-e2e': 'dashboard:detail' | 'dashboard:recurring-dialog';
+  'data-e2e':
+    | 'dashboard:detail'
+    | 'dashboard:recurring-dialog'
+    | 'dashboard:categories-dialog';
 }) => (
   <Dialog.Root
     open
