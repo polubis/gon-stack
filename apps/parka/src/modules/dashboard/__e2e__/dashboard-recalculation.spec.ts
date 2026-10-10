@@ -110,11 +110,11 @@ const commands = {
   }) => {
     await getByE2e('dashboard:expense-new').click();
     await expect(getByE2e('expenses-management:main')).toBeVisible();
-    await getByE2e('expenses-management:merchant').fill('Piekarnia');
-    await getByE2e('expenses-management:add-product').click();
-    await getByE2ePrefix('expenses-management:product-name:').fill('Chleb');
-    await getByE2ePrefix('expenses-management:product-price:').fill('25');
-    await getByE2e('expenses-management:save').click();
+    await getByE2e('expense-form:merchant').fill('Piekarnia');
+    await getByE2e('expense-form:add-product').click();
+    await getByE2ePrefix('expense-form:product-name:').fill('Chleb');
+    await getByE2ePrefix('expense-form:product-price:').fill('25');
+    await getByE2e('expense-form:save').click();
     await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
     await page.waitForLoadState('networkidle');
   },
@@ -123,11 +123,17 @@ const commands = {
     await expect(getByE2e('dashboard:transactions')).toHaveText('3');
   },
 
-  'i change the amount of the first expense to 150': async ({ getByE2e }) => {
+  'i change the amount of the first expense to 150': async ({
+    page,
+    getByE2e,
+  }) => {
     await getByE2e('dashboard:expense:e-1').click();
-    await getByE2e('dashboard:edit-amount').fill('150');
-    await getByE2e('dashboard:save').click();
-    await expect(getByE2e('dashboard:detail')).toHaveCount(0);
+    await getByE2e('dashboard:edit').click();
+    await page.waitForURL('**/app/expenses/edit/**');
+    await page.waitForLoadState('networkidle');
+    await getByE2e('expense-form:amount').fill('150');
+    await getByE2e('expense-form:save').click();
+    await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
   },
   'the month shows 190,00 over 2 expenses': async ({ getByE2e }) => {
     await expect(getByE2e('dashboard:total')).toContainText('190,00');
@@ -154,9 +160,9 @@ const commands = {
   },
   'i add a normal expense of 25': async ({ page, getByE2e }) => {
     await getByE2e('dashboard:expense-new').click();
-    await getByE2e('expenses-management:merchant').fill('Piekarnia');
-    await getByE2e('expenses-management:amount').fill('25');
-    await getByE2e('expenses-management:save').click();
+    await getByE2e('expense-form:merchant').fill('Piekarnia');
+    await getByE2e('expense-form:amount').fill('25');
+    await getByE2e('expense-form:save').click();
     await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
   },
   'i add an expense from an uploaded receipt': async ({ page, getByE2e }) => {
@@ -169,10 +175,8 @@ const commands = {
         'base64',
       ),
     });
-    await expect(getByE2e('expenses-management:merchant')).toHaveValue(
-      'Biedronka',
-    );
-    await getByE2e('expenses-management:save').click();
+    await expect(getByE2e('expense-form:merchant')).toHaveValue('Biedronka');
+    await getByE2e('expense-form:save').click();
     await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
   },
   'the month shows 142,50 over 3 expenses': async ({ getByE2e }) => {

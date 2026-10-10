@@ -2,6 +2,7 @@ import { atom } from '@repo/react-kit/supa-store';
 import type {
   Category,
   Month,
+  StoredExpense,
   Notice,
   ScanState,
   ScannedReceipt,
@@ -17,6 +18,9 @@ export const createStore = () => {
   const $saved = atom<Month | null>(null);
   const $scan = atom<ScanState>({ status: 'idle' });
   const $scanned = atom<ScannedReceipt | null>(null);
+  /** Expense the edit page works on; `null` until loaded or when missing. */
+  const $expense = atom<StoredExpense | null>(null);
+  const $expenseLoading = atom(true);
   const $notice = atom<Notice | null>(null);
 
   return {
@@ -28,6 +32,8 @@ export const createStore = () => {
     $saved,
     $scan,
     $scanned,
+    $expense,
+    $expenseLoading,
     $notice,
   };
 };

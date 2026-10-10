@@ -104,14 +104,12 @@ const commands = {
     getByE2ePrefix,
   }) => {
     await open(page, APP_ROUTER.newExpense());
-    await expect(getByE2e('expenses-management:expense-form')).toBeVisible();
-    await getByE2e('expenses-management:merchant').fill('Sklep E2E Backend');
-    await getByE2e('expenses-management:add-product').click();
-    await getByE2ePrefix('expenses-management:product-name:').fill(
-      'Chleb razowy',
-    );
-    await getByE2ePrefix('expenses-management:product-price:').fill('3.20');
-    await getByE2e('expenses-management:save').click();
+    await expect(getByE2e('expense-form:form')).toBeVisible();
+    await getByE2e('expense-form:merchant').fill('Sklep E2E Backend');
+    await getByE2e('expense-form:add-product').click();
+    await getByE2ePrefix('expense-form:product-name:').fill('Chleb razowy');
+    await getByE2ePrefix('expense-form:product-price:').fill('3.20');
+    await getByE2e('expense-form:save').click();
     await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
     await expect(page.getByText('Sklep E2E Backend')).toBeVisible();
     await reload(page);
@@ -122,11 +120,16 @@ const commands = {
     await open(page, APP_ROUTER.dashboard());
     await page.getByRole('button', { name: /Sklep E2E Backend/ }).click();
     await expect(getByE2e('dashboard:detail')).toBeVisible();
-    await getByE2e('dashboard:edit-merchant').fill('Sklep Nowy');
+    await getByE2e('dashboard:edit').click();
+    await page.waitForURL('**/app/expenses/edit/**');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(150);
+    await getByE2e('expense-form:merchant').fill('Sklep Nowy');
     await Promise.all([
       synced(page, 'PUT', API_ROUTER.expenses()),
-      getByE2e('dashboard:save').click(),
+      getByE2e('expense-form:save').click(),
     ]);
+    await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
     await expect(page.getByText('Sklep Nowy')).toBeVisible();
     await reload(page);
     await expect(page.getByText('Sklep Nowy')).toBeVisible();

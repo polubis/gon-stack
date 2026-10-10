@@ -1,18 +1,6 @@
 import { RECEIPT_MAX_BYTES } from '@schemas/receipts';
-import type { Category, CategoryId } from '../domain/models';
 
 export const FEATURE_NAME = 'ExpensesManagement';
-
-/** Placeholder category id while the user has no categories. */
-export const NO_CATEGORY = '' as CategoryId;
-
-/** Shown for products when the user has no categories. */
-export const UNCATEGORIZED: Category = {
-  id: NO_CATEGORY,
-  name: 'Bez kategorii',
-  icon: 'sparkles',
-  color: '#4b5a52',
-};
 
 /** Largest receipt photo the server accepts. */
 export const MAX_RECEIPT_BYTES = RECEIPT_MAX_BYTES;
@@ -23,9 +11,16 @@ export const RECEIPT_UPLOAD = { maxEdge: 1600, quality: 0.8 } as const;
 /** Query param holding the expense type tab. */
 export const KIND_PARAM = 'type';
 
+/** Query param holding the id of the expense the edit page works on. */
+export const EXPENSE_ID_PARAM = 'id';
+
+/** Query param holding the dashboard month to come back to. */
+export const MONTH_PARAM = 'month';
+
 export const ERROR_CODES = {
   load: 'EXPENSES_MANAGEMENT_LOAD',
   render: 'EXPENSES_MANAGEMENT_RENDER',
+  notFound: 'EXPENSE_NOT_FOUND',
   scan: 'RECEIPT_SCAN',
 } as const;
 
@@ -38,6 +33,10 @@ export const NOTICES = {
   expenseFailed: {
     title: 'Nie udało się dodać wydatku',
     code: 'EXPENSE_CREATE_FAILED',
+  },
+  expenseUpdateFailed: {
+    title: 'Nie udało się zapisać zmian',
+    code: 'EXPENSE_UPDATE_FAILED',
   },
   recurringFailed: {
     title: 'Nie udało się dodać wydatku cyklicznego',

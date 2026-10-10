@@ -90,6 +90,10 @@ export const router = createRouter({
       APP_ROUTER.newExpense(),
       () => import('@/modules/expenses-management/presentation/main'),
     ),
+    page(
+      APP_ROUTER.expenseEdit(),
+      () => import('@/modules/expenses-management/presentation/main'),
+    ),
   ]),
   trailingSlash: 'always',
   scrollRestoration: true,

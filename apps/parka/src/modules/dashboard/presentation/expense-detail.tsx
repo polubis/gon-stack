@@ -1,16 +1,22 @@
+import { Pencil, Trash2 } from 'lucide-react';
+import { APP_ROUTER } from '@/shared/router/routes';
 import { categoryLabel } from '@/shared/i18n/category-label';
-import { useState } from 'react';
-import { Trash2 } from 'lucide-react';
-import { Button, Field, inputClass } from '@/shared/ui/controls';
-import { NumberInput } from '@/shared/ui/number-input';
+import { Button } from '@/shared/ui/controls';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { itemTotal, dateTimeLabel, money } from '../domain/format';
-import type { CategoryId, Expense, Month } from '../domain/models';
+import type { Expense, Month } from '../domain/models';
 import { useContext } from './context';
 import { DetailDialog, DialogActions } from './detail-dialog';
 import { categoryOf } from './selectors';
 
-/** Popup of a stored expense: the fields are editable right away. */
+const Row = ({ label, value }: { label: string; value: string }) => (
+  <div className="flex justify-between gap-3">
+    <dt className="text-ink-soft">{label}</dt>
+    <dd className="text-right">{value}</dd>
+  </div>
+);
+
+/** Popup of a stored expense: read-only, editing opens the expense edit page. */
 export const ExpenseDetail = ({
   modal,
   expense,
@@ -25,22 +31,6 @@ export const ExpenseDetail = ({
   const ctx = useContext();
   const categories = ctx.useCategories();
   const category = categoryOf(categories, expense.categoryId);
-  const [merchant, setMerchant] = useState(expense.merchant);
-  const [amount, setAmount] = useState(expense.amount);
-  const hasProducts = expense.items.length > 0;
-  const [categoryId, setCategoryId] = useState<CategoryId>(
-    expense.categoryId ?? categories[0]?.id ?? ('' as CategoryId),
-  );
-
-  const save = () => {
-    ctx.updateExpense(
-      hasProducts
-        ? { ...expense, merchant }
-        : { ...expense, merchant, amount, categoryId },
-      month,
-    );
-    onClose();
-  };
 
   const remove = () => {
     ctx.removeExpense(expense.id, month);
@@ -56,65 +46,18 @@ export const ExpenseDetail = ({
       avatar={<CategoryAvatar category={category} />}
       onClose={onClose}
     >
-      <div className="space-y-3">
-        <Field label="Sklep">
-          <input
-            className={inputClass}
-            value={merchant}
-            data-e2e="dashboard:edit-merchant"
-            onChange={(e) => setMerchant(e.target.value)}
-          />
-        </Field>
-        <Field
-          label="Kwota"
-          hint={hasProducts ? 'Suma produktów poniżej.' : undefined}
-        >
-          <NumberInput
-            value={amount}
-            readOnly={hasProducts}
-            data-e2e="dashboard:edit-amount"
-            onValueChange={setAmount}
-          />
-        </Field>
-        <Field
+      <dl className="space-y-2 text-sm">
+        <Row label="Kwota" value={money(expense.amount)} />
+        <Row
           label="Kategoria"
-          hint={hasProducts ? 'Wynika z kategorii produktów.' : undefined}
-        >
-          {hasProducts ? (
-            <p className={inputClass} data-e2e="dashboard:edit-category">
-              {categoryLabel(category.name)}
-            </p>
-          ) : (
-            <select
-              className={inputClass}
-              value={categoryId}
-              data-e2e="dashboard:edit-category"
-              onChange={(e) =>
-                setCategoryId(
-                  categories.find((c) => c.id === e.target.value)?.id ??
-                    categoryId,
-                )
-              }
-            >
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {categoryLabel(c.name)}
-                </option>
-              ))}
-            </select>
-          )}
-        </Field>
-      </div>
-
-      <dl className="mt-3 space-y-2 text-sm">
-        <div className="flex justify-between">
-          <dt className="text-ink-soft">Metoda płatności</dt>
-          <dd>{expense.paymentMethod}</dd>
-        </div>
-        <div className="flex justify-between">
-          <dt className="text-ink-soft">Typ</dt>
-          <dd>{expense.isBill ? 'Rachunek' : 'Zakup'}</dd>
-        </div>
+          value={
+            expense.categoryId
+              ? categoryLabel(category.name)
+              : 'Wiele kategorii'
+          }
+        />
+        <Row label="Metoda płatności" value={expense.paymentMethod || '-'} />
+        <Row label="Typ" value={expense.isBill ? 'Rachunek' : 'Zakup'} />
       </dl>
 
       {expense.items.length > 0 ? (
@@ -151,8 +94,12 @@ export const ExpenseDetail = ({
         <Button variant="ghost" className="w-auto" onClick={onClose}>
           Anuluj
         </Button>
-        <Button className="w-auto" data-e2e="dashboard:save" onClick={save}>
-          Zapisz zmiany
+        <Button
+          className="w-auto"
+          data-e2e="dashboard:edit"
+          href={APP_ROUTER.expenseEdit({ id: expense.id, month })}
+        >
+          <Pencil className="h-4 w-4" aria-hidden="true" /> Edytuj
         </Button>
       </DialogActions>
     </DetailDialog>

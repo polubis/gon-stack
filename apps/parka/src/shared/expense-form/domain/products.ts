@@ -1,13 +1,19 @@
 import { deriveExpenseCategory } from '@/shared/expense-category/category';
-import { NO_CATEGORY, UNCATEGORIZED } from '../configuration/constraints';
-import { newProductId } from './ids';
-import type {
-  Category,
-  CategoryId,
-  Product,
-  ProductId,
-  ReceiptDraft,
-} from './models';
+import type { Category, CategoryId, Product, ProductId } from './models';
+
+/** Placeholder category id while the user has no categories. */
+export const NO_CATEGORY = '' as CategoryId;
+
+/** Shown for products when the user has no categories. */
+export const UNCATEGORIZED: Category = {
+  id: NO_CATEGORY,
+  name: 'Bez kategorii',
+  icon: 'sparkles',
+  color: '#4b5a52',
+};
+
+const newProductId = (): ProductId =>
+  `item-${crypto.randomUUID()}` as ProductId;
 
 export const productTotal = (
   product: Pick<Product, 'unitPrice' | 'quantity' | 'discount'>,
@@ -29,10 +35,10 @@ export const createProduct = (
 });
 
 export const productsFromDraft = (
-  draft: ReceiptDraft,
+  items: Omit<Product, 'id' | 'categoryId'>[],
   categoryId: CategoryId,
 ): Product[] =>
-  draft.items.map((item) => ({ ...item, id: newProductId(), categoryId }));
+  items.map((item) => ({ ...item, id: newProductId(), categoryId }));
 
 export const patchProduct = (
   products: Product[],

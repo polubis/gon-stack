@@ -232,11 +232,11 @@ const commands = {
       ),
     });
 
-    await expect(getByE2e('expenses-management:merchant')).toHaveValue(
+    await expect(getByE2e('expense-form:merchant')).toHaveValue(
       'Testowy Sklep E2E',
     );
-    await expect(getByE2e('expenses-management:total')).toContainText('3,20');
-    await getByE2e('expenses-management:save').click();
+    await expect(getByE2e('expense-form:total')).toContainText('3,20');
+    await getByE2e('expense-form:save').click();
     await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
   },
 
@@ -283,17 +283,13 @@ const commands = {
       ),
     });
 
-    await expect(getByE2e('expenses-management:merchant')).toHaveValue(
-      'Biedronka',
-    );
-    await expect(getByE2e('expenses-management:date')).toHaveValue(
-      '2026-09-15',
-    );
-    await expect(getByE2e('expenses-management:method')).toHaveValue('Karta');
+    await expect(getByE2e('expense-form:merchant')).toHaveValue('Biedronka');
+    await expect(getByE2e('expense-form:date')).toHaveValue('2026-09-15');
+    await expect(getByE2e('expense-form:method')).toHaveValue('Karta');
     await expect(page.getByText('Chleb')).toBeVisible();
     await expect(page.getByText('Mleko')).toBeVisible();
     // 3,20 + 2 * 4,50 - 1,00 discount
-    await expect(getByE2e('expenses-management:total')).toContainText('11,20');
+    await expect(getByE2e('expense-form:total')).toContainText('11,20');
   },
 
   'i cannot save an expense before any category exists': async ({
@@ -303,9 +299,9 @@ const commands = {
     await mockState(page, { categories: [] });
     await open(page, APP_ROUTER.newExpense());
 
-    await expect(getByE2e('expenses-management:expense-form')).toBeVisible();
-    await expect(getByE2e('expenses-management:no-categories')).toBeVisible();
-    await expect(getByE2e('expenses-management:save')).toBeDisabled();
+    await expect(getByE2e('expense-form:form')).toBeVisible();
+    await expect(getByE2e('expense-form:no-categories')).toBeVisible();
+    await expect(getByE2e('expense-form:save')).toBeDisabled();
   },
 
   'i add a suggested category': async ({ page, getByE2e }) => {
@@ -326,24 +322,24 @@ const commands = {
     await mockState(page);
     await open(page, APP_ROUTER.newExpense());
 
-    await expect(getByE2e('expenses-management:expense-form')).toBeVisible();
-    await getByE2e('expenses-management:merchant').fill('Sklep Ręczny');
-    await getByE2e('expenses-management:add-product').click();
-    await getByE2ePrefix('expenses-management:product-name:').fill('Chleb');
-    const price = getByE2ePrefix('expenses-management:product-price:');
+    await expect(getByE2e('expense-form:form')).toBeVisible();
+    await getByE2e('expense-form:merchant').fill('Sklep Ręczny');
+    await getByE2e('expense-form:add-product').click();
+    await getByE2ePrefix('expense-form:product-name:').fill('Chleb');
+    const price = getByE2ePrefix('expense-form:product-price:');
     await price.pressSequentially('12,50');
     await expect(price).toHaveValue('12,50');
     await price.fill('');
     await expect(price).toHaveValue('');
     await price.pressSequentially('3,20');
     await expect(price).toHaveValue('3,20');
-    await expect(getByE2e('expenses-management:total')).toContainText('3,20');
-    await getByE2e('expenses-management:date').fill('2026-03-10');
+    await expect(getByE2e('expense-form:total')).toContainText('3,20');
+    await getByE2e('expense-form:date').fill('2026-03-10');
 
     const request = page.waitForRequest(
       (r) => r.method() === 'POST' && r.url().includes(API_ROUTER.expenses()),
     );
-    await getByE2e('expenses-management:save').click();
+    await getByE2e('expense-form:save').click();
     const saved = new Date((await request).postDataJSON().date as string);
     expect([saved.getFullYear(), saved.getMonth(), saved.getDate()]).toEqual([
       2026, 2, 10,
@@ -359,12 +355,12 @@ const commands = {
   }) => {
     await mockState(page);
     await open(page, APP_ROUTER.newExpense());
-    await getByE2e('expenses-management:merchant').fill('Sklep');
-    await getByE2e('expenses-management:add-product').click();
+    await getByE2e('expense-form:merchant').fill('Sklep');
+    await getByE2e('expense-form:add-product').click();
 
-    const name = getByE2ePrefix('expenses-management:product-name:');
+    const name = getByE2ePrefix('expense-form:product-name:');
     await expect(name).toHaveValue('');
-    await getByE2e('expenses-management:save').click();
+    await getByE2e('expense-form:save').click();
     await expect(name).toHaveAttribute('aria-invalid', 'true');
     await expect(page).toHaveURL(new RegExp(APP_ROUTER.newExpense()));
   },
@@ -378,26 +374,24 @@ const commands = {
       categories: [CATEGORY, { ...CATEGORY, id: 'cat-2', name: 'Rozrywka' }],
     });
     await open(page, APP_ROUTER.newExpense());
-    await getByE2e('expenses-management:merchant').fill('Sklep Mieszany');
+    await getByE2e('expense-form:merchant').fill('Sklep Mieszany');
 
-    await getByE2e('expenses-management:add-product').click();
-    await getByE2ePrefix('expenses-management:product-name:').fill('Bilet');
-    await expect(getByE2e('expenses-management:category')).toHaveText(
-      'Rozrywka',
-    );
-    await getByE2e('expenses-management:add-product').click();
-    await getByE2ePrefix('expenses-management:product-name:').fill('Chleb');
-    await getByE2ePrefix('expenses-management:product-category:')
+    await getByE2e('expense-form:add-product').click();
+    await getByE2ePrefix('expense-form:product-name:').fill('Bilet');
+    await expect(getByE2e('expense-form:category')).toHaveText('Rozrywka');
+    await getByE2e('expense-form:add-product').click();
+    await getByE2ePrefix('expense-form:product-name:').fill('Chleb');
+    await getByE2ePrefix('expense-form:product-category:')
       .last()
       .selectOption(CATEGORY.id);
 
-    await expect(getByE2e('expenses-management:category')).toHaveText(
+    await expect(getByE2e('expense-form:category')).toHaveText(
       'Wiele kategorii',
     );
     const request = page.waitForRequest(
       (r) => r.method() === 'POST' && r.url().includes(API_ROUTER.expenses()),
     );
-    await getByE2e('expenses-management:save').click();
+    await getByE2e('expense-form:save').click();
     expect((await request).postDataJSON()).toMatchObject({ categoryId: null });
   },
 
@@ -486,7 +480,10 @@ const commands = {
         return;
       }
       if (method === 'DELETE') {
-        const id = new URL(route.request().url()).pathname.split('/').pop();
+        const id = new URL(route.request().url()).pathname
+          .split('/')
+          .filter(Boolean)
+          .pop();
         expenses = expenses.filter((e) => e.id !== id);
         await route.fulfill({
           status: 200,
@@ -508,14 +505,46 @@ const commands = {
     );
   },
 
-  'i update an expense merchant name': async ({ page, getByE2e }) => {
+  'i open an expense on its edit page': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.dashboard());
     await page.getByRole('button', { name: /Kino Helios/ }).click();
     await expect(getByE2e('dashboard:detail')).toBeVisible();
-
-    await getByE2e('dashboard:edit-merchant').fill('Kino Nowe Horyzonty');
-    await getByE2e('dashboard:save').click();
-    await expect(page.getByText('Kino Nowe Horyzonty')).toBeVisible();
+    await getByE2e('dashboard:edit').click();
+    await page.waitForURL('**/app/expenses/edit/**');
+    await page.waitForLoadState('networkidle');
+    await expect(getByE2e('expense-form:merchant')).toHaveValue('Kino Helios');
+  },
+  'i add a product and save the expense': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
+    await getByE2e('expense-form:merchant').fill('Kino Nowe Horyzonty');
+    await getByE2e('expense-form:add-product').click();
+    await getByE2ePrefix('expense-form:product-name:').fill('Popcorn');
+    await getByE2ePrefix('expense-form:product-price:').fill('12');
+    await expect(getByE2e('expense-form:total')).toContainText('12,00');
+    const saved = page.waitForRequest(
+      (r) => r.method() === 'PUT' && r.url().includes(API_ROUTER.expenses()),
+    );
+    await getByE2e('expense-form:save').click();
+    const body = (await saved).postDataJSON();
+    expect(body.merchant).toBe('Kino Nowe Horyzonty');
+    expect(body.items).toHaveLength(1);
+    await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
+  },
+  'the saved product shows in the expense popup': async ({
+    page,
+    getByE2e,
+  }) => {
+    await page.waitForLoadState('networkidle');
+    await page.getByRole('button', { name: /Kino Nowe Horyzonty/ }).click();
+    await expect(
+      getByE2e('dashboard:detail').getByText('Popcorn'),
+    ).toBeVisible();
+    await expect(getByE2e('expense-form:merchant')).toHaveCount(0);
+    await page.keyboard.press('Escape');
+    await expect(getByE2e('dashboard:detail')).toHaveCount(0);
   },
   'i delete the updated expense': async ({ page, getByE2e }) => {
     await page.getByRole('button', { name: /Kino Nowe Horyzonty/ }).click();
@@ -769,10 +798,14 @@ test('expenses can be filtered by category', async ({ e2e }) => {
   );
 });
 
-test('an expense can be updated and removed', async ({ e2e }) => {
+test('an expense is edited on its own page and then removed', async ({
+  e2e,
+}) => {
   await interpreter(commands, e2e)(
     ['i mock the expenses list'],
-    ['i update an expense merchant name'],
+    ['i open an expense on its edit page'],
+    ['i add a product and save the expense'],
+    ['the saved product shows in the expense popup'],
     ['i delete the updated expense'],
   );
 });

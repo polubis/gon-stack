@@ -1,6 +1,8 @@
 import type { Store } from './store';
 import { load } from './handlers/load';
 import { createExpense } from './handlers/create-expense';
+import { loadExpense } from './handlers/load-expense';
+import { updateExpense } from './handlers/update-expense';
 import { createRecurring } from './handlers/create-recurring';
 import { scanReceipt } from './handlers/scan-receipt';
 import { dismissScan } from './handlers/dismiss-scan';
@@ -13,6 +15,8 @@ export const createRegistry = (store: Store) => {
   const register = bus.createRegistry(
     load(store, bus),
     createExpense(store, bus),
+    loadExpense(store, bus),
+    updateExpense(store, bus),
     createRecurring(store, bus),
     scanReceipt(store, bus),
     dismissScan(store, bus),

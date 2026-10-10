@@ -72,7 +72,7 @@ export const ProductCard = ({
                 required
                 aria-invalid={invalid}
                 autoFocus={invalid}
-                data-e2e={`expenses-management:product-name:${product.id}`}
+                data-e2e={`expense-form:product-name:${product.id}`}
                 onChange={(e) => onPatch({ name: e.target.value })}
               />
             </Field>
@@ -80,7 +80,7 @@ export const ProductCard = ({
           <Field label="Cena">
             <NumberInput
               value={product.unitPrice}
-              data-e2e={`expenses-management:product-price:${product.id}`}
+              data-e2e={`expense-form:product-price:${product.id}`}
               onValueChange={(unitPrice) => onPatch({ unitPrice })}
             />
           </Field>
@@ -88,14 +88,14 @@ export const ProductCard = ({
             <NumberInput
               integer
               value={product.quantity}
-              data-e2e={`expenses-management:product-qty:${product.id}`}
+              data-e2e={`expense-form:product-qty:${product.id}`}
               onValueChange={(quantity) => onPatch({ quantity })}
             />
           </Field>
           <Field label="Rabat">
             <NumberInput
               value={product.discount}
-              data-e2e={`expenses-management:product-discount:${product.id}`}
+              data-e2e={`expense-form:product-discount:${product.id}`}
               onValueChange={(discount) => onPatch({ discount })}
             />
           </Field>
@@ -103,7 +103,7 @@ export const ProductCard = ({
             <select
               className={inputClass}
               value={product.categoryId}
-              data-e2e={`expenses-management:product-category:${product.id}`}
+              data-e2e={`expense-form:product-category:${product.id}`}
               onChange={(e) => {
                 const next = categories.find((c) => c.id === e.target.value);
                 if (next) onPatch({ categoryId: next.id });
@@ -121,7 +121,7 @@ export const ProductCard = ({
           </Field>
           <button
             type="button"
-            data-e2e={`expenses-management:product-remove:${product.id}`}
+            data-e2e={`expense-form:product-remove:${product.id}`}
             onClick={onRemove}
             className="col-span-2 inline-flex items-center justify-center gap-2 rounded-xl py-2 text-sm font-medium text-danger hover:bg-danger-faint"
           >

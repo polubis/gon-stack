@@ -55,6 +55,11 @@ export type CategoryEditQuery = {
   id?: string;
 };
 
+export type ExpenseEditQuery = {
+  id?: string;
+  month?: string;
+};
+
 export type NewExpenseQuery = {
   type?: 'normal' | 'recurring';
 };
@@ -83,6 +88,9 @@ export const APP_ROUTER = {
   dataExport: route('/app/data-export/'),
   newExpense: routeWithQuery<'/app/expenses/new/', NewExpenseQuery>(
     '/app/expenses/new/',
+  ),
+  expenseEdit: routeWithQuery<'/app/expenses/edit/', ExpenseEditQuery>(
+    '/app/expenses/edit/',
   ),
   signIn: route('/sign-in/'),
   signUp: route('/sign-up/'),

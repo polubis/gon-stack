@@ -51,6 +51,12 @@ export type NewExpense = {
   items: Product[];
 };
 
+/** An expense as stored: what the edit page loads and saves. */
+export type StoredExpense = Omit<NewExpense, 'isBill' | 'source'> & {
+  isBill: boolean;
+  source: 'receipt' | 'manual';
+};
+
 export type NewRecurring = {
   id: RecurringId;
   name: string;

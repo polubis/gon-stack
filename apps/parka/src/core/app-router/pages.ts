@@ -62,4 +62,9 @@ export const APP_PAGES: readonly AppPage[] = [
     title: 'Nowy wydatek | Parka',
     description: 'Dodaj wydatek, wgraj paragon lub dodaj wydatek cykliczny.',
   },
+  {
+    url: APP_ROUTER.expenseEdit(),
+    title: 'Edycja wydatku | Parka',
+    description: 'Zmień wydatek i jego produkty.',
+  },
 ];

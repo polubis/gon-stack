@@ -1,5 +1,6 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, type ReactNode } from 'react';
 import { Check, LoaderCircle, Plus } from 'lucide-react';
+import { cn } from '@repo/react-kit/cn';
 import {
   categoryLabel,
   MIXED_CATEGORY_LABEL,
@@ -9,39 +10,56 @@ import { Button, Field, inputClass } from '@/shared/ui/controls';
 import { Card } from '@/shared/ui/layout';
 import { NumberInput } from '@/shared/ui/number-input';
 import { money, toLocalDateInput, toTimestamp } from '../domain/format';
-import { newExpenseId } from '../domain/ids';
 import {
   createProduct,
   defaultCategoryId,
   expenseCategoryId,
   patchProduct,
-  productsFromDraft,
   productsTotal,
 } from '../domain/products';
 import type {
+  Category,
   CategoryId,
+  ExpenseFormValues,
   Product,
   ProductId,
-  ReceiptDraft,
 } from '../domain/models';
-import { useContext } from './context';
 import { ProductCard } from './product-card';
 
-/** Normal expense: shop, date, amount or products. Starts from a scan when given. */
-export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
-  const ctx = useContext();
-  const categories = ctx.useCategories();
-  const saving = ctx.useSaving();
-  const [merchant, setMerchant] = useState(draft?.merchant ?? '');
+type Props = {
+  /** Starting values; `null` = a blank new expense. */
+  base: ExpenseFormValues | null;
+  categories: Category[];
+  saving: boolean;
+  /** `page` = own route, `dialog` = popup over the dashboard. Same fields. */
+  layout: 'page' | 'dialog';
+  submitLabel: string;
+  /** Extra footer buttons (cancel, delete) shown next to the submit. */
+  actions?: ReactNode;
+  onSubmit: (values: ExpenseFormValues) => void;
+};
+
+/** The one expense form: shop, date, amount or products. Adds and edits. */
+export const ExpenseForm = ({
+  base,
+  categories,
+  saving,
+  layout,
+  submitLabel,
+  actions,
+  onSubmit,
+}: Props) => {
+  const dialog = layout === 'dialog';
+  const [merchant, setMerchant] = useState(base?.merchant ?? '');
   const [date, setDate] = useState(
-    toLocalDateInput(draft?.date ?? new Date().toISOString()),
+    toLocalDateInput(base?.date ?? new Date().toISOString()),
   );
-  const [method, setMethod] = useState(draft?.paymentMethod ?? '');
-  const [categoryId, setCategoryId] = useState<CategoryId | null>(null);
-  const [amount, setAmount] = useState(draft?.amount ?? 0);
-  const [products, setProducts] = useState<Product[]>(() =>
-    draft ? productsFromDraft(draft, defaultCategoryId(categories)) : [],
+  const [method, setMethod] = useState(base?.paymentMethod ?? '');
+  const [categoryId, setCategoryId] = useState<CategoryId | null>(
+    base?.categoryId ?? null,
   );
+  const [amount, setAmount] = useState(base?.amount ?? 0);
+  const [products, setProducts] = useState<Product[]>(base?.items ?? []);
   const [openId, setOpenId] = useState<ProductId | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
@@ -73,15 +91,12 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
       setOpenId(unnamed.id);
       return;
     }
-    ctx.createExpense({
-      id: newExpenseId(),
+    onSubmit({
       merchant: merchant.trim(),
-      date: toTimestamp(date, draft?.date),
+      date: toTimestamp(date, base?.date),
       amount: total,
       categoryId: derived,
       paymentMethod: method.trim(),
-      isBill: false,
-      source: draft ? 'receipt' : 'manual',
       items: products,
     });
   };
@@ -90,12 +105,18 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
     <form
       onSubmit={save}
       className="flex flex-1 flex-col"
-      data-e2e="expenses-management:expense-form"
+      data-e2e="expense-form:form"
     >
-      <div className="flex flex-1 flex-col gap-4 md:gap-6 lg:grid lg:grid-cols-3 lg:content-start lg:items-start">
+      <div
+        className={cn(
+          'flex flex-1 flex-col gap-4',
+          !dialog &&
+            'md:gap-6 lg:grid lg:grid-cols-3 lg:content-start lg:items-start',
+        )}
+      >
         {categories.length === 0 ? (
           <Card
-            data-e2e="expenses-management:no-categories"
+            data-e2e="expense-form:no-categories"
             role="status"
             className="lg:col-span-3"
           >
@@ -118,7 +139,7 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
               required
               value={merchant}
               placeholder="np. Biedronka"
-              data-e2e="expenses-management:merchant"
+              data-e2e="expense-form:merchant"
               onChange={(e) => setMerchant(e.target.value)}
             />
           </Field>
@@ -130,7 +151,7 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
               required
               value={total}
               readOnly={hasProducts}
-              data-e2e="expenses-management:amount"
+              data-e2e="expense-form:amount"
               onValueChange={setAmount}
             />
           </Field>
@@ -140,7 +161,7 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
               className={inputClass}
               required
               value={date}
-              data-e2e="expenses-management:date"
+              data-e2e="expense-form:date"
               onChange={(e) => setDate(e.target.value)}
             />
           </Field>
@@ -149,7 +170,7 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
             hint={hasProducts ? 'Wynika z kategorii produktów.' : undefined}
           >
             {hasProducts ? (
-              <p className={inputClass} data-e2e="expenses-management:category">
+              <p className={inputClass} data-e2e="expense-form:category">
                 {derivedName}
               </p>
             ) : (
@@ -157,7 +178,7 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
                 className={inputClass}
                 required
                 value={selected ?? ''}
-                data-e2e="expenses-management:category"
+                data-e2e="expense-form:category"
                 onChange={(e) => setCategoryId(e.target.value as CategoryId)}
               >
                 {categories.map((c) => (
@@ -173,7 +194,7 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
               className={inputClass}
               value={method}
               placeholder="np. Karta"
-              data-e2e="expenses-management:method"
+              data-e2e="expense-form:method"
               onChange={(e) => setMethod(e.target.value)}
             />
           </Field>
@@ -181,7 +202,7 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
 
         <section
           aria-labelledby="products-heading"
-          className="space-y-2 lg:col-span-2"
+          className={cn('space-y-2', !dialog && 'lg:col-span-2')}
         >
           <div className="flex items-center justify-between">
             <h2
@@ -192,7 +213,7 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
             </h2>
             <button
               type="button"
-              data-e2e="expenses-management:add-product"
+              data-e2e="expense-form:add-product"
               onClick={addProduct}
               className="inline-flex items-center gap-1 text-sm font-medium text-brand-dark"
             >
@@ -201,7 +222,13 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
           </div>
 
           {hasProducts ? (
-            <ul className="space-y-2 md:grid md:grid-cols-2 md:items-start md:gap-4 md:space-y-0">
+            <ul
+              className={cn(
+                'space-y-2',
+                !dialog &&
+                  'md:grid md:grid-cols-2 md:items-start md:gap-4 md:space-y-0',
+              )}
+            >
               {products.map((product) => (
                 <ProductCard
                   key={product.id}
@@ -229,20 +256,28 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
         </section>
       </div>
 
-      <div className="sticky bottom-0 -mx-4 mt-4 flex items-center gap-3 border-t border-line bg-card px-4 py-3 md:-mx-8 md:px-8 lg:-mx-10 lg:px-10 xl:-mx-16 xl:px-16">
+      <div
+        className={cn(
+          'mt-4 flex items-center gap-3 border-t border-line bg-card py-3',
+          dialog
+            ? 'flex-wrap'
+            : 'sticky bottom-0 -mx-4 px-4 md:-mx-8 md:px-8 lg:-mx-10 lg:px-10 xl:-mx-16 xl:px-16',
+        )}
+      >
         <div className="flex-1">
           <p className="text-xs text-ink-soft">Razem</p>
           <p
             className="text-lg font-bold tabular-nums"
-            data-e2e="expenses-management:total"
+            data-e2e="expense-form:total"
           >
             {money(total)}
           </p>
         </div>
+        {actions}
         <Button
           type="submit"
           className="w-auto px-6"
-          data-e2e="expenses-management:save"
+          data-e2e="expense-form:save"
           disabled={saving || !selected}
         >
           {saving ? (
@@ -253,7 +288,7 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
           ) : (
             <Check className="h-4 w-4" aria-hidden="true" />
           )}{' '}
-          Dodaj wydatek
+          {submitLabel}
         </Button>
       </div>
     </form>

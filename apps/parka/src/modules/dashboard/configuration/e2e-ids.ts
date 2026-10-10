@@ -41,10 +41,7 @@ export const DASHBOARD_E2E_IDS = [
   'dashboard:recurring-delete',
   'dashboard:toast',
   'dashboard:detail',
-  'dashboard:edit-merchant',
-  'dashboard:edit-amount',
-  'dashboard:edit-category',
-  'dashboard:save',
+  'dashboard:edit',
   'dashboard:delete',
 ] as const;
 
