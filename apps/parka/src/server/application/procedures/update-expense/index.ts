@@ -1,5 +1,10 @@
 import { updateExpenseSchema } from '@schemas/expenses';
-import { InternalServer, NotFound } from '../../core/error-handling';
+import { deriveExpenseCategory } from '@/shared/expense-category/category';
+import {
+  BadRequest,
+  InternalServer,
+  NotFound,
+} from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 
@@ -8,13 +13,17 @@ export const updateExpense = privateProcedure({
 })({
   handler: async (input, { db, user }) => {
     const uid = user.id;
+    const categoryId = deriveExpenseCategory(input.items, input.categoryId);
+    if (!categoryId && input.items.length === 0) {
+      throw new BadRequest(undefined, 'Expense needs a category');
+    }
     const { data, error } = await db
       .from('expenses')
       .update({
         merchant: input.merchant,
         date: input.date,
         amount: input.amount,
-        category_id: input.categoryId,
+        category_id: categoryId,
         payment_method: input.paymentMethod,
         is_bill: input.isBill,
         source: input.source,

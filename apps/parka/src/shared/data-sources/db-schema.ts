@@ -61,7 +61,7 @@ export type Database = {
       expenses: {
         Row: {
           amount: number;
-          category_id: string;
+          category_id: string | null;
           date: string;
           id: string;
           is_bill: boolean;
@@ -72,7 +72,7 @@ export type Database = {
         };
         Insert: {
           amount?: number;
-          category_id: string;
+          category_id: string | null;
           date: string;
           id: string;
           is_bill?: boolean;
@@ -83,7 +83,7 @@ export type Database = {
         };
         Update: {
           amount?: number;
-          category_id?: string;
+          category_id?: string | null;
           date?: string;
           id?: string;
           is_bill?: boolean;

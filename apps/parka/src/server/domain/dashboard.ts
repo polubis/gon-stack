@@ -1,7 +1,14 @@
+import {
+  categoryShares,
+  type CategorizedItem,
+} from '@/shared/expense-category/category';
+
 export type DashboardExpense = {
   date: string;
   amount: number;
-  categoryId: string;
+  /** `null` for an expense made of products from different categories. */
+  categoryId: string | null;
+  items?: CategorizedItem[];
 };
 export type DashboardCategory = { id: string; name: string; color: string };
 
@@ -120,9 +127,17 @@ export const summarizeDashboard = ({
   const dailyAverage = elapsed === 0 ? 0 : total / elapsed;
 
   const scoped = inMonths(expenses, [month]);
+  const shares = scoped.flatMap((e) =>
+    categoryShares({ ...e, items: e.items ?? [] }),
+  );
   const categorySlices = categories
     .map((category) => {
-      const amount = sum(scoped.filter((e) => e.categoryId === category.id));
+      const amount = Number(
+        shares
+          .filter((s) => s.categoryId === category.id)
+          .reduce((total, s) => total + s.amount, 0)
+          .toFixed(2),
+      );
       return {
         categoryId: category.id,
         name: category.name,
