@@ -9,6 +9,12 @@ export const MONTH_OPTIONS_COUNT = 12;
 /** Category legend rows shown before "Pokaż wszystkie". */
 export const MAX_VISIBLE_CATEGORIES = 6;
 
+/** Expense rows shown before "Pokaż wszystkie". */
+export const MAX_VISIBLE_EXPENSES = 6;
+
+/** Fixed list box (6 rows of 3.5rem + 5 dividers of 1px): nothing shifts. */
+export const EXPENSES_LIST_HEIGHT = 'h-[calc(6*3.5rem+0.3125rem)]';
+
 /** Y-axis rows of the spending chart. */
 export const CHART_TICKS = 4;
 

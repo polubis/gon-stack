@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { currentMonth, monthTitle, prevMonth } from '../domain/format';
 import { Main } from '../presentation/main';
+import { readBody } from './dashboard-backend';
 
 const SUMMARY = {
   userName: 'Anna Kowalska',
@@ -131,6 +132,50 @@ describe('dashboard screen', () => {
     const dialog = within(await screen.findByRole('dialog'));
     expect(dialog.getByText('Kat 7')).toBeTruthy();
     expect(dialog.getByText('Kat 0')).toBeTruthy();
+  });
+
+  it('shows six expenses and lists all of them in a dialog', async () => {
+    const month = currentMonth();
+    const expenses = Array.from({ length: 8 }, (_, i) => ({
+      id: `e-${i}`,
+      merchant: `Sklep ${i}`,
+      date: `${month}-02T1${i}:00:00Z`,
+      amount: 10,
+      categoryId: 'c-1',
+      paymentMethod: 'card',
+      isBill: false,
+      source: 'manual',
+      items: [],
+    }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => ({
+        json: async () => readBody(url, { expenses }),
+      })),
+    );
+    const user = userEvent.setup();
+
+    render(<Main />);
+
+    expect(await screen.findByText('Sklep 2')).toBeTruthy();
+    expect(screen.queryByText('Sklep 1')).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Pokaż wszystkie' }));
+    const dialog = within(await screen.findByRole('dialog'));
+    expect(dialog.getByText('Sklep 1')).toBeTruthy();
+    expect(dialog.getByText('Sklep 0')).toBeTruthy();
+    await user.click(dialog.getByRole('button', { name: 'Zamknij' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('hides the show-all button when six expenses or fewer', async () => {
+    stubApi();
+
+    render(<Main />);
+
+    await screen.findByText('Limity');
+    expect(
+      screen.queryByRole('button', { name: 'Pokaż wszystkie' }),
+    ).toBeNull();
   });
 
   it('asks the backend for the chosen month', async () => {

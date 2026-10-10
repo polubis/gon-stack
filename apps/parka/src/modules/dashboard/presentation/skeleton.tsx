@@ -1,7 +1,10 @@
+import { cn } from '@repo/react-kit/cn';
+import {
+  EXPENSES_LIST_HEIGHT,
+  MAX_VISIBLE_EXPENSES,
+} from '../configuration/constraints';
 import { Card } from '@/shared/ui/layout';
 import { Skeleton } from '@/shared/ui/skeleton';
-
-const LIST_ROWS = 8;
 
 const Rows = ({ count, className }: { count: number; className: string }) => (
   <>
@@ -78,8 +81,13 @@ export const DashboardSkeleton = () => (
       <div className="flex gap-2 pb-1">
         <Rows count={3} className="h-8.5 w-24 shrink-0 rounded-full" />
       </div>
-      <ul className="divide-y divide-line">
-        {Array.from({ length: LIST_ROWS }, (_, i) => (
+      <ul
+        className={cn(
+          'divide-y divide-line overflow-hidden pr-2',
+          EXPENSES_LIST_HEIGHT,
+        )}
+      >
+        {Array.from({ length: MAX_VISIBLE_EXPENSES }, (_, i) => (
           <li key={i} className="flex items-center gap-3 px-2 py-2">
             <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
             <span className="flex flex-1 flex-col gap-1.5">

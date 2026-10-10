@@ -6,10 +6,22 @@ import { categoryLabel } from '@/shared/i18n/category-label';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { Card } from '@/shared/ui/layout';
 import { cn } from '@repo/react-kit/cn';
-import { money, shortDateTimeLabel } from '../domain/format';
-import type { CategoryId, ExpenseId, Month } from '../domain/models';
+import {
+  EXPENSES_LIST_HEIGHT,
+  MAX_VISIBLE_EXPENSES,
+} from '../configuration/constraints';
+import { money, monthTitle, shortDateTimeLabel } from '../domain/format';
+import type {
+  Category,
+  CategoryId,
+  Expense,
+  ExpenseId,
+  Month,
+} from '../domain/models';
+import { DetailDialog } from './detail-dialog';
 import { useContext } from './context';
 import { RecurringMark } from './recurring-badge';
+import { ShowAllFade } from './show-all-fade';
 import {
   categoryOf,
   categoryTabs,
@@ -55,10 +67,6 @@ const Chip = ({
   </button>
 );
 
-/** Rows the list shows before it scrolls. */
-/** Fixed so filters/loading never shift the layout: 8 rows of 3.5rem + 7 dividers (1px each). */
-const LIST_HEIGHT = 'h-[calc(8*3.5rem+0.4375rem)]';
-
 const ROW_CLASS =
   'flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left';
 
@@ -82,6 +90,51 @@ const Row = ({
   </button>
 );
 
+/** Rows of the expenses list; every row opens its edit popup. */
+const ExpenseList = ({
+  expenses,
+  categories,
+  onSelect,
+}: {
+  expenses: Expense[];
+  categories: Category[];
+  onSelect: (id: ExpenseId) => void;
+}) => (
+  <ul className="divide-y divide-line pr-2">
+    {expenses.map((e) => {
+      const category = categoryOf(categories, e.categoryId);
+      return (
+        <li key={e.id} className="group">
+          <Row id={e.id} onSelect={onSelect}>
+            <span className="relative shrink-0">
+              <CategoryAvatar category={category} className="h-10 w-10" />
+              {e.source === 'recurring' ? <RecurringMark /> : null}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-semibold">
+                {e.merchant}
+              </span>
+              <span className="block text-xs text-ink-soft">
+                {shortDateTimeLabel(e.date)}
+                <span className="sr-only">{`, ${categoryLabel(category.name)}`}</span>
+              </span>
+            </span>
+            <span className="relative text-sm font-semibold tabular-nums">
+              {money(e.amount)}
+              <span
+                role="tooltip"
+                className="pointer-events-none absolute top-1/2 right-full z-(--z-tooltip) mr-3 hidden -translate-y-1/2 rounded-lg bg-card px-3 py-1.5 text-xs font-medium whitespace-nowrap text-ink shadow-popover md:group-hover:block md:group-focus-within:block"
+              >
+                {categoryLabel(category.name)}
+              </span>
+            </span>
+          </Row>
+        </li>
+      );
+    })}
+  </ul>
+);
+
 /** All expenses of the selected month, recurring ones included, filterable by category. */
 export const MonthExpenses = ({
   month,
@@ -94,6 +147,7 @@ export const MonthExpenses = ({
   const expenses = withRecurring(ctx.useExpenses(), ctx.useRecurring(), month);
   const categories = ctx.useCategories();
   const [filter, setFilter] = useState<CategoryId | null>(null);
+  const [all, setAll] = useState(false);
 
   const inMonth = expensesInMonth(expenses, month);
   const tabs = categoryTabs(inMonth, categories);
@@ -154,50 +208,42 @@ export const MonthExpenses = ({
         </div>
       ) : null}
 
-      <div className={cn(LIST_HEIGHT, 'overflow-y-auto')}>
+      <div className={cn('relative overflow-hidden', EXPENSES_LIST_HEIGHT)}>
         {visible.length === 0 ? (
           <p className="py-2 text-sm text-ink-soft">
             Brak wydatków w tym miesiącu.
           </p>
         ) : (
-          <ul className="divide-y divide-line pr-2">
-            {visible.map((e) => {
-              const category = categoryOf(categories, e.categoryId);
-              return (
-                <li key={e.id} className="group">
-                  <Row id={e.id} onSelect={onSelect}>
-                    <span className="relative shrink-0">
-                      <CategoryAvatar
-                        category={category}
-                        className="h-10 w-10"
-                      />
-                      {e.source === 'recurring' ? <RecurringMark /> : null}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-semibold">
-                        {e.merchant}
-                      </span>
-                      <span className="block text-xs text-ink-soft">
-                        {shortDateTimeLabel(e.date)}
-                        <span className="sr-only">{`, ${categoryLabel(category.name)}`}</span>
-                      </span>
-                    </span>
-                    <span className="relative text-sm font-semibold tabular-nums">
-                      {money(e.amount)}
-                      <span
-                        role="tooltip"
-                        className="pointer-events-none absolute top-1/2 right-full z-(--z-tooltip) mr-3 hidden -translate-y-1/2 rounded-lg bg-card px-3 py-1.5 text-xs font-medium whitespace-nowrap text-ink shadow-popover md:group-hover:block md:group-focus-within:block"
-                      >
-                        {categoryLabel(category.name)}
-                      </span>
-                    </span>
-                  </Row>
-                </li>
-              );
-            })}
-          </ul>
+          <ExpenseList
+            expenses={visible.slice(0, MAX_VISIBLE_EXPENSES)}
+            categories={categories}
+            onSelect={onSelect}
+          />
+        )}
+        {visible.length > MAX_VISIBLE_EXPENSES && (
+          <ShowAllFade
+            onClick={() => setAll(true)}
+            data-e2e="dashboard:expenses-toggle"
+          />
         )}
       </div>
+      {all && (
+        <DetailDialog
+          data-e2e="dashboard:expenses-dialog"
+          title="Wydatki"
+          description={monthTitle(month)}
+          onClose={() => setAll(false)}
+        >
+          <ExpenseList
+            expenses={visible}
+            categories={categories}
+            onSelect={(id) => {
+              setAll(false);
+              onSelect(id);
+            }}
+          />
+        </DetailDialog>
+      )}
     </Card>
   );
 };

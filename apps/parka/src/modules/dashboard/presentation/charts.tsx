@@ -1,6 +1,6 @@
 import { cn } from '@repo/react-kit/cn';
-import { Button } from '@/shared/ui/controls';
 import { money } from '../domain/format';
+import { ShowAllFade } from './show-all-fade';
 
 type Slice = { label: string; value: number; color: string };
 
@@ -84,16 +84,10 @@ export const Donut = ({
           ))}
         </ul>
         {overflows && onShowAll && (
-          <div className="absolute inset-x-0 bottom-0 flex h-16 items-end justify-center bg-linear-to-t from-card from-40% to-transparent">
-            <Button
-              variant="ghost"
-              className="w-auto px-3 py-1.5"
-              onClick={onShowAll}
-              data-e2e="dashboard:categories-toggle"
-            >
-              Pokaż wszystkie
-            </Button>
-          </div>
+          <ShowAllFade
+            onClick={onShowAll}
+            data-e2e="dashboard:categories-toggle"
+          />
         )}
       </div>
     </figure>

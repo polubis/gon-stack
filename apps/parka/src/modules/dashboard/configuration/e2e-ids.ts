@@ -19,6 +19,8 @@ export const DASHBOARD_E2E_IDS = [
   'dashboard:category-new',
   'dashboard:categories-toggle',
   'dashboard:categories-dialog',
+  'dashboard:expenses-toggle',
+  'dashboard:expenses-dialog',
   'dashboard:limit-new-hint',
   'dashboard:limit-form',
   'dashboard:limit-form-category',

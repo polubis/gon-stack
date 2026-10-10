@@ -35,7 +35,8 @@ export const DetailDialog = ({
   'data-e2e':
     | 'dashboard:detail'
     | 'dashboard:recurring-dialog'
-    | 'dashboard:categories-dialog';
+    | 'dashboard:categories-dialog'
+    | 'dashboard:expenses-dialog';
 }) => (
   <Dialog.Root
     open
