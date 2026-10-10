@@ -9,7 +9,7 @@ import { cn } from '@repo/react-kit/cn';
 import { money, shortDateTimeLabel } from '../domain/format';
 import type { CategoryId, ExpenseId, Month } from '../domain/models';
 import { useContext } from './context';
-import { RecurringBadge } from './recurring-badge';
+import { RecurringMark } from './recurring-badge';
 import {
   categoryOf,
   categoryTabs,
@@ -164,25 +164,32 @@ export const MonthExpenses = ({
             {visible.map((e) => {
               const category = categoryOf(categories, e.categoryId);
               return (
-                <li key={e.id}>
+                <li key={e.id} className="group">
                   <Row id={e.id} onSelect={onSelect}>
-                    <CategoryAvatar category={category} className="h-10 w-10" />
+                    <span className="relative shrink-0">
+                      <CategoryAvatar
+                        category={category}
+                        className="h-10 w-10"
+                      />
+                      {e.source === 'recurring' ? <RecurringMark /> : null}
+                    </span>
                     <span className="min-w-0 flex-1">
-                      <span className="flex items-center gap-2">
-                        <span className="truncate text-sm font-semibold">
-                          {e.merchant}
-                        </span>
-                        {e.source === 'recurring' ? <RecurringBadge /> : null}
+                      <span className="block truncate text-sm font-semibold">
+                        {e.merchant}
                       </span>
                       <span className="block text-xs text-ink-soft">
                         {shortDateTimeLabel(e.date)}
+                        <span className="sr-only">{`, ${categoryLabel(category.name)}`}</span>
                       </span>
                     </span>
-                    <span className="text-sm font-semibold tabular-nums">
+                    <span className="relative text-sm font-semibold tabular-nums">
                       {money(e.amount)}
-                    </span>
-                    <span className="hidden rounded-full bg-brand-soft px-3 py-1 text-xs font-medium text-brand-dark md:inline">
-                      {categoryLabel(category.name)}
+                      <span
+                        role="tooltip"
+                        className="pointer-events-none absolute top-1/2 right-full z-(--z-tooltip) mr-3 hidden -translate-y-1/2 rounded-lg bg-card px-3 py-1.5 text-xs font-medium whitespace-nowrap text-ink shadow-popover md:group-hover:block md:group-focus-within:block"
+                      >
+                        {categoryLabel(category.name)}
+                      </span>
                     </span>
                   </Row>
                 </li>
