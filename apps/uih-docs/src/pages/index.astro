@@ -1,0 +1,27 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '@/layout.astro';
+
+const docs = (await getCollection('docs')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+
+<Layout title="Overview" current="/">
+  <h1 class="mb-4 text-2xl font-semibold">@repo/uih</h1>
+  <p class="text-ink-soft mb-4">
+    Headless React UI with an optional plain-CSS theme. Documented components:
+  </p>
+  <ul class="list-disc pl-6">
+    {
+      docs.map((doc) => (
+        <li>
+          <a class="underline" href={`/${doc.id}/`}>
+            {doc.data.title}
+          </a>
+          <span class="text-ink-soft"> - {doc.data.description}</span>
+        </li>
+      ))
+    }
+  </ul>
+</Layout>

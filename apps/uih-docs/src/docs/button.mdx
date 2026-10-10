@@ -1,0 +1,71 @@
+---
+title: Button
+description: Native button with variants.
+order: 1
+---
+
+import { Button } from '@repo/uih/button';
+
+export const VARIANTS = ['primary', 'secondary', 'ghost', 'danger'];
+
+# Button
+
+Native `<button>` with `variant` and `type` (defaults to `button`). Hooks: `data-ds-button`, `data-variant`.
+
+## Usage
+
+```tsx
+import { Button } from '@repo/uih/button';
+import '@repo/uih/theme/button.css';
+
+<Button.Root variant="primary">Save</Button.Root>;
+```
+
+## Variants
+
+<div class="not-prose flex flex-wrap gap-3">
+  {VARIANTS.map((variant) => (
+    <Button.Root variant={variant}>{variant}</Button.Root>
+  ))}
+</div>
+
+## Disabled
+
+<div class="not-prose flex flex-wrap gap-3">
+  {VARIANTS.map((variant) => (
+    <Button.Root variant={variant} disabled>
+      {variant}
+    </Button.Root>
+  ))}
+</div>
+
+## Override with Tailwind
+
+`className` utilities beat every `ds` style, no `!important` needed. The theme lives in `@layer ds`, declared below `utilities`:
+
+```css
+@layer theme, base, ds, components, utilities;
+@import 'tailwindcss';
+@import '@repo/uih/theme/all.css';
+```
+
+Background, text color, padding, radius, border, font size and hover are all replaced below:
+
+```tsx
+<Button.Root
+  variant="primary"
+  className="rounded-full border-4 border-amber-500 bg-emerald-600 px-10 py-4 text-2xl font-bold text-amber-100 hover:bg-emerald-800"
+>
+  Overridden
+</Button.Root>
+```
+
+<div class="not-prose flex flex-wrap gap-3">
+  <Button.Root
+    data-e2e="tailwind-override"
+    variant="primary"
+    className="rounded-full border-4 border-amber-500 bg-emerald-600 px-10 py-4 text-2xl font-bold text-amber-100 hover:bg-emerald-800"
+  >
+    Overridden
+  </Button.Root>
+</div>

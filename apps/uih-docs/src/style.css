@@ -1,0 +1,13 @@
+@layer theme, base, ds, components, utilities;
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+@import '@repo/uih/theme/all.css';
+
+@theme {
+  --color-page: #f9fafb;
+  --color-ink: #111827;
+  --color-ink-soft: #4b5563;
+  --color-line: #d1d5db;
+  --color-code: #111827;
+  --color-on-code: #f3f4f6;
+}

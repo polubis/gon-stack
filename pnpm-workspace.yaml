@@ -72,6 +72,7 @@ overrides:
 catalog:
   '@astrojs/check': 0.9.10
   '@astrojs/cloudflare': 14.3.4
+  '@astrojs/mdx': 8.0.3
   '@astrojs/react': 6.0.6
   '@astrojs/sitemap': 3.7.4
   '@axe-core/playwright': 4.13.0

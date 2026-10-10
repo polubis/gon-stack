@@ -1,0 +1,51 @@
+---
+import { getCollection } from 'astro:content';
+import '@/style.css';
+
+type Props = { title: string; current: string };
+
+const { title, current } = Astro.props;
+
+const docs = (await getCollection('docs')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const NAV = [
+  { href: '/', label: 'Overview' },
+  ...docs.map((doc) => ({ href: `/${doc.id}/`, label: doc.data.title })),
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} | uih docs</title>
+  </head>
+  <body class="bg-page text-ink min-h-screen md:flex">
+    <nav
+      aria-label="Components"
+      class="border-line border-b p-4 md:min-h-screen md:w-56 md:border-r md:border-b-0"
+    >
+      <p class="mb-2 font-semibold">uih</p>
+      <ul class="flex gap-2 md:flex-col">
+        {
+          NAV.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                aria-current={item.href === current ? 'page' : undefined}
+                class="block rounded px-2 py-1 hover:underline aria-[current=page]:font-semibold"
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <main class="mx-auto w-full max-w-3xl p-4 md:p-8">
+      <slot />
+    </main>
+  </body>
+</html>
