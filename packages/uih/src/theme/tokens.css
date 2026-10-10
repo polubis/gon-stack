@@ -1,0 +1,15 @@
+@layer ds.tokens {
+  :where(:root, [data-ds-theme]) {
+    --ds-color-primary: #1d4ed8;
+    --ds-color-on-primary: #ffffff;
+    --ds-color-surface: #ffffff;
+    --ds-color-on-surface: #111827;
+    --ds-color-border: #6b7280;
+    --ds-color-focus: #1d4ed8;
+    --ds-radius: 0.375rem;
+    --ds-font-size: 1rem;
+    --ds-space-y: 0.5em;
+    --ds-space-x: 1em;
+    --ds-target-size: 2.75em;
+  }
+}
