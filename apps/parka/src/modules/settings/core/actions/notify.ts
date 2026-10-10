@@ -1,14 +1,9 @@
-import type { Notice } from '../../domain/models';
+import type { NoticeBody } from '../../domain/models';
 import type { Store } from '../store';
 
-export const notify = (
-  store: Store,
-  tone: Notice['tone'],
-  message: string,
-): void => {
+export const notify = (store: Store, notice: NoticeBody): void => {
   store.$notice.set({
     id: (store.$notice.get()?.id ?? 0) + 1,
-    tone,
-    message,
+    ...notice,
   });
 };

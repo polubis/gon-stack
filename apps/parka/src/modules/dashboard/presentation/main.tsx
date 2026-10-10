@@ -97,9 +97,8 @@ const DashboardView = () => {
         <Toast
           key={notice.id}
           data-e2e="dashboard:toast"
-          tone={notice.tone}
-          message={notice.message}
-          onDismiss={ctx.dismissNotice}
+          notice={notice}
+          onClose={ctx.dismissNotice}
         />
       ) : null}
     </>
@@ -151,11 +150,11 @@ const DashboardView = () => {
 
 export const Main = () => (
   <ErrorBoundary
-    fallback={({ reset }) => (
+    fallback={({ error, reset }) => (
       <ErrorState
         title="Wystąpił błąd widoku podsumowania"
         code={ERROR_CODES.render}
-        description="Nie udało się wyświetlić podsumowania. Spróbuj ponownie."
+        description={error.message}
         onRetry={reset}
         backHref={APP_ROUTER.home()}
       />

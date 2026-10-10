@@ -34,11 +34,15 @@ export const ERROR_CODES = {
 export const RECEIPT_FILE_ERRORS = {
   notImage: 'Wybierz plik ze zdjęciem paragonu.',
   tooLarge: 'Zdjęcie jest za duże. Maksymalny rozmiar to 10 MB.',
-  scan: 'Nie udało się przetworzyć zdjęcia. Spróbuj ponownie.',
-  limit: 'Osiągnięto dzienny limit skanów paragonów. Spróbuj jutro.',
 } as const;
 
 export const NOTICES = {
-  expenseFailed: 'Nie udało się dodać wydatku.',
-  recurringFailed: 'Nie udało się dodać wydatku cyklicznego.',
+  expenseFailed: {
+    title: 'Nie udało się dodać wydatku',
+    code: 'EXPENSE_CREATE_FAILED',
+  },
+  recurringFailed: {
+    title: 'Nie udało się dodać wydatku cyklicznego',
+    code: 'RECURRING_CREATE_FAILED',
+  },
 } as const;

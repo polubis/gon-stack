@@ -113,11 +113,11 @@ const DataExportView = () => {
 
 export const Main = () => (
   <ErrorBoundary
-    fallback={({ reset }) => (
+    fallback={({ error, reset }) => (
       <ErrorState
         title="Wystąpił błąd widoku eksportu"
         code={ERROR_CODES.render}
-        description="Nie udało się wyświetlić strony. Spróbuj ponownie."
+        description={error.message}
         onRetry={reset}
         backHref={APP_ROUTER.privacy()}
       />

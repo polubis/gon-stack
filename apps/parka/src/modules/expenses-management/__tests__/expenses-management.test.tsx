@@ -255,9 +255,13 @@ describe('adding an expense on its own page', () => {
       await user.type(screen.getByLabelText('Kwota'), '25');
       await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
 
-      expect(await screen.findByRole('alert')).toHaveTextContent(
-        'Nie udało się dodać wydatku.',
-      );
+      const toast = await screen.findByRole('alert');
+      expect(toast).toHaveTextContent('Nie udało się dodać wydatku');
+      expect(toast).toHaveTextContent('EXPENSE_CREATE_FAILED');
+      expect(toast).toHaveTextContent('x');
+      expect(
+        within(toast).getByRole('button', { name: 'Spróbuj ponownie' }),
+      ).toBeVisible();
       expect(navigateTo).not.toHaveBeenCalled();
       expect(screen.getByLabelText('Sklep')).toHaveValue('Piekarnia');
     });

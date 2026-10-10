@@ -1,12 +1,9 @@
 import { catchError, EMPTY, finalize, from, map, switchMap, tap } from 'rxjs';
 import type { Store } from '../store';
 import type { Bus } from '../bus';
-import { RECEIPT_FILE_ERRORS } from '../../configuration/constraints';
+import { errorMessage } from '@/shared/errors/error-message';
 import { receiptFileProblem } from '../../domain/receipt-file';
-import {
-  postReceiptScan,
-  ReceiptScanLimitError,
-} from '../../integration/repository';
+import { postReceiptScan } from '../../integration/repository';
 
 /** A newer photo replaces the one still being read. */
 export const scanReceipt = (store: Store, { ofType }: Bus) =>
@@ -36,10 +33,7 @@ export const scanReceipt = (store: Store, { ofType }: Bus) =>
           if (!isAbort) {
             store.$scan.set({
               status: 'failed',
-              message:
-                error instanceof ReceiptScanLimitError
-                  ? RECEIPT_FILE_ERRORS.limit
-                  : RECEIPT_FILE_ERRORS.scan,
+              message: errorMessage(error),
               file,
             });
           }

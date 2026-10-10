@@ -104,9 +104,8 @@ const ExpensesManagementView = () => {
         <Toast
           key={notice.id}
           data-e2e="expenses-management:toast"
-          tone={notice.tone}
-          message={notice.message}
-          onDismiss={ctx.dismissNotice}
+          notice={notice}
+          onClose={ctx.dismissNotice}
         />
       ) : null}
     </div>
@@ -115,11 +114,11 @@ const ExpensesManagementView = () => {
 
 export const Main = () => (
   <ErrorBoundary
-    fallback={({ reset }) => (
+    fallback={({ error, reset }) => (
       <ErrorState
         title="Wystąpił błąd widoku wydatku"
         code={ERROR_CODES.render}
-        description="Nie udało się wyświetlić formularza. Spróbuj ponownie."
+        description={error.message}
         onRetry={reset}
         backHref={APP_ROUTER.dashboard()}
       />

@@ -73,9 +73,7 @@ describe('sign up', () => {
 
     await fillAndSubmit('a@b.co', 'secret1');
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Could not reach the server',
-    );
+    expect(await screen.findByRole('alert')).toHaveTextContent('offline');
   });
 
   it('sends only one request when the form is submitted twice', async () => {

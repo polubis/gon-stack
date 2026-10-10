@@ -2,7 +2,7 @@ import { catchError, EMPTY, exhaustMap, finalize, from, tap } from 'rxjs';
 import type { Store } from '../store';
 import type { Bus } from '../bus';
 import { signUp } from '../../integration/repository';
-import { MESSAGES } from '../../configuration/constraints';
+import { errorMessage } from '@/shared/errors/error-message';
 
 export const submit = (store: Store, { ofType }: Bus) =>
   ofType('[TRIGGER]_SUBMIT').pipe(
@@ -29,8 +29,8 @@ export const submit = (store: Store, { ofType }: Bus) =>
             }
           }
         }),
-        catchError(() => {
-          store.$error.set(MESSAGES.unreachable);
+        catchError((error: unknown) => {
+          store.$error.set(errorMessage(error));
           return EMPTY;
         }),
         finalize(() => store.$pending.reset()),

@@ -62,8 +62,6 @@ export const postRecurring = async (recurring: NewRecurring): Promise<void> => {
   if (json.code !== 201) throw new Error(json.message);
 };
 
-export class ReceiptScanLimitError extends Error {}
-
 export const postReceiptScan = async (
   file: File,
   signal: AbortSignal,
@@ -76,7 +74,6 @@ export const postReceiptScan = async (
     signal,
   });
   const json = (await response.json()) as ScanReceiptOut;
-  if (json.code === 429) throw new ReceiptScanLimitError(json.message);
   if (json.code !== 200) throw new Error(json.message);
   return toReceiptDraft(json.data);
 };

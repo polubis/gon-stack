@@ -7,6 +7,5 @@ export const ERROR_CODES = {
 export const MESSAGES = {
   invalidInput: 'Enter a valid email and password (min. 6 characters).',
   rejectedFallback: 'Sign-up failed. Try again.',
-  unreachable: 'Could not reach the server. Try again.',
   confirmation: 'Sprawdź skrzynkę e-mail i potwierdź rejestrację.',
 } as const;

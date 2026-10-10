@@ -110,11 +110,11 @@ const SignInView = () => {
 
 export const Main = () => (
   <ErrorBoundary
-    fallback={({ reset }) => (
+    fallback={({ error, reset }) => (
       <ErrorState
         title="Wystąpił błąd widoku logowania"
         code={ERROR_CODES.render}
-        description="Nie udało się wyświetlić formularza. Spróbuj ponownie."
+        description={error.message}
         onRetry={reset}
         backHref={APP_ROUTER.home()}
       />

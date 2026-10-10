@@ -12,8 +12,15 @@ export type Category = {
   color: string;
 };
 
-export type Notice = {
-  id: number;
-  tone: 'success' | 'error';
-  message: string;
-};
+export type NoticeBody =
+  | { tone: 'success'; message: string }
+  | {
+      tone: 'error';
+      title: string;
+      code: string;
+      description: string;
+      /** Re-runs the failed action. */
+      retry?: () => void;
+    };
+
+export type Notice = { id: number } & NoticeBody;

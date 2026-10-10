@@ -1,10 +1,11 @@
 import { catchError, concatMap, EMPTY, from, map, tap } from 'rxjs';
 import type { Store } from '../store';
 import type { Bus } from '../bus';
+import { errorMessage } from '@/shared/errors/error-message';
 import { notify } from '../actions/notify';
 import { putCategory } from '../../integration/repository';
 
-export const update = (store: Store, { ofType }: Bus) =>
+export const update = (store: Store, { ofType, emit }: Bus) =>
   ofType('[TRIGGER]_UPDATE').pipe(
     map(({ category }) => ({
       category,
@@ -19,8 +20,10 @@ export const update = (store: Store, { ofType }: Bus) =>
     }),
     concatMap(({ category, previous }) =>
       from(putCategory(category)).pipe(
-        tap(() => notify(store, 'success', 'Zapisano zmiany.')),
-        catchError(() => {
+        tap(() =>
+          notify(store, { tone: 'success', message: 'Zapisano zmiany.' }),
+        ),
+        catchError((error: unknown) => {
           if (previous) {
             store.$categories.set(
               store.$categories
@@ -28,7 +31,13 @@ export const update = (store: Store, { ofType }: Bus) =>
                 .map((c) => (c.id === previous.id ? previous : c)),
             );
           }
-          notify(store, 'error', 'Nie udało się zapisać zmian.');
+          notify(store, {
+            tone: 'error',
+            title: 'Nie udało się zapisać zmian',
+            code: 'CATEGORY_UPDATE_FAILED',
+            description: errorMessage(error),
+            retry: () => emit('[TRIGGER]_UPDATE', { category }),
+          });
           return EMPTY;
         }),
       ),

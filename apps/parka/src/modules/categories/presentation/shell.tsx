@@ -56,9 +56,8 @@ const Layout = () => {
         <Toast
           key={notice.id}
           data-e2e="categories:toast"
-          tone={notice.tone}
-          message={notice.message}
-          onDismiss={ctx.dismissNotice}
+          notice={notice}
+          onClose={ctx.dismissNotice}
         />
       ) : null}
     </div>
@@ -68,11 +67,11 @@ const Layout = () => {
 /** Layout route: one store shared by the list and the editor views. */
 export const Main = () => (
   <ErrorBoundary
-    fallback={({ reset }) => (
+    fallback={({ error, reset }) => (
       <ErrorState
         title="Wystąpił błąd widoku kategorii"
         code={ERROR_CODES.render}
-        description="Nie udało się wyświetlić kategorii. Spróbuj ponownie."
+        description={error.message}
         onRetry={reset}
         backHref={APP_ROUTER.settings()}
       />
