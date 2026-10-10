@@ -9,7 +9,7 @@ import { Button, Field, inputClass } from '@/shared/ui/controls';
 import { Card } from '@/shared/ui/layout';
 import { NumberInput } from '@/shared/ui/number-input';
 import { DEFAULT_PRODUCT_NAME } from '../configuration/constraints';
-import { fromDateInput, money, toDateInput } from '../domain/format';
+import { money, toLocalDateInput, toTimestamp } from '../domain/format';
 import { newExpenseId } from '../domain/ids';
 import {
   createProduct,
@@ -35,7 +35,7 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
   const saving = ctx.useSaving();
   const [merchant, setMerchant] = useState(draft?.merchant ?? '');
   const [date, setDate] = useState(
-    toDateInput(draft?.date ?? new Date().toISOString()),
+    toLocalDateInput(draft?.date ?? new Date().toISOString()),
   );
   const [method, setMethod] = useState(draft?.paymentMethod ?? '');
   const [categoryId, setCategoryId] = useState<CategoryId | null>(null);
@@ -70,7 +70,7 @@ export const ExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
     ctx.createExpense({
       id: newExpenseId(),
       merchant: merchant.trim(),
-      date: fromDateInput(date),
+      date: toTimestamp(date, draft?.date),
       amount: total,
       categoryId: derived,
       paymentMethod: method.trim(),

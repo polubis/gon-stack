@@ -87,6 +87,15 @@ const upload = async (
   label = 'Plik ze zdjęciem paragonu',
 ) => user.upload(screen.getByLabelText(label), file);
 
+const msOfDay = (date: Date) =>
+  ((date.getHours() * 60 + date.getMinutes()) * 60 + date.getSeconds()) * 1000 +
+  date.getMilliseconds();
+
+const localDay = (date: Date) =>
+  [date.getFullYear(), date.getMonth() + 1, date.getDate()]
+    .map((n) => String(n).padStart(2, '0'))
+    .join('-');
+
 const setDate = (value: string) =>
   fireEvent.change(screen.getByLabelText('Data'), { target: { value } });
 
@@ -133,20 +142,36 @@ describe('adding an expense on its own page', () => {
       await user.type(screen.getByLabelText('Sklep'), 'Piekarnia');
       await user.type(screen.getByLabelText('Kwota'), '25');
       setDate('2025-04-10');
+      const before = new Date();
       await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
 
-      await waitFor(() =>
-        expect(navigateTo).toHaveBeenCalledWith('/app/?month=2025-04'),
-      );
-      expect(written).toHaveLength(1);
+      await waitFor(() => expect(written).toHaveLength(1));
+      const after = new Date();
       expect(written[0]!.body).toMatchObject({
         merchant: 'Piekarnia',
         amount: 25,
         categoryId: 'c-1',
         source: 'manual',
         isBill: false,
-        date: '2025-04-10T00:00:00.000Z',
       });
+      const saved = new Date(written[0]!.body.date as string);
+      expect(localDay(saved)).toBe('2025-04-10');
+      expect(msOfDay(saved)).toBeGreaterThanOrEqual(msOfDay(before));
+      expect(msOfDay(saved)).toBeLessThanOrEqual(msOfDay(after));
+    });
+
+    it('redirects to the month of the saved expense', async () => {
+      mockBackend();
+      const user = await open();
+
+      await user.type(screen.getByLabelText('Sklep'), 'Piekarnia');
+      await user.type(screen.getByLabelText('Kwota'), '25');
+      setDate('2025-04-15');
+      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+
+      await waitFor(() =>
+        expect(navigateTo).toHaveBeenCalledWith('/app/?month=2025-04'),
+      );
     });
 
     it('sums products into the amount', async () => {
@@ -393,6 +418,38 @@ describe('adding an expense on its own page', () => {
         amount: 42.5,
         source: 'receipt',
       });
+    });
+
+    it('keeps the scanned timestamp when the day is unchanged', async () => {
+      mockScan();
+      const written = mockBackend();
+      const user = await open();
+
+      await upload(user, photo());
+      await screen.findByDisplayValue('Biedronka');
+      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+
+      await waitFor(() => expect(written).toHaveLength(1));
+      expect(written[0]!.body.date).toBe(DRAFT.date);
+    });
+
+    it('uses the current time when the scanned day is changed', async () => {
+      mockScan();
+      const written = mockBackend();
+      const user = await open();
+
+      await upload(user, photo());
+      await screen.findByDisplayValue('Biedronka');
+      setDate('2025-03-01');
+      const before = new Date();
+      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+
+      await waitFor(() => expect(written).toHaveLength(1));
+      const after = new Date();
+      const saved = new Date(written[0]!.body.date as string);
+      expect(localDay(saved)).toBe('2025-03-01');
+      expect(msOfDay(saved)).toBeGreaterThanOrEqual(msOfDay(before));
+      expect(msOfDay(saved)).toBeLessThanOrEqual(msOfDay(after));
     });
 
     it('sends the photo to the scan endpoint as multipart', async () => {

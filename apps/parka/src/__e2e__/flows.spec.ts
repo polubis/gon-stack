@@ -338,8 +338,17 @@ const commands = {
     await price.pressSequentially('3,20');
     await expect(price).toHaveValue('3,20');
     await expect(getByE2e('expenses-management:total')).toContainText('3,20');
+    await getByE2e('expenses-management:date').fill('2026-03-10');
 
+    const request = page.waitForRequest(
+      (r) => r.method() === 'POST' && r.url().includes(API_ROUTER.expenses()),
+    );
     await getByE2e('expenses-management:save').click();
+    const saved = new Date((await request).postDataJSON().date as string);
+    expect([saved.getFullYear(), saved.getMonth(), saved.getDate()]).toEqual([
+      2026, 2, 10,
+    ]);
+    expect(saved.toISOString()).not.toMatch(/T00:00:00.000Z$/);
     await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
   },
 
