@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Plus } from 'lucide-react';
+import { useModal } from '@/shared/router/modal-stack';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { Button } from '@/shared/ui/controls';
 import { categoryLabel } from '@/shared/i18n/category-label';
@@ -20,6 +21,7 @@ import type {
 } from '../domain/models';
 import { DetailDialog } from './detail-dialog';
 import { useContext } from './context';
+import { EXPENSES_MODAL } from './modal-ids';
 import { RecurringMark } from './recurring-badge';
 import { ShowAllFade } from './show-all-fade';
 import {
@@ -147,7 +149,7 @@ export const MonthExpenses = ({
   const expenses = withRecurring(ctx.useExpenses(), ctx.useRecurring(), month);
   const categories = ctx.useCategories();
   const [filter, setFilter] = useState<CategoryId | null>(null);
-  const [all, setAll] = useState(false);
+  const all = useModal(EXPENSES_MODAL);
 
   const inMonth = expensesInMonth(expenses, month);
   const tabs = categoryTabs(inMonth, categories);
@@ -222,25 +224,23 @@ export const MonthExpenses = ({
         )}
         {visible.length > MAX_VISIBLE_EXPENSES && (
           <ShowAllFade
-            onClick={() => setAll(true)}
+            onClick={all.open}
             data-e2e="dashboard:expenses-toggle"
           />
         )}
       </div>
-      {all && (
+      {all.isOpen && (
         <DetailDialog
+          modal={EXPENSES_MODAL}
           data-e2e="dashboard:expenses-dialog"
           title="Wydatki"
           description={monthTitle(month)}
-          onClose={() => setAll(false)}
+          onClose={all.close}
         >
           <ExpenseList
             expenses={visible}
             categories={categories}
-            onSelect={(id) => {
-              setAll(false);
-              onSelect(id);
-            }}
+            onSelect={onSelect}
           />
         </DetailDialog>
       )}

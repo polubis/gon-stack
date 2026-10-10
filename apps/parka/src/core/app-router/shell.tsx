@@ -37,8 +37,15 @@ const Shell = () => {
 
   useEffect(() => {
     registerNavigator({
-      push: (path) => router.history.push(path),
-      replace: (path) => router.history.replace(path),
+      // flush: the browser URL must be current right after the call.
+      push: (path, state) => {
+        router.history.push(path, state);
+        router.history.flush();
+      },
+      replace: (path, state) => {
+        router.history.replace(path, state);
+        router.history.flush();
+      },
     });
     document.addEventListener('click', onDocumentClick);
     return () => {

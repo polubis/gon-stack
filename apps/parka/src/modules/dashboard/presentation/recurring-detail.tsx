@@ -9,10 +9,12 @@ import { categoryOf } from './selectors';
 
 /** Popup of a recurring expense: form first, then its payment history. */
 export const RecurringDetail = ({
+  modal,
   recurring,
   month,
   onClose,
 }: {
+  modal: string;
   recurring: Recurring;
   month: Month;
   onClose: () => void;
@@ -22,6 +24,7 @@ export const RecurringDetail = ({
 
   return (
     <DetailDialog
+      modal={modal}
       data-e2e="dashboard:recurring-dialog"
       title={recurring.name}
       description={`Co miesiąc · następny ${dateLabel(recurring.nextPaymentDate)}`}

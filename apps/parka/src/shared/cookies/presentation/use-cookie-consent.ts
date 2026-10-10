@@ -1,4 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useModal, useModalMounted } from '@/shared/router/modal-stack';
 import {
   acceptAllPreferences,
   defaultPreferences,
@@ -17,6 +18,9 @@ import {
 } from '../integration/storage';
 
 const SAVED_TOAST_DURATION_MS = 5000;
+
+/** URL id of the preferences dialog (see `shared/router/modal-stack`). */
+const PREFERENCES_MODAL = 'cookies';
 
 type UseCookieConsent = {
   view: CookiesView | null;
@@ -47,12 +51,21 @@ export const useCookieConsent = (): UseCookieConsent => {
   const [manualView, setManualView] = useState<CookiesView | null | undefined>(
     undefined,
   );
-  const [preferences, setPreferences] =
-    useState<ConsentPreferences>(defaultPreferences);
+  // Unsaved toggles; null = show what is stored (also after a URL deep link).
+  const [draft, setDraft] = useState<ConsentPreferences | null>(null);
+  const preferences = draft ?? storedConsent?.preferences ?? defaultPreferences;
   const [showSavedToast, setShowSavedToast] = useState(false);
 
-  const view: CookiesView | null =
-    manualView !== undefined ? manualView : hasConsented ? null : 'banner';
+  const dialog = useModal(PREFERENCES_MODAL);
+  useModalMounted(PREFERENCES_MODAL, dialog.isOpen);
+
+  const view: CookiesView | null = dialog.isOpen
+    ? 'preferences'
+    : manualView !== undefined
+      ? manualView
+      : hasConsented
+        ? null
+        : 'banner';
 
   useEffect(() => {
     if (!showSavedToast) return;
@@ -65,15 +78,11 @@ export const useCookieConsent = (): UseCookieConsent => {
     return () => window.clearTimeout(timeout);
   }, [showSavedToast]);
 
-  const openPreferences = () => {
-    setPreferences(storedConsent?.preferences ?? defaultPreferences);
-    setManualView('preferences');
-  };
-
   const consent = (next: ConsentPreferences) => {
     writeConsent(next);
-    setPreferences(next);
+    setDraft(null);
     setManualView(null);
+    dialog.close();
     setShowSavedToast(true);
   };
 
@@ -82,11 +91,13 @@ export const useCookieConsent = (): UseCookieConsent => {
     preferences,
     hasConsented,
     showSavedToast,
-    openPreferences,
-    closePreferences: () => setManualView(hasConsented ? null : 'banner'),
+    openPreferences: () => {
+      setDraft(null);
+      dialog.open();
+    },
+    closePreferences: dialog.close,
     dismissBanner: () => setManualView(null),
-    toggleCategory: (id) =>
-      setPreferences((prev) => toggleCategoryPreference(prev, id)),
+    toggleCategory: (id) => setDraft(toggleCategoryPreference(preferences, id)),
     rejectOptional: () => consent(defaultPreferences),
     savePreferences: () => consent(preferences),
     acceptAll: () => consent(acceptAllPreferences()),

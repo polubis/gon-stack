@@ -11,3 +11,5 @@
 9. (A) No needless duplicates on screen: same info/control shown once. F.e: no preview card repeating what fields already show
 10. (A) Each view entry is smoothly animated as a whole (fade + slight slide), disabled with `motion-reduce`
 11. (A) Error toasts follow pattern: `title:tech-code:description:close-option:retry-option`. Success toasts stay a plain message
+12. (A) Opening a modal over another stacks it on top: previous stays mounted underneath, never closed/replaced
+13. (A) Open modals live in URL query params (stack order kept): deep link/reload restores the stack, Back closes only the topmost

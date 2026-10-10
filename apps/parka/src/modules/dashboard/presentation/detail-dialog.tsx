@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
+import { useModalMounted } from '@/shared/router/modal-stack';
 
 /** Footer of every popup: delete on the left, cancel and confirm on the right. */
 export const DialogActions = ({
@@ -18,6 +19,7 @@ export const DialogActions = ({
 
 /** Popup shell shared by every editable row of the expenses list. */
 export const DetailDialog = ({
+  modal,
   title,
   description,
   avatar,
@@ -26,6 +28,8 @@ export const DetailDialog = ({
   children,
   'data-e2e': dataE2e,
 }: {
+  /** Its id in the URL modal stack. */
+  modal: string;
   title: string;
   description: string;
   avatar?: ReactNode;
@@ -37,39 +41,42 @@ export const DetailDialog = ({
     | 'dashboard:recurring-dialog'
     | 'dashboard:categories-dialog'
     | 'dashboard:expenses-dialog';
-}) => (
-  <Dialog.Root
-    open
-    onOpenChange={(open) => {
-      if (!open) onClose();
-    }}
-  >
-    <Dialog.Portal>
-      <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-overlay" />
-      <Dialog.Content
-        data-e2e={dataE2e}
-        className="fixed inset-x-4 bottom-4 z-(--z-modal) mx-auto max-h-[calc(100dvh-2rem)] max-w-md overflow-y-auto rounded-2xl bg-card p-4 focus:outline-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2"
-      >
-        <div className="mb-3 flex items-center gap-3">
-          {avatar}
-          <div className="min-w-0 flex-1">
-            <Dialog.Title className="truncate text-base font-semibold">
-              {title}
-            </Dialog.Title>
-            <Dialog.Description className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-soft">
-              {badge}
-              {description}
-            </Dialog.Description>
+}) => {
+  useModalMounted(modal);
+  return (
+    <Dialog.Root
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-overlay" />
+        <Dialog.Content
+          data-e2e={dataE2e}
+          className="fixed inset-x-4 bottom-4 z-(--z-modal) mx-auto max-h-[calc(100dvh-2rem)] max-w-md overflow-y-auto rounded-2xl bg-card p-4 focus:outline-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2"
+        >
+          <div className="mb-3 flex items-center gap-3">
+            {avatar}
+            <div className="min-w-0 flex-1">
+              <Dialog.Title className="truncate text-base font-semibold">
+                {title}
+              </Dialog.Title>
+              <Dialog.Description className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-soft">
+                {badge}
+                {description}
+              </Dialog.Description>
+            </div>
+            <Dialog.Close
+              aria-label="Zamknij"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink-soft hover:bg-hover"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </Dialog.Close>
           </div>
-          <Dialog.Close
-            aria-label="Zamknij"
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink-soft hover:bg-hover"
-          >
-            <X className="h-4 w-4" aria-hidden="true" />
-          </Dialog.Close>
-        </div>
-        {children}
-      </Dialog.Content>
-    </Dialog.Portal>
-  </Dialog.Root>
-);
+          {children}
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+};

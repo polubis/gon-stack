@@ -3,6 +3,7 @@ import { useRouterState } from '@tanstack/react-router';
 import { Trash2 } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { categoryLabel } from '@/shared/i18n/category-label';
+import { useModal } from '@/shared/router/modal-stack';
 import { navigateTo, readQueryParam } from '@/shared/router/navigation';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { Button, Field, inputClass } from '@/shared/ui/controls';
@@ -26,6 +27,9 @@ import { IconPicker } from './icon-picker';
 const isPreset = (value: string) =>
   COLORS.some((preset) => preset === value.toLowerCase());
 
+/** URL id of the delete confirmation (see `shared/router/modal-stack`). */
+const DELETE_MODAL = 'delete';
+
 const backToList = () => navigateTo(APP_ROUTER.categories());
 
 type FormProps = {
@@ -37,7 +41,7 @@ const Form = ({ base }: FormProps) => {
   const ctx = useContext();
   const categories = ctx.useCategories();
   const originalName = base ? categoryLabel(base.name) : '';
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const deleting = useModal(DELETE_MODAL);
   const [name, setName] = useState(originalName);
   const [icon, setIcon] = useState<CategoryIconId>(base?.icon ?? 'cart');
   const [color, setColor] = useState<string>(base?.color ?? COLORS[0]);
@@ -147,7 +151,7 @@ const Form = ({ base }: FormProps) => {
               <Button
                 variant="danger"
                 data-e2e="categories:form-delete"
-                onClick={() => setConfirmingDelete(true)}
+                onClick={deleting.open}
               >
                 <Trash2 className="h-4 w-4" aria-hidden="true" /> Usuń kategorię
               </Button>
@@ -156,10 +160,11 @@ const Form = ({ base }: FormProps) => {
         </form>
       </main>
 
-      {base && confirmingDelete ? (
+      {base && deleting.isOpen ? (
         <DeleteDialog
+          modal={DELETE_MODAL}
           name={originalName}
-          onClose={() => setConfirmingDelete(false)}
+          onClose={deleting.close}
           onConfirm={() => {
             ctx.remove(base.id);
             backToList();

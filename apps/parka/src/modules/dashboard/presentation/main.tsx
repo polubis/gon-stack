@@ -5,15 +5,21 @@ import { ErrorState } from '@/shared/ui/error-state';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
 import { Button } from '@/shared/ui/controls';
 import { Toast } from '@/shared/ui/toast';
+import {
+  closeModal,
+  openModal,
+  useModalStack,
+} from '@/shared/router/modal-stack';
 import { readQueryParam, writeQueryParam } from '@/shared/router/navigation';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { ERROR_CODES } from '../configuration/constraints';
 import { currentMonth, toMonth } from '../domain/format';
-import type { ExpenseId, Month } from '../domain/models';
+import type { Month } from '../domain/models';
 import { CategoriesCard } from './categories-card';
 import { Provider, useContext } from './context';
 import { ExpenseDetail } from './expense-detail';
 import { LimitsCard } from './limits-card';
+import { expenseModal, expenseOfModal } from './modal-ids';
 import { MonthExpenses } from './month-expenses';
 import { Header } from './header';
 import { TotalHero } from './total-hero';
@@ -32,7 +38,7 @@ const initialMonth = (): Month => {
 const DashboardView = () => {
   const ctx = useContext();
   const [month, setMonth] = useState(initialMonth);
-  const [selectedId, setSelectedId] = useState<ExpenseId | null>(null);
+  const modals = useModalStack();
   const initialized = ctx.useInitialized();
   const loading = ctx.useLoading();
   const error = ctx.useError();
@@ -50,10 +56,23 @@ const DashboardView = () => {
     setMonth(next);
   };
 
-  const selected = expenses.find((e) => e.id === selectedId) ?? null;
-  const selectedRecurring =
-    recurring.find((r) => recurringChargeId(r.id, month) === selectedId) ??
-    null;
+  // Detail popups stack in the order they were opened (URL order).
+  const details = modals.flatMap((modal) => {
+    const id = expenseOfModal(modal);
+    if (id === null) return [];
+    const expense = expenses.find((e) => e.id === id);
+    const charge = recurring.find((r) => recurringChargeId(r.id, month) === id);
+    return [{ modal, expense, charge }];
+  });
+
+  // A popup whose expense is gone (stale link) must not linger in the URL.
+  const dangling =
+    initialized && summary !== null
+      ? details.find((d) => !d.expense && !d.charge)?.modal
+      : undefined;
+  useEffect(() => {
+    if (dangling) closeModal(dangling);
+  }, [dangling]);
 
   // One failure screen for the whole dashboard: all or nothing.
   if (error) {
@@ -77,22 +96,25 @@ const DashboardView = () => {
 
   const overlays = (
     <>
-      {selected && !selectedRecurring ? (
-        <ExpenseDetail
-          key={selected.id}
-          expense={selected}
-          month={month}
-          onClose={() => setSelectedId(null)}
-        />
-      ) : null}
-      {selectedRecurring ? (
-        <RecurringDetail
-          key={selectedRecurring.id}
-          recurring={selectedRecurring}
-          month={month}
-          onClose={() => setSelectedId(null)}
-        />
-      ) : null}
+      {details.map(({ modal, expense, charge }) =>
+        charge ? (
+          <RecurringDetail
+            key={modal}
+            modal={modal}
+            recurring={charge}
+            month={month}
+            onClose={() => closeModal(modal)}
+          />
+        ) : expense ? (
+          <ExpenseDetail
+            key={modal}
+            modal={modal}
+            expense={expense}
+            month={month}
+            onClose={() => closeModal(modal)}
+          />
+        ) : null,
+      )}
       {notice ? (
         <Toast
           key={notice.id}
@@ -124,7 +146,10 @@ const DashboardView = () => {
             </div>
             <SpendingChart month={month} summary={summary} />
             <CategoriesCard month={month} summary={summary} />
-            <MonthExpenses month={month} onSelect={setSelectedId} />
+            <MonthExpenses
+              month={month}
+              onSelect={(id) => openModal(expenseModal(id))}
+            />
             <LimitsCard month={month} />
             {overlays}
           </>

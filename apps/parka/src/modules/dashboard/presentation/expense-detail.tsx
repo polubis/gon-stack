@@ -12,10 +12,12 @@ import { categoryOf } from './selectors';
 
 /** Popup of a stored expense: the fields are editable right away. */
 export const ExpenseDetail = ({
+  modal,
   expense,
   month,
   onClose,
 }: {
+  modal: string;
   expense: Expense;
   month: Month;
   onClose: () => void;
@@ -47,6 +49,7 @@ export const ExpenseDetail = ({
 
   return (
     <DetailDialog
+      modal={modal}
       data-e2e="dashboard:detail"
       title={expense.merchant}
       description={dateTimeLabel(expense.date)}

@@ -4,8 +4,8 @@
  * Guarded for SSR — no-ops outside the browser.
  */
 type Navigator = {
-  push: (path: string) => void;
-  replace: (path: string) => void;
+  push: (path: string, state?: Record<string, unknown>) => void;
+  replace: (path: string, state?: Record<string, unknown>) => void;
 };
 
 let navigator: Navigator | null = null;
@@ -52,6 +52,19 @@ export const onBackClick = (event: {
   if (!inApp && !fromApp) return;
   event.preventDefault();
   window.history.back();
+};
+
+/** Adds a history entry, so Back returns to the previous URL. */
+export const pushUrl = (
+  path: string,
+  state: Record<string, unknown> = {},
+): void => {
+  if (typeof window === 'undefined') return;
+  if (navigator) {
+    navigator.push(path, state);
+    return;
+  }
+  window.history.pushState({ ...window.history.state, ...state }, '', path);
 };
 
 export const replaceUrl = (path: string): void => {

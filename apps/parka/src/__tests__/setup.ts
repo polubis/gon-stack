@@ -6,3 +6,8 @@ vi.stubEnv('PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY', 'dasdsa-dadasd-231edd');
 afterAll(() => {
   vi.unstubAllEnvs();
 });
+
+// Modals live in the URL: never leak an open one into the next test.
+afterEach(() => {
+  if (typeof window !== 'undefined') window.history.replaceState(null, '', '/');
+});

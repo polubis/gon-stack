@@ -33,7 +33,7 @@ Read `references/aodi-framework.md` for tag legend (`A` / `O` / `D` / `I`). Appl
 | `rules/styling.md`       | Design tokens, theming, `cn` from `react-kit`         |
 | `rules/ui.md`            | Mobile-first RWD, dark mode, a11y prefs, breakpoints  |
 | `rules/accessibility.md` | WCAG 2.2, ARIA attributes, keyboard navigation        |
-| `rules/ux.md`            | Error pattern, skeletons, banners, optimistic UI      |
+| `rules/ux.md`            | Error pattern, skeletons, banners, optimistic UI, URL-stacked modals |
 | `rules/testing.md`       | Black-box tests, selectors, E2E via `vibe-test`       |
 | `rules/git.md`           | `subject: ticket + title`; scoped change list in body |
 | `rules/security.md`      | Stop on personal or sensitive data                    |
