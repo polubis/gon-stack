@@ -1,5 +1,10 @@
+import { categoryShares } from '@/shared/expense-category/category';
 import { occurrencesInMonth } from '@/shared/recurring/occurrences';
-import { UNCATEGORIZED, WARN_PCT } from '../configuration/constraints';
+import {
+  MIXED_CATEGORY,
+  UNCATEGORIZED,
+  WARN_PCT,
+} from '../configuration/constraints';
 import { monthOf, prevMonth } from '../domain/format';
 import type {
   Category,
@@ -53,8 +58,28 @@ export const expensesInMonth = (list: Expense[], month: Month): Expense[] =>
   sortByDateDesc(list.filter((e) => monthOf(e.date) === month));
 
 /** Unknown category ids fall back to the first category, then to a stub. */
-export const categoryOf = (categories: Category[], id: CategoryId): Category =>
-  categories.find((c) => c.id === id) ?? categories[0] ?? UNCATEGORIZED;
+export const categoryOf = (
+  categories: Category[],
+  id: CategoryId | null,
+): Category =>
+  id === null
+    ? MIXED_CATEGORY
+    : (categories.find((c) => c.id === id) ?? categories[0] ?? UNCATEGORIZED);
+
+/** How the expense amount splits across categories: products when mixed. */
+export const expenseShares = (
+  expense: Expense,
+): { categoryId: CategoryId; amount: number }[] =>
+  categoryShares(expense) as { categoryId: CategoryId; amount: number }[];
+
+export const touchesCategory = (
+  expense: Expense,
+  categories: Category[],
+  id: CategoryId,
+): boolean =>
+  expenseShares(expense).some(
+    (s) => categoryOf(categories, s.categoryId).id === id,
+  );
 
 export type CategoryTab = { category: Category; count: number; total: number };
 
@@ -65,13 +90,15 @@ export const categoryTabs = (
 ): CategoryTab[] => {
   const tabs = new Map<CategoryId, CategoryTab>();
   for (const e of list) {
-    const category = categoryOf(categories, e.categoryId);
-    const tab = tabs.get(category.id) ?? { category, count: 0, total: 0 };
-    tabs.set(category.id, {
-      category,
-      count: tab.count + 1,
-      total: tab.total + e.amount,
-    });
+    for (const share of expenseShares(e)) {
+      const category = categoryOf(categories, share.categoryId);
+      const tab = tabs.get(category.id) ?? { category, count: 0, total: 0 };
+      tabs.set(category.id, {
+        category,
+        count: tab.count + 1,
+        total: tab.total + share.amount,
+      });
+    }
   }
   return [...tabs.values()].sort((a, b) => b.total - a.total);
 };
@@ -147,9 +174,10 @@ export const categoryProgress = (
 ): CategoryProgress[] => {
   const scoped = expensesInMonth(expenses, month);
   return limits.filter(isCategoryLimit).map((l) => {
-    const spent = sumAmount(
-      scoped.filter((e) => e.categoryId === l.categoryId),
-    );
+    const spent = scoped
+      .flatMap(expenseShares)
+      .filter((s) => s.categoryId === l.categoryId)
+      .reduce((total, s) => total + s.amount, 0);
     return {
       id: l.id,
       categoryId: l.categoryId,

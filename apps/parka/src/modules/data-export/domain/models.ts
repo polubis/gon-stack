@@ -16,7 +16,8 @@ export type Expense = {
   /** ISO date-time string. */
   date: string;
   amount: number;
-  categoryId: CategoryId;
+  /** `null` when its products come from different categories. */
+  categoryId: CategoryId | null;
   paymentMethod: string;
 };
 

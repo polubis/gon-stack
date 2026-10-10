@@ -36,6 +36,14 @@ export const UNCATEGORIZED: Category = {
   color: 'var(--track-strong)',
 };
 
+/** Shown for an expense whose products span several categories. */
+export const MIXED_CATEGORY: Category = {
+  id: '' as CategoryId,
+  name: 'Wiele kategorii',
+  icon: 'receipt',
+  color: 'var(--track-strong)',
+};
+
 export const ERROR_CODES = {
   load: 'DASHBOARD_LOAD',
   render: 'DASHBOARD_RENDER',

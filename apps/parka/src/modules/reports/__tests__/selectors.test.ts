@@ -24,6 +24,7 @@ const expense = (
   date,
   amount,
   categoryId: categoryId as CategoryId,
+  categoryIds: [categoryId as CategoryId],
   isBill,
 });
 
@@ -40,6 +41,18 @@ describe('report selectors', () => {
     expect(expensesForMonth(expenses, APRIL).map((e) => e.amount)).toEqual([
       3, 1,
     ]);
+  });
+
+  it('counts every category a multi-category expense touches', () => {
+    const mixed: Expense = {
+      ...expense('2025-04-05T10:00:00Z', 9, 'c-1'),
+      categoryId: null,
+      categoryIds: ['c-1', 'c-3'] as CategoryId[],
+    };
+
+    expect(
+      summarize([mixed, expense('2025-04-06T10:00:00Z', 1, 'c-2')], []),
+    ).toMatchObject({ categoryCount: 3 });
   });
 
   it('counts distinct categories and active recurring payments', () => {

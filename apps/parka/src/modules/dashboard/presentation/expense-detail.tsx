@@ -25,10 +25,18 @@ export const ExpenseDetail = ({
   const category = categoryOf(categories, expense.categoryId);
   const [merchant, setMerchant] = useState(expense.merchant);
   const [amount, setAmount] = useState(expense.amount);
-  const [categoryId, setCategoryId] = useState<CategoryId>(expense.categoryId);
+  const hasProducts = expense.items.length > 0;
+  const [categoryId, setCategoryId] = useState<CategoryId>(
+    expense.categoryId ?? categories[0]?.id ?? ('' as CategoryId),
+  );
 
   const save = () => {
-    ctx.updateExpense({ ...expense, merchant, amount, categoryId }, month);
+    ctx.updateExpense(
+      hasProducts
+        ? { ...expense, merchant }
+        : { ...expense, merchant, amount, categoryId },
+      month,
+    );
     onClose();
   };
 
@@ -54,31 +62,44 @@ export const ExpenseDetail = ({
             onChange={(e) => setMerchant(e.target.value)}
           />
         </Field>
-        <Field label="Kwota">
+        <Field
+          label="Kwota"
+          hint={hasProducts ? 'Suma produktów poniżej.' : undefined}
+        >
           <NumberInput
             value={amount}
+            readOnly={hasProducts}
             data-e2e="dashboard:edit-amount"
             onValueChange={setAmount}
           />
         </Field>
-        <Field label="Kategoria">
-          <select
-            className={inputClass}
-            value={categoryId}
-            data-e2e="dashboard:edit-category"
-            onChange={(e) =>
-              setCategoryId(
-                categories.find((c) => c.id === e.target.value)?.id ??
-                  categoryId,
-              )
-            }
-          >
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {categoryLabel(c.name)}
-              </option>
-            ))}
-          </select>
+        <Field
+          label="Kategoria"
+          hint={hasProducts ? 'Wynika z kategorii produktów.' : undefined}
+        >
+          {hasProducts ? (
+            <p className={inputClass} data-e2e="dashboard:edit-category">
+              {categoryLabel(category.name)}
+            </p>
+          ) : (
+            <select
+              className={inputClass}
+              value={categoryId}
+              data-e2e="dashboard:edit-category"
+              onChange={(e) =>
+                setCategoryId(
+                  categories.find((c) => c.id === e.target.value)?.id ??
+                    categoryId,
+                )
+              }
+            >
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {categoryLabel(c.name)}
+                </option>
+              ))}
+            </select>
+          )}
         </Field>
       </div>
 

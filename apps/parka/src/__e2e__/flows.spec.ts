@@ -343,6 +343,36 @@ const commands = {
     await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
   },
 
+  'i add an expense with products from different categories': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
+    await mockState(page, {
+      categories: [CATEGORY, { ...CATEGORY, id: 'cat-2', name: 'Rozrywka' }],
+    });
+    await open(page, APP_ROUTER.newExpense());
+    await getByE2e('expenses-management:merchant').fill('Sklep Mieszany');
+
+    await getByE2e('expenses-management:add-product').click();
+    await expect(getByE2e('expenses-management:category')).toHaveText(
+      'Spożywcze',
+    );
+    await getByE2e('expenses-management:add-product').click();
+    await getByE2ePrefix('expenses-management:product-category:')
+      .last()
+      .selectOption('cat-2');
+
+    await expect(getByE2e('expenses-management:category')).toHaveText(
+      'Wiele kategorii',
+    );
+    const request = page.waitForRequest(
+      (r) => r.method() === 'POST' && r.url().includes(API_ROUTER.expenses()),
+    );
+    await getByE2e('expenses-management:save').click();
+    expect((await request).postDataJSON()).toMatchObject({ categoryId: null });
+  },
+
   'i add a recurring expense': async ({ page, getByE2e }) => {
     await mockState(page);
     await open(page, APP_ROUTER.newExpense());
@@ -680,6 +710,15 @@ test('an expense can be added manually with products', async ({ e2e }) => {
     commands,
     e2e,
   )(['i add an expense manually with a product']);
+});
+
+test('products from different categories leave the expense without one', async ({
+  e2e,
+}) => {
+  await interpreter(
+    commands,
+    e2e,
+  )(['i add an expense with products from different categories']);
 });
 
 test('a recurring expense can be added from the type tab', async ({ e2e }) => {
