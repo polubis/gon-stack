@@ -14,7 +14,7 @@ export default [
     ],
   },
   // e2e specs must reach elements through the type-safe `getByE2e` /
-  // `getByE2ePrefix` fixtures (see src/__e2e__/__log__/0002-*.md).
+  // `getByE2ePrefix` fixtures (see decisions/0002-parka-migrate-e2e-ids-per-module.md).
   {
     files: ['src/**/__e2e__/**/*.ts'],
     ignores: ['src/__e2e__/test.ts'],

@@ -36,18 +36,21 @@ export const createSnapshot = async (
   ]
     .filter((file) => !deleted.has(file))
     .sort();
-  const stagedAdded = (
-    await git(projectRoot, [
-      'diff',
-      '--cached',
-      '--name-only',
-      '--diff-filter=A',
-      '-z',
-    ])
-  )
-    .split('\0')
-    .filter(Boolean)
-    .sort();
+  const staged = async (...extra: string[]): Promise<string[]> =>
+    (
+      await git(projectRoot, [
+        'diff',
+        '--cached',
+        '--name-only',
+        ...extra,
+        '-z',
+      ])
+    )
+      .split('\0')
+      .filter(Boolean)
+      .sort();
+  const stagedAdded = await staged('--diff-filter=A');
+  const stagedChanged = await staged();
   const texts = new Map<string, Promise<string>>();
   const readText = (file: string): Promise<string> => {
     const cached = texts.get(file);
@@ -99,6 +102,7 @@ export const createSnapshot = async (
         git: {
           commitMessages,
           stagedAddedFiles: scoped(stagedAdded),
+          stagedFiles: scoped(stagedChanged),
           lastCommitMessages: (count) => readLog([`-${count}`]),
         },
         report,

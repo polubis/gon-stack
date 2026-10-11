@@ -52,7 +52,7 @@ Read `references/aodi-framework.md` for tag legend (`A` / `O` / `D` / `I`). Appl
 
 | Path                        | What                          |
 | --------------------------- | ----------------------------- |
-| `templates/task-log.md`     | Session end log entry         |
+| `templates/decision-entry.md` | Session end decision entry  |
 | `templates/feature.md`      | Feature requirements scaffold |
 | `templates/AGENTS.md`       | Module agent doc scaffold     |
 | `templates/SKILL.md`        | Skill scaffold                |

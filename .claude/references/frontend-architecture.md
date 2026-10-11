@@ -9,7 +9,6 @@
 ```md
 src/
 ├── `__e2e__/` — e2e test setup
-├── `__log__/` — app decisions record
 ├── `__tests__/` — unit/integration test setup
 ├── `core/` — shell/bootstrap; wires app
 ├── `libs/` — generic non-app code
@@ -25,8 +24,8 @@ src/
 └── `*.spec.*`
 `__evals__/` — optional eval fixtures
 └── `*.json`
-`__log__/` — optional; per-task decisions + progress (repo root convention)
-└── `{id}-{summary}.md` — template `templates/task-log.md`
+`decisions/` — repo root; per-task decisions, one file each
+└── `{NNNN}-{scope-prefix}-{verb}-{object}.md` — template `templates/decision-entry.md`
 `__tests__/` — unit/integration tests
 └── `*.test.*`
 `AGENTS.md` — module conventions + references via `templates/AGENTS.md`

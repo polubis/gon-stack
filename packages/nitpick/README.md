@@ -13,7 +13,7 @@ Implemented:
 - Check snapshot: `files`, `readText`, `git`, `meta`
 - Per-rule `include` / `exclude`
 - `rules` as an array or a function
-- Ready-made rules: `richCommit`, `logEntry`
+- Ready-made rules: `richCommit`, `createDecisionEntry`
 
 Covered by tests: 100% statements, branches, functions and lines (enforced by `test:coverage`; `cli.ts` is excluded).
 
@@ -83,7 +83,8 @@ Override a ready-made rule by spreading it: `{ ...richCommit, importance: 'D' }`
 | `files`                     | Files from `git ls-files --cached --others --exclude-standard`, sorted, without tracked files deleted from disk, filtered by the rule's `include` / `exclude`. Globs follow `path.matchesGlob`, so `**` does not enter dot folders: use `.ai/**` explicitly |
 | `readText(file)`            | Reads UTF-8 text (path relative to project root), cached per run                                                                                                                                                                                            |
 | `git.commitMessages`        | Last commit by default; `--commit-msg <file>` uses file content; `--range <a..b>` uses commits in range (invalid range = exit 2)                                                                                                                            |
-| `git.stagedAddedFiles` | Files newly added to the index (`git diff --cached --diff-filter=A`), sorted, filtered by the rule's `include` / `exclude` |
+| `git.stagedAddedFiles` | Files newly added to the index (`git diff --cached --diff-filter=A`), sorted, filtered by the rule's `include` / `exclude`. Git rename detection applies: a moved file that was rewritten a lot is reported as added |
+| `git.stagedFiles` | All files changed in the index (`git diff --cached --name-only`), same sorting and filtering |
 | `git.lastCommitMessages(n)` | Last `n` commit messages                                                                                                                                                                                                                                    |
 | `report(message)`           | Reports a problem as `[ruleId] message`                                                                                                                                                                                                                     |
 | `meta`                      | `{ ruleId, projectRoot }`                                                                                                                                                                                                                                   |
@@ -137,13 +138,15 @@ Id `rich-commit`, importance `A`. Its instruction lives in the library (`src/rul
 - Body contains at least one `- ` change list item.
 - Body is only a `- ` list (nested `  - ` items allowed). Nothing may follow it: no blank lines, prose, footers, `Key: value` trailers, references (`Refs`, `Fixes`, `Closes`), `Co-authored-by`, `Signed-off-by` or AI credits.
 
-## `logEntry` rule
+## `createDecisionEntry` rule
 
-Id `log-entry`, group `general`, importance `A`. Instruction `src/rules/log-entry.md`. Validates `git.stagedAddedFiles` (works with `--commit-msg`, i.e. in the `commit-msg` hook):
+Factory `createDecisionEntry({ scopes })`, id `decision-entry`, group `general`, importance `A`. Instruction `src/rules/decision-entry.md`. `scopes`: regexes a `scope` must match (see `.nitpick/config.ts`). Validates `git.stagedAddedFiles` / `git.stagedFiles` (works with `--commit-msg`, i.e. in the `commit-msg` hook):
 
-- At least one newly staged file `<...>/__log__/<NNNN>-<slug>.md`. Modified or unstaged logs do not count.
-- First line `# <NNNN> - <summary>` with the same number as the file name.
-- A json `"status"`: `done`, `failed` or `done-with-clarification`.
+- Exactly one newly staged file `decisions/NNNN-<scope-prefix>-<verb>-<object>.md`. New files under any `__log__/` are reported as wrong location. A commit that only touches `decisions/` files (moves, edits) needs no new entry.
+- Name: `NNNN` = max existing + 1, slug `[a-z0-9-]` 8-60 chars, starts with the first `scope` segment, then a verb from the allow-list (`VERBS` in the rule), then an object.
+- Frontmatter (strict flat YAML subset: `key: value`, inline `[a, b]` or `- a` lists, plain or double-quoted scalars; no external parser, the rule needs nothing more): required `ticket` (`none` or `ABC-123`), `scope`, `summary` (10-70 chars), `why` (10-200 chars); optional `date`, `supersedes` (existing `NNNN`), `tags` (kebab-case), `models`, `inputTokens`, `outTokens`, `cost`, `workTimeInMinutes`. Unknown or duplicate keys fail.
+- Body: 1-40 lines, each a `- ` item of max 240 chars, nested by 2 spaces (one level deeper at most). No heading, prose, code fence, blank line or empty bullet.
+- Git rename detection: a `__log__` -> `decisions/` move whose content was rewritten a lot is reported by git as added file. Move first with unchanged content (pure rename, no entry needed), then edit in a second commit.
 
 ## Flow
 

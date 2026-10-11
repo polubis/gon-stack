@@ -10,4 +10,4 @@
 
 ### (A) Always
 
-- [log-entry](rules/log-entry.md)
+- [decision-entry](rules/decision-entry.md)

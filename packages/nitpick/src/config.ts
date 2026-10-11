@@ -6,6 +6,7 @@ export type CheckContext = {
   git: {
     commitMessages: string[];
     stagedAddedFiles: string[];
+    stagedFiles: string[];
     lastCommitMessages: (count: number) => Promise<string[]>;
   };
   report: (message: string) => void;

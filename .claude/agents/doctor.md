@@ -34,7 +34,7 @@ Show dev adequate evidence the problem is solved, e.g.:
 
 1. **Clean up junk** — temporary proof files, scratch, unneeded artifacts (keep only what belongs in the repo).
 2. **Rules audit** on the final diff — fix again if needed.
-3. **Decision log** — add a new `__log__/NNNN-slug.md` for this session (next free number under the changed tree; template `templates/task-log.md`, rule `rules/general.md` #3). Stage it with the code change.
+3. **Decision log** — add a new `decisions/NNNN-slug.md` for this session (next free global number; template `templates/decision-entry.md`, rule `rules/general.md` #3). Stage it with the code change.
 4. Commit (`rules/git.md`) and push **only when dev asked for it**.
 5. **Shut down** dev servers/ports you started this session (e.g. `pnpm dev`).
 

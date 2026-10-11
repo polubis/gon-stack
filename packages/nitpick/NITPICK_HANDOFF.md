@@ -4,7 +4,7 @@ State as of 2026-10-07. Branch `main`, nothing pushed. Do not push unless the us
 
 ## What it is
 
-`packages/nitpick` (`@repo/nitpick`): one definition of AI rules that (a) generates AODI docs for agents and (b) runs project checks. Config: `.nitpick/config.ts`. Full docs: `README.md` (English, current). Decision log: `__log__/0031-nitpick-docs-and-checks-engine.md`.
+`packages/nitpick` (`@repo/nitpick`): one definition of AI rules that (a) generates AODI docs for agents and (b) runs project checks. Config: `.nitpick/config.ts`. Full docs: `README.md` (English, current). Decision log: `decisions/0112-nitpick-add-docs-and-checks-engine.md`.
 
 ## Decided and implemented (2026-10-07, uncommitted)
 
@@ -39,7 +39,7 @@ State as of 2026-10-07. Branch `main`, nothing pushed. Do not push unless the us
 - Rule: `id`, `instruction` (function or `{ file }` markdown; relative to `.nitpick/`, absolute allowed), optional `check`, `importance` A/O/D/I, `include`/`exclude` (globs via `path.matchesGlob`; `**` skips dot folders), `group` (only splits root docs into `## Rules for <Group>`).
 - Output: first `output` entry gets full docs (`<path>/<root>`, `<path>/rules/<id>.md`, `<path>/<knowledge.dir>/<key>.md`); every next entry is one line `Follow instructions here: [..](..)`. Default `.ai/AGENTS.md`. Root file lines: `- [id](rules/id.md)` for file instructions, `` - `id`: text `` for function instructions.
 - Knowledge: `knowledge.refs`, `ref()` in instructions, `{{ref:key}}` in markdown; validated (missing file, self ref, unknown ref, cycle, duplicate rule id).
-- Ready-made rules: `richCommit`, `logEntry` (`@repo/nitpick/rules/log-entry`, group `general`, needs a new staged `__log__/NNNN-slug.md`); `richCommit` (`@repo/nitpick/rules/rich-commit`, group `git`). Instruction text: `src/rules/rich-commit.md` (copied to `dist` by `build`). `.nitpick/config.ts` is just `rules: [richCommit]`.
+- Ready-made rules: `richCommit`, `createDecisionEntry` (`@repo/nitpick/rules/decision-entry`, group `general`, needs one new staged `decisions/NNNN-<scope-prefix>-<verb>-<object>.md`, replaces `logEntry`); `richCommit` (`@repo/nitpick/rules/rich-commit`, group `git`). Instruction text: `src/rules/rich-commit.md` (copied to `dist` by `build`). `.nitpick/config.ts`: `richCommit` + `createDecisionEntry({ scopes })`.
 - Tests: vitest, 205 passing, 100% statements/branches/functions/lines enforced by thresholds (`cli.ts` excluded). Run in `packages/nitpick`: `pnpm test:coverage`, `pnpm check-types`, `pnpm lint`, `pnpm build`.
 
 ## Repo wiring (current)

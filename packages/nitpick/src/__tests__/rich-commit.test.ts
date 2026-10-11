@@ -10,6 +10,7 @@ const run = async (rule: typeof richCommit, message: string) => {
     git: {
       commitMessages: [message],
       stagedAddedFiles: [],
+      stagedFiles: [],
       lastCommitMessages: async () => [],
     },
     report: (problem) => reports.push(problem),

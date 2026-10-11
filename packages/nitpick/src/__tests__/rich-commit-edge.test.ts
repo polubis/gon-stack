@@ -9,6 +9,7 @@ const check = async (...messages: string[]) => {
     git: {
       commitMessages: messages,
       stagedAddedFiles: [],
+      stagedFiles: [],
       lastCommitMessages: async () => [],
     },
     report: (problem) => reports.push(problem),
