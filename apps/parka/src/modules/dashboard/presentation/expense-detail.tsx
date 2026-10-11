@@ -92,16 +92,32 @@ export const ExpenseDetail = ({
           <p className="mb-1 text-sm font-semibold">
             Produkty ({expense.items.length})
           </p>
-          <ul className="space-y-1 text-sm">
-            {expense.items.map((i) => (
-              <li key={i.id} className="flex justify-between">
-                <span className="text-ink-soft">
-                  {i.name}
-                  {i.quantity > 1 ? ` ×${i.quantity}` : ''}
-                </span>
-                <span className="tabular-nums">{money(itemTotal(i))}</span>
-              </li>
-            ))}
+          <ul className="space-y-2 text-sm">
+            {expense.items.map((i) => {
+              const itemCategory = categoryOf(categories, i.categoryId);
+              const hints = [
+                expense.categoryId === null
+                  ? categoryLabel(itemCategory.name)
+                  : null,
+                i.quantity > 1 ? `${i.quantity} × ${money(i.unitPrice)}` : null,
+              ].filter(Boolean);
+              return (
+                <li key={i.id} className="flex items-center gap-3">
+                  <CategoryAvatar category={itemCategory} className="h-8 w-8" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-medium">{i.name}</span>
+                    {hints.length > 0 ? (
+                      <span className="block truncate text-xs text-ink-soft">
+                        {hints.join(' · ')}
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="font-semibold tabular-nums">
+                    {money(itemTotal(i))}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         </div>
       ) : null}

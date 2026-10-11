@@ -54,6 +54,33 @@ describe('expense popup', () => {
     expect(dialog.queryByRole('textbox')).not.toBeInTheDocument();
   });
 
+  it('shows each product with its category icon and no repeated category', async () => {
+    render(<Main />);
+    const dialog = within(await screen.findByRole('dialog'));
+    const row = dialog.getByText('Chleb').closest('li')!;
+
+    expect(row.querySelector('svg')).not.toBeNull();
+    expect(within(row).queryByText('Jedzenie')).not.toBeInTheDocument();
+  });
+
+  it('names the category of each product when the expense mixes categories', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => ({
+        json: async () =>
+          readBody(url, {
+            expenses: [{ ...expense(), categoryId: null }],
+            categories: [CATEGORY],
+          }),
+      })),
+    );
+    render(<Main />);
+    const dialog = within(await screen.findByRole('dialog'));
+    const row = dialog.getByText('Chleb').closest('li')!;
+
+    expect(within(row).getByText('Jedzenie')).toBeVisible();
+  });
+
   it('shows the device it was created from with its id', async () => {
     render(<Main />);
     const dialog = within(await screen.findByRole('dialog'));
