@@ -99,6 +99,7 @@ Read `references/aodi-framework.md` for tag legend (`A` / `O` / `D` / `I`). Appl
 | [e2e-via-commands](skills/e2e-via-commands/SKILL.md)                                 | E2E via step interpreter             | Extend e2e path         |
 | [check-html](skills/check-html/SKILL.md)                                             | a11y audit HTML/URL                  | Check accessibility     |
 | [witch-doctor](skills/witch-doctor/SKILL.md)                                         | Score module quality                 | Audit/review codebase   |
+| [evidence](skills/evidence/SKILL.md)                                                 | Before/after video + labels          | Proof of UI change      |
 
 | [copyman](skills/copyman/SKILL.md) | Landing/pricing conversion copy | Marketing copy |
 | [posty](skills/posty/SKILL.md) | Batch polish posts (`---` split) | Post grammar/typo |
