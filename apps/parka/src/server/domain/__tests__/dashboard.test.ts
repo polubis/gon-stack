@@ -196,3 +196,46 @@ describe('dashboard summary for other periods', () => {
     expect(summary.previousSeries[2]).toEqual({ index: 3, total: 7 });
   });
 });
+
+describe('days in the viewer time zone', () => {
+  const summarizeIn = (timeZone: string, expenses: DashboardExpense[]) => {
+    const period = periodContaining('month', '2026-10-15');
+    return summarizeDashboard({
+      expenses,
+      categories,
+      period,
+      previous: shiftPeriod(period, -1),
+      today: '2026-10-31',
+      monthlyLimit: null,
+      timeZone,
+    });
+  };
+
+  it('counts a late evening UTC expense on the next local day', () => {
+    // 23:30 UTC on 30 Sep is 1 Oct, 01:30 in Warsaw: it belongs to October.
+    const summary = summarizeIn('Europe/Warsaw', [
+      expense('2026-09-30T23:30:00.000Z', 10),
+    ]);
+
+    expect(summary.total).toBe(10);
+    expect(summary.series[0]?.total).toBe(10);
+  });
+
+  it('keeps the same expense in September for a western zone', () => {
+    const summary = summarizeIn('America/Los_Angeles', [
+      expense('2026-09-30T23:30:00.000Z', 10),
+    ]);
+
+    expect(summary.total).toBe(0);
+    expect(summary.previousTotal).toBe(10);
+  });
+
+  it('buckets an expense by the local day of the month', () => {
+    const summary = summarizeIn('Pacific/Auckland', [
+      expense('2026-10-14T12:00:00.000Z', 7),
+    ]);
+
+    // 13:00 +13h = 01:00 on 15 Oct.
+    expect(summary.series[14]?.total).toBe(7);
+  });
+});

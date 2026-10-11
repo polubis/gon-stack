@@ -4,6 +4,7 @@ import {
   productsFromDraft,
 } from '@/shared/expense-form/domain/products';
 import type { ExpenseFormValues } from '@/shared/expense-form/domain/models';
+import { dayAtCurrentTime } from '@/shared/date/date';
 import { currentDevice } from '@/shared/device/integration/current-device';
 import { newExpenseId } from '../domain/ids';
 import type { ReceiptDraft } from '../domain/models';
@@ -18,7 +19,7 @@ export const NewExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
   const base: ExpenseFormValues | null = draft
     ? {
         merchant: draft.merchant,
-        date: draft.date,
+        date: dayAtCurrentTime(draft.date),
         amount: draft.amount,
         categoryId: null,
         paymentMethod: draft.paymentMethod ?? '',

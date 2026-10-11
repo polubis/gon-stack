@@ -1,3 +1,4 @@
+import { localMonth } from '@/shared/date/date';
 import type { Month } from './models';
 
 const MONTH_PATTERN = /^\d{4}-\d{2}$/;
@@ -90,23 +91,16 @@ export const prevMonth = (month: Month): Month => {
 };
 
 /** Today's month, e.g. `2026-09`. */
-export const currentMonth = (): Month =>
-  toMonth(new Date().toISOString().slice(0, 7));
+export const currentMonth = (): Month => toMonth(localMonth(new Date()));
 
 /** ISO date(-time) → `14.04.2025`. */
 export const dateLabel = (iso: string): string => plDate.format(new Date(iso));
-
-/** `YYYY-MM-DD` for a date input. */
-export const toDateInput = (iso: string): string => iso.slice(0, 10);
-
-export const fromDateInput = (value: string): string =>
-  `${value}T00:00:00.000Z`;
 
 export const dateTimeLabel = (iso: string): string =>
   plDateTime.format(new Date(iso));
 
 /** ISO date-time → `YYYY-MM`. */
-export const monthOf = (iso: string): Month => toMonth(iso.slice(0, 7));
+export const monthOf = (iso: string): Month => toMonth(localMonth(iso));
 
 export const itemTotal = (item: {
   unitPrice: number;

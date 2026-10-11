@@ -38,6 +38,7 @@ const LIMITS = {
 };
 const EARLIEST_DATE = Date.parse('2000-01-01');
 const DAY_MS = 24 * 60 * 60 * 1000;
+const DAY_ONLY = /^\d{4}-\d{2}-\d{2}$/;
 
 // Text comes from a photo, so control and invisible/bidi characters are dropped.
 const cleanText = (value: string) =>
@@ -46,11 +47,15 @@ const cleanText = (value: string) =>
 const text = (max: number, min = 0) =>
   z.string().transform(cleanText).pipe(z.string().min(min).max(max));
 
-// Missing, malformed or out-of-range dates fall back to now.
+// Missing, malformed or out-of-range dates fall back to now. A receipt with
+// a day only stays a plain `YYYY-MM-DD`: the server does not know the user's
+// zone, so the client adds the time of day (never midnight UTC).
 const toPurchaseDate = (value: string | null) => {
-  const time = value === null ? Number.NaN : Date.parse(value);
+  const text = value?.trim() ?? '';
+  const time = Date.parse(text);
   const valid = time >= EARLIEST_DATE && time <= Date.now() + DAY_MS;
 
+  if (valid && DAY_ONLY.test(text)) return text;
   return new Date(valid ? time : Date.now()).toISOString();
 };
 

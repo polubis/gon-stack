@@ -113,4 +113,10 @@ describe('receipt reader output checks', () => {
 
     expect(result.date).toBe('2026-10-07T10:00:00.000Z');
   });
+
+  it('keeps a day-only date as a plain day, not midnight UTC', async () => {
+    const result = await read(receipt({ date: '2026-10-07' }));
+
+    expect(result.date).toBe('2026-10-07');
+  });
 });

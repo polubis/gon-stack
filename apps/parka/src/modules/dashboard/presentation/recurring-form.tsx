@@ -5,7 +5,7 @@ import { Trash2 } from 'lucide-react';
 import { Button, Field, Input, Select } from '@/shared/ui/controls';
 import { NumberInput } from '@/shared/ui/number-input';
 import type { Period } from '@/shared/period/period';
-import { fromDateInput, toDateInput } from '../domain/format';
+import { localDay } from '@/shared/date/date';
 import type { CategoryId, Recurring } from '../domain/models';
 import { useContext } from './context';
 import { DialogActions } from './detail-dialog';
@@ -27,7 +27,7 @@ export const RecurringForm = ({
   const categories = ctx.useCategories();
   const [name, setName] = useState(recurring.name);
   const [cost, setCost] = useState(recurring.cost);
-  const [date, setDate] = useState(toDateInput(recurring.nextPaymentDate));
+  const [date, setDate] = useState(localDay(recurring.nextPaymentDate));
   const [method, setMethod] = useState(recurring.paymentMethod);
   const [categoryId, setCategoryId] = useState<CategoryId | null>(
     recurring.categoryId,
@@ -43,7 +43,7 @@ export const RecurringForm = ({
     const values = {
       name: name.trim(),
       cost,
-      nextPaymentDate: fromDateInput(date),
+      nextPaymentDate: date,
       paymentMethod: method.trim(),
       categoryId: selected,
     };

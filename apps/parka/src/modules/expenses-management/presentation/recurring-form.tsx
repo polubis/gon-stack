@@ -6,7 +6,7 @@ import { APP_ROUTER } from '@/shared/router/routes';
 import { Button, Field, Input, Select } from '@/shared/ui/controls';
 import { Card } from '@/shared/ui/layout';
 import { NumberInput } from '@/shared/ui/number-input';
-import { fromDateInput, toDateInput } from '../domain/format';
+import { today } from '@/shared/date/date';
 import { newRecurringId } from '../domain/ids';
 import type { CategoryId } from '../domain/models';
 import { useContext } from './context';
@@ -18,7 +18,7 @@ export const RecurringForm = () => {
   const saving = ctx.useSaving();
   const [name, setName] = useState('');
   const [cost, setCost] = useState(0);
-  const [date, setDate] = useState(toDateInput(new Date().toISOString()));
+  const [date, setDate] = useState(today());
   const [method, setMethod] = useState('');
   const [categoryId, setCategoryId] = useState<CategoryId | null>(null);
 
@@ -33,7 +33,7 @@ export const RecurringForm = () => {
       id: newRecurringId(),
       name: name.trim(),
       cost,
-      nextPaymentDate: fromDateInput(date),
+      nextPaymentDate: date,
       active: true,
       paymentMethod: method.trim(),
       categoryId: selected,

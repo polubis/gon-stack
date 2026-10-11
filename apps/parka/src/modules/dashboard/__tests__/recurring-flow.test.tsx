@@ -13,7 +13,7 @@ const NETFLIX = {
   id: 'r-1',
   name: 'Netflix',
   cost: 30,
-  nextPaymentDate: '2025-05-15T00:00:00Z',
+  nextPaymentDate: '2025-05-15',
   active: true,
   paymentMethod: 'card',
   categoryId: 'c-1',

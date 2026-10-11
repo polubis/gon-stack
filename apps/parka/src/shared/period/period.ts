@@ -1,3 +1,5 @@
+import { localDay, today } from '@/shared/date/date';
+
 /** Calendar span the dashboard shows. Days are `YYYY-MM-DD`, both ends inclusive. */
 export type PeriodKind = 'day' | 'week' | 'month' | 'year' | 'custom';
 
@@ -46,8 +48,8 @@ export const addDays = (day: string, count: number): string =>
 export const daysBetween = (from: string, to: string): number =>
   Math.round((toDate(to).getTime() - toDate(from).getTime()) / DAY_MS);
 
-/** Today as `YYYY-MM-DD` (UTC, like the stored expense dates). */
-export const todayDay = (): string => new Date().toISOString().slice(0, 10);
+/** Today as `YYYY-MM-DD` in `timeZone` (default: the local one). */
+export const todayDay = (timeZone?: string): string => today(timeZone);
 
 /** Own range from `from` to `to`, both inclusive; a swapped pair is fixed. */
 export const customPeriod = (from: string, to: string): Period => {
@@ -137,9 +139,12 @@ export const clampPeriod = (period: Period, today: string): Period => {
 export const containsDay = (period: Period, day: string): boolean =>
   day >= period.from && day <= period.to;
 
-/** `YYYY-MM-DD` or an ISO date-time, tested against the period. */
-export const containsDate = (period: Period, iso: string): boolean =>
-  containsDay(period, iso.slice(0, 10));
+/** `YYYY-MM-DD` or an instant (read in `timeZone`), tested against the period. */
+export const containsDate = (
+  period: Period,
+  iso: string,
+  timeZone?: string,
+): boolean => containsDay(period, localDay(iso, timeZone));
 
 /** Months (`YYYY-MM`) the period touches, oldest first. */
 export const periodMonths = (period: Period): string[] => {

@@ -18,6 +18,12 @@ const open = async (page: Page, path: string): Promise<void> => {
 
 const yearMonth = (date: Date): string => date.toISOString().slice(0, 7);
 
+/** Local `YYYY-MM-DDTHH:mm`, the value of a `datetime-local` input. */
+const localInput = (date: Date): string => {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
+
 const CATEGORY = {
   id: 'cat-1',
   name: 'Spożywcze',
@@ -282,7 +288,9 @@ const commands = {
     });
 
     await expect(getByE2e('expense-form:merchant')).toHaveValue('Biedronka');
-    await expect(getByE2e('expense-form:date')).toHaveValue('2026-09-15');
+    await expect(getByE2e('expense-form:date')).toHaveValue(
+      localInput(new Date('2026-09-15T12:00:00.000Z')),
+    );
     await expect(getByE2e('expense-form:method')).toHaveValue('Karta');
     await expect(page.getByText('Chleb')).toBeVisible();
     await expect(page.getByText('Mleko')).toBeVisible();
@@ -332,19 +340,32 @@ const commands = {
     await price.pressSequentially('3,20');
     await expect(price).toHaveValue('3,20');
     await expect(getByE2e('expense-form:total')).toContainText('3,20');
-    await getByE2e('expense-form:date').fill('2026-03-10');
+    await getByE2e('expense-form:date').fill('2026-03-10T14:30');
 
     const request = page.waitForRequest(
       (r) => r.method() === 'POST' && r.url().includes(API_ROUTER.expenses()),
     );
     await getByE2e('expense-form:save').click();
     const saved = new Date((await request).postDataJSON().date as string);
-    expect([saved.getFullYear(), saved.getMonth(), saved.getDate()]).toEqual([
-      2026, 2, 10,
-    ]);
-    expect(saved.toISOString()).not.toMatch(/T00:00:00.000Z$/);
+    expect(saved.toISOString()).toBe(
+      new Date(2026, 2, 10, 14, 30).toISOString(),
+    );
     await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
   },
+
+  'the expense form starts at the current date and time and requires it':
+    async ({ page, getByE2e }) => {
+      await mockState(page);
+      const before = localInput(new Date());
+      await open(page, APP_ROUTER.newExpense());
+
+      const date = getByE2e('expense-form:date');
+      await expect(date).toHaveAttribute('type', 'datetime-local');
+      const value = await date.inputValue();
+      expect(value >= before && value <= localInput(new Date())).toBe(true);
+      await expect(date).toBeVisible();
+      await expect(date).toHaveJSProperty('required', true);
+    },
 
   'i cannot save a product without a name': async ({
     page,
@@ -765,6 +786,15 @@ test('an expense can be added manually with products', async ({ e2e }) => {
     commands,
     e2e,
   )(['i add an expense manually with a product']);
+});
+
+test('the expense form starts at now and requires date and time', async ({
+  e2e,
+}) => {
+  await interpreter(
+    commands,
+    e2e,
+  )(['the expense form starts at the current date and time and requires it']);
 });
 
 test('products from different categories leave the expense without one', async ({

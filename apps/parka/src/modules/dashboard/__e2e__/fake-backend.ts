@@ -65,8 +65,13 @@ export const installBackend = async (
   const state: Seed = structuredClone(seed);
   const requests: { method: string; path: string }[] = [];
 
-  const summary = (kind: PeriodKind, from: string, to?: string) => {
-    const today = todayDay();
+  const summary = (
+    kind: PeriodKind,
+    from: string,
+    to?: string,
+    timeZone?: string,
+  ) => {
+    const today = todayDay(timeZone);
     const period = clampPeriod(resolvePeriod(kind, from, to), today);
     const previous = shiftPeriod(period, -1);
     const charges = chargesInPeriods(state.recurring, [period, previous]);
@@ -86,6 +91,7 @@ export const installBackend = async (
         previous,
         today,
         monthlyLimit: total ? total.amount : null,
+        timeZone,
       }),
       userName: 'Anna',
     };
@@ -105,6 +111,7 @@ export const installBackend = async (
           (url.searchParams.get('kind') ?? 'month') as PeriodKind,
           url.searchParams.get('from') ?? todayDay(),
           url.searchParams.get('to') ?? undefined,
+          url.searchParams.get('tz') ?? undefined,
         ),
       });
     }

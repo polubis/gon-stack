@@ -127,7 +127,7 @@ export const moreSectionPaths = (): readonly string[] => [
 export const API_ROUTER = {
   dashboard: routeWithRequiredQuery<
     '/api/dashboard/',
-    { kind: string; from: string; to?: string }
+    { kind: string; from: string; to?: string; tz?: string }
   >('/api/dashboard/'),
   expenses: route('/api/expenses/'),
   expenseById: routeById('/api/expenses/'),

@@ -17,6 +17,7 @@ import {
   listRecurringSchema,
   updateRecurringSchema,
 } from '@schemas/recurring';
+import { browserTimeZone } from '@/shared/date/date';
 import { API_ROUTER } from '@/shared/router/routes';
 import type {
   Category,
@@ -65,6 +66,7 @@ export const fetchSummary = async (
       kind: period.kind,
       from: period.from,
       to: period.kind === 'custom' ? period.to : undefined,
+      tz: browserTimeZone(),
     }),
     {
       headers: { Accept: 'application/json' },

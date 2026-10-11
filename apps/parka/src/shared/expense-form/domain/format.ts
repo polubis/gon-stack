@@ -1,3 +1,5 @@
+import { fromDateTimeInput, toDateTimeInput } from '@/shared/date/date';
+
 const plMoney = new Intl.NumberFormat('pl-PL', {
   style: 'currency',
   currency: 'PLN',
@@ -7,32 +9,11 @@ const plMoney = new Intl.NumberFormat('pl-PL', {
 
 export const money = (value: number): string => plMoney.format(value);
 
-const pad = (value: number): string => String(value).padStart(2, '0');
-
-/** ISO date-time → local `YYYY-MM-DD` (the day the user sees). */
-export const toLocalDateInput = (iso: string): string => {
-  const date = new Date(iso);
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-};
-
 /**
- * Local `YYYY-MM-DD` → ISO timestamp. Keeps `original` when it falls on that
- * local day, otherwise combines the day with the current local time.
+ * Local `YYYY-MM-DDTHH:mm` → UTC ISO instant; `null` when empty or invalid.
+ * Keeps `original` untouched while the shown minute is not changed.
  */
-export const toTimestamp = (
-  value: string,
-  original?: string,
-  now: Date = new Date(),
-): string => {
-  if (original && toLocalDateInput(original) === value) return original;
-  const [y, m, d] = value.split('-').map(Number) as [number, number, number];
-  return new Date(
-    y,
-    m - 1,
-    d,
-    now.getHours(),
-    now.getMinutes(),
-    now.getSeconds(),
-    now.getMilliseconds(),
-  ).toISOString();
-};
+export const toTimestamp = (value: string, original?: string): string | null =>
+  original && toDateTimeInput(original) === value
+    ? original
+    : fromDateTimeInput(value);

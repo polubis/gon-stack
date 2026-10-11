@@ -18,7 +18,9 @@ export const getDashboard = privateProcedure({
   schema: withZodSchema({ schema: getDashboardSchema }),
 })({
   handler: async (input, { db }) => {
-    const today = todayDay();
+    // Days are the caller's: the same instant is another day in another zone.
+    const timeZone = input.tz;
+    const today = todayDay(timeZone);
     // A future period holds nothing: it snaps to the present one.
     const period = clampPeriod(
       resolvePeriod(input.kind, input.from, input.to),
@@ -32,8 +34,9 @@ export const getDashboard = privateProcedure({
         db
           .from('expenses')
           .select('id, date, amount, category_id')
-          .gte('date', previous.from)
-          .lt('date', addDays(period.to, 1)),
+          // One day wider on both sides: the zone decides the exact edge.
+          .gte('date', addDays(previous.from, -1))
+          .lt('date', addDays(period.to, 2)),
         db
           .from('receipt_items')
           .select('expense_id, unit_price, quantity, discount, category_id'),
@@ -99,6 +102,7 @@ export const getDashboard = privateProcedure({
       previous,
       today,
       monthlyLimit: limits.data[0] ? Number(limits.data[0].amount) : null,
+      timeZone,
     });
 
     return {

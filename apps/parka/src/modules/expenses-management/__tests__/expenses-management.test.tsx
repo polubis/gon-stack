@@ -87,17 +87,20 @@ const upload = async (
   label = 'Plik ze zdjęciem paragonu',
 ) => user.upload(screen.getByLabelText(label), file);
 
-const msOfDay = (date: Date) =>
-  ((date.getHours() * 60 + date.getMinutes()) * 60 + date.getSeconds()) * 1000 +
-  date.getMilliseconds();
-
-const localDay = (date: Date) =>
-  [date.getFullYear(), date.getMonth() + 1, date.getDate()]
-    .map((n) => String(n).padStart(2, '0'))
-    .join('-');
+/** Local `YYYY-MM-DDTHH:mm`, the value a `datetime-local` input takes. */
+const localInput = (date: Date) =>
+  [
+    [date.getFullYear(), date.getMonth() + 1, date.getDate()],
+    [date.getHours(), date.getMinutes()],
+  ]
+    .map((part) => part.map((n) => String(n).padStart(2, '0')))
+    .map((part, i) => part.join(i === 0 ? '-' : ':'))
+    .join('T');
 
 const setDate = (value: string) =>
-  fireEvent.change(screen.getByLabelText('Data'), { target: { value } });
+  fireEvent.change(screen.getByLabelText('Data i godzina'), {
+    target: { value },
+  });
 
 describe('adding an expense on its own page', () => {
   beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
@@ -142,23 +145,61 @@ describe('adding an expense on its own page', () => {
 
       await user.type(screen.getByLabelText('Sklep'), 'Piekarnia');
       await user.type(screen.getByLabelText('Kwota'), '25');
-      setDate('2025-04-10');
-      const before = new Date();
+      setDate('2025-04-10T14:30');
       await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
 
       await waitFor(() => expect(written).toHaveLength(1));
-      const after = new Date();
       expect(written[0]!.body).toMatchObject({
         merchant: 'Piekarnia',
         amount: 25,
         categoryId: 'c-1',
         source: 'manual',
         isBill: false,
+        date: new Date(2025, 3, 10, 14, 30).toISOString(),
       });
-      const saved = new Date(written[0]!.body.date as string);
-      expect(localDay(saved)).toBe('2025-04-10');
-      expect(msOfDay(saved)).toBeGreaterThanOrEqual(msOfDay(before));
-      expect(msOfDay(saved)).toBeLessThanOrEqual(msOfDay(after));
+    });
+
+    it('prefills the date and time with the current moment', async () => {
+      mockBackend();
+      const before = localInput(new Date());
+      await open();
+
+      const input = screen.getByLabelText('Data i godzina');
+      expect(input).toHaveAttribute('type', 'datetime-local');
+      expect((input as HTMLInputElement).value >= before).toBe(true);
+      expect((input as HTMLInputElement).value <= localInput(new Date())).toBe(
+        true,
+      );
+    });
+
+    it('saves the current moment in UTC when the date is left alone', async () => {
+      const written = mockBackend();
+      const user = await open();
+
+      await user.type(screen.getByLabelText('Sklep'), 'Piekarnia');
+      await user.type(screen.getByLabelText('Kwota'), '25');
+      const before = Date.now();
+      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+
+      await waitFor(() => expect(written).toHaveLength(1));
+      const saved = written[0]!.body.date as string;
+      expect(saved).toMatch(/Z$/);
+      // Prefilled with the minute of opening, so never later than the save.
+      expect(Date.parse(saved)).toBeLessThanOrEqual(before);
+      expect(before - Date.parse(saved)).toBeLessThan(5 * 60_000);
+    });
+
+    it('does not save without a date and time', async () => {
+      const written = mockBackend();
+      const user = await open();
+
+      await user.type(screen.getByLabelText('Sklep'), 'Piekarnia');
+      await user.type(screen.getByLabelText('Kwota'), '25');
+      setDate('');
+
+      expect(screen.getByLabelText('Data i godzina')).toBeRequired();
+      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+      expect(written).toHaveLength(0);
     });
 
     it('saves which device the expense was created from', async () => {
@@ -201,7 +242,7 @@ describe('adding an expense on its own page', () => {
 
       await user.type(screen.getByLabelText('Sklep'), 'Piekarnia');
       await user.type(screen.getByLabelText('Kwota'), '25');
-      setDate('2025-04-15');
+      setDate('2025-04-15T09:00');
       await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
 
       await waitFor(() =>
@@ -396,7 +437,7 @@ describe('adding an expense on its own page', () => {
           name: 'Netflix',
           cost: 30,
           active: true,
-          nextPaymentDate: '2025-05-15T00:00:00.000Z',
+          nextPaymentDate: '2025-05-15',
           history: [],
         },
       });
@@ -473,23 +514,44 @@ describe('adding an expense on its own page', () => {
       expect(written[0]!.body.date).toBe(DRAFT.date);
     });
 
-    it('uses the current time when the scanned day is changed', async () => {
+    it('saves the scanned date and time after they are changed', async () => {
       mockScan();
       const written = mockBackend();
       const user = await open();
 
       await upload(user, photo());
       await screen.findByDisplayValue('Biedronka');
-      setDate('2025-03-01');
-      const before = new Date();
+      setDate('2025-03-01T18:45');
       await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
 
       await waitFor(() => expect(written).toHaveLength(1));
-      const after = new Date();
-      const saved = new Date(written[0]!.body.date as string);
-      expect(localDay(saved)).toBe('2025-03-01');
-      expect(msOfDay(saved)).toBeGreaterThanOrEqual(msOfDay(before));
-      expect(msOfDay(saved)).toBeLessThanOrEqual(msOfDay(after));
+      expect(written[0]!.body.date).toBe(
+        new Date(2025, 2, 1, 18, 45).toISOString(),
+      );
+    });
+
+    it('prefills a day-only scanned date with the current local time', async () => {
+      server.use(
+        http.post('/api/receipts/scan/', () =>
+          HttpResponse.json({
+            code: 200,
+            data: { ...DRAFT, date: '2025-03-01' },
+          }),
+        ),
+      );
+      mockBackend();
+      const user = await open();
+      const before = localInput(new Date());
+
+      await upload(user, photo());
+      await screen.findByDisplayValue('Biedronka');
+
+      const value = (
+        screen.getByLabelText('Data i godzina') as HTMLInputElement
+      ).value;
+      expect(value.slice(0, 10)).toBe('2025-03-01');
+      expect(value.slice(11) >= before.slice(11)).toBe(true);
+      expect(value.slice(11) <= localInput(new Date()).slice(11)).toBe(true);
     });
 
     it('sends the photo to the scan endpoint as multipart', async () => {

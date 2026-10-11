@@ -1,3 +1,4 @@
+import { localMonth } from '@/shared/date/date';
 import type { Month } from './models';
 
 const MONTH_PATTERN = /^\d{4}-\d{2}$/;
@@ -39,7 +40,7 @@ export const monthLabel = (month: Month): string => {
 };
 
 /** ISO date-time → its `YYYY-MM`. */
-export const monthOf = (iso: string): Month => toMonth(iso.slice(0, 7));
+export const monthOf = (iso: string): Month => toMonth(localMonth(iso));
 
 /** Today's month, e.g. `2026-09`. */
 export const currentMonth = (): Month => monthOf(new Date().toISOString());

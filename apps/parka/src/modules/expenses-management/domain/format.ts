@@ -1,3 +1,4 @@
+import { localMonth } from '@/shared/date/date';
 import type { Month } from './models';
 
 const plMoney = new Intl.NumberFormat('pl-PL', {
@@ -9,42 +10,5 @@ const plMoney = new Intl.NumberFormat('pl-PL', {
 
 export const money = (value: number): string => plMoney.format(value);
 
-/** ISO date-time → `YYYY-MM-DD`. */
-export const toDateInput = (iso: string): string => iso.slice(0, 10);
-
-export const fromDateInput = (value: string): string =>
-  `${value}T00:00:00.000Z`;
-
-const pad = (value: number): string => String(value).padStart(2, '0');
-
-/** ISO date-time → local `YYYY-MM-DD` (the day the user sees). */
-export const toLocalDateInput = (iso: string): string => {
-  const date = new Date(iso);
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-};
-
-/**
- * Local `YYYY-MM-DD` → ISO timestamp. Keeps `original` when it falls on that
- * local day, otherwise combines the day with the current local time.
- */
-export const toTimestamp = (
-  value: string,
-  original?: string,
-  now: Date = new Date(),
-): string => {
-  if (original && toLocalDateInput(original) === value) return original;
-  const [y, m, d] = value.split('-').map(Number) as [number, number, number];
-  return new Date(
-    y,
-    m - 1,
-    d,
-    now.getHours(),
-    now.getMinutes(),
-    now.getSeconds(),
-    now.getMilliseconds(),
-  ).toISOString();
-};
-
-/** `YYYY-MM-DD` → `YYYY-MM`. */
-export const monthOfDateInput = (value: string): Month =>
-  value.slice(0, 7) as Month;
+/** Instant (or plain `YYYY-MM-DD`) → the local `YYYY-MM` it falls in. */
+export const monthOf = (value: string): Month => localMonth(value) as Month;

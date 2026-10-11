@@ -1,4 +1,5 @@
 import z from 'zod';
+import { isTimeZone } from '@/shared/date/date';
 import { errorOut } from './general';
 
 const categorySlice = () =>
@@ -23,6 +24,8 @@ export const getDashboardSchema = () =>
         .string()
         .regex(/^\d{4}-\d{2}-\d{2}$/)
         .optional(),
+      /** IANA time zone whose calendar days the period is counted in. */
+      tz: z.string().refine(isTimeZone, 'Unknown time zone').optional(),
     }),
     out: z.union([
       z.object({

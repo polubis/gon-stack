@@ -1,3 +1,4 @@
+import { localDay, localMonth } from '@/shared/date/date';
 import {
   categoryShares,
   type CategorizedItem,
@@ -65,25 +66,34 @@ const sum = (expenses: DashboardExpense[]): number =>
 const inPeriod = (
   expenses: DashboardExpense[],
   period: Period,
-): DashboardExpense[] => expenses.filter((e) => containsDate(period, e.date));
+  timeZone?: string,
+): DashboardExpense[] =>
+  expenses.filter((e) => containsDate(period, e.date, timeZone));
 
-const bucketIndex = (period: Period, date: string): number =>
+const bucketIndex = (
+  period: Period,
+  date: string,
+  timeZone?: string,
+): number =>
   bucketOf(period) === 'month'
-    ? periodMonths(period).indexOf(date.slice(0, 7)) + 1
-    : daysBetween(period.from, date.slice(0, 10)) + 1;
+    ? periodMonths(period).indexOf(localMonth(date, timeZone)) + 1
+    : daysBetween(period.from, localDay(date, timeZone)) + 1;
 
 const seriesOf = (
   expenses: DashboardExpense[],
   period: Period,
+  timeZone?: string,
 ): DashboardPoint[] => {
-  const scoped = inPeriod(expenses, period);
+  const scoped = inPeriod(expenses, period, timeZone);
   const length =
     bucketOf(period) === 'month'
       ? periodMonths(period).length
       : periodDays(period);
   return Array.from({ length }, (_, i) => ({
     index: i + 1,
-    total: sum(scoped.filter((e) => bucketIndex(period, e.date) === i + 1)),
+    total: sum(
+      scoped.filter((e) => bucketIndex(period, e.date, timeZone) === i + 1),
+    ),
   }));
 };
 
@@ -112,6 +122,7 @@ export const summarizeDashboard = ({
   previous,
   today,
   monthlyLimit,
+  timeZone,
 }: {
   expenses: DashboardExpense[];
   categories: DashboardCategory[];
@@ -121,10 +132,12 @@ export const summarizeDashboard = ({
   /** `YYYY-MM-DD`; injected so the summary stays pure. */
   today: string;
   monthlyLimit: number | null;
+  /** IANA zone whose calendar days the expenses fall on (default: server). */
+  timeZone?: string;
 }): DashboardSummary => {
-  const scoped = inPeriod(expenses, period);
+  const scoped = inPeriod(expenses, period, timeZone);
   const total = sum(scoped);
-  const previousTotal = sum(inPeriod(expenses, previous));
+  const previousTotal = sum(inPeriod(expenses, previous, timeZone));
   const change =
     previousTotal === 0 ? 0 : ((total - previousTotal) / previousTotal) * 100;
 
@@ -159,8 +172,8 @@ export const summarizeDashboard = ({
     previousTotal,
     transactions: scoped.length,
     dailyAverage,
-    series: seriesOf(expenses, period),
-    previousSeries: seriesOf(expenses, previous),
+    series: seriesOf(expenses, period, timeZone),
+    previousSeries: seriesOf(expenses, previous, timeZone),
     monthlyLimit,
     categories: categorySlices,
   };

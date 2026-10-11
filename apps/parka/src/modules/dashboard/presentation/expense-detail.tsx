@@ -1,3 +1,4 @@
+import { localMonth } from '@/shared/date/date';
 import { Pencil, Trash2 } from 'lucide-react';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { categoryLabel } from '@/shared/i18n/category-label';
@@ -131,7 +132,7 @@ export const ExpenseDetail = ({
           data-e2e="dashboard:edit"
           href={APP_ROUTER.expenseEdit({
             id: expense.id,
-            month: expense.date.slice(0, 7),
+            month: localMonth(expense.date),
           })}
         >
           <Pencil className="h-4 w-4" aria-hidden="true" /> Edytuj

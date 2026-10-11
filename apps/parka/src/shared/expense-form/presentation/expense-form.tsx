@@ -11,7 +11,8 @@ import { Button, Field, Input, Select, inputClass } from '@/shared/ui/controls';
 import { useRememberedField } from '@/shared/form-memory/presentation/use-remembered-field';
 import { Card } from '@/shared/ui/layout';
 import { NumberInput } from '@/shared/ui/number-input';
-import { money, toLocalDateInput, toTimestamp } from '../domain/format';
+import { money, toTimestamp } from '../domain/format';
+import { nowDateTimeInput, toDateTimeInput } from '@/shared/date/date';
 import {
   createProduct,
   defaultCategoryId,
@@ -63,7 +64,7 @@ export const ExpenseForm = ({
     base?.merchant || merchantMemory.recalled || '',
   );
   const [date, setDate] = useState(
-    toLocalDateInput(base?.date ?? new Date().toISOString()),
+    base?.date ? toDateTimeInput(base.date) : nowDateTimeInput(),
   );
   const methodMemory = useRememberedField({
     key: 'expense.paymentMethod',
@@ -113,12 +114,14 @@ export const ExpenseForm = ({
       setOpenId(unnamed.id);
       return;
     }
+    const timestamp = toTimestamp(date, base?.date);
+    if (!timestamp) return;
     merchantMemory.remember(merchant);
     methodMemory.remember(method);
     if (!hasProducts) categoryMemory.remember(selected);
     onSubmit({
       merchant: merchant.trim(),
-      date: toTimestamp(date, base?.date),
+      date: timestamp,
       amount: total,
       categoryId: derived,
       paymentMethod: method.trim(),
@@ -179,9 +182,9 @@ export const ExpenseForm = ({
               onValueChange={setAmount}
             />
           </Field>
-          <Field label="Data">
+          <Field label="Data i godzina">
             <Input
-              type="date"
+              type="datetime-local"
               required
               value={date}
               data-e2e="expense-form:date"

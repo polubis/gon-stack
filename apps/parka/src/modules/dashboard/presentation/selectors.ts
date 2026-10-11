@@ -1,3 +1,4 @@
+import { dayStart } from '@/shared/date/date';
 import { categoryShares } from '@/shared/expense-category/category';
 import { occurrencesInMonth } from '@/shared/recurring/occurrences';
 import {
@@ -52,7 +53,7 @@ export const withRecurringIn = (
     .map(({ o, month }) => ({
       id: recurringChargeId(o.recurringId as RecurringId, month as Month),
       merchant: o.name,
-      date: `${o.date}T00:00:00.000Z`,
+      date: dayStart(o.date),
       amount: o.amount,
       categoryId: o.categoryId as CategoryId,
       paymentMethod:
