@@ -17,6 +17,7 @@ describe('dashboard expense mappers', () => {
       paymentMethod: 'card',
       isBill: true,
       source: 'receipt',
+      device: { id: 'device-1', name: 'Chrome on Windows', type: 'desktop' },
       items: [
         {
           id: 'i-1',
@@ -31,6 +32,11 @@ describe('dashboard expense mappers', () => {
 
     expect(expense.id).toBe('e-1');
     expect(expense.isBill).toBe(true);
+    expect(expense.device).toEqual({
+      id: 'device-1',
+      name: 'Chrome on Windows',
+      type: 'desktop',
+    });
     expect(expense.items).toHaveLength(1);
     expect(expense.items[0]!.name).toBe('Milk');
   });

@@ -3,6 +3,7 @@ import { deriveExpenseCategory } from '@/shared/expense-category/category';
 import { BadRequest, InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
+import { deviceColumns, toDevice } from '../../shared/device';
 
 export const createExpense = privateProcedure({
   schema: withZodSchema({ schema: createExpenseSchema }),
@@ -25,6 +26,7 @@ export const createExpense = privateProcedure({
         payment_method: input.paymentMethod,
         is_bill: input.isBill,
         source: input.source,
+        ...deviceColumns(input.device),
       })
       .select()
       .single();
@@ -57,6 +59,7 @@ export const createExpense = privateProcedure({
         paymentMethod: data.payment_method,
         isBill: data.is_bill,
         source: data.source as 'receipt' | 'manual',
+        device: toDevice(data),
         items: input.items,
       },
     };

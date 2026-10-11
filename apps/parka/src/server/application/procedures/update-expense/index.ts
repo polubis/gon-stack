@@ -7,6 +7,7 @@ import {
 } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
+import { toDevice } from '../../shared/device';
 
 export const updateExpense = privateProcedure({
   schema: withZodSchema({ schema: updateExpenseSchema }),
@@ -67,6 +68,7 @@ export const updateExpense = privateProcedure({
         paymentMethod: data.payment_method,
         isBill: data.is_bill,
         source: data.source as 'receipt' | 'manual',
+        device: toDevice(data),
         items: input.items,
       },
     };

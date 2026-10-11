@@ -4,6 +4,7 @@ import { receiptItem } from '@schemas/general';
 import { InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
+import { toDevice } from '../../shared/device';
 
 export const listExpenses = privateProcedure({
   schema: withZodSchema({ schema: listExpensesSchema }),
@@ -45,6 +46,7 @@ export const listExpenses = privateProcedure({
           paymentMethod: e.payment_method,
           isBill: e.is_bill,
           source: e.source as 'receipt' | 'manual',
+          device: toDevice(e),
           items: itemsByExpense.get(e.id) ?? [],
         }))
         .sort((a, b) => (a.date < b.date ? 1 : -1)),

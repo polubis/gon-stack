@@ -1,6 +1,7 @@
 import { Pencil, Trash2 } from 'lucide-react';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { categoryLabel } from '@/shared/i18n/category-label';
+import { DeviceIcon } from '@/shared/device/presentation/device-icon';
 import { Button } from '@/shared/ui/controls';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { itemTotal, dateTimeLabel, money } from '../domain/format';
@@ -59,6 +60,31 @@ export const ExpenseDetail = ({
         />
         <Row label="Metoda płatności" value={expense.paymentMethod || '-'} />
         <Row label="Typ" value={expense.isBill ? 'Rachunek' : 'Zakup'} />
+        {expense.device ? (
+          <>
+            <div className="flex justify-between gap-3">
+              <dt className="text-ink-soft">Urządzenie</dt>
+              <dd className="flex min-w-0 items-center gap-1.5 text-right">
+                <DeviceIcon
+                  type={expense.device.type}
+                  className="h-4 w-4 shrink-0"
+                />
+                <span data-e2e="dashboard:detail-device-name">
+                  {expense.device.name}
+                </span>
+              </dd>
+            </div>
+            <div className="flex justify-between gap-3">
+              <dt className="shrink-0 text-ink-soft">ID urządzenia</dt>
+              <dd
+                className="min-w-0 text-right font-mono text-xs break-all"
+                data-e2e="dashboard:detail-device-id"
+              >
+                {expense.device.id}
+              </dd>
+            </div>
+          </>
+        ) : null}
       </dl>
 
       {expense.items.length > 0 ? (

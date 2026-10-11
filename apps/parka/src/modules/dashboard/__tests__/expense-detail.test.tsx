@@ -20,6 +20,7 @@ const expense = () => ({
   paymentMethod: 'Karta',
   isBill: false,
   source: 'manual',
+  device: { id: 'device-abc-123', name: 'Chrome on Windows', type: 'desktop' },
   items: [
     {
       id: 'i-1',
@@ -51,6 +52,14 @@ describe('expense popup', () => {
 
     expect(dialog.getByText('Chleb')).toBeVisible();
     expect(dialog.queryByRole('textbox')).not.toBeInTheDocument();
+  });
+
+  it('shows the device it was created from with its id', async () => {
+    render(<Main />);
+    const dialog = within(await screen.findByRole('dialog'));
+
+    expect(dialog.getByText('Chrome on Windows')).toBeVisible();
+    expect(dialog.getByText('device-abc-123')).toBeVisible();
   });
 
   it('sends Edit to the edit page of that expense', async () => {

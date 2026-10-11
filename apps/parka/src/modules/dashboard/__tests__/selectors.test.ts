@@ -30,6 +30,7 @@ const expense = (id: string, date: string, amount: number): Expense => ({
   paymentMethod: 'card',
   isBill: false,
   source: 'manual',
+  device: null,
   items: [],
 });
 

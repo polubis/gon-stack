@@ -69,6 +69,7 @@ export const toExpense = (dto: ExpenseDto): Expense => ({
   paymentMethod: dto.paymentMethod,
   isBill: dto.isBill,
   source: dto.source,
+  device: dto.device,
   items: dto.items.map((item) => ({
     id: item.id as ReceiptItemId,
     name: item.name,

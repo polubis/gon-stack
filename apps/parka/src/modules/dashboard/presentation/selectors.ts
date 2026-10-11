@@ -59,6 +59,7 @@ export const withRecurringIn = (
         recurring.find((r) => r.id === o.recurringId)?.paymentMethod ?? '',
       isBill: true,
       source: 'recurring' as const,
+      device: null,
       items: [],
     })),
 ];

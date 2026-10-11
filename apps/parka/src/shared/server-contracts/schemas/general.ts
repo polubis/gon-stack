@@ -24,6 +24,14 @@ export const receiptItem = () =>
     categoryId: z.string().min(1),
   });
 
+/** The device an expense was created from. */
+export const device = () =>
+  z.object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+    type: z.enum(['mobile', 'desktop', 'tablet']),
+  });
+
 export const expense = () =>
   z.object({
     id: z.string().min(1),
@@ -35,6 +43,8 @@ export const expense = () =>
     paymentMethod: z.string(),
     isBill: z.boolean(),
     source: z.enum(['receipt', 'manual']),
+    /** `null` for expenses made before devices were tracked. */
+    device: device().nullable().default(null),
     items: z.array(receiptItem()),
   });
 

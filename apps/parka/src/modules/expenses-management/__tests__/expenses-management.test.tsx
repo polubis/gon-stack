@@ -160,6 +160,40 @@ describe('adding an expense on its own page', () => {
       expect(msOfDay(saved)).toBeLessThanOrEqual(msOfDay(after));
     });
 
+    it('saves which device the expense was created from', async () => {
+      const written = mockBackend();
+      const user = await open();
+
+      await user.type(screen.getByLabelText('Sklep'), 'Piekarnia');
+      await user.type(screen.getByLabelText('Kwota'), '25');
+      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+
+      await waitFor(() => expect(written).toHaveLength(1));
+      expect(written[0]!.body.device).toEqual({
+        id: expect.any(String),
+        name: expect.any(String),
+        type: expect.stringMatching(/^(mobile|desktop|tablet)$/),
+      });
+    });
+
+    it('keeps the same device id for the next expense', async () => {
+      const written = mockBackend();
+      const user = await open();
+
+      for (const merchant of ['Piekarnia', 'Kiosk']) {
+        await user.clear(screen.getByLabelText('Sklep'));
+        await user.type(screen.getByLabelText('Sklep'), merchant);
+        await user.clear(screen.getByLabelText('Kwota'));
+        await user.type(screen.getByLabelText('Kwota'), '5');
+        await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+        await waitFor(() => expect(written.length).toBeGreaterThan(0));
+        window.history.replaceState(null, '', '/app/expenses/new/');
+      }
+
+      const ids = written.map((w) => (w.body.device as { id: string }).id);
+      expect(new Set(ids).size).toBe(1);
+    });
+
     it('redirects to the month of the saved expense', async () => {
       mockBackend();
       const user = await open();

@@ -21,6 +21,7 @@ import type {
   ExpenseId,
 } from '../domain/models';
 import { DetailDialog } from './detail-dialog';
+import { DeviceBadge } from './device-badge';
 import { useContext } from './context';
 import { EXPENSES_MODAL } from './modal-ids';
 import { RecurringMark } from './recurring-badge';
@@ -117,9 +118,12 @@ const ExpenseList = ({
               <span className="block truncate text-sm font-semibold">
                 {e.merchant}
               </span>
-              <span className="block text-xs text-ink-soft">
-                {shortDateTimeLabel(e.date)}
-                <span className="sr-only">{`, ${categoryLabel(category.name)}`}</span>
+              <span className="flex items-center gap-2 text-xs text-ink-soft">
+                <span className="shrink-0">
+                  {shortDateTimeLabel(e.date)}
+                  <span className="sr-only">{`, ${categoryLabel(category.name)}`}</span>
+                </span>
+                {e.device ? <DeviceBadge device={e.device} /> : null}
               </span>
             </span>
             <span className="relative text-sm font-semibold tabular-nums">

@@ -63,6 +63,9 @@ export type Database = {
           amount: number;
           category_id: string | null;
           date: string;
+          device_id: string | null;
+          device_name: string | null;
+          device_type: string | null;
           id: string;
           is_bill: boolean;
           merchant: string;
@@ -74,6 +77,9 @@ export type Database = {
           amount?: number;
           category_id: string | null;
           date: string;
+          device_id?: string | null;
+          device_name?: string | null;
+          device_type?: string | null;
           id: string;
           is_bill?: boolean;
           merchant: string;
@@ -85,6 +91,9 @@ export type Database = {
           amount?: number;
           category_id?: string | null;
           date?: string;
+          device_id?: string | null;
+          device_name?: string | null;
+          device_type?: string | null;
           id?: string;
           is_bill?: boolean;
           merchant?: string;

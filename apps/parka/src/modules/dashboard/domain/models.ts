@@ -1,5 +1,6 @@
 import type { Brand } from '@repo/type-beast/brand';
 import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
+import type { Device } from '@/shared/device/domain/models';
 
 export type Month = Brand<string, 'Month'>;
 export type { Period, PeriodKind } from '@/shared/period/period';
@@ -70,6 +71,8 @@ export type Expense = {
   isBill: boolean;
   /** `recurring`: derived from a recurring expense, never stored. */
   source: 'receipt' | 'manual' | 'recurring';
+  /** Where it was created; `null` for older and recurring expenses. */
+  device: Device | null;
   items: ReceiptItem[];
 };
 

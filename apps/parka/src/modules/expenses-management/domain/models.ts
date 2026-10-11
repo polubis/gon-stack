@@ -1,5 +1,6 @@
 import type { Brand } from '@repo/type-beast/brand';
 import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
+import type { Device } from '@/shared/device/domain/models';
 
 export type Month = Brand<string, 'Month'>;
 export type CategoryId = Brand<string, 'CategoryId'>;
@@ -48,6 +49,8 @@ export type NewExpense = {
   paymentMethod: string;
   isBill: false;
   source: 'receipt' | 'manual';
+  /** Where it was created; kept as is when edited. */
+  device: Device | null;
   items: Product[];
 };
 

@@ -4,6 +4,7 @@ import {
   productsFromDraft,
 } from '@/shared/expense-form/domain/products';
 import type { ExpenseFormValues } from '@/shared/expense-form/domain/models';
+import { currentDevice } from '@/shared/device/integration/current-device';
 import { newExpenseId } from '../domain/ids';
 import type { ReceiptDraft } from '../domain/models';
 import { useContext } from './context';
@@ -38,6 +39,7 @@ export const NewExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
           id: newExpenseId(),
           isBill: false,
           source: draft ? 'receipt' : 'manual',
+          device: currentDevice(),
         })
       }
     />

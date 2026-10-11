@@ -50,6 +50,8 @@ export const DASHBOARD_E2E_IDS = [
   'dashboard:recurring-delete',
   'dashboard:toast',
   'dashboard:detail',
+  'dashboard:detail-device-name',
+  'dashboard:detail-device-id',
   'dashboard:edit',
   'dashboard:delete',
 ] as const;
