@@ -1,4 +1,4 @@
-One decision/task/work means one commit. Never splitted accross many. Follow this conventional commit convention:
+Follow this conventional commit convention:
 
 ```md
 <!-- First option (no breaking change) -->

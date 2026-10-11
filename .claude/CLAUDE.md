@@ -6,6 +6,8 @@ This file + `rules/`, `skills/`, `references/`, `templates/` guide agents in **g
 
 Always check `references/aodi-framework.md` and `rules/*.md` before any task and force rules.
 
+Every task starts by delegating to the `coord` agent. `coord` never delegates and never commits: it does the work, shows proof, and waits for dev acceptance. Commit only after acceptance.
+
 ## Ecosystem
 
 ### Structure

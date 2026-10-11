@@ -44,6 +44,11 @@ export const logEntry: Rule<never> = {
     if (entries.length === 0) {
       report('No new "__log__/NNNN-slug.md" entry staged in this commit');
     }
+    if (entries.length > 1) {
+      report(
+        `Exactly one new "__log__/NNNN-slug.md" entry per commit, found ${entries.length}: ${entries.join(', ')}`,
+      );
+    }
     for (const file of entries)
       for (const problem of validateLogEntry(file, await readText(file)))
         report(problem);

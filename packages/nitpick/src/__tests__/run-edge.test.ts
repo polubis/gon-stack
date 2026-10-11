@@ -664,6 +664,6 @@ describe('Rich commit through the CLI works when', () => {
     );
     expect(
       await readFile(join(root, '.ai', 'rules', 'rich-commit.md'), 'utf8'),
-    ).toContain('One decision/task/work means one commit.');
+    ).toContain('Follow this conventional commit convention');
   });
 });

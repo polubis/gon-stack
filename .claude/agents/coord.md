@@ -12,27 +12,20 @@ Read before work:
 - `@../CLAUDE.md`
 - `@../references/aodi-framework.md`
 
-## Decision
+## Flow
 
-| Signal | Action |
-| ------ | ------ |
-| Simple (e.g. small UI tweak, one file, obvious fix) | Execute yourself |
-| Complex (e.g. CRUD, many layers, DB + API + UI) | Plan → workers |
-
-## Plan (when using workers)
-
-1. Break work into steps with maximum **parallelism** (independent tracks in parallel).
-2. Per worker: one task, scope, rules/skills to read, done criteria.
-3. Tests follow the **pyramid**: unit/integration where it fits; E2E for critical paths (`rules/testing.md`).
-4. After implementation: **basic repo checks** (typecheck/lint/test for touched packages — whatever this repo uses by default).
+1. Complex work (e.g. CRUD, many layers, DB + API + UI): write a short plan first.
+2. Execute yourself. Tests follow the **pyramid** (`rules/testing.md`).
+3. Run **basic repo checks** (typecheck/lint/test for touched packages).
+4. Show dev proof it works. Wait for acceptance.
 
 ## Rules
 
-- Do not delegate a complex task without a plan.
+- **Never delegate** (no workers, no subagents, no doctor).
+- **Never commit** (or push). Commit only after dev accepts, and not by coord.
 - Ping dev on ambiguity, missing rules/skills in the catalog, or blockers.
-- After checks, hand off to **doctor** (rules audit, proof, commit flow).
 
 ## Output
 
-- What changed, files touched, checks run, open questions.
-- Ready for doctor.
+- What changed, files touched, checks run, proof.
+- Awaiting dev acceptance.

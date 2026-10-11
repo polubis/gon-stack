@@ -81,6 +81,19 @@ describe('Log entry rule works when', () => {
     expect(errors.join('\n')).toContain('Fix: Add a new file');
   });
 
+  it('rejects a commit that adds more than one log entry', async () => {
+    expect(
+      await commitCheck(
+        {},
+        {
+          '__log__/0001-add-thing.md': entry(),
+          '__log__/0002-other-thing.md': entry('0002'),
+        },
+      ),
+    ).toBe(1);
+    expect(errors.join('\n')).toContain('Exactly one new "__log__/');
+  });
+
   it('rejects an entry that is only modified, not added', async () => {
     expect(
       await commitCheck(
