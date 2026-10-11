@@ -63,7 +63,7 @@ describe('expense popup', () => {
     expect(within(row).queryByText('Jedzenie')).not.toBeInTheDocument();
   });
 
-  it('names the category of each product when the expense mixes categories', async () => {
+  it('keeps only name and price per product when the expense mixes categories', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn(async (url: string) => ({
@@ -78,7 +78,8 @@ describe('expense popup', () => {
     const dialog = within(await screen.findByRole('dialog'));
     const row = dialog.getByText('Chleb').closest('li')!;
 
-    expect(within(row).getByText('Jedzenie')).toBeVisible();
+    expect(row.querySelector('svg')).not.toBeNull();
+    expect(within(row).queryByText('Jedzenie')).not.toBeInTheDocument();
   });
 
   it('shows the device it was created from with its id', async () => {
