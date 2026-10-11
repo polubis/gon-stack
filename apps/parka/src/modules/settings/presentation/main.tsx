@@ -7,6 +7,7 @@ import { Card, ScreenHeader } from '@/shared/ui/layout';
 import { ErrorState } from '@/shared/ui/error-state';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
 import { Toast } from '@/shared/ui/toast';
+import { useDarkTheme } from '@/shared/theme/use-dark-theme';
 import {
   ERROR_CODES,
   LINKS,
@@ -19,6 +20,7 @@ import { SettingsSkeleton } from './settings-skeleton';
 const SettingsContent = ({ settings }: { settings: Settings }) => {
   const ctx = useContext();
   const isSigningOut = ctx.useIsSigningOut();
+  const [dark, setDark] = useDarkTheme();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -99,6 +101,14 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
           Dane przechowywane w UE i szyfrowane w spoczynku oraz podczas
           przesyłania.
         </p>
+      </Card>
+
+      <Card as="section" className="space-y-2" data-e2e="settings:appearance">
+        <h2 className="text-sm font-semibold text-ink-soft">Wygląd</h2>
+        <div className="flex items-center justify-between py-2 text-sm">
+          <span>Ciemny motyw</span>
+          <Toggle checked={dark} onChange={setDark} label="Ciemny motyw" />
+        </div>
       </Card>
 
       <Card as="section" className="space-y-2 lg:col-span-2">

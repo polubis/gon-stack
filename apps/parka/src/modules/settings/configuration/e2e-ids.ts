@@ -5,6 +5,7 @@ export const SETTINGS_E2E_IDS = [
   'settings:profile-name',
   'settings:profile-email',
   'settings:save-profile',
+  'settings:appearance',
   'settings:notifications',
   'settings:sign-out',
   'settings:load-error',

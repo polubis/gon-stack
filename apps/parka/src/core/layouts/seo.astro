@@ -43,6 +43,12 @@ const showCookieConsent = COOKIE_CONSENT_PAGES.includes(url);
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
     <slot name="head-extra" />
+    <script is:inline>
+      try {
+        if (localStorage.getItem('parka:theme') === 'dark')
+          document.documentElement.dataset.theme = 'dark';
+      } catch {}
+    </script>
 
     <title>{title}</title>
     <meta name="description" content={description} />
