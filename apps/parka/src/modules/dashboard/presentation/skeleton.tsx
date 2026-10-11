@@ -32,10 +32,16 @@ export const DashboardSkeleton = () => (
         <div className="mt-4 grid w-full max-w-md grid-cols-3 divide-x divide-line border-t border-line pt-4">
           {Array.from({ length: 3 }, (_, i) => (
             <div key={i} className="flex flex-col items-center gap-0.5 px-2">
-              <Skeleton className="h-4 w-16" />
-              <Skeleton
-                className={i === 2 ? 'h-8.5 w-12 md:h-9.5' : 'h-5 w-12 md:h-6'}
-              />
+              <div className="flex min-h-8 items-end">
+                <Skeleton className="h-4 w-16" />
+              </div>
+              <div className="min-h-10">
+                <Skeleton
+                  className={
+                    i === 2 ? 'h-8.5 w-12 md:h-9.5' : 'h-5 w-12 md:h-6'
+                  }
+                />
+              </div>
             </div>
           ))}
         </div>
@@ -46,9 +52,12 @@ export const DashboardSkeleton = () => (
       className="space-y-4 xl:col-span-12 xl:row-start-3"
       aria-hidden="true"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex flex-col items-start gap-2 xl:flex-row xl:items-center xl:justify-between">
         <Skeleton className="h-6 w-40" />
-        <Skeleton className="h-4 w-60" />
+        <div className="flex flex-col gap-1 xl:flex-row xl:gap-4">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-4 w-40" />
+        </div>
       </div>
       <div>
         <Skeleton className="h-48 w-full md:h-56" />
@@ -66,7 +75,7 @@ export const DashboardSkeleton = () => (
       </div>
       <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
         <Skeleton className="h-40 w-40 shrink-0 rounded-full" />
-        <div className="h-48 w-full min-w-0 flex-1 space-y-1.5">
+        <div className="h-48 w-full min-w-0 space-y-1.5 sm:flex-1">
           <Rows count={6} className="h-5 w-full" />
         </div>
       </div>
@@ -78,8 +87,10 @@ export const DashboardSkeleton = () => (
         <Skeleton className="h-5 w-24" />
         <Skeleton className="ml-auto hidden h-8.5 w-36 rounded-xl md:block" />
       </div>
-      <div className="flex gap-2 pb-1">
-        <Rows count={3} className="h-8.5 w-24 shrink-0 rounded-full" />
+      <div className="h-10">
+        <div className="flex gap-2 pb-1">
+          <Rows count={3} className="h-8.5 w-24 shrink-0 rounded-full" />
+        </div>
       </div>
       <ul
         className={cn(

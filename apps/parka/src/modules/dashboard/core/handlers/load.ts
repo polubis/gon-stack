@@ -18,13 +18,13 @@ export const load = (store: Store, { ofType }: Bus) =>
       store.$initialized.set(true);
       store.$error.reset();
     }),
-    map(({ month }) => ({ month, ctrl: new AbortController() })),
-    switchMap(({ month, ctrl }) =>
+    map(({ period }) => ({ period, ctrl: new AbortController() })),
+    switchMap(({ period, ctrl }) =>
       // Deferred: runs after switchMap dropped the previous load, whose
       // `finalize` resets the flag, so the flag is never reset under a live load.
       defer(() => {
         store.$loading.set(true);
-        return from(fetchDashboard(month, ctrl.signal));
+        return from(fetchDashboard(period, ctrl.signal));
       }).pipe(
         tap((data) => {
           store.$data.set(data.summary);

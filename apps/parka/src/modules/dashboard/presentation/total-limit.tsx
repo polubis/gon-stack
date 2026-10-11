@@ -4,19 +4,24 @@ import { Button, Field, ProgressBar } from '@/shared/ui/controls';
 import { NumberInput } from '@/shared/ui/number-input';
 import { DEFAULT_TOTAL_LIMIT } from '../configuration/constraints';
 import { newLimitId } from '../domain/ids';
-import { money, monthLabel } from '../domain/format';
-import type { Limit, Month, TotalProgress } from '../domain/models';
+import type { Period } from '@/shared/period/period';
+import { money } from '../domain/format';
+import type { Limit, TotalProgress } from '../domain/models';
+import { LIMIT_NOUN, periodTitle } from '../domain/period';
 import { limitTone } from './selectors';
 import { useContext } from './context';
 
 /** The always-visible headline of the limits card. */
 export const TotalLimit = ({
   progress,
-  month,
+  period,
+  monthly,
   onEdit,
 }: {
   progress: TotalProgress | null;
-  month: Month;
+  period: Period;
+  /** The limit as set, per month; `progress` holds it scaled to the period. */
+  monthly: number | undefined;
   onEdit: () => void;
 }) => {
   if (!progress)
@@ -42,9 +47,16 @@ export const TotalLimit = ({
     <div className="space-y-2" data-e2e="dashboard:limit-total">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm text-ink-soft">Limit · {monthLabel(month)}</p>
+          <p className="text-sm text-ink-soft">
+            Limit na {LIMIT_NOUN[period.kind]} · {periodTitle(period)}
+          </p>
           <p className="text-2xl font-bold tabular-nums">
             {money(progress.amount)}
+          </p>
+          <p className="h-4 text-xs text-ink-soft">
+            {period.kind !== 'month' && monthly !== undefined
+              ? `z limitu miesięcznego ${money(monthly)}`
+              : null}
           </p>
         </div>
         <Button
@@ -59,7 +71,7 @@ export const TotalLimit = ({
       <ProgressBar
         pct={progress.pct}
         tone={limitTone(progress.pct)}
-        label={`Wykorzystano ${Math.round(progress.pct)}% limitu`}
+        label={`Wykorzystano ${Math.round(progress.pct)}% limitu na ${LIMIT_NOUN[period.kind]}`}
       />
       <p className="text-sm tabular-nums text-ink-soft">
         {money(progress.spent)} · {Math.round(progress.pct)}%

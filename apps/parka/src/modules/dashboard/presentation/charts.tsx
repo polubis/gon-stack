@@ -12,11 +12,14 @@ export const Donut = ({
   slices,
   caption,
   rows,
+  empty,
   onShowAll,
 }: {
   slices: Slice[];
   caption: string;
   rows?: number;
+  /** Shown in place of the legend when there are no slices. */
+  empty?: string;
   onShowAll?: () => void;
 }) => {
   const total = Math.max(
@@ -45,6 +48,16 @@ export const Donut = ({
         role="img"
         aria-label={caption}
       >
+        {slices.length === 0 ? (
+          <circle
+            cx="80"
+            cy="80"
+            r={radius}
+            fill="none"
+            stroke="var(--track-strong)"
+            strokeWidth="20"
+          />
+        ) : null}
         <g transform="rotate(-90 80 80)">
           {arcs.map(({ slice, dash, offset }) => (
             <circle
@@ -63,10 +76,13 @@ export const Donut = ({
       </svg>
       <div
         className={cn(
-          'relative w-full min-w-0 flex-1',
+          'relative w-full min-w-0 sm:flex-1',
           rows !== undefined && 'h-48 overflow-hidden',
         )}
       >
+        {slices.length === 0 && empty ? (
+          <p className="text-sm text-ink-soft">{empty}</p>
+        ) : null}
         <ul className="space-y-1.5 text-sm">
           {slices.slice(0, rows).map((s) => (
             <li key={s.label} className="flex h-5 items-center gap-2">

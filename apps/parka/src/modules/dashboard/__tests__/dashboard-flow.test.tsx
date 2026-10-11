@@ -1,7 +1,8 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { currentMonth, monthTitle, prevMonth } from '../domain/format';
+import { currentPeriod, shiftPeriod, todayDay } from '@/shared/period/period';
+import { currentMonth } from '../domain/format';
 import { Main } from '../presentation/main';
 import { readBody } from './dashboard-backend';
 
@@ -12,13 +13,13 @@ const SUMMARY = {
   previousTotal: 8,
   transactions: 3,
   dailyAverage: 1.5,
-  daily: [
-    { day: 1, total: 4 },
-    { day: 2, total: 6 },
+  series: [
+    { index: 1, total: 4 },
+    { index: 2, total: 6 },
   ],
-  previousDaily: [
-    { day: 1, total: 8 },
-    { day: 2, total: 0 },
+  previousSeries: [
+    { index: 1, total: 8 },
+    { index: 2, total: 0 },
   ],
   monthlyLimit: 100,
   categories: [
@@ -66,7 +67,9 @@ describe('dashboard screen', () => {
     expect(screen.getByText('3')).toBeTruthy();
     expect(screen.getByText(/90,00/)).toBeTruthy();
     expect(
-      screen.getByRole('progressbar', { name: 'Wykorzystano 10% limitu' }),
+      screen.getByRole('progressbar', {
+        name: /Wykorzystano 10% limitu na miesiąc/,
+      }),
     ).toBeTruthy();
   });
 
@@ -75,7 +78,7 @@ describe('dashboard screen', () => {
 
     render(<Main />);
 
-    expect(await screen.findByText('Ponad limit')).toBeTruthy();
+    expect(await screen.findByText('Ponad limit na miesiąc')).toBeTruthy();
     expect(screen.getByText(/^30,00/)).toBeTruthy();
   });
 
@@ -84,7 +87,7 @@ describe('dashboard screen', () => {
 
     render(<Main />);
 
-    expect(await screen.findByText('Blisko limitu')).toBeTruthy();
+    expect(await screen.findByText('Blisko limitu na miesiąc')).toBeTruthy();
     expect(screen.getByText(/^15,00/)).toBeTruthy();
   });
 
@@ -178,21 +181,20 @@ describe('dashboard screen', () => {
     ).toBeNull();
   });
 
-  it('asks the backend for the chosen month', async () => {
+  it('asks the backend for the previous month after going back', async () => {
     const fetchMock = stubApi();
     render(<Main />);
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
-    const previous = prevMonth(currentMonth());
+    const previous = shiftPeriod(currentPeriod('month', todayDay()), -1);
 
-    await userEvent.selectOptions(
-      screen.getByRole('combobox', { name: 'Miesiąc' }),
-      monthTitle(previous),
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Poprzedni okres' }),
     );
 
     await waitFor(() =>
       expect(
         fetchMock.mock.calls.some(([url]) =>
-          String(url).includes(`month=${previous}`),
+          String(url).includes(`kind=month&from=${previous.from}`),
         ),
       ).toBe(true),
     );
@@ -255,7 +257,10 @@ describe('dashboard screen', () => {
 });
 
 describe('dashboard month expenses', () => {
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    window.history.replaceState(null, '', '/');
+  });
 
   const expense = (id: string, merchant: string, categoryId: string) => ({
     id,
@@ -302,9 +307,8 @@ describe('dashboard month expenses', () => {
     );
 
   const openSeptember = async () => {
+    window.history.replaceState(null, '', '/app/?month=2026-09');
     render(<Main />);
-    const select = await screen.findByRole('combobox', { name: 'Miesiąc' });
-    await userEvent.selectOptions(select, '2026-09');
   };
 
   it('lists only the expenses of the selected month', async () => {

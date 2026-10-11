@@ -3,6 +3,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { periodContaining } from '@/shared/period/period';
 import { Provider, useContext } from '../presentation/context';
 import { totalProgress, withRecurring } from '../presentation/selectors';
 import type { CategoryId, Limit, Month, Recurring } from '../domain/models';
@@ -45,7 +46,7 @@ const setup = async () => {
     },
     { wrapper },
   );
-  act(() => view.result.current.ctx.load(TEST_MONTH));
+  act(() => view.result.current.ctx.load(TEST_PERIOD));
   await waitFor(() => expect(view.result.current.recurring).toHaveLength(1));
   return view;
 };
@@ -53,7 +54,7 @@ const setup = async () => {
 const asRecurring = (over: Partial<typeof NETFLIX> = {}) =>
   ({ ...NETFLIX, ...over }) as unknown as Recurring;
 
-const TEST_MONTH = '2025-06' as Month;
+const TEST_PERIOD = periodContaining('month', '2025-06-01');
 
 describe('recurring expenses', () => {
   beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
@@ -70,7 +71,7 @@ describe('recurring expenses', () => {
           ...view.result.current.recurring[0]!,
           cost: 45,
         },
-        TEST_MONTH,
+        TEST_PERIOD,
       ),
     );
 
@@ -90,7 +91,7 @@ describe('recurring expenses', () => {
           ...view.result.current.recurring[0]!,
           cost: 45,
         },
-        TEST_MONTH,
+        TEST_PERIOD,
       ),
     );
 
@@ -103,7 +104,7 @@ describe('recurring expenses', () => {
     const view = await setup();
 
     act(() =>
-      view.result.current.ctx.removeRecurring(NETFLIX.id as never, TEST_MONTH),
+      view.result.current.ctx.removeRecurring(NETFLIX.id as never, TEST_PERIOD),
     );
 
     expect(view.result.current.recurring).toHaveLength(0);
@@ -117,7 +118,7 @@ describe('recurring expenses', () => {
     const view = await setup();
 
     act(() =>
-      view.result.current.ctx.removeRecurring(NETFLIX.id as never, TEST_MONTH),
+      view.result.current.ctx.removeRecurring(NETFLIX.id as never, TEST_PERIOD),
     );
 
     await waitFor(() => expect(view.result.current.notice?.tone).toBe('error'));
@@ -146,7 +147,9 @@ describe('recurring expenses in the totals', () => {
   it('raises the limit usage by the recurring cost', () => {
     const expenses = withRecurring([], [asRecurring()], month('2025-06'));
 
-    expect(totalProgress([total], expenses, month('2025-06'))).toMatchObject({
+    expect(
+      totalProgress([total], expenses, periodContaining('month', '2025-06-01')),
+    ).toMatchObject({
       spent: 30,
       pct: 30,
     });

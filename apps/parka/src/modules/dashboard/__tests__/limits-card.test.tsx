@@ -6,10 +6,10 @@ import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { Provider, useContext } from '../presentation/context';
 import { LimitsCard } from '../presentation/limits-card';
-import type { Month } from '../domain/models';
+import { periodContaining } from '@/shared/period/period';
 import { readHandlers } from './dashboard-backend';
 
-const MONTH = '2025-04' as Month;
+const PERIOD = periodContaining('month', '2025-04-01');
 
 const CATEGORY = { id: 'c-1', name: 'Spożywcze', icon: 'cart', color: '#0a0' };
 const FOOD_LIMIT = {
@@ -48,9 +48,9 @@ const mockBackend = (limits: object[]) =>
 const Harness = () => {
   const ctx = useContext();
   useEffect(() => {
-    ctx.load(MONTH);
+    ctx.load(PERIOD);
   }, [ctx]);
-  return <LimitsCard month={MONTH} />;
+  return <LimitsCard period={PERIOD} />;
 };
 
 const renderCard = async () => {

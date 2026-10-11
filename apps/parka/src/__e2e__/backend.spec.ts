@@ -12,15 +12,6 @@ import { API_ROUTER, APP_ROUTER } from '@/shared/router/routes';
  * the change round-tripped through the database under row-level security.
  */
 
-const monthValue = (offset: number): string => {
-  const date = new Date(
-    new Date().getFullYear(),
-    new Date().getMonth() + offset,
-    1,
-  );
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-};
-
 const EMAIL = `e2e-${Date.now()}@parka.test`;
 const PASSWORD = 'secret123';
 
@@ -54,16 +45,15 @@ const commands = {
 
   'the dashboard opens on the current month': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.dashboard());
-    await expect(getByE2e('dashboard:month-select')).toHaveValue(monthValue(0));
+    await expect(getByE2e('dashboard:period-next')).toBeDisabled();
     await expect(getByE2e('dashboard:total')).toContainText('zł');
   },
   'month navigation reads other months from the db': async ({ getByE2e }) => {
-    await getByE2e('dashboard:month-select').selectOption(monthValue(-1));
-    await expect(getByE2e('dashboard:month-select')).toHaveValue(
-      monthValue(-1),
-    );
-    await getByE2e('dashboard:month-select').selectOption(monthValue(0));
-    await expect(getByE2e('dashboard:month-select')).toHaveValue(monthValue(0));
+    await getByE2e('dashboard:period-prev').click();
+    await expect(getByE2e('dashboard:period-next')).toBeEnabled();
+    await expect(getByE2e('dashboard:total')).toContainText('zł');
+    await getByE2e('dashboard:period-next').click();
+    await expect(getByE2e('dashboard:period-next')).toBeDisabled();
   },
 
   'i add suggested categories and they survive a reload': async ({

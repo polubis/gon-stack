@@ -87,3 +87,16 @@ export const writeQueryParam = (name: string, value: string): void => {
   url.searchParams.set(name, value);
   replaceUrl(url.pathname + url.search + url.hash);
 };
+
+/** Sets or (with `null`) removes several query params in one history replace. */
+export const writeQueryParams = (
+  updates: Record<string, string | null>,
+): void => {
+  if (typeof window === 'undefined') return;
+  const url = new URL(window.location.href);
+  for (const [name, value] of Object.entries(updates)) {
+    if (value === null) url.searchParams.delete(name);
+    else url.searchParams.set(name, value);
+  }
+  replaceUrl(url.pathname + url.search + url.hash);
+};

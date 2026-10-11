@@ -7,18 +7,18 @@ import { deleteRecurring } from '../../integration/repository';
 
 export const removeRecurring = (store: Store, { ofType, emit }: Bus) =>
   ofType('[TRIGGER]_DELETE_RECURRING').pipe(
-    map(({ id, month }) => ({ id, month, previous: store.$recurring.get() })),
+    map(({ id, period }) => ({ id, period, previous: store.$recurring.get() })),
     tap(({ id }) => {
       store.$recurring.set(store.$recurring.get().filter((r) => r.id !== id));
     }),
-    concatMap(({ id, month, previous }) =>
+    concatMap(({ id, period, previous }) =>
       from(deleteRecurring(id)).pipe(
         tap(() => {
           notify(store, {
             tone: 'success',
             message: 'Usunięto wydatek cykliczny.',
           });
-          emit('[FACT]_RECURRING_CHANGED', { month });
+          emit('[FACT]_RECURRING_CHANGED', { period });
         }),
         catchError((error: unknown) => {
           store.$recurring.set(previous);
@@ -27,7 +27,7 @@ export const removeRecurring = (store: Store, { ofType, emit }: Bus) =>
             title: 'Nie udało się usunąć wydatku cyklicznego',
             code: 'RECURRING_DELETE_FAILED',
             description: errorMessage(error),
-            retry: () => emit('[TRIGGER]_DELETE_RECURRING', { id, month }),
+            retry: () => emit('[TRIGGER]_DELETE_RECURRING', { id, period }),
           });
           return EMPTY;
         }),

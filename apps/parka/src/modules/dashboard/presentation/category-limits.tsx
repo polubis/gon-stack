@@ -3,15 +3,19 @@ import { Pencil } from 'lucide-react';
 import { Button, ProgressBar } from '@/shared/ui/controls';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { money } from '../domain/format';
+import type { Period } from '@/shared/period/period';
 import type { Category, CategoryProgress, LimitId } from '../domain/models';
+import { LIMIT_NOUN } from '../domain/period';
 import { categoryOf, limitTone } from './selectors';
 
 export const CategoryLimits = ({
   progress,
+  period,
   categories,
   onEdit,
 }: {
   progress: CategoryProgress[];
+  period: Period;
   categories: Category[];
   onEdit: (id: LimitId) => void;
 }) =>
@@ -45,7 +49,7 @@ export const CategoryLimits = ({
             />
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs text-ink-soft">
-                {Math.round(c.pct)}% limitu
+                {Math.round(c.pct)}% limitu na {LIMIT_NOUN[period.kind]}
                 {c.alertAt80 ? ' · alert przy 80%' : ''}
               </p>
               <Button

@@ -2,30 +2,38 @@ import { getDashboardSchema } from '@schemas/dashboard';
 import { InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
-import { occurrencesInMonth } from '@/shared/recurring/occurrences';
 import {
-  monthsEndingAt,
-  nextMonthOf,
+  addDays,
+  clampPeriod,
+  resolvePeriod,
+  shiftPeriod,
+  todayDay,
+} from '@/shared/period/period';
+import {
+  chargesInPeriods,
   summarizeDashboard,
 } from '@/server/domain/dashboard';
-
-// The previous month is needed for the month-over-month comparison.
-const FETCH_MONTHS = 2;
 
 export const getDashboard = privateProcedure({
   schema: withZodSchema({ schema: getDashboardSchema }),
 })({
   handler: async (input, { db }) => {
-    const rangeStart = `${monthsEndingAt(input.month, FETCH_MONTHS)[0]}-01`;
-    const rangeEnd = `${nextMonthOf(input.month)}-01`;
+    const today = todayDay();
+    // A future period holds nothing: it snaps to the present one.
+    const period = clampPeriod(
+      resolvePeriod(input.kind, input.from, input.to),
+      today,
+    );
+    // The period right before it is needed for the comparison.
+    const previous = shiftPeriod(period, -1);
 
     const [expenses, items, categories, limits, profile, recurring, payments] =
       await Promise.all([
         db
           .from('expenses')
           .select('id, date, amount, category_id')
-          .gte('date', rangeStart)
-          .lt('date', rangeEnd),
+          .gte('date', previous.from)
+          .lt('date', addDays(period.to, 1)),
         db
           .from('receipt_items')
           .select('expense_id, unit_price, quantity, discount, category_id'),
@@ -56,13 +64,14 @@ export const getDashboard = privateProcedure({
       categoryId: r.category_id,
       history: payments.data.filter((h) => h.recurring_id === r.id),
     }));
-    const recurringExpenses = monthsEndingAt(input.month, FETCH_MONTHS)
-      .flatMap((month) => occurrencesInMonth(schedule, month))
-      .map((o) => ({
-        date: o.date,
-        amount: o.amount,
-        categoryId: o.categoryId,
-      }));
+    const recurringExpenses = chargesInPeriods(schedule, [
+      period,
+      previous,
+    ]).map((o) => ({
+      date: o.date,
+      amount: o.amount,
+      categoryId: o.categoryId,
+    }));
 
     const data = summarizeDashboard({
       expenses: [
@@ -86,8 +95,9 @@ export const getDashboard = privateProcedure({
         name: c.name,
         color: c.color,
       })),
-      month: input.month,
-      today: new Date().toISOString().slice(0, 10),
+      period,
+      previous,
+      today,
       monthlyLimit: limits.data[0] ? Number(limits.data[0].amount) : null,
     });
 

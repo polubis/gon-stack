@@ -7,15 +7,15 @@ import { deleteExpense } from '../../integration/repository';
 
 export const removeExpense = (store: Store, { ofType, emit }: Bus) =>
   ofType('[TRIGGER]_DELETE_EXPENSE').pipe(
-    map(({ id, month }) => ({ id, month, previous: store.$expenses.get() })),
+    map(({ id, period }) => ({ id, period, previous: store.$expenses.get() })),
     tap(({ id }) => {
       store.$expenses.set(store.$expenses.get().filter((e) => e.id !== id));
     }),
-    concatMap(({ id, month, previous }) =>
+    concatMap(({ id, period, previous }) =>
       from(deleteExpense(id)).pipe(
         tap(() => {
           notify(store, { tone: 'success', message: 'Usunięto wydatek.' });
-          emit('[FACT]_EXPENSE_CHANGED', { month });
+          emit('[FACT]_EXPENSE_CHANGED', { period });
         }),
         catchError((error: unknown) => {
           store.$expenses.set(previous);
@@ -24,7 +24,7 @@ export const removeExpense = (store: Store, { ofType, emit }: Bus) =>
             title: 'Nie udało się usunąć wydatku',
             code: 'EXPENSE_DELETE_FAILED',
             description: errorMessage(error),
-            retry: () => emit('[TRIGGER]_DELETE_EXPENSE', { id, month }),
+            retry: () => emit('[TRIGGER]_DELETE_EXPENSE', { id, period }),
           });
           return EMPTY;
         }),

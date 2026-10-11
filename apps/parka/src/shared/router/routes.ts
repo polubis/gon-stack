@@ -48,7 +48,12 @@ const routeById =
 
 export type DashboardQuery = {
   month?: string;
+  /** Period kind other than month: `day`, `week` or `year`. */
   range?: string;
+  /** First day (`YYYY-MM-DD`) of the `range` period. */
+  from?: string;
+  /** Last day of a `custom` range. */
+  to?: string;
 };
 
 export type CategoryEditQuery = {
@@ -120,9 +125,10 @@ export const moreSectionPaths = (): readonly string[] => [
  * origin suffixes, so client and server can never drift.
  */
 export const API_ROUTER = {
-  dashboard: routeWithRequiredQuery<'/api/dashboard/', { month: string }>(
+  dashboard: routeWithRequiredQuery<
     '/api/dashboard/',
-  ),
+    { kind: string; from: string; to?: string }
+  >('/api/dashboard/'),
   expenses: route('/api/expenses/'),
   expenseById: routeById('/api/expenses/'),
   scanReceipt: route('/api/receipts/scan/'),

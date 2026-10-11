@@ -42,8 +42,8 @@ describe('dashboard expense mappers', () => {
   });
 
   it('maps a summary DTO with its new month fields', () => {
-    const daily = [{ day: 1, total: 4 }];
-    const previousDaily = [{ day: 1, total: 8 }];
+    const series = [{ index: 1, total: 4 }];
+    const previousSeries = [{ index: 1, total: 8 }];
 
     const summary = toSummary({
       userName: 'Anna',
@@ -52,8 +52,8 @@ describe('dashboard expense mappers', () => {
       previousTotal: 8,
       transactions: 3,
       dailyAverage: 1.5,
-      daily,
-      previousDaily,
+      series,
+      previousSeries,
       monthlyLimit: null,
       categories: [
         { categoryId: 'c-1', name: 'Food', color: 'green', amount: 6, pct: 60 },
@@ -67,8 +67,8 @@ describe('dashboard expense mappers', () => {
       previousTotal: 8,
       transactions: 3,
       dailyAverage: 1.5,
-      daily,
-      previousDaily,
+      series,
+      previousSeries,
       monthlyLimit: null,
       categories: [
         { id: 'c-1', name: 'Food', color: 'green', amount: 6, pct: 60 },

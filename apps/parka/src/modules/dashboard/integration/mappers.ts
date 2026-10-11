@@ -48,8 +48,8 @@ export const toSummary = (
   previousTotal: dto.previousTotal,
   transactions: dto.transactions,
   dailyAverage: dto.dailyAverage,
-  daily: dto.daily,
-  previousDaily: dto.previousDaily,
+  series: dto.series,
+  previousSeries: dto.previousSeries,
   monthlyLimit: dto.monthlyLimit,
   categories: dto.categories.map((c) => ({
     id: c.categoryId as CategoryId,

@@ -2,13 +2,15 @@ import type { Brand } from '@repo/type-beast/brand';
 import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
 
 export type Month = Brand<string, 'Month'>;
+export type { Period, PeriodKind } from '@/shared/period/period';
 export type CategoryId = Brand<string, 'CategoryId'>;
 export type ExpenseId = Brand<string, 'ExpenseId'>;
 export type ReceiptItemId = Brand<string, 'ReceiptItemId'>;
 export type LimitId = Brand<string, 'LimitId'>;
 export type RecurringId = Brand<string, 'RecurringId'>;
 
-export type DayPoint = { day: number; total: number };
+/** One bucket of the spending chart: a day, or a month when a year is shown. */
+export type SeriesPoint = { index: number; total: number };
 
 export type CategorySlice = {
   id: CategoryId;
@@ -20,21 +22,21 @@ export type CategorySlice = {
 
 export type Summary = {
   userName: string;
-  /** Selected month total. */
+  /** Selected period total. */
   total: number;
-  /** Selected month vs previous month, in percent. */
+  /** Selected period vs the one before it, in percent. */
   change: number;
   previousTotal: number;
   transactions: number;
-  /** Selected month total per elapsed day. */
+  /** Selected period total per elapsed day. */
   dailyAverage: number;
-  /** Per-day totals of the selected month, day 1 first. */
-  daily: DayPoint[];
-  /** Per-day totals of the previous month, day 1 first. */
-  previousDaily: DayPoint[];
+  /** Per-bucket totals of the selected period, first bucket first. */
+  series: SeriesPoint[];
+  /** Per-bucket totals of the previous period, first bucket first. */
+  previousSeries: SeriesPoint[];
   /** Total monthly limit, `null` when none is set. */
   monthlyLimit: number | null;
-  /** Breakdown of the selected month. */
+  /** Breakdown of the selected period. */
   categories: CategorySlice[];
 };
 

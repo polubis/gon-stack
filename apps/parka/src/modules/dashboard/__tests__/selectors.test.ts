@@ -1,17 +1,16 @@
 import { describe, expect, it } from 'vitest';
+import { periodContaining } from '@/shared/period/period';
 import {
   categoryProgress,
   categoryTabs,
   expensesInMonth,
   limitTone,
-  monthOptions,
   niceStep,
   sortByDateDesc,
   sumAmount,
   totalProgress,
   withoutLimit,
 } from '../presentation/selectors';
-import { toMonth } from '../domain/format';
 import type {
   Category,
   CategoryId,
@@ -87,26 +86,6 @@ describe('dashboard selectors', () => {
   });
 });
 
-describe('dashboard month options', () => {
-  const month = (value: string) => toMonth(value);
-
-  it('lists the window newest first, crossing year boundaries', () => {
-    expect(monthOptions(month('2026-01'), month('2026-02'), 3)).toEqual([
-      '2026-02',
-      '2026-01',
-      '2025-12',
-    ]);
-  });
-
-  it('prepends a selected month older than the window', () => {
-    expect(monthOptions(month('2024-05'), month('2026-02'), 2)).toEqual([
-      '2024-05',
-      '2026-02',
-      '2026-01',
-    ]);
-  });
-});
-
 describe('dashboard chart axis step', () => {
   it.each([
     [0, 0.5],
@@ -119,7 +98,7 @@ describe('dashboard chart axis step', () => {
 });
 
 describe('dashboard limit progress', () => {
-  const MONTH = '2025-04' as Month;
+  const MONTH = periodContaining('month', '2025-04-01');
   const FOOD = 'c-food' as CategoryId;
   const OTHER = 'c-other' as CategoryId;
 
@@ -156,6 +135,22 @@ describe('dashboard limit progress', () => {
       amount: 1000,
       pct: 20,
     });
+  });
+
+  it('scales the limit down to a day of the month', () => {
+    const day = periodContaining('day', '2025-04-02');
+
+    expect(totalProgress([TOTAL], EXPENSES, day)).toMatchObject({
+      spent: 50,
+      amount: 33.33,
+    });
+  });
+
+  it('scales a category limit up to a year', () => {
+    const year = periodContaining('year', '2025-04-02');
+    const [progress] = categoryProgress([FOOD_LIMIT], EXPENSES, year);
+
+    expect(progress?.amount).toBe(FOOD_LIMIT.amount * 12);
   });
 
   it('has no total progress without a total limit', () => {

@@ -25,7 +25,7 @@ import type {
   ExpenseId,
   Limit,
   LimitId,
-  Month,
+  Period,
   Recurring,
   RecurringId,
   Summary,
@@ -57,13 +57,20 @@ type DeleteRecurringOut = z.infer<
 >['out'];
 
 export const fetchSummary = async (
-  month: Month,
+  period: Period,
   signal: AbortSignal,
 ): Promise<Summary> => {
-  const response = await fetch(API_ROUTER.dashboard({ month }), {
-    headers: { Accept: 'application/json' },
-    signal,
-  });
+  const response = await fetch(
+    API_ROUTER.dashboard({
+      kind: period.kind,
+      from: period.from,
+      to: period.kind === 'custom' ? period.to : undefined,
+    }),
+    {
+      headers: { Accept: 'application/json' },
+      signal,
+    },
+  );
 
   const json = (await response.json()) as Schema['out'];
 
@@ -190,11 +197,11 @@ export const deleteRecurring = async (id: RecurringId): Promise<void> => {
 
 /** Single entry point for reading: every read of the dashboard in parallel. */
 export const fetchDashboard = async (
-  month: Month,
+  period: Period,
   signal: AbortSignal,
 ): Promise<DashboardData> => {
   const [summary, expenses, categories, limits, recurring] = await Promise.all([
-    fetchSummary(month, signal),
+    fetchSummary(period, signal),
     fetchExpenses(signal),
     fetchCategories(signal),
     fetchLimits(signal),

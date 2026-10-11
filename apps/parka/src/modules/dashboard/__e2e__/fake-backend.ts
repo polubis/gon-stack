@@ -1,9 +1,16 @@
 import type { Page, Route } from '@playwright/test';
-import { monthsEndingAt, summarizeDashboard } from '@/server/domain/dashboard';
 import {
-  occurrencesInMonth,
-  type RecurringSource,
-} from '@/shared/recurring/occurrences';
+  chargesInPeriods,
+  summarizeDashboard,
+} from '@/server/domain/dashboard';
+import {
+  clampPeriod,
+  resolvePeriod,
+  shiftPeriod,
+  todayDay,
+  type PeriodKind,
+} from '@/shared/period/period';
+import type { RecurringSource } from '@/shared/recurring/occurrences';
 
 type Row = { id: string };
 type Expense = Row & { date: string; amount: number; categoryId: string };
@@ -32,9 +39,6 @@ const SCANNED_RECEIPT = {
   items: [{ name: 'Chleb', unitPrice: 42.5, quantity: 1, discount: 0 }],
 };
 
-// Same two-month window the real `get-dashboard` procedure reads.
-const FETCH_MONTHS = 2;
-
 const json = (route: Route, body: unknown) =>
   route.fulfill({
     status: 200,
@@ -61,10 +65,11 @@ export const installBackend = async (
   const state: Seed = structuredClone(seed);
   const requests: { method: string; path: string }[] = [];
 
-  const summary = (month: string) => {
-    const charges = monthsEndingAt(month, FETCH_MONTHS).flatMap((m) =>
-      occurrencesInMonth(state.recurring, m),
-    );
+  const summary = (kind: PeriodKind, from: string, to?: string) => {
+    const today = todayDay();
+    const period = clampPeriod(resolvePeriod(kind, from, to), today);
+    const previous = shiftPeriod(period, -1);
+    const charges = chargesInPeriods(state.recurring, [period, previous]);
     const total = state.limits.find((l) => l.scope === 'total');
     return {
       ...summarizeDashboard({
@@ -77,8 +82,9 @@ export const installBackend = async (
           })),
         ],
         categories: state.categories,
-        month,
-        today: new Date().toISOString().slice(0, 10),
+        period,
+        previous,
+        today,
         monthlyLimit: total ? total.amount : null,
       }),
       userName: 'Anna',
@@ -95,7 +101,11 @@ export const installBackend = async (
     if (collection === 'dashboard') {
       return json(route, {
         code: 200,
-        data: summary(url.searchParams.get('month') ?? ''),
+        data: summary(
+          (url.searchParams.get('kind') ?? 'month') as PeriodKind,
+          url.searchParams.get('from') ?? todayDay(),
+          url.searchParams.get('to') ?? undefined,
+        ),
       });
     }
 

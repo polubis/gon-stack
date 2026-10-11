@@ -11,13 +11,14 @@ import {
   EXPENSES_LIST_HEIGHT,
   MAX_VISIBLE_EXPENSES,
 } from '../configuration/constraints';
-import { money, monthTitle, shortDateTimeLabel } from '../domain/format';
+import type { Period } from '@/shared/period/period';
+import { money, shortDateTimeLabel } from '../domain/format';
+import { periodTitle } from '../domain/period';
 import type {
   Category,
   CategoryId,
   Expense,
   ExpenseId,
-  Month,
 } from '../domain/models';
 import { DetailDialog } from './detail-dialog';
 import { useContext } from './context';
@@ -27,10 +28,10 @@ import { ShowAllFade } from './show-all-fade';
 import {
   categoryOf,
   categoryTabs,
-  expensesInMonth,
+  expensesInPeriod,
   sumAmount,
   touchesCategory,
-  withRecurring,
+  withRecurringIn,
 } from './selectors';
 
 const Chip = ({
@@ -137,27 +138,31 @@ const ExpenseList = ({
   </ul>
 );
 
-/** All expenses of the selected month, recurring ones included, filterable by category. */
+/** All expenses of the selected period, recurring ones included, filterable by category. */
 export const MonthExpenses = ({
-  month,
+  period,
   onSelect,
 }: {
-  month: Month;
+  period: Period;
   onSelect: (id: ExpenseId) => void;
 }) => {
   const ctx = useContext();
-  const expenses = withRecurring(ctx.useExpenses(), ctx.useRecurring(), month);
+  const expenses = withRecurringIn(
+    ctx.useExpenses(),
+    ctx.useRecurring(),
+    period,
+  );
   const categories = ctx.useCategories();
   const [filter, setFilter] = useState<CategoryId | null>(null);
   const all = useModal(EXPENSES_MODAL);
 
-  const inMonth = expensesInMonth(expenses, month);
-  const tabs = categoryTabs(inMonth, categories);
-  // The chosen category may have no expenses in another month: show all then.
+  const inPeriod = expensesInPeriod(expenses, period);
+  const tabs = categoryTabs(inPeriod, categories);
+  // The chosen category may have no expenses in another period: show all then.
   const active = tabs.some((t) => t.category.id === filter) ? filter : null;
   const visible = active
-    ? inMonth.filter((e) => touchesCategory(e, categories, active))
-    : inMonth;
+    ? inPeriod.filter((e) => touchesCategory(e, categories, active))
+    : inPeriod;
 
   return (
     <Card
@@ -183,37 +188,40 @@ export const MonthExpenses = ({
         </Button>
       </div>
 
-      {tabs.length > 1 ? (
-        <div
-          role="group"
-          aria-label="Filtruj wydatki wg kategorii"
-          className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:flex-wrap md:overflow-visible md:px-0"
-        >
-          <Chip
-            active={active === null}
-            onClick={() => setFilter(null)}
-            data-e2e="dashboard:filter:all"
+      {/* Reserved even when empty: the filter row never moves the list. */}
+      <div className="h-10">
+        {tabs.length > 1 ? (
+          <div
+            role="group"
+            aria-label="Filtruj wydatki wg kategorii"
+            className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:px-0"
           >
-            {`Wszystkie ${inMonth.length}`}
-          </Chip>
-          {tabs.map(({ category, count }) => (
             <Chip
-              key={category.id}
-              active={active === category.id}
-              color={category.color}
-              onClick={() => setFilter(category.id)}
-              data-e2e={`dashboard:filter:${category.id}`}
+              active={active === null}
+              onClick={() => setFilter(null)}
+              data-e2e="dashboard:filter:all"
             >
-              {`${categoryLabel(category.name)} ${count}`}
+              {`Wszystkie ${inPeriod.length}`}
             </Chip>
-          ))}
-        </div>
-      ) : null}
+            {tabs.map(({ category, count }) => (
+              <Chip
+                key={category.id}
+                active={active === category.id}
+                color={category.color}
+                onClick={() => setFilter(category.id)}
+                data-e2e={`dashboard:filter:${category.id}`}
+              >
+                {`${categoryLabel(category.name)} ${count}`}
+              </Chip>
+            ))}
+          </div>
+        ) : null}
+      </div>
 
       <div className={cn('relative overflow-hidden', EXPENSES_LIST_HEIGHT)}>
         {visible.length === 0 ? (
           <p className="py-2 text-sm text-ink-soft">
-            Brak wydatków w tym miesiącu.
+            Brak wydatków w tym okresie.
           </p>
         ) : (
           <ExpenseList
@@ -234,7 +242,7 @@ export const MonthExpenses = ({
           modal={EXPENSES_MODAL}
           data-e2e="dashboard:expenses-dialog"
           title="Wydatki"
-          description={monthTitle(month)}
+          description={periodTitle(period)}
           onClose={all.close}
         >
           <ExpenseList

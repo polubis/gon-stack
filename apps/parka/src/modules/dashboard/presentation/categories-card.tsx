@@ -5,17 +5,18 @@ import { APP_ROUTER } from '@/shared/router/routes';
 import { Button } from '@/shared/ui/controls';
 import { Card } from '@/shared/ui/layout';
 import { MAX_VISIBLE_CATEGORIES } from '../configuration/constraints';
-import { monthTitle } from '../domain/format';
-import type { Month, Summary } from '../domain/models';
+import type { Period } from '@/shared/period/period';
+import type { Summary } from '../domain/models';
+import { periodTitle } from '../domain/period';
 import { Donut } from './charts';
 import { DetailDialog } from './detail-dialog';
 import { CATEGORIES_MODAL } from './modal-ids';
 
 export const CategoriesCard = ({
-  month,
+  period,
   summary,
 }: {
-  month: Month;
+  period: Period;
   summary: Summary;
 }) => {
   const all = useModal(CATEGORIES_MODAL);
@@ -24,7 +25,7 @@ export const CategoriesCard = ({
     value: c.amount,
     color: c.color,
   }));
-  const caption = `Rozkład wydatków wg kategorii w ${monthTitle(month)}`;
+  const caption = `Rozkład wydatków wg kategorii w okresie: ${periodTitle(period)}`;
 
   return (
     <Card className="space-y-4 xl:col-span-6 xl:col-start-7 xl:row-start-2">
@@ -40,22 +41,19 @@ export const CategoriesCard = ({
           <span className="truncate">Dodaj</span>
         </Button>
       </div>
-      {slices.length > 0 ? (
-        <Donut
-          caption={caption}
-          slices={slices}
-          rows={MAX_VISIBLE_CATEGORIES}
-          onShowAll={all.open}
-        />
-      ) : (
-        <p className="text-sm text-ink-soft">Brak wydatków w tym miesiącu.</p>
-      )}
+      <Donut
+        caption={caption}
+        slices={slices}
+        rows={MAX_VISIBLE_CATEGORIES}
+        empty="Brak wydatków w tym okresie."
+        onShowAll={all.open}
+      />
       {all.isOpen && (
         <DetailDialog
           modal={CATEGORIES_MODAL}
           data-e2e="dashboard:categories-dialog"
           title="Kategorie wydatków"
-          description={monthTitle(month)}
+          description={periodTitle(period)}
           onClose={all.close}
         >
           <Donut caption={caption} slices={slices} />

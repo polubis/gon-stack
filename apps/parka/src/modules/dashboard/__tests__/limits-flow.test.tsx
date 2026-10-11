@@ -2,8 +2,9 @@ import type { ReactNode } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Provider, useContext } from '../presentation/context';
-import type { Limit, LimitId, Month } from '../domain/models';
+import type { Limit, LimitId } from '../domain/models';
 import { readBody } from './dashboard-backend';
+import { periodContaining } from '@/shared/period/period';
 
 const TOTAL = {
   id: 'l-1',
@@ -39,7 +40,9 @@ const setup = async () => {
     },
     { wrapper },
   );
-  act(() => view.result.current.ctx.load('2025-04' as Month));
+  act(() =>
+    view.result.current.ctx.load(periodContaining('month', '2025-04-01')),
+  );
   await waitFor(() => expect(view.result.current.limits).toHaveLength(1));
   return view;
 };

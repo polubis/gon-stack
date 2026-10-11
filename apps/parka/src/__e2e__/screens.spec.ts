@@ -71,7 +71,7 @@ const commands = {
     // Dashboard is backend-only (see modules/dashboard/AGENTS.md) — stub the
     // response so the a11y check doesn't depend on an authenticated session.
     await page.route(
-      `**${API_ROUTER.dashboard({ month: '' })}**`,
+      `**${API_ROUTER.dashboard({ kind: '', from: '' })}**`,
       async (route) => {
         await route.fulfill({
           status: 200,
@@ -85,8 +85,8 @@ const commands = {
               userName: 'Anna',
               transactions: 0,
               dailyAverage: 0,
-              daily: [],
-              previousDaily: [],
+              series: [],
+              previousSeries: [],
               monthlyLimit: null,
               categories: [],
             },

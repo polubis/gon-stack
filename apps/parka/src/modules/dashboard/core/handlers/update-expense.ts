@@ -7,9 +7,9 @@ import { putExpense } from '../../integration/repository';
 
 export const updateExpense = (store: Store, { ofType, emit }: Bus) =>
   ofType('[TRIGGER]_UPDATE_EXPENSE').pipe(
-    map(({ expense, month }) => ({
+    map(({ expense, period }) => ({
       expense,
-      month,
+      period,
       previous: store.$expenses.get(),
     })),
     tap(({ expense }) => {
@@ -17,11 +17,11 @@ export const updateExpense = (store: Store, { ofType, emit }: Bus) =>
         store.$expenses.get().map((e) => (e.id === expense.id ? expense : e)),
       );
     }),
-    concatMap(({ expense, month, previous }) =>
+    concatMap(({ expense, period, previous }) =>
       from(putExpense(expense)).pipe(
         tap(() => {
           notify(store, { tone: 'success', message: 'Zapisano zmiany.' });
-          emit('[FACT]_EXPENSE_CHANGED', { month });
+          emit('[FACT]_EXPENSE_CHANGED', { period });
         }),
         catchError((error: unknown) => {
           store.$expenses.set(previous);
@@ -30,7 +30,7 @@ export const updateExpense = (store: Store, { ofType, emit }: Bus) =>
             title: 'Nie udało się zapisać zmian',
             code: 'EXPENSE_UPDATE_FAILED',
             description: errorMessage(error),
-            retry: () => emit('[TRIGGER]_UPDATE_EXPENSE', { expense, month }),
+            retry: () => emit('[TRIGGER]_UPDATE_EXPENSE', { expense, period }),
           });
           return EMPTY;
         }),

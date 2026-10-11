@@ -1,6 +1,6 @@
 import { Card } from '@/shared/ui/layout';
 import { LIMITS_SECTION_ID } from '../configuration/constraints';
-import type { Month } from '../domain/models';
+import type { Period } from '@/shared/period/period';
 import { AddLimitButton } from './add-limit-button';
 import { CategoryLimits } from './category-limits';
 import { useContext } from './context';
@@ -11,7 +11,7 @@ import {
   isCategoryLimit,
   totalProgress,
   withoutLimit,
-  withRecurring,
+  withRecurringIn,
 } from './selectors';
 import { TotalLimit, TotalLimitForm } from './total-limit';
 import { useSheet } from '@/shared/ui/use-sheet';
@@ -22,11 +22,15 @@ type SheetKind = 'total' | 'limit' | `edit:${string}`;
  * Total limit as the headline, category limits scrolling below it. Fixed
  * height; the forms open as a sheet over the card, so nothing around it moves.
  */
-export const LimitsCard = ({ month }: { month: Month }) => {
+export const LimitsCard = ({ period }: { period: Period }) => {
   const ctx = useContext();
   const limits = ctx.useLimits();
   const categories = ctx.useCategories();
-  const expenses = withRecurring(ctx.useExpenses(), ctx.useRecurring(), month);
+  const expenses = withRecurringIn(
+    ctx.useExpenses(),
+    ctx.useRecurring(),
+    period,
+  );
   const { sheet, open, close } = useSheet<SheetKind>();
   const total = limits.find((l) => l.scope === 'total');
   const editing = sheet?.startsWith('edit:')
@@ -59,13 +63,15 @@ export const LimitsCard = ({ month }: { month: Month }) => {
         </div>
 
         <TotalLimit
-          progress={totalProgress(limits, expenses, month)}
-          month={month}
+          progress={totalProgress(limits, expenses, period)}
+          period={period}
+          monthly={total?.amount}
           onEdit={() => open('total')}
         />
         <div className="min-h-0 flex-1 overflow-y-auto pr-2">
           <CategoryLimits
-            progress={categoryProgress(limits, expenses, month)}
+            progress={categoryProgress(limits, expenses, period)}
+            period={period}
             categories={categories}
             onEdit={(id) => open(`edit:${id}`)}
           />

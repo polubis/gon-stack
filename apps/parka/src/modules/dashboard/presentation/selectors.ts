@@ -5,7 +5,13 @@ import {
   UNCATEGORIZED,
   WARN_PCT,
 } from '../configuration/constraints';
-import { monthOf, prevMonth } from '../domain/format';
+import { monthOf } from '../domain/format';
+import {
+  containsDate,
+  limitForPeriod,
+  periodContaining,
+  periodMonths,
+} from '@/shared/period/period';
 import type {
   Category,
   CategoryId,
@@ -15,6 +21,7 @@ import type {
   ExpenseId,
   Limit,
   Month,
+  Period,
   ProgressTone,
   Recurring,
   RecurringId,
@@ -28,31 +35,51 @@ export const recurringChargeId = (
 ): ExpenseId => `recurring:${recurringId}:${month}` as ExpenseId;
 
 /**
- * Stored expenses plus `month`'s charges of the recurring ones, so every
- * total and limit counts them. Those charges are derived, never stored.
+ * Stored expenses plus the charges the recurring ones make in `period`, so
+ * every total and limit counts them. Those charges are derived, never stored.
  */
+export const withRecurringIn = (
+  expenses: Expense[],
+  recurring: Recurring[],
+  period: Period,
+): Expense[] => [
+  ...expenses,
+  ...periodMonths(period)
+    .flatMap((month) =>
+      occurrencesInMonth(recurring, month).map((o) => ({ o, month })),
+    )
+    .filter(({ o }) => containsDate(period, o.date))
+    .map(({ o, month }) => ({
+      id: recurringChargeId(o.recurringId as RecurringId, month as Month),
+      merchant: o.name,
+      date: `${o.date}T00:00:00.000Z`,
+      amount: o.amount,
+      categoryId: o.categoryId as CategoryId,
+      paymentMethod:
+        recurring.find((r) => r.id === o.recurringId)?.paymentMethod ?? '',
+      isBill: true,
+      source: 'recurring' as const,
+      items: [],
+    })),
+];
+
+/** Same as `withRecurringIn` for one whole calendar month. */
 export const withRecurring = (
   expenses: Expense[],
   recurring: Recurring[],
   month: Month,
-): Expense[] => [
-  ...expenses,
-  ...occurrencesInMonth(recurring, month).map((o) => ({
-    id: recurringChargeId(o.recurringId as RecurringId, month),
-    merchant: o.name,
-    date: `${o.date}T00:00:00.000Z`,
-    amount: o.amount,
-    categoryId: o.categoryId as CategoryId,
-    paymentMethod:
-      recurring.find((r) => r.id === o.recurringId)?.paymentMethod ?? '',
-    isBill: true,
-    source: 'recurring' as const,
-    items: [],
-  })),
-];
+): Expense[] =>
+  withRecurringIn(
+    expenses,
+    recurring,
+    periodContaining('month', `${month}-01`),
+  );
 
 export const sortByDateDesc = (list: Expense[]): Expense[] =>
   [...list].sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+
+export const expensesInPeriod = (list: Expense[], period: Period): Expense[] =>
+  sortByDateDesc(list.filter((e) => containsDate(period, e.date)));
 
 export const expensesInMonth = (list: Expense[], month: Month): Expense[] =>
   sortByDateDesc(list.filter((e) => monthOf(e.date) === month));
@@ -106,18 +133,12 @@ export const categoryTabs = (
 export const sumAmount = (list: Expense[]): number =>
   list.reduce((total, e) => total + e.amount, 0);
 
-/** Newest first: `count` months ending at `current`, plus `selected` if older. */
-export const monthOptions = (
-  selected: Month,
-  current: Month,
-  count: number,
-): Month[] => {
-  const months = Array.from({ length: count - 1 }).reduce<Month[]>(
-    (acc) => [...acc, prevMonth(acc[acc.length - 1])],
-    [current],
-  );
-  return months.includes(selected) ? months : [selected, ...months];
-};
+/**
+ * Limits are monthly budgets: they follow the month the period ends in, or
+ * the present month when the period is still running.
+ */
+export const limitsMonth = (period: Period, today: string): Month =>
+  (period.to < today ? period.to : today).slice(0, 7) as Month;
 
 /** Smallest "round" step (1, 2, 5 × 10ⁿ) that fits `ticks` rows over `max`. */
 export const niceStep = (max: number, ticks: number): number => {
@@ -137,34 +158,37 @@ export const isCategoryLimit = (limit: Limit): limit is CategoryLimit =>
 export const limitTone = (pct: number): ProgressTone =>
   pct >= 100 ? 'danger' : pct >= WARN_PCT ? 'warn' : 'brand';
 
+/** Limits are monthly: both progress helpers scale them to `period`. */
 export const totalProgress = (
   limits: Limit[],
   expenses: Expense[],
-  month: Month,
+  period: Period,
 ): TotalProgress | null => {
   const total = limits.find((l) => l.scope === 'total');
   if (!total) return null;
-  const spent = sumAmount(expensesInMonth(expenses, month));
-  return { spent, amount: total.amount, pct: pctOf(spent, total.amount) };
+  const spent = sumAmount(expensesInPeriod(expenses, period));
+  const amount = limitForPeriod(total.amount, period);
+  return { spent, amount, pct: pctOf(spent, amount) };
 };
 
 export const categoryProgress = (
   limits: Limit[],
   expenses: Expense[],
-  month: Month,
+  period: Period,
 ): CategoryProgress[] => {
-  const scoped = expensesInMonth(expenses, month);
+  const scoped = expensesInPeriod(expenses, period);
   return limits.filter(isCategoryLimit).map((l) => {
     const spent = scoped
       .flatMap(expenseShares)
       .filter((s) => s.categoryId === l.categoryId)
       .reduce((total, s) => total + s.amount, 0);
+    const amount = limitForPeriod(l.amount, period);
     return {
       id: l.id,
       categoryId: l.categoryId,
       spent,
-      amount: l.amount,
-      pct: pctOf(spent, l.amount),
+      amount,
+      pct: pctOf(spent, amount),
       alertAt80: l.alertAt80,
     };
   });

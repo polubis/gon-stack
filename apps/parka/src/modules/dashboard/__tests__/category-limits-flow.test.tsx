@@ -4,8 +4,9 @@ import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { Provider, useContext } from '../presentation/context';
-import type { CategoryLimit, LimitId, Month } from '../domain/models';
+import type { CategoryLimit, LimitId } from '../domain/models';
 import { readHandlers } from './dashboard-backend';
+import { periodContaining } from '@/shared/period/period';
 
 const FOOD = {
   id: 'l-1',
@@ -48,7 +49,9 @@ const setup = async () => {
     },
     { wrapper },
   );
-  act(() => view.result.current.ctx.load('2025-04' as Month));
+  act(() =>
+    view.result.current.ctx.load(periodContaining('month', '2025-04-01')),
+  );
   await waitFor(() => expect(view.result.current.limits).toHaveLength(2));
   return view;
 };

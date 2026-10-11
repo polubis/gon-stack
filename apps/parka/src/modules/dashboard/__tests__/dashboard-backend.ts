@@ -14,8 +14,8 @@ const SUMMARY = {
   previousTotal: 10,
   transactions: 1,
   dailyAverage: 1,
-  daily: [{ day: 1, total: 10 }],
-  previousDaily: [{ day: 1, total: 10 }],
+  series: [{ index: 1, total: 10 }],
+  previousSeries: [{ index: 1, total: 10 }],
   monthlyLimit: null,
   categories: [],
 };

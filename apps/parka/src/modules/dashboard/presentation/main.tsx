@@ -10,11 +10,17 @@ import {
   openModal,
   useModalStack,
 } from '@/shared/router/modal-stack';
-import { readQueryParam, writeQueryParam } from '@/shared/router/navigation';
+import { readQueryParam, writeQueryParams } from '@/shared/router/navigation';
+import {
+  clampPeriod,
+  periodMonths,
+  todayDay,
+  type Period,
+} from '@/shared/period/period';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { ERROR_CODES } from '../configuration/constraints';
-import { currentMonth, toMonth } from '../domain/format';
 import type { Month } from '../domain/models';
+import { periodFromQuery, periodToQuery } from '../domain/period';
 import { CategoriesCard } from './categories-card';
 import { Provider, useContext } from './context';
 import { ExpenseDetail } from './expense-detail';
@@ -24,36 +30,48 @@ import { MonthExpenses } from './month-expenses';
 import { Header } from './header';
 import { TotalHero } from './total-hero';
 import { RecurringDetail } from './recurring-detail';
-import { recurringChargeId, withRecurring } from './selectors';
+import { recurringChargeId, withRecurringIn } from './selectors';
 import { DashboardSkeleton } from './skeleton';
 import { SpendingChart } from './spending-chart';
 
-const MONTH_PARAM = 'month';
+const PERIOD_PARAMS = ['month', 'range', 'from', 'to'] as const;
 
-const initialMonth = (): Month => {
-  const fromUrl = readQueryParam(MONTH_PARAM);
-  return toMonth(fromUrl ?? currentMonth());
-};
+const initialPeriod = (): Period =>
+  periodFromQuery(
+    {
+      month: readQueryParam('month'),
+      range: readQueryParam('range'),
+      from: readQueryParam('from'),
+      to: readQueryParam('to'),
+    },
+    todayDay(),
+  );
 
 const DashboardView = () => {
   const ctx = useContext();
-  const [month, setMonth] = useState(initialMonth);
+  const [period, setPeriod] = useState(initialPeriod);
+  const today = todayDay();
   const modals = useModalStack();
   const initialized = ctx.useInitialized();
   const loading = ctx.useLoading();
   const error = ctx.useError();
   const summary = ctx.useData();
   const recurring = ctx.useRecurring();
-  const expenses = withRecurring(ctx.useExpenses(), recurring, month);
+  const expenses = withRecurringIn(ctx.useExpenses(), recurring, period);
   const notice = ctx.useNotice();
 
   useEffect(() => {
-    ctx.load(month);
-  }, [month, ctx]);
+    ctx.load(period);
+  }, [period, ctx]);
 
-  const goToMonth = (next: Month) => {
-    writeQueryParam(MONTH_PARAM, next);
-    setMonth(next);
+  // Future periods hold nothing, so every move is clamped to the present.
+  const goToPeriod = (next: Period) => {
+    const target = clampPeriod(next, today);
+    writeQueryParams({
+      ...Object.fromEntries(PERIOD_PARAMS.map((name) => [name, null])),
+      ...periodToQuery(target),
+    });
+    setPeriod(target);
   };
 
   // Detail popups stack in the order they were opened (URL order).
@@ -61,7 +79,11 @@ const DashboardView = () => {
     const id = expenseOfModal(modal);
     if (id === null) return [];
     const expense = expenses.find((e) => e.id === id);
-    const charge = recurring.find((r) => recurringChargeId(r.id, month) === id);
+    const charge = recurring.find((r) =>
+      periodMonths(period).some(
+        (month) => recurringChargeId(r.id, month as Month) === id,
+      ),
+    );
     return [{ modal, expense, charge }];
   });
 
@@ -84,7 +106,7 @@ const DashboardView = () => {
             title="Nie udało się wczytać podsumowania"
             code={ERROR_CODES.load}
             description={error}
-            onRetry={() => ctx.load(month)}
+            onRetry={() => ctx.load(period)}
             backHref={APP_ROUTER.home()}
           />
         </main>
@@ -102,7 +124,7 @@ const DashboardView = () => {
             key={modal}
             modal={modal}
             recurring={charge}
-            month={month}
+            period={period}
             onClose={() => closeModal(modal)}
           />
         ) : expense ? (
@@ -110,7 +132,7 @@ const DashboardView = () => {
             key={modal}
             modal={modal}
             expense={expense}
-            month={month}
+            period={period}
             onClose={() => closeModal(modal)}
           />
         ) : null,
@@ -132,25 +154,26 @@ const DashboardView = () => {
       <main className="flex flex-1 flex-col gap-4 px-4 pb-24 pt-4 md:gap-6 md:px-8 md:pb-6 lg:px-10 lg:pt-8 xl:grid xl:grid-cols-12 xl:content-start xl:px-16">
         <div className="xl:col-span-12">
           <Header
-            month={month}
+            period={period}
+            today={today}
             userName={summary?.userName}
             initializing={!ready}
-            onMonthChange={goToMonth}
+            onPeriodChange={goToPeriod}
           />
         </div>
 
         {ready ? (
           <>
             <div className="xl:col-span-6 xl:col-start-1 xl:row-start-2">
-              <TotalHero summary={summary} />
+              <TotalHero period={period} summary={summary} />
             </div>
-            <SpendingChart month={month} summary={summary} />
-            <CategoriesCard month={month} summary={summary} />
+            <SpendingChart period={period} summary={summary} />
+            <CategoriesCard period={period} summary={summary} />
             <MonthExpenses
-              month={month}
+              period={period}
               onSelect={(id) => openModal(expenseModal(id))}
             />
-            <LimitsCard month={month} />
+            <LimitsCard period={period} />
             {overlays}
           </>
         ) : (

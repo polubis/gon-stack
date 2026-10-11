@@ -10,12 +10,19 @@ const categorySlice = () =>
     pct: z.number(),
   });
 
-const dayPoint = () => z.object({ day: z.number(), total: z.number() });
+const point = () => z.object({ index: z.number(), total: z.number() });
 
 export const getDashboardSchema = () =>
   z.object({
     in: z.object({
-      month: z.string().regex(/^\d{4}-\d{2}$/),
+      kind: z.enum(['day', 'week', 'month', 'year', 'custom']),
+      /** Any day of the period; a future one snaps to the present period. */
+      from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      /** Last day of a `custom` range; ignored for the other kinds. */
+      to: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .optional(),
     }),
     out: z.union([
       z.object({
@@ -27,8 +34,8 @@ export const getDashboardSchema = () =>
           userName: z.string(),
           transactions: z.number(),
           dailyAverage: z.number(),
-          daily: z.array(dayPoint()),
-          previousDaily: z.array(dayPoint()),
+          series: z.array(point()),
+          previousSeries: z.array(point()),
           monthlyLimit: z.number().nullable(),
           categories: z.array(categorySlice()),
         }),

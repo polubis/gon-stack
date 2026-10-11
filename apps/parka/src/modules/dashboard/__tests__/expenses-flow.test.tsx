@@ -2,10 +2,11 @@ import type { ReactNode } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Provider, useContext } from '../presentation/context';
-import type { ExpenseId, Month } from '../domain/models';
+import type { ExpenseId } from '../domain/models';
+import { periodContaining } from '@/shared/period/period';
 import { readBody } from './dashboard-backend';
 
-const MONTH = '2025-04' as Month;
+const MONTH = periodContaining('month', '2025-04-01');
 
 const EXPENSE = {
   id: 'e-1',

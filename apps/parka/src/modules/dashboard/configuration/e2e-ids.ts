@@ -1,6 +1,15 @@
 export const DASHBOARD_E2E_IDS = [
   'dashboard:main',
-  'dashboard:month-select',
+  'dashboard:period-prev',
+  'dashboard:period-next',
+  'dashboard:period-label',
+  'dashboard:period-jump',
+  'dashboard:period-value',
+  'dashboard:period-kind',
+  'dashboard:period-day',
+  'dashboard:period-from',
+  'dashboard:period-to',
+  'dashboard:period-apply',
   'dashboard:total',
   'dashboard:change',
   'dashboard:daily-average',
@@ -48,7 +57,9 @@ export const DASHBOARD_E2E_IDS = [
 export type DashboardDynamicE2eId =
   | `dashboard:expense:${string | number}`
   | `dashboard:limit-edit:${string | number}`
-  | `dashboard:filter:${string | number}`;
+  | `dashboard:filter:${string | number}`
+  | `dashboard:period-preset:${string}`
+  | `dashboard:period-option:${string}`;
 
 export type DashboardE2eId =
   (typeof DASHBOARD_E2E_IDS)[number] | DashboardDynamicE2eId;

@@ -6,25 +6,25 @@ import type {
   ExpenseId,
   Limit,
   LimitId,
-  Month,
+  Period,
   Recurring,
   RecurringId,
 } from '../domain/models';
 
 export const createFacade = (store: Store, trigger: Registry['trigger']) => {
   return {
-    load: (month: Month) => trigger('[TRIGGER]_LOAD', { month }),
-    updateExpense: (expense: Expense, month: Month) =>
-      trigger('[TRIGGER]_UPDATE_EXPENSE', { expense, month }),
-    removeExpense: (id: ExpenseId, month: Month) =>
-      trigger('[TRIGGER]_DELETE_EXPENSE', { id, month }),
+    load: (period: Period) => trigger('[TRIGGER]_LOAD', { period }),
+    updateExpense: (expense: Expense, period: Period) =>
+      trigger('[TRIGGER]_UPDATE_EXPENSE', { expense, period }),
+    removeExpense: (id: ExpenseId, period: Period) =>
+      trigger('[TRIGGER]_DELETE_EXPENSE', { id, period }),
     createLimit: (limit: Limit) => trigger('[TRIGGER]_CREATE_LIMIT', { limit }),
     updateLimit: (limit: Limit) => trigger('[TRIGGER]_UPDATE_LIMIT', { limit }),
     removeLimit: (id: LimitId) => trigger('[TRIGGER]_DELETE_LIMIT', { id }),
-    updateRecurring: (recurring: Recurring, month: Month) =>
-      trigger('[TRIGGER]_UPDATE_RECURRING', { recurring, month }),
-    removeRecurring: (id: RecurringId, month: Month) =>
-      trigger('[TRIGGER]_DELETE_RECURRING', { id, month }),
+    updateRecurring: (recurring: Recurring, period: Period) =>
+      trigger('[TRIGGER]_UPDATE_RECURRING', { recurring, period }),
+    removeRecurring: (id: RecurringId, period: Period) =>
+      trigger('[TRIGGER]_DELETE_RECURRING', { id, period }),
     dismissNotice: () => trigger('[TRIGGER]_DISMISS_NOTICE'),
     useInitialized: () => store.$initialized.use(),
     useLoading: () => store.$loading.use(),

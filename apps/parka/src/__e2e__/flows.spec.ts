@@ -16,8 +16,7 @@ const open = async (page: Page, path: string): Promise<void> => {
   await page.waitForTimeout(200);
 };
 
-const yearMonth = (date: Date): string =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+const yearMonth = (date: Date): string => date.toISOString().slice(0, 7);
 
 const CATEGORY = {
   id: 'cat-1',
@@ -66,7 +65,7 @@ const mockState = async (
   }
   // The dashboard loads its summary together with every list: all or nothing.
   await page.route(
-    `**${API_ROUTER.dashboard({ month: '' })}**`,
+    `**${API_ROUTER.dashboard({ kind: '', from: '' })}**`,
     async (route) => {
       await route.fulfill({
         status: 200,
@@ -80,8 +79,8 @@ const mockState = async (
             userName: 'Anna',
             transactions: 0,
             dailyAverage: 0,
-            daily: [],
-            previousDaily: [],
+            series: [],
+            previousSeries: [],
             monthlyLimit: null,
             categories: [],
           },
@@ -133,15 +132,19 @@ const commands = {
     // response so the view has deterministic per-month totals to assert
     // against.
     const current = new Date();
-    const previous = new Date(current.getFullYear(), current.getMonth() - 1, 1);
+    const previous = new Date(
+      Date.UTC(current.getUTCFullYear(), current.getUTCMonth() - 1, 1),
+    );
     const totals: Record<string, number> = {
       [yearMonth(current)]: 1234,
       [yearMonth(previous)]: 999,
     };
     await page.route(
-      `**${API_ROUTER.dashboard({ month: '' })}**`,
+      `**${API_ROUTER.dashboard({ kind: '', from: '' })}**`,
       async (route) => {
-        const month = new URL(route.request().url()).searchParams.get('month');
+        const month = new URL(route.request().url()).searchParams
+          .get('from')
+          ?.slice(0, 7);
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
@@ -154,8 +157,8 @@ const commands = {
               userName: 'Anna',
               transactions: 0,
               dailyAverage: 0,
-              daily: [],
-              previousDaily: [],
+              series: [],
+              previousSeries: [],
               monthlyLimit: null,
               categories: [],
             },
@@ -170,19 +173,14 @@ const commands = {
   }) => {
     const current = new Date();
     await open(page, APP_ROUTER.dashboard());
-    await expect(getByE2e('dashboard:month-select')).toHaveValue(
-      yearMonth(current),
+    await expect(getByE2e('dashboard:period-label')).toContainText(
+      String(current.getUTCFullYear()),
     );
     const total = await getByE2e('dashboard:total').textContent();
     currentTotalByPage.set(page, total ?? '');
   },
   'the previous month shows a different total': async ({ page, getByE2e }) => {
-    const current = new Date();
-    const previous = new Date(current.getFullYear(), current.getMonth() - 1, 1);
-    await getByE2e('dashboard:month-select').selectOption(yearMonth(previous));
-    await expect(getByE2e('dashboard:month-select')).toHaveValue(
-      yearMonth(previous),
-    );
+    await getByE2e('dashboard:period-prev').click();
     await expect(getByE2e('dashboard:total')).not.toHaveText(
       currentTotalByPage.get(page) ?? '',
     );

@@ -2,6 +2,19 @@ import {
   categoryShares,
   type CategorizedItem,
 } from '@/shared/expense-category/category';
+import {
+  occurrencesInMonth,
+  type RecurringOccurrence,
+  type RecurringSource,
+} from '@/shared/recurring/occurrences';
+import {
+  bucketOf,
+  containsDate,
+  daysBetween,
+  periodDays,
+  periodMonths,
+  type Period,
+} from '@/shared/period/period';
 
 export type DashboardExpense = {
   date: string;
@@ -20,113 +33,104 @@ export type DashboardCategorySlice = {
   pct: number;
 };
 
-export type DashboardDayPoint = { day: number; total: number };
+export type DashboardPoint = {
+  /** 1-based bucket: a day of the period, or a month of a year. */
+  index: number;
+  total: number;
+};
 
 export type DashboardSummary = {
-  /** Selected month total. */
+  /** Selected period total. */
   total: number;
-  /** Selected month vs previous month, in percent. */
+  /** Selected period vs the previous one, in percent. */
   change: number;
   previousTotal: number;
-  /** Number of expenses in the selected month. */
+  /** Number of expenses in the selected period. */
   transactions: number;
-  /** Selected month total per elapsed day. */
+  /** Selected period total per elapsed day. */
   dailyAverage: number;
-  /** Per-day totals of the selected month, day 1 first. */
-  daily: DashboardDayPoint[];
-  /** Per-day totals of the previous month, day 1 first. */
-  previousDaily: DashboardDayPoint[];
+  /** Per-bucket totals of the selected period, first bucket first. */
+  series: DashboardPoint[];
+  /** Per-bucket totals of the previous period, first bucket first. */
+  previousSeries: DashboardPoint[];
   /** Total monthly limit, `null` when none is set. */
   monthlyLimit: number | null;
-  /** Category breakdown of the selected month. */
+  /** Category breakdown of the selected period. */
   categories: DashboardCategorySlice[];
-};
-
-const monthOf = (iso: string): string => iso.slice(0, 7);
-
-const prevMonthOf = (month: string): string => {
-  const [y, m] = month.split('-').map(Number);
-  const d = new Date(y, m - 2, 1);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-};
-
-export const nextMonthOf = (month: string): string => {
-  const [y, m] = month.split('-').map(Number);
-  const d = new Date(y, m, 1);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-};
-
-export const monthsEndingAt = (month: string, count: number): string[] => {
-  const [y, m] = month.split('-').map(Number);
-  const out: string[] = [];
-  for (let i = count - 1; i >= 0; i -= 1) {
-    const d = new Date(y, m - 1 - i, 1);
-    out.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
-  }
-  return out;
 };
 
 const sum = (expenses: DashboardExpense[]): number =>
   expenses.reduce((total, e) => total + e.amount, 0);
 
-const inMonths = (
+const inPeriod = (
   expenses: DashboardExpense[],
-  months: string[],
-): DashboardExpense[] =>
-  expenses.filter((e) => months.includes(monthOf(e.date)));
+  period: Period,
+): DashboardExpense[] => expenses.filter((e) => containsDate(period, e.date));
 
-const daysIn = (month: string): number => {
-  const [y, m] = month.split('-').map(Number);
-  return new Date(y, m, 0).getDate();
-};
+const bucketIndex = (period: Period, date: string): number =>
+  bucketOf(period) === 'month'
+    ? periodMonths(period).indexOf(date.slice(0, 7)) + 1
+    : daysBetween(period.from, date.slice(0, 10)) + 1;
 
-const dayOf = (iso: string): number => Number(iso.slice(8, 10));
-
-const dailyTotals = (
+const seriesOf = (
   expenses: DashboardExpense[],
-  month: string,
-): DashboardDayPoint[] => {
-  const scoped = inMonths(expenses, [month]);
-  return Array.from({ length: daysIn(month) }, (_, i) => ({
-    day: i + 1,
-    total: sum(scoped.filter((e) => dayOf(e.date) === i + 1)),
+  period: Period,
+): DashboardPoint[] => {
+  const scoped = inPeriod(expenses, period);
+  const length =
+    bucketOf(period) === 'month'
+      ? periodMonths(period).length
+      : periodDays(period);
+  return Array.from({ length }, (_, i) => ({
+    index: i + 1,
+    total: sum(scoped.filter((e) => bucketIndex(period, e.date) === i + 1)),
   }));
 };
 
-/** Days of `month` that have passed as of `today` (`YYYY-MM-DD`). */
-const elapsedDays = (month: string, today: string): number => {
-  const current = monthOf(today);
-  if (month < current) return daysIn(month);
-  if (month > current) return 0;
-  return dayOf(today);
+/** Days of `period` that have passed as of `today` (`YYYY-MM-DD`). */
+const elapsedDays = (period: Period, today: string): number => {
+  if (today < period.from) return 0;
+  const last = today < period.to ? today : period.to;
+  return daysBetween(period.from, last) + 1;
 };
 
-const totalFor = (expenses: DashboardExpense[], month: string): number =>
-  sum(inMonths(expenses, [month]));
+/** Recurring charges that fall into any of `periods`; derived, never stored. */
+export const chargesInPeriods = (
+  schedule: RecurringSource[],
+  periods: Period[],
+): RecurringOccurrence[] => {
+  const months = [...new Set(periods.flatMap(periodMonths))];
+  return months
+    .flatMap((month) => occurrencesInMonth(schedule, month))
+    .filter((o) => periods.some((p) => containsDate(p, o.date)));
+};
 
 export const summarizeDashboard = ({
   expenses,
   categories,
-  month,
+  period,
+  previous,
   today,
   monthlyLimit,
 }: {
   expenses: DashboardExpense[];
   categories: DashboardCategory[];
-  month: string;
+  period: Period;
+  /** The period right before `period`, to compare with. */
+  previous: Period;
   /** `YYYY-MM-DD`; injected so the summary stays pure. */
   today: string;
   monthlyLimit: number | null;
 }): DashboardSummary => {
-  const total = totalFor(expenses, month);
-  const previousTotal = totalFor(expenses, prevMonthOf(month));
+  const scoped = inPeriod(expenses, period);
+  const total = sum(scoped);
+  const previousTotal = sum(inPeriod(expenses, previous));
   const change =
     previousTotal === 0 ? 0 : ((total - previousTotal) / previousTotal) * 100;
 
-  const elapsed = elapsedDays(month, today);
+  const elapsed = elapsedDays(period, today);
   const dailyAverage = elapsed === 0 ? 0 : total / elapsed;
 
-  const scoped = inMonths(expenses, [month]);
   const shares = scoped.flatMap((e) =>
     categoryShares({ ...e, items: e.items ?? [] }),
   );
@@ -155,8 +159,8 @@ export const summarizeDashboard = ({
     previousTotal,
     transactions: scoped.length,
     dailyAverage,
-    daily: dailyTotals(expenses, month),
-    previousDaily: dailyTotals(expenses, prevMonthOf(month)),
+    series: seriesOf(expenses, period),
+    previousSeries: seriesOf(expenses, previous),
     monthlyLimit,
     categories: categorySlices,
   };

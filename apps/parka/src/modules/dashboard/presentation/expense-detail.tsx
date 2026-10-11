@@ -4,7 +4,8 @@ import { categoryLabel } from '@/shared/i18n/category-label';
 import { Button } from '@/shared/ui/controls';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { itemTotal, dateTimeLabel, money } from '../domain/format';
-import type { Expense, Month } from '../domain/models';
+import type { Period } from '@/shared/period/period';
+import type { Expense } from '../domain/models';
 import { useContext } from './context';
 import { DetailDialog, DialogActions } from './detail-dialog';
 import { categoryOf } from './selectors';
@@ -20,12 +21,12 @@ const Row = ({ label, value }: { label: string; value: string }) => (
 export const ExpenseDetail = ({
   modal,
   expense,
-  month,
+  period,
   onClose,
 }: {
   modal: string;
   expense: Expense;
-  month: Month;
+  period: Period;
   onClose: () => void;
 }) => {
   const ctx = useContext();
@@ -33,7 +34,7 @@ export const ExpenseDetail = ({
   const category = categoryOf(categories, expense.categoryId);
 
   const remove = () => {
-    ctx.removeExpense(expense.id, month);
+    ctx.removeExpense(expense.id, period);
     onClose();
   };
 
@@ -97,7 +98,10 @@ export const ExpenseDetail = ({
         <Button
           className="w-auto"
           data-e2e="dashboard:edit"
-          href={APP_ROUTER.expenseEdit({ id: expense.id, month })}
+          href={APP_ROUTER.expenseEdit({
+            id: expense.id,
+            month: expense.date.slice(0, 7),
+          })}
         >
           <Pencil className="h-4 w-4" aria-hidden="true" /> Edytuj
         </Button>

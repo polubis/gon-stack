@@ -1,6 +1,7 @@
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { dateLabel, money } from '../domain/format';
-import type { Month, Recurring } from '../domain/models';
+import type { Period } from '@/shared/period/period';
+import type { Recurring } from '../domain/models';
 import { useContext } from './context';
 import { DetailDialog } from './detail-dialog';
 import { RecurringBadge } from './recurring-badge';
@@ -11,12 +12,12 @@ import { categoryOf } from './selectors';
 export const RecurringDetail = ({
   modal,
   recurring,
-  month,
+  period,
   onClose,
 }: {
   modal: string;
   recurring: Recurring;
-  month: Month;
+  period: Period;
   onClose: () => void;
 }) => {
   const ctx = useContext();
@@ -36,7 +37,7 @@ export const RecurringDetail = ({
       }
       onClose={onClose}
     >
-      <RecurringForm recurring={recurring} month={month} onDone={onClose}>
+      <RecurringForm recurring={recurring} period={period} onDone={onClose}>
         {recurring.history.length > 0 ? (
           <div
             className="border-t border-line pt-3"

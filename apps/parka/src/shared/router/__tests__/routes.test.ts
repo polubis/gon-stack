@@ -29,8 +29,8 @@ describe('api routes', () => {
   it('builds collection and by-id paths', () => {
     expect(API_ROUTER.expenses()).toBe('/api/expenses/');
     expect(API_ROUTER.expenseById('e-1')).toBe('/api/expenses/e-1/');
-    expect(API_ROUTER.dashboard({ month: '2025-04' })).toBe(
-      '/api/dashboard/?month=2025-04',
+    expect(API_ROUTER.dashboard({ kind: 'week', from: '2025-04-07' })).toBe(
+      '/api/dashboard/?kind=week&from=2025-04-07',
     );
   });
 

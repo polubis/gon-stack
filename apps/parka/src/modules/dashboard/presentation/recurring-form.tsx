@@ -3,20 +3,21 @@ import { categoryLabel } from '@/shared/i18n/category-label';
 import { Trash2 } from 'lucide-react';
 import { Button, Field, inputClass } from '@/shared/ui/controls';
 import { NumberInput } from '@/shared/ui/number-input';
+import type { Period } from '@/shared/period/period';
 import { fromDateInput, toDateInput } from '../domain/format';
-import type { CategoryId, Month, Recurring } from '../domain/models';
+import type { CategoryId, Recurring } from '../domain/models';
 import { useContext } from './context';
 import { DialogActions } from './detail-dialog';
 
 /** Edits `recurring` (history kept); it can also be removed. */
 export const RecurringForm = ({
   recurring,
-  month,
+  period,
   onDone,
   children,
 }: {
   recurring: Recurring;
-  month: Month;
+  period: Period;
   onDone: () => void;
   /** Rendered between the fields and the buttons. */
   children?: ReactNode;
@@ -45,12 +46,12 @@ export const RecurringForm = ({
       paymentMethod: method.trim(),
       categoryId: selected,
     };
-    ctx.updateRecurring({ ...recurring, ...values }, month);
+    ctx.updateRecurring({ ...recurring, ...values }, period);
     onDone();
   };
 
   const remove = () => {
-    ctx.removeRecurring(recurring.id, month);
+    ctx.removeRecurring(recurring.id, period);
     onDone();
   };
 
