@@ -16,3 +16,4 @@ fix(repo)!: prevent racing of requests
 - Other points
 ```
 2. (A) No AI credits, refs, footer in commit message. Only title + description as nested list
+3. (A) Never commit artifacts: videos, screenshots, recordings, logs, build/test output, scratch files
