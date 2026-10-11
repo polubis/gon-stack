@@ -7,6 +7,7 @@ import {
 } from '@/shared/i18n/category-label';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { Button, Field, inputClass } from '@/shared/ui/controls';
+import { useRememberedField } from '@/shared/form-memory/presentation/use-remembered-field';
 import { Card } from '@/shared/ui/layout';
 import { NumberInput } from '@/shared/ui/number-input';
 import { money, toLocalDateInput, toTimestamp } from '../domain/format';
@@ -34,6 +35,8 @@ type Props = {
   /** `page` = own route, `dialog` = popup over the dashboard. Same fields. */
   layout: 'page' | 'dialog';
   submitLabel: string;
+  /** Prefill remembered payment method and category (adding, not editing). */
+  prefill?: boolean;
   /** Extra footer buttons (cancel, delete) shown next to the submit. */
   actions?: ReactNode;
   onSubmit: (values: ExpenseFormValues) => void;
@@ -46,17 +49,35 @@ export const ExpenseForm = ({
   saving,
   layout,
   submitLabel,
+  prefill = false,
   actions,
   onSubmit,
 }: Props) => {
   const dialog = layout === 'dialog';
-  const [merchant, setMerchant] = useState(base?.merchant ?? '');
+  const merchantMemory = useRememberedField({
+    key: 'expense.merchant',
+    enabled: prefill,
+  });
+  const [merchant, setMerchant] = useState(
+    base?.merchant || merchantMemory.recalled || '',
+  );
   const [date, setDate] = useState(
     toLocalDateInput(base?.date ?? new Date().toISOString()),
   );
-  const [method, setMethod] = useState(base?.paymentMethod ?? '');
+  const methodMemory = useRememberedField({
+    key: 'expense.paymentMethod',
+    enabled: prefill,
+  });
+  const categoryMemory = useRememberedField({
+    key: 'expense.categoryId',
+    enabled: prefill,
+    options: categories.map((c) => c.id),
+  });
+  const [method, setMethod] = useState(
+    base?.paymentMethod || methodMemory.recalled || '',
+  );
   const [categoryId, setCategoryId] = useState<CategoryId | null>(
-    base?.categoryId ?? null,
+    base?.categoryId ?? (categoryMemory.recalled as CategoryId | null),
   );
   const [amount, setAmount] = useState(base?.amount ?? 0);
   const [products, setProducts] = useState<Product[]>(base?.items ?? []);
@@ -91,6 +112,9 @@ export const ExpenseForm = ({
       setOpenId(unnamed.id);
       return;
     }
+    merchantMemory.remember(merchant);
+    methodMemory.remember(method);
+    if (!hasProducts) categoryMemory.remember(selected);
     onSubmit({
       merchant: merchant.trim(),
       date: toTimestamp(date, base?.date),

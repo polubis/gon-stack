@@ -32,6 +32,7 @@ export const NewExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
       categories={categories}
       saving={saving}
       layout="page"
+      prefill
       submitLabel="Dodaj wydatek"
       onSubmit={(values) =>
         ctx.createExpense({

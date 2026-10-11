@@ -102,6 +102,7 @@ const setDate = (value: string) =>
 describe('adding an expense on its own page', () => {
   beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
   beforeEach(() => {
+    window.localStorage.clear();
     window.history.replaceState(null, '', '/app/expenses/new/');
   });
   afterEach(() => {
