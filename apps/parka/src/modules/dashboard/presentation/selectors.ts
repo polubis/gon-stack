@@ -1,18 +1,12 @@
-import { dayStart } from '@/shared/date/date';
 import { categoryShares } from '@/shared/expense-category/category';
-import { occurrencesInMonth } from '@/shared/recurring/occurrences';
+import { upcomingOccurrences } from '@/shared/recurring/occurrences';
 import {
   MIXED_CATEGORY,
   UNCATEGORIZED,
   WARN_PCT,
 } from '../configuration/constraints';
 import { monthOf } from '../domain/format';
-import {
-  containsDate,
-  limitForPeriod,
-  periodContaining,
-  periodMonths,
-} from '@/shared/period/period';
+import { containsDate, limitForPeriod } from '@/shared/period/period';
 import type {
   Category,
   CategoryId,
@@ -25,57 +19,51 @@ import type {
   Period,
   ProgressTone,
   Recurring,
-  RecurringId,
+  RecurringInterval,
   TotalProgress,
+  Upcoming,
 } from '../domain/models';
 
-/** Id of the derived charge `recurringId` makes in `month`. */
-export const recurringChargeId = (
-  recurringId: RecurringId,
-  month: Month,
-): ExpenseId => `recurring:${recurringId}:${month}` as ExpenseId;
+const UPCOMING_PREFIX = 'upcoming:';
+
+/** How many rules the list announces at most, each by its next payment. */
+export const UPCOMING_LIMIT = 3;
 
 /**
- * Stored expenses plus the charges the recurring ones make in `period`, so
- * every total and limit counts them. Those charges are derived, never stored.
+ * The next payment of each rule after `today` (`YYYY-MM-DD`), nearest first.
+ * One per rule: the same rule repeated would only duplicate what is on
+ * screen. A projection: never stored, never part of a sum or a limit.
  */
-export const withRecurringIn = (
-  expenses: Expense[],
+export const upcomingCharges = (
   recurring: Recurring[],
-  period: Period,
-): Expense[] => [
-  ...expenses,
-  ...periodMonths(period)
-    .flatMap((month) =>
-      occurrencesInMonth(recurring, month).map((o) => ({ o, month })),
+  today: string,
+): Upcoming[] =>
+  recurring
+    .flatMap((r) =>
+      upcomingOccurrences(r, today, 1).map((date) => ({
+        id: `${UPCOMING_PREFIX}${r.id}:${date}` as ExpenseId,
+        recurring: r,
+        date,
+      })),
     )
-    .filter(({ o }) => containsDate(period, o.date))
-    .map(({ o, month }) => ({
-      id: recurringChargeId(o.recurringId as RecurringId, month as Month),
-      merchant: o.name,
-      date: dayStart(o.date),
-      amount: o.amount,
-      categoryId: o.categoryId as CategoryId,
-      paymentMethod:
-        recurring.find((r) => r.id === o.recurringId)?.paymentMethod ?? '',
-      isBill: true,
-      source: 'recurring' as const,
-      device: null,
-      items: [],
-    })),
-];
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
+    .slice(0, UPCOMING_LIMIT);
 
-/** Same as `withRecurringIn` for one whole calendar month. */
-export const withRecurring = (
-  expenses: Expense[],
-  recurring: Recurring[],
-  month: Month,
-): Expense[] =>
-  withRecurringIn(
-    expenses,
-    recurring,
-    periodContaining('month', `${month}-01`),
-  );
+/** Weekly / monthly / yearly in the app's language. */
+export const intervalLabel = (interval: RecurringInterval): string => {
+  switch (interval) {
+    case 'weekly':
+      return 'Co tydzień';
+    case 'monthly':
+      return 'Co miesiąc';
+    case 'yearly':
+      return 'Co rok';
+    default: {
+      const unreachable: never = interval;
+      return unreachable;
+    }
+  }
+};
 
 export const sortByDateDesc = (list: Expense[]): Expense[] =>
   [...list].sort((a, b) => Date.parse(b.date) - Date.parse(a.date));

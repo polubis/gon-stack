@@ -3,13 +3,22 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { DeviceIcon } from '@/shared/device/presentation/device-icon';
+import {
+  closeModalThen,
+  openModal,
+  useModal,
+} from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
+import { ScopeNote } from '@/shared/ui/scope-note';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { itemTotal, dateTimeLabel, money } from '../domain/format';
 import type { Period } from '@/shared/period/period';
 import type { Expense } from '../domain/models';
 import { useContext } from './context';
+import { ConfirmDeleteDialog } from './confirm-delete-dialog';
 import { DetailDialog, DialogActions } from './detail-dialog';
+import { deleteModal } from './modal-ids';
+import { RecurringBadge } from './recurring-badge';
 import { categoryOf } from './selectors';
 
 const Row = ({ label, value }: { label: string; value: string }) => (
@@ -35,10 +44,9 @@ export const ExpenseDetail = ({
   const categories = ctx.useCategories();
   const category = categoryOf(categories, expense.categoryId);
 
-  const remove = () => {
-    ctx.removeExpense(expense.id, period);
-    onClose();
-  };
+  const confirmId = deleteModal(expense.id);
+  const confirming = useModal(confirmId);
+  const fromRule = expense.recurringId !== null;
 
   return (
     <DetailDialog
@@ -46,9 +54,16 @@ export const ExpenseDetail = ({
       data-e2e="dashboard:detail"
       title={expense.merchant}
       description={dateTimeLabel(expense.date)}
+      badge={fromRule ? <RecurringBadge /> : undefined}
       avatar={<CategoryAvatar category={category} />}
       onClose={onClose}
     >
+      {fromRule ? (
+        <ScopeNote className="mb-3" data-e2e="dashboard:scope-note">
+          Ten wydatek został już naliczony. Edycja i usunięcie dotyczą tylko
+          jego – reguła cykliczna i pozostałe wydatki zostają bez zmian.
+        </ScopeNote>
+      ) : null}
       <dl className="space-y-2 text-sm">
         <Row label="Kwota" value={money(expense.amount)} />
         <Row
@@ -118,7 +133,7 @@ export const ExpenseDetail = ({
             variant="danger"
             className="w-auto"
             data-e2e="dashboard:delete"
-            onClick={remove}
+            onClick={() => openModal(confirmId)}
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" /> Usuń
           </Button>
@@ -138,6 +153,25 @@ export const ExpenseDetail = ({
           <Pencil className="h-4 w-4" aria-hidden="true" /> Edytuj
         </Button>
       </DialogActions>
+      {confirming.isOpen ? (
+        <ConfirmDeleteDialog
+          modal={confirmId}
+          title={`Usunąć wydatek „${expense.merchant}”?`}
+          description={
+            fromRule
+              ? 'Usuniesz tylko ten wydatek. Reguła cykliczna i pozostałe wydatki zostają, a usunięty wydatek nie pojawi się ponownie.'
+              : 'Wydatek zostanie usunięty z listy i podsumowania.'
+          }
+          confirmLabel="Usuń wydatek"
+          onClose={confirming.close}
+          onConfirm={() =>
+            closeModalThen(confirmId, () => {
+              ctx.removeExpense(expense.id, period);
+              onClose();
+            })
+          }
+        />
+      ) : null}
     </DetailDialog>
   );
 };

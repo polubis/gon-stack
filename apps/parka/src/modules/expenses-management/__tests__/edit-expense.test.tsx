@@ -94,6 +94,42 @@ describe('editing an expense on its own page', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('says an ordinary expense is edited without any rule note', async () => {
+    mockBackend();
+    await open();
+    await screen.findByLabelText('Sklep');
+
+    expect(screen.queryByRole('note')).not.toBeInTheDocument();
+  });
+
+  it('says a charged recurring expense is edited alone', async () => {
+    mockBackend([
+      { ...STORED, recurringId: 'r-1', occurrenceDate: '2025-04-10' },
+    ]);
+    await open();
+    await screen.findByLabelText('Sklep');
+
+    expect(screen.getByRole('note')).toHaveTextContent(
+      'Edytujesz tylko jego – reguła i pozostałe wydatki zostają bez zmian.',
+    );
+  });
+
+  it('keeps the rule link when saving a charged recurring expense', async () => {
+    const written = mockBackend([
+      { ...STORED, recurringId: 'r-1', occurrenceDate: '2025-04-10' },
+    ]);
+    const user = await open();
+    await screen.findByLabelText('Sklep');
+
+    await user.click(screen.getByRole('button', { name: 'Zapisz zmiany' }));
+
+    await waitFor(() => expect(written).toHaveLength(1));
+    expect(written[0]).toMatchObject({
+      recurringId: 'r-1',
+      occurrenceDate: '2025-04-10',
+    });
+  });
+
   it('saves a product added while editing and returns to the month', async () => {
     const written = mockBackend();
     const user = await open();

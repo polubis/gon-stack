@@ -69,7 +69,9 @@ export type Database = {
           id: string;
           is_bill: boolean;
           merchant: string;
+          occurrence_date: string | null;
           payment_method: string;
+          recurring_id: string | null;
           source: string;
           user_id: string;
         };
@@ -83,7 +85,9 @@ export type Database = {
           id: string;
           is_bill?: boolean;
           merchant: string;
+          occurrence_date?: string | null;
           payment_method?: string;
+          recurring_id?: string | null;
           source?: string;
           user_id: string;
         };
@@ -97,11 +101,21 @@ export type Database = {
           id?: string;
           is_bill?: boolean;
           merchant?: string;
+          occurrence_date?: string | null;
           payment_method?: string;
+          recurring_id?: string | null;
           source?: string;
           user_id?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: 'expenses_recurring_fk';
+            columns: ['user_id', 'recurring_id'];
+            isOneToOne: false;
+            referencedRelation: 'recurring_expenses';
+            referencedColumns: ['user_id', 'id'];
+          },
+        ];
       };
       limits: {
         Row: {
@@ -272,65 +286,42 @@ export type Database = {
           active: boolean;
           category_id: string;
           cost: number;
+          end_date: string | null;
           id: string;
+          interval: string;
+          last_materialized_date: string | null;
           name: string;
-          next_payment_date: string;
           payment_method: string;
+          start_date: string;
           user_id: string;
         };
         Insert: {
           active?: boolean;
           category_id: string;
           cost?: number;
+          end_date?: string | null;
           id: string;
+          interval?: string;
+          last_materialized_date?: string | null;
           name: string;
-          next_payment_date: string;
           payment_method?: string;
+          start_date: string;
           user_id: string;
         };
         Update: {
           active?: boolean;
           category_id?: string;
           cost?: number;
+          end_date?: string | null;
           id?: string;
+          interval?: string;
+          last_materialized_date?: string | null;
           name?: string;
-          next_payment_date?: string;
           payment_method?: string;
+          start_date?: string;
           user_id?: string;
         };
         Relationships: [];
-      };
-      recurring_payments: {
-        Row: {
-          amount: number;
-          date: string;
-          id: number;
-          recurring_id: string;
-          user_id: string;
-        };
-        Insert: {
-          amount?: number;
-          date: string;
-          id?: never;
-          recurring_id: string;
-          user_id: string;
-        };
-        Update: {
-          amount?: number;
-          date?: string;
-          id?: never;
-          recurring_id?: string;
-          user_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'recurring_payments_user_id_recurring_id_fkey';
-            columns: ['user_id', 'recurring_id'];
-            isOneToOne: false;
-            referencedRelation: 'recurring_expenses';
-            referencedColumns: ['user_id', 'id'];
-          },
-        ];
       };
     };
     Views: {

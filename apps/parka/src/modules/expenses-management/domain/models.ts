@@ -1,6 +1,9 @@
 import type { Brand } from '@repo/type-beast/brand';
 import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
 import type { Device } from '@/shared/device/domain/models';
+import type { RecurringInterval } from '@/shared/recurring/occurrences';
+
+export type { RecurringInterval };
 
 export type Month = Brand<string, 'Month'>;
 export type CategoryId = Brand<string, 'CategoryId'>;
@@ -58,18 +61,25 @@ export type NewExpense = {
 export type StoredExpense = Omit<NewExpense, 'isBill' | 'source'> & {
   isBill: boolean;
   source: 'receipt' | 'manual';
+  /** Rule that created it; `null` for an ordinary expense. Kept as is when edited. */
+  recurringId: RecurringId | null;
+  /** `YYYY-MM-DD` the rule's series put it on. Kept as is when edited. */
+  occurrenceDate: string | null;
 };
 
+/** A rule: an instruction that makes expenses once their day has passed. */
 export type NewRecurring = {
   id: RecurringId;
   name: string;
   cost: number;
-  /** ISO date-time string. */
-  nextPaymentDate: string;
+  interval: RecurringInterval;
+  /** `YYYY-MM-DD`: first payment. */
+  startDate: string;
+  /** `YYYY-MM-DD`: last day a payment may fall on; `null` = open ended. */
+  endDate: string | null;
   active: true;
   paymentMethod: string;
   categoryId: CategoryId;
-  history: [];
 };
 
 /** A receipt photo being read, or the reason it could not be. */

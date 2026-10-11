@@ -37,15 +37,34 @@ const expense = (
   items: [],
 });
 
+const NETFLIX_DAY = `${month()}-02`;
+
+/** A rule that already charged this month's payment (an ordinary expense now). */
 const NETFLIX = {
   id: 'r-1',
   name: 'Netflix',
   cost: 30,
-  nextPaymentDate: `${month()}-02T00:00:00.000Z`,
+  interval: 'monthly' as const,
+  startDate: NETFLIX_DAY,
+  endDate: null,
+  lastMaterializedDate: NETFLIX_DAY,
   active: true,
   paymentMethod: 'card',
   categoryId: FOOD.id,
-  history: [],
+};
+
+const NETFLIX_CHARGE = {
+  ...expense(`r-1:${NETFLIX_DAY}`, 30, NETFLIX_DAY, FOOD.id),
+  merchant: 'Netflix',
+  recurringId: NETFLIX.id,
+  occurrenceDate: NETFLIX_DAY,
+};
+
+/** `YYYY-MM-DD` of the local day `offset` days from today. */
+const day = (offset: number): string => {
+  const target = new Date();
+  target.setDate(target.getDate() + offset);
+  return `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, '0')}-${String(target.getDate()).padStart(2, '0')}`;
 };
 
 /** This month: 60 + 40 = 100 in 2 expenses. Last month: 50 in 1. */
@@ -84,7 +103,11 @@ const commands = {
   'i open a dashboard with expenses of two months': ({ page }) =>
     openDashboardWith(page, BASE),
   'i open a dashboard with a recurring expense': ({ page }) =>
-    openDashboardWith(page, { ...BASE, recurring: [NETFLIX] }),
+    openDashboardWith(page, {
+      ...BASE,
+      expenses: [...BASE.expenses, NETFLIX_CHARGE],
+      recurring: [NETFLIX],
+    }),
   'i open a dashboard with a monthly limit of 500': ({ page }) =>
     openDashboardWith(page, {
       ...BASE,
@@ -143,6 +166,7 @@ const commands = {
   'i delete the first expense': async ({ getByE2e }) => {
     await getByE2e('dashboard:expense:e-1').click();
     await getByE2e('dashboard:delete').click();
+    await getByE2e('dashboard:delete-confirm').click();
     await expect(getByE2e('dashboard:detail')).toHaveCount(0);
   },
   'the month shows 40,00 over 1 expense': async ({ getByE2e }) => {
@@ -155,6 +179,18 @@ const commands = {
     await page.getByRole('tab', { name: 'Cykliczny' }).click();
     await getByE2e('expenses-management:recurring-name').fill('Siłownia');
     await getByE2e('expenses-management:recurring-cost').fill('50');
+    await getByE2e('expenses-management:recurring-save').click();
+    await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
+  },
+  'i add a recurring expense of 50 starting in a week': async ({
+    page,
+    getByE2e,
+  }) => {
+    await getByE2e('dashboard:expense-new').click();
+    await page.getByRole('tab', { name: 'Cykliczny' }).click();
+    await getByE2e('expenses-management:recurring-name').fill('Siłownia');
+    await getByE2e('expenses-management:recurring-cost').fill('50');
+    await getByE2e('expenses-management:recurring-date').fill(day(7));
     await getByE2e('expenses-management:recurring-save').click();
     await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
   },
@@ -188,20 +224,62 @@ const commands = {
     await expect(getByE2e('dashboard:transactions')).toHaveText('3');
   },
 
-  'i change the recurring expense cost to 45': async ({ page, getByE2e }) => {
-    await page.getByRole('button', { name: /Netflix/ }).click();
+  'i change the upcoming payment cost to 45': async ({
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
+    await getByE2ePrefix('dashboard:upcoming:').first().click();
+    await expect(getByE2e('dashboard:scope-note')).toContainText(
+      'Edytujesz ten i kolejne wydatki',
+    );
     await getByE2e('dashboard:recurring-form-cost').fill('45');
     await getByE2e('dashboard:recurring-form-save').click();
     await expect(getByE2e('dashboard:recurring-form')).toHaveCount(0);
   },
-  'the month shows 145,00 over 3 charges': async ({ getByE2e }) => {
-    await expect(getByE2e('dashboard:total')).toContainText('145,00');
-    await expect(getByE2e('dashboard:transactions')).toHaveText('3');
+  'the upcoming payment shows 45,00': async ({ getByE2e }) => {
+    await expect(getByE2e('dashboard:upcoming')).toContainText('45,00');
   },
-  'i delete the recurring expense': async ({ page, getByE2e }) => {
-    await page.getByRole('button', { name: /Netflix/ }).click();
+  'the month still shows 100,00 over 2 expenses': async ({ getByE2e }) => {
+    await expect(getByE2e('dashboard:total')).toContainText('100,00');
+    await expect(getByE2e('dashboard:transactions')).toHaveText('2');
+  },
+  'the upcoming payment of Siłownia is announced': async ({ getByE2e }) => {
+    await expect(getByE2e('dashboard:upcoming')).toContainText('Siłownia');
+    await expect(getByE2e('dashboard:upcoming-badge')).toBeVisible();
+  },
+  'i delete the recurring rule from its upcoming payment': async ({
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
+    await getByE2ePrefix('dashboard:upcoming:').first().click();
     await getByE2e('dashboard:recurring-delete').click();
-    await expect(getByE2e('dashboard:recurring-form')).toHaveCount(0);
+    await expect(getByE2e('dashboard:delete-scope')).toContainText(
+      'Usuniesz regułę',
+    );
+    await getByE2e('dashboard:delete-confirm').click();
+    await expect(getByE2e('dashboard:recurring-dialog')).toHaveCount(0);
+  },
+  'no payment is announced': async ({ getByE2e }) => {
+    await expect(getByE2e('dashboard:upcoming')).toHaveCount(0);
+  },
+  'i delete the charged recurring expense': async ({ getByE2e }) => {
+    await getByE2e(`dashboard:expense:r-1:${NETFLIX_DAY}`).click();
+    await expect(getByE2e('dashboard:scope-note')).toContainText(
+      'dotyczą tylko jego',
+    );
+    await getByE2e('dashboard:delete').click();
+    await expect(getByE2e('dashboard:delete-scope')).toContainText(
+      'Usuniesz tylko ten wydatek',
+    );
+    await getByE2e('dashboard:delete-confirm').click();
+    await expect(getByE2e('dashboard:detail')).toHaveCount(0);
+  },
+  'the next payment of the rule is still announced': async ({ getByE2e }) => {
+    await expect(getByE2e('dashboard:upcoming')).toContainText('Netflix');
+  },
+  'i reload the dashboard': async ({ page }) => {
+    await page.reload();
+    await page.waitForLoadState('networkidle');
   },
 
   'the limit has 400,00 left': async ({ getByE2e }) => {
@@ -286,7 +364,7 @@ test.describe('dashboard values after changes', () => {
     );
   });
 
-  test('a new recurring expense is added to the month total', async ({
+  test('a recurring expense due today is charged into the month total', async ({
     e2e,
   }) => {
     await interpreter(commands, e2e)(
@@ -304,19 +382,47 @@ test.describe('dashboard values after changes', () => {
     );
   });
 
-  test('editing a recurring cost changes the month total', async ({ e2e }) => {
+  test('a recurring expense starting later is only announced', async ({
+    e2e,
+  }) => {
     await interpreter(commands, e2e)(
-      ['i open a dashboard with a recurring expense'],
-      ['i change the recurring expense cost to 45'],
-      ['the month shows 145,00 over 3 charges'],
+      ['i open a dashboard with expenses of two months'],
+      ['i add a recurring expense of 50 starting in a week'],
+      ['the month still shows 100,00 over 2 expenses'],
+      ['the upcoming payment of Siłownia is announced'],
     );
   });
 
-  test('deleting a recurring expense takes its charge out', async ({ e2e }) => {
+  test('editing an upcoming payment changes the rule, not what was charged', async ({
+    e2e,
+  }) => {
     await interpreter(commands, e2e)(
       ['i open a dashboard with a recurring expense'],
-      ['i delete the recurring expense'],
-      ['the month shows 100,00 over 2 expenses'],
+      ['i change the upcoming payment cost to 45'],
+      ['the month shows 130,00 over 3 charges'],
+      ['the upcoming payment shows 45,00'],
+    );
+  });
+
+  test('deleting the rule keeps what was already charged', async ({ e2e }) => {
+    await interpreter(commands, e2e)(
+      ['i open a dashboard with a recurring expense'],
+      ['i delete the recurring rule from its upcoming payment'],
+      ['the month shows 130,00 over 3 charges'],
+      ['no payment is announced'],
+    );
+  });
+
+  test('a deleted charged expense leaves the rule and does not come back', async ({
+    e2e,
+  }) => {
+    await interpreter(commands, e2e)(
+      ['i open a dashboard with a recurring expense'],
+      ['i delete the charged recurring expense'],
+      ['the month still shows 100,00 over 2 expenses'],
+      ['the next payment of the rule is still announced'],
+      ['i reload the dashboard'],
+      ['the month still shows 100,00 over 2 expenses'],
     );
   });
 
@@ -345,12 +451,10 @@ test.describe('dashboard values after changes', () => {
     );
   });
 
-  test('a recurring change reloads the dashboard once more', async ({
-    e2e,
-  }) => {
+  test('a rule change reloads the dashboard once more', async ({ e2e }) => {
     await interpreter(commands, e2e)(
       ['i open a dashboard with a recurring expense'],
-      ['i change the recurring expense cost to 45'],
+      ['i change the upcoming payment cost to 45'],
       ['the dashboard loaded everything twice'],
     );
   });

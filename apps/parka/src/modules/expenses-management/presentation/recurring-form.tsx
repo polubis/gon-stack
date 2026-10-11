@@ -8,17 +8,28 @@ import { Card } from '@/shared/ui/layout';
 import { NumberInput } from '@/shared/ui/number-input';
 import { today } from '@/shared/date/date';
 import { newRecurringId } from '../domain/ids';
-import type { CategoryId } from '../domain/models';
+import type { CategoryId, RecurringInterval } from '../domain/models';
+
+const INTERVALS: { value: RecurringInterval; label: string }[] = [
+  { value: 'weekly', label: 'Co tydzień' },
+  { value: 'monthly', label: 'Co miesiąc' },
+  { value: 'yearly', label: 'Co rok' },
+];
 import { useContext } from './context';
 
-/** Recurring expense: charged every month, counted into expenses and limits. */
+/**
+ * Recurring expense: a rule, not an expense. A payment becomes an expense
+ * only once its day has passed; until then it is just announced.
+ */
 export const RecurringForm = () => {
   const ctx = useContext();
   const categories = ctx.useCategories();
   const saving = ctx.useSaving();
   const [name, setName] = useState('');
   const [cost, setCost] = useState(0);
-  const [date, setDate] = useState(today());
+  const [frequency, setFrequency] = useState<RecurringInterval>('monthly');
+  const [startDate, setStartDate] = useState(today());
+  const [endDate, setEndDate] = useState('');
   const [method, setMethod] = useState('');
   const [categoryId, setCategoryId] = useState<CategoryId | null>(null);
 
@@ -33,11 +44,12 @@ export const RecurringForm = () => {
       id: newRecurringId(),
       name: name.trim(),
       cost,
-      nextPaymentDate: date,
+      interval: frequency,
+      startDate,
+      endDate: endDate || null,
       active: true,
       paymentMethod: method.trim(),
       categoryId: selected,
-      history: [],
     });
   };
 
@@ -64,7 +76,8 @@ export const RecurringForm = () => {
 
         <Card className="max-w-xl space-y-3">
           <p className="text-sm text-ink-soft">
-            Naliczany co miesiąc do wydatków i limitów.
+            Wydatek powstanie w dniu płatności. Do tego czasu będzie tylko
+            nadchodzący i nie wliczy się do podsumowania ani limitów.
           </p>
           <Field label="Nazwa">
             <ClearableInput
@@ -75,7 +88,7 @@ export const RecurringForm = () => {
               onChange={(e) => setName(e.target.value)}
             />
           </Field>
-          <Field label="Koszt miesięczny">
+          <Field label="Koszt płatności">
             <NumberInput
               required
               value={cost}
@@ -83,16 +96,43 @@ export const RecurringForm = () => {
               onValueChange={setCost}
             />
           </Field>
+          <Field label="Częstotliwość">
+            <Select
+              value={frequency}
+              data-e2e="expenses-management:recurring-interval"
+              onChange={(e) =>
+                setFrequency(e.target.value as RecurringInterval)
+              }
+            >
+              {INTERVALS.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </Select>
+          </Field>
           <Field
             label="Pierwsza płatność"
-            hint="Co miesiąc w tym dniu naliczamy koszt do wydatków i limitów."
+            hint="Płatność w przeszłości od razu nalicza minione terminy."
           >
             <Input
               type="date"
               required
-              value={date}
+              value={startDate}
               data-e2e="expenses-management:recurring-date"
-              onChange={(e) => setDate(e.target.value)}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+          </Field>
+          <Field
+            label="Koniec (opcjonalnie)"
+            hint="Po tym dniu płatność się nie powtarza. Puste = bez końca."
+          >
+            <Input
+              type="date"
+              value={endDate}
+              min={startDate}
+              data-e2e="expenses-management:recurring-end"
+              onChange={(e) => setEndDate(e.target.value)}
             />
           </Field>
           <Field label="Kategoria">

@@ -49,6 +49,8 @@ export const DASHBOARD_E2E_IDS = [
   'dashboard:recurring-form-name',
   'dashboard:recurring-form-cost',
   'dashboard:recurring-form-date',
+  'dashboard:recurring-form-interval',
+  'dashboard:recurring-form-end',
   'dashboard:recurring-form-category',
   'dashboard:recurring-form-method',
   'dashboard:recurring-form-save',
@@ -59,10 +61,17 @@ export const DASHBOARD_E2E_IDS = [
   'dashboard:detail-device-id',
   'dashboard:edit',
   'dashboard:delete',
+  'dashboard:delete-dialog',
+  'dashboard:delete-scope',
+  'dashboard:delete-confirm',
+  'dashboard:scope-note',
+  'dashboard:upcoming',
+  'dashboard:upcoming-badge',
 ] as const;
 
 export type DashboardDynamicE2eId =
   | `dashboard:expense:${string | number}`
+  | `dashboard:upcoming:${string}`
   | `dashboard:limit-edit:${string | number}`
   | `dashboard:filter:${string | number}`
   | `dashboard:period-preset:${string}`

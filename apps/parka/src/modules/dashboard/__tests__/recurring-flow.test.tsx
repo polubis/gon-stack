@@ -5,19 +5,21 @@ import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { periodContaining } from '@/shared/period/period';
 import { Provider, useContext } from '../presentation/context';
-import { totalProgress, withRecurring } from '../presentation/selectors';
-import type { CategoryId, Limit, Month, Recurring } from '../domain/models';
+import { totalProgress, upcomingCharges } from '../presentation/selectors';
+import type { Expense, Limit, Recurring } from '../domain/models';
 import { readHandlers } from './dashboard-backend';
 
 const NETFLIX = {
   id: 'r-1',
   name: 'Netflix',
   cost: 30,
-  nextPaymentDate: '2025-05-15',
+  interval: 'monthly',
+  startDate: '2025-05-15',
+  endDate: null,
+  lastMaterializedDate: null,
   active: true,
   paymentMethod: 'card',
   categoryId: 'c-1',
-  history: [],
 };
 
 const server = setupServer();
@@ -51,7 +53,7 @@ const setup = async () => {
   return view;
 };
 
-const asRecurring = (over: Partial<typeof NETFLIX> = {}) =>
+const asRecurring = (over: Record<string, unknown> = {}) =>
   ({ ...NETFLIX, ...over }) as unknown as Recurring;
 
 const TEST_PERIOD = periodContaining('month', '2025-06-01');
@@ -126,8 +128,7 @@ describe('recurring expenses', () => {
   });
 });
 
-describe('recurring expenses in the totals', () => {
-  const month = (value: string) => value as Month;
+describe('upcoming recurring payments', () => {
   const total = {
     id: 'l-0',
     scope: 'total',
@@ -136,35 +137,46 @@ describe('recurring expenses in the totals', () => {
     delivery: 'push',
   } as unknown as Limit;
 
-  it('counts the charge in every month from the first payment on', () => {
-    const list = [asRecurring()];
-
-    expect(withRecurring([], list, month('2025-04'))).toHaveLength(0);
-    expect(withRecurring([], list, month('2025-05'))).toHaveLength(1);
-    expect(withRecurring([], list, month('2025-09'))).toHaveLength(1);
-  });
-
-  it('raises the limit usage by the recurring cost', () => {
-    const expenses = withRecurring([], [asRecurring()], month('2025-06'));
+  it('announces the next payment of each rule, nearest first', () => {
+    const list = [
+      asRecurring(),
+      asRecurring({ id: 'r-2', name: 'Prąd', startDate: '2025-06-25' }),
+    ];
 
     expect(
-      totalProgress([total], expenses, periodContaining('month', '2025-06-01')),
-    ).toMatchObject({
+      upcomingCharges(list, '2025-06-20').map((u) => [
+        u.recurring.name,
+        u.date,
+      ]),
+    ).toEqual([
+      ['Prąd', '2025-06-25'],
+      ['Netflix', '2025-07-15'],
+    ]);
+  });
+
+  it('announces nothing for a paused or finished rule', () => {
+    const list = [
+      asRecurring({ active: false }),
+      asRecurring({ id: 'r-2', endDate: '2025-06-01' }),
+    ];
+
+    expect(upcomingCharges(list, '2025-06-20')).toEqual([]);
+  });
+
+  it('leaves the limit usage alone: only real expenses count', () => {
+    const charged = {
+      id: 'r-1:2025-05-15',
+      amount: 30,
+      date: '2025-06-15T12:00:00.000Z',
+      categoryId: 'c-1',
+      items: [],
+    } as unknown as Expense;
+    const period = periodContaining('month', '2025-06-01');
+
+    expect(totalProgress([total], [], period)).toMatchObject({ spent: 0 });
+    expect(totalProgress([total], [charged], period)).toMatchObject({
       spent: 30,
       pct: 30,
     });
-  });
-
-  it('ignores paused items', () => {
-    const list = [asRecurring({ active: false })];
-
-    expect(withRecurring([], list, month('2025-06'))).toHaveLength(0);
-  });
-
-  it('files the charge under the item category', () => {
-    const [charge] = withRecurring([], [asRecurring()], month('2025-06'));
-
-    expect(charge?.categoryId).toBe('c-1' as CategoryId);
-    expect(charge?.source).toBe('recurring');
   });
 });

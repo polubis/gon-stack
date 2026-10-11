@@ -1,11 +1,15 @@
 import z from 'zod';
+import { isTimeZone } from '@/shared/date/date';
 import { recurring, errorOut, notFoundOut } from './general';
+
+/** Zone whose today decides which recurring charges have come due. */
+const tz = z.string().refine(isTimeZone, 'Unknown time zone').optional();
 
 const writeErrors = z.union([errorOut(), notFoundOut()]);
 
 export const listRecurringSchema = () =>
   z.object({
-    in: z.object({}),
+    in: z.object({ tz }),
     out: z.union([
       z.object({ code: z.literal(200), data: z.array(recurring()) }),
       errorOut(),

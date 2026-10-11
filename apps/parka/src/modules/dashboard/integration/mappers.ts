@@ -70,6 +70,8 @@ export const toExpense = (dto: ExpenseDto): Expense => ({
   isBill: dto.isBill,
   source: dto.source,
   device: dto.device,
+  recurringId: (dto.recurringId ?? null) as RecurringId | null,
+  occurrenceDate: dto.occurrenceDate ?? null,
   items: dto.items.map((item) => ({
     id: item.id as ReceiptItemId,
     name: item.name,
@@ -104,9 +106,11 @@ export const toRecurring = (dto: RecurringDto): Recurring => ({
   id: dto.id as RecurringId,
   name: dto.name,
   cost: dto.cost,
-  nextPaymentDate: dto.nextPaymentDate,
+  interval: dto.interval,
+  startDate: dto.startDate,
+  endDate: dto.endDate,
+  lastMaterializedDate: dto.lastMaterializedDate,
   active: dto.active,
   paymentMethod: dto.paymentMethod,
   categoryId: dto.categoryId as CategoryId,
-  history: dto.history.map((h) => ({ date: h.date, amount: h.amount })),
 });

@@ -1,4 +1,4 @@
-import { Repeat } from 'lucide-react';
+import { CalendarClock, Repeat } from 'lucide-react';
 
 /** The one mark of a recurring expense: list rows and popups alike. */
 export const RecurringBadge = () => (
@@ -13,5 +13,16 @@ export const RecurringMark = () => (
   <span className="absolute -right-0.5 -bottom-0.5 grid h-5 w-5 place-items-center rounded-full border border-line-strong bg-card text-brand-dark">
     <Repeat className="h-3 w-3" aria-hidden="true" />
     <span className="sr-only">Cykliczny</span>
+  </span>
+);
+
+/** Not charged yet: a projection of the rule, outside every sum. */
+export const UpcomingBadge = () => (
+  <span
+    className="inline-flex items-center gap-1 rounded-full border border-line-strong px-2 py-0.5 text-xs font-medium text-ink-soft"
+    data-e2e="dashboard:upcoming-badge"
+  >
+    <CalendarClock className="h-3 w-3" aria-hidden="true" />
+    Nadchodzący
   </span>
 );

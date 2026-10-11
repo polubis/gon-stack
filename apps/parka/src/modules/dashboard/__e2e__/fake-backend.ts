@@ -1,8 +1,5 @@
 import type { Page, Route } from '@playwright/test';
-import {
-  chargesInPeriods,
-  summarizeDashboard,
-} from '@/server/domain/dashboard';
+import { summarizeDashboard } from '@/server/domain/dashboard';
 import {
   clampPeriod,
   resolvePeriod,
@@ -10,13 +7,28 @@ import {
   todayDay,
   type PeriodKind,
 } from '@/shared/period/period';
-import type { RecurringSource } from '@/shared/recurring/occurrences';
+import {
+  dueOccurrences,
+  type RecurringRule,
+} from '@/shared/recurring/occurrences';
 
 type Row = { id: string };
-type Expense = Row & { date: string; amount: number; categoryId: string };
+type Expense = Row & {
+  merchant?: string;
+  paymentMethod?: string;
+  isBill?: boolean;
+  source?: string;
+  device?: null;
+  items?: never[];
+  date: string;
+  amount: number;
+  categoryId: string;
+  recurringId?: string | null;
+  occurrenceDate?: string | null;
+};
 type Category = Row & { name: string; icon: string; color: string };
 type Limit = Row & { scope: 'total' | 'category'; amount: number };
-type Recurring = RecurringSource;
+type Recurring = RecurringRule & { paymentMethod: string };
 
 export type Seed = {
   categories: Category[];
@@ -55,8 +67,9 @@ const without = <T extends Row>(list: T[], id: string | undefined): T[] =>
 /**
  * In-memory stand-in for the API behind the dashboard. Writes change the
  * state and the dashboard summary is computed from that state with the real
- * server-side domain code (recurring charges included), so a test proves the
- * numbers the UI shows after a change, not what a stub was told to say.
+ * server-side domain code, so a test proves the numbers the UI shows after a
+ * change, not what a stub was told to say. Reads materialize due recurring
+ * charges the way the real server does (same pure `dueOccurrences`).
  */
 export const installBackend = async (
   page: Page,
@@ -64,6 +77,36 @@ export const installBackend = async (
 ): Promise<Backend> => {
   const state: Seed = structuredClone(seed);
   const requests: { method: string; path: string }[] = [];
+
+  /** Turns due occurrences into expenses, once each, like the server does. */
+  const materialize = (timeZone?: string) => {
+    const today = todayDay(timeZone);
+    for (const rule of state.recurring) {
+      const due = dueOccurrences(rule, today);
+      for (const day of due) {
+        const exists = state.expenses.some(
+          (e) => e.recurringId === rule.id && e.occurrenceDate === day,
+        );
+        if (!exists)
+          state.expenses.push({
+            id: `${rule.id}:${day}`,
+            merchant: rule.name,
+            date: `${day}T12:00:00.000Z`,
+            amount: rule.cost,
+            paymentMethod: rule.paymentMethod,
+            isBill: true,
+            source: 'manual',
+            device: null,
+            items: [],
+            categoryId: rule.categoryId,
+            recurringId: rule.id,
+            occurrenceDate: day,
+          });
+      }
+      const newest = due.at(-1);
+      if (newest) rule.lastMaterializedDate = newest;
+    }
+  };
 
   const summary = (
     kind: PeriodKind,
@@ -74,18 +117,10 @@ export const installBackend = async (
     const today = todayDay(timeZone);
     const period = clampPeriod(resolvePeriod(kind, from, to), today);
     const previous = shiftPeriod(period, -1);
-    const charges = chargesInPeriods(state.recurring, [period, previous]);
     const total = state.limits.find((l) => l.scope === 'total');
     return {
       ...summarizeDashboard({
-        expenses: [
-          ...state.expenses,
-          ...charges.map((c) => ({
-            date: c.date,
-            amount: c.amount,
-            categoryId: c.categoryId,
-          })),
-        ],
+        expenses: state.expenses,
         categories: state.categories,
         period,
         previous,
@@ -105,6 +140,7 @@ export const installBackend = async (
     requests.push({ method, path: url.pathname });
 
     if (collection === 'dashboard') {
+      materialize(url.searchParams.get('tz') ?? undefined);
       return json(route, {
         code: 200,
         data: summary(
@@ -125,6 +161,8 @@ export const installBackend = async (
     }
 
     if (method === 'GET') {
+      if (collection === 'expenses' || collection === 'recurring')
+        materialize(url.searchParams.get('tz') ?? undefined);
       const lists = {
         expenses: state.expenses,
         categories: state.categories,
@@ -139,8 +177,12 @@ export const installBackend = async (
       if (collection === 'expenses')
         state.expenses = without(state.expenses, id);
       if (collection === 'limits') state.limits = without(state.limits, id);
-      if (collection === 'recurring')
+      if (collection === 'recurring') {
         state.recurring = without(state.recurring, id);
+        state.expenses = state.expenses.map((e) =>
+          e.recurringId === id ? { ...e, recurringId: null } : e,
+        );
+      }
       return json(route, { code: 200, ok: true });
     }
 
@@ -156,8 +198,13 @@ export const installBackend = async (
         : replace(state.limits, body);
     if (collection === 'recurring')
       state.recurring = created
-        ? [...state.recurring, body]
-        : replace(state.recurring, body);
+        ? [...state.recurring, { ...body, lastMaterializedDate: null }]
+        : state.recurring.map((r) =>
+            // Like the server: the mark is never taken from the request.
+            r.id === body.id
+              ? { ...body, lastMaterializedDate: r.lastMaterializedDate }
+              : r,
+          );
     return json(route, { code: created ? 201 : 200, data: body });
   });
 

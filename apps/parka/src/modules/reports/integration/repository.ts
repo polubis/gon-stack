@@ -2,6 +2,7 @@ import type { z } from 'zod';
 import type { listExpensesSchema } from '@schemas/expenses';
 import type { listCategoriesSchema } from '@schemas/categories';
 import type { listRecurringSchema } from '@schemas/recurring';
+import { browserTimeZone } from '@/shared/date/date';
 import { API_ROUTER } from '@/shared/router/routes';
 import type { Category, Expense, Recurring } from '../domain/models';
 import { toCategory, toExpense, toRecurring } from './mappers';
@@ -16,7 +17,7 @@ type ListRecurringOut = z.infer<ReturnType<typeof listRecurringSchema>>['out'];
 export const fetchExpenses = async (
   signal: AbortSignal,
 ): Promise<Expense[]> => {
-  const response = await fetch(API_ROUTER.expenses(), {
+  const response = await fetch(API_ROUTER.expenses({ tz: browserTimeZone() }), {
     headers: { Accept: 'application/json' },
     signal,
   });
@@ -40,10 +41,13 @@ export const fetchCategories = async (
 export const fetchRecurring = async (
   signal: AbortSignal,
 ): Promise<Recurring[]> => {
-  const response = await fetch(API_ROUTER.recurring(), {
-    headers: { Accept: 'application/json' },
-    signal,
-  });
+  const response = await fetch(
+    API_ROUTER.recurring({ tz: browserTimeZone() }),
+    {
+      headers: { Accept: 'application/json' },
+      signal,
+    },
+  );
   const json = (await response.json()) as ListRecurringOut;
   if (json.code !== 200) throw new Error(json.message);
   return json.data.map(toRecurring);

@@ -31,6 +31,8 @@ const expense = (id: string, date: string, amount: number): Expense => ({
   isBill: false,
   source: 'manual',
   device: null,
+  recurringId: null,
+  occurrenceDate: null,
   items: [],
 });
 

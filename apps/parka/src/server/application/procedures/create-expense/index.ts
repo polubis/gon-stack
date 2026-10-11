@@ -60,6 +60,8 @@ export const createExpense = privateProcedure({
         isBill: data.is_bill,
         source: data.source as 'receipt' | 'manual',
         device: toDevice(data),
+        recurringId: data.recurring_id,
+        occurrenceDate: data.occurrence_date,
         items: input.items,
       },
     };

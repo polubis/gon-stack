@@ -86,7 +86,7 @@ export const fetchSummary = async (
 export const fetchExpenses = async (
   signal: AbortSignal,
 ): Promise<Expense[]> => {
-  const response = await fetch(API_ROUTER.expenses(), {
+  const response = await fetch(API_ROUTER.expenses({ tz: browserTimeZone() }), {
     headers: { Accept: 'application/json' },
     signal,
   });
@@ -167,10 +167,13 @@ export const deleteLimit = async (id: LimitId): Promise<void> => {
 export const fetchRecurring = async (
   signal: AbortSignal,
 ): Promise<Recurring[]> => {
-  const response = await fetch(API_ROUTER.recurring(), {
-    headers: { Accept: 'application/json' },
-    signal,
-  });
+  const response = await fetch(
+    API_ROUTER.recurring({ tz: browserTimeZone() }),
+    {
+      headers: { Accept: 'application/json' },
+      signal,
+    },
+  );
   const json = (await response.json()) as ListRecurringOut;
   if (json.code !== 200) throw new Error(json.message);
   return json.data.map(toRecurring);
@@ -197,7 +200,11 @@ export const deleteRecurring = async (id: RecurringId): Promise<void> => {
   if (json.code !== 200) throw new Error(json.message);
 };
 
-/** Single entry point for reading: every read of the dashboard in parallel. */
+/**
+ * Single entry point for reading: every read of the dashboard in parallel.
+ * Each read first turns due recurring charges into expenses on the server;
+ * that is idempotent, so parallel reads never double a charge.
+ */
 export const fetchDashboard = async (
   period: Period,
   signal: AbortSignal,

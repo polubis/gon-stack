@@ -5,21 +5,30 @@ import { Trash2 } from 'lucide-react';
 import { Button, Field, Input, Select } from '@/shared/ui/controls';
 import { NumberInput } from '@/shared/ui/number-input';
 import type { Period } from '@/shared/period/period';
-import { localDay } from '@/shared/date/date';
-import type { CategoryId, Recurring } from '../domain/models';
+import type {
+  CategoryId,
+  Recurring,
+  RecurringInterval,
+} from '../domain/models';
 import { useContext } from './context';
 import { DialogActions } from './detail-dialog';
+import { intervalLabel } from './selectors';
 
-/** Edits `recurring` (history kept); it can also be removed. */
+const INTERVALS: RecurringInterval[] = ['weekly', 'monthly', 'yearly'];
+
+/** Edits the rule `recurring` (expenses it already made stay); it can also be removed. */
 export const RecurringForm = ({
   recurring,
   period,
   onDone,
+  onRemove,
   children,
 }: {
   recurring: Recurring;
   period: Period;
   onDone: () => void;
+  /** Asks to remove the rule; the caller confirms first. */
+  onRemove: () => void;
   /** Rendered between the fields and the buttons. */
   children?: ReactNode;
 }) => {
@@ -27,7 +36,9 @@ export const RecurringForm = ({
   const categories = ctx.useCategories();
   const [name, setName] = useState(recurring.name);
   const [cost, setCost] = useState(recurring.cost);
-  const [date, setDate] = useState(localDay(recurring.nextPaymentDate));
+  const [frequency, setFrequency] = useState(recurring.interval);
+  const [startDate, setStartDate] = useState(recurring.startDate);
+  const [endDate, setEndDate] = useState(recurring.endDate ?? '');
   const [method, setMethod] = useState(recurring.paymentMethod);
   const [categoryId, setCategoryId] = useState<CategoryId | null>(
     recurring.categoryId,
@@ -43,16 +54,13 @@ export const RecurringForm = ({
     const values = {
       name: name.trim(),
       cost,
-      nextPaymentDate: date,
+      interval: frequency,
+      startDate,
+      endDate: endDate || null,
       paymentMethod: method.trim(),
       categoryId: selected,
     };
     ctx.updateRecurring({ ...recurring, ...values }, period);
-    onDone();
-  };
-
-  const remove = () => {
-    ctx.removeRecurring(recurring.id, period);
     onDone();
   };
 
@@ -71,7 +79,7 @@ export const RecurringForm = ({
           onChange={(e) => setName(e.target.value)}
         />
       </Field>
-      <Field label="Koszt miesięczny">
+      <Field label="Koszt płatności">
         <NumberInput
           required
           value={cost}
@@ -79,16 +87,41 @@ export const RecurringForm = ({
           onValueChange={setCost}
         />
       </Field>
+      <Field label="Częstotliwość">
+        <Select
+          value={frequency}
+          data-e2e="dashboard:recurring-form-interval"
+          onChange={(e) => setFrequency(e.target.value as RecurringInterval)}
+        >
+          {INTERVALS.map((value) => (
+            <option key={value} value={value}>
+              {intervalLabel(value)}
+            </option>
+          ))}
+        </Select>
+      </Field>
       <Field
         label="Pierwsza płatność"
-        hint="Co miesiąc w tym dniu naliczamy koszt do wydatków i limitów."
+        hint="Wydatek powstaje dopiero, gdy minie dzień płatności. Wcześniej jest tylko nadchodzący i nie liczy się do podsumowania."
       >
         <Input
           type="date"
           required
-          value={date}
+          value={startDate}
           data-e2e="dashboard:recurring-form-date"
-          onChange={(e) => setDate(e.target.value)}
+          onChange={(e) => setStartDate(e.target.value)}
+        />
+      </Field>
+      <Field
+        label="Koniec (opcjonalnie)"
+        hint="Po tym dniu płatność się nie powtarza. Puste = bez końca."
+      >
+        <Input
+          type="date"
+          value={endDate}
+          min={startDate}
+          data-e2e="dashboard:recurring-form-end"
+          onChange={(e) => setEndDate(e.target.value)}
         />
       </Field>
       <Field label="Kategoria">
@@ -120,7 +153,7 @@ export const RecurringForm = ({
             variant="danger"
             className="w-auto"
             data-e2e="dashboard:recurring-delete"
-            onClick={remove}
+            onClick={onRemove}
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" /> Usuń
           </Button>

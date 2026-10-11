@@ -23,6 +23,29 @@ const del = (page: Page, path: string) =>
     headers: { 'Content-Type': 'application/json' },
   });
 
+/** Zone whose "today" the server charges recurring payments by. */
+const ZONE = 'UTC';
+
+/** `YYYY-MM-DD` of the UTC day `offset` days from today. */
+const dayFromToday = (offset: number): string => {
+  const day = new Date();
+  day.setUTCDate(day.getUTCDate() + offset);
+  return day.toISOString().slice(0, 10);
+};
+
+type Charged = {
+  recurringId: string | null;
+  occurrenceDate: string | null;
+  merchant: string;
+  amount: number;
+};
+
+/** Expenses a rule created, newest occurrence first. */
+const chargedBy = (list: Charged[], recurringId: string): Charged[] =>
+  list
+    .filter((e) => e.recurringId === recurringId)
+    .sort((a, b) => (a.occurrenceDate! < b.occurrenceDate! ? 1 : -1));
+
 const categoryIdByPage = new WeakMap<Page, string>();
 const settingsEmailByPage = new WeakMap<Page, string>();
 
@@ -155,45 +178,133 @@ const commands = {
     expect(res.status()).toBe(404);
   },
 
-  'i create a recurring expense with history': async ({ page }) => {
+  'i create a weekly recurring rule that started 20 days ago': async ({
+    page,
+  }) => {
     const categoryId = categoryIdByPage.get(page)!;
     const res = await page.request.post(API_ROUTER.recurring(), {
       data: {
         id: 'e2e-rec-1',
         name: 'Netflix',
         cost: 45,
-        nextPaymentDate: '2025-05-01',
+        interval: 'weekly',
+        startDate: dayFromToday(-20),
+        endDate: null,
         active: true,
         paymentMethod: 'card',
         categoryId,
-        history: [{ date: '2025-04-01', amount: 45 }],
       },
     });
     expect(res.status()).toBe(201);
-    expect((await res.json()).data.history).toHaveLength(1);
+    expect((await res.json()).data.lastMaterializedDate).toBeNull();
   },
-  'i deactivate the recurring expense and clear history': async ({ page }) => {
+  'a new rule has charged nothing until it is read': async ({ page }) => {
+    // The create call itself must not charge anything.
+    const body = await (await page.request.get(API_ROUTER.expenses())).json();
+    expect(chargedBy(body.data, 'e2e-rec-1')).toHaveLength(0);
+  },
+  'the first read catches up every payment that came due': async ({ page }) => {
+    const body = await (
+      await page.request.get(API_ROUTER.expenses({ tz: ZONE }))
+    ).json();
+    expect(
+      chargedBy(body.data, 'e2e-rec-1').map((e) => e.occurrenceDate),
+    ).toEqual([dayFromToday(-6), dayFromToday(-13), dayFromToday(-20)]);
+    expect(chargedBy(body.data, 'e2e-rec-1')[0]).toMatchObject({
+      merchant: 'Netflix',
+      amount: 45,
+      recurringId: 'e2e-rec-1',
+    });
+  },
+  'reading again charges nothing twice': async ({ page }) => {
+    await page.request.get(API_ROUTER.recurring({ tz: ZONE }));
+    const body = await (
+      await page.request.get(API_ROUTER.expenses({ tz: ZONE }))
+    ).json();
+    expect(chargedBy(body.data, 'e2e-rec-1')).toHaveLength(3);
+  },
+  'the dashboard counts the charged payments and not the upcoming one': async ({
+    page,
+  }) => {
+    const body = await (
+      await page.request.get(
+        API_ROUTER.dashboard({
+          kind: 'custom',
+          from: dayFromToday(-30),
+          to: dayFromToday(0),
+          tz: ZONE,
+        }),
+      )
+    ).json();
+    expect(body.data.total).toBe(135);
+    expect(body.data.transactions).toBe(3);
+  },
+  'i delete one charged payment': async ({ page }) => {
+    const res = await del(
+      page,
+      API_ROUTER.expenseById(`e2e-rec-1:${dayFromToday(-13)}`),
+    );
+    expect(res.ok()).toBe(true);
+  },
+  'the deleted payment does not come back and the rule stays': async ({
+    page,
+  }) => {
+    const expenses = await (
+      await page.request.get(API_ROUTER.expenses({ tz: ZONE }))
+    ).json();
+    expect(
+      chargedBy(expenses.data, 'e2e-rec-1').map((e) => e.occurrenceDate),
+    ).toEqual([dayFromToday(-6), dayFromToday(-20)]);
+    const rules = await (
+      await page.request.get(API_ROUTER.recurring({ tz: ZONE }))
+    ).json();
+    expect(rules.data).toHaveLength(1);
+    expect(rules.data[0].lastMaterializedDate).toBe(dayFromToday(-6));
+  },
+  'i edit the rule and cannot move its materialization mark': async ({
+    page,
+  }) => {
     const categoryId = categoryIdByPage.get(page)!;
     const res = await page.request.put(API_ROUTER.recurringById('e2e-rec-1'), {
       data: {
         id: 'e2e-rec-1',
         name: 'Netflix',
-        cost: 45,
-        nextPaymentDate: '2025-06-01',
-        active: false,
+        cost: 50,
+        interval: 'weekly',
+        startDate: dayFromToday(-20),
+        endDate: null,
+        lastMaterializedDate: '2000-01-01',
+        active: true,
         paymentMethod: 'card',
         categoryId,
-        history: [],
       },
     });
     expect(res.ok()).toBe(true);
     const body = await res.json();
-    expect(body.data.active).toBe(false);
-    expect(body.data.history).toHaveLength(0);
+    expect(body.data.cost).toBe(50);
+    expect(body.data.lastMaterializedDate).toBe(dayFromToday(-6));
   },
-  'i delete the recurring expense': async ({ page }) => {
+  'the edit left the charged payments as they were': async ({ page }) => {
+    const body = await (
+      await page.request.get(API_ROUTER.expenses({ tz: ZONE }))
+    ).json();
+    expect(chargedBy(body.data, 'e2e-rec-1').map((e) => e.amount)).toEqual([
+      45, 45,
+    ]);
+  },
+  'i delete the rule': async ({ page }) => {
     const res = await del(page, API_ROUTER.recurringById('e2e-rec-1'));
     expect(res.ok()).toBe(true);
+  },
+  'the charged payments stay as ordinary expenses': async ({ page }) => {
+    const body = await (
+      await page.request.get(API_ROUTER.expenses({ tz: ZONE }))
+    ).json();
+    const kept = (
+      body.data as { merchant: string; recurringId: string | null }[]
+    ).filter((e) => e.merchant === 'Netflix');
+    expect(kept).toHaveLength(2);
+    expect(kept.every((e) => e.recurringId === null)).toBe(true);
   },
 
   'i create a notification': async ({ page }) => {
@@ -256,9 +367,17 @@ test('REST endpoints CRUD each finance entity through Postgres', async ({
     ['i raise the limit amount'],
     ['i delete the limit'],
     ['deleting the limit again is not found'],
-    ['i create a recurring expense with history'],
-    ['i deactivate the recurring expense and clear history'],
-    ['i delete the recurring expense'],
+    ['i create a weekly recurring rule that started 20 days ago'],
+    ['a new rule has charged nothing until it is read'],
+    ['the first read catches up every payment that came due'],
+    ['reading again charges nothing twice'],
+    ['the dashboard counts the charged payments and not the upcoming one'],
+    ['i delete one charged payment'],
+    ['the deleted payment does not come back and the rule stays'],
+    ['i edit the rule and cannot move its materialization mark'],
+    ['the edit left the charged payments as they were'],
+    ['i delete the rule'],
+    ['the charged payments stay as ordinary expenses'],
     ['i create a notification'],
     ['i dismiss the notification'],
     ['the notification is gone from the list'],

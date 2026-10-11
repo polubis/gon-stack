@@ -15,7 +15,7 @@ export const createRecurring = (store: Store, { ofType, emit }: Bus) =>
       store.$saving.set(true);
 
       return from(postRecurring(recurring)).pipe(
-        tap(() => store.$saved.set(monthOf(recurring.nextPaymentDate))),
+        tap(() => store.$saved.set(monthOf(recurring.startDate))),
         catchError((error: unknown) => {
           notify(store, {
             ...NOTICES.recurringFailed,

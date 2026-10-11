@@ -3,16 +3,11 @@ import { InternalServer, NotFound } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 
+/** Removes the rule; its expenses stay as ordinary ones (FK sets null). */
 export const deleteRecurring = privateProcedure({
   schema: withZodSchema({ schema: deleteRecurringSchema }),
 })({
   handler: async (input, { db }) => {
-    const { error: paymentsError } = await db
-      .from('recurring_payments')
-      .delete()
-      .eq('recurring_id', input.id);
-    if (paymentsError) throw new InternalServer(paymentsError);
-
     const { data, error } = await db
       .from('recurring_expenses')
       .delete()

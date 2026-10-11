@@ -11,15 +11,9 @@ import {
   useModalStack,
 } from '@/shared/router/modal-stack';
 import { readQueryParam, writeQueryParams } from '@/shared/router/navigation';
-import {
-  clampPeriod,
-  periodMonths,
-  todayDay,
-  type Period,
-} from '@/shared/period/period';
+import { clampPeriod, todayDay, type Period } from '@/shared/period/period';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { ERROR_CODES } from '../configuration/constraints';
-import type { Month } from '../domain/models';
 import { periodFromQuery, periodToQuery } from '../domain/period';
 import { CategoriesCard } from './categories-card';
 import { Provider, useContext } from './context';
@@ -30,7 +24,7 @@ import { MonthExpenses } from './month-expenses';
 import { Header } from './header';
 import { TotalHero } from './total-hero';
 import { RecurringDetail } from './recurring-detail';
-import { recurringChargeId, withRecurringIn } from './selectors';
+import { upcomingCharges } from './selectors';
 import { DashboardSkeleton } from './skeleton';
 import { SpendingChart } from './spending-chart';
 
@@ -57,7 +51,7 @@ const DashboardView = () => {
   const error = ctx.useError();
   const summary = ctx.useData();
   const recurring = ctx.useRecurring();
-  const expenses = withRecurringIn(ctx.useExpenses(), recurring, period);
+  const expenses = ctx.useExpenses();
   const notice = ctx.useNotice();
 
   useEffect(() => {
@@ -74,23 +68,21 @@ const DashboardView = () => {
     setPeriod(target);
   };
 
+  const upcoming = upcomingCharges(recurring, today);
+
   // Detail popups stack in the order they were opened (URL order).
   const details = modals.flatMap((modal) => {
     const id = expenseOfModal(modal);
     if (id === null) return [];
     const expense = expenses.find((e) => e.id === id);
-    const charge = recurring.find((r) =>
-      periodMonths(period).some(
-        (month) => recurringChargeId(r.id, month as Month) === id,
-      ),
-    );
-    return [{ modal, expense, charge }];
+    const projected = upcoming.find((u) => u.id === id);
+    return [{ modal, expense, projected }];
   });
 
   // A popup whose expense is gone (stale link) must not linger in the URL.
   const dangling =
     initialized && summary !== null
-      ? details.find((d) => !d.expense && !d.charge)?.modal
+      ? details.find((d) => !d.expense && !d.projected)?.modal
       : undefined;
   useEffect(() => {
     if (dangling) closeModal(dangling);
@@ -118,12 +110,12 @@ const DashboardView = () => {
 
   const overlays = (
     <>
-      {details.map(({ modal, expense, charge }) =>
-        charge ? (
+      {details.map(({ modal, expense, projected }) =>
+        projected ? (
           <RecurringDetail
             key={modal}
             modal={modal}
-            recurring={charge}
+            upcoming={projected}
             period={period}
             onClose={() => closeModal(modal)}
           />

@@ -13,3 +13,8 @@ export const expenseOfModal = (modal: string): ExpenseId | null =>
   modal.startsWith(EXPENSE_PREFIX)
     ? (modal.slice(EXPENSE_PREFIX.length) as ExpenseId)
     : null;
+
+const DELETE_PREFIX = 'delete:';
+
+/** Confirmation stacked over the popup of `id` (an expense or a projection). */
+export const deleteModal = (id: ExpenseId): string => `${DELETE_PREFIX}${id}`;

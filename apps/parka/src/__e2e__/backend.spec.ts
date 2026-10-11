@@ -125,9 +125,10 @@ const commands = {
     await expect(page.getByText('Sklep Nowy')).toBeVisible();
 
     await page.getByRole('button', { name: /Sklep Nowy/ }).click();
+    await getByE2e('dashboard:delete').click();
     await Promise.all([
       synced(page, 'DELETE', API_ROUTER.expenses()),
-      getByE2e('dashboard:delete').click(),
+      getByE2e('dashboard:delete-confirm').click(),
     ]);
     await expect(page.getByText('Sklep Nowy')).toHaveCount(0);
     await reload(page);

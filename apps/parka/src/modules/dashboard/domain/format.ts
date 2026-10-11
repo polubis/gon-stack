@@ -96,6 +96,12 @@ export const currentMonth = (): Month => toMonth(localMonth(new Date()));
 /** ISO date(-time) → `14.04.2025`. */
 export const dateLabel = (iso: string): string => plDate.format(new Date(iso));
 
+/** Plain day `YYYY-MM-DD` → `14.04.2025`; never shifted by the time zone. */
+export const plainDateLabel = (day: string): string => {
+  const [y = 0, m = 1, d = 1] = day.split('-').map(Number);
+  return plDate.format(new Date(y, m - 1, d));
+};
+
 export const dateTimeLabel = (iso: string): string =>
   plDateTime.format(new Date(iso));
 

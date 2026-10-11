@@ -1,15 +1,21 @@
 import type { z } from 'zod';
 import { listExpensesSchema } from '@schemas/expenses';
 import { receiptItem } from '@schemas/general';
+import { todayDay } from '@/shared/period/period';
 import { InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { toDevice } from '../../shared/device';
+import { materializeRecurring } from '../../shared/recurring';
 
 export const listExpenses = privateProcedure({
   schema: withZodSchema({ schema: listExpensesSchema }),
 })({
-  handler: async (_input, { db }) => {
+  handler: async (input, { db, user }) => {
+    // Due recurring charges become expenses on the first read of the day.
+    // Without the caller's zone "today" is a guess: do not charge early.
+    if (input.tz) await materializeRecurring(db, user.id, todayDay(input.tz));
+
     const [expenses, items] = await Promise.all([
       db.from('expenses').select('*'),
       db.from('receipt_items').select('*'),
@@ -47,6 +53,8 @@ export const listExpenses = privateProcedure({
           isBill: e.is_bill,
           source: e.source as 'receipt' | 'manual',
           device: toDevice(e),
+          recurringId: e.recurring_id,
+          occurrenceDate: e.occurrence_date,
           items: itemsByExpense.get(e.id) ?? [],
         }))
         .sort((a, b) => (a.date < b.date ? 1 : -1)),

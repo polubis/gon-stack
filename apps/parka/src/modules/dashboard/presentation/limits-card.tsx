@@ -11,7 +11,6 @@ import {
   isCategoryLimit,
   totalProgress,
   withoutLimit,
-  withRecurringIn,
 } from './selectors';
 import { TotalLimit, TotalLimitForm } from './total-limit';
 import { useSheet } from '@/shared/ui/use-sheet';
@@ -26,11 +25,7 @@ export const LimitsCard = ({ period }: { period: Period }) => {
   const ctx = useContext();
   const limits = ctx.useLimits();
   const categories = ctx.useCategories();
-  const expenses = withRecurringIn(
-    ctx.useExpenses(),
-    ctx.useRecurring(),
-    period,
-  );
+  const expenses = ctx.useExpenses();
   const { sheet, open, close } = useSheet<SheetKind>();
   const total = limits.find((l) => l.scope === 'total');
   const editing = sheet?.startsWith('edit:')

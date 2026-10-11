@@ -18,6 +18,8 @@ describe('dashboard expense mappers', () => {
       isBill: true,
       source: 'receipt',
       device: { id: 'device-1', name: 'Chrome on Windows', type: 'desktop' },
+      recurringId: null,
+      occurrenceDate: null,
       items: [
         {
           id: 'i-1',
@@ -39,6 +41,26 @@ describe('dashboard expense mappers', () => {
     });
     expect(expense.items).toHaveLength(1);
     expect(expense.items[0]!.name).toBe('Milk');
+  });
+
+  it('keeps the rule an expense was charged from', () => {
+    const expense = toExpense({
+      id: 'r-1:2025-05-15',
+      merchant: 'Netflix',
+      date: '2025-05-15T12:00:00.000Z',
+      amount: 30,
+      categoryId: 'c-1',
+      paymentMethod: '',
+      isBill: true,
+      source: 'manual',
+      device: null,
+      recurringId: 'r-1',
+      occurrenceDate: '2025-05-15',
+      items: [],
+    });
+
+    expect(expense.recurringId).toBe('r-1');
+    expect(expense.occurrenceDate).toBe('2025-05-15');
   });
 
   it('maps a category DTO', () => {

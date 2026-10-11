@@ -1,5 +1,7 @@
 import z from 'zod';
 
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
+
 /**
  * Per-entity shapes shared across the per-entity REST schemas. Kept as
  * factory functions so each call site gets its own zod instance rather than
@@ -45,6 +47,10 @@ export const expense = () =>
     source: z.enum(['receipt', 'manual']),
     /** `null` for expenses made before devices were tracked. */
     device: device().nullable().default(null),
+    /** Rule this expense came from; `null` for an ordinary one. Server-set. */
+    recurringId: z.string().min(1).nullable().default(null),
+    /** Day of the rule's series this expense stands for. Server-set. */
+    occurrenceDate: z.string().regex(DAY).nullable().default(null),
     items: z.array(receiptItem()),
   });
 
@@ -58,16 +64,22 @@ export const limit = () =>
     delivery: z.enum(['push', 'email']),
   });
 
+export const recurringInterval = () => z.enum(['weekly', 'monthly', 'yearly']);
+
+/** A rule is an instruction: it never counts into any total. */
 export const recurring = () =>
   z.object({
     id: z.string().min(1),
     name: z.string(),
     cost: z.coerce.number(),
-    nextPaymentDate: z.string().min(1),
+    interval: recurringInterval(),
+    startDate: z.string().regex(DAY),
+    endDate: z.string().regex(DAY).nullable().default(null),
+    /** Set by the server as occurrences become expenses; input is ignored. */
+    lastMaterializedDate: z.string().regex(DAY).nullable().default(null),
     active: z.boolean(),
     paymentMethod: z.string(),
     categoryId: z.string().min(1),
-    history: z.array(z.object({ date: z.string(), amount: z.coerce.number() })),
   });
 
 export const notification = () =>

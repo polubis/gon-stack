@@ -4,11 +4,6 @@ import {
   type CategorizedItem,
 } from '@/shared/expense-category/category';
 import {
-  occurrencesInMonth,
-  type RecurringOccurrence,
-  type RecurringSource,
-} from '@/shared/recurring/occurrences';
-import {
   bucketOf,
   containsDate,
   daysBetween,
@@ -102,17 +97,6 @@ const elapsedDays = (period: Period, today: string): number => {
   if (today < period.from) return 0;
   const last = today < period.to ? today : period.to;
   return daysBetween(period.from, last) + 1;
-};
-
-/** Recurring charges that fall into any of `periods`; derived, never stored. */
-export const chargesInPeriods = (
-  schedule: RecurringSource[],
-  periods: Period[],
-): RecurringOccurrence[] => {
-  const months = [...new Set(periods.flatMap(periodMonths))];
-  return months
-    .flatMap((month) => occurrencesInMonth(schedule, month))
-    .filter((o) => periods.some((p) => containsDate(p, o.date)));
 };
 
 export const summarizeDashboard = ({

@@ -392,7 +392,7 @@ describe('adding an expense on its own page', () => {
 
       await user.click(screen.getByRole('tab', { name: 'Cykliczny' }));
 
-      expect(screen.getByLabelText('Koszt miesięczny')).toBeVisible();
+      expect(screen.getByLabelText('Koszt płatności')).toBeVisible();
       expect(
         screen.queryByRole('button', { name: 'Wgraj z pliku' }),
       ).not.toBeInTheDocument();
@@ -414,15 +414,22 @@ describe('adding an expense on its own page', () => {
       );
     });
 
-    it('saves the charge and opens the dashboard', async () => {
+    it('saves the rule and opens the dashboard', async () => {
       const written = mockBackend();
       const user = await open();
 
       await user.click(screen.getByRole('tab', { name: 'Cykliczny' }));
       await user.type(screen.getByLabelText('Nazwa'), 'Netflix');
-      await user.type(screen.getByLabelText('Koszt miesięczny'), '30');
+      await user.type(screen.getByLabelText('Koszt płatności'), '30');
+      await user.selectOptions(
+        screen.getByLabelText('Częstotliwość'),
+        'Co tydzień',
+      );
       fireEvent.change(screen.getByLabelText(/^Pierwsza płatność/), {
         target: { value: '2025-05-15' },
+      });
+      fireEvent.change(screen.getByLabelText(/^Koniec/), {
+        target: { value: '2025-12-31' },
       });
       await user.click(
         screen.getByRole('button', { name: 'Dodaj wydatek cykliczny' }),
@@ -437,8 +444,9 @@ describe('adding an expense on its own page', () => {
           name: 'Netflix',
           cost: 30,
           active: true,
-          nextPaymentDate: '2025-05-15',
-          history: [],
+          interval: 'weekly',
+          startDate: '2025-05-15',
+          endDate: '2025-12-31',
         },
       });
     });

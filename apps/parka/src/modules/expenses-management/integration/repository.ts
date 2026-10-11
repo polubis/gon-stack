@@ -7,6 +7,7 @@ import type {
 } from '@schemas/expenses';
 import type { createRecurringSchema } from '@schemas/recurring';
 import type { scanReceiptSchema } from '@schemas/receipts';
+import { browserTimeZone } from '@/shared/date/date';
 import { API_ROUTER } from '@/shared/router/routes';
 import type {
   Category,
@@ -66,7 +67,7 @@ export const fetchExpense = async (
   id: string,
   signal: AbortSignal,
 ): Promise<StoredExpense | null> => {
-  const response = await fetch(API_ROUTER.expenses(), {
+  const response = await fetch(API_ROUTER.expenses({ tz: browserTimeZone() }), {
     headers: { Accept: 'application/json' },
     signal,
   });

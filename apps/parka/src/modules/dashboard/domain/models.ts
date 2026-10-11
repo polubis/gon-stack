@@ -1,6 +1,7 @@
 import type { Brand } from '@repo/type-beast/brand';
 import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
 import type { Device } from '@/shared/device/domain/models';
+import type { RecurringInterval } from '@/shared/recurring/occurrences';
 
 export type Month = Brand<string, 'Month'>;
 export type { Period, PeriodKind } from '@/shared/period/period';
@@ -69,29 +70,42 @@ export type Expense = {
   categoryId: CategoryId | null;
   paymentMethod: string;
   isBill: boolean;
-  /** `recurring`: derived from a recurring expense, never stored. */
-  source: 'receipt' | 'manual' | 'recurring';
+  source: 'receipt' | 'manual';
   /** Where it was created; `null` for older and recurring expenses. */
   device: Device | null;
+  /** Rule that created it; `null` for an ordinary expense. Only a marker: it lives on its own. */
+  recurringId: RecurringId | null;
+  /** `YYYY-MM-DD` the rule's series put it on; `null` for an ordinary expense. */
+  occurrenceDate: string | null;
   items: ReceiptItem[];
 };
 
-export type Payment = {
-  /** ISO date-time string. */
-  date: string;
-  amount: number;
-};
+export type { RecurringInterval } from '@/shared/recurring/occurrences';
 
+/** An instruction, not an expense: it never counts into any total. */
 export type Recurring = {
   id: RecurringId;
   name: string;
   cost: number;
-  /** ISO date-time string. */
-  nextPaymentDate: string;
+  interval: RecurringInterval;
+  /** `YYYY-MM-DD`: first occurrence. */
+  startDate: string;
+  /** `YYYY-MM-DD`: last day an occurrence may fall on; `null` = open ended. */
+  endDate: string | null;
+  /** `YYYY-MM-DD`: newest occurrence the server turned into an expense. */
+  lastMaterializedDate: string | null;
   active: boolean;
   paymentMethod: string;
   categoryId: CategoryId;
-  history: Payment[];
+};
+
+/** A projected occurrence of a rule: not charged yet, not stored. */
+export type Upcoming = {
+  /** Popup id; never the id of a stored expense. */
+  id: ExpenseId;
+  recurring: Recurring;
+  /** `YYYY-MM-DD` it will be charged on. */
+  date: string;
 };
 
 export type NoticeBody =

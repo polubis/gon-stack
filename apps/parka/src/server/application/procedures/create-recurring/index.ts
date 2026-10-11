@@ -2,20 +2,22 @@ import { createRecurringSchema } from '@schemas/recurring';
 import { InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
+import { toRule } from '../../shared/recurring';
 
 export const createRecurring = privateProcedure({
   schema: withZodSchema({ schema: createRecurringSchema }),
 })({
   handler: async (input, { db, user }) => {
-    const uid = user.id;
     const { data, error } = await db
       .from('recurring_expenses')
       .insert({
-        user_id: uid,
+        user_id: user.id,
         id: input.id,
         name: input.name,
         cost: input.cost,
-        next_payment_date: input.nextPaymentDate,
+        interval: input.interval,
+        start_date: input.startDate,
+        end_date: input.endDate,
         active: input.active,
         payment_method: input.paymentMethod,
         category_id: input.categoryId,
@@ -24,32 +26,6 @@ export const createRecurring = privateProcedure({
       .single();
     if (error) throw new InternalServer(error);
 
-    if (input.history.length > 0) {
-      const { error: historyError } = await db
-        .from('recurring_payments')
-        .insert(
-          input.history.map((h) => ({
-            user_id: uid,
-            recurring_id: input.id,
-            date: h.date,
-            amount: h.amount,
-          })),
-        );
-      if (historyError) throw new InternalServer(historyError);
-    }
-
-    return {
-      code: 201 as const,
-      data: {
-        id: data.id,
-        name: data.name,
-        cost: Number(data.cost),
-        nextPaymentDate: data.next_payment_date,
-        active: data.active,
-        paymentMethod: data.payment_method,
-        categoryId: data.category_id,
-        history: input.history,
-      },
-    };
+    return { code: 201 as const, data: toRule(data) };
   },
 });

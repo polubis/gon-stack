@@ -11,20 +11,21 @@ import {
   EXPENSES_LIST_HEIGHT,
   MAX_VISIBLE_EXPENSES,
 } from '../configuration/constraints';
-import type { Period } from '@/shared/period/period';
-import { money, shortDateTimeLabel } from '../domain/format';
+import { containsDate, todayDay, type Period } from '@/shared/period/period';
+import { money, plainDateLabel, shortDateTimeLabel } from '../domain/format';
 import { periodTitle } from '../domain/period';
 import type {
   Category,
   CategoryId,
   Expense,
   ExpenseId,
+  Upcoming,
 } from '../domain/models';
 import { DetailDialog } from './detail-dialog';
 import { DeviceBadge } from './device-badge';
 import { useContext } from './context';
 import { EXPENSES_MODAL } from './modal-ids';
-import { RecurringMark } from './recurring-badge';
+import { RecurringMark, UpcomingBadge } from './recurring-badge';
 import { ShowAllFade } from './show-all-fade';
 import {
   categoryOf,
@@ -32,7 +33,7 @@ import {
   expensesInPeriod,
   sumAmount,
   touchesCategory,
-  withRecurringIn,
+  upcomingCharges,
 } from './selectors';
 
 const Chip = ({
@@ -112,7 +113,7 @@ const ExpenseList = ({
           <Row id={e.id} onSelect={onSelect}>
             <span className="relative shrink-0">
               <CategoryAvatar category={category} className="h-10 w-10" />
-              {e.source === 'recurring' ? <RecurringMark /> : null}
+              {e.recurringId !== null ? <RecurringMark /> : null}
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-semibold">
@@ -142,7 +143,66 @@ const ExpenseList = ({
   </ul>
 );
 
-/** All expenses of the selected period, recurring ones included, filterable by category. */
+/**
+ * Payments the recurring rules will charge next: a projection, not expenses,
+ * so they sit apart from the list and never reach a sum.
+ */
+const UpcomingList = ({
+  upcoming,
+  categories,
+  onSelect,
+}: {
+  upcoming: Upcoming[];
+  categories: Category[];
+  onSelect: (id: ExpenseId) => void;
+}) => (
+  <section
+    aria-labelledby="upcoming-expenses"
+    className="rounded-xl border border-dashed border-line-strong p-2"
+    data-e2e="dashboard:upcoming"
+  >
+    <h3
+      id="upcoming-expenses"
+      className="px-2 pb-1 text-xs font-semibold text-ink-soft"
+    >
+      Nadchodzące · nie wliczone do podsumowania
+    </h3>
+    <ul className="divide-y divide-line">
+      {upcoming.map(({ id, recurring, date }) => {
+        const category = categoryOf(categories, recurring.categoryId);
+        return (
+          <li key={id}>
+            <button
+              type="button"
+              onClick={() => onSelect(id)}
+              data-e2e={`dashboard:upcoming:${id}`}
+              className={cn(ROW_CLASS, 'hover:bg-hover-soft')}
+            >
+              <span className="relative shrink-0">
+                <CategoryAvatar category={category} className="h-10 w-10" />
+                <RecurringMark />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-semibold">
+                  {recurring.name}
+                </span>
+                <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-soft">
+                  <span className="shrink-0">{plainDateLabel(date)}</span>
+                  <UpcomingBadge />
+                </span>
+              </span>
+              <span className="text-sm font-semibold tabular-nums text-ink-soft">
+                {money(recurring.cost)}
+              </span>
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  </section>
+);
+
+/** All expenses of the selected period, filterable by category; upcoming payments announced apart. */
 export const MonthExpenses = ({
   period,
   onSelect,
@@ -151,15 +211,17 @@ export const MonthExpenses = ({
   onSelect: (id: ExpenseId) => void;
 }) => {
   const ctx = useContext();
-  const expenses = withRecurringIn(
-    ctx.useExpenses(),
-    ctx.useRecurring(),
-    period,
-  );
+  const expenses = ctx.useExpenses();
+  const recurring = ctx.useRecurring();
   const categories = ctx.useCategories();
   const [filter, setFilter] = useState<CategoryId | null>(null);
   const all = useModal(EXPENSES_MODAL);
 
+  const today = todayDay();
+  // Only the present period looks ahead; a past one is just history.
+  const upcoming = containsDate(period, today)
+    ? upcomingCharges(recurring, today)
+    : [];
   const inPeriod = expensesInPeriod(expenses, period);
   const tabs = categoryTabs(inPeriod, categories);
   // The chosen category may have no expenses in another period: show all then.
@@ -221,6 +283,14 @@ export const MonthExpenses = ({
           </div>
         ) : null}
       </div>
+
+      {upcoming.length > 0 ? (
+        <UpcomingList
+          upcoming={upcoming}
+          categories={categories}
+          onSelect={onSelect}
+        />
+      ) : null}
 
       <div className={cn('relative overflow-hidden', EXPENSES_LIST_HEIGHT)}>
         {visible.length === 0 ? (

@@ -129,7 +129,7 @@ export const API_ROUTER = {
     '/api/dashboard/',
     { kind: string; from: string; to?: string; tz?: string }
   >('/api/dashboard/'),
-  expenses: route('/api/expenses/'),
+  expenses: routeWithQuery<'/api/expenses/', { tz?: string }>('/api/expenses/'),
   expenseById: routeById('/api/expenses/'),
   scanReceipt: route('/api/receipts/scan/'),
   categories: route('/api/categories/'),
@@ -138,7 +138,9 @@ export const API_ROUTER = {
   limitById: routeById('/api/limits/'),
   notifications: route('/api/notifications/'),
   notificationById: routeById('/api/notifications/'),
-  recurring: route('/api/recurring/'),
+  recurring: routeWithQuery<'/api/recurring/', { tz?: string }>(
+    '/api/recurring/',
+  ),
   recurringById: routeById('/api/recurring/'),
   settings: route('/api/settings/'),
   authLogin: route('/api/auth/login/'),

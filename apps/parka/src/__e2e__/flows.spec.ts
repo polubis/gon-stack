@@ -568,6 +568,7 @@ const commands = {
   'i delete the updated expense': async ({ page, getByE2e }) => {
     await page.getByRole('button', { name: /Kino Nowe Horyzonty/ }).click();
     await getByE2e('dashboard:delete').click();
+    await getByE2e('dashboard:delete-confirm').click();
     await expect(page.getByText('Kino Nowe Horyzonty')).toHaveCount(0);
   },
 
@@ -651,8 +652,7 @@ const commands = {
   },
 
   'i add and remove a recurring expense': async ({ page, getByE2e }) => {
-    // Stateful: a recurring change reloads the dashboard, which must read the
-    // new item back.
+    // Stateful: a rule change reloads the dashboard, which must read it back.
     await mockState(page);
     await installBackend(page, {
       categories: [CATEGORY],
@@ -665,34 +665,48 @@ const commands = {
     await page.getByRole('tab', { name: 'Cykliczny' }).click();
     await getByE2e('expenses-management:recurring-name').fill('Siłownia');
     await getByE2e('expenses-management:recurring-cost').fill('99');
+    // Starts next week: announced, not charged yet.
+    const next = new Date();
+    next.setDate(next.getDate() + 7);
+    await getByE2e('expenses-management:recurring-date').fill(
+      `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-${String(next.getDate()).padStart(2, '0')}`,
+    );
     await getByE2e('expenses-management:recurring-save').click();
     await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
     await expect(
-      getByE2e('dashboard:expenses').getByText('Siłownia'),
+      getByE2e('dashboard:upcoming').getByText('Siłownia'),
     ).toBeVisible();
     await page.getByRole('button', { name: /Siłownia/ }).click();
     await getByE2e('dashboard:recurring-delete').click();
+    await getByE2e('dashboard:delete-confirm').click();
     await expect(page.getByText('Siłownia')).toHaveCount(0);
   },
   'a recurring expense counts in this month': async ({ page, getByE2e }) => {
-    await mockState(page, {
+    // Due today: the server turns it into an ordinary expense on read.
+    await installBackend(page, {
+      categories: [CATEGORY],
+      expenses: [],
+      limits: [],
       recurring: [
         {
           id: 'rec-2',
           name: 'Spotify',
           cost: 24.99,
-          nextPaymentDate: new Date().toISOString().slice(0, 10),
+          interval: 'monthly',
+          startDate: new Date().toLocaleDateString('en-CA'),
+          endDate: null,
+          lastMaterializedDate: null,
           active: true,
           paymentMethod: 'card',
           categoryId: CATEGORY.id,
-          history: [],
         },
       ],
     });
     await open(page, APP_ROUTER.dashboard());
-    await expect(
-      getByE2e('dashboard:expenses').getByText('Spotify'),
-    ).toBeVisible();
+    const today = new Date().toLocaleDateString('en-CA');
+    await expect(getByE2e(`dashboard:expense:rec-2:${today}`)).toContainText(
+      'Spotify',
+    );
   },
   'the expenses list links to adding a recurring expense': async ({
     page,
@@ -876,7 +890,9 @@ test('recurring expenses can be added and removed', async ({ e2e }) => {
   await interpreter(commands, e2e)(['i add and remove a recurring expense']);
 });
 
-test('a recurring expense is counted in its months', async ({ e2e }) => {
+test('a recurring expense due today is charged as an expense', async ({
+  e2e,
+}) => {
   await interpreter(
     commands,
     e2e,
