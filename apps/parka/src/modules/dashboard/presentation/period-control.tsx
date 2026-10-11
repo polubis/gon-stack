@@ -1,13 +1,12 @@
-import { useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useState, type KeyboardEvent } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { CalendarRange, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
+import { useModal } from '@/shared/router/modal-stack';
 import {
   canGoNext,
   clampPeriod,
   currentPeriod,
-  customPeriod,
-  isDay,
   fromInputValue,
   maxInputValue,
   PERIOD_KINDS,
@@ -20,6 +19,8 @@ import {
   periodTitle,
   pickerOptions,
 } from '../domain/period';
+import { PERIOD_RANGE_MODAL } from './modal-ids';
+import { PeriodRangeDialog } from './period-range-dialog';
 
 const STEP_BUTTON =
   'grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-line-strong bg-card text-ink transition-colors hover:bg-hover-soft disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
@@ -78,73 +79,6 @@ const focusChosen = (e: Event) => {
 const OPTION =
   'flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
 
-const DATE_FIELD =
-  'h-11 w-full rounded-lg border border-line-strong bg-card px-3 text-sm [color-scheme:light_dark] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
-
-/** Own range: two date fields, applied together so half-typed dates never load. */
-const CustomRange = ({
-  period,
-  today,
-  onPick,
-}: {
-  period: Period;
-  today: string;
-  onPick: (period: Period) => void;
-}) => {
-  const [from, setFrom] = useState(period.from);
-  const [to, setTo] = useState(period.to);
-  const valid = isDay(from) && isDay(to) && from <= to;
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    if (valid) onPick(clampPeriod(customPeriod(from, to), today));
-  };
-
-  return (
-    <form
-      aria-label={JUMP_LABEL.custom}
-      onSubmit={submit}
-      className="space-y-3 p-1"
-    >
-      <label className="block space-y-1 text-sm font-medium text-ink-soft">
-        Od
-        <input
-          data-e2e="dashboard:period-from"
-          type="date"
-          value={from}
-          max={to && to < today ? to : today}
-          onChange={(e) => setFrom(e.target.value)}
-          className={DATE_FIELD}
-        />
-      </label>
-      <label className="block space-y-1 text-sm font-medium text-ink-soft">
-        Do
-        <input
-          data-e2e="dashboard:period-to"
-          type="date"
-          value={to}
-          min={from}
-          max={today}
-          onChange={(e) => setTo(e.target.value)}
-          className={DATE_FIELD}
-        />
-      </label>
-      {isDay(from) && isDay(to) && from > to && (
-        <p role="alert" className="text-sm text-danger">
-          Data końcowa jest przed początkową.
-        </p>
-      )}
-      <button
-        type="submit"
-        data-e2e="dashboard:period-apply"
-        disabled={!valid}
-        className="h-11 w-full rounded-xl bg-brand px-3 text-sm font-semibold text-on-brand transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        Zastosuj
-      </button>
-    </form>
-  );
-};
-
 /**
  * The picker that fits the kind: a date field for a day, a list of periods
  * (never later than the present) for a week, month or year.
@@ -164,9 +98,8 @@ const PeriodChoices = ({
     if (next) onPick(clampPeriod(next, today));
   };
 
-  if (period.kind === 'custom') {
-    return <CustomRange period={period} today={today} onPick={onPick} />;
-  }
+  // An own range is picked in its modal, never in the popover.
+  if (period.kind === 'custom') return null;
 
   if (period.kind === 'day') {
     return (
@@ -230,7 +163,9 @@ export const PeriodControl = ({
 }) => {
   const [valueOpen, setValueOpen] = useState(false);
   const [kindOpen, setKindOpen] = useState(false);
+  const range = useModal(PERIOD_RANGE_MODAL);
   const next = canGoNext(period, today);
+  const own = period.kind === 'custom';
 
   return (
     <div
@@ -248,7 +183,16 @@ export const PeriodControl = ({
         <ChevronLeft className="h-5 w-5" aria-hidden="true" />
       </button>
 
-      <Popover.Root open={valueOpen} onOpenChange={setValueOpen}>
+      <Popover.Root
+        open={valueOpen && !own}
+        onOpenChange={(open) => {
+          if (own) {
+            if (open) range.open();
+            return;
+          }
+          setValueOpen(open);
+        }}
+      >
         <Popover.Anchor asChild>
           <div className="flex h-11 min-w-0 flex-1 rounded-xl border border-line-strong bg-card text-sm font-semibold">
             <Popover.Trigger
@@ -302,6 +246,7 @@ export const PeriodControl = ({
                             if (kind !== period.kind)
                               onChange(currentPeriod(kind, today));
                             setKindOpen(false);
+                            if (kind === 'custom') range.open();
                           }}
                           className={cn(
                             OPTION,
@@ -342,6 +287,10 @@ export const PeriodControl = ({
           </Popover.Content>
         </Popover.Portal>
       </Popover.Root>
+
+      {range.isOpen && own && (
+        <PeriodRangeDialog period={period} today={today} onPick={onChange} />
+      )}
 
       <span role="status" className="sr-only">
         {periodTitle(period)}

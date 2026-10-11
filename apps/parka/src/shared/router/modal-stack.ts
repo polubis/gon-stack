@@ -115,6 +115,22 @@ export const closeModal = (id: string): void => {
   notify();
 };
 
+/**
+ * Closes a modal, then runs `then` once the URL has settled. Stepping Back
+ * is async, so URL writes made before it would be undone by it.
+ */
+export const closeModalThen = (id: string, then: () => void): void => {
+  if (typeof window === 'undefined') return;
+  const stack = read();
+  const goesBack =
+    stack.lastIndexOf(id) === stack.length - 1 &&
+    pushedDepth() === stack.length &&
+    closing !== id;
+  if (goesBack) window.addEventListener('popstate', then, { once: true });
+  closeModal(id);
+  if (!goesBack) then();
+};
+
 export const useModalStack = (): readonly string[] =>
   useSyncExternalStore(subscribe, view, () => EMPTY);
 

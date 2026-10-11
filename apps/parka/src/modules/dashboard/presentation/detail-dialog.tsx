@@ -40,7 +40,8 @@ export const DetailDialog = ({
     | 'dashboard:detail'
     | 'dashboard:recurring-dialog'
     | 'dashboard:categories-dialog'
-    | 'dashboard:expenses-dialog';
+    | 'dashboard:expenses-dialog'
+    | 'dashboard:period-range-dialog';
 }) => {
   useModalMounted(modal);
   return (

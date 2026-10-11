@@ -335,45 +335,75 @@ describe('dashboard period control', () => {
   });
 
   describe('own range', () => {
-    const apply = async (from: string, to: string) => {
-      await userEvent.click(valueButton());
-      fireEvent.change(screen.getByLabelText('Od'), {
-        target: { value: from },
+    const dialog = () => screen.getByRole('dialog', { name: 'Własny zakres' });
+    const day = (name: string) =>
+      within(dialog()).getByRole('button', { name });
+    const applyButton = () =>
+      within(dialog()).getByRole<HTMLButtonElement>('button', {
+        name: 'Zastosuj',
       });
-      fireEvent.change(screen.getByLabelText('Do'), { target: { value: to } });
-      await userEvent.click(screen.getByRole('button', { name: 'Zastosuj' }));
+    /** Picks days in the calendar, going back `months` months first. */
+    const choose = async (months: number, from: string, to: string) => {
+      for (let i = 0; i < months; i++)
+        await userEvent.click(
+          within(dialog()).getByRole('button', { name: 'Poprzedni miesiąc' }),
+        );
+      await userEvent.click(day(from));
+      await userEvent.click(day(to));
+    };
+    const apply = async (months: number, from: string, to: string) => {
+      await choose(months, from, to);
+      await userEvent.click(applyButton());
     };
 
-    it('starts with the last seven days', async () => {
+    it('opens a modal with a calendar as soon as own range is chosen', async () => {
       await open();
 
       await kind('Własny');
 
-      expect(label().textContent).toBe('4 paź – 10 paź 2026');
-      expect(next().disabled).toBe(true);
+      expect(dialog()).toBeTruthy();
+      expect(screen.queryByLabelText('Od')).toBeNull();
+      expect(window.location.search).toContain('modal=period-range');
+      expect(day('10 października 2026').getAttribute('aria-pressed')).toBe(
+        'true',
+      );
     });
 
     it('shows the chosen from-to range and asks for it', async () => {
       const fetchMock = await open();
       await kind('Własny');
 
-      await apply('2026-09-01', '2026-09-30');
+      await apply(1, '1 września 2026', '30 września 2026');
 
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
       expect(label().textContent).toBe('1 wrz – 30 wrz 2026');
       await waitFor(() =>
         expect(asked(fetchMock).at(-1)).toContain(
           'kind=custom&from=2026-09-01&to=2026-09-30',
         ),
       );
-      expect(window.location.search).toBe(
-        '?range=custom&from=2026-09-01&to=2026-09-30',
+      expect(window.location.search).toContain(
+        'range=custom&from=2026-09-01&to=2026-09-30',
       );
+    });
+
+    it('reopens the modal from the period label', async () => {
+      await open();
+      await kind('Własny');
+      await apply(1, '1 września 2026', '30 września 2026');
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+
+      await userEvent.click(valueButton());
+
+      expect(dialog()).toBeTruthy();
+      expect(day('1 września 2026').getAttribute('aria-pressed')).toBe('true');
     });
 
     it('steps by its own length', async () => {
       await open();
       await kind('Własny');
-      await apply('2026-09-01', '2026-09-30');
+      await apply(1, '1 września 2026', '30 września 2026');
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 
       await userEvent.click(prev());
 
@@ -382,23 +412,159 @@ describe('dashboard period control', () => {
       expect(label().textContent).toBe('1 wrz – 30 wrz 2026');
     });
 
-    it('refuses an end date before the start', async () => {
+    it('waits for both days before it can be applied', async () => {
       await open();
       await kind('Własny');
-      await userEvent.click(valueButton());
 
-      fireEvent.change(screen.getByLabelText('Od'), {
-        target: { value: '2026-10-05' },
-      });
-      fireEvent.change(screen.getByLabelText('Do'), {
-        target: { value: '2026-10-01' },
-      });
+      await userEvent.click(day('5 października 2026'));
 
-      expect(screen.getByRole('alert').textContent).toMatch(/przed/);
+      expect(applyButton().disabled).toBe(true);
+      await userEvent.click(day('8 października 2026'));
+      expect(applyButton().disabled).toBe(false);
+    });
+
+    it('starts again from an earlier second click', async () => {
+      await open();
+      await kind('Własny');
+
+      await userEvent.click(day('5 października 2026'));
+      await userEvent.click(day('1 października 2026'));
+
+      expect(applyButton().disabled).toBe(true);
+      expect(day('1 października 2026').getAttribute('aria-pressed')).toBe(
+        'true',
+      );
+      expect(day('5 października 2026').getAttribute('aria-pressed')).toBe(
+        'false',
+      );
+    });
+
+    it('does not offer days after today', async () => {
+      await open();
+      await kind('Własny');
+
+      expect(day('11 października 2026').hasAttribute('disabled')).toBe(true);
       expect(
-        screen.getByRole<HTMLButtonElement>('button', { name: 'Zastosuj' })
+        within(dialog())
+          .getByRole('button', { name: 'Następny miesiąc' })
+          .hasAttribute('disabled'),
+      ).toBe(true);
+    });
+
+    const monthTitle = () =>
+      within(dialog()).getByRole('button', { name: /wybierz miesiąc i rok/ });
+    const jumpTo = async (year: string, month: string) => {
+      await userEvent.click(monthTitle());
+      await userEvent.selectOptions(
+        within(dialog()).getByRole('combobox', { name: 'Rok' }),
+        year,
+      );
+      await userEvent.click(
+        within(dialog()).getByRole('button', { name: month }),
+      );
+    };
+
+    it('jumps to a chosen month of another year in a few taps', async () => {
+      await open();
+      await kind('Własny');
+
+      await jumpTo('2023', 'marzec');
+
+      expect(monthTitle().textContent).toBe('marzec 2023');
+      expect(day('1 marca 2023')).toBeTruthy();
+      expect(document.activeElement).toBe(monthTitle());
+    });
+
+    it('picks days after a jump and applies them', async () => {
+      await open();
+      await kind('Własny');
+
+      await jumpTo('2025', 'czerwiec');
+      await userEvent.click(day('3 czerwca 2025'));
+      await userEvent.click(day('9 czerwca 2025'));
+      await userEvent.click(applyButton());
+
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+      expect(label().textContent).toBe('3 cze – 9 cze 2025');
+    });
+
+    it('steps the year with arrows and never past the present', async () => {
+      await open();
+      await kind('Własny');
+      await userEvent.click(monthTitle());
+      const nextYear = within(dialog()).getByRole<HTMLButtonElement>('button', {
+        name: 'Następny rok',
+      });
+
+      expect(nextYear.disabled).toBe(true);
+      await userEvent.click(
+        within(dialog()).getByRole('button', { name: 'Poprzedni rok' }),
+      );
+
+      expect(nextYear.disabled).toBe(false);
+      expect(
+        within(dialog()).getByRole<HTMLSelectElement>('combobox', {
+          name: 'Rok',
+        }).value,
+      ).toBe('2025');
+    });
+
+    it('does not offer months after the present', async () => {
+      await open();
+      await kind('Własny');
+      await userEvent.click(monthTitle());
+
+      const grid = within(dialog());
+      expect(
+        grid.getByRole<HTMLButtonElement>('button', { name: 'październik' })
+          .disabled,
+      ).toBe(false);
+      expect(
+        grid.getByRole<HTMLButtonElement>('button', { name: 'listopad' })
           .disabled,
       ).toBe(true);
+      expect(grid.queryByRole('option', { name: '2027' })).toBeNull();
+    });
+
+    it('opens the month grid from the keyboard and returns focus', async () => {
+      await open();
+      await kind('Własny');
+      monthTitle().focus();
+
+      await userEvent.keyboard('{Enter}');
+
+      expect(monthTitle().getAttribute('aria-expanded')).toBe('true');
+      expect(document.activeElement).toBe(
+        within(dialog()).getByRole('button', { name: 'październik' }),
+      );
+      await userEvent.keyboard('{Enter}');
+      expect(monthTitle().getAttribute('aria-expanded')).toBe('false');
+      expect(document.activeElement).toBe(monthTitle());
+    });
+
+    it('keeps the selected days while jumping around', async () => {
+      await open();
+      await kind('Własny');
+      await userEvent.click(day('5 października 2026'));
+
+      await jumpTo('2025', 'styczeń');
+      await jumpTo('2026', 'październik');
+
+      expect(day('5 października 2026').getAttribute('aria-pressed')).toBe(
+        'true',
+      );
+    });
+
+    it('closes without changing the range', async () => {
+      await open();
+      await kind('Własny');
+
+      await userEvent.click(
+        within(dialog()).getByRole('button', { name: 'Zamknij' }),
+      );
+
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+      expect(label().textContent).toBe('4 paź – 10 paź 2026');
     });
 
     it('restores the range from the address', async () => {
