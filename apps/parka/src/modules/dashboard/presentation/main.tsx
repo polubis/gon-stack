@@ -167,13 +167,13 @@ const DashboardView = () => {
             <div className="xl:col-span-6 xl:col-start-1 xl:row-start-2">
               <TotalHero period={period} summary={summary} />
             </div>
-            <SpendingChart period={period} summary={summary} />
-            <CategoriesCard period={period} summary={summary} />
+            <LimitsCard period={period} />
             <MonthExpenses
               period={period}
               onSelect={(id) => openModal(expenseModal(id))}
             />
-            <LimitsCard period={period} />
+            <CategoriesCard period={period} summary={summary} />
+            <SpendingChart period={period} summary={summary} />
             {overlays}
           </>
         ) : (

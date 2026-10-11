@@ -142,7 +142,7 @@ export const SpendingChart = ({
   period: Period;
   summary: Summary;
 }) => (
-  <Card className="space-y-4 xl:col-span-12 xl:row-start-3">
+  <Card className="space-y-4 xl:col-span-12 xl:row-start-4">
     <div className="flex flex-col items-start gap-2 xl:flex-row xl:items-center xl:justify-between">
       <h2 className="text-base font-semibold">Wydatki w czasie</h2>
       <Legend period={period} />
