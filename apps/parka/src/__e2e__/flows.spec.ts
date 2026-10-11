@@ -400,9 +400,8 @@ const commands = {
     await expect(getByE2e('expense-form:category')).toHaveText('Rozrywka');
     await getByE2e('expense-form:add-product').click();
     await getByE2ePrefix('expense-form:product-name:').fill('Chleb');
-    await getByE2ePrefix('expense-form:product-category:')
-      .last()
-      .selectOption(CATEGORY.id);
+    await getByE2ePrefix('expense-form:product-category:').last().click();
+    await page.getByRole('option', { name: CATEGORY.name }).click();
 
     await expect(getByE2e('expense-form:category')).toHaveText(
       'Wiele kategorii',

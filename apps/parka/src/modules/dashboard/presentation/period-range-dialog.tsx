@@ -9,6 +9,7 @@ import {
   periodContaining,
   type Period,
 } from '@/shared/period/period';
+import { Select } from '@/shared/ui/controls';
 import { DetailDialog } from './detail-dialog';
 import { PERIOD_RANGE_MODAL } from './modal-ids';
 
@@ -222,19 +223,17 @@ export const PeriodRangeDialog = ({
             >
               <ChevronLeft className="h-5 w-5" aria-hidden="true" />
             </button>
-            <select
+            <Select
               aria-label="Rok"
               data-e2e="dashboard:period-range-year"
-              value={year}
-              onChange={(e) => setYear(Number(e.target.value))}
+              value={String(year)}
+              onValueChange={(value) => setYear(Number(value))}
               className={YEAR_SELECT}
-            >
-              {years.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
+              options={years.map((y) => ({
+                value: String(y),
+                label: String(y),
+              }))}
+            />
             <button
               type="button"
               data-e2e="dashboard:period-range-year-next"

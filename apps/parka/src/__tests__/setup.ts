@@ -11,3 +11,16 @@ afterAll(() => {
 afterEach(() => {
   if (typeof window !== 'undefined') window.history.replaceState(null, '', '/');
 });
+
+// Radix Select needs pointer capture, scrolling and resize APIs jsdom lacks.
+if (typeof window !== 'undefined') {
+  Element.prototype.hasPointerCapture ??= () => false;
+  Element.prototype.setPointerCapture ??= () => {};
+  Element.prototype.releasePointerCapture ??= () => {};
+  Element.prototype.scrollIntoView ??= () => {};
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}

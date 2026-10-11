@@ -1,4 +1,12 @@
-import { createContext, useContext, useId, type ComponentProps } from 'react';
+import {
+  createContext,
+  useContext,
+  useId,
+  type ComponentProps,
+  type ReactNode,
+} from 'react';
+import * as SelectPrimitive from '@radix-ui/react-select';
+import { Check, ChevronDown } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import type { E2eId } from '@/__e2e__/selectors';
 
@@ -204,18 +212,78 @@ export const Input = ({ className, id, ...props }: ComponentProps<'input'>) => {
   );
 };
 
-/** Plain `<select>` wired to the surrounding `Field` label. */
+export type SelectOption = { value: string; label: ReactNode };
+
+/** Radix select wired to the surrounding `Field` label. Empty value shows `placeholder`. */
 export const Select = ({
+  options,
+  value,
+  onValueChange,
+  placeholder,
+  required,
+  disabled,
   className,
   id,
   ...props
-}: ComponentProps<'select'>) => {
+}: Omit<ComponentProps<typeof SelectPrimitive.Trigger>, 'value'> & {
+  required?: boolean;
+  options: SelectOption[];
+  value: string;
+  onValueChange: (value: string) => void;
+  placeholder?: string;
+}) => {
   const field = useField();
   return (
-    <select
-      {...props}
-      id={id ?? field?.id}
-      className={cn(inputClass, className)}
-    />
+    <SelectPrimitive.Root
+      value={value}
+      onValueChange={onValueChange}
+      required={required}
+      disabled={disabled}
+    >
+      <SelectPrimitive.Trigger
+        {...props}
+        id={id ?? field?.id}
+        className={cn(
+          inputClass,
+          'flex items-center justify-between gap-2 text-left disabled:opacity-60 data-[placeholder]:text-ink-soft',
+          className,
+        )}
+      >
+        <span className="min-w-0 truncate">
+          <SelectPrimitive.Value placeholder={placeholder} />
+        </span>
+        <SelectPrimitive.Icon asChild>
+          <ChevronDown
+            className="h-4 w-4 shrink-0 text-ink-soft"
+            aria-hidden="true"
+          />
+        </SelectPrimitive.Icon>
+      </SelectPrimitive.Trigger>
+      <SelectPrimitive.Portal>
+        <SelectPrimitive.Content
+          position="popper"
+          sideOffset={4}
+          collisionPadding={16}
+          className="z-(--z-tooltip) min-w-(--radix-select-trigger-width) overflow-hidden rounded-xl border border-line-strong bg-card text-ink shadow-popover"
+        >
+          <SelectPrimitive.Viewport className="max-h-72 p-1">
+            {options.map((option) => (
+              <SelectPrimitive.Item
+                key={option.value}
+                value={option.value}
+                className="relative flex cursor-pointer items-center rounded-lg py-2 pr-8 pl-3 text-sm outline-none select-none data-[highlighted]:bg-brand-softer data-[state=checked]:font-semibold data-[state=checked]:text-brand-dark"
+              >
+                <SelectPrimitive.ItemText>
+                  {option.label}
+                </SelectPrimitive.ItemText>
+                <SelectPrimitive.ItemIndicator className="absolute right-2 inline-flex">
+                  <Check className="h-4 w-4" aria-hidden="true" />
+                </SelectPrimitive.ItemIndicator>
+              </SelectPrimitive.Item>
+            ))}
+          </SelectPrimitive.Viewport>
+        </SelectPrimitive.Content>
+      </SelectPrimitive.Portal>
+    </SelectPrimitive.Root>
   );
 };

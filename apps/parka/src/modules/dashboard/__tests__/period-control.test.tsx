@@ -6,6 +6,7 @@ import {
   within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { pickOption } from '@/__tests__/pick-option';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Main } from '../presentation/main';
 import { readBody } from './dashboard-backend';
@@ -455,7 +456,8 @@ describe('dashboard period control', () => {
       within(dialog()).getByRole('button', { name: /wybierz miesiąc i rok/ });
     const jumpTo = async (year: string, month: string) => {
       await userEvent.click(monthTitle());
-      await userEvent.selectOptions(
+      await pickOption(
+        userEvent.setup(),
         within(dialog()).getByRole('combobox', { name: 'Rok' }),
         year,
       );
@@ -503,10 +505,8 @@ describe('dashboard period control', () => {
 
       expect(nextYear.disabled).toBe(false);
       expect(
-        within(dialog()).getByRole<HTMLSelectElement>('combobox', {
-          name: 'Rok',
-        }).value,
-      ).toBe('2025');
+        within(dialog()).getByRole('combobox', { name: 'Rok' }),
+      ).toHaveTextContent('2025');
     });
 
     it('does not offer months after the present', async () => {

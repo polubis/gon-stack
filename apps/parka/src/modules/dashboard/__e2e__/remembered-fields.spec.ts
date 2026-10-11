@@ -33,9 +33,8 @@ const commands = {
   }) => {
     await getByE2e('expense-form:merchant').fill('  Biedronka ');
     await getByE2e('expense-form:amount').fill('20');
-    await getByE2e('expense-form:category').selectOption({
-      label: 'Spożywcze',
-    });
+    await getByE2e('expense-form:category').click();
+    await page.getByRole('option', { name: 'Spożywcze' }).click();
     await getByE2e('expense-form:method').fill('BLIK');
     await getByE2e('expense-form:save').click();
     await expect(getByE2e('dashboard:main')).toBeVisible();
@@ -58,10 +57,10 @@ const commands = {
     await expect(getByE2e('expense-form:method')).toHaveValue('BLIK');
   },
   'the category is "Spożywcze"': async ({ getByE2e }) => {
-    await expect(getByE2e('expense-form:category')).toHaveValue('cat-1');
+    await expect(getByE2e('expense-form:category')).toHaveText('Spożywcze');
   },
   'the category is left on "Rozrywka"': async ({ getByE2e }) => {
-    await expect(getByE2e('expense-form:category')).toHaveValue('cat-2');
+    await expect(getByE2e('expense-form:category')).toHaveText('Rozrywka');
   },
 } satisfies CommandRegistry<Ctx>;
 

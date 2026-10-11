@@ -89,9 +89,11 @@ describe('controls without a clear button', () => {
           <Input type="date" value="2026-01-01" onChange={() => {}} />
         </Field>
         <Field label="Kategoria">
-          <Select value="a" onChange={() => {}}>
-            <option value="a">Alfa</option>
-          </Select>
+          <Select
+            value="a"
+            options={[{ value: 'a', label: 'Alfa' }]}
+            onValueChange={() => {}}
+          />
         </Field>
         <ClearableInput
           aria-label="Data 2"
@@ -104,7 +106,7 @@ describe('controls without a clear button', () => {
 
     expect(screen.getByLabelText('Kwota')).toHaveValue('12');
     expect(screen.getByLabelText('Data')).toBeVisible();
-    expect(screen.getByLabelText('Kategoria')).toBeVisible();
+    expect(screen.getByLabelText('Kategoria')).toHaveTextContent('Alfa');
     expect(screen.queryByRole('button', { name: /Wyczyść/ })).toBeNull();
   });
 });

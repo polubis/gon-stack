@@ -69,14 +69,12 @@ export const LimitForm = ({
           disabled={Boolean(limit)}
           value={selected ?? ''}
           data-e2e="dashboard:limit-form-category"
-          onChange={(e) => setCategoryId(e.target.value as CategoryId)}
-        >
-          {available.map((c) => (
-            <option key={c.id} value={c.id}>
-              {categoryLabel(c.name)}
-            </option>
-          ))}
-        </Select>
+          options={available.map((c) => ({
+            value: c.id,
+            label: categoryLabel(c.name),
+          }))}
+          onValueChange={(id) => setCategoryId(id as CategoryId)}
+        />
       </Field>
       <Field label="Limit miesięczny">
         <NumberInput

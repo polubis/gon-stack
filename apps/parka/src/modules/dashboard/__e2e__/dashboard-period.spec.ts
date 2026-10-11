@@ -135,11 +135,10 @@ const commands = {
     await getByE2e('dashboard:period-range-apply').click();
     await expect(dialog).toBeHidden();
   },
-  'i jump in the calendar to June of last year': async ({ getByE2e }) => {
+  'i jump in the calendar to June of last year': async ({ getByE2e, page }) => {
     await getByE2e('dashboard:period-range-month').click();
-    await getByE2e('dashboard:period-range-year').selectOption(
-      String(lastYear),
-    );
+    await getByE2e('dashboard:period-range-year').click();
+    await page.getByRole('option', { name: String(lastYear) }).click();
     await getByE2e(
       `dashboard:period-range-month-option:${lastYear}-06`,
     ).click();

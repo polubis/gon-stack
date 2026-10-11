@@ -103,20 +103,19 @@ export const ProductCard = ({
             <Select
               value={product.categoryId}
               data-e2e={`expense-form:product-category:${product.id}`}
-              onChange={(e) => {
-                const next = categories.find((c) => c.id === e.target.value);
+              options={
+                categories.length === 0
+                  ? [{ value: product.categoryId, label: 'Bez kategorii' }]
+                  : categories.map((c) => ({
+                      value: c.id,
+                      label: categoryLabel(c.name),
+                    }))
+              }
+              onValueChange={(id) => {
+                const next = categories.find((c) => c.id === id);
                 if (next) onPatch({ categoryId: next.id });
               }}
-            >
-              {categories.length === 0 ? (
-                <option value={product.categoryId}>Bez kategorii</option>
-              ) : null}
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {categoryLabel(c.name)}
-                </option>
-              ))}
-            </Select>
+            />
           </Field>
           <button
             type="button"

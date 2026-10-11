@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { pickOption } from '@/__tests__/pick-option';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import {
@@ -68,7 +69,7 @@ const addExpense = async (
   await user.clear(screen.getByLabelText('Sklep'));
   await user.type(screen.getByLabelText('Sklep'), merchant);
   await user.type(screen.getByLabelText('Kwota'), '20');
-  await user.selectOptions(screen.getByLabelText('Kategoria'), category);
+  await pickOption(user, screen.getByLabelText('Kategoria'), category);
   await user.clear(screen.getByLabelText('Metoda płatności'));
   if (method)
     await user.type(screen.getByLabelText('Metoda płatności'), method);
@@ -90,7 +91,7 @@ describe('remembered expense form fields', () => {
     await openNew();
 
     expect(screen.getByLabelText('Metoda płatności')).toHaveValue('');
-    expect(screen.getByLabelText('Kategoria')).toHaveValue('c-2');
+    expect(screen.getByLabelText('Kategoria')).toHaveTextContent(FUN.name);
   });
 
   it('prefills payment method and category after an expense was added', async () => {
@@ -102,7 +103,7 @@ describe('remembered expense form fields', () => {
     await openNew();
 
     expect(screen.getByLabelText('Metoda płatności')).toHaveValue('BLIK');
-    expect(screen.getByLabelText('Kategoria')).toHaveValue('c-1');
+    expect(screen.getByLabelText('Kategoria')).toHaveTextContent(FOOD.name);
   });
 
   it('prefills the shop trimmed after an expense was added', async () => {
@@ -127,7 +128,7 @@ describe('remembered expense form fields', () => {
     mockBackend([FOOD, FUN]);
     await openNew();
 
-    expect(screen.getByLabelText('Kategoria')).toHaveValue('c-1');
+    expect(screen.getByLabelText('Kategoria')).toHaveTextContent(FOOD.name);
     expect(screen.getByLabelText('Metoda płatności')).toHaveValue('BLIK');
   });
 
@@ -140,7 +141,7 @@ describe('remembered expense form fields', () => {
 
     await openNew();
 
-    expect(screen.getByLabelText('Kategoria')).toHaveValue('c-2');
+    expect(screen.getByLabelText('Kategoria')).toHaveTextContent(FUN.name);
     expect(screen.getByLabelText('Metoda płatności')).toHaveValue('BLIK');
   });
 
@@ -165,7 +166,7 @@ describe('remembered expense form fields', () => {
 
     expect(screen.getByLabelText('Sklep')).toHaveValue('');
     expect(screen.getByLabelText('Metoda płatności')).toHaveValue('');
-    expect(screen.getByLabelText('Kategoria')).toHaveValue('c-2');
+    expect(screen.getByLabelText('Kategoria')).toHaveTextContent(FUN.name);
   });
 
   it('does not prefill when editing an expense', async () => {
@@ -183,6 +184,6 @@ describe('remembered expense form fields', () => {
 
     expect(await screen.findByLabelText('Sklep')).toHaveValue('Piekarnia');
     expect(screen.getByLabelText('Metoda płatności')).toHaveValue('Karta');
-    expect(screen.getByLabelText('Kategoria')).toHaveValue('c-1');
+    expect(screen.getByLabelText('Kategoria')).toHaveTextContent(FOOD.name);
   });
 });

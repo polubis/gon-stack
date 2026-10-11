@@ -100,16 +100,11 @@ export const RecurringForm = () => {
             <Select
               value={frequency}
               data-e2e="expenses-management:recurring-interval"
-              onChange={(e) =>
-                setFrequency(e.target.value as RecurringInterval)
+              options={INTERVALS}
+              onValueChange={(value) =>
+                setFrequency(value as RecurringInterval)
               }
-            >
-              {INTERVALS.map(({ value, label }) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </Select>
+            />
           </Field>
           <Field
             label="Pierwsza płatność"
@@ -140,14 +135,12 @@ export const RecurringForm = () => {
               required
               value={selected ?? ''}
               data-e2e="expenses-management:recurring-category"
-              onChange={(e) => setCategoryId(e.target.value as CategoryId)}
-            >
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {categoryLabel(c.name)}
-                </option>
-              ))}
-            </Select>
+              options={categories.map((c) => ({
+                value: c.id,
+                label: categoryLabel(c.name),
+              }))}
+              onValueChange={(id) => setCategoryId(id as CategoryId)}
+            />
           </Field>
           <Field label="Metoda płatności">
             <ClearableInput

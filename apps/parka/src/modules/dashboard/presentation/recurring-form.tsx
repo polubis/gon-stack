@@ -91,14 +91,12 @@ export const RecurringForm = ({
         <Select
           value={frequency}
           data-e2e="dashboard:recurring-form-interval"
-          onChange={(e) => setFrequency(e.target.value as RecurringInterval)}
-        >
-          {INTERVALS.map((value) => (
-            <option key={value} value={value}>
-              {intervalLabel(value)}
-            </option>
-          ))}
-        </Select>
+          options={INTERVALS.map((value) => ({
+            value,
+            label: intervalLabel(value),
+          }))}
+          onValueChange={(value) => setFrequency(value as RecurringInterval)}
+        />
       </Field>
       <Field
         label="Pierwsza płatność"
@@ -129,14 +127,12 @@ export const RecurringForm = ({
           required
           value={selected ?? ''}
           data-e2e="dashboard:recurring-form-category"
-          onChange={(e) => setCategoryId(e.target.value as CategoryId)}
-        >
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {categoryLabel(c.name)}
-            </option>
-          ))}
-        </Select>
+          options={categories.map((c) => ({
+            value: c.id,
+            label: categoryLabel(c.name),
+          }))}
+          onValueChange={(id) => setCategoryId(id as CategoryId)}
+        />
       </Field>
       <Field label="Metoda płatności">
         <ClearableInput

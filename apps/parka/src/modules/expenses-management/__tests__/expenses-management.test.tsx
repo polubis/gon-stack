@@ -6,6 +6,7 @@ import {
   within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { pickOption } from '@/__tests__/pick-option';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import {
@@ -298,7 +299,8 @@ describe('adding an expense on its own page', () => {
 
         await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
         await user.type(screen.getByLabelText('Nazwa produktu'), 'Kino');
-        await user.selectOptions(
+        await pickOption(
+          user,
           screen.getByLabelText('Kategoria produktu'),
           'Rozrywka',
         );
@@ -315,7 +317,8 @@ describe('adding an expense on its own page', () => {
 
         await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
         await user.type(screen.getByLabelText('Nazwa produktu'), 'Chleb');
-        await user.selectOptions(
+        await pickOption(
+          user,
           screen.getAllByLabelText('Kategoria produktu')[0]!,
           'Spożywcze',
         );
@@ -421,7 +424,8 @@ describe('adding an expense on its own page', () => {
       await user.click(screen.getByRole('tab', { name: 'Cykliczny' }));
       await user.type(screen.getByLabelText('Nazwa'), 'Netflix');
       await user.type(screen.getByLabelText('Koszt płatności'), '30');
-      await user.selectOptions(
+      await pickOption(
+        user,
         screen.getByLabelText('Częstotliwość'),
         'Co tydzień',
       );

@@ -34,6 +34,7 @@
     "@astrojs/sitemap": "catalog:",
     "@radix-ui/react-dialog": "catalog:",
     "@radix-ui/react-popover": "catalog:",
+    "@radix-ui/react-select": "catalog:",
     "@repo/react-kit": "workspace:*",
     "@repo/type-beast": "workspace:*",
     "@supabase/ssr": "catalog:",
