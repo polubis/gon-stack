@@ -1,7 +1,8 @@
+import { ClearableInput } from '@/shared/ui/clearable';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { Trash2 } from 'lucide-react';
-import { Button, Field, inputClass } from '@/shared/ui/controls';
+import { Button, Field, Input, Select } from '@/shared/ui/controls';
 import { NumberInput } from '@/shared/ui/number-input';
 import type { Period } from '@/shared/period/period';
 import { fromDateInput, toDateInput } from '../domain/format';
@@ -62,8 +63,7 @@ export const RecurringForm = ({
       data-e2e="dashboard:recurring-form"
     >
       <Field label="Nazwa">
-        <input
-          className={inputClass}
+        <ClearableInput
           required
           value={name}
           placeholder="np. Netflix"
@@ -83,9 +83,8 @@ export const RecurringForm = ({
         label="Pierwsza płatność"
         hint="Co miesiąc w tym dniu naliczamy koszt do wydatków i limitów."
       >
-        <input
+        <Input
           type="date"
-          className={inputClass}
           required
           value={date}
           data-e2e="dashboard:recurring-form-date"
@@ -93,8 +92,7 @@ export const RecurringForm = ({
         />
       </Field>
       <Field label="Kategoria">
-        <select
-          className={inputClass}
+        <Select
           required
           value={selected ?? ''}
           data-e2e="dashboard:recurring-form-category"
@@ -105,11 +103,10 @@ export const RecurringForm = ({
               {categoryLabel(c.name)}
             </option>
           ))}
-        </select>
+        </Select>
       </Field>
       <Field label="Metoda płatności">
-        <input
-          className={inputClass}
+        <ClearableInput
           value={method}
           placeholder="np. Karta"
           data-e2e="dashboard:recurring-form-method"

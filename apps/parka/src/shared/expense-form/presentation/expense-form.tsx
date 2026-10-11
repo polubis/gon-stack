@@ -1,3 +1,4 @@
+import { ClearableInput } from '@/shared/ui/clearable';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Check, LoaderCircle, Plus } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
@@ -6,7 +7,7 @@ import {
   MIXED_CATEGORY_LABEL,
 } from '@/shared/i18n/category-label';
 import { APP_ROUTER } from '@/shared/router/routes';
-import { Button, Field, inputClass } from '@/shared/ui/controls';
+import { Button, Field, Input, Select, inputClass } from '@/shared/ui/controls';
 import { useRememberedField } from '@/shared/form-memory/presentation/use-remembered-field';
 import { Card } from '@/shared/ui/layout';
 import { NumberInput } from '@/shared/ui/number-input';
@@ -158,8 +159,7 @@ export const ExpenseForm = ({
 
         <Card className="space-y-3">
           <Field label="Sklep">
-            <input
-              className={inputClass}
+            <ClearableInput
               required
               value={merchant}
               placeholder="np. Biedronka"
@@ -180,9 +180,8 @@ export const ExpenseForm = ({
             />
           </Field>
           <Field label="Data">
-            <input
+            <Input
               type="date"
-              className={inputClass}
               required
               value={date}
               data-e2e="expense-form:date"
@@ -198,8 +197,7 @@ export const ExpenseForm = ({
                 {derivedName}
               </p>
             ) : (
-              <select
-                className={inputClass}
+              <Select
                 required
                 value={selected ?? ''}
                 data-e2e="expense-form:category"
@@ -210,12 +208,11 @@ export const ExpenseForm = ({
                     {categoryLabel(c.name)}
                   </option>
                 ))}
-              </select>
+              </Select>
             )}
           </Field>
           <Field label="Metoda płatności">
-            <input
-              className={inputClass}
+            <ClearableInput
               value={method}
               placeholder="np. Karta"
               data-e2e="expense-form:method"

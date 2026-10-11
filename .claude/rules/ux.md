@@ -13,3 +13,4 @@
 11. (A) Error toasts follow pattern: `title:tech-code:description:close-option:retry-option`. Success toasts stay a plain message
 12. (A) Opening a modal over another stacks it on top: previous stays mounted underneath, never closed/replaced
 13. (A) Open modals live in URL query params (stack order kept): deep link/reload restores the stack, Back closes only the topmost
+14. (A) Every text input (text/email/password/search/tel/url) has an "x" icon button (`lucide-react`) clearing it; click focuses the input. Shown only when value present. Not on select, number, date

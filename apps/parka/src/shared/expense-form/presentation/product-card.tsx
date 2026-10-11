@@ -1,8 +1,9 @@
+import { ClearableInput } from '@/shared/ui/clearable';
 import { ChevronDown, Trash2 } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
-import { Field, inputClass } from '@/shared/ui/controls';
+import { Field, Select } from '@/shared/ui/controls';
 import { Card } from '@/shared/ui/layout';
 import { NumberInput } from '@/shared/ui/number-input';
 import { money } from '../domain/format';
@@ -66,8 +67,7 @@ export const ProductCard = ({
               label="Nazwa produktu"
               hint={invalid ? 'Podaj nazwę produktu.' : undefined}
             >
-              <input
-                className={inputClass}
+              <ClearableInput
                 value={product.name}
                 required
                 aria-invalid={invalid}
@@ -100,8 +100,7 @@ export const ProductCard = ({
             />
           </Field>
           <Field label="Kategoria produktu">
-            <select
-              className={inputClass}
+            <Select
               value={product.categoryId}
               data-e2e={`expense-form:product-category:${product.id}`}
               onChange={(e) => {
@@ -117,7 +116,7 @@ export const ProductCard = ({
                   {categoryLabel(c.name)}
                 </option>
               ))}
-            </select>
+            </Select>
           </Field>
           <button
             type="button"

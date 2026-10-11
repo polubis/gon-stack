@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { categoryLabel } from '@/shared/i18n/category-label';
-import { Button, Field, inputClass, Toggle } from '@/shared/ui/controls';
+import { Button, Field, Select, Toggle } from '@/shared/ui/controls';
 import { NumberInput } from '@/shared/ui/number-input';
 import { DEFAULT_CATEGORY_LIMIT } from '../configuration/constraints';
 import { newLimitId } from '../domain/ids';
@@ -64,8 +64,7 @@ export const LimitForm = ({
   return (
     <form onSubmit={save} className="space-y-3" data-e2e="dashboard:limit-form">
       <Field label="Kategoria">
-        <select
-          className={inputClass}
+        <Select
           required
           disabled={Boolean(limit)}
           value={selected ?? ''}
@@ -77,7 +76,7 @@ export const LimitForm = ({
               {categoryLabel(c.name)}
             </option>
           ))}
-        </select>
+        </Select>
       </Field>
       <Field label="Limit miesięczny">
         <NumberInput

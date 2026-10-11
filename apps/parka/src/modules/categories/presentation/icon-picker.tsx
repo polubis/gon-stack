@@ -1,7 +1,7 @@
+import { ClearableInput } from '@/shared/ui/clearable';
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
-import { inputClass } from '@/shared/ui/controls';
 import { CATEGORY_ICON_OPTIONS, CategoryIcon } from '@/shared/ui/icon';
 import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
 import { SelectPopover } from '@/shared/ui/select-popover';
@@ -43,21 +43,21 @@ const Panel = ({ value, color, onChange, close }: PanelProps) => {
 
   return (
     <div className="space-y-3">
-      <div className="relative">
-        <Search
-          className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft"
-          aria-hidden="true"
-        />
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Szukaj, np. kawa"
-          aria-label="Szukaj ikony"
-          data-e2e="categories:form-icon-search"
-          className={cn(inputClass, 'pl-9')}
-        />
-      </div>
+      <ClearableInput
+        leading={
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft"
+            aria-hidden="true"
+          />
+        }
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Szukaj, np. kawa"
+        aria-label="Szukaj ikony"
+        data-e2e="categories:form-icon-search"
+        className="pl-9"
+      />
 
       <div
         role="group"

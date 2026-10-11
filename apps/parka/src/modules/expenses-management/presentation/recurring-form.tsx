@@ -1,8 +1,9 @@
+import { ClearableInput } from '@/shared/ui/clearable';
 import { useState, type FormEvent } from 'react';
 import { Check, LoaderCircle } from 'lucide-react';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { APP_ROUTER } from '@/shared/router/routes';
-import { Button, Field, inputClass } from '@/shared/ui/controls';
+import { Button, Field, Input, Select } from '@/shared/ui/controls';
 import { Card } from '@/shared/ui/layout';
 import { NumberInput } from '@/shared/ui/number-input';
 import { fromDateInput, toDateInput } from '../domain/format';
@@ -66,8 +67,7 @@ export const RecurringForm = () => {
             Naliczany co miesiąc do wydatków i limitów.
           </p>
           <Field label="Nazwa">
-            <input
-              className={inputClass}
+            <ClearableInput
               required
               value={name}
               placeholder="np. Netflix"
@@ -87,9 +87,8 @@ export const RecurringForm = () => {
             label="Pierwsza płatność"
             hint="Co miesiąc w tym dniu naliczamy koszt do wydatków i limitów."
           >
-            <input
+            <Input
               type="date"
-              className={inputClass}
               required
               value={date}
               data-e2e="expenses-management:recurring-date"
@@ -97,8 +96,7 @@ export const RecurringForm = () => {
             />
           </Field>
           <Field label="Kategoria">
-            <select
-              className={inputClass}
+            <Select
               required
               value={selected ?? ''}
               data-e2e="expenses-management:recurring-category"
@@ -109,11 +107,10 @@ export const RecurringForm = () => {
                   {categoryLabel(c.name)}
                 </option>
               ))}
-            </select>
+            </Select>
           </Field>
           <Field label="Metoda płatności">
-            <input
-              className={inputClass}
+            <ClearableInput
               value={method}
               placeholder="np. Karta"
               data-e2e="expenses-management:recurring-method"

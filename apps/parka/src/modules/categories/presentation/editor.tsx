@@ -1,12 +1,12 @@
+import { ClearableInput } from '@/shared/ui/clearable';
 import { useState, type FormEvent } from 'react';
 import { useRouterState } from '@tanstack/react-router';
 import { Trash2 } from 'lucide-react';
-import { cn } from '@repo/react-kit/cn';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { useModal } from '@/shared/router/modal-stack';
 import { navigateTo, readQueryParam } from '@/shared/router/navigation';
 import { APP_ROUTER } from '@/shared/router/routes';
-import { Button, Field, inputClass } from '@/shared/ui/controls';
+import { Button, Field } from '@/shared/ui/controls';
 import { ErrorState } from '@/shared/ui/error-state';
 import { CategoryIcon } from '@/shared/ui/icon';
 import { ScreenHeader } from '@/shared/ui/layout';
@@ -100,28 +100,28 @@ const Form = ({ base }: FormProps) => {
           className="space-y-6"
         >
           <Field label="Nazwa">
-            <div className="relative">
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute left-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full"
-                style={{ backgroundColor: `${color}1a`, color }}
-              >
-                <CategoryIcon id={icon} className="h-4 w-4" />
-              </span>
-              <input
-                autoFocus={!base}
-                className={cn(inputClass, 'pl-12')}
-                value={name}
-                maxLength={NAME_MAX_LENGTH}
-                data-e2e="categories:form-name"
-                aria-invalid={showErrors && nameError ? true : undefined}
-                aria-describedby={
-                  showErrors && nameError ? 'category-name-error' : undefined
-                }
-                onChange={(e) => setName(e.target.value)}
-                placeholder="np. Kultura"
-              />
-            </div>
+            <ClearableInput
+              leading={
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full"
+                  style={{ backgroundColor: `${color}1a`, color }}
+                >
+                  <CategoryIcon id={icon} className="h-4 w-4" />
+                </span>
+              }
+              autoFocus={!base}
+              className="pl-12"
+              value={name}
+              maxLength={NAME_MAX_LENGTH}
+              data-e2e="categories:form-name"
+              aria-invalid={showErrors && nameError ? true : undefined}
+              aria-describedby={
+                showErrors && nameError ? 'category-name-error' : undefined
+              }
+              onChange={(e) => setName(e.target.value)}
+              placeholder="np. Kultura"
+            />
           </Field>
           {showErrors && nameError ? (
             <p

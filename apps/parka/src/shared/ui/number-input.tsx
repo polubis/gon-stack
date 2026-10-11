@@ -1,5 +1,5 @@
 import { useState, type ComponentProps } from 'react';
-import { inputClass } from './controls';
+import { Input } from './controls';
 
 const parse = (text: string): number => {
   const n = Number(text.replace(',', '.'));
@@ -30,13 +30,13 @@ export const NumberInput = ({
   const shown = parse(text) === value ? text : format(value);
 
   return (
-    <input
+    <Input
       type="text"
       inputMode={integer ? 'numeric' : 'decimal'}
       autoComplete="off"
       placeholder="0"
       {...props}
-      className={className ?? inputClass}
+      className={className}
       value={shown}
       onChange={(e) => {
         const next = e.target.value;

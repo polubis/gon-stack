@@ -1,3 +1,4 @@
+import { createContext, useContext, useId, type ComponentProps } from 'react';
 import { cn } from '@repo/react-kit/cn';
 import type { E2eId } from '@/__e2e__/selectors';
 
@@ -155,6 +156,11 @@ export const Button = ({
   );
 };
 
+const FieldContext = createContext<{ id: string; label: string } | null>(null);
+
+/** Id + visible label of the surrounding `Field`, if any. */
+export const useField = () => useContext(FieldContext);
+
 export const Field = ({
   label,
   children,
@@ -163,17 +169,53 @@ export const Field = ({
   label: string;
   children: React.ReactNode;
   hint?: string;
-}) => (
-  <label className="block">
-    <span className="mb-1 block text-sm font-medium text-ink-soft">
-      {label}
-    </span>
-    {children}
-    {hint ? (
-      <span className="mt-1 block text-xs text-ink-soft">{hint}</span>
-    ) : null}
-  </label>
-);
+}) => {
+  const id = useId();
+  return (
+    <FieldContext.Provider value={{ id, label }}>
+      <div className="block">
+        <label
+          htmlFor={id}
+          className="mb-1 block text-sm font-medium text-ink-soft"
+        >
+          {label}
+        </label>
+        {children}
+        {hint ? (
+          <span className="mt-1 block text-xs text-ink-soft">{hint}</span>
+        ) : null}
+      </div>
+    </FieldContext.Provider>
+  );
+};
 
 export const inputClass =
   'w-full rounded-xl border border-line-strong bg-card px-3 py-2.5 text-sm outline-none focus:border-brand';
+
+/** Plain `<input>` wired to the surrounding `Field` label. */
+export const Input = ({ className, id, ...props }: ComponentProps<'input'>) => {
+  const field = useField();
+  return (
+    <input
+      {...props}
+      id={id ?? field?.id}
+      className={cn(inputClass, className)}
+    />
+  );
+};
+
+/** Plain `<select>` wired to the surrounding `Field` label. */
+export const Select = ({
+  className,
+  id,
+  ...props
+}: ComponentProps<'select'>) => {
+  const field = useField();
+  return (
+    <select
+      {...props}
+      id={id ?? field?.id}
+      className={cn(inputClass, className)}
+    />
+  );
+};

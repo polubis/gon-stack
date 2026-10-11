@@ -1,8 +1,9 @@
+import { ClearableInput } from '@/shared/ui/clearable';
 import { useEffect, useState } from 'react';
 import type { SubmitEvent } from 'react';
 import { Leaf } from 'lucide-react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
-import { Button, Field, inputClass } from '@/shared/ui/controls';
+import { Button, Field } from '@/shared/ui/controls';
 import { ErrorState } from '@/shared/ui/error-state';
 import { navigateTo } from '@/shared/router/navigation';
 import { APP_ROUTER } from '@/shared/router/routes';
@@ -50,11 +51,10 @@ const SignInView = () => {
 
         <form className="mt-6 space-y-4" onSubmit={submit} noValidate>
           <Field label="E-mail">
-            <input
+            <ClearableInput
               type="email"
               name="email"
               autoComplete="email"
-              className={inputClass}
               value={email}
               data-e2e="auth:email"
               onChange={(e) => setEmail(e.target.value)}
@@ -62,11 +62,10 @@ const SignInView = () => {
             />
           </Field>
           <Field label="Hasło">
-            <input
+            <ClearableInput
               type="password"
               name="password"
               autoComplete="current-password"
-              className={inputClass}
               value={password}
               data-e2e="auth:password"
               onChange={(e) => setPassword(e.target.value)}

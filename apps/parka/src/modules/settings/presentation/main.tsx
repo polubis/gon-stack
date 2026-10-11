@@ -1,8 +1,9 @@
+import { ClearableInput } from '@/shared/ui/clearable';
 import { useEffect, useState } from 'react';
 import { ChevronRight, CircleUser } from 'lucide-react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import { APP_ROUTER } from '@/shared/router/routes';
-import { Button, Field, inputClass, Toggle } from '@/shared/ui/controls';
+import { Button, Field, Toggle } from '@/shared/ui/controls';
 import { Card, ScreenHeader } from '@/shared/ui/layout';
 import { ErrorState } from '@/shared/ui/error-state';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
@@ -70,17 +71,15 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
         {editing ? (
           <div className="space-y-3">
             <Field label="Imię i nazwisko">
-              <input
-                className={inputClass}
+              <ClearableInput
                 value={name}
                 data-e2e="settings:profile-name"
                 onChange={(e) => setName(e.target.value)}
               />
             </Field>
             <Field label="E-mail">
-              <input
+              <ClearableInput
                 type="email"
-                className={inputClass}
                 value={email}
                 data-e2e="settings:profile-email"
                 onChange={(e) => setEmail(e.target.value)}
