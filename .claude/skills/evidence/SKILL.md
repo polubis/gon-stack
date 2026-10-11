@@ -7,39 +7,33 @@ description: Record video proof that a change works. Before/after side-by-side o
 
 Video proof of UI behavior. Playwright records one page. Highlights + labels injected into DOM. Output one `.webm`.
 
-## Reference (always follow)
-
-- Ideal example video: [references/parka-date-before-after.webm](references/parka-date-before-after.webm)
-- Script that made it: [references/record-before-after.mjs](references/record-before-after.mjs)
-
-Copy script structure. Swap scenes, selectors, URLs, captions. Never reinvent.
-
 ## When
 
-- Fix/feature visible in UI, dev wants proof
-- Bug repro: BEFORE shows bug, AFTER shows fix
+- Change visible in UI, dev wants proof
+- Bug fix: BEFORE shows bug, AFTER shows fix
 - New feature only: single run (no BEFORE), same labels
 
 Not for non-UI change. Use tests.
 
 ## Workflow
 
-1. **Scenes.** List 1-3 scenes. Each = one user story + one highlight target. Bug = scene shows bad value BEFORE. Say so if BEFORE cannot show bug (ex: manual add already ok) - show missing capability instead, caption honestly.
-2. **BEFORE code.** `git worktree add <scratch>/before HEAD` (uncommitted work stays in main tree = AFTER). Never edit main tree.
-3. **Two dev servers.** BEFORE on port A, AFTER on port B, plus tiny wrapper origin C. Start background, wait ready.
-4. **Wrapper page.** Served via `context.route(C/**)`. Two `<iframe>` side by side: left red banner `PRZED`, right green banner `PO`. Top bar = scene name. Hidden `#card` overlay for title cards.
-5. **Context.** `recordVideo` size = viewport (1920x1040). Fixed `timezoneId`, `locale`. Stub auth cookie + auth user call. Mock whole backend via `context.route('**/api/**')`, one state per origin. Mock answers what OLD/NEW server would return - say so in report.
-6. **Run both sides in lockstep.** helper `both(fn)` = `Promise.all` on both frames. Use `data-e2e` locators.
-7. **Label.** Per highlight: `mark(frame, locator, caption, good)` then hold, then `unmark`. Colors: bad `#dc2626`, good `#16a34a`.
-8. **Title cards** between scenes + closing summary card.
-9. **Save.** `page.video().path()` after `context.close()`, copy to `final.webm`.
-10. **Verify.** Screenshots every ~2.5s (`shots/`), log real values (`console.log` field values, POST bodies). View screenshots before claiming. Caption must match logged value.
-11. **Cleanup.** Stop servers, `git worktree remove --force` + `prune`. Check `git status` same as before. Check `node_modules` junction not re-linked by worktree (run install in main tree only).
-12. **Deliver.** Absolute path + `SendUserFile` (`display: render`). Report scenes, limits.
+1. **Scenes.** List 1-3 scenes. Each = one user story + one highlight target. If BEFORE cannot show the bug, show the missing capability instead and caption honestly.
+2. **BEFORE code.** `git worktree add <scratch>/before HEAD`. Uncommitted work in main tree = AFTER. Never edit main tree.
+3. **Isolate deps.** Worktree must not share `node_modules` with main tree (symlink/junction). Install inside worktree, or run its server without relinking. Removing worktree through shared link deletes main files. After cleanup check main tree still builds/lints.
+4. **Two dev servers.** BEFORE on port A, AFTER on port B, plus tiny wrapper origin C. Start in background, wait ready.
+5. **Wrapper page.** Served via `context.route(C/**)`. Two `<iframe>` side by side: left red banner `BEFORE`, right green banner `AFTER`. Top bar = scene name. Hidden `#card` overlay for title cards.
+6. **Context.** `recordVideo` size = viewport. Fixed `timezoneId` + `locale`. Stub auth if needed. Mock whole backend with `context.route`, one state per origin. Mock answers what old/new server would return - say so in report.
+7. **Lockstep.** Helper `both(fn)` = `Promise.all` on both frames. Use stable locators.
+8. **Label.** Per highlight: `mark(frame, locator, caption, good)`, hold, `unmark`. Colors: bad `#dc2626`, good `#16a34a`.
+9. **Title cards** between scenes + closing summary card.
+10. **Save.** `page.video().path()` after `context.close()`, copy to `final.webm`.
+11. **Verify.** Screenshot every ~2.5s, log real values (field values, request bodies). View screenshots before claiming. Caption must match logged value.
+12. **Cleanup.** Stop servers, `git worktree remove --force`, `git worktree prune`. `git status` must equal state before.
+13. **Deliver.** Absolute path + `SendUserFile` (`display: render`). Report scenes, limits.
 
 ## Label helper
 
-Draws box + caption in frame, `position:fixed`, `pointer-events:none`, max z-index. Caption above element; below if element near top.
+Box + caption inside frame, `position:fixed`, `pointer-events:none`, max z-index. Caption above element; below if element near top.
 
 ```js
 const mark = async (frame, loc, caption, good) => {
@@ -62,24 +56,23 @@ const unmark = (frame) =>
   frame.evaluate(() => document.querySelectorAll('.__hl').forEach((n) => n.remove()));
 ```
 
-## Single-run variant (no BEFORE)
+## Single-run variant
 
-Drop wrapper + second server. Use one page, same `mark`/`unmark`/title card helpers, `recordVideo` on context.
+No wrapper, no second server. One page, same `mark`/`unmark`/title card helpers, `recordVideo` on context.
 
 ## Rules
 
 - Hold each highlight 3-4.5s; title cards 3s. Readable.
-- Caption = fact (value, state), short, Polish ok.
+- Caption = fact (value, state), short.
 - Fixed timezone + locale, else video not reproducible.
 - Mock backend, never real data. Personal/sensitive data seen -> stop (`rules/security.md`).
 - Never modify source of main tree. Proof only.
 - No `ffmpeg` = `.webm` only; do not fake `.mp4`.
-- Script paths in reference are absolute to original machine - adapt.
-- Report limits honestly: mocked parts, dev server not build, scenes dropped.
-- Put video in scratch dir, not repo, unless dev asks to keep.
+- Video + scripts live in scratch dir, not repo, unless dev asks to keep.
+- Report limits honestly: mocked parts, dev server not build, dropped scenes.
 
 ## Report
 
 - Path of final video
 - Per scene: what BEFORE shows, what AFTER shows (logged values)
-- Limits + anything repaired (worktree, links)
+- Limits + anything repaired
