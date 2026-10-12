@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { config } from '../config.js';
-import { buildDocs } from '../docs.js';
+import { AODI_LEGEND, buildDocs } from '../docs.js';
 
 const setup = async (knowledge: Record<string, string>) => {
   const root = await mkdtemp(join(tmpdir(), 'nitpick-'));
@@ -137,7 +137,9 @@ describe('Rule groups work when', () => {
   it('renders ungrouped rules under a plain Rules heading', async () => {
     const { text } = await build([{ id: 'x', instruction: () => 'y' }]);
     expect(text).toBe(
-      '# Information for AI\n\n## Rules\n\n### (A) Always\n\n- `x`: y\n',
+      '# Information for AI\n\n' +
+        AODI_LEGEND +
+        '\n\n## Rules\n\n### (A) Always\n\n- `x`: y\n',
     );
   });
 
@@ -147,7 +149,9 @@ describe('Rule groups work when', () => {
       { id: 'b', group: 'git', importance: 'I', instruction: () => 'two' },
     ]);
     expect(text).toBe(
-      '# Information for AI\n\n## Rules for Git\n\n### (A) Always\n\n- `a`: one\n\n### (I) Infer during task\n\n- `b`: two\n',
+      '# Information for AI\n\n' +
+        AODI_LEGEND +
+        '\n\n## Rules for Git\n\n### (A) Always\n\n- `a`: one\n\n### (I) Infer during task\n\n- `b`: two\n',
     );
   });
 

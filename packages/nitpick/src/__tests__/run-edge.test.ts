@@ -3,6 +3,7 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { AODI_LEGEND } from '../docs.js';
 import { EXIT_CONFIG, EXIT_PROBLEMS, EXIT_USAGE, run } from '../run.js';
 
 const richCommitPath = join(
@@ -168,7 +169,7 @@ describe('CLI sync works when', () => {
     );
     expect(await run(['--sync'], root)).toBe(0);
     expect(await readFile(join(root, 'a', 'b', 'c', 'X.md'), 'utf8')).toBe(
-      '# Information for AI\n',
+      '# Information for AI\n\n' + AODI_LEGEND + '\n',
     );
   });
 
@@ -660,7 +661,9 @@ describe('Rich commit through the CLI works when', () => {
   it('writes the rule instruction file and a group heading on sync', async () => {
     const root = await synced(rich);
     expect(await readFile(join(root, '.ai', 'AGENTS.md'), 'utf8')).toBe(
-      '# Information for AI\n\n## Rules for Git\n\n### (A) Always\n\n- [rich-commit](rules/rich-commit.md)\n',
+      '# Information for AI\n\n' +
+        AODI_LEGEND +
+        '\n\n## Rules for Git\n\n### (A) Always\n\n- [rich-commit](rules/rich-commit.md)\n',
     );
     expect(
       await readFile(join(root, '.ai', 'rules', 'rich-commit.md'), 'utf8'),

@@ -44,6 +44,24 @@ import { richCommit } from '@repo/nitpick/rules/rich-commit';
 export default config({
   output: [{ path: '.claude', root: 'CLAUDE.md' }], // default: [{ path: '.ai', root: 'AGENTS.md' }]
 
+  docs: {
+    header: 'Project rules', // default 'Information for AI'
+    intro: ({ ref }) => `Start with ${ref('react/state')}.`, // or { file: './intro.md' }
+    ungrouped: { title: 'Basics', text: () => 'Applies everywhere.' },
+    groups: {
+      git: {
+        title: 'Version control',
+        text: ({ group }) => `Rules of ${group}.`,
+      },
+    },
+    importances: {
+      A: {
+        title: 'Must follow',
+        text: ({ group, importance }) => `${group}/${importance}`,
+      },
+    },
+  },
+
   settings: {
     name: 'settings.json', // or 'settings.local.json'; default 'settings.json'
     permissions: { allow: ['Bash(pnpm test:*)'] },
@@ -87,6 +105,20 @@ export default config({
 `rules` is an array or a function `({ rule }) => Rule[]`. The function form makes `ref()` suggest keys from `knowledge.refs`. There are no check categories or schedules; `group` only splits the root docs into areas.
 
 Override a ready-made rule by spreading it: `{ ...richCommit, importance: 'D' }`.
+
+### Docs
+
+The root docs always include a built-in `## AODI framework` legend (tag meanings, not configurable) right below the header, before the intro.
+
+Optional `docs` customizes the root docs of the first `output` entry. Defaults give the same output as without it.
+
+- `header`: `# ` title. Default `Information for AI`.
+- `intro`: text right below the header.
+- `ungrouped`: `{ title?, text? }` for rules without `group`. Default title `Rules`.
+- `groups`: per `Rule.group`, `{ title?, text? }`. Default title `Rules for <Group>`. A key no rule uses is a config error.
+- `importances`: per tag `A | O | D | I`, `{ title?, text? }`. Text goes under the `### ` title, in every area. Default titles `(A) Always`, ...
+- `text` is a function `({ ref, group?, importance? }) => string` or `{ file }` (relative to `.nitpick/`). `group` is set in group, ungrouped and importance texts, `importance` only in importance texts. File text supports `{{ref:key}}`. Text is inlined in the root docs, not linked.
+- Missing file or unknown ref is a config error.
 
 ### Output
 

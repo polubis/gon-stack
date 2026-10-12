@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { basename, dirname, join, posix, relative, resolve } from 'node:path';
 import { resolveRules } from './config.js';
-import type { Config, Importance, Rule } from './config.js';
+import type { Config, DocsText, Importance, Rule } from './config.js';
 import { buildSettings } from './settings.js';
 
 type Docs = {
@@ -21,6 +21,19 @@ const TITLES: Record<Importance, string> = {
   D: '(D) When directly mentioned',
   I: '(I) Infer during task',
 };
+
+export const AODI_LEGEND = [
+  '## AODI framework',
+  '',
+  'Rules meaning:',
+  '',
+  '| Tag | Meaning                                     |',
+  '| --- | ------------------------------------------- |',
+  '| `A` | always - apply every task                   |',
+  '| `O` | optional - use when helpful                 |',
+  '| `D` | when directly mentioned - only if user asks |',
+  '| `I` | infer during task - apply when context fits |',
+].join('\n');
 
 const readSource = async (configDir: string, file: string): Promise<string> =>
   (await readFile(resolve(configDir, file), 'utf8')).replaceAll('\r\n', '\n');
@@ -90,45 +103,81 @@ const validateRefs = (
   return [...problems, ...findCycles(graph)];
 };
 
-const renderRules = (
+type Resolve = (
+  text: DocsText<string> | undefined,
+  label: string,
+  meta?: { group?: string; importance?: Importance },
+) => Promise<string | undefined>;
+
+const renderRules = async (
   rules: Rule[],
   describe: (rule: Rule) => string,
   problems: string[],
-): string => {
+  docs: NonNullable<Config['docs']>,
+  resolveText: Resolve,
+): Promise<string> => {
   const ids = new Set<string>();
   for (const { id } of rules) {
     if (ids.has(id)) problems.push(`Duplicate rule id "${id}"`);
     ids.add(id);
   }
-  const renderByImportance = (items: Rule[]): string =>
-    ORDER.map((tag) => ({
-      tag,
-      rules: items.filter((rule) => (rule.importance ?? 'A') === tag),
-    }))
-      .filter((section) => section.rules.length > 0)
-      .map(
-        ({ tag, rules }) =>
-          `### ${TITLES[tag]}\n\n` +
-          rules.map((rule) => `- ${describe(rule)}`).join('\n'),
-      )
-      .join('\n\n');
-
   const groups = new Set(rules.flatMap(({ group }) => (group ? [group] : [])));
+  for (const key of Object.keys(docs.groups ?? {})) {
+    if (!groups.has(key))
+      problems.push(`Docs groups "${key}": no rule uses it`);
+  }
+
+  const renderByImportance = async (
+    items: Rule[],
+    group?: string,
+  ): Promise<string[]> => {
+    const parts: string[] = [];
+    for (const tag of ORDER) {
+      const tagged = items.filter((rule) => (rule.importance ?? 'A') === tag);
+      if (tagged.length === 0) continue;
+      const slot = docs.importances?.[tag];
+      const text = await resolveText(slot?.text, `importances "${tag}"`, {
+        group,
+        importance: tag,
+      });
+      parts.push(
+        [
+          `### ${slot?.title ?? TITLES[tag]}`,
+          ...(text ? [text] : []),
+          tagged.map((rule) => `- ${describe(rule)}`).join('\n'),
+        ].join('\n\n'),
+      );
+    }
+    return parts;
+  };
+
   const areas = [
     ...(rules.some(({ group }) => !group) ? [undefined] : []),
     ...groups,
   ];
-
-  return (
-    [
-      '# Information for AI',
-      ...areas.map(
-        (area) =>
-          `## Rules${area ? ` for ${area[0]?.toUpperCase()}${area.slice(1)}` : ''}\n\n` +
-          renderByImportance(rules.filter(({ group }) => group === area)),
-      ),
-    ].join('\n\n') + '\n'
-  );
+  const sections: string[] = [
+    `# ${docs.header ?? 'Information for AI'}`,
+    AODI_LEGEND,
+  ];
+  const intro = await resolveText(docs.intro, 'intro');
+  if (intro) sections.push(intro);
+  for (const area of areas) {
+    const slot = area ? docs.groups?.[area] : docs.ungrouped;
+    const text = await resolveText(
+      slot?.text,
+      area ? `groups "${area}"` : 'ungrouped',
+      { group: area },
+    );
+    sections.push(
+      `## ${slot?.title ?? `Rules${area ? ` for ${area[0]?.toUpperCase()}${area.slice(1)}` : ''}`}`,
+      ...(text ? [text] : []),
+      ...(await renderByImportance(
+        rules.filter(({ group }) => group === area),
+        area,
+      )),
+    );
+  }
+  return sections.join('\n\n') + '\n';
 };
 
 export const buildDocs = async <K extends string>(
@@ -169,13 +218,33 @@ export const buildDocs = async <K extends string>(
       problems.push(`Rule "${id}": missing file ${instruction.file}`);
     }
   }
-  const markdown = renderRules(
+  const resolveText: Resolve = async (text, label, meta) => {
+    if (!text) return undefined;
+    const docsRef = (key: string): string => {
+      if (key in refs) return link('root.md', target(key), key);
+      problems.push(`Docs ${label}: unknown ref "${key}"`);
+      return key;
+    };
+    if (typeof text === 'function')
+      return text({ ref: docsRef, ...meta }).trim();
+    try {
+      return (await readSource(configDir, text.file))
+        .replace(REF, (_, key: string) => docsRef(key))
+        .trim();
+    } catch {
+      problems.push(`Docs ${label}: missing file ${text.file}`);
+      return undefined;
+    }
+  };
+  const markdown = await renderRules(
     rules,
     ({ id, instruction }) =>
       typeof instruction === 'function'
         ? `\`${id}\`: ${instruction({ ref })}`
         : `[${id}](${instructionPath(id)})`,
     problems,
+    config.docs ?? {},
+    resolveText,
   );
 
   const [primary = DEFAULT_OUTPUT[0] as Output, ...others] =

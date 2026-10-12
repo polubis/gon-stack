@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { config } from '../config.js';
 import type { Config, Rule } from '../config.js';
-import { buildDocs } from '../docs.js';
+import { AODI_LEGEND, buildDocs } from '../docs.js';
 
 type Output = { path: string; root: string };
 
@@ -52,7 +52,9 @@ describe('Root docs layout works when', () => {
     (await build({}, config({ rules }))).read('.ai', 'AGENTS.md');
 
   it('renders only the heading when there are no rules', async () => {
-    expect(await render([])).toBe('# Information for AI\n');
+    expect(await render([])).toBe(
+      '# Information for AI\n\n' + AODI_LEGEND + '\n',
+    );
   });
 
   it('renders all importance sections in A, O, D, I order', async () => {
@@ -66,6 +68,7 @@ describe('Root docs layout works when', () => {
     ).toBe(
       [
         '# Information for AI',
+        AODI_LEGEND,
         '## Rules\n\n### (A) Always\n\n- `a`: a',
         '### (O) Optional\n\n- `o`: o',
         '### (D) When directly mentioned\n\n- `d`: d',
@@ -449,5 +452,135 @@ describe('Outputs work when', () => {
       join('two', 'B.md'),
       join('three', 'C.md'),
     ]);
+  });
+});
+
+describe('Docs customization works when', () => {
+  const rules = [
+    inline('a', { group: 'git', importance: 'D' }),
+    inline('b'),
+    inline('c', { group: 'git' }),
+  ];
+
+  it('defaults keep the heading and section titles', async () => {
+    const { first } = await build({}, { rules });
+    expect(first).toBe(
+      [
+        '# Information for AI',
+        AODI_LEGEND,
+        '## Rules',
+        '### (A) Always',
+        '- `b`: b',
+        '## Rules for Git',
+        '### (A) Always',
+        '- `c`: c',
+        '### (D) When directly mentioned',
+        '- `a`: a',
+      ].join('\n\n') + '\n',
+    );
+  });
+
+  it('renders header, intro, titles and texts in place', async () => {
+    const { first, problems } = await build(
+      { 'intro.md': 'Hello {{ref:k}}\r\n', 'k.md': 'k' },
+      {
+        docs: {
+          header: 'Guide',
+          intro: { file: './intro.md' },
+          ungrouped: { title: 'Core', text: () => 'core text' },
+          groups: { git: { title: 'VCS', text: () => 'git text' } },
+          importances: { D: { title: 'Rare', text: () => 'rare text' } },
+        },
+        knowledge: { refs: { k: './k.md' } },
+        rules,
+      },
+    );
+    expect(problems).toEqual([]);
+    expect(first).toBe(
+      [
+        '# Guide',
+        AODI_LEGEND,
+        'Hello [k](references/k.md)',
+        '## Core',
+        'core text',
+        '### (A) Always',
+        '- `b`: b',
+        '## VCS',
+        'git text',
+        '### (A) Always',
+        '- `c`: c',
+        '### Rare',
+        'rare text',
+        '- `a`: a',
+      ].join('\n\n') + '\n',
+    );
+  });
+
+  it('passes group and importance metadata to function texts', async () => {
+    const { first } = await build(
+      {},
+      {
+        docs: {
+          intro: ({ group, importance }) => `${group}|${importance}`,
+          groups: { git: { text: ({ group }) => `g:${group}` } },
+          importances: {
+            A: {
+              text: ({ group, importance }) => `i:${group}:${importance}`,
+            },
+          },
+        },
+        rules,
+      },
+    );
+    expect(first).toContain('undefined|undefined');
+    expect(first).toContain('g:git');
+    expect(first).toContain('i:git:A');
+    expect(first).toContain('i:undefined:A');
+  });
+
+  it('links refs from function texts relative to the root', async () => {
+    const { first, problems } = await build(
+      { 'k.md': 'k' },
+      {
+        docs: { intro: ({ ref }) => `see ${ref('k')}` },
+        knowledge: { refs: { k: './k.md' } },
+        rules,
+      },
+    );
+    expect(problems).toEqual([]);
+    expect(first).toContain('see [k](references/k.md)');
+  });
+
+  it('reports missing files, unknown refs and unused group keys', async () => {
+    const { problems } = await build(
+      { 'bad.md': '{{ref:nope}}' },
+      {
+        docs: {
+          intro: { file: './gone.md' },
+          ungrouped: { text: { file: './bad.md' } },
+          groups: { ghost: { title: 'Ghost' } },
+          importances: { O: { title: 'Unused' } },
+        },
+        rules,
+      },
+    );
+    expect(problems).toEqual([
+      'Docs groups "ghost": no rule uses it',
+      'Docs intro: missing file ./gone.md',
+      'Docs ungrouped: unknown ref "nope"',
+    ]);
+  });
+});
+
+describe('AODI legend works when', () => {
+  it('comes right after the header even with custom header and intro', async () => {
+    const { first } = await build(
+      {},
+      {
+        docs: { header: 'X', intro: () => 'y' },
+        rules: [inline('a')],
+      },
+    );
+    expect(first?.startsWith('# X\n\n' + AODI_LEGEND + '\n\ny\n')).toBe(true);
   });
 });

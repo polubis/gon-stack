@@ -53,7 +53,24 @@ export type Settings = {
   [key: string]: unknown;
 };
 
+export type DocsText<K extends string> =
+  | ((helpers: {
+      ref: (key: K) => string;
+      group?: string;
+      importance?: Importance;
+    }) => string)
+  | { file: string };
+
+type DocsSlot<K extends string> = { title?: string; text?: DocsText<K> };
+
 export type Config<K extends string = string> = {
+  docs?: {
+    header?: string;
+    intro?: DocsText<K>;
+    ungrouped?: DocsSlot<K>;
+    groups?: Record<string, DocsSlot<K>>;
+    importances?: Partial<Record<Importance, DocsSlot<K>>>;
+  };
   output?: { path: string; root: string }[];
   settings?: Settings;
   knowledge?: { dir?: string; refs?: Record<K, string> };
