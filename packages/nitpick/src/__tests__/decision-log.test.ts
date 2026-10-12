@@ -3,17 +3,17 @@ import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { validateDecisionEntry } from '../rules/decision-entry.js';
+import { validateDecisionLog } from '../rules/decision-log.js';
 import { run } from '../run.js';
 
-const rulePath = join(import.meta.dirname, '..', 'rules', 'decision-entry.ts')
+const rulePath = join(import.meta.dirname, '..', 'rules', 'decision-log.ts')
   .split(String.fromCharCode(92))
   .join('/');
 
-const CONFIG = String.raw`import { createDecisionEntry } from '${rulePath}';
+const CONFIG = String.raw`import { decisionLog } from '${rulePath}';
 export default {
   rules: [
-    createDecisionEntry({
+    decisionLog({
       scopes: [/^(repo|claude|nitpick)$/, /^(parka|uih)(\/[a-z0-9-]+)*$/],
     }),
   ],
@@ -94,7 +94,7 @@ const OPTIONS = {
 };
 
 const problemsOf = (content: string, name = NAME, existing: number[] = []) =>
-  validateDecisionEntry(name, content, existing, OPTIONS).join('\n');
+  validateDecisionLog(name, content, existing, OPTIONS).join('\n');
 
 const failsWith = (
   content: string,
@@ -125,7 +125,7 @@ describe('Decision entry rule accepts', () => {
       '- Order: hero, limits\n  - Nested detail\n    - Deeper detail\n- Second\n',
     );
     expect(
-      validateDecisionEntry(
+      validateDecisionLog(
         'decisions/0002-parka-order-tiles.md',
         full,
         [1],
@@ -176,7 +176,7 @@ describe('Decision entry rule rejects', () => {
 
   it('a commit without any entry', async () => {
     expect(await commitCheck({}, { 'a.ts': 'x' })).toBe(1);
-    expect(output()).toContain('[decision-entry] No new "decisions/');
+    expect(output()).toContain('[decision-log] No new "decisions/');
     expect(output()).toContain('Fix: Add exactly one new file');
   });
 

@@ -366,7 +366,7 @@ const validateEntry = (
   return problems.map((problem) => `${file}: ${problem}`);
 };
 
-export const validateDecisionEntry = (
+export const validateDecisionLog = (
   file: string,
   content: string,
   existing: number[],
@@ -386,12 +386,12 @@ export const validateDecisionEntry = (
       ];
 };
 
-export const createDecisionEntry = (options: Options): Rule<never> => ({
-  id: 'decision-entry',
+export const decisionLog = (options: Options): Rule<never> => ({
+  id: 'decision-log',
   group: 'general',
   fix: `Add exactly one new file to the commit and stage it (a commit that only moves or edits files in decisions/ needs none). Template:\n${TEMPLATE}\nSummary ${SUMMARY.min}-${SUMMARY.max} chars, why ${WHY.min}-${WHY.max} chars, slug ${SLUG.min}-${SLUG.max} chars, ${BULLETS.min}-${BULLETS.max} bullets of max ${LINE_MAX} chars. Allowed scopes: ${options.scopes.map(String).join(' ')}`,
   instruction: {
-    file: fileURLToPath(new URL('decision-entry.md', import.meta.url)),
+    file: fileURLToPath(new URL('decision-log.md', import.meta.url)),
   },
   check: async ({ files, git, readText, report }) => {
     for (const file of git.stagedAddedFiles.filter((item) =>
@@ -418,7 +418,7 @@ export const createDecisionEntry = (options: Options): Rule<never> => ({
       .filter((number) => number !== undefined)
       .map(Number);
     for (const file of entries)
-      for (const problem of validateDecisionEntry(
+      for (const problem of validateDecisionLog(
         file,
         await readText(file),
         existing,

@@ -31,4 +31,4 @@ Applies to every session.
 
 Rules tagged A in general: follow always.
 
-- [decision-entry](rules/decision-entry.md)
+- [decision-log](rules/decision-log.md)

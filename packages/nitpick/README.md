@@ -13,7 +13,7 @@ Implemented:
 - Check snapshot: `files`, `readText`, `git`, `meta`
 - Per-rule `include` / `exclude`
 - `rules` as an array or a function
-- Ready-made rules: `richCommit`, `createDecisionEntry`
+- Ready-made rules: `richCommit`, `decisionLog`
 - Claude Code settings: `settings` option generates `settings.json` / `settings.local.json` and `.mcp.json`
 
 Covered by tests: 100% statements, branches, functions and lines (enforced by `test:coverage`; `cli.ts` is excluded).
@@ -201,9 +201,9 @@ Id `rich-commit`, importance `A`. Its instruction lives in the library (`src/rul
 - Body contains at least one `- ` change list item.
 - Body is only a `- ` list (nested ` -` items allowed). Nothing may follow it: no blank lines, prose, footers, `Key: value` trailers, references (`Refs`, `Fixes`, `Closes`), `Co-authored-by`, `Signed-off-by` or AI credits.
 
-## `createDecisionEntry` rule
+## `decisionLog` rule
 
-Factory `createDecisionEntry({ scopes })`, id `decision-entry`, group `general`, importance `A`. Instruction `src/rules/decision-entry.md`. `scopes`: regexes a `scope` must match (see `.nitpick/config.ts`). Validates `git.stagedAddedFiles` / `git.stagedFiles` (works with `--commit-msg`, i.e. in the `commit-msg` hook):
+Factory `decisionLog({ scopes })`, id `decision-log`, group `general`, importance `A`. Instruction `src/rules/decision-log.md`. `scopes`: regexes a `scope` must match (see `.nitpick/config.ts`). Validates `git.stagedAddedFiles` / `git.stagedFiles` (works with `--commit-msg`, i.e. in the `commit-msg` hook):
 
 - Exactly one newly staged file `decisions/NNNN-<scope-prefix>-<verb>-<object>.md`. New files under any `__log__/` are reported as wrong location. A commit that only touches `decisions/` files (moves, edits) needs no new entry.
 - Name: `NNNN` = max existing + 1, slug `[a-z0-9-]` 8-60 chars, starts with the first `scope` segment, then a verb from the allow-list (`VERBS` in the rule), then an object.

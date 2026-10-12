@@ -18,4 +18,4 @@ tags: [{kebab-tag}]
 - required: `ticket`, `scope`, `summary`, `why`. Optional: `date`, `supersedes`, `tags`
 - optional metrics, only if known from the conversation, skip otherwise: `models`, `inputTokens`, `outTokens`, `cost`, `workTimeInMinutes`
 - body: only nested `- ` list, no heading, prose or code fence
-- bounds and allowed scopes: `packages/nitpick/src/rules/decision-entry.md`, `.nitpick/config.ts`
+- bounds and allowed scopes: `packages/nitpick/src/rules/decision-log.md`, `.nitpick/config.ts`
