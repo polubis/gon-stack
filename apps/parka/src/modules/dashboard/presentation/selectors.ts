@@ -6,7 +6,11 @@ import {
   WARN_PCT,
 } from '../configuration/constraints';
 import { monthOf } from '../domain/format';
-import { containsDate, limitForPeriod } from '@/shared/period/period';
+import {
+  containsDate,
+  containsDay,
+  limitForPeriod,
+} from '@/shared/period/period';
 import type {
   Category,
   CategoryId,
@@ -30,13 +34,16 @@ const UPCOMING_PREFIX = 'upcoming:';
 export const UPCOMING_LIMIT = 3;
 
 /**
- * The next payment of each rule after `today` (`YYYY-MM-DD`), nearest first.
+ * The next payment of each rule after `today` (`YYYY-MM-DD`): the nearest
+ * `UPCOMING_LIMIT` of them, shown latest first.
  * One per rule: the same rule repeated would only duplicate what is on
- * screen. A projection: never stored, never part of a sum or a limit.
+ * screen. With a `period` only payments inside it are kept. A projection:
+ * never stored, never part of a sum or a limit.
  */
 export const upcomingCharges = (
   recurring: Recurring[],
   today: string,
+  period?: Period,
 ): Upcoming[] =>
   recurring
     .flatMap((r) =>
@@ -46,8 +53,10 @@ export const upcomingCharges = (
         date,
       })),
     )
+    .filter((u) => period === undefined || containsDay(period, u.date))
     .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
-    .slice(0, UPCOMING_LIMIT);
+    .slice(0, UPCOMING_LIMIT)
+    .reverse();
 
 /** Weekly / monthly / yearly in the app's language. */
 export const intervalLabel = (interval: RecurringInterval): string => {

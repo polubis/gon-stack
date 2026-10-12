@@ -137,7 +137,7 @@ describe('upcoming recurring payments', () => {
     delivery: 'push',
   } as unknown as Limit;
 
-  it('announces the next payment of each rule, nearest first', () => {
+  it('announces the next payment of each rule, latest first', () => {
     const list = [
       asRecurring(),
       asRecurring({ id: 'r-2', name: 'Prąd', startDate: '2025-06-25' }),
@@ -149,9 +149,21 @@ describe('upcoming recurring payments', () => {
         u.date,
       ]),
     ).toEqual([
-      ['Prąd', '2025-06-25'],
       ['Netflix', '2025-07-15'],
+      ['Prąd', '2025-06-25'],
     ]);
+  });
+
+  it('keeps only payments inside the selected range, latest first', () => {
+    const list = [
+      asRecurring({ id: 'r-1', name: 'Późno', startDate: '2025-06-28' }),
+      asRecurring({ id: 'r-2', name: 'Poza', startDate: '2025-07-02' }),
+      asRecurring({ id: 'r-3', name: 'Wcześnie', startDate: '2025-06-22' }),
+    ];
+
+    expect(
+      upcomingCharges(list, '2025-06-20', TEST_PERIOD).map((u) => u.date),
+    ).toEqual(['2025-06-28', '2025-06-22']);
   });
 
   it('announces nothing for a paused or finished rule', () => {

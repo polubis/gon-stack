@@ -1,7 +1,7 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { addDays, todayDay } from '@/shared/period/period';
+import { addDays, periodContaining, todayDay } from '@/shared/period/period';
 import { Main } from '../presentation/main';
 import { readBody } from './dashboard-backend';
 
@@ -79,6 +79,20 @@ describe('upcoming payment', () => {
     expect(expenses.getByText(/^0 · /)).toBeVisible();
   });
 
+  it('stays hidden when its date falls beyond the selected range', async () => {
+    const nextMonth = addDays(periodContaining('month', todayDay()).to, 1);
+    stubApi({
+      recurring: [{ ...rule(), startDate: nextMonth }],
+      categories: [CATEGORY],
+    });
+    render(<Main />);
+    const expenses = within(
+      await screen.findByRole('region', { name: 'Wydatki' }),
+    );
+
+    expect(expenses.getByText('Brak wydatków w tym okresie.')).toBeVisible();
+    expect(screen.queryByRole('region', { name: /Nadchodzące/ })).toBeNull();
+  });
   it('says that editing reaches this and the following payments', async () => {
     const user = userEvent.setup();
     render(<Main />);

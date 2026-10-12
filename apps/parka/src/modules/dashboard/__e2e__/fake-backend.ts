@@ -74,13 +74,16 @@ const without = <T extends Row>(list: T[], id: string | undefined): T[] =>
 export const installBackend = async (
   page: Page,
   seed: Seed,
+  fixedToday?: string,
 ): Promise<Backend> => {
   const state: Seed = structuredClone(seed);
+  const todayOf = (timeZone?: string): string =>
+    fixedToday ?? todayDay(timeZone);
   const requests: { method: string; path: string }[] = [];
 
   /** Turns due occurrences into expenses, once each, like the server does. */
   const materialize = (timeZone?: string) => {
-    const today = todayDay(timeZone);
+    const today = todayOf(timeZone);
     for (const rule of state.recurring) {
       const due = dueOccurrences(rule, today);
       for (const day of due) {
@@ -114,7 +117,7 @@ export const installBackend = async (
     to?: string,
     timeZone?: string,
   ) => {
-    const today = todayDay(timeZone);
+    const today = todayOf(timeZone);
     const period = clampPeriod(resolvePeriod(kind, from, to), today);
     const previous = shiftPeriod(period, -1);
     const total = state.limits.find((l) => l.scope === 'total');
@@ -145,7 +148,7 @@ export const installBackend = async (
         code: 200,
         data: summary(
           (url.searchParams.get('kind') ?? 'month') as PeriodKind,
-          url.searchParams.get('from') ?? todayDay(),
+          url.searchParams.get('from') ?? todayOf(),
           url.searchParams.get('to') ?? undefined,
           url.searchParams.get('tz') ?? undefined,
         ),

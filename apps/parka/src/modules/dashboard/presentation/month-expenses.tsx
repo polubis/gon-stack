@@ -220,7 +220,7 @@ export const MonthExpenses = ({
   const today = todayDay();
   // Only the present period looks ahead; a past one is just history.
   const upcoming = containsDate(period, today)
-    ? upcomingCharges(recurring, today)
+    ? upcomingCharges(recurring, today, period)
     : [];
   const inPeriod = expensesInPeriod(expenses, period);
   const tabs = categoryTabs(inPeriod, categories);

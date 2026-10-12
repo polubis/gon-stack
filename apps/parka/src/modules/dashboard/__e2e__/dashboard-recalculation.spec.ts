@@ -37,14 +37,17 @@ const expense = (
   items: [],
 });
 
-const NETFLIX_DAY = `${month()}-02`;
+/** A fixed present keeps the month's upcoming payments independent of the real date. */
+const TODAY = `${month()}-03`;
+
+const NETFLIX_DAY = `${month()}-01`;
 
 /** A rule that already charged this month's payment (an ordinary expense now). */
 const NETFLIX = {
   id: 'r-1',
   name: 'Netflix',
   cost: 30,
-  interval: 'monthly' as const,
+  interval: 'weekly' as const,
   startDate: NETFLIX_DAY,
   endDate: null,
   lastMaterializedDate: NETFLIX_DAY,
@@ -60,9 +63,9 @@ const NETFLIX_CHARGE = {
   occurrenceDate: NETFLIX_DAY,
 };
 
-/** `YYYY-MM-DD` of the local day `offset` days from today. */
+/** `YYYY-MM-DD` of the day `offset` days from the fixed present. */
 const day = (offset: number): string => {
-  const target = new Date();
+  const target = new Date(`${TODAY}T12:00:00`);
   target.setDate(target.getDate() + offset);
   return `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, '0')}-${String(target.getDate()).padStart(2, '0')}`;
 };
@@ -95,7 +98,8 @@ const open = async (page: Page, path: string): Promise<void> => {
 
 const openDashboardWith = async (page: Page, seed: Seed): Promise<void> => {
   await signInAsTestUser(page);
-  backends.set(page, await installBackend(page, seed));
+  await page.clock.setFixedTime(new Date(`${TODAY}T12:00:00`));
+  backends.set(page, await installBackend(page, seed, TODAY));
   await open(page, APP_ROUTER.dashboard());
 };
 
