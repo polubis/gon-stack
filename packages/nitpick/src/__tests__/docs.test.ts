@@ -295,3 +295,88 @@ describe('Multiple outputs work when', () => {
     );
   });
 });
+
+describe('Settings generation works when', () => {
+  const build = async (settings: Parameters<typeof config>[0]['settings']) => {
+    const root = await setup({});
+    const docs = await buildDocs(
+      config({
+        output: [
+          { path: 'out', root: 'A.md' },
+          { path: 'other', root: 'B.md' },
+        ],
+        settings,
+        rules: () => [],
+      }),
+      join(root, '.nitpick'),
+      root,
+    );
+    return { root, ...docs };
+  };
+
+  it('writes settings only under the first output', async () => {
+    const { root, files, problems } = await build({
+      permissions: { allow: ['Bash(ls)'] },
+      env: { MODE: 'dev' },
+    });
+    expect(problems).toEqual([]);
+    expect(files.get(join(root, 'out', 'settings.json'))).toBe(
+      '{\n  "permissions": {\n    "allow": [\n      "Bash(ls)"\n    ]\n  },\n  "env": {\n    "MODE": "dev"\n  }\n}\n',
+    );
+    expect(files.has(join(root, 'other', 'settings.json'))).toBe(false);
+    expect(files.has(join(root, '.mcp.json'))).toBe(false);
+  });
+
+  it('uses the local name and passes extra keys through', async () => {
+    const { root, files } = await build({
+      name: 'settings.local.json',
+      model: 'opus',
+    });
+    expect(files.get(join(root, 'out', 'settings.local.json'))).toBe(
+      '{\n  "model": "opus"\n}\n',
+    );
+  });
+
+  it('writes .mcp.json and enables its servers', async () => {
+    const { root, files, problems } = await build({
+      mcp: {
+        local: { command: 'npx', args: ['x'], env: { TOKEN: '${TOKEN}' } },
+        remote: { type: 'http', url: 'https://a.b', headers: { A: '${A:-x}' } },
+      },
+    });
+    expect(problems).toEqual([]);
+    expect(JSON.parse(files.get(join(root, '.mcp.json')) ?? '')).toEqual({
+      mcpServers: {
+        local: { command: 'npx', args: ['x'], env: { TOKEN: '${TOKEN}' } },
+        remote: { type: 'http', url: 'https://a.b', headers: { A: '${A:-x}' } },
+      },
+    });
+    expect(
+      JSON.parse(files.get(join(root, 'out', 'settings.json')) ?? ''),
+    ).toEqual({ enabledMcpjsonServers: ['local', 'remote'] });
+  });
+
+  it('skips .mcp.json for empty mcp', async () => {
+    const { root, files } = await build({ mcp: {} });
+    expect(files.has(join(root, '.mcp.json'))).toBe(false);
+  });
+
+  it('reports literal secrets, bad name and empty server name', async () => {
+    const { problems } = await build({
+      name: 'x.json' as 'settings.json',
+      env: { API_KEY: 'abc', LONG: 'abcdefghijklmnopqrstuvwxyz' },
+      mcp: {
+        ' ': { command: 'a', env: { SECRET: 'x' } },
+        r: { type: 'sse', url: 'u', headers: { Authorization: 'Bearer x' } },
+      },
+    });
+    expect(problems).toEqual([
+      'Settings name "x.json": use settings.json or settings.local.json',
+      'Settings mcp: empty server name',
+      'Settings mcp " " env "SECRET": looks like a literal secret, use ${VAR} expansion',
+      'Settings mcp "r" headers "Authorization": looks like a literal secret, use ${VAR} expansion',
+      'Settings env "API_KEY": looks like a literal secret, use ${VAR} expansion',
+      'Settings env "LONG": looks like a literal secret, use ${VAR} expansion',
+    ]);
+  });
+});

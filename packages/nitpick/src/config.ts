@@ -29,8 +29,33 @@ export type Rule<K extends string = string> = RuleBase<K> &
     | { check?: undefined; fix?: string }
   );
 
+export type McpServer =
+  | {
+      type?: 'stdio';
+      command: string;
+      args?: string[];
+      env?: Record<string, string>;
+    }
+  | { type: 'http' | 'sse'; url: string; headers?: Record<string, string> };
+
+export type Settings = {
+  name?: 'settings.json' | 'settings.local.json';
+  permissions?: {
+    allow?: string[];
+    ask?: string[];
+    deny?: string[];
+    defaultMode?: string;
+    additionalDirectories?: string[];
+  };
+  hooks?: Record<string, unknown>;
+  env?: Record<string, string>;
+  mcp?: Record<string, McpServer>;
+  [key: string]: unknown;
+};
+
 export type Config<K extends string = string> = {
   output?: { path: string; root: string }[];
+  settings?: Settings;
   knowledge?: { dir?: string; refs?: Record<K, string> };
   rules:
     Rule<K>[] | ((helpers: { rule: (rule: Rule<K>) => Rule<K> }) => Rule<K>[]);

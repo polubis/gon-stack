@@ -14,6 +14,7 @@ Implemented:
 - Per-rule `include` / `exclude`
 - `rules` as an array or a function
 - Ready-made rules: `richCommit`, `createDecisionEntry`
+- Claude Code settings: `settings` option generates `settings.json` / `settings.local.json` and `.mcp.json`
 
 Covered by tests: 100% statements, branches, functions and lines (enforced by `test:coverage`; `cli.ts` is excluded).
 
@@ -43,6 +44,24 @@ import { richCommit } from '@repo/nitpick/rules/rich-commit';
 export default config({
   output: [{ path: '.claude', root: 'CLAUDE.md' }], // default: [{ path: '.ai', root: 'AGENTS.md' }]
 
+  settings: {
+    name: 'settings.json', // or 'settings.local.json'; default 'settings.json'
+    permissions: { allow: ['Bash(pnpm test:*)'] },
+    env: { API_URL: '${API_URL}' },
+    mcp: {
+      files: {
+        command: 'npx',
+        args: ['-y', 'some-mcp'],
+        env: { TOKEN: '${TOKEN}' },
+      },
+      docs: {
+        type: 'http',
+        url: 'https://example.com/mcp',
+        headers: { Authorization: 'Bearer ${DOCS_TOKEN}' },
+      },
+    },
+  },
+
   knowledge: {
     dir: 'references', // default: 'references'
     refs: { 'react/state': './knowledge/react/state.md' },
@@ -71,10 +90,22 @@ Override a ready-made rule by spreading it: `{ ...richCommit, importance: 'D' }`
 
 ### Output
 
+- With `settings`, `<name>` is written under the first `output` entry; `.mcp.json` goes to the project root. Other entries are unaffected. `--check` reports them as `[sync] <path> is out of date, run nitpick --sync`.
 - The first `output` entry gets the full docs: `<path>/<root>` (root docs), `<path>/rules/<id>.md` (file instructions) and `<path>/<knowledge.dir>/<key>.md` (knowledge). Every next entry is a single file with `Follow instructions here: [<first root>](<relative path>)`.
 - `ref(key)` in `instruction` becomes a markdown link relative to the root file. Unknown key is a config error.
 - `{{ref:key}}` in a knowledge file becomes a link relative to that file.
 - Source paths in `refs` are relative to `.nitpick/`. `output.path` and globs are relative to the project root.
+
+### Settings
+
+Optional top-level `settings` (inline object only) generates Claude Code settings.
+
+- `name`: `settings.json` (default) or `settings.local.json`. Other value is a config error.
+- `permissions`, `hooks`, `env` are typed; any other key passes through unchanged.
+- `mcp`: `Record<name, McpServer>`. Stdio `{ command, args?, env? }` or remote `{ type: 'http' | 'sse', url, headers? }`. Empty server name is a config error.
+- `name` and `mcp` are not emitted into the settings JSON. When `mcp` has servers, `.mcp.json` (`{ "mcpServers": {...} }`) is written at the project root and `enabledMcpjsonServers: [names]` is added to the settings file, because Claude Code reads project MCP servers from `.mcp.json`.
+- Secret heuristic (config error, exit 3) for `env` values and MCP `env` / `headers` values: a value without `${VAR}` (or `${VAR:-default}`) expansion is rejected when its key matches `token|secret|key|password|passwd|auth|credential|bearer` (case-insensitive) or the value looks like a token (optional `Bearer ` plus 20+ chars of `[A-Za-z0-9_-./+=]`).
+- Output: deterministic JSON (2-space indent, trailing newline, key order as in config).
 
 ### CheckContext
 
@@ -83,8 +114,8 @@ Override a ready-made rule by spreading it: `{ ...richCommit, importance: 'D' }`
 | `files`                     | Files from `git ls-files --cached --others --exclude-standard`, sorted, without tracked files deleted from disk, filtered by the rule's `include` / `exclude`. Globs follow `path.matchesGlob`, so `**` does not enter dot folders: use `.ai/**` explicitly |
 | `readText(file)`            | Reads UTF-8 text (path relative to project root), cached per run                                                                                                                                                                                            |
 | `git.commitMessages`        | Last commit by default; `--commit-msg <file>` uses file content; `--range <a..b>` uses commits in range (invalid range = exit 2)                                                                                                                            |
-| `git.stagedAddedFiles` | Files newly added to the index (`git diff --cached --diff-filter=A`), sorted, filtered by the rule's `include` / `exclude`. Git rename detection applies: a moved file that was rewritten a lot is reported as added |
-| `git.stagedFiles` | All files changed in the index (`git diff --cached --name-only`), same sorting and filtering |
+| `git.stagedAddedFiles`      | Files newly added to the index (`git diff --cached --diff-filter=A`), sorted, filtered by the rule's `include` / `exclude`. Git rename detection applies: a moved file that was rewritten a lot is reported as added                                        |
+| `git.stagedFiles`           | All files changed in the index (`git diff --cached --name-only`), same sorting and filtering                                                                                                                                                                |
 | `git.lastCommitMessages(n)` | Last `n` commit messages                                                                                                                                                                                                                                    |
 | `report(message)`           | Reports a problem as `[ruleId] message`                                                                                                                                                                                                                     |
 | `meta`                      | `{ ruleId, projectRoot }`                                                                                                                                                                                                                                   |
@@ -136,7 +167,7 @@ Id `rich-commit`, importance `A`. Its instruction lives in the library (`src/rul
 - Subject `type(scope)!: title`; types: `feat fix docs style refactor perf test build ci chore revert`; scope required.
 - Blank line after the subject.
 - Body contains at least one `- ` change list item.
-- Body is only a `- ` list (nested `  - ` items allowed). Nothing may follow it: no blank lines, prose, footers, `Key: value` trailers, references (`Refs`, `Fixes`, `Closes`), `Co-authored-by`, `Signed-off-by` or AI credits.
+- Body is only a `- ` list (nested ` -` items allowed). Nothing may follow it: no blank lines, prose, footers, `Key: value` trailers, references (`Refs`, `Fixes`, `Closes`), `Co-authored-by`, `Signed-off-by` or AI credits.
 
 ## `createDecisionEntry` rule
 

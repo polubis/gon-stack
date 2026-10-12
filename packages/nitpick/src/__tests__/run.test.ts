@@ -301,3 +301,38 @@ describe('Violation guidance works when', () => {
     expect(guidance).toEqual([]);
   });
 });
+
+describe('CLI settings works when', () => {
+  const source = withRule(
+    '',
+    "settings: { env: { MODE: 'dev' }, mcp: { s: { command: 'x' } } },",
+  );
+
+  it('sync writes settings and .mcp.json, then check passes', async () => {
+    const root = await project(source);
+    expect(await run(['--sync'], root)).toBe(0);
+    expect(await readFile(join(root, '.mcp.json'), 'utf8')).toBe(
+      '{\n  "mcpServers": {\n    "s": {\n      "command": "x"\n    }\n  }\n}\n',
+    );
+    expect(
+      JSON.parse(await readFile(join(root, '.ai', 'settings.json'), 'utf8')),
+    ).toEqual({ env: { MODE: 'dev' }, enabledMcpjsonServers: ['s'] });
+    expect(await run(['--check'], root)).toBe(0);
+  });
+
+  it('check reports outdated settings files', async () => {
+    const root = await synced(source);
+    await writeFile(join(root, '.mcp.json'), '{}');
+    expect(await run(['--check'], root)).toBe(1);
+    expect(errors).toEqual([
+      '[sync] .mcp.json is out of date, run nitpick --sync',
+    ]);
+  });
+
+  it('exits 3 for a literal secret', async () => {
+    const root = await project(
+      withRule('', "settings: { env: { API_KEY: 'abc' } },"),
+    );
+    expect(await run(['--check'], root)).toBe(3);
+  });
+});

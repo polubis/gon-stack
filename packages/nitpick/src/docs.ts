@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { basename, dirname, join, posix, relative, resolve } from 'node:path';
 import { resolveRules } from './config.js';
 import type { Config, Importance, Rule } from './config.js';
+import { buildSettings } from './settings.js';
 
 type Docs = {
   files: Map<string, string>;
@@ -202,6 +203,12 @@ export const buildDocs = async <K extends string>(
       file,
       `Follow instructions here: [${basename(primaryPath)}](${to})\n`,
     );
+  }
+
+  if (config.settings) {
+    const built = buildSettings(config.settings, primary.path, projectRoot);
+    problems.push(...built.problems);
+    for (const [file, text] of built.files) files.set(file, text);
   }
 
   const rulePaths = new Map(
