@@ -30,11 +30,20 @@ type Category = Row & { name: string; icon: string; color: string };
 type Limit = Row & { scope: 'total' | 'category'; amount: number };
 type Recurring = RecurringRule & { paymentMethod: string };
 
+type Suggestion = {
+  field: 'merchant' | 'paymentMethod';
+  value: string;
+  useCount: number;
+  lastUsed: string | null;
+};
+
 export type Seed = {
   categories: Category[];
   expenses: Expense[];
   limits: Limit[];
   recurring: Recurring[];
+  /** Remembered shop / payment method values; none when omitted. */
+  suggestions?: Suggestion[];
 };
 
 export type Backend = {
@@ -76,7 +85,8 @@ export const installBackend = async (
   seed: Seed,
   fixedToday?: string,
 ): Promise<Backend> => {
-  const state: Seed = structuredClone(seed);
+  const state = structuredClone(seed);
+  let suggestions: Suggestion[] = state.suggestions ?? [];
   const todayOf = (timeZone?: string): string =>
     fixedToday ?? todayDay(timeZone);
   const requests: { method: string; path: string }[] = [];
@@ -157,6 +167,24 @@ export const installBackend = async (
 
     if (collection === 'receipts') {
       return json(route, { code: 200, data: SCANNED_RECEIPT });
+    }
+
+    if (collection === 'suggestions') {
+      if (method === 'GET')
+        return json(route, { code: 200, data: suggestions });
+      const body = request.postDataJSON() as Suggestion;
+      const key = body.value.trim().toLowerCase();
+      const known = suggestions.find(
+        (x) => x.field === body.field && x.value.toLowerCase() === key,
+      );
+      const next: Suggestion = {
+        field: body.field,
+        value: body.value,
+        useCount: (known?.useCount ?? 0) + 1,
+        lastUsed: new Date().toISOString(),
+      };
+      suggestions = [...suggestions.filter((x) => x !== known), next];
+      return json(route, { code: 200, ok: true });
     }
 
     if (collection === 'notifications') {

@@ -1,4 +1,3 @@
-import { ClearableInput } from '@/shared/ui/clearable';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Check, LoaderCircle, Plus } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
@@ -9,6 +8,9 @@ import {
 import { APP_ROUTER } from '@/shared/router/routes';
 import { Button, Field, Input, Select, inputClass } from '@/shared/ui/controls';
 import { useRememberedField } from '@/shared/form-memory/presentation/use-remembered-field';
+import { useSuggestions } from '@/shared/form-memory/presentation/use-suggestions';
+import { Typeahead } from '@/shared/form-memory/presentation/typeahead';
+import { topSuggestion } from '@/shared/form-memory/domain/suggestions';
 import { Card } from '@/shared/ui/layout';
 import { NumberInput } from '@/shared/ui/number-input';
 import { money, toTimestamp } from '../domain/format';
@@ -37,7 +39,7 @@ type Props = {
   /** `page` = own route, `dialog` = popup over the dashboard. Same fields. */
   layout: 'page' | 'dialog';
   submitLabel: string;
-  /** Prefill remembered payment method and category (adding, not editing). */
+  /** Prefill the best remembered shop, payment method and category (adding, not editing). */
   prefill?: boolean;
   /** Extra footer buttons (cancel, delete) shown next to the submit. */
   actions?: ReactNode;
@@ -56,28 +58,28 @@ export const ExpenseForm = ({
   onSubmit,
 }: Props) => {
   const dialog = layout === 'dialog';
-  const merchantMemory = useRememberedField({
-    key: 'expense.merchant',
-    enabled: prefill,
-  });
-  const [merchant, setMerchant] = useState(
-    base?.merchant || merchantMemory.recalled || '',
-  );
+  const suggestions = useSuggestions();
+  // `null` = untouched: shows the form's base, else the best remembered value.
+  const [merchantInput, setMerchantInput] = useState<string | null>(null);
+  const [methodInput, setMethodInput] = useState<string | null>(null);
+  const merchant =
+    merchantInput ??
+    (base?.merchant ||
+      (prefill ? topSuggestion(suggestions.items, 'merchant') : null) ||
+      '');
+  const method =
+    methodInput ??
+    (base?.paymentMethod ||
+      (prefill ? topSuggestion(suggestions.items, 'paymentMethod') : null) ||
+      '');
   const [date, setDate] = useState(
     base?.date ? toDateTimeInput(base.date) : nowDateTimeInput(),
   );
-  const methodMemory = useRememberedField({
-    key: 'expense.paymentMethod',
-    enabled: prefill,
-  });
   const categoryMemory = useRememberedField({
     key: 'expense.categoryId',
     enabled: prefill,
     options: categories.map((c) => c.id),
   });
-  const [method, setMethod] = useState(
-    base?.paymentMethod || methodMemory.recalled || '',
-  );
   const [categoryId, setCategoryId] = useState<CategoryId | null>(
     base?.categoryId ?? (categoryMemory.recalled as CategoryId | null),
   );
@@ -116,8 +118,10 @@ export const ExpenseForm = ({
     }
     const timestamp = toTimestamp(date, base?.date);
     if (!timestamp) return;
-    merchantMemory.remember(merchant);
-    methodMemory.remember(method);
+    suggestions.recordUse([
+      { field: 'merchant', value: merchant },
+      { field: 'paymentMethod', value: method },
+    ]);
     if (!hasProducts) categoryMemory.remember(selected);
     onSubmit({
       merchant: merchant.trim(),
@@ -162,12 +166,14 @@ export const ExpenseForm = ({
 
         <Card className="space-y-3">
           <Field label="Sklep">
-            <ClearableInput
+            <Typeahead
               required
+              field="merchant"
               value={merchant}
+              suggestions={suggestions.items}
               placeholder="np. Biedronka"
               data-e2e="expense-form:merchant"
-              onChange={(e) => setMerchant(e.target.value)}
+              onValueChange={setMerchantInput}
             />
           </Field>
           <Field
@@ -213,11 +219,13 @@ export const ExpenseForm = ({
             )}
           </Field>
           <Field label="Metoda płatności">
-            <ClearableInput
+            <Typeahead
+              field="paymentMethod"
               value={method}
+              suggestions={suggestions.items}
               placeholder="np. Karta"
               data-e2e="expense-form:method"
-              onChange={(e) => setMethod(e.target.value)}
+              onValueChange={setMethodInput}
             />
           </Field>
         </Card>

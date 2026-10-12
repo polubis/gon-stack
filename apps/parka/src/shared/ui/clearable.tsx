@@ -22,11 +22,14 @@ const clear = (el: HTMLInputElement) => {
 export const ClearableInput = ({
   className,
   leading,
+  trailing,
   'aria-label': ariaLabel,
   ...props
 }: ComponentProps<'input'> & {
   /** Absolutely positioned adornment rendered inside the field (e.g. an icon). */
   leading?: ReactNode;
+  /** Control rendered inside the field, left of the clear button. */
+  trailing?: ReactNode;
 }) => {
   const ref = useRef<HTMLInputElement>(null);
   const field = useField();
@@ -44,10 +47,16 @@ export const ClearableInput = ({
         ref={ref}
         aria-label={ariaLabel}
         className={cn(
-          'pr-10 [&::-webkit-search-cancel-button]:hidden',
+          trailing ? 'pr-18' : 'pr-10',
+          '[&::-webkit-search-cancel-button]:hidden',
           className,
         )}
       />
+      {trailing ? (
+        <div className="absolute right-9 top-1/2 -translate-y-1/2">
+          {trailing}
+        </div>
+      ) : null}
       {filled ? (
         <button
           type="button"

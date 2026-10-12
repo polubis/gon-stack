@@ -1,7 +1,9 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { pickOption } from '@/__tests__/pick-option';
-import { http, HttpResponse } from 'msw';
+import { fakeSuggestions } from '@/__tests__/suggestions-backend';
+import type { Suggestion } from '@/shared/form-memory/domain/suggestions';
+import { delay, http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import {
   afterAll,
@@ -39,8 +41,19 @@ const STORED = {
 
 const server = setupServer();
 
+let suggestions = fakeSuggestions();
+
+const saved = (value: string, patch: Partial<Suggestion> = {}): Suggestion => ({
+  field: 'merchant',
+  value,
+  useCount: 1,
+  lastUsed: null,
+  ...patch,
+});
+
 const mockBackend = (categories: object[]) =>
   server.use(
+    ...suggestions.handlers,
     http.get('/api/categories/', () =>
       HttpResponse.json({ code: 200, data: categories }),
     ),
@@ -79,7 +92,10 @@ const addExpense = async (
 
 describe('remembered expense form fields', () => {
   beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
-  beforeEach(() => window.localStorage.clear());
+  beforeEach(() => {
+    window.localStorage.clear();
+    suggestions = fakeSuggestions();
+  });
   afterEach(() => {
     server.resetHandlers();
     navigateTo.mockClear();
@@ -102,7 +118,9 @@ describe('remembered expense form fields', () => {
 
     await openNew();
 
-    expect(screen.getByLabelText('Metoda płatności')).toHaveValue('BLIK');
+    expect(await screen.findByDisplayValue('BLIK')).toBe(
+      screen.getByLabelText('Metoda płatności'),
+    );
     expect(screen.getByLabelText('Kategoria')).toHaveTextContent(FOOD.name);
   });
 
@@ -114,22 +132,80 @@ describe('remembered expense form fields', () => {
 
     await openNew();
 
-    expect(screen.getByLabelText('Sklep')).toHaveValue('Biedronka');
+    expect(await screen.findByDisplayValue('Biedronka')).toBe(
+      screen.getByLabelText('Sklep'),
+    );
   });
 
-  it('prefills the category and method from differently cased memory', async () => {
+  it('prefills the most used shop rather than the last one', async () => {
+    suggestions = fakeSuggestions([
+      saved('Lidl', { useCount: 2, lastUsed: '2026-02-01T00:00:00Z' }),
+      saved('Biedronka', { useCount: 9, lastUsed: '2026-01-01T00:00:00Z' }),
+    ]);
+    mockBackend([FOOD, FUN]);
+    await openNew();
+
+    expect(await screen.findByDisplayValue('Biedronka')).toBe(
+      screen.getByLabelText('Sklep'),
+    );
+  });
+
+  it('counts one more use of the shop and the payment method on save', async () => {
+    suggestions = fakeSuggestions([
+      saved('Kino', { useCount: 4 }),
+      saved('BLIK', { field: 'paymentMethod', useCount: 4 }),
+    ]);
+    mockBackend([FOOD, FUN]);
+    const { user } = await openNew();
+    await screen.findByDisplayValue('Kino');
+    await addExpense(user, 'BLIK', 'Spożywcze');
+
+    await waitFor(() =>
+      expect(
+        suggestions.items().map((s) => [s.field, s.value, s.useCount]),
+      ).toEqual([
+        ['merchant', 'Kino', 5],
+        ['paymentMethod', 'BLIK', 5],
+      ]),
+    );
+  });
+
+  it('does not count a blank payment method', async () => {
+    mockBackend([FOOD, FUN]);
+    const { user } = await openNew();
+    await addExpense(user, '', 'Spożywcze');
+
+    await waitFor(() =>
+      expect(suggestions.items().map((s) => s.field)).toEqual(['merchant']),
+    );
+  });
+
+  it('suggests remembered shops while typing', async () => {
+    suggestions = fakeSuggestions([
+      saved('Biedronka', { useCount: 9 }),
+      saved('Lidl', { useCount: 2 }),
+    ]);
+    mockBackend([FOOD, FUN]);
+    const { user } = await openNew();
+    await screen.findByDisplayValue('Biedronka');
+
+    await user.clear(screen.getByLabelText('Sklep'));
+    await user.type(screen.getByLabelText('Sklep'), 'li');
+
+    expect(screen.getAllByRole('option')).toHaveLength(1);
+    await user.click(screen.getByRole('option', { name: /Lidl/ }));
+    expect(screen.getByLabelText('Sklep')).toHaveValue('Lidl');
+  });
+
+  it('prefills the category from differently cased memory', async () => {
     window.localStorage.setItem(
       'parka:form-memory',
-      JSON.stringify({
-        'expense.categoryId': ' C-1 ',
-        'expense.paymentMethod': '  BLIK ',
-      }),
+      JSON.stringify({ 'expense.categoryId': ' C-1 ' }),
     );
     mockBackend([FOOD, FUN]);
     await openNew();
 
     expect(screen.getByLabelText('Kategoria')).toHaveTextContent(FOOD.name);
-    expect(screen.getByLabelText('Metoda płatności')).toHaveValue('BLIK');
   });
 
   it('leaves the category on its default when the remembered one was deleted', async () => {
@@ -142,41 +218,54 @@ describe('remembered expense form fields', () => {
     await openNew();
 
     expect(screen.getByLabelText('Kategoria')).toHaveTextContent(FUN.name);
-    expect(screen.getByLabelText('Metoda płatności')).toHaveValue('BLIK');
+    expect(await screen.findByDisplayValue('BLIK')).toBeInTheDocument();
   });
 
-  it('forgets a payment method saved empty', async () => {
-    mockBackend([FOOD, FUN]);
-    const first = await openNew();
-    await addExpense(first.user, 'BLIK', 'Spożywcze');
-    first.view.unmount();
-    const second = await openNew();
-    await addExpense(second.user, '', 'Spożywcze');
-    second.view.unmount();
-
-    await openNew();
-
-    expect(screen.getByLabelText('Metoda płatności')).toHaveValue('');
-  });
-
-  it('starts blank when the stored memory is corrupt', async () => {
+  it('starts with the default category when the stored memory is corrupt', async () => {
     window.localStorage.setItem('parka:form-memory', '{oops');
     mockBackend([FOOD, FUN]);
     await openNew();
 
     expect(screen.getByLabelText('Sklep')).toHaveValue('');
-    expect(screen.getByLabelText('Metoda płatności')).toHaveValue('');
     expect(screen.getByLabelText('Kategoria')).toHaveTextContent(FUN.name);
   });
 
+  it('stays usable and blank when the remembered values cannot be loaded', async () => {
+    mockBackend([FOOD, FUN]);
+    server.use(http.get('/api/suggestions/', () => HttpResponse.error()));
+    const { user } = await openNew();
+
+    await user.type(screen.getByLabelText('Sklep'), 'Kino');
+
+    expect(screen.getByLabelText('Metoda płatności')).toHaveValue('');
+    expect(screen.getByLabelText('Sklep')).toHaveValue('Kino');
+  });
+
+  it('does not overwrite what the user typed when the values arrive late', async () => {
+    suggestions = fakeSuggestions([saved('Biedronka', { useCount: 9 })]);
+    mockBackend([FOOD, FUN]);
+    server.use(
+      http.get('/api/suggestions/', async () => {
+        await delay(150);
+        return HttpResponse.json({ code: 200, data: suggestions.items() });
+      }),
+    );
+    const { user } = await openNew();
+
+    await user.type(screen.getByLabelText('Sklep'), 'K');
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    expect(screen.getByLabelText('Sklep')).toHaveValue('K');
+  });
+
   it('does not prefill when editing an expense', async () => {
+    suggestions = fakeSuggestions([
+      saved('Lidl', { useCount: 9 }),
+      saved('BLIK', { field: 'paymentMethod', useCount: 9 }),
+    ]);
     window.localStorage.setItem(
       'parka:form-memory',
-      JSON.stringify({
-        'expense.paymentMethod': 'BLIK',
-        'expense.categoryId': 'c-2',
-        'expense.merchant': 'Lidl',
-      }),
+      JSON.stringify({ 'expense.categoryId': 'c-2' }),
     );
     mockBackend([FOOD, FUN]);
     window.history.replaceState(null, '', '/app/expenses/edit/?id=e-1');

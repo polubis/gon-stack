@@ -117,6 +117,33 @@ export type Database = {
           },
         ];
       };
+      field_suggestions: {
+        Row: {
+          field: string;
+          last_used: string | null;
+          use_count: number;
+          user_id: string;
+          value: string;
+          value_key: string;
+        };
+        Insert: {
+          field: string;
+          last_used?: string | null;
+          use_count?: number;
+          user_id: string;
+          value: string;
+          value_key?: never;
+        };
+        Update: {
+          field?: string;
+          last_used?: string | null;
+          use_count?: number;
+          user_id?: string;
+          value?: string;
+          value_key?: never;
+        };
+        Relationships: [];
+      };
       limits: {
         Row: {
           alert_at80: boolean;
@@ -331,6 +358,10 @@ export type Database = {
       claim_receipt_scan: {
         Args: never;
         Returns: boolean;
+      };
+      record_field_use: {
+        Args: { p_field: string; p_value: string };
+        Returns: undefined;
       };
     };
     Enums: {

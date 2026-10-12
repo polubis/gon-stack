@@ -15,6 +15,18 @@ const seed = (categories: Seed['categories']): Seed => ({
   recurring: [],
 });
 
+const remembered = (
+  field: 'merchant' | 'paymentMethod',
+  value: string,
+  patch: { useCount?: number } = {},
+) => ({
+  field,
+  value,
+  useCount: 1,
+  lastUsed: null,
+  ...patch,
+});
+
 const settle = async (page: Page): Promise<void> => {
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(200);
@@ -25,6 +37,41 @@ const commands = {
     await signInAsTestUser(page);
     await installBackend(page, seed([FOOD, FUN]));
     await page.goto(APP_ROUTER.newExpense());
+    await settle(page);
+  },
+  'i open the page for adding an expense with remembered shops': async ({
+    page,
+  }) => {
+    await signInAsTestUser(page);
+    await installBackend(page, {
+      ...seed([FOOD, FUN]),
+      suggestions: [
+        remembered('merchant', 'Biedronka', { useCount: 9 }),
+        remembered('merchant', 'Lidl', { useCount: 2 }),
+        remembered('merchant', 'Bistro'),
+      ],
+    });
+    await page.goto(APP_ROUTER.newExpense());
+    await settle(page);
+  },
+  'i type "bi" in the shop': async ({ getByE2e }) => {
+    await getByE2e('expense-form:merchant').fill('bi');
+  },
+  'i type "Rossmann" in the shop': async ({ getByE2e }) => {
+    await getByE2e('expense-form:merchant').fill('Rossmann');
+  },
+  'i pick the shop "Bistro" from the suggestions': async ({ page }) => {
+    await page.getByRole('option', { name: /Bistro/ }).click();
+  },
+  'i add the expense for 20 in category "Spożywcze"': async ({
+    getByE2e,
+    page,
+  }) => {
+    await getByE2e('expense-form:amount').fill('20');
+    await getByE2e('expense-form:category').click();
+    await page.getByRole('option', { name: 'Spożywcze' }).click();
+    await getByE2e('expense-form:save').click();
+    await expect(getByE2e('dashboard:main')).toBeVisible();
     await settle(page);
   },
   'i add "  Biedronka " paid with "BLIK" in category "Spożywcze"': async ({
@@ -45,11 +92,26 @@ const commands = {
     await settle(page);
   },
   'i open the page again after the category was deleted': async ({ page }) => {
-    await installBackend(page, seed([FUN]));
+    await installBackend(page, {
+      ...seed([FUN]),
+      suggestions: [remembered('paymentMethod', 'BLIK')],
+    });
     await page.goto(APP_ROUTER.newExpense());
     await settle(page);
   },
 
+  'the shop suggestions are "Biedronka" then "Bistro"': async ({ page }) => {
+    await expect(page.getByRole('option')).toHaveText([
+      /^Biedronka/,
+      /^Bistro/,
+    ]);
+  },
+  'the shop is "Rossmann"': async ({ getByE2e }) => {
+    await expect(getByE2e('expense-form:merchant')).toHaveValue('Rossmann');
+  },
+  'the shop is "Bistro"': async ({ getByE2e }) => {
+    await expect(getByE2e('expense-form:merchant')).toHaveValue('Bistro');
+  },
   'the shop is "Biedronka"': async ({ getByE2e }) => {
     await expect(getByE2e('expense-form:merchant')).toHaveValue('Biedronka');
   },
@@ -89,6 +151,31 @@ test.describe('remembered expense form fields', () => {
       ['i open the page again after the category was deleted'],
       ['the payment method is "BLIK"'],
       ['the category is left on "Rozrywka"'],
+    );
+  });
+
+  test('a blank shop is filled with the most used one and typing narrows the remembered ones', async ({
+    e2e,
+  }) => {
+    await interpreter(commands, e2e)(
+      ['i open the page for adding an expense with remembered shops'],
+      ['the shop is "Biedronka"'],
+      ['i type "bi" in the shop'],
+      ['the shop suggestions are "Biedronka" then "Bistro"'],
+      ['i pick the shop "Bistro" from the suggestions'],
+      ['the shop is "Bistro"'],
+    );
+  });
+
+  test('a shop typed for the first time is offered on the next new expense', async ({
+    e2e,
+  }) => {
+    await interpreter(commands, e2e)(
+      ['i open the page for adding an expense'],
+      ['i type "Rossmann" in the shop'],
+      ['i add the expense for 20 in category "Spożywcze"'],
+      ['i open the page for adding an expense again'],
+      ['the shop is "Rossmann"'],
     );
   });
 });

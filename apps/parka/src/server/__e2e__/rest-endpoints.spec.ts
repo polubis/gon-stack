@@ -332,6 +332,35 @@ const commands = {
     );
   },
 
+  'i use "Biedronka" twice and "Lidl" once as shops': async ({ page }) => {
+    for (const value of ['Biedronka', ' biedronka ', 'Lidl']) {
+      const res = await page.request.post(API_ROUTER.suggestions(), {
+        data: { field: 'merchant', value },
+      });
+      expect(res.ok()).toBe(true);
+    }
+  },
+  'the shops come back most used first': async ({ page }) => {
+    const body = await (
+      await page.request.get(API_ROUTER.suggestions())
+    ).json();
+    expect(
+      body.data.map((s: { value: string; useCount: number }) => [
+        s.value,
+        s.useCount,
+      ]),
+    ).toEqual([
+      ['biedronka', 2],
+      ['Lidl', 1],
+    ]);
+  },
+  'a blank value is refused': async ({ page }) => {
+    const res = await page.request.post(API_ROUTER.suggestions(), {
+      data: { field: 'merchant', value: '   ' },
+    });
+    expect(res.status()).toBe(400);
+  },
+
   'settings are readable': async ({ page }) => {
     const body = await (await page.request.get(API_ROUTER.settings())).json();
     expect(body.data.profile.email).toBeDefined();
@@ -381,6 +410,9 @@ test('REST endpoints CRUD each finance entity through Postgres', async ({
     ['i create a notification'],
     ['i dismiss the notification'],
     ['the notification is gone from the list'],
+    ['i use "Biedronka" twice and "Lidl" once as shops'],
+    ['the shops come back most used first'],
+    ['a blank value is refused'],
     ['settings are readable'],
     ['the settings profile name is updated'],
   );
