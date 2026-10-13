@@ -1,4 +1,5 @@
 import z from 'zod';
+import { AVATAR_SIZES } from '../../avatar/domain/rules';
 import { DEVICE_AVATAR_IDS } from '../../device/domain/avatars';
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
@@ -27,6 +28,17 @@ export const receiptItem = () =>
     categoryId: z.string().min(1),
   });
 
+/** WebP variants of an uploaded device photo, one per size. */
+export const devicePhoto = () =>
+  z.object({
+    variants: z.array(
+      z.object({
+        size: z.union(AVATAR_SIZES.map((s) => z.literal(s))),
+        url: z.string().min(1),
+      }),
+    ),
+  });
+
 /** The device an expense was created from. */
 export const device = () =>
   z.object({
@@ -35,6 +47,8 @@ export const device = () =>
     type: z.enum(['mobile', 'desktop', 'tablet']),
     /** Picture the user chose for the device. Server-set, `null` for the default icon. */
     avatar: z.enum(DEVICE_AVATAR_IDS).nullable().default(null),
+    /** Photo the user uploaded (WebP variants). Server-set, `null` when none. */
+    photo: devicePhoto().nullable().default(null),
     /** What the browser reported; `null` when unknown. */
     model: z.string().max(64).nullable().default(null),
     os: z.string().max(32).nullable().default(null),

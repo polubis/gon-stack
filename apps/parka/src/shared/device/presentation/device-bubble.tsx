@@ -26,7 +26,7 @@ export const DeviceBubble = ({
   className,
   ...rest
 }: {
-  device: Pick<Device, 'id' | 'avatar' | 'type'>;
+  device: Pick<Device, 'id' | 'avatar' | 'type' | 'photo'>;
   iconClassName?: string;
 } & ComponentProps<'span'>) => {
   const color = deviceColorIndex(device.id);
@@ -35,17 +35,30 @@ export const DeviceBubble = ({
       aria-hidden="true"
       data-device-color={color + 1}
       className={cn(
-        'grid shrink-0 place-items-center rounded-full',
+        'grid shrink-0 place-items-center overflow-hidden rounded-full',
         COLORS[color],
         className,
       )}
       {...rest}
     >
-      <DeviceAvatar
-        avatar={device.avatar}
-        type={device.type}
-        className={iconClassName}
-      />
+      {device.photo ? (
+        <img
+          data-device-photo=""
+          alt=""
+          src={device.photo.variants.at(-1)?.url}
+          srcSet={device.photo.variants
+            .map((v) => `${v.url} ${v.size}w`)
+            .join(', ')}
+          sizes="3rem"
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <DeviceAvatar
+          avatar={device.avatar}
+          type={device.type}
+          className={iconClassName}
+        />
+      )}
     </span>
   );
 };

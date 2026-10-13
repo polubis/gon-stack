@@ -1,7 +1,12 @@
 import type { z } from 'zod';
-import { getAvatarSchema, uploadAvatarSchema } from '@schemas/avatar';
+import {
+  getAvatarSchema,
+  uploadAvatarSchema,
+  uploadDevicePhotoSchema,
+} from '@schemas/avatar';
 import { getSettingsSchema, updateSettingsSchema } from '@schemas/settings';
 import { API_ROUTER } from '@/shared/router/routes';
+import type { DevicePhoto } from '@/shared/device/domain/models';
 import type { Avatar, Settings } from '../domain/models';
 import { toAvatar, toSettings, toSettingsDto } from './mappers';
 
@@ -54,6 +59,26 @@ export const postAvatar = async (file: File): Promise<Avatar | null> => {
   const json = (await response.json()) as UploadAvatarOut;
   if (json.code !== 200) throw new Error(json.message);
   return toAvatar(json.data);
+};
+
+type UploadDevicePhotoOut = z.infer<
+  ReturnType<typeof uploadDevicePhotoSchema>
+>['out'];
+
+export const postDevicePhoto = async (
+  deviceId: string,
+  file: File,
+): Promise<DevicePhoto> => {
+  const body = new FormData();
+  body.set('deviceId', deviceId);
+  body.set('file', file);
+  const response = await fetch(API_ROUTER.devicePhoto(), {
+    method: 'POST',
+    body,
+  });
+  const json = (await response.json()) as UploadDevicePhotoOut;
+  if (json.code !== 200) throw new Error(json.message);
+  return { variants: json.data.variants.map((v) => ({ ...v })) };
 };
 
 export const logout = async (): Promise<void> => {

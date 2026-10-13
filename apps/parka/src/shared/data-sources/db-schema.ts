@@ -63,18 +63,21 @@ export type Database = {
           avatar: string | null;
           custom_name: string | null;
           device_id: string;
+          photo_updated_at: string | null;
           user_id: string;
         };
         Insert: {
           avatar?: string | null;
           custom_name?: string | null;
           device_id: string;
+          photo_updated_at?: string | null;
           user_id: string;
         };
         Update: {
           avatar?: string | null;
           custom_name?: string | null;
           device_id?: string;
+          photo_updated_at?: string | null;
           user_id?: string;
         };
         Relationships: [];

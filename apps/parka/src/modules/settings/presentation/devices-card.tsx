@@ -1,5 +1,5 @@
 import { cn } from '@repo/react-kit/cn';
-import { LocateFixed } from 'lucide-react';
+import { ImagePlus, LocateFixed } from 'lucide-react';
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import {
   DEVICE_AVATARS,
@@ -24,7 +24,10 @@ type Patch = Partial<Pick<Device, 'avatar' | 'customName'>>;
 
 type Props = {
   devices: Device[];
+  /** Ids of devices whose photo is being uploaded. */
+  uploadingIds: string[];
   onChange: (id: Device['id'], patch: Patch) => void;
+  onPhoto: (id: Device['id'], file: File) => void;
 };
 
 const HIGHLIGHT_MS = 3000;
@@ -81,18 +84,66 @@ const NameField = ({
   );
 };
 
+/** Own photo of the device; the only way to set it is to upload a file. */
+const PhotoField = ({
+  device,
+  uploading,
+  onPick,
+}: {
+  device: Device;
+  uploading: boolean;
+  onPick: (file: File) => void;
+}) => {
+  const input = useRef<HTMLInputElement>(null);
+  return (
+    <div>
+      <input
+        ref={input}
+        type="file"
+        accept="image/*"
+        hidden
+        data-e2e={`settings:device-photo-input:${device.id}`}
+        aria-label={`Wybierz zdjęcie urządzenia ${deviceLabel(device)}`}
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          event.target.value = '';
+          if (file) onPick(file);
+        }}
+      />
+      <Button
+        variant="ghost"
+        className="w-auto px-3 py-1.5"
+        data-e2e={`settings:device-photo-change:${device.id}`}
+        disabled={uploading}
+        onClick={() => input.current?.click()}
+      >
+        <ImagePlus className="h-4 w-4" aria-hidden="true" />
+        {uploading
+          ? 'Przesyłanie…'
+          : device.photo
+            ? 'Zmień zdjęcie urządzenia'
+            : 'Dodaj zdjęcie'}
+      </Button>
+    </div>
+  );
+};
+
 const DeviceRow = ({
   device,
   isCurrent,
   highlighted,
+  uploading,
   rowRef,
   onChange,
+  onPhoto,
 }: {
   device: Device;
   isCurrent: boolean;
   highlighted: boolean;
+  uploading: boolean;
   rowRef: (el: HTMLLIElement | null) => void;
   onChange: (patch: Patch) => void;
+  onPhoto: (file: File) => void;
 }) => {
   const secondary = deviceDetailsLine(device);
   return (
@@ -135,6 +186,7 @@ const DeviceRow = ({
         device={device}
         onCommit={(customName) => onChange({ customName })}
       />
+      <PhotoField device={device} uploading={uploading} onPick={onPhoto} />
       <div
         role="radiogroup"
         aria-label={`Awatar urządzenia ${deviceLabel(device)}`}
@@ -183,7 +235,12 @@ const DeviceRow = ({
 };
 
 /** Recognise each device (color, model, id), name it, pick its picture. */
-export const DevicesCard = ({ devices, onChange }: Props) => {
+export const DevicesCard = ({
+  devices,
+  uploadingIds,
+  onChange,
+  onPhoto,
+}: Props) => {
   // Browser-only value: unknown while rendering on the server.
   const currentId = useSyncExternalStore(
     subscribeNever,
@@ -262,11 +319,13 @@ export const DevicesCard = ({ devices, onChange }: Props) => {
                 device={device}
                 isCurrent={device.id === currentId}
                 highlighted={device.id === highlighted}
+                uploading={uploadingIds.includes(device.id)}
                 rowRef={(el) => {
                   if (el) rows.current.set(device.id, el);
                   else rows.current.delete(device.id);
                 }}
                 onChange={(patch) => onChange(device.id, patch)}
+                onPhoto={(file) => onPhoto(device.id, file)}
               />
             ))}
           </ul>

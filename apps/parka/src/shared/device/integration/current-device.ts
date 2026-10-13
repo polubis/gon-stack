@@ -67,6 +67,7 @@ export const currentDevice = (): Device => {
     type: detectDeviceType(now),
     avatar: null,
     customName: null,
+    photo: null,
     ...detectDeviceDetails(now, hints, window.screen),
   };
 };

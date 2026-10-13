@@ -5,6 +5,7 @@ export const createStore = () => {
   const $settings = atom<Settings | null>(null);
   const $avatar = atom<Avatar | null>(null);
   const $isUploadingAvatar = atom(false);
+  const $uploadingDeviceIds = atom<string[]>([]);
   const $initializing = atom(true);
   const $isLoading = atom(false);
   const $isSigningOut = atom(false);
@@ -15,6 +16,7 @@ export const createStore = () => {
     $settings,
     $avatar,
     $isUploadingAvatar,
+    $uploadingDeviceIds,
     $initializing,
     $isLoading,
     $isSigningOut,

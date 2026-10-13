@@ -1,7 +1,7 @@
 import z from 'zod';
 import { AVATAR_SIZES } from '../../avatar/domain/rules';
 import { validateAvatarFile } from '../../avatar/domain/validate-avatar-file';
-import { errorOut } from './general';
+import { devicePhoto, errorOut } from './general';
 
 const avatarFile = () =>
   z.instanceof(File).superRefine(async (file, ctx) => {
@@ -34,6 +34,18 @@ export const uploadAvatarSchema = () =>
     in: z.object({ file: avatarFile() }),
     out: z.union([
       z.object({ code: z.literal(200), data: avatar() }),
+      errorOut(),
+    ]),
+  });
+
+/** Id of a device as the browser mints it; safe inside a storage path. */
+const deviceId = () => z.string().regex(/^[A-Za-z0-9_-]{1,64}$/);
+
+export const uploadDevicePhotoSchema = () =>
+  z.object({
+    in: z.object({ deviceId: deviceId(), file: avatarFile() }),
+    out: z.union([
+      z.object({ code: z.literal(200), data: devicePhoto() }),
       errorOut(),
     ]),
   });

@@ -27,6 +27,7 @@ describe('dashboard expense mappers', () => {
         browser: null,
         screen: null,
         customName: null,
+        photo: null,
       },
       recurringId: null,
       occurrenceDate: null,
@@ -54,6 +55,7 @@ describe('dashboard expense mappers', () => {
       browser: null,
       screen: null,
       customName: null,
+      photo: null,
     });
     expect(expense.items).toHaveLength(1);
     expect(expense.items[0]!.name).toBe('Milk');

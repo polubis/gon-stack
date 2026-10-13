@@ -2,6 +2,7 @@ import type { z } from 'zod';
 import type { device } from '@schemas/general';
 import type { SupabaseServer } from '@/shared/data-sources/supabase-server';
 import { DEVICE_AVATAR_IDS } from '@/shared/device/domain/avatars';
+import { toDevicePhoto, type DevicePhoto } from './device-photo';
 
 type Device = z.infer<ReturnType<typeof device>>;
 
@@ -29,6 +30,7 @@ export const deviceColumns = (value: Device | null) => ({
 export type DeviceProfile = {
   avatar: string | null;
   customName: string | null;
+  photo: DevicePhoto | null;
 };
 export type ProfilesByDevice = ReadonlyMap<string, DeviceProfile>;
 
@@ -47,6 +49,7 @@ export const toDevice = (
         browser: row.device_browser ?? null,
         screen: row.device_screen ?? null,
         customName: profiles.get(row.device_id)?.customName ?? null,
+        photo: profiles.get(row.device_id)?.photo ?? null,
       }
     : null;
 
@@ -56,11 +59,17 @@ export const loadProfiles = async (
 ): Promise<ProfilesByDevice> => {
   const { data } = await db
     .from('device_profiles')
-    .select('device_id, avatar, custom_name');
+    .select('user_id, device_id, avatar, custom_name, photo_updated_at');
   return new Map(
     (data ?? []).map((r) => [
       r.device_id,
-      { avatar: r.avatar, customName: r.custom_name },
+      {
+        avatar: r.avatar,
+        customName: r.custom_name,
+        photo: r.photo_updated_at
+          ? toDevicePhoto(db, r.user_id, r.device_id, r.photo_updated_at)
+          : null,
+      },
     ]),
   );
 };

@@ -1,3 +1,4 @@
+import type { AvatarSize } from '../../avatar/domain/rules';
 import type { DeviceAvatarId } from './avatars';
 
 export type DeviceType = 'mobile' | 'desktop' | 'tablet';
@@ -13,6 +14,11 @@ export type DeviceDetails = {
   screen: string | null;
 };
 
+/** Square WebP variants of a picture the user uploaded. */
+export type DevicePhoto = {
+  variants: { size: AvatarSize; url: string }[];
+};
+
 /** A browser installation an expense can be created from. */
 export type Device = DeviceDetails & {
   /** Stable per browser. */
@@ -24,4 +30,6 @@ export type Device = DeviceDetails & {
   avatar: DeviceAvatarId | null;
   /** Name the user gave; `null` shows the name built from the details. */
   customName: string | null;
+  /** Photo the user uploaded; wins over `avatar`. `null` when none. */
+  photo: DevicePhoto | null;
 };

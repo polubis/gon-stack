@@ -5,5 +5,9 @@ export type Event =
   | TriggerEvent<'[TRIGGER]_LOAD'>
   | TriggerEvent<'[TRIGGER]_UPDATE', { settings: Settings }>
   | TriggerEvent<'[TRIGGER]_UPLOAD_AVATAR', { file: File }>
+  | TriggerEvent<
+      '[TRIGGER]_UPLOAD_DEVICE_PHOTO',
+      { deviceId: string; file: File }
+    >
   | TriggerEvent<'[TRIGGER]_SIGN_OUT'>
   | TriggerEvent<'[TRIGGER]_DISMISS_NOTICE'>;

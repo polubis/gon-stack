@@ -8,7 +8,7 @@ const ROW = {
 };
 
 const profiles = (avatar: string | null, customName: string | null = null) =>
-  new Map([['device-1', { avatar, customName }]]);
+  new Map([['device-1', { avatar, customName, photo: null }]]);
 
 describe('expense device', () => {
   it('carries the avatar chosen for its device', () => {
@@ -63,5 +63,23 @@ describe('expense device', () => {
         profiles('cat'),
       ),
     ).toBeNull();
+  });
+});
+
+describe('expense device photo', () => {
+  const photo = {
+    variants: [{ size: 32 as const, url: 'http://cdn/32.webp' }],
+  };
+
+  it('carries the photo uploaded for its device', () => {
+    const profiles = new Map([
+      ['device-1', { avatar: null, customName: null, photo }],
+    ]);
+
+    expect(toDevice(ROW, profiles)?.photo).toEqual(photo);
+  });
+
+  it('has no photo when none was uploaded', () => {
+    expect(toDevice(ROW)?.photo).toBeNull();
   });
 });

@@ -28,6 +28,7 @@ type Expense = Row & {
     browser?: string | null;
     screen?: string | null;
     customName?: string | null;
+    photo?: { variants: { size: number; url: string }[] } | null;
   } | null;
   items?: never[];
   date: string;
@@ -104,6 +105,11 @@ export const installBackend = async (
   const profiles = new Map<
     string,
     { avatar: string | null; customName: string | null }
+  >();
+  /** Stands in for the stored variants of a device photo, per device id. */
+  const devicePhotos = new Map<
+    string,
+    { variants: { size: number; url: string }[] }
   >();
   let profileAvatar: { variants: { size: number; url: string }[] } | null =
     null;
@@ -208,6 +214,26 @@ export const installBackend = async (
       return json(route, { code: 200, ok: true });
     }
 
+    if (collection === 'device-photo' && method === 'POST') {
+      const deviceId = /name="deviceId"\r\n\r\n([^\r]+)/.exec(
+        request.postDataBuffer()?.toString('latin1') ?? '',
+      )?.[1];
+      if (!deviceId)
+        return json(route, {
+          code: 400,
+          type: 'bad-request',
+          message: 'No device',
+        });
+      const photo = {
+        variants: [32, 64, 128, 256].map((size) => ({
+          size,
+          url: PROFILE_AVATAR_URL,
+        })),
+      };
+      devicePhotos.set(deviceId, photo);
+      return json(route, { code: 200, data: photo });
+    }
+
     if (collection === 'avatar') {
       if (method === 'POST') {
         profileAvatar = {
@@ -243,6 +269,7 @@ export const installBackend = async (
             ...e.device,
             avatar: profiles.get(e.device.id)?.avatar ?? null,
             customName: profiles.get(e.device.id)?.customName ?? null,
+            photo: devicePhotos.get(e.device.id) ?? null,
           });
       return json(route, {
         code: 200,
@@ -285,6 +312,7 @@ export const installBackend = async (
                     ...e.device,
                     avatar: profiles.get(e.device.id)?.avatar ?? null,
                     customName: profiles.get(e.device.id)?.customName ?? null,
+                    photo: devicePhotos.get(e.device.id) ?? null,
                   },
                 }
               : e,

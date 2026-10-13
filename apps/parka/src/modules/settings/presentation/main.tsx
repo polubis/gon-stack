@@ -27,6 +27,7 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
   const isSigningOut = ctx.useIsSigningOut();
   const avatar = ctx.useAvatar();
   const isUploadingAvatar = ctx.useIsUploadingAvatar();
+  const uploadingDeviceIds = ctx.useUploadingDeviceIds();
   const [dark, setDark] = useDarkTheme();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
@@ -148,7 +149,12 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
         </ul>
       </Card>
 
-      <DevicesCard devices={settings.devices} onChange={setDevice} />
+      <DevicesCard
+        devices={settings.devices}
+        uploadingIds={uploadingDeviceIds}
+        onChange={setDevice}
+        onPhoto={ctx.uploadDevicePhoto}
+      />
 
       <nav aria-label="Ustawienia szczegółowe">
         <ul className="overflow-hidden rounded-2xl border border-line bg-card">

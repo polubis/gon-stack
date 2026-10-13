@@ -62,13 +62,18 @@ export const updateSettings = privateProcedure({
       if (error) throw new InternalServer(error);
     }
     if (cleared.length) {
+      // A device with a photo keeps its row; the rest of the profile resets.
+      const ids = cleared.map((d) => d.id);
+      const reset = await db
+        .from('device_profiles')
+        .update({ avatar: null, custom_name: null })
+        .in('device_id', ids);
+      if (reset.error) throw new InternalServer(reset.error);
       const { error } = await db
         .from('device_profiles')
         .delete()
-        .in(
-          'device_id',
-          cleared.map((d) => d.id),
-        );
+        .in('device_id', ids)
+        .is('photo_updated_at', null);
       if (error) throw new InternalServer(error);
     }
 
