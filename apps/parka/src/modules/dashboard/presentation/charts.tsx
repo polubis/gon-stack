@@ -77,7 +77,7 @@ export const Donut = ({
       <div
         className={cn(
           'relative w-full min-w-0 sm:flex-1',
-          rows !== undefined && 'h-48 overflow-hidden',
+          overflows && 'h-48 overflow-hidden',
         )}
       >
         {slices.length === 0 && empty ? (

@@ -1,8 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { Plus } from 'lucide-react';
 import { useModal } from '@/shared/router/modal-stack';
-import { APP_ROUTER } from '@/shared/router/routes';
-import { Button } from '@/shared/ui/controls';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { Card } from '@/shared/ui/layout';
@@ -241,17 +238,9 @@ export const MonthExpenses = ({
         <h2 id="month-expenses" className="text-base font-semibold">
           Wydatki
         </h2>
-        <p className="text-sm text-ink-soft">
+        <p className="ml-auto text-sm text-ink-soft">
           {`${visible.length} · ${money(sumAmount(visible))}`}
         </p>
-        <Button
-          variant="ghost"
-          className="ml-auto w-auto px-3 py-1.5 max-md:hidden"
-          data-e2e="dashboard:expense-new"
-          href={APP_ROUTER.newExpense()}
-        >
-          <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj wydatek
-        </Button>
       </div>
 
       {/* Reserved even when empty: the filter row never moves the list. */}

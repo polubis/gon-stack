@@ -46,7 +46,7 @@ const Chart = ({ period, summary }: { period: Period; summary: Summary }) => {
         Wydatki w okresie {periodTitle(period)} na tle poprzedniego okresu
       </figcaption>
       <div className="flex gap-2" aria-hidden="true">
-        <ul className="flex h-48 w-14 shrink-0 flex-col-reverse justify-between text-right text-micro text-ink-soft md:h-56">
+        <ul className="flex h-48 w-14 shrink-0 flex-col-reverse justify-between text-right text-xs text-ink-soft md:h-56">
           {ticks.map((tick) => (
             <li key={tick} className="-my-1.5 leading-3">
               {tick} zł
@@ -61,7 +61,7 @@ const Chart = ({ period, summary }: { period: Period; summary: Summary }) => {
                 <li key={tick} className="border-t border-line" />
               ))}
             </ul>
-            <div className="absolute inset-0 flex items-end gap-[0.0625rem]">
+            <div className="absolute inset-0 flex items-end gap-px">
               {series.map((d) => (
                 <div
                   key={d.index}
@@ -69,7 +69,8 @@ const Chart = ({ period, summary }: { period: Period; summary: Summary }) => {
                 >
                   <div
                     className={cn(
-                      'min-h-0.5 w-full rounded-t-sm bg-brand/70 group-hover:bg-brand',
+                      d.total > 0 && 'min-h-0.5',
+                      'w-full rounded-t-sm bg-brand/70 group-hover:bg-brand',
                       series.length <= 12 && 'mx-auto max-w-10',
                     )}
                     style={{ height: `${percentOf(d.total, top)}%` }}
@@ -98,7 +99,7 @@ const Chart = ({ period, summary }: { period: Period; summary: Summary }) => {
               />
             </svg>
           </div>
-          <ul className="relative mt-1 h-4 text-micro text-ink-soft">
+          <ul className="relative mt-1 h-4 text-xs text-ink-soft">
             {labelledPoints(period.kind, series.length).map((index) => (
               <li
                 key={index}

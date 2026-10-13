@@ -31,14 +31,11 @@ export const Header = ({
                 <Skeleton className="h-8 w-48 lg:h-9" />
               </>
             ) : firstName ? (
-              `Cześć, ${firstName} 👋`
+              `Cześć, ${firstName}`
             ) : (
-              'Cześć 👋'
+              'Cześć'
             )}
           </h1>
-          <p className="mt-1 text-sm text-ink-soft">
-            Oto Twoje wydatki w wybranym okresie.
-          </p>
         </div>
 
         <UnreadLink />
@@ -53,6 +50,7 @@ export const Header = ({
 
         <Button
           href={APP_ROUTER.newExpense()}
+          data-e2e="dashboard:expense-new"
           className="h-11 w-auto shrink-0 py-0 max-md:hidden"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />

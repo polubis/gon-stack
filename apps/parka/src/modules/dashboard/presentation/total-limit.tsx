@@ -7,7 +7,7 @@ import { newLimitId } from '../domain/ids';
 import type { Period } from '@/shared/period/period';
 import { money } from '../domain/format';
 import type { Limit, TotalProgress } from '../domain/models';
-import { LIMIT_NOUN, periodTitle } from '../domain/period';
+import { LIMIT_NOUN } from '../domain/period';
 import { limitTone } from './selectors';
 import { useContext } from './context';
 
@@ -48,7 +48,7 @@ export const TotalLimit = ({
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm text-ink-soft">
-            Limit na {LIMIT_NOUN[period.kind]} · {periodTitle(period)}
+            Limit na {LIMIT_NOUN[period.kind]}
           </p>
           <p className="text-2xl font-bold tabular-nums">
             {money(progress.amount)}

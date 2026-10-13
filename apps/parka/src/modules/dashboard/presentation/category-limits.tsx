@@ -1,5 +1,5 @@
 import { categoryLabel } from '@/shared/i18n/category-label';
-import { Pencil } from 'lucide-react';
+import { Layers, Pencil } from 'lucide-react';
 import { Button, ProgressBar } from '@/shared/ui/controls';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { money } from '../domain/format';
@@ -20,7 +20,15 @@ export const CategoryLimits = ({
   onEdit: (id: LimitId) => void;
 }) =>
   progress.length === 0 ? (
-    <p className="text-sm text-ink-soft">Brak limitów kategorii.</p>
+    <div className="grid h-full min-h-32 place-items-center rounded-xl border border-dashed border-line p-4 text-center">
+      <div className="space-y-1">
+        <Layers className="mx-auto h-6 w-6 text-ink-soft" aria-hidden="true" />
+        <p className="text-sm font-medium">Brak limitów kategorii.</p>
+        <p className="text-xs text-ink-soft">
+          Ogranicz wydatki w wybranej kategorii przyciskiem Dodaj limit.
+        </p>
+      </div>
+    </div>
   ) : (
     <ul
       className="grid gap-3 md:grid-cols-2 xl:grid-cols-1"
