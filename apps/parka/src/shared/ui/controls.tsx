@@ -250,7 +250,12 @@ export const Select = ({
         )}
       >
         <span className="min-w-0 truncate">
-          <SelectPrimitive.Value placeholder={placeholder} />
+          <SelectPrimitive.Value placeholder={placeholder}>
+            {/* Own keyed node: page translation wraps text in <font>, which breaks React's in-place text swap. */}
+            <span key={value}>
+              {options.find((option) => option.value === value)?.label}
+            </span>
+          </SelectPrimitive.Value>
         </span>
         <SelectPrimitive.Icon asChild>
           <ChevronDown
