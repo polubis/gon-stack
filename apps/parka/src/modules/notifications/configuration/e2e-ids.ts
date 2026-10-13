@@ -1,7 +1,19 @@
-export const NOTIFICATIONS_E2E_IDS = [
-  'notifications:main',
-  'notifications:list',
-  'notifications:load-error',
-] as const;
-
-export type NotificationsE2eId = (typeof NOTIFICATIONS_E2E_IDS)[number];
+export type NotificationsE2eId =
+  | 'notifications:main'
+  | 'notifications:list'
+  | 'notifications:skeleton'
+  | 'notifications:load-error'
+  | 'notifications:empty'
+  | 'notifications:unread-count'
+  | 'notifications:mark-all-read'
+  | 'notifications:toast'
+  | 'notifications:unread-link'
+  | 'notifications:sentinel'
+  | 'notifications:loading-more'
+  | 'notifications:load-more'
+  | 'notifications:more-error'
+  | 'notifications:end'
+  | `notifications:row:${string}`
+  | `notifications:mark-read:${string}`
+  | `notifications:read:${string}`
+  | `notifications:diff:${string}`;

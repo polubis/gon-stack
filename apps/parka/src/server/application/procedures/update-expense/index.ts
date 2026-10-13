@@ -8,6 +8,11 @@ import {
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { toDevice } from '../../shared/device';
+import {
+  expenseSnapshot,
+  loadCategoryNames,
+  tryRecordNotifications,
+} from '../../shared/notifications';
 
 export const updateExpense = privateProcedure({
   schema: withZodSchema({ schema: updateExpenseSchema }),
@@ -18,6 +23,14 @@ export const updateExpense = privateProcedure({
     if (!categoryId && input.items.length === 0) {
       throw new BadRequest(undefined, 'Expense needs a category');
     }
+    const { data: previous, error: previousError } = await db
+      .from('expenses')
+      .select('*')
+      .eq('id', input.id)
+      .maybeSingle();
+    if (previousError) throw new InternalServer(previousError);
+    if (!previous) throw new NotFound(undefined, 'Expense not found');
+
     const { data, error } = await db
       .from('expenses')
       .update({
@@ -56,6 +69,17 @@ export const updateExpense = privateProcedure({
       );
       if (itemsError) throw new InternalServer(itemsError);
     }
+
+    const names = await loadCategoryNames(db);
+    await tryRecordNotifications(db, uid, [
+      {
+        kind: 'expense-updated',
+        payload: {
+          before: expenseSnapshot(previous, names),
+          after: expenseSnapshot(data, names),
+        },
+      },
+    ]);
 
     return {
       code: 200 as const,

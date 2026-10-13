@@ -1,31 +1,37 @@
 import { describe, expect, it } from 'vitest';
 import { toNotification } from '../integration/mappers';
 
-const dto = (kind: string) => ({
-  id: 'n-1',
-  kind,
-  title: 'Title',
-  body: 'Body',
-  ageDays: 2,
-});
-
 describe('notifications mapper', () => {
-  it('keeps a known kind', () => {
-    expect(toNotification(dto('recurring')).kind).toBe('recurring');
-  });
+  it('keeps a typed notification with its payload and read state', () => {
+    const n = toNotification({
+      id: 'n-1',
+      kind: 'category-created',
+      title: 'Dodano kategorię',
+      body: 'Kawa',
+      createdAt: '2026-10-12T10:00:00.000Z',
+      read: false,
+      payload: { category: { name: 'Kawa', icon: 'coffee', color: '#fff' } },
+    });
 
-  it('falls back to other for an unknown kind', () => {
-    expect(toNotification(dto('mystery')).kind).toBe('other');
-  });
-
-  it('copies the text and age', () => {
-    const n = toNotification(dto('limit-alert'));
-
-    expect([n.id, n.title, n.body, n.ageDays]).toEqual([
+    expect([n.id, n.kind, n.read, n.payload]).toEqual([
       'n-1',
-      'Title',
-      'Body',
-      2,
+      'category-created',
+      false,
+      { category: { name: 'Kawa', icon: 'coffee', color: '#fff' } },
     ]);
+  });
+
+  it('keeps a legacy notification without payload', () => {
+    const n = toNotification({
+      id: 'n-2',
+      kind: 'other',
+      title: 'Stare',
+      body: '',
+      createdAt: '2026-10-12T10:00:00.000Z',
+      read: true,
+      payload: null,
+    });
+
+    expect([n.kind, n.payload, n.read]).toEqual(['other', null, true]);
   });
 });

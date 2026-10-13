@@ -4,6 +4,11 @@ import { BadRequest, InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { deviceColumns, toDevice } from '../../shared/device';
+import {
+  expenseSnapshot,
+  loadCategoryNames,
+  tryRecordNotifications,
+} from '../../shared/notifications';
 
 export const createExpense = privateProcedure({
   schema: withZodSchema({ schema: createExpenseSchema }),
@@ -47,6 +52,15 @@ export const createExpense = privateProcedure({
       );
       if (itemsError) throw new InternalServer(itemsError);
     }
+
+    await tryRecordNotifications(db, uid, [
+      {
+        kind: 'expense-created',
+        payload: {
+          expense: expenseSnapshot(data, await loadCategoryNames(db)),
+        },
+      },
+    ]);
 
     return {
       code: 201 as const,

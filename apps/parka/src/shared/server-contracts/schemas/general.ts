@@ -82,15 +82,6 @@ export const recurring = () =>
     categoryId: z.string().min(1),
   });
 
-export const notification = () =>
-  z.object({
-    id: z.string().min(1),
-    kind: z.string().min(1),
-    title: z.string(),
-    body: z.string(),
-    ageDays: z.coerce.number(),
-  });
-
 export const settings = () =>
   z.object({
     profile: z.object({ name: z.string(), email: z.string() }),

@@ -20,7 +20,7 @@ export const ScreenHeader = ({
         href={backHref}
         onClick={onBackClick}
         aria-label="Wróć"
-        className="grid h-9 w-9 place-items-center rounded-full text-ink-soft hover:bg-hover"
+        className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-ink-soft hover:bg-hover"
       >
         <ArrowLeft className="h-5 w-5" aria-hidden="true" />
       </a>

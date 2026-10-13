@@ -8,6 +8,7 @@ import { Card, ScreenHeader } from '@/shared/ui/layout';
 import { ErrorState } from '@/shared/ui/error-state';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
 import { Toast } from '@/shared/ui/toast';
+import { UnreadLink } from '@/modules/notifications/presentation/unread-link';
 import { useDarkTheme } from '@/shared/theme/use-dark-theme';
 import {
   ERROR_CODES,
@@ -178,7 +179,7 @@ const SettingsView = () => {
     <div data-e2e="settings:main" className="relative flex flex-1 flex-col">
       <LoadingBanner active={isLoading && !initializing} />
       <div className="md:px-4 lg:px-6 xl:px-12">
-        <ScreenHeader title="Ustawienia" />
+        <ScreenHeader title="Ustawienia" action={<UnreadLink />} />
       </div>
       <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2 md:gap-6 md:px-8 lg:px-10 xl:px-16">
         {error ? (

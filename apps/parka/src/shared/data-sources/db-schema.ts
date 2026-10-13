@@ -203,26 +203,32 @@ export type Database = {
       };
       notifications: {
         Row: {
-          age_days: number;
           body: string;
+          created_at: string;
           id: string;
           kind: string;
+          payload: Json;
+          read_at: string | null;
           title: string;
           user_id: string;
         };
         Insert: {
-          age_days?: number;
           body?: string;
+          created_at?: string;
           id: string;
           kind: string;
+          payload?: Json;
+          read_at?: string | null;
           title: string;
           user_id: string;
         };
         Update: {
-          age_days?: number;
           body?: string;
+          created_at?: string;
           id?: string;
           kind?: string;
+          payload?: Json;
+          read_at?: string | null;
           title?: string;
           user_id?: string;
         };

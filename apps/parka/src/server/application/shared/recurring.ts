@@ -4,6 +4,12 @@ import type { Database } from '@/shared/data-sources/db-schema';
 import { dueOccurrences } from '@/shared/recurring/occurrences';
 import { InternalServer } from '../core/error-handling';
 import type { SupabaseServer } from '@/shared/data-sources/supabase-server';
+import {
+  loadCategoryNames,
+  recurringSnapshot,
+  tryRecordNotifications,
+  type NotificationEvent,
+} from './notifications';
 
 type Rule = z.infer<ReturnType<typeof recurring>>;
 type RuleRow = Database['public']['Tables']['recurring_expenses']['Row'];
@@ -44,31 +50,50 @@ export const materializeRecurring = async (
     .eq('active', true);
   if (error) throw new InternalServer(error);
 
+  const accrued: NotificationEvent[] = [];
   for (const row of rows) {
     const due = dueOccurrences(toRule(row), today);
     const newest = due.at(-1);
     if (newest === undefined) continue;
 
-    const { error: insertError } = await db.from('expenses').upsert(
-      due.map((day) => ({
-        user_id: userId,
-        id: `${row.id}:${day}`,
-        merchant: row.name,
-        date: occurrenceInstant(day),
-        amount: row.cost,
-        category_id: row.category_id,
-        payment_method: row.payment_method,
-        is_bill: true,
-        source: 'manual',
-        recurring_id: row.id,
-        occurrence_date: day,
-      })),
-      {
-        onConflict: 'user_id,recurring_id,occurrence_date',
-        ignoreDuplicates: true,
-      },
-    );
+    const { data: inserted, error: insertError } = await db
+      .from('expenses')
+      .upsert(
+        due.map((day) => ({
+          user_id: userId,
+          id: `${row.id}:${day}`,
+          merchant: row.name,
+          date: occurrenceInstant(day),
+          amount: row.cost,
+          category_id: row.category_id,
+          payment_method: row.payment_method,
+          is_bill: true,
+          source: 'manual',
+          recurring_id: row.id,
+          occurrence_date: day,
+        })),
+        {
+          onConflict: 'user_id,recurring_id,occurrence_date',
+          ignoreDuplicates: true,
+        },
+      )
+      .select('occurrence_date');
     if (insertError) throw new InternalServer(insertError);
+
+    // Only rows this call really created: a parallel request that lost the race adds none.
+    const days = inserted
+      .map((e) => e.occurrence_date)
+      .filter((day): day is string => day !== null)
+      .sort();
+    if (days.length > 0) {
+      accrued.push({
+        kind: 'recurring-accrued',
+        payload: {
+          rule: recurringSnapshot(row, await loadCategoryNames(db)),
+          days,
+        },
+      });
+    }
 
     // Only forward: a slower parallel request must not roll the mark back.
     const { error: markError } = await db
@@ -78,4 +103,6 @@ export const materializeRecurring = async (
       .or(`last_materialized_date.is.null,last_materialized_date.lt.${newest}`);
     if (markError) throw new InternalServer(markError);
   }
+
+  await tryRecordNotifications(db, userId, accrued);
 };

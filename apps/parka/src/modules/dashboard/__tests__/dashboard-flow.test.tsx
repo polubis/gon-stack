@@ -216,7 +216,10 @@ describe('dashboard screen', () => {
     render(<Main />);
 
     await screen.findByText('Limity');
-    expect(fetchMock).toHaveBeenCalledTimes(5);
+    const dashboardCalls = fetchMock.mock.calls.filter(
+      ([url]) => !String(url).includes('/api/notifications'),
+    );
+    expect(dashboardCalls).toHaveLength(5);
   });
 
   it('shows only the failure screen when any part fails to load', async () => {

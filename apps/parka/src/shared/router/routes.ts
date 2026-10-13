@@ -136,8 +136,12 @@ export const API_ROUTER = {
   categoryById: routeById('/api/categories/'),
   limits: route('/api/limits/'),
   limitById: routeById('/api/limits/'),
-  notifications: route('/api/notifications/'),
+  notifications: routeWithQuery<
+    '/api/notifications/',
+    { limit?: number; cursor?: string }
+  >('/api/notifications/'),
   notificationById: routeById('/api/notifications/'),
+  notificationsReadAll: route('/api/notifications/read-all/'),
   recurring: routeWithQuery<'/api/recurring/', { tz?: string }>(
     '/api/recurring/',
   ),

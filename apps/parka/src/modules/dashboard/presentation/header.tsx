@@ -2,6 +2,7 @@ import { Plus, User } from 'lucide-react';
 import type { Period } from '@/shared/period/period';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { Button } from '@/shared/ui/controls';
+import { UnreadLink } from '@/modules/notifications/presentation/unread-link';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { PeriodControl } from './period-control';
 
@@ -22,7 +23,7 @@ export const Header = ({
   return (
     <div className="space-y-4">
       <header className="flex flex-wrap items-center gap-x-4 gap-y-3 md:flex-nowrap">
-        <div className="min-w-0 flex-1 basis-full md:basis-0">
+        <div className="min-w-0 flex-1 basis-0">
           <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">
             {initializing ? (
               <>
@@ -39,6 +40,8 @@ export const Header = ({
             Oto Twoje wydatki w wybranym okresie.
           </p>
         </div>
+
+        <UnreadLink />
 
         <a
           href={APP_ROUTER.settings()}

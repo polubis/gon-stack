@@ -46,6 +46,40 @@ const chargedBy = (list: Charged[], recurringId: string): Charged[] =>
     .filter((e) => e.recurringId === recurringId)
     .sort((a, b) => (a.occurrenceDate! < b.occurrenceDate! ? 1 : -1));
 
+/** Same default as `.env.example`; the app reads it from `.env` at build time. */
+type ListedNotification = {
+  id: string;
+  kind: string;
+  read: boolean;
+  createdAt: string;
+  payload: unknown;
+};
+
+const notificationList = async (page: Page): Promise<ListedNotification[]> =>
+  (await (await page.request.get(API_ROUTER.notifications())).json()).data;
+
+type NotificationsPage = {
+  data: ListedNotification[];
+  nextCursor: string | null;
+  unread: number;
+};
+
+const walkNotifications = async (
+  page: Page,
+  limit: number,
+): Promise<NotificationsPage[]> => {
+  const pages: NotificationsPage[] = [];
+  let cursor: string | undefined;
+  do {
+    const body = (await (
+      await page.request.get(API_ROUTER.notifications({ limit, cursor }))
+    ).json()) as NotificationsPage;
+    pages.push(body);
+    cursor = body.nextCursor ?? undefined;
+  } while (cursor);
+  return pages;
+};
+
 const categoryIdByPage = new WeakMap<Page, string>();
 const settingsEmailByPage = new WeakMap<Page, string>();
 
@@ -307,29 +341,149 @@ const commands = {
     expect(kept.every((e) => e.recurringId === null)).toBe(true);
   },
 
-  'i create a notification': async ({ page }) => {
-    const res = await page.request.post(API_ROUTER.notifications(), {
-      data: {
-        id: 'e2e-notif-1',
-        kind: 'info',
-        title: 'Test',
-        body: 'Wiadomość testowa',
-        ageDays: 0,
-      },
+  'every write left a typed notification': async ({ page }) => {
+    const list = await notificationList(page);
+    const kinds = list.map((n) => n.kind);
+    for (const kind of [
+      'category-created',
+      'category-updated',
+      'expense-created',
+      'expense-updated',
+      'expense-deleted',
+      'recurring-accrued',
+    ]) {
+      expect(kinds).toContain(kind);
+    }
+    expect(list.every((n) => n.read === false)).toBe(true);
+    const edit = list.find((n) => n.kind === 'category-updated');
+    expect(edit?.payload).toMatchObject({
+      before: { name: 'Kultura' },
+      after: { name: 'Sztuka' },
     });
-    expect(res.status()).toBe(201);
+  },
+  'a charged recurring rule is reported once': async ({ page }) => {
+    const accrued = (await notificationList(page)).filter(
+      (n) => n.kind === 'recurring-accrued',
+    );
+    expect(accrued).toHaveLength(1);
+  },
+  'i mark one notification as read': async ({ page }) => {
+    const [first, second] = await notificationList(page);
+    const res = await page.request.put(API_ROUTER.notificationById(first!.id), {
+      headers: { 'Content-Type': 'application/json' },
+      data: {},
+    });
+    expect(res.ok()).toBe(true);
+    const after = await notificationList(page);
+    expect(after.find((n) => n.id === first!.id)?.read).toBe(true);
+    expect(after.find((n) => n.id === second!.id)?.read).toBe(false);
+  },
+  'marking a missing notification is not found': async ({ page }) => {
+    const res = await page.request.put(API_ROUTER.notificationById('nope'), {
+      headers: { 'Content-Type': 'application/json' },
+      data: {},
+    });
+    expect(res.status()).toBe(404);
+  },
+  'i mark all notifications as read': async ({ page }) => {
+    const res = await page.request.put(API_ROUTER.notificationsReadAll(), {
+      headers: { 'Content-Type': 'application/json' },
+      data: {},
+    });
+    expect(res.ok()).toBe(true);
+    expect((await notificationList(page)).every((n) => n.read)).toBe(true);
+  },
+  'there is no public route to create a notification': async ({ page }) => {
+    const res = await page.request.post(API_ROUTER.notifications(), {
+      data: { id: 'forged', kind: 'other', title: 'x', body: 'y' },
+    });
+    expect(res.status()).toBeGreaterThanOrEqual(400);
+    expect((await notificationList(page)).some((n) => n.id === 'forged')).toBe(
+      false,
+    );
   },
   'i dismiss the notification': async ({ page }) => {
-    const res = await del(page, API_ROUTER.notificationById('e2e-notif-1'));
+    const id = (await notificationList(page)).at(-1)!.id;
+    categoryIdByPage.set(page, id);
+    const res = await del(page, API_ROUTER.notificationById(id));
     expect(res.ok()).toBe(true);
   },
   'the notification is gone from the list': async ({ page }) => {
-    const body = await (
-      await page.request.get(API_ROUTER.notifications())
-    ).json();
-    expect(body.data.some((n: { id: string }) => n.id === 'e2e-notif-1')).toBe(
-      false,
+    const id = categoryIdByPage.get(page)!;
+    expect((await notificationList(page)).some((n) => n.id === id)).toBe(false);
+  },
+
+  'i create 30 more categories, each leaving a notification': async ({
+    page,
+  }) => {
+    for (let i = 0; i < 30; i += 1) {
+      const res = await page.request.post(API_ROUTER.categories(), {
+        data: {
+          id: `seed-${i}`,
+          name: `Seed ${i}`,
+          icon: 'star',
+          color: '#00ff00',
+        },
+      });
+      expect(res.status()).toBe(201);
+    }
+  },
+  'notifications come in pages, newest first, without gaps or repeats': async ({
+    page,
+  }) => {
+    const pages = await walkNotifications(page, 12);
+    const ids = pages.flatMap((p) => p.data.map((n) => n.id));
+    expect(pages.length).toBeGreaterThan(2);
+    expect(pages.slice(0, -1).every((p) => p.data.length === 12)).toBe(true);
+    expect(pages.at(-1)!.nextCursor).toBeNull();
+    expect(new Set(ids).size).toBe(ids.length);
+    const times = pages.flatMap((p) => p.data.map((n) => n.createdAt));
+    expect(times).toEqual([...times].sort().reverse());
+    // The server total covers every page; read ones are listed too.
+    expect(new Set(pages.map((p) => p.unread)).size).toBe(1);
+    expect(pages[0]!.unread).toBe(30);
+    expect(pages.flatMap((p) => p.data).some((n) => n.read)).toBe(true);
+  },
+  'a broken cursor is refused': async ({ page }) => {
+    const res = await page.request.get(
+      API_ROUTER.notifications({ cursor: 'nope' }),
     );
+    expect((await res.json()).code).toBe(400);
+  },
+  'marking one as read keeps it listed and lowers the total': async ({
+    page,
+  }) => {
+    const before = await walkNotifications(page, 50);
+    const unread = before[0]!.data.find((n) => !n.read)!;
+    const res = await page.request.put(API_ROUTER.notificationById(unread.id), {
+      headers: { 'Content-Type': 'application/json' },
+      data: {},
+    });
+    expect(res.ok()).toBe(true);
+    const after = await walkNotifications(page, 50);
+    expect(after[0]!.unread).toBe(before[0]!.unread - 1);
+    expect(after.flatMap((p) => p.data)).toHaveLength(
+      before.flatMap((p) => p.data).length,
+    );
+    expect(
+      after.flatMap((p) => p.data).find((n) => n.id === unread.id)?.read,
+    ).toBe(true);
+  },
+  'marking all as read reaches pages that were never loaded': async ({
+    page,
+  }) => {
+    const first = await (
+      await page.request.get(API_ROUTER.notifications({ limit: 5 }))
+    ).json();
+    expect(first.unread).toBeGreaterThan(5);
+    const res = await page.request.put(API_ROUTER.notificationsReadAll(), {
+      headers: { 'Content-Type': 'application/json' },
+      data: {},
+    });
+    expect(res.ok()).toBe(true);
+    const pages = await walkNotifications(page, 7);
+    expect(pages[0]!.unread).toBe(0);
+    expect(pages.flatMap((p) => p.data).every((n) => n.read)).toBe(true);
   },
 
   'i use "Biedronka" twice and "Lidl" once as shops': async ({ page }) => {
@@ -407,9 +561,19 @@ test('REST endpoints CRUD each finance entity through Postgres', async ({
     ['the edit left the charged payments as they were'],
     ['i delete the rule'],
     ['the charged payments stay as ordinary expenses'],
-    ['i create a notification'],
+    ['every write left a typed notification'],
+    ['a charged recurring rule is reported once'],
+    ['i mark one notification as read'],
+    ['marking a missing notification is not found'],
+    ['i mark all notifications as read'],
+    ['there is no public route to create a notification'],
     ['i dismiss the notification'],
     ['the notification is gone from the list'],
+    ['i create 30 more categories, each leaving a notification'],
+    ['notifications come in pages, newest first, without gaps or repeats'],
+    ['a broken cursor is refused'],
+    ['marking one as read keeps it listed and lowers the total'],
+    ['marking all as read reaches pages that were never loaded'],
     ['i use "Biedronka" twice and "Lidl" once as shops'],
     ['the shops come back most used first'],
     ['a blank value is refused'],

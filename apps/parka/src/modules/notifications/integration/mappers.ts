@@ -4,29 +4,22 @@ import type { InferOut } from '@/shared/server-contracts/extraction';
 import type {
   Notification,
   NotificationId,
-  NotificationKind,
+  NotificationsPage,
 } from '../domain/models';
 
-type NotificationDto = InferOut<
+type ListDto = InferOut<
   z.infer<ReturnType<typeof listNotificationsSchema>>['out'],
   200
->['data'][number];
-
-const KINDS = [
-  'limit-warning',
-  'receipt-confirmation',
-  'limit-alert',
-  'recurring',
-] as const satisfies readonly NotificationKind[];
-
-/** Server validates `kind` as a non-empty string, not the closed union. */
-const toKind = (kind: string): NotificationKind =>
-  KINDS.find((known) => known === kind) ?? 'other';
+>;
+type NotificationDto = ListDto['data'][number];
 
 export const toNotification = (dto: NotificationDto): Notification => ({
+  ...dto,
   id: dto.id as NotificationId,
-  kind: toKind(dto.kind),
-  title: dto.title,
-  body: dto.body,
-  ageDays: dto.ageDays,
+});
+
+export const toPage = (dto: ListDto): NotificationsPage => ({
+  items: dto.data.map(toNotification),
+  nextCursor: dto.nextCursor,
+  unread: dto.unread,
 });
