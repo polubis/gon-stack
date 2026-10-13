@@ -109,6 +109,7 @@ const mockState = async (
             receiptConfirmations: true,
             limitAlerts: true,
           },
+          devices: [],
         },
       }),
     });

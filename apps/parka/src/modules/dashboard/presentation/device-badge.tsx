@@ -1,4 +1,4 @@
-import { DeviceIcon } from '@/shared/device/presentation/device-icon';
+import { DeviceAvatar } from '@/shared/device/presentation/device-avatar';
 import type { Device } from '@/shared/device/domain/models';
 
 /**
@@ -8,7 +8,11 @@ import type { Device } from '@/shared/device/domain/models';
  */
 export const DeviceBadge = ({ device }: { device: Device }) => (
   <span className="flex min-w-0 items-center gap-1">
-    <DeviceIcon type={device.type} className="h-3.5 w-3.5 shrink-0" />
+    <DeviceAvatar
+      avatar={device.avatar}
+      type={device.type}
+      className="h-3.5 w-3.5 shrink-0"
+    />
     <span className="truncate max-sm:sr-only">{device.name}</span>
   </span>
 );

@@ -9,6 +9,7 @@ import { ErrorState } from '@/shared/ui/error-state';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
 import { Toast } from '@/shared/ui/toast';
 import { UnreadLink } from '@/modules/notifications/presentation/unread-link';
+import type { Device } from '@/shared/device/domain/models';
 import { useDarkTheme } from '@/shared/theme/use-dark-theme';
 import {
   ERROR_CODES,
@@ -16,6 +17,7 @@ import {
   NOTIFICATION_OPTIONS,
 } from '../configuration/constraints';
 import type { NotificationKey, Settings } from '../domain/models';
+import { DevicesCard } from './devices-card';
 import { Provider, useContext } from './context';
 import { SettingsSkeleton } from './settings-skeleton';
 
@@ -42,6 +44,14 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
     ctx.update({
       ...settings,
       notifications: { ...settings.notifications, [key]: value },
+    });
+
+  const setAvatar = (id: string, avatar: Device['avatar']) =>
+    ctx.update({
+      ...settings,
+      devices: settings.devices.map((d) =>
+        d.id === id ? { ...d, avatar } : d,
+      ),
     });
 
   return (
@@ -129,6 +139,8 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
           ))}
         </ul>
       </Card>
+
+      <DevicesCard devices={settings.devices} onChange={setAvatar} />
 
       <nav aria-label="Ustawienia szczegółowe">
         <ul className="overflow-hidden rounded-2xl border border-line bg-card">

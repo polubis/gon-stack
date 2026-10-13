@@ -18,7 +18,12 @@ type Expense = Row & {
   paymentMethod?: string;
   isBill?: boolean;
   source?: string;
-  device?: null;
+  device?: {
+    id: string;
+    name: string;
+    type: string;
+    avatar?: string | null;
+  } | null;
   items?: never[];
   date: string;
   amount: number;
@@ -86,6 +91,7 @@ export const installBackend = async (
   fixedToday?: string,
 ): Promise<Backend> => {
   const state = structuredClone(seed);
+  const avatars = new Map<string, string | null>();
   let suggestions: Suggestion[] = state.suggestions ?? [];
   const todayOf = (timeZone?: string): string =>
     fixedToday ?? todayDay(timeZone);
@@ -187,6 +193,37 @@ export const installBackend = async (
       return json(route, { code: 200, ok: true });
     }
 
+    if (collection === 'settings') {
+      if (method === 'PUT') {
+        const body = request.postDataJSON() as {
+          devices: { id: string; avatar: string | null }[];
+        };
+        for (const d of body.devices) avatars.set(d.id, d.avatar);
+        return json(route, { code: 200, data: body });
+      }
+      const devices = new Map<string, NonNullable<Expense['device']>>();
+      for (const e of state.expenses)
+        if (e.device && !devices.has(e.device.id))
+          devices.set(e.device.id, {
+            ...e.device,
+            avatar: avatars.get(e.device.id) ?? null,
+          });
+      return json(route, {
+        code: 200,
+        data: {
+          profile: { name: 'Anna', email: 'anna@example.com' },
+          notifications: {
+            push: true,
+            email: false,
+            limitWarnings: true,
+            receiptConfirmations: true,
+            limitAlerts: true,
+          },
+          devices: [...devices.values()],
+        },
+      });
+    }
+
     if (collection === 'notifications') {
       return json(route, { code: 200, data: [] });
     }
@@ -201,6 +238,21 @@ export const installBackend = async (
         recurring: state.recurring,
       } as Record<string, Row[]>;
       if (!(collection in lists)) return route.fallback();
+      if (collection === 'expenses')
+        return json(route, {
+          code: 200,
+          data: state.expenses.map((e) =>
+            e.device
+              ? {
+                  ...e,
+                  device: {
+                    ...e.device,
+                    avatar: avatars.get(e.device.id) ?? null,
+                  },
+                }
+              : e,
+          ),
+        });
       return json(route, { code: 200, data: lists[collection] });
     }
 

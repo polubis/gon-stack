@@ -12,6 +12,9 @@ const SETTINGS = {
     receiptConfirmations: true,
     limitAlerts: true,
   },
+  devices: [
+    { id: 'device-1', name: 'Safari on iOS', type: 'mobile', avatar: null },
+  ],
 };
 
 const stubApi = (putResponse: object) =>

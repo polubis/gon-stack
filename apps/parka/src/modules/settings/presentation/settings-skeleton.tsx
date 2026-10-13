@@ -2,7 +2,7 @@ import { Card } from '@/shared/ui/layout';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { LINKS, NOTIFICATION_OPTIONS } from '../configuration/constraints';
 
-/** Mirrors profile card, notifications card and links list. */
+/** Mirrors profile, notifications and devices cards and links list. */
 export const SettingsSkeleton = () => (
   <div
     className="flex flex-col gap-4 md:gap-6 lg:grid lg:grid-cols-3"
@@ -27,6 +27,10 @@ export const SettingsSkeleton = () => (
           <Skeleton className="h-6 w-10 rounded-full" />
         </div>
       ))}
+    </Card>
+    <Card className="space-y-3 lg:col-span-2">
+      <Skeleton className="h-4 w-24" />
+      <Skeleton className="h-10 w-full" />
     </Card>
     <div className="space-y-2">
       {LINKS.map(({ href }) => (

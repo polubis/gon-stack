@@ -7,7 +7,7 @@ import {
 } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
-import { toDevice } from '../../shared/device';
+import { loadAvatars, toDevice } from '../../shared/device';
 import {
   expenseSnapshot,
   loadCategoryNames,
@@ -92,7 +92,7 @@ export const updateExpense = privateProcedure({
         paymentMethod: data.payment_method,
         isBill: data.is_bill,
         source: data.source as 'receipt' | 'manual',
-        device: toDevice(data),
+        device: toDevice(data, await loadAvatars(db)),
         recurringId: data.recurring_id,
         occurrenceDate: data.occurrence_date,
         items: input.items,

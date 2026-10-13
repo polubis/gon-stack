@@ -5,7 +5,7 @@ import { todayDay } from '@/shared/period/period';
 import { InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
-import { toDevice } from '../../shared/device';
+import { loadAvatars, toDevice } from '../../shared/device';
 import { materializeRecurring } from '../../shared/recurring';
 
 export const listExpenses = privateProcedure({
@@ -16,9 +16,10 @@ export const listExpenses = privateProcedure({
     // Without the caller's zone "today" is a guess: do not charge early.
     if (input.tz) await materializeRecurring(db, user.id, todayDay(input.tz));
 
-    const [expenses, items] = await Promise.all([
+    const [expenses, items, avatars] = await Promise.all([
       db.from('expenses').select('*'),
       db.from('receipt_items').select('*'),
+      loadAvatars(db),
     ]);
     if (expenses.error) throw new InternalServer(expenses.error);
     if (items.error) throw new InternalServer(items.error);
@@ -52,7 +53,7 @@ export const listExpenses = privateProcedure({
           paymentMethod: e.payment_method,
           isBill: e.is_bill,
           source: e.source as 'receipt' | 'manual',
-          device: toDevice(e),
+          device: toDevice(e, avatars),
           recurringId: e.recurring_id,
           occurrenceDate: e.occurrence_date,
           items: itemsByExpense.get(e.id) ?? [],

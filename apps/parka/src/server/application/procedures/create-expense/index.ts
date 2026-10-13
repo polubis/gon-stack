@@ -3,7 +3,7 @@ import { deriveExpenseCategory } from '@/shared/expense-category/category';
 import { BadRequest, InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
-import { deviceColumns, toDevice } from '../../shared/device';
+import { deviceColumns, loadAvatars, toDevice } from '../../shared/device';
 import {
   expenseSnapshot,
   loadCategoryNames,
@@ -73,7 +73,7 @@ export const createExpense = privateProcedure({
         paymentMethod: data.payment_method,
         isBill: data.is_bill,
         source: data.source as 'receipt' | 'manual',
-        device: toDevice(data),
+        device: toDevice(data, await loadAvatars(db)),
         recurringId: data.recurring_id,
         occurrenceDate: data.occurrence_date,
         items: input.items,

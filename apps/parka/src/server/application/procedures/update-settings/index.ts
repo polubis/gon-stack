@@ -1,7 +1,17 @@
 import { updateSettingsSchema } from '@schemas/settings';
+import type { SupabaseServer } from '@/shared/data-sources/supabase-server';
 import { InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
+
+const getOwnDeviceIds = async (db: SupabaseServer): Promise<string[]> => {
+  const { data, error } = await db
+    .from('expenses')
+    .select('device_id')
+    .not('device_id', 'is', null);
+  if (error) throw new InternalServer(error);
+  return [...new Set(data.map((r) => r.device_id as string))];
+};
 
 export const updateSettings = privateProcedure({
   schema: withZodSchema({ schema: updateSettingsSchema }),
@@ -26,6 +36,36 @@ export const updateSettings = privateProcedure({
         limit_alerts: input.notifications.limitAlerts,
       });
     if (prefsError) throw new InternalServer(prefsError);
+
+    // Only avatars are writable; a device the user owns no expense of is ignored.
+    const known = new Set(
+      (await getOwnDeviceIds(db)).filter((id) =>
+        input.devices.some((d) => d.id === id),
+      ),
+    );
+    const chosen = input.devices.filter((d) => known.has(d.id) && d.avatar);
+    const cleared = input.devices.filter((d) => known.has(d.id) && !d.avatar);
+
+    if (chosen.length) {
+      const { error } = await db.from('device_avatars').upsert(
+        chosen.map((d) => ({
+          user_id: uid,
+          device_id: d.id,
+          avatar: d.avatar as string,
+        })),
+      );
+      if (error) throw new InternalServer(error);
+    }
+    if (cleared.length) {
+      const { error } = await db
+        .from('device_avatars')
+        .delete()
+        .in(
+          'device_id',
+          cleared.map((d) => d.id),
+        );
+      if (error) throw new InternalServer(error);
+    }
 
     return { code: 200 as const, data: input };
   },

@@ -38,5 +38,6 @@ export const currentDevice = (): Device => {
     id: deviceId(),
     name: detectDeviceName(now),
     type: detectDeviceType(now),
+    avatar: null,
   };
 };

@@ -20,6 +20,8 @@ deps:
 - **[receipt]** - Submitted purchase document processed by AI.
 - **[receipt_item]** - Single line item extracted from a **[receipt]**.
 - **[category]** - Classification label applied to an **[expense]** or **[receipt_item]**.
+- **[device]** - Browser installation an **[expense]** was created from: stable id, readable name, type (mobile, desktop, tablet).
+- **[device_avatar]** - Picture chosen by **[user]** to recognise a **[device]**; one of a fixed set, stored per account.
 - **[payment_method]** - Means used to pay for an **[expense]** (e.g. card ending in masked digits).
 
 ## Budgeting

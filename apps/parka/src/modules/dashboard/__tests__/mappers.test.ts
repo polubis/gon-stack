@@ -17,7 +17,12 @@ describe('dashboard expense mappers', () => {
       paymentMethod: 'card',
       isBill: true,
       source: 'receipt',
-      device: { id: 'device-1', name: 'Chrome on Windows', type: 'desktop' },
+      device: {
+        id: 'device-1',
+        name: 'Chrome on Windows',
+        type: 'desktop',
+        avatar: null,
+      },
       recurringId: null,
       occurrenceDate: null,
       items: [
@@ -37,6 +42,7 @@ describe('dashboard expense mappers', () => {
     expect(expense.device).toEqual({
       id: 'device-1',
       name: 'Chrome on Windows',
+      avatar: null,
       type: 'desktop',
     });
     expect(expense.items).toHaveLength(1);

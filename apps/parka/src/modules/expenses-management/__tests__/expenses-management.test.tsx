@@ -216,6 +216,7 @@ describe('adding an expense on its own page', () => {
         id: expect.any(String),
         name: expect.any(String),
         type: expect.stringMatching(/^(mobile|desktop|tablet)$/),
+        avatar: null,
       });
     });
 

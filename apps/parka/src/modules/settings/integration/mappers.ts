@@ -17,9 +17,11 @@ export const toSettings = (dto: SettingsDto): Settings => ({
     push: dto.notifications.push,
     email: dto.notifications.email,
   },
+  devices: dto.devices.map((d) => ({ ...d })),
 });
 
 export const toSettingsDto = (settings: Settings): SettingsDto => ({
   profile: { name: settings.profile.name, email: settings.profile.email },
   notifications: { ...settings.notifications },
+  devices: settings.devices.map((d) => ({ ...d })),
 });

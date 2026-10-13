@@ -37,6 +37,7 @@ describe('expense device in the list', () => {
                 id: 'device-1',
                 name: 'Safari on iOS',
                 type: 'mobile',
+                avatar: 'rocket',
               }),
               expense('e-2', 'Kiosk', null),
             ],
@@ -51,6 +52,13 @@ describe('expense device in the list', () => {
     const row = await screen.findByRole('button', { name: /Piekarnia/ });
 
     expect(within(row).getByText('Safari on iOS')).toBeInTheDocument();
+  });
+
+  it('shows the avatar chosen for the device', async () => {
+    render(<Main />);
+    const row = await screen.findByRole('button', { name: /Piekarnia/ });
+
+    expect(row.querySelector('[data-avatar="rocket"]')).not.toBeNull();
   });
 
   it('shows no device on a row created before devices were tracked', async () => {

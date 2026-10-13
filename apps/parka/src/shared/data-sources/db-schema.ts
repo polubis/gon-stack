@@ -58,6 +58,24 @@ export type Database = {
         };
         Relationships: [];
       };
+      device_avatars: {
+        Row: {
+          avatar: string;
+          device_id: string;
+          user_id: string;
+        };
+        Insert: {
+          avatar: string;
+          device_id: string;
+          user_id: string;
+        };
+        Update: {
+          avatar?: string;
+          device_id?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       expenses: {
         Row: {
           amount: number;

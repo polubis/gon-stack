@@ -1,4 +1,5 @@
 import z from 'zod';
+import { DEVICE_AVATAR_IDS } from '../../device/domain/avatars';
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -32,6 +33,8 @@ export const device = () =>
     id: z.string().min(1),
     name: z.string().min(1),
     type: z.enum(['mobile', 'desktop', 'tablet']),
+    /** Picture the user chose for the device. Server-set, `null` for the default icon. */
+    avatar: z.enum(DEVICE_AVATAR_IDS).nullable().default(null),
   });
 
 export const expense = () =>
@@ -92,6 +95,8 @@ export const settings = () =>
       receiptConfirmations: z.boolean(),
       limitAlerts: z.boolean(),
     }),
+    /** Devices of the user's expenses; only `avatar` is writable. */
+    devices: z.array(device()).max(100).default([]),
   });
 
 export const notFoundOut = () =>

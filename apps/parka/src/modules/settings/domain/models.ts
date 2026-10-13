@@ -1,3 +1,5 @@
+import type { Device } from '@/shared/device/domain/models';
+
 export type Profile = {
   name: string;
   email: string;
@@ -9,6 +11,8 @@ export type NotificationKey =
 export type Settings = {
   profile: Profile;
   notifications: Record<NotificationKey, boolean>;
+  /** Devices expenses were made from. */
+  devices: Device[];
 };
 
 export type NoticeBody =

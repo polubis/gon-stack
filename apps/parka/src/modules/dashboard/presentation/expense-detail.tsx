@@ -2,7 +2,7 @@ import { localMonth } from '@/shared/date/date';
 import { Pencil, Trash2 } from 'lucide-react';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { categoryLabel } from '@/shared/i18n/category-label';
-import { DeviceIcon } from '@/shared/device/presentation/device-icon';
+import { DeviceAvatar } from '@/shared/device/presentation/device-avatar';
 import {
   closeModalThen,
   openModal,
@@ -81,7 +81,8 @@ export const ExpenseDetail = ({
             <div className="flex justify-between gap-3">
               <dt className="text-ink-soft">Urządzenie</dt>
               <dd className="flex min-w-0 items-center gap-1.5 text-right">
-                <DeviceIcon
+                <DeviceAvatar
+                  avatar={expense.device.avatar}
                   type={expense.device.type}
                   className="h-4 w-4 shrink-0"
                 />
