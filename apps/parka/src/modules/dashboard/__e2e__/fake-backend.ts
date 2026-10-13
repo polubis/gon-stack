@@ -57,6 +57,11 @@ export type Backend = {
 };
 
 /** What the scan endpoint answers for any photo. */
+/** Stands in for the stored WebP variants the server would link. */
+const PROFILE_AVATAR_URL = `data:image/svg+xml;utf8,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f97316"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs><rect width="64" height="64" fill="url(#g)"/><circle cx="32" cy="26" r="11" fill="#fde68a"/><rect x="14" y="40" width="36" height="30" rx="16" fill="#fde68a"/></svg>',
+)}`;
+
 const SCANNED_RECEIPT = {
   merchant: 'Biedronka',
   date: new Date().toISOString(),
@@ -92,6 +97,8 @@ export const installBackend = async (
 ): Promise<Backend> => {
   const state = structuredClone(seed);
   const avatars = new Map<string, string | null>();
+  let profileAvatar: { variants: { size: number; url: string }[] } | null =
+    null;
   let suggestions: Suggestion[] = state.suggestions ?? [];
   const todayOf = (timeZone?: string): string =>
     fixedToday ?? todayDay(timeZone);
@@ -191,6 +198,18 @@ export const installBackend = async (
       };
       suggestions = [...suggestions.filter((x) => x !== known), next];
       return json(route, { code: 200, ok: true });
+    }
+
+    if (collection === 'avatar') {
+      if (method === 'POST') {
+        profileAvatar = {
+          variants: [32, 64, 128, 256].map((size) => ({
+            size,
+            url: PROFILE_AVATAR_URL,
+          })),
+        };
+      }
+      return json(route, { code: 200, data: profileAvatar });
     }
 
     if (collection === 'settings') {

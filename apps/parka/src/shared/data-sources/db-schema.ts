@@ -252,6 +252,21 @@ export type Database = {
         };
         Relationships: [];
       };
+      profile_avatars: {
+        Row: {
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           created_at: string;

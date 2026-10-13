@@ -1,0 +1,112 @@
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { Main } from '../presentation/main';
+
+const SETTINGS = {
+  profile: { name: 'Ada', email: 'ada@example.com' },
+  notifications: {
+    push: false,
+    email: true,
+    limitWarnings: true,
+    receiptConfirmations: true,
+    limitAlerts: true,
+  },
+  devices: [],
+};
+
+const variants = (version: number) =>
+  [32, 64, 128, 256].map((size) => ({
+    size,
+    url: `http://cdn/u/${size}.webp?v=${version}`,
+  }));
+
+const PNG = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+
+let uploads: FormData[] = [];
+let uploadResponse: object = { code: 200, data: { variants: variants(2) } };
+
+const chooser = () =>
+  document.querySelector<HTMLInputElement>('input[type="file"]')!;
+
+const png = () =>
+  new File([new Uint8Array(PNG)], 'me.png', { type: 'image/png' });
+
+describe('profile avatar in settings', () => {
+  beforeEach(() => {
+    uploads = [];
+    uploadResponse = { code: 200, data: { variants: variants(2) } };
+    URL.createObjectURL = () => 'blob:preview';
+    URL.revokeObjectURL = () => {};
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init?: RequestInit) => ({
+        json: async () => {
+          if (url.includes('/api/avatar')) {
+            if (init?.method !== 'POST') return { code: 200, data: null };
+            uploads.push(init.body as FormData);
+            return uploadResponse;
+          }
+          return { code: 200, data: SETTINGS };
+        },
+      })),
+    );
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('shows the default icon until a picture is uploaded', async () => {
+    render(<Main />);
+
+    await screen.findByText('Ada');
+    expect(
+      screen.queryByRole('img', { name: /zdjęcie profilowe/i }),
+    ).toBeNull();
+  });
+
+  it('shows the uploaded picture in place of the default icon', async () => {
+    render(<Main />);
+    await screen.findByText('Ada');
+
+    await userEvent.upload(chooser(), png());
+
+    const img = await screen.findByRole('img', { name: /zdjęcie profilowe/i });
+    await waitFor(() =>
+      expect(img).toHaveAttribute('src', expect.stringContaining('v=2')),
+    );
+    expect(img).toHaveAttribute('srcset', expect.stringContaining('32w'));
+    expect(await screen.findByText('Zmieniono zdjęcie.')).toBeVisible();
+    expect(uploads).toHaveLength(1);
+  });
+
+  it('rejects a file that is not an image without calling the server', async () => {
+    render(<Main />);
+    await screen.findByText('Ada');
+
+    await userEvent.upload(
+      chooser(),
+      new File(['hello'], 'notes.png', { type: 'image/png' }),
+    );
+
+    expect(
+      await screen.findByText('File must be a JPEG, PNG, WebP or GIF image'),
+    ).toBeVisible();
+    expect(uploads).toHaveLength(0);
+  });
+
+  it('keeps the old picture and reports an error when the upload fails', async () => {
+    uploadResponse = {
+      code: 400,
+      type: 'bad-request',
+      message: 'Broken image',
+    };
+    render(<Main />);
+    await screen.findByText('Ada');
+
+    await userEvent.upload(chooser(), png());
+
+    expect(await screen.findByText('Broken image')).toBeVisible();
+    expect(
+      screen.queryByRole('img', { name: /zdjęcie profilowe/i }),
+    ).toBeNull();
+  });
+});

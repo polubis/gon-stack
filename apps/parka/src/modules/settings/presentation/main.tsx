@@ -1,6 +1,6 @@
 import { ClearableInput } from '@/shared/ui/clearable';
 import { useEffect, useState } from 'react';
-import { ChevronRight, CircleUser } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { Button, Field, Toggle } from '@/shared/ui/controls';
@@ -18,12 +18,15 @@ import {
 } from '../configuration/constraints';
 import type { NotificationKey, Settings } from '../domain/models';
 import { DevicesCard } from './devices-card';
+import { ProfileAvatar } from './profile-avatar';
 import { Provider, useContext } from './context';
 import { SettingsSkeleton } from './settings-skeleton';
 
 const SettingsContent = ({ settings }: { settings: Settings }) => {
   const ctx = useContext();
   const isSigningOut = ctx.useIsSigningOut();
+  const avatar = ctx.useAvatar();
+  const isUploadingAvatar = ctx.useIsUploadingAvatar();
   const [dark, setDark] = useDarkTheme();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
@@ -58,9 +61,11 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
     <div className="flex flex-col gap-4 md:gap-6 lg:grid lg:grid-cols-3">
       <Card className="space-y-3 lg:col-span-2">
         <div className="flex items-center gap-3">
-          <span className="grid h-12 w-12 place-items-center rounded-full bg-brand-soft text-brand">
-            <CircleUser className="h-6 w-6" aria-hidden="true" />
-          </span>
+          <ProfileAvatar
+            avatar={avatar}
+            uploading={isUploadingAvatar}
+            onPick={ctx.uploadAvatar}
+          />
           <div className="flex-1">
             <p className="text-base font-semibold" data-e2e="settings:name">
               {settings.profile.name}

@@ -18,3 +18,8 @@ declare namespace App {
     siteDomain: string;
   }
 }
+
+declare module 'cloudflare:workers' {
+  /** Bindings declared in `wrangler.jsonc`. */
+  export const env: { IMAGES: unknown };
+}

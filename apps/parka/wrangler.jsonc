@@ -15,6 +15,9 @@
 		"binding": "ASSETS",
 		"directory": "./dist"
 	},
+	"images": {
+		"binding": "IMAGES"
+	},
 	"observability": {
 		"enabled": true
 	}

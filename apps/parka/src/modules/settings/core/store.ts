@@ -1,8 +1,10 @@
 import { atom } from '@repo/react-kit/supa-store';
-import type { Notice, Settings } from '../domain/models';
+import type { Avatar, Notice, Settings } from '../domain/models';
 
 export const createStore = () => {
   const $settings = atom<Settings | null>(null);
+  const $avatar = atom<Avatar | null>(null);
+  const $isUploadingAvatar = atom(false);
   const $initializing = atom(true);
   const $isLoading = atom(false);
   const $isSigningOut = atom(false);
@@ -11,6 +13,8 @@ export const createStore = () => {
 
   return {
     $settings,
+    $avatar,
+    $isUploadingAvatar,
     $initializing,
     $isLoading,
     $isSigningOut,
