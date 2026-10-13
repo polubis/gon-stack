@@ -29,7 +29,10 @@ const SEED: Seed = {
   recurring: [],
 };
 
-const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+const PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+  'base64',
+);
 
 const commands = {
   'i open the settings': async ({ page }) => {
@@ -86,6 +89,20 @@ const commands = {
         .locator('img[data-device-photo]'),
     ).toBeVisible();
   },
+  'i see the crop editor': async ({ getByE2e }) => {
+    await expect(getByE2e('image-editor:dialog')).toBeVisible();
+  },
+  'i zoom in and rotate the picture': async ({ getByE2e }) => {
+    await getByE2e('image-editor:zoom').fill('2');
+    await getByE2e('image-editor:rotate-right').click();
+  },
+  'i confirm the crop': async ({ getByE2e }) => {
+    await getByE2e('image-editor:confirm').click();
+  },
+  'i cancel the crop': async ({ getByE2e }) => {
+    await getByE2e('image-editor:cancel').click();
+    await expect(getByE2e('image-editor:dialog')).toHaveCount(0);
+  },
 } satisfies CommandRegistry<Ctx>;
 
 test.describe('device photo', () => {
@@ -98,6 +115,9 @@ test.describe('device photo', () => {
       ['i open the settings'],
       ['i see no photo for "Chrome on Windows"'],
       ['i upload the image "desk.png" for "Chrome on Windows"'],
+      ['i see the crop editor'],
+      ['i zoom in and rotate the picture'],
+      ['i confirm the crop'],
       ['the settings show my photo for "Chrome on Windows"'],
       ['i open the expenses'],
       ['the "Kawiarnia" row shows my photo'],
@@ -109,6 +129,15 @@ test.describe('device photo', () => {
       ['i open the settings'],
       ['i upload a text file named "notes.png" for "Chrome on Windows"'],
       ['i see the error "File must be a JPEG, PNG, WebP or GIF image"'],
+      ['i see no photo for "Chrome on Windows"'],
+    );
+  });
+
+  test('a cancelled crop uploads nothing', async ({ e2e }) => {
+    await interpreter(commands, e2e)(
+      ['i open the settings'],
+      ['i upload the image "desk.png" for "Chrome on Windows"'],
+      ['i cancel the crop'],
       ['i see no photo for "Chrome on Windows"'],
     );
   });

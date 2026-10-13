@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { stubImageCanvas } from '@/__tests__/stub-image-canvas';
 import { Main } from '../presentation/main';
 
 const variants = (version: number) =>
@@ -45,6 +46,7 @@ const png = () =>
 
 describe('device photo in settings', () => {
   beforeEach(() => {
+    stubImageCanvas();
     uploads = [];
     uploadResponse = { code: 200, data: { variants: variants(2) } };
     URL.createObjectURL = () => 'blob:preview';
@@ -83,6 +85,9 @@ describe('device photo in settings', () => {
     await screen.findByLabelText('Wybierz zdjęcie urządzenia Telefon Ani');
 
     await userEvent.upload(chooser(), png());
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Zatwierdź' }),
+    );
 
     await waitFor(() =>
       expect(photo()).toHaveAttribute('src', expect.stringContaining('v=2')),
@@ -124,6 +129,9 @@ describe('device photo in settings', () => {
     await screen.findByLabelText('Wybierz zdjęcie urządzenia Telefon Ani');
 
     await userEvent.upload(chooser(), png());
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Zatwierdź' }),
+    );
 
     expect(await screen.findByText('Broken image')).toBeVisible();
     expect(photo()).toBeNull();

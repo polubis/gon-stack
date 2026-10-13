@@ -12,6 +12,7 @@ import type { ReportsE2eId } from '@/modules/reports/configuration/e2e-ids';
 import type { SettingsE2eId } from '@/modules/settings/configuration/e2e-ids';
 import type { ExpenseFormE2eId } from '@/shared/expense-form/configuration/e2e-ids';
 import type { CookiesE2eId } from '@/shared/cookies/configuration/e2e-ids';
+import type { ImageEditorE2eId } from '@/shared/image-editor/configuration/e2e-ids';
 import type { PublicNavE2eId } from '@/shared/navigation/public-nav/configuration/e2e-ids';
 import type { WalkthroughE2eId } from '@/shared/walkthrough/configuration/e2e-ids';
 
@@ -36,6 +37,7 @@ export type E2eId =
   | AiInfoE2eId
   | DataExportE2eId
   | CookiesE2eId
+  | ImageEditorE2eId
   | PublicNavE2eId;
 
 declare module 'react' {

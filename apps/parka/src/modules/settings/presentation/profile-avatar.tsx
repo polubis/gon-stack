@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { CircleUser } from 'lucide-react';
+import { useImageEditor } from '@/shared/image-editor/presentation/use-image-editor';
 import { Button } from '@/shared/ui/controls';
 import type { Avatar } from '../domain/models';
 
@@ -12,6 +13,7 @@ type Props = {
 /** Profile picture with the only control to change it. Falls back to the default icon. */
 export const ProfileAvatar = ({ avatar, uploading, onPick }: Props) => {
   const input = useRef<HTMLInputElement>(null);
+  const { select, editor } = useImageEditor('avatar', onPick);
 
   return (
     <div
@@ -44,7 +46,7 @@ export const ProfileAvatar = ({ avatar, uploading, onPick }: Props) => {
         onChange={(event) => {
           const file = event.target.files?.[0];
           event.target.value = '';
-          if (file) onPick(file);
+          if (file) select(file);
         }}
       />
       <Button
@@ -56,6 +58,7 @@ export const ProfileAvatar = ({ avatar, uploading, onPick }: Props) => {
       >
         {uploading ? 'Przesyłanie…' : 'Zmień zdjęcie'}
       </Button>
+      {editor}
     </div>
   );
 };

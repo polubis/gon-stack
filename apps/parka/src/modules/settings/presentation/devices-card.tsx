@@ -17,6 +17,7 @@ import { DeviceAvatar } from '@/shared/device/presentation/device-avatar';
 import { DeviceBubble } from '@/shared/device/presentation/device-bubble';
 import { DeviceIcon } from '@/shared/device/presentation/device-icon';
 import { ClearableInput } from '@/shared/ui/clearable';
+import { useImageEditor } from '@/shared/image-editor/presentation/use-image-editor';
 import { Button } from '@/shared/ui/controls';
 import { Card } from '@/shared/ui/layout';
 
@@ -95,6 +96,7 @@ const PhotoField = ({
   onPick: (file: File) => void;
 }) => {
   const input = useRef<HTMLInputElement>(null);
+  const { select, editor } = useImageEditor(`device:${device.id}`, onPick);
   return (
     <div>
       <input
@@ -107,7 +109,7 @@ const PhotoField = ({
         onChange={(event) => {
           const file = event.target.files?.[0];
           event.target.value = '';
-          if (file) onPick(file);
+          if (file) select(file);
         }}
       />
       <Button
@@ -124,6 +126,7 @@ const PhotoField = ({
             ? 'Zmień zdjęcie urządzenia'
             : 'Dodaj zdjęcie'}
       </Button>
+      {editor}
     </div>
   );
 };

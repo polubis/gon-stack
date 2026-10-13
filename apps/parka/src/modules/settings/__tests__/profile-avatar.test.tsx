@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { stubImageCanvas } from '@/__tests__/stub-image-canvas';
 import { Main } from '../presentation/main';
 
 const SETTINGS = {
@@ -34,6 +35,7 @@ const png = () =>
 
 describe('profile avatar in settings', () => {
   beforeEach(() => {
+    stubImageCanvas();
     uploads = [];
     uploadResponse = { code: 200, data: { variants: variants(2) } };
     URL.createObjectURL = () => 'blob:preview';
@@ -68,6 +70,9 @@ describe('profile avatar in settings', () => {
     await screen.findByText('Ada');
 
     await userEvent.upload(chooser(), png());
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Zatwierdź' }),
+    );
 
     const img = await screen.findByRole('img', { name: /zdjęcie profilowe/i });
     await waitFor(() =>
@@ -76,6 +81,20 @@ describe('profile avatar in settings', () => {
     expect(img).toHaveAttribute('srcset', expect.stringContaining('32w'));
     expect(await screen.findByText('Zmieniono zdjęcie.')).toBeVisible();
     expect(uploads).toHaveLength(1);
+  });
+
+  it('uploads only after the crop is confirmed', async () => {
+    render(<Main />);
+    await screen.findByText('Ada');
+
+    await userEvent.upload(chooser(), png());
+    await screen.findByRole('dialog', { name: 'Przytnij zdjęcie' });
+    expect(uploads).toHaveLength(0);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Anuluj' }));
+
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(uploads).toHaveLength(0);
   });
 
   it('rejects a file that is not an image without calling the server', async () => {
@@ -103,6 +122,9 @@ describe('profile avatar in settings', () => {
     await screen.findByText('Ada');
 
     await userEvent.upload(chooser(), png());
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Zatwierdź' }),
+    );
 
     expect(await screen.findByText('Broken image')).toBeVisible();
     expect(

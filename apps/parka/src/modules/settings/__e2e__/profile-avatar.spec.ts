@@ -10,7 +10,10 @@ import { APP_ROUTER } from '@/shared/router/routes';
 
 const SEED: Seed = { categories: [], expenses: [], limits: [], recurring: [] };
 
-const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+const PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+  'base64',
+);
 
 const commands = {
   'i open the settings': async ({ page }) => {
@@ -49,6 +52,20 @@ const commands = {
   'i reload the settings': async ({ page }) => {
     await page.reload();
   },
+  'i see the crop editor': async ({ getByE2e }) => {
+    await expect(getByE2e('image-editor:dialog')).toBeVisible();
+  },
+  'i zoom in and rotate the picture': async ({ getByE2e }) => {
+    await getByE2e('image-editor:zoom').fill('2');
+    await getByE2e('image-editor:rotate-right').click();
+  },
+  'i confirm the crop': async ({ getByE2e }) => {
+    await getByE2e('image-editor:confirm').click();
+  },
+  'i cancel the crop': async ({ getByE2e }) => {
+    await getByE2e('image-editor:cancel').click();
+    await expect(getByE2e('image-editor:dialog')).toHaveCount(0);
+  },
 } satisfies CommandRegistry<Ctx>;
 
 test.describe('profile avatar', () => {
@@ -61,6 +78,9 @@ test.describe('profile avatar', () => {
       ['i open the settings'],
       ['i see no profile picture'],
       ['i upload the image "me.png"'],
+      ['i see the crop editor'],
+      ['i zoom in and rotate the picture'],
+      ['i confirm the crop'],
       ['my picture replaces the default icon'],
       ['i reload the settings'],
       ['my picture replaces the default icon'],
@@ -72,6 +92,15 @@ test.describe('profile avatar', () => {
       ['i open the settings'],
       ['i upload a text file named "notes.png"'],
       ['i see the error "File must be a JPEG, PNG, WebP or GIF image"'],
+      ['i see no profile picture'],
+    );
+  });
+
+  test('a cancelled crop uploads nothing', async ({ e2e }) => {
+    await interpreter(commands, e2e)(
+      ['i open the settings'],
+      ['i upload the image "me.png"'],
+      ['i cancel the crop'],
       ['i see no profile picture'],
     );
   });
