@@ -5,6 +5,7 @@ import type { SupabaseServer } from '@/shared/data-sources/supabase-server';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { InternalServer } from '../core/error-handling';
 import { logger } from '../core/logger';
+import { deliverPush } from './push-delivery';
 
 export type NotificationEvent = z.infer<ReturnType<typeof notificationEvent>>;
 
@@ -108,7 +109,7 @@ const text = (event: NotificationEvent): { title: string; body: string } => {
 };
 
 /**
- * The one place that writes notifications. Used directly by the backend flows
+ * The one place that writes notifications (and pushes them to the user's devices). Used directly by the backend flows
  * (their own session client) and by the internal endpoint (service client).
  */
 export const recordNotifications = async (
@@ -117,16 +118,18 @@ export const recordNotifications = async (
   events: readonly NotificationEvent[],
 ): Promise<number> => {
   if (events.length === 0) return 0;
+  const messages = events.map(text);
   const { error } = await db.from('notifications').insert(
-    events.map((event) => ({
+    events.map((event, i) => ({
       user_id: userId,
       id: crypto.randomUUID(),
       kind: event.kind,
       payload: event.payload,
-      ...text(event),
+      ...messages[i]!,
     })),
   );
   if (error) throw new InternalServer(error);
+  await deliverPush(db, userId, messages);
   return events.length;
 };
 
