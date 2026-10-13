@@ -2,7 +2,8 @@ import { localMonth } from '@/shared/date/date';
 import { Pencil, Trash2 } from 'lucide-react';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { categoryLabel } from '@/shared/i18n/category-label';
-import { DeviceAvatar } from '@/shared/device/presentation/device-avatar';
+import { deviceDetailsLine, deviceLabel } from '@/shared/device/domain/label';
+import { DeviceBubble } from '@/shared/device/presentation/device-bubble';
 import {
   closeModalThen,
   openModal,
@@ -81,13 +82,23 @@ export const ExpenseDetail = ({
             <div className="flex justify-between gap-3">
               <dt className="text-ink-soft">Urządzenie</dt>
               <dd className="flex min-w-0 items-center gap-1.5 text-right">
-                <DeviceAvatar
-                  avatar={expense.device.avatar}
-                  type={expense.device.type}
-                  className="h-4 w-4 shrink-0"
+                <DeviceBubble
+                  device={expense.device}
+                  className="h-6 w-6"
+                  iconClassName="h-3.5 w-3.5"
                 />
-                <span data-e2e="dashboard:detail-device-name">
-                  {expense.device.name}
+                <span className="min-w-0">
+                  <span data-e2e="dashboard:detail-device-name">
+                    {deviceLabel(expense.device)}
+                  </span>
+                  {deviceDetailsLine(expense.device) ? (
+                    <span
+                      className="block text-xs text-ink-soft"
+                      data-e2e="dashboard:detail-device-details"
+                    >
+                      {deviceDetailsLine(expense.device)}
+                    </span>
+                  ) : null}
                 </span>
               </dd>
             </div>

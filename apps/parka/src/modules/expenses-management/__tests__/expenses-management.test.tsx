@@ -212,7 +212,7 @@ describe('adding an expense on its own page', () => {
       await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
 
       await waitFor(() => expect(written).toHaveLength(1));
-      expect(written[0]!.body.device).toEqual({
+      expect(written[0]!.body.device).toMatchObject({
         id: expect.any(String),
         name: expect.any(String),
         type: expect.stringMatching(/^(mobile|desktop|tablet)$/),

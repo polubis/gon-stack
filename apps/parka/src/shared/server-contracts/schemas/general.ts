@@ -35,6 +35,13 @@ export const device = () =>
     type: z.enum(['mobile', 'desktop', 'tablet']),
     /** Picture the user chose for the device. Server-set, `null` for the default icon. */
     avatar: z.enum(DEVICE_AVATAR_IDS).nullable().default(null),
+    /** What the browser reported; `null` when unknown. */
+    model: z.string().max(64).nullable().default(null),
+    os: z.string().max(32).nullable().default(null),
+    browser: z.string().max(32).nullable().default(null),
+    screen: z.string().max(16).nullable().default(null),
+    /** Name the user gave the device. Server-set, `null` for the built name. */
+    customName: z.string().max(40).nullable().default(null),
   });
 
 export const expense = () =>
@@ -95,7 +102,7 @@ export const settings = () =>
       receiptConfirmations: z.boolean(),
       limitAlerts: z.boolean(),
     }),
-    /** Devices of the user's expenses; only `avatar` is writable. */
+    /** Devices of the user's expenses; only `avatar` and `customName` are writable. */
     devices: z.array(device()).max(100).default([]),
   });
 

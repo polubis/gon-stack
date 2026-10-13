@@ -23,6 +23,9 @@ deps:
 - **[profile_avatar]** - Image uploaded by **[user]** as their picture; stored as WebP variants of 32, 64, 128 and 256 pixels.
 - **[device]** - Browser installation an **[expense]** was created from: stable id, readable name, type (mobile, desktop, tablet).
 - **[device_avatar]** - Picture chosen by **[user]** to recognise a **[device]**; one of a fixed set, stored per account.
+- **[device_details]** - Facts the browser reports about a **[device]**: model code (when exposed), operating system with version, browser, screen resolution.
+- **[device_color]** - Colour derived automatically from the **[device]** id, taken from a fixed set of theme colours.
+- **[device_label]** - Name a **[device]** is shown under: the custom name of **[user]**, else a name built from **[device_details]**.
 - **[payment_method]** - Means used to pay for an **[expense]** (e.g. card ending in masked digits).
 
 ## Budgeting

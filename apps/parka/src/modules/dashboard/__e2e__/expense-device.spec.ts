@@ -46,7 +46,7 @@ const commands = {
   'the list row names the device': async ({ getByE2ePrefix }) => {
     await expect(
       getByE2ePrefix('dashboard:expense:').filter({ hasText: 'Kawiarnia' }),
-    ).toContainText(/Chrome on/);
+    ).toContainText(/Chrome/);
   },
   'the list row shows only the device icon': async ({ getByE2ePrefix }) => {
     const row = getByE2ePrefix('dashboard:expense:').filter({
@@ -54,7 +54,7 @@ const commands = {
     });
     await expect(row.locator('svg.lucide-smartphone')).toBeVisible();
     // Screen-reader only: the name takes no room in the row.
-    const box = await row.getByText('Safari on iOS').boundingBox();
+    const box = await row.getByText('iOS 17 · Safari').boundingBox();
     expect(box?.width ?? 0).toBeLessThanOrEqual(1);
   },
   'the popup names the device and its id': async ({ getByE2e }) => {
@@ -63,9 +63,9 @@ const commands = {
       /^device-/,
     );
   },
-  'the popup names the device as Safari on iOS': async ({ getByE2e }) => {
+  'the popup names the device as iOS 17 · Safari': async ({ getByE2e }) => {
     await expect(getByE2e('dashboard:detail-device-name')).toHaveText(
-      'Safari on iOS',
+      'iOS 17 · Safari',
     );
   },
 } satisfies CommandRegistry<Ctx>;
@@ -102,7 +102,7 @@ test.describe('expense device on mobile', () => {
       ['i add the expense "Kawiarnia" of 25 zloty'],
       ['the list row shows only the device icon'],
       ['i open "Kawiarnia" from the list'],
-      ['the popup names the device as Safari on iOS'],
+      ['the popup names the device as iOS 17 · Safari'],
       ['the popup names the device and its id'],
     );
   });

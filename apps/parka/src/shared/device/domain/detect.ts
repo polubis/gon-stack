@@ -1,4 +1,4 @@
-import type { DeviceType } from './models';
+import type { DeviceDetails, DeviceType } from './models';
 
 /** The parts of `navigator` that tell the device apart; all optional. */
 export type DeviceSignals = {
@@ -102,4 +102,52 @@ export const detectDeviceName = (signals: DeviceSignals): string => {
     : systemOf(signals);
   if (browser && system) return `${browser} on ${system}`;
   return browser ?? system ?? 'Unknown device';
+};
+
+/** Values only `getHighEntropyValues` gives, when the browser allows them. */
+export type DeviceHints = { model?: string; platformVersion?: string };
+
+const major = (version: string | undefined): number | null => {
+  const value = Number.parseInt(version ?? '', 10);
+  return Number.isNaN(value) ? null : value;
+};
+
+const systemVersion = (
+  system: string,
+  { userAgent }: DeviceSignals,
+  { platformVersion }: DeviceHints,
+): number | null => {
+  if (system === 'iOS') return major(/OS (\d+)[_.]/.exec(userAgent)?.[1]);
+  if (system === 'Android')
+    return (
+      major(platformVersion) ?? major(/Android (\d+)/.exec(userAgent)?.[1])
+    );
+  // Chromium reports 13+ for Windows 11 and 0-10 for Windows 10 and older.
+  if (system === 'Windows') {
+    const version = major(platformVersion);
+    return version === null ? null : version >= 13 ? 11 : 10;
+  }
+  return system === 'macOS' ? major(platformVersion) : null;
+};
+
+/** Model, system version, browser and screen of the running browser. */
+export const detectDeviceDetails = (
+  signals: DeviceSignals,
+  hints: DeviceHints = {},
+  screen?: { width: number; height: number },
+): DeviceDetails => {
+  const platform = signals.userAgentData?.platform;
+  const system = platform
+    ? (systemOf(signals) ?? platformLabel(platform))
+    : systemOf(signals);
+  const version = system ? systemVersion(system, signals, hints) : null;
+  return {
+    model: hints.model?.trim() || null,
+    os: system ? (version === null ? system : `${system} ${version}`) : null,
+    browser: browserOf(signals),
+    screen:
+      screen && screen.width > 0 && screen.height > 0
+        ? `${screen.width}×${screen.height}`
+        : null,
+  };
 };

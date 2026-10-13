@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { ExpenseForm } from '@/shared/expense-form/presentation/expense-form';
 import {
   defaultCategoryId,
@@ -5,7 +6,10 @@ import {
 } from '@/shared/expense-form/domain/products';
 import type { ExpenseFormValues } from '@/shared/expense-form/domain/models';
 import { dayAtCurrentTime } from '@/shared/date/date';
-import { currentDevice } from '@/shared/device/integration/current-device';
+import {
+  currentDevice,
+  loadDeviceHints,
+} from '@/shared/device/integration/current-device';
 import { newExpenseId } from '../domain/ids';
 import type { ReceiptDraft } from '../domain/models';
 import { useContext } from './context';
@@ -15,6 +19,11 @@ export const NewExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
   const ctx = useContext();
   const categories = ctx.useCategories();
   const saving = ctx.useSaving();
+
+  // The model code is async; have it by the time the user submits.
+  useEffect(() => {
+    void loadDeviceHints();
+  }, []);
 
   const base: ExpenseFormValues | null = draft
     ? {

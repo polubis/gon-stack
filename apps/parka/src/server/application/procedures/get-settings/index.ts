@@ -2,21 +2,23 @@ import { getSettingsSchema } from '@schemas/settings';
 import { InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
-import { loadAvatars, toDevice } from '../../shared/device';
+import { loadProfiles, toDevice } from '../../shared/device';
 
 export const getSettings = privateProcedure({
   schema: withZodSchema({ schema: getSettingsSchema }),
 })({
   handler: async (_input, { db }) => {
-    const [profile, prefs, rows, avatars] = await Promise.all([
+    const [profile, prefs, rows, profiles] = await Promise.all([
       db.from('profiles').select('*').maybeSingle(),
       db.from('notification_preferences').select('*').maybeSingle(),
       db
         .from('expenses')
-        .select('device_id, device_name, device_type')
+        .select(
+          'device_id, device_name, device_type, device_model, device_os, device_browser, device_screen',
+        )
         .not('device_id', 'is', null)
         .order('date', { ascending: false }),
-      loadAvatars(db),
+      loadProfiles(db),
     ]);
     if (profile.error) throw new InternalServer(profile.error);
     if (prefs.error) throw new InternalServer(prefs.error);
@@ -25,7 +27,7 @@ export const getSettings = privateProcedure({
     // One entry per device, named by its most recent expense.
     const devices = new Map<string, NonNullable<ReturnType<typeof toDevice>>>();
     for (const row of rows.data) {
-      const device = toDevice(row, avatars);
+      const device = toDevice(row, profiles);
       if (device && !devices.has(device.id)) devices.set(device.id, device);
     }
 

@@ -23,6 +23,11 @@ type Expense = Row & {
     name: string;
     type: string;
     avatar?: string | null;
+    model?: string | null;
+    os?: string | null;
+    browser?: string | null;
+    screen?: string | null;
+    customName?: string | null;
   } | null;
   items?: never[];
   date: string;
@@ -96,7 +101,10 @@ export const installBackend = async (
   fixedToday?: string,
 ): Promise<Backend> => {
   const state = structuredClone(seed);
-  const avatars = new Map<string, string | null>();
+  const profiles = new Map<
+    string,
+    { avatar: string | null; customName: string | null }
+  >();
   let profileAvatar: { variants: { size: number; url: string }[] } | null =
     null;
   let suggestions: Suggestion[] = state.suggestions ?? [];
@@ -215,9 +223,17 @@ export const installBackend = async (
     if (collection === 'settings') {
       if (method === 'PUT') {
         const body = request.postDataJSON() as {
-          devices: { id: string; avatar: string | null }[];
+          devices: {
+            id: string;
+            avatar: string | null;
+            customName?: string | null;
+          }[];
         };
-        for (const d of body.devices) avatars.set(d.id, d.avatar);
+        for (const d of body.devices)
+          profiles.set(d.id, {
+            avatar: d.avatar,
+            customName: d.customName ?? null,
+          });
         return json(route, { code: 200, data: body });
       }
       const devices = new Map<string, NonNullable<Expense['device']>>();
@@ -225,7 +241,8 @@ export const installBackend = async (
         if (e.device && !devices.has(e.device.id))
           devices.set(e.device.id, {
             ...e.device,
-            avatar: avatars.get(e.device.id) ?? null,
+            avatar: profiles.get(e.device.id)?.avatar ?? null,
+            customName: profiles.get(e.device.id)?.customName ?? null,
           });
       return json(route, {
         code: 200,
@@ -266,7 +283,8 @@ export const installBackend = async (
                   ...e,
                   device: {
                     ...e.device,
-                    avatar: avatars.get(e.device.id) ?? null,
+                    avatar: profiles.get(e.device.id)?.avatar ?? null,
+                    customName: profiles.get(e.device.id)?.customName ?? null,
                   },
                 }
               : e,

@@ -34,6 +34,24 @@
   --danger-line: #fecdd3;
   --warn: #c2410c;
 
+  /* Device colours: tint + ink pairs, >= 4.5:1, picked by device id hash. */
+  --device-1: #dbeafe;
+  --on-device-1: #1d4ed8;
+  --device-2: #ede9fe;
+  --on-device-2: #6d28d9;
+  --device-3: #fce7f3;
+  --on-device-3: #be185d;
+  --device-4: #ffedd5;
+  --on-device-4: #9a3412;
+  --device-5: #ccfbf1;
+  --on-device-5: #0f766e;
+  --device-6: #fef3c7;
+  --on-device-6: #92400e;
+  --device-7: #fee2e2;
+  --on-device-7: #b91c1c;
+  --device-8: #e0f2fe;
+  --on-device-8: #0369a1;
+
   --shadow-card-value: 0 1px 2px rgb(16 36 27 / 0.04);
   --shadow-popover-value:
     0 8px 24px rgb(16 36 27 / 0.16), 0 2px 6px rgb(16 36 27 / 0.08);
@@ -68,6 +86,24 @@
   --danger-line: #7f1d3a;
   --warn: #fb923c;
 
+  /* Device colours, dark. */
+  --device-1: #1e2a4a;
+  --on-device-1: #93c5fd;
+  --device-2: #2e1f55;
+  --on-device-2: #c4b5fd;
+  --device-3: #4a1535;
+  --on-device-3: #f9a8d4;
+  --device-4: #4a2310;
+  --on-device-4: #fdba74;
+  --device-5: #0f3b37;
+  --on-device-5: #5eead4;
+  --device-6: #40300a;
+  --on-device-6: #fcd34d;
+  --device-7: #4a1616;
+  --on-device-7: #fca5a5;
+  --device-8: #0c3350;
+  --on-device-8: #7dd3fc;
+
   --shadow-card-value: none;
   --shadow-popover-value:
     0 8px 24px rgb(0 0 0 / 0.5), 0 2px 6px rgb(0 0 0 / 0.3);
@@ -101,6 +137,23 @@
   --color-danger-line: var(--danger-line);
   --color-warn: var(--warn);
 
+  --color-device-1: var(--device-1);
+  --color-on-device-1: var(--on-device-1);
+  --color-device-2: var(--device-2);
+  --color-on-device-2: var(--on-device-2);
+  --color-device-3: var(--device-3);
+  --color-on-device-3: var(--on-device-3);
+  --color-device-4: var(--device-4);
+  --color-on-device-4: var(--on-device-4);
+  --color-device-5: var(--device-5);
+  --color-on-device-5: var(--on-device-5);
+  --color-device-6: var(--device-6);
+  --color-on-device-6: var(--on-device-6);
+  --color-device-7: var(--device-7);
+  --color-on-device-7: var(--on-device-7);
+  --color-device-8: var(--device-8);
+  --color-on-device-8: var(--on-device-8);
+
   --shadow-card: var(--shadow-card-value);
   --shadow-popover: var(--shadow-popover-value);
 
@@ -116,6 +169,14 @@
    * from above on purpose: a downward offset adds scrollable overflow at the
    * bottom for the duration, flashing a scrollbar in and out.
    */
+  /* Draws the eye to one row; pair with `motion-reduce:animate-none`. */
+  --animate-device-pulse: device-pulse 0.8s ease-in-out 3;
+  @keyframes device-pulse {
+    50% {
+      background-color: var(--brand-soft);
+    }
+  }
+
   --animate-view-enter: view-enter 0.3s ease-out;
   @keyframes view-enter {
     from {

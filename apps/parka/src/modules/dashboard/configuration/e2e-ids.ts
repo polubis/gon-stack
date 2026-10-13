@@ -58,6 +58,7 @@ export const DASHBOARD_E2E_IDS = [
   'dashboard:toast',
   'dashboard:detail',
   'dashboard:detail-device-name',
+  'dashboard:detail-device-details',
   'dashboard:detail-device-id',
   'dashboard:edit',
   'dashboard:delete',

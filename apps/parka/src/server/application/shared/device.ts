@@ -9,39 +9,63 @@ type DeviceColumns = {
   device_id: string | null;
   device_name: string | null;
   device_type: string | null;
+  device_model?: string | null;
+  device_os?: string | null;
+  device_browser?: string | null;
+  device_screen?: string | null;
 };
 
-export const deviceColumns = (value: Device | null): DeviceColumns => ({
+export const deviceColumns = (value: Device | null) => ({
   device_id: value?.id ?? null,
   device_name: value?.name ?? null,
   device_type: value?.type ?? null,
+  device_model: value?.model ?? null,
+  device_os: value?.os ?? null,
+  device_browser: value?.browser ?? null,
+  device_screen: value?.screen ?? null,
 });
 
-/** Avatar chosen per device id, as stored in `device_avatars`. */
-export type AvatarsByDevice = ReadonlyMap<string, string>;
+/** What the user set per device id, as stored in `device_profiles`. */
+export type DeviceProfile = {
+  avatar: string | null;
+  customName: string | null;
+};
+export type ProfilesByDevice = ReadonlyMap<string, DeviceProfile>;
 
 export const toDevice = (
   row: DeviceColumns,
-  avatars: AvatarsByDevice = new Map(),
+  profiles: ProfilesByDevice = new Map(),
 ): Device | null =>
   row.device_id && row.device_name && isDeviceType(row.device_type)
     ? {
         id: row.device_id,
         name: row.device_name,
         type: row.device_type,
-        avatar: toAvatar(avatars.get(row.device_id)),
+        avatar: toAvatar(profiles.get(row.device_id)?.avatar),
+        model: row.device_model ?? null,
+        os: row.device_os ?? null,
+        browser: row.device_browser ?? null,
+        screen: row.device_screen ?? null,
+        customName: profiles.get(row.device_id)?.customName ?? null,
       }
     : null;
 
-/** The user's avatars; reading never fails an expense, so errors give none. */
-export const loadAvatars = async (
+/** The user's profiles; reading never fails an expense, so errors give none. */
+export const loadProfiles = async (
   db: SupabaseServer,
-): Promise<AvatarsByDevice> => {
-  const { data } = await db.from('device_avatars').select('device_id, avatar');
-  return new Map((data ?? []).map((r) => [r.device_id, r.avatar]));
+): Promise<ProfilesByDevice> => {
+  const { data } = await db
+    .from('device_profiles')
+    .select('device_id, avatar, custom_name');
+  return new Map(
+    (data ?? []).map((r) => [
+      r.device_id,
+      { avatar: r.avatar, customName: r.custom_name },
+    ]),
+  );
 };
 
-const toAvatar = (value: string | undefined): Device['avatar'] =>
+const toAvatar = (value: string | null | undefined): Device['avatar'] =>
   DEVICE_AVATAR_IDS.find((id) => id === value) ?? null;
 
 const isDeviceType = (value: string | null): value is Device['type'] =>

@@ -37,28 +37,33 @@ export const updateSettings = privateProcedure({
       });
     if (prefsError) throw new InternalServer(prefsError);
 
-    // Only avatars are writable; a device the user owns no expense of is ignored.
-    const known = new Set(
-      (await getOwnDeviceIds(db)).filter((id) =>
-        input.devices.some((d) => d.id === id),
-      ),
-    );
-    const chosen = input.devices.filter((d) => known.has(d.id) && d.avatar);
-    const cleared = input.devices.filter((d) => known.has(d.id) && !d.avatar);
+    // Only avatar and custom name are writable; a device the user owns no
+    // expense of is ignored.
+    const owned = new Set(await getOwnDeviceIds(db));
+    const own = input.devices
+      .filter((d) => owned.has(d.id))
+      .map((d) => ({
+        id: d.id,
+        avatar: d.avatar,
+        customName: d.customName?.trim() || null,
+      }));
+    const set = own.filter((d) => d.avatar || d.customName);
+    const cleared = own.filter((d) => !d.avatar && !d.customName);
 
-    if (chosen.length) {
-      const { error } = await db.from('device_avatars').upsert(
-        chosen.map((d) => ({
+    if (set.length) {
+      const { error } = await db.from('device_profiles').upsert(
+        set.map((d) => ({
           user_id: uid,
           device_id: d.id,
-          avatar: d.avatar as string,
+          avatar: d.avatar,
+          custom_name: d.customName,
         })),
       );
       if (error) throw new InternalServer(error);
     }
     if (cleared.length) {
       const { error } = await db
-        .from('device_avatars')
+        .from('device_profiles')
         .delete()
         .in(
           'device_id',

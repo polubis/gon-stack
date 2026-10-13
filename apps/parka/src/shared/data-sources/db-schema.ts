@@ -58,19 +58,22 @@ export type Database = {
         };
         Relationships: [];
       };
-      device_avatars: {
+      device_profiles: {
         Row: {
-          avatar: string;
+          avatar: string | null;
+          custom_name: string | null;
           device_id: string;
           user_id: string;
         };
         Insert: {
-          avatar: string;
+          avatar?: string | null;
+          custom_name?: string | null;
           device_id: string;
           user_id: string;
         };
         Update: {
-          avatar?: string;
+          avatar?: string | null;
+          custom_name?: string | null;
           device_id?: string;
           user_id?: string;
         };
@@ -81,8 +84,12 @@ export type Database = {
           amount: number;
           category_id: string | null;
           date: string;
+          device_browser: string | null;
           device_id: string | null;
+          device_model: string | null;
           device_name: string | null;
+          device_os: string | null;
+          device_screen: string | null;
           device_type: string | null;
           id: string;
           is_bill: boolean;
@@ -97,8 +104,12 @@ export type Database = {
           amount?: number;
           category_id: string | null;
           date: string;
+          device_browser?: string | null;
           device_id?: string | null;
+          device_model?: string | null;
           device_name?: string | null;
+          device_os?: string | null;
+          device_screen?: string | null;
           device_type?: string | null;
           id: string;
           is_bill?: boolean;
@@ -113,8 +124,12 @@ export type Database = {
           amount?: number;
           category_id?: string | null;
           date?: string;
+          device_browser?: string | null;
           device_id?: string | null;
+          device_model?: string | null;
           device_name?: string | null;
+          device_os?: string | null;
+          device_screen?: string | null;
           device_type?: string | null;
           id?: string;
           is_bill?: boolean;

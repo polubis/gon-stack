@@ -24,8 +24,11 @@ const expense = (id: string, merchant: string, device: object | null) => ({
   items: [],
 });
 
+let custom: string | null = null;
+
 describe('expense device in the list', () => {
   beforeEach(() => {
+    custom = null;
     vi.stubGlobal(
       'fetch',
       vi.fn(async (url: string) => ({
@@ -38,6 +41,11 @@ describe('expense device in the list', () => {
                 name: 'Safari on iOS',
                 type: 'mobile',
                 avatar: 'rocket',
+                model: 'SM-S918B',
+                os: 'iOS 17',
+                browser: 'Safari',
+                screen: null,
+                customName: custom,
               }),
               expense('e-2', 'Kiosk', null),
             ],
@@ -51,7 +59,25 @@ describe('expense device in the list', () => {
     render(<Main />);
     const row = await screen.findByRole('button', { name: /Piekarnia/ });
 
-    expect(within(row).getByText('Safari on iOS')).toBeInTheDocument();
+    expect(
+      within(row).getByText('SM-S918B · iOS 17 · Safari'),
+    ).toBeInTheDocument();
+    expect(within(row).getByText('#ce-1')).toBeInTheDocument();
+  });
+
+  it('shows the custom name instead of the built one', async () => {
+    custom = 'Telefon Ani';
+    render(<Main />);
+    const row = await screen.findByRole('button', { name: /Piekarnia/ });
+
+    expect(within(row).getByText('Telefon Ani')).toBeInTheDocument();
+  });
+
+  it('colors the avatar by the device id', async () => {
+    render(<Main />);
+    const row = await screen.findByRole('button', { name: /Piekarnia/ });
+
+    expect(row.querySelector('[data-device-color]')).not.toBeNull();
   });
 
   it('shows the avatar chosen for the device', async () => {

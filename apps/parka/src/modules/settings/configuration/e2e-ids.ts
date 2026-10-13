@@ -8,6 +8,8 @@ export const SETTINGS_E2E_IDS = [
   'settings:appearance',
   'settings:notifications',
   'settings:devices',
+  'settings:identify-device',
+  'settings:device-announcement',
   'settings:avatar',
   'settings:avatar-image',
   'settings:avatar-input',
@@ -18,7 +20,10 @@ export const SETTINGS_E2E_IDS = [
 ] as const;
 
 export type SettingsE2eDynamicId =
-  `settings:device:${string}` | `settings:device-avatar:${string}`;
+  | `settings:device:${string}`
+  | `settings:device-avatar:${string}`
+  | `settings:device-name:${string}`
+  | `settings:device-this:${string}`;
 
 export type SettingsE2eId =
   (typeof SETTINGS_E2E_IDS)[number] | SettingsE2eDynamicId;

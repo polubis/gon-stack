@@ -22,6 +22,11 @@ describe('dashboard expense mappers', () => {
         name: 'Chrome on Windows',
         type: 'desktop',
         avatar: null,
+        model: null,
+        os: null,
+        browser: null,
+        screen: null,
+        customName: null,
       },
       recurringId: null,
       occurrenceDate: null,
@@ -44,6 +49,11 @@ describe('dashboard expense mappers', () => {
       name: 'Chrome on Windows',
       avatar: null,
       type: 'desktop',
+      model: null,
+      os: null,
+      browser: null,
+      screen: null,
+      customName: null,
     });
     expect(expense.items).toHaveLength(1);
     expect(expense.items[0]!.name).toBe('Milk');

@@ -49,11 +49,14 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
       notifications: { ...settings.notifications, [key]: value },
     });
 
-  const setAvatar = (id: string, avatar: Device['avatar']) =>
+  const setDevice = (
+    id: string,
+    patch: Partial<Pick<Device, 'avatar' | 'customName'>>,
+  ) =>
     ctx.update({
       ...settings,
       devices: settings.devices.map((d) =>
-        d.id === id ? { ...d, avatar } : d,
+        d.id === id ? { ...d, ...patch } : d,
       ),
     });
 
@@ -145,7 +148,7 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
         </ul>
       </Card>
 
-      <DevicesCard devices={settings.devices} onChange={setAvatar} />
+      <DevicesCard devices={settings.devices} onChange={setDevice} />
 
       <nav aria-label="Ustawienia szczegółowe">
         <ul className="overflow-hidden rounded-2xl border border-line bg-card">
