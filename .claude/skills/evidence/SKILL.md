@@ -26,7 +26,7 @@ Not for non-UI change. Use tests.
 7. **Lockstep.** Helper `both(fn)` = `Promise.all` on both frames. Use stable locators.
 8. **Label.** Per highlight: `mark(frame, locator, caption, good)`, hold, `unmark`. Colors: bad `#dc2626`, good `#16a34a`.
 9. **Title cards** between scenes + closing summary card.
-10. **Save.** `page.video().path()` after `context.close()`, copy to `final.webm`.
+10. **Save.** `page.video().path()` after `context.close()`, copy to root `.evidences/<name>.webm` (create dir if missing).
 11. **Verify.** Screenshot every ~2.5s, log real values (field values, request bodies). View screenshots before claiming. Caption must match logged value.
 12. **Cleanup.** Stop servers, `git worktree remove --force`, `git worktree prune`. `git status` must equal state before.
 13. **Deliver.** Absolute path + `SendUserFile` (`display: render`). Report scenes, limits.
@@ -68,7 +68,7 @@ No wrapper, no second server. One page, same `mark`/`unmark`/title card helpers,
 - Mock backend, never real data. Personal/sensitive data seen -> stop (`rules/security.md`).
 - Never modify source of main tree. Proof only.
 - No `ffmpeg` = `.webm` only; do not fake `.mp4`.
-- Video + scripts live in scratch dir, not repo, unless dev asks to keep.
+- Final video + screenshots go ONLY to root `.evidences/` (gitignored). Check `.gitignore` has `/.evidences/`, add if missing. Scripts stay in scratch dir.
 - Report limits honestly: mocked parts, dev server not build, dropped scenes.
 
 ## Report
