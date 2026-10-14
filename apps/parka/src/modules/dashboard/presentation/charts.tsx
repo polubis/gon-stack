@@ -91,7 +91,12 @@ export const Donut = ({
                 style={{ backgroundColor: s.color }}
                 aria-hidden="true"
               />
-              <span className="flex-1 truncate text-ink-soft">{s.label}</span>
+              <span
+                className="min-w-0 flex-1 truncate text-ink-soft"
+                title={s.label}
+              >
+                {s.label}
+              </span>
               <span className="font-medium tabular-nums">{money(s.value)}</span>
               <span className="w-10 text-right text-ink-soft tabular-nums">
                 {Math.round((s.value / total) * 100)}%

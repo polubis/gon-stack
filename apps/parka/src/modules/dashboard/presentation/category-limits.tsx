@@ -41,12 +41,12 @@ export const CategoryLimits = ({
             key={c.id}
             className="space-y-2 rounded-xl border border-line p-3"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <CategoryAvatar category={category} />
-              <span className="flex-1 text-sm font-medium">
+              <span className="min-w-24 flex-1 text-sm font-medium">
                 {categoryLabel(category.name)}
               </span>
-              <span className="text-sm tabular-nums">
+              <span className="ml-auto text-sm whitespace-nowrap tabular-nums">
                 {money(c.spent)} / {money(c.amount)}
               </span>
             </div>

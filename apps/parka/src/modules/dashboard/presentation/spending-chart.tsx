@@ -10,7 +10,7 @@ import { niceStep } from './selectors';
 const percentOf = (value: number, top: number): number => (value / top) * 100;
 
 const Legend = ({ period }: { period: Period }) => (
-  <ul className="flex flex-col gap-1 text-xs text-ink-soft xl:flex-row xl:items-center xl:gap-4">
+  <ul className="flex flex-col gap-1 text-xs text-ink-soft md:flex-row md:items-center md:gap-4">
     <li className="flex items-center gap-1.5">
       <span className="h-2 w-2 rounded-full bg-brand" aria-hidden="true" />
       {periodTitle(period)}
@@ -100,10 +100,14 @@ const Chart = ({ period, summary }: { period: Period; summary: Summary }) => {
             </svg>
           </div>
           <ul className="relative mt-1 h-4 text-xs text-ink-soft">
-            {labelledPoints(period.kind, series.length).map((index) => (
+            {labelledPoints(period.kind, series.length).map((index, i) => (
               <li
                 key={index}
-                className="absolute -translate-x-1/2 whitespace-nowrap"
+                className={cn(
+                  'absolute -translate-x-1/2 whitespace-nowrap',
+                  // Narrow screens keep every other label so none touch.
+                  i % 2 === 1 && 'max-sm:hidden',
+                )}
                 style={{ left: `${percentOf(index - 0.5, series.length)}%` }}
               >
                 {pointLabel(period, index)}
@@ -144,7 +148,7 @@ export const SpendingChart = ({
   summary: Summary;
 }) => (
   <Card className="space-y-4 xl:col-span-12 xl:row-start-4">
-    <div className="flex flex-col items-start gap-2 xl:flex-row xl:items-center xl:justify-between">
+    <div className="flex flex-col items-start gap-2 md:flex-row md:items-center md:justify-between">
       <h2 className="text-base font-semibold">Wydatki w czasie</h2>
       <Legend period={period} />
     </div>
