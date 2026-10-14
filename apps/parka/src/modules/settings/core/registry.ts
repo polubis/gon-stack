@@ -4,6 +4,8 @@ import { update } from './handlers/update';
 import { loadAvatar } from './handlers/load-avatar';
 import { uploadAvatar } from './handlers/upload-avatar';
 import { uploadDevicePhoto } from './handlers/upload-device-photo';
+import { loadPush } from './handlers/load-push';
+import { togglePush } from './handlers/toggle-push';
 import { signOut } from './handlers/sign-out';
 import { dismissNotice } from './handlers/dismiss-notice';
 import { createBus } from './bus';
@@ -17,6 +19,8 @@ export const createRegistry = (store: Store) => {
     loadAvatar(store, bus),
     uploadAvatar(store, bus),
     uploadDevicePhoto(store, bus),
+    loadPush(store, bus),
+    togglePush(store, bus),
     signOut(store, bus),
     dismissNotice(store, bus),
   );

@@ -13,6 +13,10 @@ export type Avatar = {
 export type NotificationKey =
   'limitWarnings' | 'receiptConfirmations' | 'limitAlerts' | 'push' | 'email';
 
+/** What this browser can do about push; independent of the saved preference. */
+export type PushState =
+  'checking' | 'unsupported' | 'unconfigured' | 'blocked' | 'off' | 'on';
+
 export type Settings = {
   profile: Profile;
   notifications: Record<NotificationKey, boolean>;

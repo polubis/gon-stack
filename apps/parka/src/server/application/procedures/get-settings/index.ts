@@ -39,7 +39,7 @@ export const getSettings = privateProcedure({
           email: profile.data?.email ?? '',
         },
         notifications: {
-          push: prefs.data?.push ?? true,
+          push: prefs.data?.push ?? false,
           email: prefs.data?.email ?? false,
           limitWarnings: prefs.data?.limit_warnings ?? true,
           receiptConfirmations: prefs.data?.receipt_confirmations ?? true,

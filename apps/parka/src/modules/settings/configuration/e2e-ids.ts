@@ -7,6 +7,7 @@ export const SETTINGS_E2E_IDS = [
   'settings:save-profile',
   'settings:appearance',
   'settings:notifications',
+  'settings:push-hint',
   'settings:devices',
   'settings:identify-device',
   'settings:device-announcement',

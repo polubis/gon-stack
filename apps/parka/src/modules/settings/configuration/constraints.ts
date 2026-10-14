@@ -7,7 +7,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { APP_ROUTER } from '@/shared/router/routes';
-import type { NotificationKey } from '../domain/models';
+import type { NotificationKey, PushState } from '../domain/models';
 
 export const FEATURE_NAME = 'Settings';
 
@@ -25,10 +25,15 @@ export const LINKS: { label: string; href: string; icon: LucideIcon }[] = [
   { label: 'Eksport danych', href: APP_ROUTER.dataExport(), icon: FileText },
 ];
 
+/** Why push cannot be switched on in this browser; absent when it can. */
+export const PUSH_HINTS: Partial<Record<PushState, string>> = {
+  unsupported:
+    'Ta przeglądarka nie obsługuje powiadomień push. Na iPhonie dodaj Parkę do ekranu początkowego i otwórz ją stamtąd.',
+  unconfigured: 'Powiadomienia push nie są skonfigurowane na serwerze.',
+  blocked:
+    'Powiadomienia są zablokowane w przeglądarce. Zezwól na nie w ustawieniach strony i odśwież widok.',
+};
+
 export const NOTIFICATION_OPTIONS: { key: NotificationKey; label: string }[] = [
-  { key: 'limitWarnings', label: 'Ostrzeżenia o limitach' },
-  { key: 'receiptConfirmations', label: 'Potwierdzenia paragonów' },
-  { key: 'limitAlerts', label: 'Alerty limitów' },
   { key: 'push', label: 'Powiadomienia push' },
-  { key: 'email', label: 'Powiadomienia e-mail' },
 ];

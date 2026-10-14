@@ -9,5 +9,6 @@ export type Event =
       '[TRIGGER]_UPLOAD_DEVICE_PHOTO',
       { deviceId: string; file: File }
     >
+  | TriggerEvent<'[TRIGGER]_TOGGLE_PUSH', { enabled: boolean }>
   | TriggerEvent<'[TRIGGER]_SIGN_OUT'>
   | TriggerEvent<'[TRIGGER]_DISMISS_NOTICE'>;
