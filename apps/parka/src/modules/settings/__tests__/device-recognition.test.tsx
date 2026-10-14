@@ -1,6 +1,16 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from 'vitest';
 import { Main } from '../presentation/main';
 
 const NO_DETAILS = {
@@ -46,27 +56,29 @@ const settings = () => ({
   ],
 });
 
+const server = setupServer();
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
 let saved: ReturnType<typeof settings> | null = null;
 
 describe('device recognition in settings', () => {
   beforeEach(() => {
     saved = null;
     window.localStorage.setItem('parka:device-id', 'device-aaaa-a3f9');
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (_url: string, init?: RequestInit) => ({
-        json: async () => {
-          if (init?.method !== 'PUT') return { code: 200, data: settings() };
-          saved = JSON.parse(String(init.body));
-          return { code: 200, data: saved };
-        },
-      })),
+    server.use(
+      http.get('/api/settings/', () =>
+        HttpResponse.json({ code: 200, data: settings() }),
+      ),
+      http.put('/api/settings/', async ({ request }) => {
+        saved = (await request.json()) as ReturnType<typeof settings>;
+        return HttpResponse.json({ code: 200, data: saved });
+      }),
     );
   });
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    window.localStorage.clear();
-  });
+  afterEach(() => window.localStorage.clear());
 
   const row = async (label: string) =>
     (await screen.findByText(label)).closest('li')!;

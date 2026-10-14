@@ -733,10 +733,10 @@ const commands = {
   'i update my profile name': async ({ page, getByE2e }) => {
     await mockState(page);
     await open(page, APP_ROUTER.settings());
-    await getByE2e('settings:edit-profile').click();
     await getByE2e('settings:profile-name').fill('Anna Testowa');
+    await getByE2e('settings:profile-email').fill('anna@example.com');
     await getByE2e('settings:save-profile').click();
-    await expect(getByE2e('settings:name')).toHaveText('Anna Testowa');
+    await expect(getByE2e('settings:profile-name')).toHaveValue('Anna Testowa');
   },
 
   'financial data exports as csv': async ({ page, getByE2e }) => {

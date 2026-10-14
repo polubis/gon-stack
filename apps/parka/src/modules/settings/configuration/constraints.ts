@@ -1,5 +1,5 @@
 import {
-  Bell,
+  Download,
   FileText,
   LayoutGrid,
   ShieldCheck,
@@ -20,9 +20,8 @@ export const LINKS: { label: string; href: string; icon: LucideIcon }[] = [
   { label: 'RODO — Twoje dane', href: APP_ROUTER.privacy(), icon: ShieldCheck },
   { label: 'AI — jak to działa', href: APP_ROUTER.aiInfo(), icon: Sparkles },
   { label: 'Kategorie', href: APP_ROUTER.categories(), icon: LayoutGrid },
-  { label: 'Powiadomienia', href: APP_ROUTER.notifications(), icon: Bell },
   { label: 'Raport miesięczny', href: APP_ROUTER.reports(), icon: FileText },
-  { label: 'Eksport danych', href: APP_ROUTER.dataExport(), icon: FileText },
+  { label: 'Eksport danych', href: APP_ROUTER.dataExport(), icon: Download },
 ];
 
 /** Why push cannot be switched on in this browser; absent when it can. */

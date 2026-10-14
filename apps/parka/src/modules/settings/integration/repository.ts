@@ -1,5 +1,4 @@
 import type { z } from 'zod';
-import { logoutAccount } from '@/shared/auth/integration/repository';
 import {
   getAvatarSchema,
   uploadAvatarSchema,
@@ -97,6 +96,3 @@ export const putPushSubscription = async (
   const json = (await response.json()) as SubscribePushOut;
   if (json.code !== 200) throw new Error(json.message);
 };
-
-/** Signs the active account out; resolves where to go next. */
-export const logout = (): Promise<string> => logoutAccount('active');

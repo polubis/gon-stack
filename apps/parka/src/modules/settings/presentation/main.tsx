@@ -17,36 +17,87 @@ import {
   NOTIFICATION_OPTIONS,
   PUSH_HINTS,
 } from '../configuration/constraints';
-import type { Settings } from '../domain/models';
+import type { Avatar, Settings } from '../domain/models';
 import { DevicesCard } from './devices-card';
 import { ProfileAvatar } from './profile-avatar';
 import { Provider, useContext } from './context';
 import { SettingsSkeleton } from './settings-skeleton';
 
+const ProfileCard = ({
+  profile,
+  avatar,
+  uploading,
+  onPickAvatar,
+  onSave,
+}: {
+  profile: Settings['profile'];
+  avatar: Avatar | null;
+  uploading: boolean;
+  onPickAvatar: (file: File) => void;
+  onSave: (profile: Settings['profile']) => void;
+}) => {
+  const [name, setName] = useState(profile.name);
+  const [email, setEmail] = useState(profile.email);
+  const next = { name: name.trim(), email: email.trim() };
+  const canSave =
+    next.name !== '' &&
+    next.email !== '' &&
+    (next.name !== profile.name || next.email !== profile.email);
+
+  return (
+    <Card className="flex flex-col items-center gap-4 md:flex-row md:items-start md:gap-8 lg:col-span-2">
+      <ProfileAvatar
+        avatar={avatar}
+        uploading={uploading}
+        onPick={onPickAvatar}
+      />
+      <form
+        className="grid w-full min-w-0 flex-1 gap-3 md:grid-cols-2 md:gap-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (canSave) onSave(next);
+        }}
+      >
+        <Field label="Imię i nazwisko">
+          <ClearableInput
+            value={name}
+            autoComplete="name"
+            data-e2e="settings:profile-name"
+            onChange={(e) => setName(e.target.value)}
+          />
+        </Field>
+        <Field label="E-mail">
+          <ClearableInput
+            type="email"
+            value={email}
+            autoComplete="email"
+            data-e2e="settings:profile-email"
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </Field>
+        <div className="md:col-span-2 md:flex md:justify-end">
+          <Button
+            type="submit"
+            className="md:w-auto md:min-w-40"
+            data-e2e="settings:save-profile"
+            disabled={!canSave}
+          >
+            Zapisz
+          </Button>
+        </div>
+      </form>
+    </Card>
+  );
+};
+
 const SettingsContent = ({ settings }: { settings: Settings }) => {
   const ctx = useContext();
-  const isSigningOut = ctx.useIsSigningOut();
   const avatar = ctx.useAvatar();
   const isUploadingAvatar = ctx.useIsUploadingAvatar();
   const uploadingDeviceIds = ctx.useUploadingDeviceIds();
   const push = ctx.usePush();
   const isPushBusy = ctx.useIsPushBusy();
   const [dark, setDark] = useDarkTheme();
-  const [editing, setEditing] = useState(false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-
-  const startEditing = () => {
-    setName(settings.profile.name);
-    setEmail(settings.profile.email);
-    setEditing(true);
-  };
-
-  const saveProfile = () => {
-    ctx.update({ ...settings, profile: { name, email } });
-    setEditing(false);
-  };
-
   const setDevice = (
     id: string,
     patch: Partial<Pick<Device, 'avatar' | 'customName'>>,
@@ -59,54 +110,22 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
     });
 
   return (
-    <div className="flex flex-col gap-4 md:gap-6 lg:grid lg:grid-cols-3">
-      <Card className="space-y-3 lg:col-span-2">
-        <div className="flex items-center gap-3">
-          <ProfileAvatar
-            avatar={avatar}
-            uploading={isUploadingAvatar}
-            onPick={ctx.uploadAvatar}
-          />
-          <div className="flex-1">
-            <p className="text-base font-semibold" data-e2e="settings:name">
-              {settings.profile.name}
-            </p>
-            <p className="text-xs text-ink-soft">{settings.profile.email}</p>
-          </div>
-          {!editing ? (
-            <Button
-              variant="ghost"
-              className="w-auto px-3 py-1.5"
-              data-e2e="settings:edit-profile"
-              onClick={startEditing}
-            >
-              Edytuj
-            </Button>
-          ) : null}
-        </div>
+    <div className="flex flex-col gap-4 md:gap-6 lg:grid lg:grid-cols-2">
+      <ProfileCard
+        key={`${settings.profile.name}\n${settings.profile.email}`}
+        profile={settings.profile}
+        avatar={avatar}
+        uploading={isUploadingAvatar}
+        onPickAvatar={ctx.uploadAvatar}
+        onSave={(profile) => ctx.update({ ...settings, profile })}
+      />
 
-        {editing ? (
-          <div className="space-y-3">
-            <Field label="Imię i nazwisko">
-              <ClearableInput
-                value={name}
-                data-e2e="settings:profile-name"
-                onChange={(e) => setName(e.target.value)}
-              />
-            </Field>
-            <Field label="E-mail">
-              <ClearableInput
-                type="email"
-                value={email}
-                data-e2e="settings:profile-email"
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </Field>
-            <Button data-e2e="settings:save-profile" onClick={saveProfile}>
-              Zapisz
-            </Button>
-          </div>
-        ) : null}
+      <Card as="section" className="space-y-2" data-e2e="settings:appearance">
+        <h2 className="text-sm font-semibold text-ink-soft">Wygląd</h2>
+        <div className="flex items-center justify-between py-2 text-sm">
+          <span>Ciemny motyw</span>
+          <Toggle checked={dark} onChange={setDark} label="Ciemny motyw" />
+        </div>
       </Card>
 
       <Card as="section" className="space-y-1">
@@ -119,15 +138,7 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
         </p>
       </Card>
 
-      <Card as="section" className="space-y-2" data-e2e="settings:appearance">
-        <h2 className="text-sm font-semibold text-ink-soft">Wygląd</h2>
-        <div className="flex items-center justify-between py-2 text-sm">
-          <span>Ciemny motyw</span>
-          <Toggle checked={dark} onChange={setDark} label="Ciemny motyw" />
-        </div>
-      </Card>
-
-      <Card as="section" className="space-y-2 lg:col-span-2">
+      <Card as="section" className="space-y-2">
         <h2 className="text-sm font-semibold text-ink-soft">Powiadomienia</h2>
         <ul className="divide-y divide-line" data-e2e="settings:notifications">
           {NOTIFICATION_OPTIONS.map(({ key, label }) => {
@@ -157,15 +168,8 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
         </ul>
       </Card>
 
-      <DevicesCard
-        devices={settings.devices}
-        uploadingIds={uploadingDeviceIds}
-        onChange={setDevice}
-        onPhoto={ctx.uploadDevicePhoto}
-      />
-
       <nav aria-label="Ustawienia szczegółowe">
-        <ul className="overflow-hidden rounded-2xl border border-line bg-card">
+        <ul className="h-full overflow-hidden rounded-2xl border border-line bg-card">
           {LINKS.map(({ label, href, icon: Icon }) => (
             <li key={href} className="border-b border-line last:border-0">
               <a
@@ -184,15 +188,12 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
         </ul>
       </nav>
 
-      <Button
-        variant="ghost"
-        className="lg:col-start-3"
-        data-e2e="settings:sign-out"
-        disabled={isSigningOut}
-        onClick={ctx.signOut}
-      >
-        Wyloguj się
-      </Button>
+      <DevicesCard
+        devices={settings.devices}
+        uploadingIds={uploadingDeviceIds}
+        onChange={setDevice}
+        onPhoto={ctx.uploadDevicePhoto}
+      />
     </div>
   );
 };
@@ -210,7 +211,10 @@ const SettingsView = () => {
   }, [ctx]);
 
   return (
-    <div data-e2e="settings:main" className="relative flex flex-1 flex-col">
+    <div
+      data-e2e="settings:main"
+      className="relative mx-auto flex w-full max-w-6xl flex-1 animate-view-enter flex-col motion-reduce:animate-none"
+    >
       <LoadingBanner active={isLoading && !initializing} />
       <div className="md:px-4 lg:px-6 xl:px-12">
         <ScreenHeader title="Ustawienia" action={<UnreadLink />} />

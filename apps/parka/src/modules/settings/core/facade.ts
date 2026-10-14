@@ -11,7 +11,6 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
       trigger('[TRIGGER]_UPLOAD_DEVICE_PHOTO', { deviceId, file }),
     togglePush: (enabled: boolean) =>
       trigger('[TRIGGER]_TOGGLE_PUSH', { enabled }),
-    signOut: () => trigger('[TRIGGER]_SIGN_OUT'),
     dismissNotice: () => trigger('[TRIGGER]_DISMISS_NOTICE'),
     useSettings: () => store.$settings.use(),
     useAvatar: () => store.$avatar.use(),
@@ -21,7 +20,6 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
     useIsPushBusy: () => store.$isPushBusy.use(),
     useInitializing: () => store.$initializing.use(),
     useIsLoading: () => store.$isLoading.use(),
-    useIsSigningOut: () => store.$isSigningOut.use(),
     useError: () => store.$error.use(),
     useNotice: () => store.$notice.use(),
   };

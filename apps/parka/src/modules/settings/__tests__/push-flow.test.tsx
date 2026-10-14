@@ -1,6 +1,17 @@
 import type { ReactNode } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import { Provider, useContext } from '../presentation/context';
 
 const SETTINGS = {
@@ -54,24 +65,28 @@ const stubBrowser = (answer: NotificationPermission, subscribed = false) => {
   });
 };
 
+const server = setupServer();
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
 const stubApi = () => {
   const calls: { url: string; method: string; body?: unknown }[] = [];
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(async (url: string, init?: RequestInit) => {
-      const method = init?.method ?? 'GET';
-      const body = init?.body ? JSON.parse(String(init.body)) : undefined;
-      calls.push({ url, method, body });
-      if (url.includes('/api/push/'))
-        return { json: async () => ({ code: 200, ok: true }) };
-      if (url.includes('/api/avatar/'))
-        return { json: async () => ({ code: 200, data: null }) };
-      return {
-        json: async () => ({
-          code: 200,
-          data: method === 'PUT' ? body : SETTINGS,
-        }),
-      };
+  server.use(
+    http.all('/api/*', async ({ request }) => {
+      const { pathname } = new URL(request.url);
+      const text = await request.text();
+      const body = text ? (JSON.parse(text) as unknown) : undefined;
+      calls.push({ url: pathname, method: request.method, body });
+      if (pathname.includes('/api/push/'))
+        return HttpResponse.json({ code: 200, ok: true });
+      if (pathname.includes('/api/avatar/'))
+        return HttpResponse.json({ code: 200, data: null });
+      return HttpResponse.json({
+        code: 200,
+        data: request.method === 'PUT' ? body : SETTINGS,
+      });
     }),
   );
   return calls;

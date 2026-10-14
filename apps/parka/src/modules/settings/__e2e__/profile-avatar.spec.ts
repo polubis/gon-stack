@@ -22,7 +22,7 @@ const commands = {
     await page.goto(APP_ROUTER.settings());
   },
   'i see no profile picture': async ({ getByE2e }) => {
-    await expect(getByE2e('settings:name')).toBeVisible();
+    await expect(getByE2e('settings:profile-name')).toBeVisible();
     await expect(getByE2e('settings:avatar-image')).toHaveCount(0);
   },
   'i upload a text file named "notes.png"': async ({ getByE2e }) => {

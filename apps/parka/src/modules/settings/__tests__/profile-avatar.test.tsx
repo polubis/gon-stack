@@ -1,6 +1,16 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from 'vitest';
 import { stubImageCanvas } from '@/__tests__/stub-image-canvas';
 import { Main } from '../presentation/main';
 
@@ -24,7 +34,13 @@ const variants = (version: number) =>
 
 const PNG = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
-let uploads: FormData[] = [];
+const server = setupServer();
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
+let uploads: Request[] = [];
 let uploadResponse: object = { code: 200, data: { variants: variants(2) } };
 
 const chooser = () =>
@@ -40,26 +56,24 @@ describe('profile avatar in settings', () => {
     uploadResponse = { code: 200, data: { variants: variants(2) } };
     URL.createObjectURL = () => 'blob:preview';
     URL.revokeObjectURL = () => {};
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (url: string, init?: RequestInit) => ({
-        json: async () => {
-          if (url.includes('/api/avatar')) {
-            if (init?.method !== 'POST') return { code: 200, data: null };
-            uploads.push(init.body as FormData);
-            return uploadResponse;
-          }
-          return { code: 200, data: SETTINGS };
-        },
-      })),
+    server.use(
+      http.get('/api/settings/', () =>
+        HttpResponse.json({ code: 200, data: SETTINGS }),
+      ),
+      http.get('/api/avatar/', () =>
+        HttpResponse.json({ code: 200, data: null }),
+      ),
+      http.post('/api/avatar/', ({ request }) => {
+        uploads.push(request);
+        return HttpResponse.json(uploadResponse);
+      }),
     );
   });
-  afterEach(() => vi.unstubAllGlobals());
 
   it('shows the default icon until a picture is uploaded', async () => {
     render(<Main />);
 
-    await screen.findByText('Ada');
+    await screen.findByRole('textbox', { name: 'Imię i nazwisko' });
     expect(
       screen.queryByRole('img', { name: /zdjęcie profilowe/i }),
     ).toBeNull();
@@ -67,7 +81,7 @@ describe('profile avatar in settings', () => {
 
   it('shows the uploaded picture in place of the default icon', async () => {
     render(<Main />);
-    await screen.findByText('Ada');
+    await screen.findByRole('textbox', { name: 'Imię i nazwisko' });
 
     await userEvent.upload(chooser(), png());
     await userEvent.click(
@@ -85,7 +99,7 @@ describe('profile avatar in settings', () => {
 
   it('uploads only after the crop is confirmed', async () => {
     render(<Main />);
-    await screen.findByText('Ada');
+    await screen.findByRole('textbox', { name: 'Imię i nazwisko' });
 
     await userEvent.upload(chooser(), png());
     await screen.findByRole('dialog', { name: 'Przytnij zdjęcie' });
@@ -99,7 +113,7 @@ describe('profile avatar in settings', () => {
 
   it('rejects a file that is not an image without calling the server', async () => {
     render(<Main />);
-    await screen.findByText('Ada');
+    await screen.findByRole('textbox', { name: 'Imię i nazwisko' });
 
     await userEvent.upload(
       chooser(),
@@ -119,7 +133,7 @@ describe('profile avatar in settings', () => {
       message: 'Broken image',
     };
     render(<Main />);
-    await screen.findByText('Ada');
+    await screen.findByRole('textbox', { name: 'Imię i nazwisko' });
 
     await userEvent.upload(chooser(), png());
     await userEvent.click(

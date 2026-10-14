@@ -10,7 +10,6 @@ export const createStore = () => {
   const $isPushBusy = atom(false);
   const $initializing = atom(true);
   const $isLoading = atom(false);
-  const $isSigningOut = atom(false);
   const $error = atom<string | null>(null);
   const $notice = atom<Notice | null>(null);
 
@@ -23,7 +22,6 @@ export const createStore = () => {
     $isPushBusy,
     $initializing,
     $isLoading,
-    $isSigningOut,
     $error,
     $notice,
   };

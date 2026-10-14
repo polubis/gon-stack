@@ -1,6 +1,16 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from 'vitest';
 import { stubImageCanvas } from '@/__tests__/stub-image-canvas';
 import { Main } from '../presentation/main';
 
@@ -33,7 +43,14 @@ const settings = () => ({
 
 const PNG = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
-let uploads: FormData[] = [];
+const server = setupServer();
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
+/** Raw multipart bodies, the form fields stay readable in them. */
+let uploads: string[] = [];
 let uploadResponse: object = { code: 200, data: { variants: variants(2) } };
 
 const chooser = () =>
@@ -51,21 +68,19 @@ describe('device photo in settings', () => {
     uploadResponse = { code: 200, data: { variants: variants(2) } };
     URL.createObjectURL = () => 'blob:preview';
     URL.revokeObjectURL = () => {};
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (url: string, init?: RequestInit) => ({
-        json: async () => {
-          if (url.includes('/api/device-photo')) {
-            uploads.push(init?.body as FormData);
-            return uploadResponse;
-          }
-          if (url.includes('/api/avatar')) return { code: 200, data: null };
-          return { code: 200, data: settings() };
-        },
-      })),
+    server.use(
+      http.get('/api/settings/', () =>
+        HttpResponse.json({ code: 200, data: settings() }),
+      ),
+      http.get('/api/avatar/', () =>
+        HttpResponse.json({ code: 200, data: null }),
+      ),
+      http.post('/api/device-photo/', async ({ request }) => {
+        uploads.push(await request.text());
+        return HttpResponse.json(uploadResponse);
+      }),
     );
   });
-  afterEach(() => vi.unstubAllGlobals());
 
   const photo = () =>
     document.querySelector<HTMLImageElement>('img[data-device-photo]');
@@ -81,7 +96,7 @@ describe('device photo in settings', () => {
 
   it('shows the uploaded photo and sends it with the device id', async () => {
     render(<Main />);
-    await screen.findByText('Ada');
+    await screen.findByRole('textbox', { name: 'Imię i nazwisko' });
     await screen.findByLabelText('Wybierz zdjęcie urządzenia Telefon Ani');
 
     await userEvent.upload(chooser(), png());
@@ -100,7 +115,7 @@ describe('device photo in settings', () => {
       await screen.findByRole('button', { name: 'Zmień zdjęcie urządzenia' }),
     ).toBeVisible();
     expect(uploads).toHaveLength(1);
-    expect(uploads[0]?.get('deviceId')).toBe('device-1');
+    expect(uploads[0]).toMatch(/name="deviceId"\r\n\r\ndevice-1\r\n/);
   });
 
   it('rejects a file that is not an image without calling the server', async () => {

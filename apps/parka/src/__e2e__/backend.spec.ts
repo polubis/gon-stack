@@ -167,15 +167,18 @@ const commands = {
 
   'i update my settings profile': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.settings());
-    await getByE2e('settings:edit-profile').click();
     await getByE2e('settings:profile-name').fill('Anna Backendowa');
     await Promise.all([
       synced(page, 'PUT', API_ROUTER.settings()),
       getByE2e('settings:save-profile').click(),
     ]);
-    await expect(getByE2e('settings:name')).toHaveText('Anna Backendowa');
+    await expect(getByE2e('settings:profile-name')).toHaveValue(
+      'Anna Backendowa',
+    );
     await reload(page);
-    await expect(getByE2e('settings:name')).toHaveText('Anna Backendowa');
+    await expect(getByE2e('settings:profile-name')).toHaveValue(
+      'Anna Backendowa',
+    );
   },
 
   'data export downloads a csv': async ({ page, getByE2e }) => {
@@ -190,9 +193,10 @@ const commands = {
 
   'i sign out and sign back in': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.settings());
+    await getByE2e('account-menu:trigger').filter({ visible: true }).click();
     await Promise.all([
       page.waitForURL(`**${APP_ROUTER.signIn()}`),
-      getByE2e('settings:sign-out').click(),
+      getByE2e('account-menu:logout').click(),
     ]);
     await getByE2e('auth:email').fill(EMAIL);
     await getByE2e('auth:password').fill(PASSWORD);
@@ -204,7 +208,9 @@ const commands = {
     getByE2e,
   }) => {
     await open(page, APP_ROUTER.settings());
-    await expect(getByE2e('settings:name')).toHaveText('Anna Backendowa');
+    await expect(getByE2e('settings:profile-name')).toHaveValue(
+      'Anna Backendowa',
+    );
     await open(page, APP_ROUTER.categories());
     await expect(page.getByText('Kultura')).toBeVisible();
     await open(page, APP_ROUTER.dashboard());

@@ -1,6 +1,16 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from 'vitest';
 import { Main } from '../presentation/main';
 
 const settings = (avatar: string | null) => ({
@@ -23,24 +33,27 @@ const settings = (avatar: string | null) => ({
   ],
 });
 
+const server = setupServer();
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
 let saved: ReturnType<typeof settings> | null = null;
 
 describe('device avatars in settings', () => {
   beforeEach(() => {
     saved = null;
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (_url: string, init?: RequestInit) => ({
-        json: async () => {
-          if (init?.method !== 'PUT')
-            return { code: 200, data: settings('cat') };
-          saved = JSON.parse(String(init.body));
-          return { code: 200, data: saved };
-        },
-      })),
+    server.use(
+      http.get('/api/settings/', () =>
+        HttpResponse.json({ code: 200, data: settings('cat') }),
+      ),
+      http.put('/api/settings/', async ({ request }) => {
+        saved = (await request.json()) as ReturnType<typeof settings>;
+        return HttpResponse.json({ code: 200, data: saved });
+      }),
     );
   });
-  afterEach(() => vi.unstubAllGlobals());
 
   const group = async (name: string) =>
     screen.findByRole('radiogroup', { name: `Awatar urządzenia ${name}` });

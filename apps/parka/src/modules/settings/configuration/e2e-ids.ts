@@ -1,7 +1,5 @@
 export const SETTINGS_E2E_IDS = [
   'settings:main',
-  'settings:name',
-  'settings:edit-profile',
   'settings:profile-name',
   'settings:profile-email',
   'settings:save-profile',
@@ -14,8 +12,6 @@ export const SETTINGS_E2E_IDS = [
   'settings:avatar',
   'settings:avatar-image',
   'settings:avatar-input',
-  'settings:avatar-change',
-  'settings:sign-out',
   'settings:load-error',
   'settings:toast',
 ] as const;

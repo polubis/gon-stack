@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { Provider, useContext } from '../presentation/context';
 
 const SETTINGS = {
@@ -17,13 +19,18 @@ const SETTINGS = {
   ],
 };
 
+const server = setupServer();
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
 const stubApi = (putResponse: object) =>
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(async (_url: string, init?: RequestInit) => ({
-      json: async () =>
-        init?.method === 'PUT' ? putResponse : { code: 200, data: SETTINGS },
-    })),
+  server.use(
+    http.get('/api/settings/', () =>
+      HttpResponse.json({ code: 200, data: SETTINGS }),
+    ),
+    http.put('/api/settings/', () => HttpResponse.json(putResponse)),
   );
 
 const setup = async () => {
@@ -43,8 +50,6 @@ const setup = async () => {
 };
 
 describe('settings', () => {
-  afterEach(() => vi.unstubAllGlobals());
-
   it('loads the profile on mount', async () => {
     stubApi({ code: 200, data: SETTINGS });
     const view = await setup();
