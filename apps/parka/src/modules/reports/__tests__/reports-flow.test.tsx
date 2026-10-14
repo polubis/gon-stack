@@ -1,5 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { Main } from '../presentation/main';
 
 const EXPENSE = {
@@ -27,24 +29,28 @@ const RECURRING = {
   history: [],
 };
 
+const server = setupServer();
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
+const FAILURE = { code: 500, message: 'boom' };
+
 const stubApi = (failing = false) =>
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(async (url: string) => {
-      const body = failing
-        ? { code: 500, message: 'boom' }
-        : url.includes('categories')
-          ? { code: 200, data: [CATEGORY] }
-          : url.includes('recurring')
-            ? { code: 200, data: [RECURRING] }
-            : { code: 200, data: [EXPENSE] };
-      return { json: async () => body };
-    }),
+  server.use(
+    http.get('/api/categories/', () =>
+      HttpResponse.json(failing ? FAILURE : { code: 200, data: [CATEGORY] }),
+    ),
+    http.get('/api/recurring/', () =>
+      HttpResponse.json(failing ? FAILURE : { code: 200, data: [RECURRING] }),
+    ),
+    http.get('/api/expenses/', () =>
+      HttpResponse.json(failing ? FAILURE : { code: 200, data: [EXPENSE] }),
+    ),
   );
 
 describe('report screen', () => {
-  afterEach(() => vi.unstubAllGlobals());
-
   it('disables downloads until the data is loaded', async () => {
     stubApi();
 

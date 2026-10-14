@@ -1,8 +1,8 @@
 import { render, screen, within } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { currentMonth } from '../domain/format';
 import { Main } from '../presentation/main';
-import { readBody } from './dashboard-backend';
+import { answerApi, readBody, startBackend } from './dashboard-backend';
 
 const CATEGORY = {
   id: 'c-1',
@@ -24,36 +24,33 @@ const expense = (id: string, merchant: string, device: object | null) => ({
   items: [],
 });
 
+const server = startBackend();
+
 let custom: string | null = null;
 
 describe('expense device in the list', () => {
   beforeEach(() => {
     custom = null;
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (url: string) => ({
-        json: async () =>
-          readBody(url, {
-            categories: [CATEGORY],
-            expenses: [
-              expense('e-1', 'Piekarnia', {
-                id: 'device-1',
-                name: 'Safari on iOS',
-                type: 'mobile',
-                avatar: 'rocket',
-                model: 'SM-S918B',
-                os: 'iOS 17',
-                browser: 'Safari',
-                screen: null,
-                customName: custom,
-              }),
-              expense('e-2', 'Kiosk', null),
-            ],
+    answerApi(server, ({ url }) =>
+      readBody(url, {
+        categories: [CATEGORY],
+        expenses: [
+          expense('e-1', 'Piekarnia', {
+            id: 'device-1',
+            name: 'Safari on iOS',
+            type: 'mobile',
+            avatar: 'rocket',
+            model: 'SM-S918B',
+            os: 'iOS 17',
+            browser: 'Safari',
+            screen: null,
+            customName: custom,
           }),
-      })),
+          expense('e-2', 'Kiosk', null),
+        ],
+      }),
     );
   });
-  afterEach(() => vi.unstubAllGlobals());
 
   it('names the device on a row that has one', async () => {
     render(<Main />);

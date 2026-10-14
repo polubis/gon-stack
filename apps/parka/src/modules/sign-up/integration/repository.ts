@@ -14,7 +14,8 @@ export const signUp = async (
     redirect: 'manual',
   });
 
-  if (res.type === 'opaqueredirect') return { status: 'redirected' };
+  if (res.type === 'opaqueredirect' || res.status === 302)
+    return { status: 'redirected' };
 
   return toSignUpResult((await res.json()) as Schema['out']);
 };

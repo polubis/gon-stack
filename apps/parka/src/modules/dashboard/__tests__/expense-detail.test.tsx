@@ -1,8 +1,8 @@
 import { render, screen, within } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { currentMonth } from '../domain/format';
 import { Main } from '../presentation/main';
-import { readBody } from './dashboard-backend';
+import { answerApi, readBody, startBackend } from './dashboard-backend';
 
 const CATEGORY = {
   id: 'c-1',
@@ -33,18 +33,15 @@ const expense = () => ({
   ],
 });
 
+const server = startBackend();
+
 describe('expense popup', () => {
   beforeEach(() => {
     window.history.replaceState(null, '', '/app/?modal=expense:e-1');
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (url: string) => ({
-        json: async () =>
-          readBody(url, { expenses: [expense()], categories: [CATEGORY] }),
-      })),
+    answerApi(server, ({ url }) =>
+      readBody(url, { expenses: [expense()], categories: [CATEGORY] }),
     );
   });
-  afterEach(() => vi.unstubAllGlobals());
 
   it('only shows the expense and its products', async () => {
     render(<Main />);
@@ -64,15 +61,11 @@ describe('expense popup', () => {
   });
 
   it('keeps only name and price per product when the expense mixes categories', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (url: string) => ({
-        json: async () =>
-          readBody(url, {
-            expenses: [{ ...expense(), categoryId: null }],
-            categories: [CATEGORY],
-          }),
-      })),
+    answerApi(server, ({ url }) =>
+      readBody(url, {
+        expenses: [{ ...expense(), categoryId: null }],
+        categories: [CATEGORY],
+      }),
     );
     render(<Main />);
     const dialog = within(await screen.findByRole('dialog'));

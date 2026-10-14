@@ -1,10 +1,10 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { currentPeriod, shiftPeriod, todayDay } from '@/shared/period/period';
 import { currentMonth } from '../domain/format';
 import { Main } from '../presentation/main';
-import { readBody } from './dashboard-backend';
+import { answerApi, readBody, startBackend } from './dashboard-backend';
 
 const SUMMARY = {
   userName: 'Anna Kowalska',
@@ -33,25 +33,21 @@ const SUMMARY = {
   ],
 };
 
-const stubApi = (failing = false, overrides: Partial<typeof SUMMARY> = {}) => {
-  const fetchMock = vi.fn(async (url: string) => ({
-    json: async () =>
-      failing
-        ? { code: 500, message: 'boom' }
-        : {
-            code: 200,
-            data: url.includes('/api/dashboard')
-              ? { ...SUMMARY, ...overrides }
-              : [],
-          },
-  }));
-  vi.stubGlobal('fetch', fetchMock);
-  return fetchMock;
-};
+const server = startBackend();
+
+const stubApi = (failing = false, overrides: Partial<typeof SUMMARY> = {}) =>
+  answerApi(server, ({ url }) =>
+    failing
+      ? { code: 500, message: 'boom' }
+      : {
+          code: 200,
+          data: url.includes('/api/dashboard')
+            ? { ...SUMMARY, ...overrides }
+            : [],
+        },
+  );
 
 describe('dashboard screen', () => {
-  afterEach(() => vi.unstubAllGlobals());
-
   it('greets the user and shows the month total with its change', async () => {
     stubApi();
 
@@ -150,12 +146,7 @@ describe('dashboard screen', () => {
       source: 'manual',
       items: [],
     }));
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (url: string) => ({
-        json: async () => readBody(url, { expenses }),
-      })),
-    );
+    answerApi(server, ({ url }) => readBody(url, { expenses }));
     const user = userEvent.setup();
 
     render(<Main />);
@@ -182,9 +173,9 @@ describe('dashboard screen', () => {
   });
 
   it('asks the backend for the previous month after going back', async () => {
-    const fetchMock = stubApi();
+    const calls = stubApi();
     render(<Main />);
-    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    await waitFor(() => expect(calls).not.toHaveLength(0));
     const previous = shiftPeriod(currentPeriod('month', todayDay()), -1);
 
     await userEvent.click(
@@ -193,8 +184,8 @@ describe('dashboard screen', () => {
 
     await waitFor(() =>
       expect(
-        fetchMock.mock.calls.some(([url]) =>
-          String(url).includes(`kind=month&from=${previous.from}`),
+        calls.some(({ url }) =>
+          url.includes(`kind=month&from=${previous.from}`),
         ),
       ).toBe(true),
     );
@@ -211,29 +202,25 @@ describe('dashboard screen', () => {
   });
 
   it('loads everything in one go, once', async () => {
-    const fetchMock = stubApi();
+    const calls = stubApi();
 
     render(<Main />);
 
     await screen.findByText('Limity');
-    const dashboardCalls = fetchMock.mock.calls.filter(
-      ([url]) => !String(url).includes('/api/notifications'),
+    const dashboardCalls = calls.filter(
+      ({ url }) => !url.includes('/api/notifications'),
     );
     expect(dashboardCalls).toHaveLength(5);
   });
 
   it('shows only the failure screen when any part fails to load', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (url: string) => ({
-        json: async () =>
-          url.includes('/api/limits')
-            ? { code: 500, message: 'boom' }
-            : {
-                code: 200,
-                data: url.includes('/api/dashboard') ? SUMMARY : [],
-              },
-      })),
+    answerApi(server, ({ url }) =>
+      url.includes('/api/limits')
+        ? { code: 500, message: 'boom' }
+        : {
+            code: 200,
+            data: url.includes('/api/dashboard') ? SUMMARY : [],
+          },
     );
 
     render(<Main />);
@@ -260,11 +247,6 @@ describe('dashboard screen', () => {
 });
 
 describe('dashboard month expenses', () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    window.history.replaceState(null, '', '/');
-  });
-
   const expense = (id: string, merchant: string, categoryId: string) => ({
     id,
     merchant,
@@ -278,36 +260,31 @@ describe('dashboard month expenses', () => {
   });
 
   const stubWithExpenses = () =>
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (url: string) => ({
-        json: async () => ({
-          code: 200,
-          data: url.includes('/api/expenses')
-            ? [
-                expense('e-1', 'Sklep Testowy', 'c-1'),
-                expense('e-2', 'Kino Testowe', 'c-2'),
-                {
-                  ...expense('e-3', 'Stary Sklep', 'c-1'),
-                  date: '2026-08-02T10:00:00Z',
-                },
-              ]
-            : url.includes('/api/categories')
-              ? [
-                  { id: 'c-1', name: 'Jedzenie', icon: 'cart', color: 'green' },
-                  {
-                    id: 'c-2',
-                    name: 'Rozrywka',
-                    icon: 'popcorn',
-                    color: 'red',
-                  },
-                ]
-              : url.includes('/api/dashboard')
-                ? SUMMARY
-                : [],
-        }),
-      })),
-    );
+    answerApi(server, ({ url }) => ({
+      code: 200,
+      data: url.includes('/api/expenses')
+        ? [
+            expense('e-1', 'Sklep Testowy', 'c-1'),
+            expense('e-2', 'Kino Testowe', 'c-2'),
+            {
+              ...expense('e-3', 'Stary Sklep', 'c-1'),
+              date: '2026-08-02T10:00:00Z',
+            },
+          ]
+        : url.includes('/api/categories')
+          ? [
+              { id: 'c-1', name: 'Jedzenie', icon: 'cart', color: 'green' },
+              {
+                id: 'c-2',
+                name: 'Rozrywka',
+                icon: 'popcorn',
+                color: 'red',
+              },
+            ]
+          : url.includes('/api/dashboard')
+            ? SUMMARY
+            : [],
+    }));
 
   const openSeptember = async () => {
     window.history.replaceState(null, '', '/app/?month=2026-09');

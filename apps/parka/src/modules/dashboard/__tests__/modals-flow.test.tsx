@@ -1,12 +1,14 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { currentMonth } from '../domain/format';
 import { Main } from '../presentation/main';
-import { readBody } from './dashboard-backend';
+import { answerApi, readBody, startBackend } from './dashboard-backend';
 
 const modalsInUrl = () =>
   new URLSearchParams(window.location.search).getAll('modal');
+
+const server = startBackend();
 
 const stubExpenses = () => {
   const month = currentMonth();
@@ -21,12 +23,7 @@ const stubExpenses = () => {
     source: 'manual',
     items: [],
   }));
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(async (url: string) => ({
-      json: async () => readBody(url, { expenses }),
-    })),
-  );
+  answerApi(server, ({ url }) => readBody(url, { expenses }));
 };
 
 const openAllExpenses = async (user: ReturnType<typeof userEvent.setup>) => {
@@ -38,8 +35,6 @@ const openAllExpenses = async (user: ReturnType<typeof userEvent.setup>) => {
 const dialogs = () => screen.queryAllByRole('dialog', { hidden: true });
 
 describe('dashboard modals', () => {
-  afterEach(() => vi.unstubAllGlobals());
-
   it('stacks an expense popup over the open expenses list', async () => {
     stubExpenses();
     const user = userEvent.setup();

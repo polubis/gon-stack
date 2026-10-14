@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { Provider, useContext } from '../presentation/context';
 import type { ExpenseId } from '../domain/models';
 import { periodContaining } from '@/shared/period/period';
-import { readBody } from './dashboard-backend';
+import { answerApi, readBody, startBackend } from './dashboard-backend';
 
 const MONTH = periodContaining('month', '2025-04-01');
 
@@ -20,20 +20,17 @@ const EXPENSE = {
   items: [],
 };
 
-const stubApi = (deleteResponse: object) => {
-  const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
-    const body =
-      init?.method === 'DELETE'
-        ? deleteResponse
-        : readBody(url, { expenses: [EXPENSE] });
-    return { json: async () => body };
-  });
-  vi.stubGlobal('fetch', fetchMock);
-  return fetchMock;
-};
+const server = startBackend();
 
-const summaryReads = (fetchMock: ReturnType<typeof stubApi>) =>
-  fetchMock.mock.calls.filter(([url]) => url.includes('/api/dashboard')).length;
+const stubApi = (deleteResponse: object) =>
+  answerApi(server, ({ method, url }) =>
+    method === 'DELETE'
+      ? deleteResponse
+      : readBody(url, { expenses: [EXPENSE] }),
+  );
+
+const summaryReads = (calls: ReturnType<typeof stubApi>) =>
+  calls.filter(({ url }) => url.includes('/api/dashboard')).length;
 
 const setup = async () => {
   const wrapper = ({ children }: { children: ReactNode }) => (
@@ -56,8 +53,6 @@ const setup = async () => {
 };
 
 describe('dashboard expenses removal', () => {
-  afterEach(() => vi.unstubAllGlobals());
-
   it('removes the expense and confirms with a toast', async () => {
     stubApi({ code: 200, ok: true });
     const view = await setup();
@@ -71,23 +66,23 @@ describe('dashboard expenses removal', () => {
   });
 
   it('reads the summary again once the removal is saved', async () => {
-    const fetchMock = stubApi({ code: 200, ok: true });
+    const calls = stubApi({ code: 200, ok: true });
     const view = await setup();
-    await waitFor(() => expect(summaryReads(fetchMock)).toBe(1));
+    await waitFor(() => expect(summaryReads(calls)).toBe(1));
 
     act(() => view.result.current.ctx.removeExpense('e-1' as ExpenseId, MONTH));
 
-    await waitFor(() => expect(summaryReads(fetchMock)).toBe(2));
+    await waitFor(() => expect(summaryReads(calls)).toBe(2));
   });
 
   it('keeps the summary as it was when removal fails', async () => {
-    const fetchMock = stubApi({ code: 500, message: 'boom' });
+    const calls = stubApi({ code: 500, message: 'boom' });
     const view = await setup();
 
     act(() => view.result.current.ctx.removeExpense('e-1' as ExpenseId, MONTH));
 
     await waitFor(() => expect(view.result.current.notice?.tone).toBe('error'));
-    expect(summaryReads(fetchMock)).toBe(1);
+    expect(summaryReads(calls)).toBe(1);
   });
 
   it('brings the expense back and reports an error when removal fails', async () => {

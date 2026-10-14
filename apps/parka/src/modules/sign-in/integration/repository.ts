@@ -15,7 +15,7 @@ export const signIn = async (
     redirect: 'manual',
   });
 
-  if (res.type === 'opaqueredirect') {
+  if (res.type === 'opaqueredirect' || res.status === 302) {
     announceAuthChange();
     return { status: 'redirected' };
   }

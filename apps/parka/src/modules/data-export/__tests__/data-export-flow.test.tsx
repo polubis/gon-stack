@@ -1,6 +1,16 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import { Main } from '../presentation/main';
 
 const EXPENSE = {
@@ -15,22 +25,27 @@ const EXPENSE = {
   items: [],
 };
 
+const server = setupServer();
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
 const stubApi = (ok: boolean) =>
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(async (url: string) => ({
-      json: async () =>
-        !ok
-          ? { code: 500, message: 'boom' }
-          : url.includes('categories')
-            ? { code: 200, data: [] }
-            : { code: 200, data: [EXPENSE] },
-    })),
+  server.use(
+    http.get('/api/categories/', () =>
+      HttpResponse.json(
+        ok ? { code: 200, data: [] } : { code: 500, message: 'boom' },
+      ),
+    ),
+    http.get('/api/expenses/', () =>
+      HttpResponse.json(
+        ok ? { code: 200, data: [EXPENSE] } : { code: 500, message: 'boom' },
+      ),
+    ),
   );
 
 describe('data export page', () => {
-  afterEach(() => vi.unstubAllGlobals());
-
   it('enables export once data loaded and confirms the download', async () => {
     stubApi(true);
     URL.createObjectURL = vi.fn(() => 'blob:x');

@@ -1,4 +1,8 @@
 import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+import { afterAll, afterEach, beforeAll } from 'vitest';
+
+type Call = { method: string; url: string };
 
 type Reads = {
   expenses?: object[];
@@ -41,3 +45,29 @@ export const readHandlers = (reads: Reads = {}) =>
       HttpResponse.json(readBody(request.url, reads)),
     ),
   );
+
+/** msw server of a test file: unhandled requests fail, handlers reset per test. */
+export const startBackend = () => {
+  const server = setupServer();
+  beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+  afterEach(() => server.resetHandlers());
+  afterAll(() => server.close());
+  return server;
+};
+
+/** Answers every `/api` request with `respond` and returns the calls it got. */
+export const answerApi = (
+  server: ReturnType<typeof startBackend>,
+  respond: (call: Call) => object | Promise<object>,
+) => {
+  const calls: Call[] = [];
+  server.use(
+    http.all('/api/*', async ({ request }) => {
+      const { pathname, search } = new URL(request.url);
+      const call = { method: request.method, url: pathname + search };
+      calls.push(call);
+      return HttpResponse.json(await respond(call));
+    }),
+  );
+  return calls;
+};

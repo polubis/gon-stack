@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { Provider, useContext } from '../presentation/context';
 import type { Category, CategoryId } from '../domain/models';
 
@@ -13,17 +15,20 @@ const NEW_CATEGORY: Category = {
   color: '#2563eb',
 };
 
+const server = setupServer();
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
 const stubApi = (writeResponse: object) =>
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(async (_url: string, init?: RequestInit) => ({
-      json: async () =>
-        init?.method === 'POST' ||
-        init?.method === 'PUT' ||
-        init?.method === 'DELETE'
-          ? writeResponse
-          : { code: 200, data: [FOOD] },
-    })),
+  server.use(
+    http.get('/api/categories/', () =>
+      HttpResponse.json({ code: 200, data: [FOOD] }),
+    ),
+    http.post('/api/categories/', () => HttpResponse.json(writeResponse)),
+    http.put('/api/categories/:id/', () => HttpResponse.json(writeResponse)),
+    http.delete('/api/categories/:id/', () => HttpResponse.json(writeResponse)),
   );
 
 const setup = async () => {
@@ -47,8 +52,6 @@ const setup = async () => {
 };
 
 describe('categories creation', () => {
-  afterEach(() => vi.unstubAllGlobals());
-
   it('adds the category and confirms with a toast', async () => {
     stubApi({ code: 201, data: NEW_CATEGORY });
     const view = await setup();
@@ -95,8 +98,6 @@ describe('categories creation', () => {
 });
 
 describe('categories update', () => {
-  afterEach(() => vi.unstubAllGlobals());
-
   it('renames the category right away', async () => {
     stubApi({ code: 200, data: { ...FOOD, name: 'Meals' } });
     const view = await setup();
@@ -131,8 +132,6 @@ describe('categories update', () => {
 });
 
 describe('categories removal', () => {
-  afterEach(() => vi.unstubAllGlobals());
-
   it('removes the category and confirms with a toast', async () => {
     stubApi({ code: 200, ok: true });
     const view = await setup();

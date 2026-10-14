@@ -1,5 +1,6 @@
 import { config } from '@repo/nitpick/config';
 import { decisionLog } from '@repo/nitpick/rules/decision-log';
+import { mswBackendMocks } from '@repo/nitpick/rules/msw-backend-mocks';
 import { richCommit } from '@repo/nitpick/rules/rich-commit';
 
 export default config({
@@ -13,6 +14,7 @@ export default config({
           `Applies to every ${group} operation in this repo.`,
       },
       general: { text: () => 'Applies to every session.' },
+      testing: { text: () => 'Applies to every test.' },
     },
     importances: {
       A: {
@@ -31,6 +33,7 @@ export default config({
   },
   rules: [
     richCommit,
+    mswBackendMocks,
     decisionLog({
       scopes: [/^(repo|claude|nitpick)$/, /^(parka|uih)(\/[a-z][a-z0-9-]*)?$/],
     }),

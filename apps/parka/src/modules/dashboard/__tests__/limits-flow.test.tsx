@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { Provider, useContext } from '../presentation/context';
 import type { Limit, LimitId } from '../domain/models';
-import { readBody } from './dashboard-backend';
+import { readHandlers } from './dashboard-backend';
 import { periodContaining } from '@/shared/period/period';
 
 const TOTAL = {
@@ -14,15 +16,18 @@ const TOTAL = {
   delivery: 'push',
 };
 
+const server = setupServer();
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
 const stubApi = (writeResponse: object) =>
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(async (url: string, init?: RequestInit) => {
-      const body = init?.method
-        ? writeResponse
-        : readBody(url, { limits: [TOTAL] });
-      return { json: async () => body };
-    }),
+  server.use(
+    ...readHandlers({ limits: [TOTAL] }),
+    http.post('/api/limits/', () => HttpResponse.json(writeResponse)),
+    http.put('/api/limits/:id/', () => HttpResponse.json(writeResponse)),
+    http.delete('/api/limits/:id/', () => HttpResponse.json(writeResponse)),
   );
 
 const setup = async () => {
@@ -56,8 +61,6 @@ const raised: Limit = {
 };
 
 describe('dashboard limits changes', () => {
-  afterEach(() => vi.unstubAllGlobals());
-
   it('raises the limit and confirms with a toast', async () => {
     stubApi({ code: 200, data: { ...TOTAL, amount: 2000 } });
     const view = await setup();

@@ -23,6 +23,16 @@ Rules tagged A in git: follow always.
 
 - [rich-commit](rules/rich-commit.md)
 
+## Rules for Testing
+
+Applies to every test.
+
+### (A) Always
+
+Rules tagged A in testing: follow always.
+
+- [msw-backend-mocks](rules/msw-backend-mocks.md)
+
 ## Rules for General
 
 Applies to every session.

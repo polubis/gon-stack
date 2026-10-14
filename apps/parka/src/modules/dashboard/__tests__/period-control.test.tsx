@@ -7,9 +7,10 @@ import {
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { pickOption } from '@/__tests__/pick-option';
+import { http, HttpResponse } from 'msw';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Main } from '../presentation/main';
-import { readBody } from './dashboard-backend';
+import { answerApi, readBody, startBackend } from './dashboard-backend';
 
 const TODAY = '2026-10-10T12:00:00Z';
 
@@ -25,28 +26,24 @@ const expense = (id: string, merchant: string, date: string) => ({
   items: [],
 });
 
-const stubApi = () => {
-  const fetchMock = vi.fn(async (url: string) => ({
-    json: async () =>
-      readBody(String(url), {
-        categories: [
-          { id: 'c-1', name: 'Jedzenie', icon: 'cart', color: 'green' },
-        ],
-        expenses: [
-          expense('e-1', 'Sklep Dzisiejszy', '2026-10-10T10:00:00Z'),
-          expense('e-2', 'Sklep Zeszłotygodniowy', '2026-10-03T10:00:00Z'),
-          expense('e-3', 'Sklep Zeszłoroczny', '2025-06-03T10:00:00Z'),
-        ],
-      }),
-  }));
-  vi.stubGlobal('fetch', fetchMock);
-  return fetchMock;
-};
+const server = startBackend();
 
-const asked = (fetchMock: ReturnType<typeof stubApi>) =>
-  fetchMock.mock.calls
-    .map(([url]) => String(url))
-    .filter((url) => url.includes('/api/dashboard'));
+const stubApi = () =>
+  answerApi(server, ({ url }) =>
+    readBody(url, {
+      categories: [
+        { id: 'c-1', name: 'Jedzenie', icon: 'cart', color: 'green' },
+      ],
+      expenses: [
+        expense('e-1', 'Sklep Dzisiejszy', '2026-10-10T10:00:00Z'),
+        expense('e-2', 'Sklep Zeszłotygodniowy', '2026-10-03T10:00:00Z'),
+        expense('e-3', 'Sklep Zeszłoroczny', '2025-06-03T10:00:00Z'),
+      ],
+    }),
+  );
+
+const asked = (calls: ReturnType<typeof stubApi>) =>
+  calls.map(({ url }) => url).filter((url) => url.includes('/api/dashboard'));
 
 const label = () => {
   const el = document.querySelector('[data-e2e="dashboard:period-label"]');
@@ -71,10 +68,10 @@ const openPicker = async (name: string) => {
 
 const open = async (search = '') => {
   window.history.replaceState(null, '', `/app/${search}`);
-  const fetchMock = stubApi();
+  const calls = stubApi();
   render(<Main />);
   await screen.findByText('Limity');
-  return fetchMock;
+  return calls;
 };
 
 describe('dashboard period control', () => {
@@ -83,7 +80,6 @@ describe('dashboard period control', () => {
   });
   afterEach(() => {
     vi.useRealTimers();
-    vi.unstubAllGlobals();
   });
 
   it('opens on the current month and cannot go forward', async () => {
@@ -95,14 +91,14 @@ describe('dashboard period control', () => {
   });
 
   it('goes back and forward again, stopping at the present', async () => {
-    const fetchMock = await open();
+    const calls = await open();
 
     await userEvent.click(prev());
 
     expect(label().textContent).toBe('Wrzesień 2026');
     expect(next().disabled).toBe(false);
     await waitFor(() =>
-      expect(asked(fetchMock).at(-1)).toContain('kind=month&from=2026-09-01'),
+      expect(asked(calls).at(-1)).toContain('kind=month&from=2026-09-01'),
     );
 
     await userEvent.click(next());
@@ -112,24 +108,24 @@ describe('dashboard period control', () => {
   });
 
   it('does not ask for a future period when forward is blocked', async () => {
-    const fetchMock = await open();
-    const before = asked(fetchMock).length;
+    const calls = await open();
+    const before = asked(calls).length;
 
     await userEvent.click(next());
 
-    expect(asked(fetchMock)).toHaveLength(before);
+    expect(asked(calls)).toHaveLength(before);
     expect(label().textContent).toBe('Październik 2026');
   });
 
   it('shows the current week, Monday to Sunday, and steps by week', async () => {
-    const fetchMock = await open();
+    const calls = await open();
 
     await kind('Tydzień');
 
     expect(label().textContent).toBe('Tydzień 5–11 paź 2026');
     expect(screen.getByText('Wydatki w tym tygodniu')).toBeTruthy();
     await waitFor(() =>
-      expect(asked(fetchMock).at(-1)).toContain('kind=week&from=2026-10-05'),
+      expect(asked(calls).at(-1)).toContain('kind=week&from=2026-10-05'),
     );
 
     await userEvent.click(prev());
@@ -152,7 +148,7 @@ describe('dashboard period control', () => {
   });
 
   it('shows the current year, then last year, then back to this one', async () => {
-    const fetchMock = await open();
+    const calls = await open();
 
     await kind('Rok');
     expect(label().textContent).toBe('2026');
@@ -161,7 +157,7 @@ describe('dashboard period control', () => {
     await userEvent.click(prev());
     expect(label().textContent).toBe('2025');
     await waitFor(() =>
-      expect(asked(fetchMock).at(-1)).toContain('kind=year&from=2025-01-01'),
+      expect(asked(calls).at(-1)).toContain('kind=year&from=2025-01-01'),
     );
 
     await userEvent.click(next());
@@ -223,22 +219,21 @@ describe('dashboard period control', () => {
   });
 
   it('snaps a future period from the address back to the present', async () => {
-    const fetchMock = await open('?month=2030-01');
+    const calls = await open('?month=2030-01');
 
     expect(label().textContent).toBe('Październik 2026');
-    expect(asked(fetchMock).every((url) => !url.includes('2030'))).toBe(true);
+    expect(asked(calls).every((url) => !url.includes('2030'))).toBe(true);
   });
 
   it('keeps the data visible while the next period loads', async () => {
     await open();
     let release = () => {};
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(
-        (url: string) =>
-          new Promise((resolve) => {
-            release = () =>
-              resolve({ json: async () => readBody(String(url)) });
+    server.use(
+      http.all(
+        '/api/*',
+        ({ request }) =>
+          new Promise<Response>((resolve) => {
+            release = () => resolve(HttpResponse.json(readBody(request.url)));
           }),
       ),
     );
@@ -257,7 +252,7 @@ describe('dashboard period control', () => {
         .map((b) => b.textContent);
 
     it('jumps to a chosen month from a list without future months', async () => {
-      const fetchMock = await open();
+      const calls = await open();
       const list = await openPicker('Wybierz miesiąc');
       const names = optionNames(list);
       expect(names[0]).toBe('Październik 2026');
@@ -270,7 +265,7 @@ describe('dashboard period control', () => {
       expect(label().textContent).toBe('Marzec 2026');
       expect(screen.queryByLabelText('Wybierz miesiąc')).toBeNull();
       await waitFor(() =>
-        expect(asked(fetchMock).at(-1)).toContain('kind=month&from=2026-03-01'),
+        expect(asked(calls).at(-1)).toContain('kind=month&from=2026-03-01'),
       );
     });
 
@@ -371,7 +366,7 @@ describe('dashboard period control', () => {
     });
 
     it('shows the chosen from-to range and asks for it', async () => {
-      const fetchMock = await open();
+      const calls = await open();
       await kind('Własny');
 
       await apply(1, '1 września 2026', '30 września 2026');
@@ -379,7 +374,7 @@ describe('dashboard period control', () => {
       await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
       expect(label().textContent).toBe('1 wrz – 30 wrz 2026');
       await waitFor(() =>
-        expect(asked(fetchMock).at(-1)).toContain(
+        expect(asked(calls).at(-1)).toContain(
           'kind=custom&from=2026-09-01&to=2026-09-30',
         ),
       );
@@ -583,28 +578,22 @@ describe('dashboard period control', () => {
   describe('limit scaled to the period', () => {
     const openWithLimit = async () => {
       window.history.replaceState(null, '', '/app/');
-      vi.stubGlobal(
-        'fetch',
-        vi.fn(async (url: string) => {
-          const body = readBody(String(url), {
-            limits: [
-              {
-                id: 'l-0',
-                scope: 'total',
-                amount: 3100,
-                alertAt80: true,
-                delivery: 'push',
-              },
-            ],
-          });
-          return {
-            json: async () =>
-              String(url).includes('/api/dashboard')
-                ? { ...body, data: { ...body.data, monthlyLimit: 3100 } }
-                : body,
-          };
-        }),
-      );
+      answerApi(server, ({ url }) => {
+        const body = readBody(url, {
+          limits: [
+            {
+              id: 'l-0',
+              scope: 'total',
+              amount: 3100,
+              alertAt80: true,
+              delivery: 'push',
+            },
+          ],
+        });
+        return url.includes('/api/dashboard')
+          ? { ...body, data: { ...body.data, monthlyLimit: 3100 } }
+          : body;
+      });
       render(<Main />);
       await screen.findByText('Limity');
     };

@@ -1,6 +1,16 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import { Main } from '../presentation/main';
 
 const navigateTo = vi.hoisted(() => vi.fn());
@@ -10,10 +20,23 @@ vi.mock('@/shared/router/navigation', async (importActual) => ({
   navigateTo,
 }));
 
-const stubFetch = (impl: () => Promise<object>) => {
-  const fetchMock = vi.fn(impl);
-  vi.stubGlobal('fetch', fetchMock);
-  return fetchMock;
+const server = setupServer();
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterAll(() => server.close());
+
+const redirect = () =>
+  new HttpResponse(null, { status: 302, headers: { Location: '/app/' } });
+
+const stubServer = (respond: () => Response | Promise<Response>) => {
+  const received = vi.fn();
+  server.use(
+    http.post('/api/auth/login/', () => {
+      received();
+      return respond();
+    }),
+  );
+  return received;
 };
 
 const fillAndSubmit = async (email: string, password: string) => {
@@ -26,23 +49,23 @@ const fillAndSubmit = async (email: string, password: string) => {
 
 describe('sign in', () => {
   afterEach(() => {
-    vi.unstubAllGlobals();
+    server.resetHandlers();
     navigateTo.mockClear();
   });
 
   it('asks for valid input without calling the server', async () => {
-    const fetchMock = stubFetch(async () => ({}));
+    const received = stubServer(() => HttpResponse.json({}));
 
     await fillAndSubmit('nope', '123');
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Enter a valid email and password',
     );
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(received).not.toHaveBeenCalled();
   });
 
   it('goes to the dashboard after a successful sign in', async () => {
-    stubFetch(async () => ({ type: 'opaqueredirect' }));
+    stubServer(redirect);
 
     await fillAndSubmit('a@b.co', 'secret1');
 
@@ -50,13 +73,13 @@ describe('sign in', () => {
   });
 
   it('shows the server message when credentials are rejected', async () => {
-    stubFetch(async () => ({
-      json: async () => ({
+    stubServer(() =>
+      HttpResponse.json({
         code: 400,
         type: 'bad-request',
         message: 'Invalid credentials',
       }),
-    }));
+    );
 
     await fillAndSubmit('a@b.co', 'secret1');
 
@@ -67,21 +90,21 @@ describe('sign in', () => {
   });
 
   it('tells the user when the server is unreachable', async () => {
-    stubFetch(async () => {
-      throw new Error('offline');
-    });
+    stubServer(() => HttpResponse.error());
 
     await fillAndSubmit('a@b.co', 'secret1');
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('offline');
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Failed to fetch',
+    );
   });
 
   it('sends only one request when the form is submitted twice', async () => {
-    let finishFetch!: (value: { type: string }) => void;
-    const fetchMock = stubFetch(
+    let finishRequest!: () => void;
+    const received = stubServer(
       () =>
-        new Promise<{ type: string }>((resolve) => {
-          finishFetch = resolve;
+        new Promise<Response>((resolve) => {
+          finishRequest = () => resolve(redirect());
         }),
     );
     const user = userEvent.setup();
@@ -89,10 +112,10 @@ describe('sign in', () => {
     await user.type(screen.getByLabelText('E-mail'), 'a@b.co');
     await user.type(screen.getByLabelText('Hasło'), 'secret1{Enter}{Enter}');
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(received).toHaveBeenCalledTimes(1));
+    expect(received).toHaveBeenCalledTimes(1);
 
-    finishFetch({ type: 'opaqueredirect' });
+    finishRequest();
     await waitFor(() => expect(navigateTo).toHaveBeenCalled());
   });
 });

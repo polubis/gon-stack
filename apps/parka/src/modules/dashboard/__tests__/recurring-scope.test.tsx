@@ -1,9 +1,9 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { addDays, periodContaining, todayDay } from '@/shared/period/period';
 import { Main } from '../presentation/main';
-import { readBody } from './dashboard-backend';
+import { answerApi, readBody, startBackend } from './dashboard-backend';
 
 const CATEGORY = {
   id: 'c-1',
@@ -40,32 +40,23 @@ const charged = () => ({
   items: [],
 });
 
-let calls: { method: string; url: string }[] = [];
+const server = startBackend();
 
-const stubApi = (reads: Parameters<typeof readBody>[1]) =>
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(async (url: string, init?: RequestInit) => {
-      calls.push({ method: init?.method ?? 'GET', url });
-      return {
-        json: async () =>
-          init?.method === 'DELETE'
-            ? { code: 200, ok: true }
-            : readBody(url, reads),
-      };
-    }),
+let calls: ReturnType<typeof answerApi> = [];
+
+const stubApi = (reads: Parameters<typeof readBody>[1]) => {
+  calls = answerApi(server, ({ method, url }) =>
+    method === 'DELETE' ? { code: 200, ok: true } : readBody(url, reads),
   );
+};
 
 const deletes = () => calls.filter((c) => c.method === 'DELETE');
 
 describe('upcoming payment', () => {
   beforeEach(() => {
-    calls = [];
     window.history.replaceState(null, '', '/app/');
     stubApi({ recurring: [rule()], categories: [CATEGORY] });
   });
-  afterEach(() => vi.unstubAllGlobals());
-
   it('is announced apart from the expenses and counted nowhere', async () => {
     render(<Main />);
     const upcoming = within(
@@ -130,7 +121,6 @@ describe('upcoming payment', () => {
 
 describe('charged recurring expense', () => {
   beforeEach(() => {
-    calls = [];
     window.history.replaceState(null, '', '/app/?modal=expense:r-1:charged');
     stubApi({
       recurring: [{ ...rule(), lastMaterializedDate: todayDay() }],
@@ -138,8 +128,6 @@ describe('charged recurring expense', () => {
       categories: [CATEGORY],
     });
   });
-  afterEach(() => vi.unstubAllGlobals());
-
   it('says that editing touches only this expense', async () => {
     render(<Main />);
     const dialog = within(await screen.findByRole('dialog'));

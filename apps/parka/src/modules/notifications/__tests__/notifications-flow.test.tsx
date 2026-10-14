@@ -1,6 +1,17 @@
 import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import { Main } from '../presentation/main';
 
 const CREATED_AT = new Date().toISOString();
@@ -55,6 +66,12 @@ const page = (data: Item[], patch: Partial<Page> = {}): Page => ({
 
 type Reply = object | (() => object | Promise<object>);
 
+const server = setupServer();
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
 /** Answers lists by cursor (`first` when none) and every PUT with `write`. */
 const stubApi = ({
   pages,
@@ -63,16 +80,19 @@ const stubApi = ({
   pages: Record<string, Reply>;
   write?: object;
 }) => {
-  const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
-    if (init?.method === 'PUT') return { json: async () => write };
-    const cursor = new URL(url, 'http://x').searchParams.get('cursor');
-    const reply = pages[cursor ?? 'first']!;
-    return {
-      json: async () => (typeof reply === 'function' ? reply() : reply),
-    };
-  });
-  vi.stubGlobal('fetch', fetchMock);
-  return fetchMock;
+  const calls: { method: string; url: string }[] = [];
+  server.use(
+    http.all('/api/*', async ({ request }) => {
+      const { pathname, searchParams, search } = new URL(request.url);
+      calls.push({ method: request.method, url: pathname + search });
+      if (request.method === 'PUT') return HttpResponse.json(write);
+      const reply = pages[searchParams.get('cursor') ?? 'first']!;
+      return HttpResponse.json(
+        typeof reply === 'function' ? await reply() : reply,
+      );
+    }),
+  );
+  return calls;
 };
 
 /** Lets a test play the browser: report the sentinel as scrolled into view. */
@@ -352,7 +372,7 @@ describe('infinite scroll', () => {
   });
 
   it('marks unloaded pages read as well when all are marked as read', async () => {
-    const fetchMock = stubApi({ pages: twoPages() });
+    const calls = stubApi({ pages: twoPages() });
     const scrollToEnd = stubObserver();
     const user = userEvent.setup();
     render(<Main />);
@@ -365,9 +385,9 @@ describe('infinite scroll', () => {
 
     await waitFor(() => expect(rows()).toHaveLength(4));
     expect(screen.getAllByText('Przeczytane')).toHaveLength(4);
-    expect(fetchMock).toHaveBeenCalledWith(
-      '/api/notifications/read-all/',
-      expect.objectContaining({ method: 'PUT' }),
-    );
+    expect(calls).toContainEqual({
+      method: 'PUT',
+      url: '/api/notifications/read-all/',
+    });
   });
 });
