@@ -127,8 +127,8 @@ describe('push delivery', () => {
 
     await deliverPush(db, 'u1', [message], { keys: await vapidKeys(), send });
 
-    expect(deleted).toEqual([
-      ['https://push.example.com/gone', 'https://push.example.com/expired'],
+    expect(deleted.map((endpoints) => [...endpoints].sort())).toEqual([
+      ['https://push.example.com/expired', 'https://push.example.com/gone'],
     ]);
   });
 

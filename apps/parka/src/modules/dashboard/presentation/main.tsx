@@ -92,7 +92,7 @@ const DashboardView = () => {
   if (error) {
     return (
       <div data-e2e="dashboard:main" className="flex flex-1 flex-col">
-        <main className="flex flex-1 flex-col px-4 pb-6 pt-4 md:px-8 lg:px-10 lg:pt-8 xl:px-16">
+        <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 pb-6 pt-4 md:px-8 lg:px-10 lg:pt-8 xl:px-16">
           <ErrorState
             data-e2e="dashboard:summary-error"
             title="Nie udało się wczytać podsumowania"
@@ -143,7 +143,7 @@ const DashboardView = () => {
   return (
     <div data-e2e="dashboard:main" className="relative flex flex-1 flex-col">
       <LoadingBanner active={loading && ready} />
-      <main className="flex flex-1 flex-col gap-3 px-4 pb-24 pt-4 md:gap-4 md:px-8 md:pb-6 lg:px-10 lg:pt-8 xl:grid xl:grid-cols-12 xl:content-start xl:px-16">
+      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-3 px-4 pb-24 pt-4 md:gap-4 md:px-8 md:pb-6 lg:px-10 lg:pt-8 xl:grid xl:grid-cols-12 xl:content-start xl:px-16">
         <div className="xl:col-span-12">
           <Header
             period={period}
