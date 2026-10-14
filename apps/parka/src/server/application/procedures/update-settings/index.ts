@@ -37,6 +37,15 @@ export const updateSettings = privateProcedure({
       });
     if (prefsError) throw new InternalServer(prefsError);
 
+    // Push off means no device receives it any more.
+    if (!input.notifications.push) {
+      const { error } = await db
+        .from('push_subscriptions')
+        .delete()
+        .eq('user_id', uid);
+      if (error) throw new InternalServer(error);
+    }
+
     // Only avatar and custom name are writable; a device the user owns no
     // expense of is ignored.
     const owned = new Set(await getOwnDeviceIds(db));

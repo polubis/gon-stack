@@ -15,8 +15,9 @@ import {
   ERROR_CODES,
   LINKS,
   NOTIFICATION_OPTIONS,
+  PUSH_HINTS,
 } from '../configuration/constraints';
-import type { NotificationKey, Settings } from '../domain/models';
+import type { Settings } from '../domain/models';
 import { DevicesCard } from './devices-card';
 import { ProfileAvatar } from './profile-avatar';
 import { Provider, useContext } from './context';
@@ -28,6 +29,8 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
   const avatar = ctx.useAvatar();
   const isUploadingAvatar = ctx.useIsUploadingAvatar();
   const uploadingDeviceIds = ctx.useUploadingDeviceIds();
+  const push = ctx.usePush();
+  const isPushBusy = ctx.useIsPushBusy();
   const [dark, setDark] = useDarkTheme();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
@@ -43,12 +46,6 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
     ctx.update({ ...settings, profile: { name, email } });
     setEditing(false);
   };
-
-  const setNotification = (key: NotificationKey, value: boolean) =>
-    ctx.update({
-      ...settings,
-      notifications: { ...settings.notifications, [key]: value },
-    });
 
   const setDevice = (
     id: string,
@@ -133,19 +130,30 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
       <Card as="section" className="space-y-2 lg:col-span-2">
         <h2 className="text-sm font-semibold text-ink-soft">Powiadomienia</h2>
         <ul className="divide-y divide-line" data-e2e="settings:notifications">
-          {NOTIFICATION_OPTIONS.map(({ key, label }) => (
-            <li
-              key={key}
-              className="flex items-center justify-between py-2 text-sm"
-            >
-              <span>{label}</span>
-              <Toggle
-                checked={settings.notifications[key]}
-                onChange={(value) => setNotification(key, value)}
-                label={label}
-              />
-            </li>
-          ))}
+          {NOTIFICATION_OPTIONS.map(({ key, label }) => {
+            const hint = PUSH_HINTS[push];
+            return (
+              <li key={key} className="py-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <span>{label}</span>
+                  <Toggle
+                    checked={push === 'on' && settings.notifications.push}
+                    onChange={ctx.togglePush}
+                    disabled={(push !== 'on' && push !== 'off') || isPushBusy}
+                    label={label}
+                  />
+                </div>
+                {hint ? (
+                  <p
+                    className="mt-1 text-xs text-ink-soft"
+                    data-e2e="settings:push-hint"
+                  >
+                    {hint}
+                  </p>
+                ) : null}
+              </li>
+            );
+          })}
         </ul>
       </Card>
 
