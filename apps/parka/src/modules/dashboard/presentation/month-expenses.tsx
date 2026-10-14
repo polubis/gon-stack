@@ -243,62 +243,63 @@ export const MonthExpenses = ({
         </p>
       </div>
 
-      {/* Reserved even when empty: the filter row never moves the list. */}
-      <div className="h-10">
-        {tabs.length > 1 ? (
-          <div
-            role="group"
-            aria-label="Filtruj wydatki wg kategorii"
-            className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:px-0"
+      {/* Fixed height, always filled: the filter row never leaves a gap or moves the list. */}
+      <div className="h-10 md:h-12">
+        <div
+          role="group"
+          aria-label="Filtruj wydatki wg kategorii"
+          className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden md:mx-0 md:px-0 md:pb-1 md:[scrollbar-width:thin]"
+        >
+          <Chip
+            active={active === null}
+            onClick={() => setFilter(null)}
+            data-e2e="dashboard:filter:all"
           >
+            {`Wszystkie ${inPeriod.length}`}
+          </Chip>
+          {tabs.map(({ category, count }) => (
             <Chip
-              active={active === null}
-              onClick={() => setFilter(null)}
-              data-e2e="dashboard:filter:all"
+              key={category.id}
+              active={active === category.id}
+              color={category.color}
+              onClick={() => setFilter(category.id)}
+              data-e2e={`dashboard:filter:${category.id}`}
             >
-              {`Wszystkie ${inPeriod.length}`}
+              {`${categoryLabel(category.name)} ${count}`}
             </Chip>
-            {tabs.map(({ category, count }) => (
-              <Chip
-                key={category.id}
-                active={active === category.id}
-                color={category.color}
-                onClick={() => setFilter(category.id)}
-                data-e2e={`dashboard:filter:${category.id}`}
-              >
-                {`${categoryLabel(category.name)} ${count}`}
-              </Chip>
-            ))}
-          </div>
-        ) : null}
+          ))}
+        </div>
       </div>
 
-      {upcoming.length > 0 ? (
-        <UpcomingList
-          upcoming={upcoming}
-          categories={categories}
-          onSelect={onSelect}
-        />
-      ) : null}
-
-      <div className={cn('relative overflow-hidden', EXPENSES_LIST_HEIGHT)}>
-        {visible.length === 0 ? (
-          <p className="py-2 text-sm text-ink-soft">
-            Brak wydatków w tym okresie.
-          </p>
-        ) : (
-          <ExpenseList
-            expenses={visible.slice(0, MAX_VISIBLE_EXPENSES)}
+      {/* Stable wrapper owns the gap: the conditional widget adds no spacing of its own. */}
+      <div className="space-y-3">
+        {upcoming.length > 0 ? (
+          <UpcomingList
+            upcoming={upcoming}
             categories={categories}
             onSelect={onSelect}
           />
-        )}
-        {visible.length > MAX_VISIBLE_EXPENSES && (
-          <ShowAllFade
-            onClick={all.open}
-            data-e2e="dashboard:expenses-toggle"
-          />
-        )}
+        ) : null}
+
+        <div className={cn('relative overflow-hidden', EXPENSES_LIST_HEIGHT)}>
+          {visible.length === 0 ? (
+            <p className="py-2 text-sm text-ink-soft">
+              Brak wydatków w tym okresie.
+            </p>
+          ) : (
+            <ExpenseList
+              expenses={visible.slice(0, MAX_VISIBLE_EXPENSES)}
+              categories={categories}
+              onSelect={onSelect}
+            />
+          )}
+          {visible.length > MAX_VISIBLE_EXPENSES && (
+            <ShowAllFade
+              onClick={all.open}
+              data-e2e="dashboard:expenses-toggle"
+            />
+          )}
+        </div>
       </div>
       {all.isOpen && (
         <DetailDialog

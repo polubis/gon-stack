@@ -8,3 +8,4 @@
 6. (A) Scrollable lists keep a proper gap between items and scrollbar
 7. (A) Dashboard UI's with side panel should have all content centered in x-axis
 8. (A) No button/input/controls text overlap
+9. (A) Conditional branches must not stack padding, margin, or offset - keep spacing on the stable wrapper only

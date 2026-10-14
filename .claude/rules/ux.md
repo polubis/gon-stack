@@ -1,6 +1,6 @@
 ## UX
 
-1. (A) Proper errors display with pattern: `title:tech-code:description:retry-option:back-option`
+1. (A) Proper errors display with pattern: `icon:title:tech-code:description:retry-option:back-option`
 2. (A) Skeleton when loading app/modules/features that mimics current layout
 3. (A) Spinner in less important places, f.e: search inputs, button indicator
 4. (A) Optimistic UI and toasts when create/update/delete happens
@@ -14,3 +14,4 @@
 12. (A) Opening a modal over another stacks it on top: previous stays mounted underneath, never closed/replaced
 13. (A) Open modals live in URL query params (stack order kept): deep link/reload restores the stack, Back closes only the topmost
 14. (A) Every text input (text/email/password/search/tel/url) has an "x" icon button (`lucide-react`) clearing it; click focuses the input. Shown only when value present. Not on select, number, date
+15. (A) Proper empty states display with pattern: `icon:title:description:primary-action`
