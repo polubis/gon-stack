@@ -46,3 +46,6 @@ test-results/
 .playwright-mcp/
 # recorded proofs (artifacts, never committed)
 /.evidences/
+
+# nitpick generated docs
+.ai/
