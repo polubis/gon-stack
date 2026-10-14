@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Explainer deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@600;700;800&display=block" rel="stylesheet">
+<style>
+:root{--bg:#050507;--ink:#FFFFFF;--muted:#8A87A0;--violet:#7C5CFF;--soft:#B48CFF;--gold:#E8C547;--teal:#4FD1C5;--rose:#FF6B8A;
+  --mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;--head:'Sora',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1350px;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--sans)}
+#stage{position:relative;width:1080px;height:1350px;overflow:hidden;background:radial-gradient(ellipse 80% 50% at 50% 100%,rgba(124,92,255,.10),transparent 70%),var(--bg)}
+canvas{position:absolute;inset:0;z-index:1}
+#bar{position:absolute;top:0;left:0;height:5px;z-index:10;background:linear-gradient(90deg,var(--violet),var(--gold))}
+#brand{position:absolute;top:50px;left:72px;z-index:10;display:flex;align-items:center;gap:14px;font:600 26px var(--sans);letter-spacing:-.01em}
+#brand i{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#D9C8FF,var(--violet) 55%,#3a2399);box-shadow:0 0 18px rgba(124,92,255,.7)}
+#count{position:absolute;top:54px;right:72px;z-index:10;font:500 22px var(--mono);color:var(--muted);letter-spacing:.08em}
+.slide{position:absolute;inset:0;z-index:2;opacity:0}
+.ghost{position:absolute;right:30px;top:40px;font:800 520px/1 var(--head);letter-spacing:-.05em;color:transparent;-webkit-text-stroke:1px rgba(124,92,255,.075);z-index:0}
+.copy{position:absolute;top:150px;left:72px;right:72px;z-index:3}
+.kicker{display:flex;align-items:center;gap:16px;font:500 24px var(--mono);color:var(--violet);letter-spacing:.04em}
+.kicker:before{content:"";width:26px;height:2px;background:var(--violet)}
+h1{margin-top:26px;font:800 84px/1.04 var(--head);letter-spacing:-.035em;max-width:936px}
+h1 em{font-style:normal;color:var(--soft)}
+.sub{margin-top:26px;font:500 24px/1.3 var(--mono);color:var(--gold);text-transform:uppercase;letter-spacing:.08em}
+.tags{margin-top:26px;display:flex;gap:14px;flex-wrap:wrap}
+.tag{display:inline-flex;align-items:center;gap:10px;padding:10px 18px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);font:500 20px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:#E6E4F0}
+.tag:before{content:"";width:9px;height:9px;border-radius:50%;background:var(--c)}
+.abs{position:absolute;z-index:3}
+.code{position:absolute;left:72px;right:72px;z-index:3;padding:28px 34px;border-radius:14px;border:1px solid rgba(255,255,255,.1);
+  background:linear-gradient(rgba(255,255,255,.03),rgba(255,255,255,.03)),rgba(5,5,7,.94);font:500 28px/1.55 var(--mono);font-variant-ligatures:none}
+.ln{white-space:pre;border-radius:6px;margin:0 -12px;padding:0 12px}
+.k{color:var(--soft)}.s{color:var(--gold)}.c{color:var(--muted)}.p{color:#CFCBE0}
+.del{background:rgba(255,107,138,.12)}.del .m{color:var(--rose)}
+.add{background:rgba(79,209,197,.12)}.add .m{color:var(--teal)}
+.card{position:absolute;z-index:3;border-radius:18px;border:1px solid rgba(255,255,255,.1);background:#0B0A11;padding:26px 30px}
+.pkg{font:500 24px var(--mono);color:var(--muted)}
+.ver{margin-top:18px;display:flex;align-items:baseline;gap:16px}
+.ver b{font:600 30px var(--sans)}
+.ver span{font:700 44px var(--mono);letter-spacing:-.02em}
+.hub{position:absolute;z-index:3;border-radius:50%;display:flex;align-items:center;justify-content:center;font:600 22px var(--mono);color:var(--hc);
+  background:radial-gradient(circle,rgba(var(--hr),.38),rgba(var(--hr),.08) 70%),#0B0A11;border:1px solid rgba(var(--hr),.6);box-shadow:0 0 40px rgba(var(--hr),.35)}
+.node{position:absolute;z-index:3;height:50px;width:184px;display:flex;align-items:center;justify-content:center;border-radius:999px;font:500 21px var(--mono);
+  background:#0B0A11;border:1px solid rgba(255,255,255,.14);color:#E6E4F0}
+.cmd{position:absolute;z-index:3;left:50%;transform:translateX(-50%);padding:14px 30px;border-radius:999px;font:600 28px var(--mono);color:var(--gold);background:#0B0A11;border:1px solid rgba(232,197,71,.45)}
+.note{font:500 28px/1.35 var(--sans);color:var(--muted);text-align:center}
+.note b{color:var(--ink);font-weight:600}
+.tip{left:72px;right:72px;height:190px}
+.tip .t{font:600 31px var(--mono);font-variant-ligatures:none}
+.tip .d{margin-top:16px;font:400 27px/1.35 var(--sans);color:var(--muted)}
+.tip .badge{position:absolute;top:26px;right:28px;font:500 19px var(--mono);color:var(--teal);border:1px solid rgba(79,209,197,.4);border-radius:999px;padding:6px 14px}
+.tip h3{font:700 34px var(--head);letter-spacing:-.02em}
+.tip h3 em{font-style:normal;color:var(--soft)}
+.mark{position:absolute;z-index:3;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#E4D8FF,var(--violet) 50%,#2a1870 100%);box-shadow:0 0 80px rgba(124,92,255,.6)}
+.big{text-align:center;font:700 44px var(--head);letter-spacing:-.02em}
+</style>
+</head>
+<body>
+<div id="stage">
+<canvas id="cv" width="1080" height="1350"></canvas>
+<div id="bar"></div>
+<div id="brand"><i></i><span id="brandName"></span></div>
+<div id="count"></div>
+</div>
+
+<script>
+/* =====================================================================
+   CONFIG - edit only this block. Canvas 1080x1350, side padding 72.
+   Text block (kicker/h1/sub/tags) occupies top ~150-520px.
+   Place els + art in bottom area (~530-1300px). Coordinates in px.
+
+   Slide: { dur, kicker, title(html, <em> = accent), sub?, tags?:[[text,color]],
+            art:{layout, ...params}, els:[...] }
+   Colors: violet soft gold teal rose muted ink
+   Code line html classes: k=key s=string c=comment p=punct
+   Code line: 'html' | { h:'html', in?, hl?, diff?:'+'|'-' }
+   Morph token inside line: <span data-morph="2.0">from|to</span>
+   Elements (all accept in = appear time in s, local to slide):
+     code  {top, size?, pad?, stagger?(0 = lines appear with panel), lines}
+     cards {top, cols?, h?, gap?, step?, items:[{label,key,val,color}]}
+     hub   {x, y (center), size?, label, color?:'violet'|'teal'|'gold'|'rose'}
+     nodes {y, xs:[centers], labels, step?}
+     cmd   {top, text}
+     note  {top, html}
+     tips  {top, step?, items:[{code?|title?, desc, badge?}], stagger?}
+     mark  {x, y (center)}
+     big   {top, text}
+   Particle layouts (art.layout):
+     scatter {labels?:[[text,x,y,color]]}   floating, optional canvas labels
+     chaos   {y?, h?}                        jittery cloud + tangled lines
+     hub     {x, y}                          orbit around one point
+     flows   {x, y, xs:[], ty}               hub -> targets streams + lines
+     twoHubs {a:[x,y], b:[x,y], colors?}     two orbits
+     wave    {top, rows?, cols?, origin:[x,y], at?}  grid lit by expanding front
+     stream  {top, h}                        vertical flow top -> bottom
+     field   {}                              faint ambient dots everywhere
+     ring    {x, y}                          three concentric rings
+   ===================================================================== */
+const BRAND = 'polubinski.dev';
+const SLIDES = [
+  { dur: 4.6, kicker: 'the hook', title: 'Version drift in your <em>monorepo</em>?',
+    sub: 'one line in pnpm-workspace.yaml fixes it', tags: [['pnpm', 'violet'], ['catalog:', 'gold']],
+    art: { layout: 'scatter', labels: [['react ^18.2.0', 200, 720, 'rose'], ['react ^19.0.0', 600, 700, 'teal'], ['zod ^3.22.4', 380, 850, 'gold'],
+      ['react ^18.3.1', 700, 890, 'soft'], ['zod ^3.23.8', 150, 1010, 'gold'], ['react-dom ^18.2.0', 560, 1060, 'rose'],
+      ['react ^19.1.0', 250, 1190, 'teal'], ['zod ^4.0.0', 700, 1210, 'soft']] },
+    els: [] },
+  // kind: cards (+ small code panel)
+  { dur: 5.4, kicker: 'the problem', title: 'Every package picks its <em>own</em> react',
+    sub: '4 packages / 4 versions / 1 mess', tags: [['duplicates in lockfile', 'rose']],
+    art: { layout: 'chaos' },
+    els: [
+      { type: 'cards', top: 665, in: .3, items: [
+        { label: 'apps/web', key: 'react', val: '^18.2.0', color: 'rose' }, { label: 'apps/admin', key: 'react', val: '^18.3.1', color: 'gold' },
+        { label: 'libs/ui', key: 'react', val: '^19.0.0', color: 'teal' }, { label: 'libs/auth', key: 'react', val: '^19.1.0', color: 'soft' }] },
+      { type: 'code', top: 1095, in: 1.6, size: 26, pad: '22px 34px', lines: [
+        { h: '<span class="c"># pnpm-lock.yaml</span>', in: 1.6 },
+        { h: '<span class="k">react@18.2.0</span>  <span class="k">react@18.3.1</span>', in: 2.0 },
+        { h: '<span class="k">react@19.0.0</span>  <span class="k">react@19.1.0</span>  <span style="color:var(--rose)">x4</span>', in: 2.4 }] }] },
+  // kind: text + code + hub
+  { dur: 5.6, kicker: 'the concept', title: 'One <em>source</em> of truth',
+    sub: 'define versions once, at the root', tags: [['pnpm 9.5+', 'teal'], ['catalog:', 'violet']],
+    art: { layout: 'hub', x: 540, y: 1120 },
+    els: [
+      { type: 'code', top: 530, in: .2, lines: [
+        '<span class="c"># pnpm-workspace.yaml</span>', '<span class="k">packages</span><span class="p">:</span>',
+        '<span class="p">  - </span><span class="s">"apps/*"</span>', '<span class="p">  - </span><span class="s">"libs/*"</span>',
+        { h: '<span class="k">catalog</span><span class="p">:</span>', hl: 2.0 },
+        { h: '<span class="p">  </span><span class="k">react</span><span class="p">: </span><span class="s">^19.1.0</span>', hl: 2.2 },
+        { h: '<span class="p">  </span><span class="k">zod</span><span class="p">: </span><span class="s">^4.1.0</span>', hl: 2.4 }] },
+      { type: 'hub', x: 540, y: 1120, size: 120, label: 'catalog', in: 1.0 }] },
+  // kind: code + hub -> nodes (flows)
+  { dur: 5.4, kicker: 'usage', title: 'Reference it with <em>catalog:</em>', sub: 'no version numbers in package.json',
+    art: { layout: 'flows', x: 540, y: 1085, xs: [165, 405, 675, 915], ty: 1225 },
+    els: [
+      { type: 'code', top: 600, in: .2, lines: [
+        '<span class="c">// apps/web/package.json</span>', '<span class="p">{</span>',
+        '<span class="p">  </span><span class="k">"dependencies"</span><span class="p">: {</span>',
+        { h: '<span class="p">    </span><span class="k">"react"</span><span class="p">: </span><span class="s">"catalog:"</span><span class="p">,</span>', hl: 1.8 },
+        { h: '<span class="p">    </span><span class="k">"zod"</span><span class="p">: </span><span class="s">"catalog:"</span>', hl: 2.0 },
+        '<span class="p">  }</span>', '<span class="p">}</span>'] },
+      { type: 'hub', x: 540, y: 1085, size: 90, label: 'catalog', in: 1.4 },
+      { type: 'nodes', y: 1225, xs: [165, 405, 675, 915], labels: ['apps/web', 'apps/admin', 'libs/ui', 'libs/auth'], in: 1.8 }] },
+  // kind: variant (two hubs)
+  { dur: 5.6, kicker: 'named catalogs', title: 'Two majors? <em>Name</em> them', sub: 'catalogs: with any names you like',
+    art: { layout: 'twoHubs', a: [300, 1195], b: [780, 1195] },
+    els: [
+      { type: 'code', top: 560, in: .2, lines: [
+        '<span class="c"># pnpm-workspace.yaml</span>', '<span class="k">catalogs</span><span class="p">:</span>',
+        '<span class="p">  </span><span class="k" style="color:var(--teal)">react18</span><span class="p">:</span>',
+        '<span class="p">    </span><span class="k">react</span><span class="p">: </span><span class="s">^18.3.1</span>',
+        '<span class="p">  </span><span class="k">react19</span><span class="p">:</span>',
+        '<span class="p">    </span><span class="k">react</span><span class="p">: </span><span class="s">^19.1.0</span>',
+        { h: '<span class="k">"react"</span><span class="p">: </span><span class="s">"catalog:react18"</span>', hl: 2.4 }] },
+      { type: 'hub', x: 300, y: 1195, size: 100, label: 'react18', color: 'teal', in: 1.2 },
+      { type: 'hub', x: 780, y: 1195, size: 100, label: 'react19', in: 1.4 }] },
+  // kind: diff + wave payoff
+  { dur: 5.6, kicker: 'upgrades', title: 'Upgrade in <em>one</em> line', sub: 'bump once, the whole repo follows', tags: [['single diff', 'gold']],
+    art: { layout: 'wave', top: 870, origin: [540, 770], at: 1.7 },
+    els: [
+      { type: 'code', top: 530, in: .2, lines: [
+        '<span class="c"># pnpm-workspace.yaml</span>', '<span class="k">catalog</span><span class="p">:</span>',
+        { diff: '-', h: '<span class="k">react</span><span class="p">: </span><span class="s">^19.0.0</span>', in: .8 },
+        { diff: '+', h: '<span class="k">react</span><span class="p">: </span><span class="s">^19.1.0</span>', in: 1.2 }] },
+      { type: 'note', top: 1210, in: 3.6, html: '<b>21 packages</b> on ^19.1.0 after pnpm install' }] },
+  // kind: morph token + cmd + stream
+  { dur: 5.6, kicker: 'publishing', title: 'Publish stays <em>safe</em>', sub: 'catalog: becomes a real version range',
+    tags: [['pnpm pack', 'violet'], ['pnpm publish', 'gold']],
+    art: { layout: 'stream', top: 690, h: 190 },
+    els: [
+      { type: 'code', top: 540, in: .2, size: 31, stagger: 0, lines: [
+        '<span class="c">// apps/web/package.json</span>',
+        { h: '<span class="k">"react"</span><span class="p">: </span><span class="s">"catalog:"</span>', hl: 1.0 }] },
+      { type: 'cmd', top: 760, in: .8, text: '$ pnpm publish' },
+      { type: 'code', top: 880, in: 1.2, size: 31, stagger: 0, lines: [
+        '<span class="c">// published package.json</span>',
+        { h: '<span class="k">"react"</span><span class="p">: </span><span class="s">"<span data-morph="2.0">catalog:|^19.1.0</span>"</span>', hl: 3.0 }] },
+      { type: 'note', top: 1100, in: 3.4, html: 'consumers never see <b>catalog:</b>' }] },
+  // kind: tips cards
+  { dur: 5.8, kicker: 'pro tips', title: 'Lock it <em>down</em>', sub: 'small settings, big payoff',
+    art: { layout: 'field' },
+    els: [
+      { type: 'tips', top: 560, in: .4, items: [
+        { code: '<span class="k">catalogMode</span><span class="p">: </span><span class="s">strict</span>', desc: 'pnpm add only allows versions<br>from the catalog', badge: 'pnpm 10.12.1+' },
+        { code: '<span class="p">pnpm add zod </span><span class="k">--save-catalog</span>', desc: 'adds the dep and writes its version<br>into the catalog for you', badge: 'pnpm 10.12.1+' },
+        { title: 'Fewer <em>merge conflicts</em>', desc: 'upgrades touch one file,<br>not every package.json' }] }] },
+  // kind: CTA
+  { dur: 5.0, kicker: 'your turn', title: 'Do you use <em>catalogs</em>?', sub: 'follow for more monorepo tips',
+    tags: [['comment', 'violet'], ['share', 'gold'], ['follow', 'teal']],
+    art: { layout: 'ring', x: 540, y: 910 },
+    els: [{ type: 'mark', x: 540, y: 910, in: .3 }, { type: 'big', top: 1200, in: .8, text: BRAND }] },
+];
+/* ============================ END CONFIG ============================ */
+
+const pad2 = (n) => String(n).padStart(2, '0');
+const HUBC = { violet: ['var(--soft)', '124,92,255'], teal: ['var(--teal)', '79,209,197'], gold: ['var(--gold)', '232,197,71'], rose: ['var(--rose)', '255,107,138'] };
+const at = (v) => (v == null ? '' : ` data-in="${v}"`);
+function lineHtml(l, i, el) {
+  const o = typeof l === 'string' ? { h: l } : l;
+  const tin = o.in ?? (el.stagger === 0 ? null : (el.in ?? 0) + .1 + i * (el.stagger ?? .15));
+  const cls = o.diff === '-' ? ' del' : o.diff === '+' ? ' add' : '';
+  const pre = o.diff ? `<span class="m">${o.diff} </span><span class="p"> </span>` : '';
+  return `<div class="ln${cls}"${at(tin)}${o.hl != null ? ` data-hl="${o.hl}"` : ''}>${pre}${o.h}</div>`;
+}
+function elHtml(e) {
+  switch (e.type) {
+    case 'code': return `<div class="code"${at(e.in)} style="top:${e.top}px;${e.size ? `font-size:${e.size}px;` : ''}${e.pad ? `padding:${e.pad};` : ''}">${e.lines.map((l, i) => lineHtml(l, i, e)).join('')}</div>`;
+    case 'cards': {
+      const cols = e.cols ?? 2, gap = e.gap ?? 24, h = e.h ?? 190, w = (936 - gap * (cols - 1)) / cols;
+      return e.items.map((c, i) => `<div class="card"${at((e.in ?? 0) + i * (e.step ?? .2))} style="left:${72 + (i % cols) * (w + gap)}px;top:${e.top + Math.floor(i / cols) * (h + gap)}px;width:${w}px;height:${h}px"><div class="pkg">${c.label}</div><div class="ver"><b>${c.key}</b><span style="color:var(--${c.color ?? 'gold'})">${c.val}</span></div></div>`).join('');
+    }
+    case 'hub': {
+      const s = e.size ?? 110, [hc, hr] = HUBC[e.color ?? 'violet'];
+      return `<div class="hub"${at(e.in)} style="left:${e.x - s / 2}px;top:${e.y - s / 2}px;width:${s}px;height:${s}px;font-size:${Math.round(s * .19)}px;--hc:${hc};--hr:${hr}">${e.label}</div>`;
+    }
+    case 'nodes': return e.xs.map((x, i) => `<div class="node"${at((e.in ?? 0) + i * (e.step ?? .15))} style="left:${x - 92}px;top:${e.y}px">${e.labels[i]}</div>`).join('');
+    case 'cmd': return `<div class="cmd"${at(e.in)} style="top:${e.top}px">${e.text}</div>`;
+    case 'note': return `<div class="abs note"${at(e.in)} style="left:72px;right:72px;top:${e.top}px">${e.html}</div>`;
+    case 'tips': return e.items.map((t, i) => `<div class="card tip"${at((e.in ?? 0) + i * (e.stagger ?? .8))} style="top:${e.top + i * (e.step ?? 214)}px">${t.code ? `<div class="t">${t.code}</div>` : `<h3>${t.title}</h3>`}<div class="d">${t.desc}</div>${t.badge ? `<span class="badge">${t.badge}</span>` : ''}</div>`).join('');
+    case 'mark': return `<div class="mark"${at(e.in)} style="left:${e.x - 75}px;top:${e.y - 75}px"></div>`;
+    case 'big': return `<div class="abs big"${at(e.in)} style="left:72px;right:72px;top:${e.top}px">${e.text}</div>`;
+    default: throw new Error('unknown el ' + e.type);
+  }
+}
+const stage = document.getElementById('stage');
+stage.insertAdjacentHTML('beforeend', SLIDES.map((s, i) => `<section class="slide"><div class="ghost">${pad2(i + 1)}</div><div class="copy">
+  <div class="kicker">${pad2(i + 1)} / ${s.kicker}</div><h1>${s.title}</h1>${s.sub ? `<div class="sub">${s.sub}</div>` : ''}
+  ${s.tags?.length ? `<div class="tags">${s.tags.map(([t, c]) => `<span class="tag" style="--c:var(--${c})">${t}</span>`).join('')}</div>` : ''}
+  </div>${(s.els ?? []).map(elHtml).join('')}</section>`).join(''));
+document.getElementById('brandName').textContent = BRAND;
+
+// ---------------- engine: all state derived from t ----------------
+const DUR = SLIDES.map((s) => s.dur);
+const START = []; let acc = 0; for (const d of DUR) { START.push(acc); acc += d; }
+const TOTAL = acc; window.TOTAL_MS = TOTAL * 1000;
+window.SLIDE_MID_MS = START.map((s, i) => Math.round((s + DUR[i] * .72) * 1000));
+const slides = [...document.querySelectorAll('.slide')];
+const cl = (v) => Math.max(0, Math.min(1, v));
+const ease = (x) => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const eo = (x) => 1 - Math.pow(1 - x, 3);
+const lerp = (a, b, t) => a + (b - a) * t;
+const C = { violet: [124, 92, 255], soft: [180, 140, 255], gold: [232, 197, 71], teal: [79, 209, 197], rose: [255, 107, 138], muted: [138, 135, 160], ink: [255, 255, 255] };
+const PAL = [C.violet, C.soft, C.gold, C.teal, C.rose];
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const R = rng(42); const N = 170; const TAU = Math.PI * 2;
+const parts = Array.from({ length: N }, (_, i) => ({ i, r: Array.from({ length: 10 }, R), shape: i % 4 }));
+const mix = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
+const drift = (p, t, a) => [Math.sin(t * .5 + p.r[6] * TAU) * a, Math.cos(t * .42 + p.r[7] * TAU) * a];
+const LAYOUTS = {
+  scatter(p, t, lt, A) {
+    const r = p.r, L = A.labels?.[p.i]; let x, y, c, s = 4 + r[1] * 5, a = .8;
+    if (L) { x = L[1]; y = L[2]; c = C[L[3]]; s = 9; a = 1; }
+    else if (r[4] < .15) { x = 72 + r[2] * 936; y = 130 + r[3] * 470; c = PAL[Math.floor(r[5] * 5)]; a = .25; }
+    else { x = 60 + r[2] * 960; y = 660 + r[3] * 640; c = PAL[Math.floor(r[5] * 5)]; a = .7; }
+    const d = drift(p, t, 14); return { x: x + d[0], y: y + d[1], c, s, a };
+  },
+  chaos(p, t, lt, A) {
+    const r = p.r, cy = A.y ?? 980, h = A.h ?? 720;
+    return { x: 540 + (r[2] - .5) * 1060 + Math.sin(t * 2.6 + r[6] * 20) * 26, y: cy + (r[3] - .5) * h + Math.cos(t * 2.2 + r[7] * 20) * 22,
+      c: r[5] < .45 ? C.rose : r[5] < .75 ? C.gold : C.muted, s: 4 + r[1] * 5, a: .6 };
+  },
+  hub(p, t, lt, A) {
+    const r = p.r, s = 4 + r[1] * 5;
+    if (r[4] < .8) { const ang = r[2] * TAU + t * (.35 + r[3] * .3), rad = 72 + r[3] * 52; return { x: A.x + Math.cos(ang) * rad, y: A.y + Math.sin(ang) * rad * .9, c: r[5] < .5 ? C.violet : C.soft, s, a: .9 }; }
+    const ang = r[2] * TAU - t * .2, rad = 135 + r[3] * 30; return { x: A.x + Math.cos(ang) * rad * 1.6, y: A.y + Math.sin(ang) * rad * .55, c: C.gold, s, a: .45 };
+  },
+  flows(p, t, lt, A) {
+    const r = p.r;
+    if (p.i % 5 === 0) { const ang = r[2] * TAU + t * .6, rad = 54 + r[3] * 14; return { x: A.x + Math.cos(ang) * rad, y: A.y + Math.sin(ang) * rad, c: C.soft, s: 3.5 + r[1] * 4, a: .8 }; }
+    const f = (r[2] + t * .3) % 1, tx = A.xs[p.i % A.xs.length];
+    return { x: lerp(A.x, tx, f) + (r[3] - .5) * 10, y: lerp(A.y + 45, A.ty, f) + (r[8] - .5) * 6, c: mix(C.violet, C.gold, f), s: 3.5 + r[1] * 4, a: .15 + .85 * Math.sin(Math.PI * f) };
+  },
+  twoHubs(p, t, lt, A) {
+    const r = p.r, h = p.i % 2, [cx, cy] = h ? A.b : A.a, ang = r[2] * TAU + t * (h ? .5 : -.5), rad = 62 + r[3] * 48;
+    const ca = C[A.colors?.[0] ?? 'teal'], cb = A.colors ? C[A.colors[1]] : (r[5] < .5 ? C.violet : C.soft);
+    return { x: cx + Math.cos(ang) * rad, y: cy + Math.sin(ang) * rad * .8, c: h ? cb : ca, s: 4 + r[1] * 5, a: .85 };
+  },
+  wave(p, t, lt, A) {
+    const r = p.r, rows = A.rows ?? 3, cols = A.cols ?? 7, k = p.i % (rows * cols);
+    const nx = 150 + (k % cols) * (780 / (cols - 1)), ny = A.top + Math.floor(k / cols) * 110;
+    const ang = r[2] * TAU + t, rad = 6 + r[3] * 16, [ox, oy] = A.origin ?? [540, A.top - 100];
+    const m = cl(((lt - (A.at ?? 1.7)) * 520 - Math.hypot(nx - ox, ny - oy)) / 90);
+    return { x: nx + Math.cos(ang) * rad, y: ny + Math.sin(ang) * rad, c: mix(C.muted, C.gold, m), s: (4 + r[1] * 5) * (1 + .35 * m), a: .4 + .55 * m };
+  },
+  stream(p, t, lt, A) {
+    const r = p.r, s = 4 + r[1] * 5;
+    if (p.i % 3 === 0) return { x: 72 + r[2] * 936, y: 1270 + r[3] * 60, c: C.muted, s, a: .3 };
+    const f = (r[3] + t * .28) % 1; return { x: 150 + r[2] * 780, y: A.top + f * A.h, c: mix(C.violet, C.gold, f), s, a: Math.sin(Math.PI * f) * .85 };
+  },
+  field(p, t) { const r = p.r, d = drift(p, t, 18); return { x: r[2] * 1080 + d[0], y: r[3] * 1350 + d[1], c: PAL[Math.floor(r[5] * 5)], s: 4 + r[1] * 5, a: .3 }; },
+  ring(p, t, lt, A) {
+    const r = p.r, k = p.i % 3, rad = 135 + k * 52 + Math.sin(t * 2 + r[2] * 6) * 4, ang = r[2] * TAU + t * (k % 2 ? -.25 : .3);
+    return { x: A.x + Math.cos(ang) * rad, y: A.y + Math.sin(ang) * rad, c: [C.violet, C.soft, C.gold][k], s: 4 + r[1] * 5, a: .85 };
+  },
+};
+const layout = (k, p, t, lt) => LAYOUTS[SLIDES[k].art.layout](p, t, lt, SLIDES[k].art);
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+const rgba = (c, a) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
+function shape(p, x, y, s, rot) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.beginPath();
+  if (p.shape === 0) ctx.arc(0, 0, s / 2, 0, TAU);
+  else if (p.shape === 1) { ctx.moveTo(0, -s * .6); ctx.lineTo(s * .55, s * .4); ctx.lineTo(-s * .55, s * .4); ctx.closePath(); }
+  else if (p.shape === 2) { ctx.lineWidth = 1.8; ctx.moveTo(-s * .4, -s * .5); ctx.lineTo(s * .25, 0); ctx.lineTo(-s * .4, s * .5); ctx.stroke(); ctx.restore(); return; }
+  else ctx.rect(-s * .4, -s * .4, s * .8, s * .8);
+  ctx.fill(); ctx.restore();
+}
+function hash(a, b) { let h = Math.imul(a * 374761393 + b * 668265263, 1274126177); h ^= h >>> 13; return (h >>> 0) / 4294967296; }
+function slideAt(t) { let k = 0; for (let i = 0; i < START.length; i++) if (t >= START[i]) k = i; return k; }
+function layoutCur(p, t, k, lt) {
+  const cur = layout(k, p, t, lt);
+  if (k === 0) return cur;
+  const m = cl((lt - p.r[0] * .35) / .85); if (m >= 1) return cur;
+  const prev = layout(k - 1, p, t, DUR[k - 1] + lt), e = ease(m);
+  return { x: lerp(prev.x, cur.x, e), y: lerp(prev.y, cur.y, e), c: mix(prev.c, cur.c, e), s: lerp(prev.s, cur.s, e), a: lerp(prev.a, cur.a, e) };
+}
+function draw(t, vis) {
+  ctx.clearRect(0, 0, 1080, 1350);
+  const k = slideAt(t), lt = t - START[k];
+  SLIDES.forEach((s, j) => {
+    if (!(vis[j] > 0)) return; const A = s.art;
+    if (A.layout === 'flows') { ctx.strokeStyle = rgba(C.violet, .35 * vis[j]); ctx.lineWidth = 1.5; for (const nx of A.xs) { ctx.beginPath(); ctx.moveTo(A.x, A.y + 45); ctx.lineTo(nx, A.ty); ctx.stroke(); } }
+    if (A.layout === 'chaos') { ctx.strokeStyle = rgba(C.rose, .12 * vis[j]); ctx.lineWidth = 1; for (let i = 0; i < 40; i++) { const a = layoutCur(parts[i], t, k, lt), b = layoutCur(parts[i + 40], t, k, lt); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); } }
+  });
+  for (const p of parts) {
+    const q = layoutCur(p, t, k, lt), pulse = .68 + .32 * Math.sin(t * 2.1 + p.r[9] * TAU);
+    ctx.fillStyle = ctx.strokeStyle = rgba(q.c, q.a * pulse); ctx.shadowColor = rgba(q.c, .8); ctx.shadowBlur = 10;
+    shape(p, q.x, q.y, q.s, t * .5 * (p.r[8] - .5) * 2 + p.r[9] * TAU);
+    SLIDES.forEach((s, j) => {
+      const L = s.art.layout === 'scatter' && s.art.labels?.[p.i]; if (!L || !(vis[j] > 0)) return;
+      ctx.shadowBlur = 0; ctx.font = '500 26px "JetBrains Mono"'; ctx.fillStyle = rgba(q.c, .9 * vis[j]); ctx.fillText(L[0], q.x + 16, q.y + 9);
+    });
+  }
+  ctx.shadowBlur = 0;
+}
+const SCR = '^0123456789.:abcglot';
+function morph(el, local) {
+  const t0 = +el.dataset.morph, [a, b] = el.dataset.src.split('|'), p = cl((local - t0) / 1.0);
+  if (p <= 0) { el.textContent = a; el.style.color = ''; return; }
+  if (p >= 1) { el.textContent = b; el.style.color = 'var(--gold)'; return; }
+  const L = Math.round(lerp(a.length, b.length, p)), f = Math.floor(local * 24); let s = '';
+  for (let i = 0; i < L; i++) s += p >= (i + 1) / (L + 1) ? b[i] ?? '' : SCR[Math.floor(hash(i + 1, f) * SCR.length)];
+  el.textContent = s; el.style.color = 'var(--soft)';
+}
+document.querySelectorAll('[data-morph]').forEach((el) => el.dataset.src = el.textContent);
+const TOT = pad2(SLIDES.length);
+window.renderAt = function (ms) {
+  const t = Math.max(0, Math.min(TOTAL - 1e-3, ms / 1000)), vis = [];
+  slides.forEach((sl, j) => {
+    const s = START[j], e = s + DUR[j];
+    const vin = j === 0 ? 1 : cl((t - s) / .6), vout = j === slides.length - 1 ? 1 : cl((e - t) / .35);
+    const v = (t < s - .001 || t > e) ? 0 : vin * vout; vis.push(v);
+    sl.style.opacity = v; sl.style.visibility = v > 0 ? 'visible' : 'hidden';
+    if (v <= 0) return;
+    const local = t - s;
+    sl.querySelector('.copy').style.transform = `translateY(${(1 - eo(vin)) * 34 - (1 - vout) * 18}px)`;
+    sl.querySelector('.ghost').style.transform = `translateY(${(1 - eo(vin)) * 60}px)`;
+    sl.querySelectorAll('[data-in]').forEach((el) => {
+      const a = cl((local - +el.dataset.in) / .45); el.style.opacity = a;
+      el.style.transform = (el.classList.contains('cmd') ? 'translateX(-50%) ' : '') + `translateY(${(1 - eo(a)) * 18}px)`;
+    });
+    sl.querySelectorAll('[data-hl]').forEach((el) => { const a = cl((local - +el.dataset.hl) / .4); el.style.background = `rgba(124,92,255,${.18 * a})`; el.style.boxShadow = `inset 4px 0 0 rgba(180,140,255,${a})`; });
+    sl.querySelectorAll('[data-morph]').forEach((el) => morph(el, local));
+  });
+  draw(t, vis);
+  document.getElementById('bar').style.width = (t / TOTAL * 1080) + 'px';
+  document.getElementById('count').textContent = pad2(slideAt(t) + 1) + '/' + TOT;
+};
+window.ready = Promise.all([document.fonts.ready, document.fonts.load('500 26px "JetBrains Mono"'), document.fonts.load('800 84px Sora'), document.fonts.load('400 27px Inter')]).then(() => document.fonts.ready);
+if (!location.search.includes('capture')) { window.ready.then(() => { const t0 = performance.now(); const loop = () => { renderAt((performance.now() - t0) % (TOTAL * 1000)); requestAnimationFrame(loop); }; loop(); }); }
+else renderAt(0);
+</script>
+</body>
+</html>

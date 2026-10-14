@@ -107,3 +107,4 @@ Read `references/aodi-framework.md` for tag legend (`A` / `O` / `D` / `I`). Appl
 | [loop-article-web](skills/loop-article-web/SKILL.md) | One lang template per run | Article loop |
 | [do-memo](skills/do-memo/SKILL.md) | Concept → use case → example | Flashcard / memo |
 | [mti](skills/mti/SKILL.md) | Interview notes → scored report | Tech interview write-up |
+| [mp4-powerpoint](skills/mp4-powerpoint/SKILL.md) | Animated LinkedIn explainer video (MP4) | LinkedIn video/slides |
