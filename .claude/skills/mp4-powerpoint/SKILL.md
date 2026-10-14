@@ -1,11 +1,18 @@
 ---
 name: mp4-powerpoint
-description: Animated explainer video (MP4 slide deck, particle art, code panels) for LinkedIn/social, 1080x1350 muted autoplay. Use when dev asks for "linkedin video", "explainer video", "animated presentation/slides for LinkedIn", "mp4 presentation", "nagranie/prezentacja na LinkedIn", "filmik", or invokes /mp4-powerpoint.
+description: Code-first explainer video (MP4 slide deck, code panels, minimal purposeful animation) for LinkedIn/social, 1080x1350 muted autoplay, polubinski.dev branding. Use when dev asks for "linkedin video", "explainer video", "animated presentation/slides for LinkedIn", "mp4 presentation", "nagranie/prezentacja na LinkedIn", "filmik", or invokes /mp4-powerpoint.
 ---
 
 # mp4-powerpoint
 
-Topic -> 7-9 animated slides -> deterministic frame capture -> H.264 MP4. Optional PDF carousel. Assets: `assets/template.html` (engine + styles + example SLIDES config), `assets/capture.mjs` (Playwright + ffmpeg).
+Topic -> facts -> **skeleton (approved)** -> slides -> deterministic frame capture -> H.264 MP4. Optional PDF carousel.
+
+Assets:
+
+- `assets/skeleton.md` - skeleton template (plan before slides)
+- `assets/template.html` - engine + styles + example SLIDES config
+- `assets/capture.mjs` - Playwright + ffmpeg
+- `assets/logo.svg`, `assets/fonts/Aspekta-*.woff2` - polubinski.dev brand
 
 ## 1. Gate
 
@@ -13,89 +20,85 @@ Ask only missing. Defaults:
 
 - Topic: required.
 - Language: EN (PL on request; PL text -> `/polaczek`).
-- Output: repo root `<slug>.mp4`.
+- Output: repo `.evidences/<slug>.mp4` (gitignored).
 - Format: video only (PDF carousel on request).
-- Brand: `BRAND` in template (`polubinski.dev`).
+- Brand: polubinski.dev (logo + site theme). Never other brand.
 
 ## 2. Facts
 
-1. Every tech claim, version, flag, default -> verify on official docs (WebFetch) before slide.
+1. Every tech claim, version, flag, default -> verify in source repo or official docs (WebFetch).
 2. Unverifiable -> drop. No guessed numbers.
-3. Version pills only when verified (e.g. `pnpm 10.12.1+`).
-4. Keep source URLs for report.
+3. Code on slides = real code (repo files, docs examples). Trimmed ok, invented API never. Illustrative-only snippet -> label it (`example`) in panel header.
+4. Keep source paths/URLs for report.
 
-## 3. Story
+## 3. Skeleton first (no slides before it)
 
-7-9 slides, 4.6-5.8s each (~45-50s total). One idea per slide. Arc:
+1. Copy `assets/skeleton.md` -> `<work>/skeleton.md`, fill table: per slide message, proof, title, sub, visual, dur.
+2. Show skeleton to dev, wait for OK. Skip wait only when dev explicitly asked for direct render; then still write it and include it in report.
+3. Only after OK -> translate rows 1:1 into `SLIDES` config. Changes later -> update skeleton first.
 
-| # | Beat | Kind | `art.layout` |
-| - | ---- | ---- | ------------ |
-| 1 | hook (question) | text + canvas labels | `scatter` |
-| 2 | problem | `cards` + small `code` | `chaos` |
-| 3 | concept | `code` + `hub` | `hub` |
-| 4 | usage | `code` + `hub` + `nodes` | `flows` |
-| 5 | variant/advanced | `code` + 2 `hub` | `twoHubs` |
-| 6 | payoff | `code` diff + `note` | `wave` |
-| 7 | edge/safety | `code` + `cmd` + morph token | `stream` |
-| 8 | pro tips | `tips` (3 cards) | `field` |
-| 9 | CTA | `mark` + `big` brand | `ring` |
+Story: 6-9 slides, ~45-60s. One idea per slide. Typical arc: hook (concrete problem) -> concept -> how it works (1-3 slides) -> integration/usage -> extras -> CTA. Arc serves content, not fixed beats.
 
-Particles must tell story: chaos = mess, hub = single source, flows = fan-out, wave = change propagates, ring = closure. Title <= ~6 words, `<em>` on key word. Sub = one mono caps line. CTA = question + comment/share/follow tags.
+## 4. Content rules (priority order)
 
-## 4. Style spec (in template, keep)
+1. **Proof first.** Every content slide centers on code/terminal/example panel proving the title. Panel = largest element, right under copy.
+2. **Text minimal, each fact once.** Title states claim. Code proves it. Sub only if it adds info neither title nor code shows. Note only if it adds info. No tags/pills, no ghost numbers, no `NN /` in kicker (counter shows position).
+3. **Hierarchy.** Title (76px, ink, `<em>` green on 1 key word) > code (30px) > sub/note (30-32px muted) > kicker (22px mono green, optional section word). Title <= 7 words, max 2 lines. Sub <= 12 words, 1 line preferred.
+4. **Visuals secondary.** Art only when it explains something code cannot (fan-out, ordered flow, pass/fail). Skeleton row must name what it explains, else `none`. Each art layout max once per deck. Ambient star field always on, not counted.
+5. **Motion secondary.** Fade+rise entries, line stagger, highlight `hl` on the lines that matter, morph only for real value change (e.g. output appearing). No decorative motion.
+6. **Readability.** Code <= 10 lines, <= 46 chars/line at 30px (<= 51 at 28, min 26px). Reading time: dur ~= 3 + 0.35 x code lines (s), 5-7.5s.
 
-- Canvas 1080x1350 (4:5 portrait), side padding 72px, content width 936px.
-- Tokens `:root`: bg `#050507`, ink `#FFF`, muted `#8A87A0`, violet `#7C5CFF`, soft `#B48CFF`, gold `#E8C547`, teal `#4FD1C5`, rose `#FF6B8A`.
-- Fonts (Google, `display=block`): Sora 800 headings, Inter body, JetBrains Mono code/kicker/sub; `font-variant-ligatures:none` on code.
-- Chrome: brand dot + name top-left (50px), `NN/NN` counter top-right, 5px violet->gold progress bar top, ghost slide number (520px outline) behind copy.
-- Copy block top 150px: kicker `— NN / word`, h1 84px/1.04, sub gold mono caps 24px, pills (tags, colored dot).
-- Layout: text top ~45% (150-520px), art + code bottom (530-1300px). Bottom never empty, never overlapping copy.
-- Phone mins: h1 76-88px, code >= 26px (default 28, big 31), notes 27-28px, pills 20px.
-- Code panel near-opaque bg -> particles behind never hurt reading. Highlight = violet tint + left bar (`hl`).
+## 5. Style spec (in template, keep)
 
-## 5. Build
+- Canvas 1080x1350 (4:5), side padding 72px, content width 936px.
+- Theme = polubinski.dev tokens: bg `#000100`, ink `#d7d8d9`, muted `#888`, green `#0dd97d` / `#0bad67`, panel `#070908`, line `rgba(255,255,255,.1)`. Code-only accents: string `#e8d9a0`, comment `#6d716f`, error `#ff7b72`.
+- Fonts: Aspekta (site font, local woff2) 500 titles / 400 body; JetBrains Mono code with `font-variant-ligatures:none`.
+- Chrome: logo (60px) + `polubinski.dev` top-left, `NN/NN` counter top-right, 4px green progress bar top. Green blinking `_` cursor after title (site motif) on hook + CTA only (`cursor: true`).
+- Code panel: header with file path or `terminal`, near-opaque bg, highlight = green tint + left bar.
+- CTA: logo big + `glow`, question title, brand, repo link.
 
-1. Work dir = session scratchpad `<scratch>/<slug>/`. Copy `assets/template.html` -> `index.html`, `assets/capture.mjs`.
+## 6. Build
+
+1. Work dir = session scratchpad `<scratch>/<slug>/`. Copy `assets/template.html` -> `index.html`, plus `capture.mjs`, `logo.svg`, `fonts/`.
 2. `npm init -y && npm i playwright ffmpeg-static ffprobe-static` (+ `npx playwright install chromium` if missing).
-3. Edit only CONFIG block: `BRAND`, `SLIDES` array. Schema documented in template header comment (slide fields, element types, layouts + params).
-4. Element `in` = appear time (s, slide-local). Code lines auto-stagger `.15s`; `stagger: 0` = lines appear with panel. `hl` = highlight time. `diff: '+'|'-'`. Morph: `<span data-morph="2.0">from|to</span>`.
-5. Align art params with elements: `hub` layout `x,y` = hub el center; `flows.xs` = `nodes.xs`; `twoHubs.a/b` = hub centers; `ring` = `mark` center.
-6. Engine rules (never break): `window.renderAt(tMs)` pure fn of t; all state from t (no Date/Math.random/rAF in capture, seeded `rng(42)`, scramble via `hash(i, frame)`); `?capture=1` disables rAF loop; particles morph prev->cur layout with easing first ~1.2s of slide.
-7. Need new layout -> add fn to `LAYOUTS` `(p, t, lt, art) => {x,y,c,s,a}`, deterministic.
+3. Edit only CONFIG block: `SLIDES` from skeleton. Schema in template header comment.
+4. Element `in` = appear time (s, slide-local). Code lines auto-stagger `.15s`; `stagger: 0` = all at once. `hl` = highlight time. `diff: '+'|'-'`. Morph: `<span data-morph="2.0">from|to</span>`. Nodes `on`/`bad` + `onAt`/`badAt` = state change.
+5. Align art with elements: `flow.from` = source center, `flow.to` = node centers (`nodes.xs`, `y`); `pipe.points` = node centers; `glow` = logo center.
+6. Engine rules (never break): `window.renderAt(tMs)` pure fn of t; all state from t (no Date/Math.random/rAF in capture, seeded `rng`, scramble via `hash(i, frame)`); `?capture=1` disables rAF loop.
+7. New art layout only when skeleton needs new meaning: add fn to `ART` `(A, lt, v) => draw`, deterministic.
 
-## 6. QA loop (before full render)
+## 7. QA loop (before full render)
 
-1. `node capture.mjs index.html out.mp4 --stills` -> `stills/slide-N.png` (72% of each slide).
-2. Read every PNG. Check: overlap text/elements, clipping, off-canvas, h1 wrap (3+ lines = too long), empty-space balance (no dead bottom third), readability at phone size, counter/brand correct.
-3. Transitions: `node capture.mjs index.html x --at 10200,33000` -> `at/t<ms>.png`. Pick ms near slide starts + morph times.
+1. `node capture.mjs index.html out.mp4 --stills` -> `stills/slide-N.png` (80% of each slide).
+2. Read every PNG. Check: duplicated info (title/sub/code/note), hierarchy, code readable at phone size, overlap, clipping, h1 > 2 lines, dead space, logo/counter correct.
+3. Transitions + key moments: `node capture.mjs index.html x --at 7200,15000` -> `at/t<ms>.png`.
 4. Fix, repeat until clean.
 
-## 7. Render + proof
+## 8. Render + proof
 
-1. `node capture.mjs index.html <repo>/<slug>.mp4` -> frames every 33.333ms -> libx264 yuv420p crf 18 r30 `+faststart`, no audio.
+1. `node capture.mjs index.html <repo>/.evidences/<slug>.mp4` -> frames every 33.333ms -> libx264 yuv420p crf 18 r30 `+faststart`, no audio.
 2. Probe: `node -e "console.log(require('ffprobe-static').path)"` then `<ffprobe> -v error -show_entries stream=codec_name,pix_fmt,width,height,r_frame_rate:format=duration -of default=nw=1 <mp4>`. Expect h264, yuv420p, 1080x1350, 30/1.
 3. Final proof: extract frame per slide from MP4: `<ffmpeg> -ss <sec> -i <mp4> -frames:v 1 proof/slide-N.png`; Read them.
-4. Only MP4 goes to target path. HTML, frames, stills stay in scratchpad.
+4. Only MP4 goes to target path. HTML, frames, stills, skeleton stay in scratchpad (skeleton content goes into report).
 
-## 8. PDF carousel (optional)
+## 9. PDF carousel (optional)
 
-Same 1080x1350. From stills: Playwright page with one `<img>` per page, `page.pdf({ width: '1080px', height: '1350px', printBackground: true })`. Or `img2pdf`/ImageMagick if present. Output `<slug>.pdf` next to MP4.
+Same 1080x1350. From stills: Playwright page with one `<img>` per page, `page.pdf({ width: '1080px', height: '1350px', printBackground: true })`. Output `<slug>.pdf` next to MP4.
 
-## 9. Pitfalls (hit before)
+## 10. Pitfalls (hit before)
 
 - Never Playwright `recordVideo` -> blurry VP8, timing drift. Always frame stepping.
-- Canvas text needs explicit `document.fonts.load(...)`; `fonts.ready` alone not enough -> fallback font in labels. Await `window.ready` before first frame.
-- Element with base `transform` (`.cmd` centered via `translateX(-50%)`) -> entry anim must keep it, else jumps left. Same for any new centered el.
-- Particle transition must eval prev layout at `DUR[k-1] + lt` -> no jump at slide boundary.
-- Fade-out (.35s) + fade-in (.6s) -> brief dark gap is intended; keep copy translate small (34px in / 18px out) -> no layout shift feel.
-- Long h1 wraps to 3 lines -> pushes sub/tags into art zone. Shorten title, not font.
-- JetBrains Mono ligatures turn `->`, `!=`, `www` into glyphs -> `font-variant-ligatures:none`.
-- Stills at slide start show half-faded els -> stills sample 72% of slide.
-- yuv420p needs even dims; 1080x1350 OK.
-- LinkedIn autoplays muted -> all info burned into slides, no voiceover reliance.
+- Fonts + logo must load before first frame: `window.ready` awaits `document.fonts.load(...)` + images. Missing `fonts/` or `logo.svg` next to `index.html` -> fallback font / broken logo.
+- Centered el with base `transform` (`.node` `translateX(-50%)`) -> entry anim keeps it. Same for any new centered el.
+- Decorative particles everywhere = noise, distracts from code (old version). Art only per skeleton.
+- Title + sub + tags + note repeating same fact = clutter. Run duplication check in skeleton.
+- Long h1 wraps to 3 lines -> shorten title, not font.
+- JetBrains Mono ligatures turn `->`, `!=`, `=>` into glyphs -> `font-variant-ligatures:none`.
+- Stills at slide start show half-faded els -> stills sample 80% of slide.
+- LinkedIn autoplays muted -> all info burned into slides.
 
-## 10. Rules
+## 11. Rules
 
-- Never commit media (MP4/PDF/PNG) -> `rules/git.md` 3. Leave MP4 untracked.
+- Never commit media (MP4/PDF/PNG) -> `rules/git.md` 3.
 - Session end: one decision entry (`rules/general.md` 3).
-- Report: output path, ffprobe line, slide list, verified sources, proof frames.
+- Report: skeleton table, output path, ffprobe line, verified sources, proof frames.

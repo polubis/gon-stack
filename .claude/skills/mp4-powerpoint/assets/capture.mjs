@@ -1,5 +1,5 @@
 // node capture.mjs <deck.html> <out.mp4> [--stills] [--at ms,ms,...] [--fps 30]
-//   --stills  one PNG per slide (at 72% of slide) -> <deck dir>/stills/
+//   --stills  one PNG per slide (at 80% of slide) -> <deck dir>/stills/
 //   --at      PNGs at given ms (transitions, morphs)  -> <deck dir>/at/
 //   default   every frame -> <deck dir>/frames/, then ffmpeg -> <out.mp4>
 // Needs (in this dir): npm i playwright ffmpeg-static ffprobe-static && npx playwright install chromium
