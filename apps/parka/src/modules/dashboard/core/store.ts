@@ -1,4 +1,5 @@
 import { atom } from '@repo/react-kit/supa-store';
+import type { Avatar } from '@/shared/avatar/domain/models';
 import type {
   Category,
   Expense,
@@ -20,6 +21,7 @@ export const createStore = () => {
   const $limits = atom<Limit[]>([]);
   const $recurring = atom<Recurring[]>([]);
   const $notice = atom<Notice | null>(null);
+  const $avatar = atom<Avatar | null>(null);
 
   return {
     $initialized,
@@ -31,6 +33,7 @@ export const createStore = () => {
     $limits,
     $recurring,
     $notice,
+    $avatar,
   };
 };
 

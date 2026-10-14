@@ -1,5 +1,6 @@
 import type { Store } from './store';
 import { requestLoad } from './handlers/request-load';
+import { loadAvatar } from './handlers/load-avatar';
 import { load } from './handlers/load';
 import { updateExpense } from './handlers/update-expense';
 import { removeExpense } from './handlers/delete-expense';
@@ -19,6 +20,7 @@ export const createRegistry = (store: Store) => {
   const register = bus.createRegistry(
     requestLoad(store, bus),
     load(store, bus),
+    loadAvatar(store, bus),
     updateExpense(store, bus),
     removeExpense(store, bus),
     createLimit(store, bus),

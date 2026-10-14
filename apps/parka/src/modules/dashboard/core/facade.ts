@@ -35,6 +35,7 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
     useLimits: () => store.$limits.use(),
     useRecurring: () => store.$recurring.use(),
     useNotice: () => store.$notice.use(),
+    useAvatar: () => store.$avatar.use(),
   };
 };
 

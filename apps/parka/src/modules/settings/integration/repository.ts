@@ -1,9 +1,5 @@
 import type { z } from 'zod';
-import {
-  getAvatarSchema,
-  uploadAvatarSchema,
-  uploadDevicePhotoSchema,
-} from '@schemas/avatar';
+import { uploadAvatarSchema, uploadDevicePhotoSchema } from '@schemas/avatar';
 import { getSettingsSchema, updateSettingsSchema } from '@schemas/settings';
 import { subscribePushSchema } from '@schemas/push';
 import { API_ROUTER } from '@/shared/router/routes';
@@ -39,20 +35,7 @@ export const putSettings = async (settings: Settings): Promise<Settings> => {
   return toSettings(json.data);
 };
 
-type GetAvatarOut = z.infer<ReturnType<typeof getAvatarSchema>>['out'];
 type UploadAvatarOut = z.infer<ReturnType<typeof uploadAvatarSchema>>['out'];
-
-export const fetchAvatar = async (
-  signal: AbortSignal,
-): Promise<Avatar | null> => {
-  const response = await fetch(API_ROUTER.avatar(), {
-    headers: { Accept: 'application/json' },
-    signal,
-  });
-  const json = (await response.json()) as GetAvatarOut;
-  if (json.code !== 200) throw new Error(json.message);
-  return toAvatar(json.data);
-};
 
 export const postAvatar = async (file: File): Promise<Avatar | null> => {
   const body = new FormData();

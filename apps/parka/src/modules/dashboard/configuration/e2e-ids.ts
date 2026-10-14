@@ -1,5 +1,6 @@
 export const DASHBOARD_E2E_IDS = [
   'dashboard:main',
+  'dashboard:avatar-image',
   'dashboard:period-prev',
   'dashboard:period-next',
   'dashboard:period-label',

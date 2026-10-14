@@ -1,4 +1,5 @@
 import { Plus, User } from 'lucide-react';
+import type { Avatar } from '@/shared/avatar/domain/models';
 import type { Period } from '@/shared/period/period';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { Button } from '@/shared/ui/controls';
@@ -10,12 +11,14 @@ export const Header = ({
   period,
   today,
   userName,
+  avatar,
   initializing,
   onPeriodChange,
 }: {
   period: Period;
   today: string;
   userName: string | undefined;
+  avatar: Avatar | null;
   initializing: boolean;
   onPeriodChange: (period: Period) => void;
 }) => {
@@ -43,9 +46,25 @@ export const Header = ({
         <a
           href={APP_ROUTER.settings()}
           aria-label="Profil i ustawienia"
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-soft text-brand max-md:hidden"
+          className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-brand-soft text-brand max-md:hidden"
         >
-          <User className="h-5 w-5" aria-hidden="true" />
+          {avatar ? (
+            <img
+              data-e2e="dashboard:avatar-image"
+              alt="Twoje zdjęcie profilowe"
+              width={40}
+              height={40}
+              src={avatar.variants.at(-1)?.url}
+              srcSet={avatar.variants
+                .map((v) => `${v.url} ${v.size}w`)
+                .join(', ')}
+              sizes="2.5rem"
+              loading="lazy"
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <User className="h-5 w-5" aria-hidden="true" />
+          )}
         </a>
 
         <Button

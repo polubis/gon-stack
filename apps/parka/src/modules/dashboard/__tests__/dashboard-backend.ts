@@ -26,6 +26,7 @@ const SUMMARY = {
 
 /** Body of every read the dashboard makes while loading; empty unless given. */
 export const readBody = (url: string, reads: Reads = {}) => {
+  if (url.includes('avatar')) return { code: 200, data: null };
   const data = url.includes('dashboard')
     ? SUMMARY
     : url.includes('expenses')
@@ -40,10 +41,11 @@ export const readBody = (url: string, reads: Reads = {}) => {
 
 /** msw handlers for all reads of the dashboard load. */
 export const readHandlers = (reads: Reads = {}) =>
-  ['dashboard', 'expenses', 'categories', 'limits', 'recurring'].map((name) =>
-    http.get(`/api/${name}/`, ({ request }) =>
-      HttpResponse.json(readBody(request.url, reads)),
-    ),
+  ['dashboard', 'expenses', 'categories', 'limits', 'recurring', 'avatar'].map(
+    (name) =>
+      http.get(`/api/${name}/`, ({ request }) =>
+        HttpResponse.json(readBody(request.url, reads)),
+      ),
   );
 
 /** msw server of a test file: unhandled requests fail, handlers reset per test. */

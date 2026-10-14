@@ -53,6 +53,7 @@ const DashboardView = () => {
   const recurring = ctx.useRecurring();
   const expenses = ctx.useExpenses();
   const notice = ctx.useNotice();
+  const avatar = ctx.useAvatar();
 
   useEffect(() => {
     ctx.load(period);
@@ -149,6 +150,7 @@ const DashboardView = () => {
             period={period}
             today={today}
             userName={summary?.userName}
+            avatar={avatar}
             initializing={!ready}
             onPeriodChange={goToPeriod}
           />
