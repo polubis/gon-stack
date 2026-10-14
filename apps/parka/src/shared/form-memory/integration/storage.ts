@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'parka:form-memory';
+export const STORAGE_KEY = 'parka:form-memory';
 
 type Memory = Record<string, string>;
 

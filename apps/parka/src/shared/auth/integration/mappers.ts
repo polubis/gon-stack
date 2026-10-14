@@ -1,26 +1,36 @@
-import type { Auth, AvatarUrl, DisplayName, UserId } from '../domain/models';
+import type { Schema as MeSchema } from '@schemas/auth-me';
+import type { ListAccountsSchema } from '@schemas/auth-accounts';
+import type {
+  Accounts,
+  Auth,
+  AvatarUrl,
+  DisplayName,
+  Email,
+  UserId,
+} from '../domain/models';
 
-type UserDto = {
-  id: string;
-  user_metadata?: Record<string, unknown>;
-};
-
-const text = (value: unknown) =>
-  typeof value === 'string' && value ? value : null;
-
-export const toAuth = (user: UserDto | null | undefined): Auth => {
-  if (!user) return { status: 'unauthenticated' };
-
-  const meta = user.user_metadata ?? {};
-  const displayName = text(meta.full_name) ?? text(meta.name);
-  const avatarUrl = text(meta.avatar_url) ?? text(meta.picture);
+export const toAuth = (dto: MeSchema['out']): Auth => {
+  if (dto.code !== 200 || !dto.user) return { status: 'unauthenticated' };
 
   return {
     status: 'authenticated',
     user: {
-      id: user.id as UserId,
-      displayName: displayName as DisplayName | null,
-      avatarUrl: avatarUrl as AvatarUrl | null,
+      id: dto.user.id as UserId,
+      email: dto.user.email as Email,
+      displayName: dto.user.displayName as DisplayName | null,
+      avatarUrl: dto.user.avatarUrl as AvatarUrl | null,
     },
   };
 };
+
+export const toAccounts = (dto: ListAccountsSchema['out']): Accounts =>
+  dto.code === 200
+    ? {
+        activeId: dto.activeId as UserId | null,
+        items: dto.accounts.map(({ userId, email, avatarUrl }) => ({
+          id: userId as UserId,
+          email: email as Email,
+          avatarUrl: avatarUrl as AvatarUrl | null,
+        })),
+      }
+    : { activeId: null, items: [] };

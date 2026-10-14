@@ -154,6 +154,9 @@ export const API_ROUTER = {
   authLogin: route('/api/auth/login/'),
   authRegister: route('/api/auth/register/'),
   authLogout: route('/api/auth/logout/'),
+  authMe: route('/api/auth/me/'),
+  authAccounts: route('/api/auth/accounts/'),
+  authSwitch: route('/api/auth/switch/'),
   authCallback: route('/api/auth/callback/'),
   authConfirm: route('/api/auth/confirm/'),
 };

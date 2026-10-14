@@ -1,4 +1,5 @@
 import { cn } from '@repo/react-kit/cn';
+import { AccountMenu } from '@/shared/auth/presentation/account-menu';
 import { NAV_ITEMS } from '../configuration/constraints';
 import type { NavKey } from '../domain/models';
 
@@ -34,5 +35,8 @@ export const SidebarNav = ({ active }: Props) => (
         );
       })}
     </nav>
+    <div className="mt-auto">
+      <AccountMenu placement="side" />
+    </div>
   </aside>
 );

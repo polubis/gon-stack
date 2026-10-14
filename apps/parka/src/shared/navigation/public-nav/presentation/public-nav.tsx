@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Leaf } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
-import { supabaseBrowser } from '@/shared/data-sources/supabase-browser';
+import { onAuthChange } from '@/shared/auth/integration/auth-channel';
+import { fetchAuth } from '@/shared/auth/integration/repository';
 import { APP_ROUTER } from '@/shared/router/routes';
 
 type Session = 'unknown' | 'signed-in' | 'signed-out';
@@ -13,15 +14,20 @@ const useSession = (): Session => {
   const [session, setSession] = useState<Session>('unknown');
 
   useEffect(() => {
-    const apply = (signedIn: boolean) =>
-      setSession(signedIn ? 'signed-in' : 'signed-out');
+    let active = true;
+    const apply = () =>
+      fetchAuth().then(({ status }) => {
+        if (active)
+          setSession(status === 'authenticated' ? 'signed-in' : 'signed-out');
+      });
 
-    supabaseBrowser.auth.getUser().then(({ data }) => apply(!!data.user));
-    const { data } = supabaseBrowser.auth.onAuthStateChange((_, next) =>
-      apply(!!next?.user),
-    );
+    void apply();
+    const unsubscribe = onAuthChange(() => void apply());
 
-    return () => data.subscription.unsubscribe();
+    return () => {
+      active = false;
+      unsubscribe();
+    };
   }, []);
 
   return session;

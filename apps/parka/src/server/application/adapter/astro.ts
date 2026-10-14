@@ -4,6 +4,9 @@ import { BadRequest } from '../core/error-handling';
 type ProcedureResponse = { code: number };
 type RedirectResponse = ProcedureResponse & { location: string };
 
+// Responses may carry session cookies: never let a CDN or proxy keep them.
+const NO_STORE = 'private, no-store';
+
 const isRedirectResponse = (
   response: ProcedureResponse,
 ): response is RedirectResponse => {
@@ -39,13 +42,16 @@ export const astroAdapter =
     if (isRedirectResponse(response)) {
       return new Response(null, {
         status: response.code,
-        headers: { Location: response.location },
+        headers: { Location: response.location, 'Cache-Control': NO_STORE },
       });
     }
 
     return new Response(JSON.stringify(response), {
       status: response.code,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': NO_STORE,
+      },
     });
   };
 

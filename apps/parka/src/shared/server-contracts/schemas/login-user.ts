@@ -17,6 +17,11 @@ export const schema = () =>
         code: z.literal(303),
         location: z.string(),
       }),
+      z.object({
+        code: z.literal(409),
+        type: z.literal('conflict'),
+        message: z.string(),
+      }),
       errorOut(),
     ]),
   });

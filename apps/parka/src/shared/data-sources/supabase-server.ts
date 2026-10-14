@@ -1,6 +1,7 @@
-import { createServerClient, parseCookieHeader } from '@supabase/ssr';
+import { createServerClient } from '@supabase/ssr';
 import type { AstroCookies } from 'astro';
 import type { Database } from '@/shared/data-sources/db-schema';
+import { STORAGE_KEY, sessionStore } from './session-store';
 
 export const supabaseServer = ({
   request,
@@ -9,26 +10,14 @@ export const supabaseServer = ({
   request: Request;
   cookies: AstroCookies;
 }) => {
-  const cookieHeader = request.headers.get('Cookie') || '';
+  const { getAll, setAll } = sessionStore({ request, cookies });
 
   return createServerClient<Database>(
     import.meta.env.PUBLIC_PARKA_SUPABASE_URL,
     import.meta.env.PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY,
     {
-      cookies: {
-        getAll() {
-          const parsed = parseCookieHeader(cookieHeader);
-          return parsed.map(({ name, value }) => ({
-            name,
-            value: value ?? '',
-          }));
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookies.set(name, value, options),
-          );
-        },
-      },
+      cookieOptions: { name: STORAGE_KEY },
+      cookies: { getAll, setAll },
     },
   );
 };

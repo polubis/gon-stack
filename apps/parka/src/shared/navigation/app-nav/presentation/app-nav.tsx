@@ -1,4 +1,5 @@
 import { cn } from '@repo/react-kit/cn';
+import { AccountMenu } from '@/shared/auth/presentation/account-menu';
 import { NAV_ITEMS } from '../configuration/constraints';
 import type { NavKey } from '../domain/models';
 
@@ -33,6 +34,7 @@ export const AppNav = ({ active }: Props) => {
           );
         },
       )}
+      <AccountMenu placement="bottom" />
     </nav>
   );
 };

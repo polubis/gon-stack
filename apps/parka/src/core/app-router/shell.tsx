@@ -1,5 +1,6 @@
 import { Outlet, useRouter, useRouterState } from '@tanstack/react-router';
 import { useEffect } from 'react';
+import { AccountSwitchToast } from '@/shared/auth/presentation/account-switch-toast';
 import { ProtectedScreen } from '@/shared/auth/presentation/protected-screen';
 import { withAuth } from '@/shared/auth/presentation/with-auth';
 import { SyncedAppNav } from '@/shared/navigation/app-nav/presentation/synced-app-nav';
@@ -74,6 +75,7 @@ const Shell = () => {
           <SyncedAppNav placement="bottom" />
         </div>
       </div>
+      <AccountSwitchToast />
     </div>
   );
 };

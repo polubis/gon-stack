@@ -38,6 +38,9 @@ describe('api routes', () => {
     expect(API_ROUTER.authLogin()).toBe('/api/auth/login/');
     expect(API_ROUTER.authRegister()).toBe('/api/auth/register/');
     expect(API_ROUTER.authLogout()).toBe('/api/auth/logout/');
+    expect(API_ROUTER.authMe()).toBe('/api/auth/me/');
+    expect(API_ROUTER.authAccounts()).toBe('/api/auth/accounts/');
+    expect(API_ROUTER.authSwitch()).toBe('/api/auth/switch/');
     expect(API_ROUTER.authCallback()).toBe('/api/auth/callback/');
     expect(API_ROUTER.authConfirm()).toBe('/api/auth/confirm/');
   });

@@ -1,18 +1,20 @@
 import z from 'zod';
+import { errorOut } from './general';
 
+/** No input signs the active account out; `all` signs out every account. */
 export const schema = () =>
   z.object({
-    in: z.object({}),
+    in: z.object({
+      userId: z.uuid().optional(),
+      all: z.boolean().optional(),
+    }),
     out: z.union([
       z.object({
-        code: z.literal(303),
+        code: z.literal(200),
+        /** Where the client goes next: another account or the sign-in page. */
         location: z.string(),
       }),
-      z.object({
-        code: z.literal(500),
-        type: z.literal('internal-server'),
-        message: z.string(),
-      }),
+      errorOut(),
     ]),
   });
 

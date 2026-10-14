@@ -9,6 +9,7 @@ import type { PrivacyE2eId } from '@/modules/privacy/configuration/e2e-ids';
 import type { NotificationsE2eId } from '@/modules/notifications/configuration/e2e-ids';
 import type { ExpensesManagementE2eId } from '@/modules/expenses-management/configuration/e2e-ids';
 import type { ReportsE2eId } from '@/modules/reports/configuration/e2e-ids';
+import type { AuthE2eId } from '@/shared/auth/configuration/e2e-ids';
 import type { SettingsE2eId } from '@/modules/settings/configuration/e2e-ids';
 import type { ExpenseFormE2eId } from '@/shared/expense-form/configuration/e2e-ids';
 import type { CookiesE2eId } from '@/shared/cookies/configuration/e2e-ids';
@@ -38,7 +39,8 @@ export type E2eId =
   | DataExportE2eId
   | CookiesE2eId
   | ImageEditorE2eId
-  | PublicNavE2eId;
+  | PublicNavE2eId
+  | AuthE2eId;
 
 declare module 'react' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

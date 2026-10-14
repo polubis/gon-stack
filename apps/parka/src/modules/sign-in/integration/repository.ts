@@ -1,4 +1,5 @@
 import type { Schema } from '@schemas/login-user';
+import { announceAuthChange } from '@/shared/auth/integration/auth-channel';
 import { API_ROUTER } from '@/shared/router/routes';
 import type { Credentials, SignInResult } from '../domain/models';
 import { toSignInResult } from './mappers';
@@ -14,7 +15,10 @@ export const signIn = async (
     redirect: 'manual',
   });
 
-  if (res.type === 'opaqueredirect') return { status: 'redirected' };
+  if (res.type === 'opaqueredirect') {
+    announceAuthChange();
+    return { status: 'redirected' };
+  }
 
   return toSignInResult((await res.json()) as Schema['out']);
 };

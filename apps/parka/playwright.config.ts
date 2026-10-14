@@ -11,6 +11,7 @@ const deviceUse = base.projects![0]!.use;
 // contention instead of loosening timeouts.
 const REAL_BACKEND_SPECS = [
   '**/__e2e__/backend.spec.ts',
+  '**/__e2e__/accounts.spec.ts',
   '**/server/__e2e__/rest-endpoints.spec.ts',
 ];
 

@@ -1,4 +1,5 @@
 import type { z } from 'zod';
+import { logoutAccount } from '@/shared/auth/integration/repository';
 import {
   getAvatarSchema,
   uploadAvatarSchema,
@@ -97,9 +98,5 @@ export const putPushSubscription = async (
   if (json.code !== 200) throw new Error(json.message);
 };
 
-export const logout = async (): Promise<void> => {
-  await fetch(API_ROUTER.authLogout(), {
-    method: 'POST',
-    redirect: 'manual',
-  });
-};
+/** Signs the active account out; resolves where to go next. */
+export const logout = (): Promise<string> => logoutAccount('active');

@@ -1,28 +1,48 @@
-import { useEffect, useState } from 'react';
-import { fetchAuth, subscribeAuth } from '../integration/repository';
+import { useEffect, useRef, useState } from 'react';
+import { onAuthChange } from '../integration/auth-channel';
+import { reconcileDevice } from '../integration/device-cleanup';
+import { fetchAuth } from '../integration/repository';
 import type { Auth } from '../domain/models';
 
 /**
- * Resolves the Supabase session into one object, either `checking`,
- * `unauthenticated`, or `authenticated` with the user's id, display name and
- * avatar. Failed checks resolve as `unauthenticated`. Keeps following auth
- * changes.
+ * Asks the server who is signed in: `checking`, `unauthenticated`, or
+ * `authenticated` with the user's id, email, display name and avatar. Asks
+ * again when another tab changes accounts or this tab regains focus. A
+ * different user than the one shown reloads the page, dropping stale data.
  */
 export const useAuth = (): Auth => {
   const [auth, setAuth] = useState<Auth>({ status: 'checking' });
+  const shown = useRef<string | null>(null);
 
   useEffect(() => {
     let active = true;
-    const resolve = (next: Auth) => {
-      if (active) setAuth(next);
+
+    const refresh = async () => {
+      const next = await fetchAuth();
+      const id = next.status === 'authenticated' ? next.user.id : null;
+      if (id) await reconcileDevice(id);
+      if (!active) return;
+      if (shown.current && id && shown.current !== id) {
+        window.location.reload();
+        return;
+      }
+      shown.current = id;
+      setAuth((prev) =>
+        JSON.stringify(prev) === JSON.stringify(next) ? prev : next,
+      );
+    };
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void refresh();
     };
 
-    fetchAuth().then(resolve);
-    const unsubscribe = subscribeAuth(resolve);
+    void refresh();
+    const unsubscribe = onAuthChange(() => void refresh());
+    document.addEventListener('visibilitychange', onVisible);
 
     return () => {
       active = false;
       unsubscribe();
+      document.removeEventListener('visibilitychange', onVisible);
     };
   }, []);
 

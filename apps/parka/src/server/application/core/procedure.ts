@@ -4,6 +4,10 @@ import {
   supabaseServer,
   type SupabaseServer,
 } from '@/shared/data-sources/supabase-server';
+import {
+  sessionStore,
+  type SessionStore,
+} from '@/shared/data-sources/session-store';
 import type { APIContext } from 'astro';
 import {
   KnownUser,
@@ -49,6 +53,8 @@ const createProcedureFactory = <TIn, TOut, TExtra>({
       input: TIn,
       extra: {
         db: SupabaseServer;
+        /** Signed-in accounts of this browser (multi-account cookies). */
+        sessions: SessionStore;
         origin: string;
         signal: AbortSignal;
       } & TExtra,
@@ -65,6 +71,7 @@ const createProcedureFactory = <TIn, TOut, TExtra>({
         const parsedInput = await schema.parseInput(await readInput());
         const result = await handler(parsedInput, {
           db,
+          sessions: sessionStore(context),
           origin: new URL(context.request.url).origin,
           signal: context.request.signal,
           ...extra,

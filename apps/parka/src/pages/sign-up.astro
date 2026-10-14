@@ -2,7 +2,6 @@
 export const prerender = true;
 
 import MainLayout from '@/core/layouts/main-layout.astro';
-import { RedirectAuthenticated } from '@/shared/auth/presentation/redirect-authenticated';
 import { Main } from '@/modules/sign-up/presentation/main';
 import { APP_ROUTER } from '@/shared/router/routes';
 
@@ -20,6 +19,5 @@ const imageUrl = `${domain}/og.svg`;
   title="Rejestracja | Parka"
   description="Dostęp do Twojego konta Parka."
 >
-  <RedirectAuthenticated client:only="react" />
   <Main client:load />
 </MainLayout>
