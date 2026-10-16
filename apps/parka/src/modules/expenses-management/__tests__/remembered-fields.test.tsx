@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { pickOption } from '@/__tests__/pick-option';
 import { fakeSuggestions } from '@/__tests__/suggestions-backend';
 import type { Suggestion } from '@/shared/form-memory/domain/suggestions';
-import { delay, http, HttpResponse } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import {
   afterAll,
@@ -98,6 +98,7 @@ describe('remembered expense form fields', () => {
   });
   afterEach(() => {
     server.resetHandlers();
+    server.events.removeAllListeners();
     navigateTo.mockClear();
   });
   afterAll(() => server.close());
@@ -244,16 +245,25 @@ describe('remembered expense form fields', () => {
   it('does not overwrite what the user typed when the values arrive late', async () => {
     suggestions = fakeSuggestions([saved('Biedronka', { useCount: 9 })]);
     mockBackend([FOOD, FUN]);
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => (release = resolve));
     server.use(
       http.get('/api/suggestions/', async () => {
-        await delay(150);
+        await gate;
         return HttpResponse.json({ code: 200, data: suggestions.items() });
+      }),
+    );
+    const answered = new Promise<void>((resolve) =>
+      server.events.on('response:mocked', ({ request }) => {
+        if (request.url.includes('/api/suggestions/')) resolve();
       }),
     );
     const { user } = await openNew();
 
     await user.type(screen.getByLabelText('Sklep'), 'K');
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    release();
+    await answered;
+    await new Promise((resolve) => setTimeout(resolve, 50));
 
     expect(screen.getByLabelText('Sklep')).toHaveValue('K');
   });
