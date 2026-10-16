@@ -398,8 +398,8 @@ describe('adding an expense on its own page', () => {
 
       expect(screen.getByLabelText('Koszt płatności')).toBeVisible();
       expect(
-        screen.queryByRole('button', { name: 'Wgraj z pliku' }),
-      ).not.toBeInTheDocument();
+        screen.getByRole('button', { name: 'Wgraj z pliku' }),
+      ).toBeVisible();
       expect(window.location.search).toBe('?type=recurring');
     });
 
@@ -454,6 +454,134 @@ describe('adding an expense on its own page', () => {
           endDate: '2025-12-31',
         },
       });
+    });
+  });
+
+  describe('recurring expense with products', () => {
+    const addProduct = async (
+      user: ReturnType<typeof userEvent.setup>,
+      name: string,
+      price: string,
+    ) => {
+      await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await user.type(screen.getByLabelText('Nazwa produktu'), name);
+      await user.type(screen.getByLabelText('Cena'), price);
+    };
+
+    it('takes the cost and category from the products', async () => {
+      mockBackend();
+      const user = await open();
+
+      await user.click(screen.getByRole('tab', { name: 'Cykliczny' }));
+      await addProduct(user, 'Chleb', '12');
+
+      expect(screen.getByLabelText('Koszt płatności')).toHaveValue('12');
+      expect(screen.getByLabelText('Koszt płatności')).toHaveAttribute(
+        'readonly',
+      );
+    });
+
+    it('saves the products with the rule', async () => {
+      const written = mockBackend();
+      const user = await open();
+
+      await user.click(screen.getByRole('tab', { name: 'Cykliczny' }));
+      await user.type(screen.getByLabelText('Nazwa'), 'Zakupy');
+      await addProduct(user, 'Chleb', '12');
+      await user.click(
+        screen.getByRole('button', { name: 'Dodaj wydatek cykliczny' }),
+      );
+
+      await waitFor(() => expect(written).toHaveLength(1));
+      expect(written[0]).toMatchObject({
+        url: '/api/recurring/',
+        body: {
+          name: 'Zakupy',
+          cost: 12,
+          categoryId: 'c-1',
+          items: [{ name: 'Chleb', unitPrice: 12, quantity: 1, discount: 0 }],
+        },
+      });
+    });
+
+    it('does not save a product without a name', async () => {
+      const written = mockBackend();
+      const user = await open();
+
+      await user.click(screen.getByRole('tab', { name: 'Cykliczny' }));
+      await user.type(screen.getByLabelText('Nazwa'), 'Zakupy');
+      await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await user.click(
+        screen.getByRole('button', { name: 'Dodaj wydatek cykliczny' }),
+      );
+
+      expect(screen.getByLabelText('Nazwa produktu')).toBeInvalid();
+      expect(written).toHaveLength(0);
+    });
+  });
+
+  describe('recurring expense from a receipt photo', () => {
+    const openRecurring = async () => {
+      const user = await open();
+      await user.click(screen.getByRole('tab', { name: 'Cykliczny' }));
+      return user;
+    };
+
+    it('fills the name, method and products from an uploaded receipt', async () => {
+      mockBackend();
+      mockScan();
+      const user = await openRecurring();
+
+      await upload(user, photo());
+
+      expect(await screen.findByLabelText('Nazwa')).toHaveValue('Biedronka');
+      expect(screen.getByLabelText('Metoda płatności')).toHaveValue('Karta');
+      expect(screen.getByText('Produkty (1)')).toBeVisible();
+      expect(screen.getByLabelText('Koszt płatności')).toHaveValue('42.5');
+      expect(screen.getByLabelText('Koszt płatności')).toHaveAttribute(
+        'readonly',
+      );
+    });
+
+    it('saves the scanned products with the rule', async () => {
+      const written = mockBackend();
+      mockScan();
+      const user = await openRecurring();
+
+      await upload(user, photo());
+      await screen.findByLabelText('Nazwa');
+      await user.click(
+        screen.getByRole('button', { name: 'Dodaj wydatek cykliczny' }),
+      );
+
+      await waitFor(() => expect(written).toHaveLength(1));
+      expect(written[0]).toMatchObject({
+        url: '/api/recurring/',
+        body: {
+          name: 'Biedronka',
+          cost: 42.5,
+          categoryId: 'c-1',
+          items: [{ name: 'Chleb', unitPrice: 42.5 }],
+        },
+      });
+    });
+
+    it('shows a retryable error when scanning fails', async () => {
+      mockBackend();
+      server.use(
+        http.post('/api/receipts/scan/', () =>
+          HttpResponse.json({ code: 500, message: 'boom' }),
+        ),
+      );
+      const user = await openRecurring();
+
+      await upload(user, photo());
+
+      const alert = await screen.findByRole('alert');
+      expect(within(alert).getByText('RECEIPT_SCAN')).toBeVisible();
+      expect(
+        within(alert).getByRole('button', { name: 'Spróbuj ponownie' }),
+      ).toBeVisible();
     });
   });
 

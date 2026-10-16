@@ -486,6 +486,127 @@ const commands = {
     expect(pages.flatMap((p) => p.data).every((n) => n.read)).toBe(true);
   },
 
+  'i create a rule with products from two categories': async ({ page }) => {
+    const categoryId = 'e2e-cat-1';
+    const res = await page.request.post(API_ROUTER.recurring(), {
+      data: {
+        id: 'e2e-rec-2',
+        name: 'Zakupy',
+        cost: 1,
+        interval: 'weekly',
+        startDate: dayFromToday(-7),
+        endDate: null,
+        active: true,
+        paymentMethod: 'card',
+        categoryId,
+        items: [
+          {
+            id: 'p-1',
+            name: 'Chleb',
+            unitPrice: 5,
+            quantity: 2,
+            discount: 1,
+            categoryId,
+          },
+          {
+            id: 'p-2',
+            name: 'Mydlo',
+            unitPrice: 3.5,
+            quantity: 1,
+            discount: 0,
+            categoryId: 'seed-0',
+          },
+        ],
+      },
+    });
+    expect(res.status()).toBe(201);
+    const { data } = await res.json();
+    expect(data.items).toHaveLength(2);
+    // The cost follows the products and the mixed categories leave none.
+    expect(data.cost).toBe(12.5);
+    expect(data.categoryId).toBeNull();
+  },
+  'each charged payment carries its own copy of the products': async ({
+    page,
+  }) => {
+    const body = await (
+      await page.request.get(API_ROUTER.expenses({ tz: ZONE }))
+    ).json();
+    const charged = chargedBy(body.data, 'e2e-rec-2') as (Charged & {
+      categoryId: string | null;
+      items: { name: string }[];
+    })[];
+    expect(charged.map((e) => e.occurrenceDate)).toEqual([
+      dayFromToday(0),
+      dayFromToday(-7),
+    ]);
+    for (const expense of charged) {
+      expect(expense.amount).toBe(12.5);
+      expect(expense.categoryId).toBeNull();
+      expect(expense.items.map((i) => i.name).sort()).toEqual([
+        'Chleb',
+        'Mydlo',
+      ]);
+    }
+  },
+  'editing the products changes only the next payments': async ({ page }) => {
+    const categoryId = 'e2e-cat-1';
+    const res = await page.request.put(API_ROUTER.recurringById('e2e-rec-2'), {
+      data: {
+        id: 'e2e-rec-2',
+        name: 'Zakupy',
+        cost: 1,
+        interval: 'weekly',
+        startDate: dayFromToday(-7),
+        endDate: null,
+        active: true,
+        paymentMethod: 'card',
+        categoryId,
+        items: [
+          {
+            id: 'p-1',
+            name: 'Chleb',
+            unitPrice: 6,
+            quantity: 1,
+            discount: 0,
+            categoryId,
+          },
+        ],
+      },
+    });
+    expect(res.ok()).toBe(true);
+    const { data } = await res.json();
+    expect(data.cost).toBe(6);
+    expect(data.categoryId).toBe(categoryId);
+    const rules = await (
+      await page.request.get(API_ROUTER.recurring({ tz: ZONE }))
+    ).json();
+    expect(rules.data[0].items).toHaveLength(1);
+    const body = await (
+      await page.request.get(API_ROUTER.expenses({ tz: ZONE }))
+    ).json();
+    const charged = chargedBy(body.data, 'e2e-rec-2');
+    expect(charged.map((e) => e.amount)).toEqual([12.5, 12.5]);
+  },
+  'a rule without a category and without products is refused': async ({
+    page,
+  }) => {
+    const res = await page.request.post(API_ROUTER.recurring(), {
+      data: {
+        id: 'e2e-rec-3',
+        name: 'Nic',
+        cost: 5,
+        interval: 'monthly',
+        startDate: dayFromToday(1),
+        endDate: null,
+        active: true,
+        paymentMethod: 'card',
+        categoryId: null,
+      },
+    });
+    expect(res.status()).toBe(400);
+  },
+
   'i use "Biedronka" twice and "Lidl" once as shops': async ({ page }) => {
     for (const value of ['Biedronka', ' biedronka ', 'Lidl']) {
       const res = await page.request.post(API_ROUTER.suggestions(), {
@@ -574,6 +695,10 @@ test('REST endpoints CRUD each finance entity through Postgres', async ({
     ['a broken cursor is refused'],
     ['marking one as read keeps it listed and lowers the total'],
     ['marking all as read reaches pages that were never loaded'],
+    ['i create a rule with products from two categories'],
+    ['each charged payment carries its own copy of the products'],
+    ['editing the products changes only the next payments'],
+    ['a rule without a category and without products is refused'],
     ['i use "Biedronka" twice and "Lidl" once as shops'],
     ['the shops come back most used first'],
     ['a blank value is refused'],

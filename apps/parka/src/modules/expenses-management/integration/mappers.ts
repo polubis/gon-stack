@@ -121,4 +121,12 @@ export const toRecurringBody = (
   active: recurring.active,
   paymentMethod: recurring.paymentMethod,
   categoryId: recurring.categoryId,
+  items: recurring.items.map((item) => ({
+    id: item.id,
+    name: item.name,
+    unitPrice: item.unitPrice,
+    quantity: item.quantity,
+    discount: item.discount,
+    categoryId: item.categoryId,
+  })),
 });

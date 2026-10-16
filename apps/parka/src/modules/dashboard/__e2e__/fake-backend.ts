@@ -30,16 +30,24 @@ type Expense = Row & {
     customName?: string | null;
     photo?: { variants: { size: number; url: string }[] } | null;
   } | null;
-  items?: never[];
+  items?: Item[];
   date: string;
   amount: number;
-  categoryId: string;
+  categoryId: string | null;
   recurringId?: string | null;
   occurrenceDate?: string | null;
 };
+type Item = {
+  id: string;
+  name: string;
+  unitPrice: number;
+  quantity: number;
+  discount: number;
+  categoryId: string;
+};
 type Category = Row & { name: string; icon: string; color: string };
 type Limit = Row & { scope: 'total' | 'category'; amount: number };
-type Recurring = RecurringRule & { paymentMethod: string };
+type Recurring = RecurringRule & { paymentMethod: string; items?: Item[] };
 
 type Suggestion = {
   field: 'merchant' | 'paymentMethod';
@@ -102,6 +110,7 @@ export const installBackend = async (
   fixedToday?: string,
 ): Promise<Backend> => {
   const state = structuredClone(seed);
+  state.recurring = state.recurring.map((r) => ({ items: [], ...r }));
   const profiles = new Map<
     string,
     { avatar: string | null; customName: string | null }
@@ -137,7 +146,11 @@ export const installBackend = async (
             isBill: true,
             source: 'manual',
             device: null,
-            items: [],
+            // Own copies, like the server: a later edit of the rule leaves them.
+            items: (rule.items ?? []).map((it) => ({
+              ...it,
+              id: `${rule.id}:${day}:${it.id}`,
+            })),
             categoryId: rule.categoryId,
             recurringId: rule.id,
             occurrenceDate: day,

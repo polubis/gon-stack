@@ -10,6 +10,7 @@ export type ExpenseId = Brand<string, 'ExpenseId'>;
 export type ReceiptItemId = Brand<string, 'ReceiptItemId'>;
 export type LimitId = Brand<string, 'LimitId'>;
 export type RecurringId = Brand<string, 'RecurringId'>;
+export type RecurringItemId = Brand<string, 'ProductId'>;
 
 /** One bucket of the spending chart: a day, or a month when a year is shown. */
 export type SeriesPoint = { index: number; total: number };
@@ -82,6 +83,15 @@ export type Expense = {
 
 export type { RecurringInterval } from '@/shared/recurring/occurrences';
 
+export type RecurringItem = {
+  id: RecurringItemId;
+  name: string;
+  unitPrice: number;
+  quantity: number;
+  discount: number;
+  categoryId: CategoryId;
+};
+
 /** An instruction, not an expense: it never counts into any total. */
 export type Recurring = {
   id: RecurringId;
@@ -96,7 +106,10 @@ export type Recurring = {
   lastMaterializedDate: string | null;
   active: boolean;
   paymentMethod: string;
-  categoryId: CategoryId;
+  /** `null` when the products come from different categories. */
+  categoryId: CategoryId | null;
+  /** Copied into every expense the rule makes; `cost` is their total. */
+  items: RecurringItem[];
 };
 
 /** A projected occurrence of a rule: not charged yet, not stored. */

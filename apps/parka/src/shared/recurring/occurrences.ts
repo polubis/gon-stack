@@ -17,7 +17,7 @@ export type RecurringRule = {
   lastMaterializedDate: string | null;
   /** Paused rules neither charge nor announce anything. */
   active: boolean;
-  categoryId: string;
+  categoryId: string | null;
 };
 
 /** Safety valve: one catch-up never creates more than this many expenses. */

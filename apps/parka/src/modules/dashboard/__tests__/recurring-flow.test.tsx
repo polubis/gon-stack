@@ -20,6 +20,7 @@ const NETFLIX = {
   active: true,
   paymentMethod: 'card',
   categoryId: 'c-1',
+  items: [],
 };
 
 const server = setupServer();

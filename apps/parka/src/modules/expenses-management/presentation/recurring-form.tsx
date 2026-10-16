@@ -3,12 +3,22 @@ import { useState, type FormEvent } from 'react';
 import { Check, LoaderCircle } from 'lucide-react';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { APP_ROUTER } from '@/shared/router/routes';
-import { Button, Field, Input, Select } from '@/shared/ui/controls';
+import { Button, Field, Input, Select, inputClass } from '@/shared/ui/controls';
 import { Card } from '@/shared/ui/layout';
 import { NumberInput } from '@/shared/ui/number-input';
+import { ProductsSection } from '@/shared/expense-form/presentation/products-section';
+import { useProducts } from '@/shared/expense-form/presentation/use-products';
+import {
+  defaultCategoryId,
+  productsFromDraft,
+} from '@/shared/expense-form/domain/products';
 import { today } from '@/shared/date/date';
 import { newRecurringId } from '../domain/ids';
-import type { CategoryId, RecurringInterval } from '../domain/models';
+import type {
+  CategoryId,
+  ReceiptDraft,
+  RecurringInterval,
+} from '../domain/models';
 
 const INTERVALS: { value: RecurringInterval; label: string }[] = [
   { value: 'weekly', label: 'Co tydzień' },
@@ -21,35 +31,55 @@ import { useContext } from './context';
  * Recurring expense: a rule, not an expense. A payment becomes an expense
  * only once its day has passed; until then it is just announced.
  */
-export const RecurringForm = () => {
+export const RecurringForm = ({ draft }: { draft: ReceiptDraft | null }) => {
   const ctx = useContext();
   const categories = ctx.useCategories();
   const saving = ctx.useSaving();
-  const [name, setName] = useState('');
+  const [name, setName] = useState(draft?.merchant ?? '');
   const [cost, setCost] = useState(0);
   const [frequency, setFrequency] = useState<RecurringInterval>('monthly');
   const [startDate, setStartDate] = useState(today());
   const [endDate, setEndDate] = useState('');
-  const [method, setMethod] = useState('');
+  const [method, setMethod] = useState(draft?.paymentMethod ?? '');
   const [categoryId, setCategoryId] = useState<CategoryId | null>(null);
 
   const selected = categories.some((c) => c.id === categoryId)
     ? categoryId
     : categories[0]?.id;
+  const {
+    products,
+    setProducts,
+    openId,
+    setOpenId,
+    submitted,
+    hasProducts,
+    total,
+    derivedCategoryId,
+    derivedCategoryName,
+    validate,
+  } = useProducts({
+    initial: draft
+      ? productsFromDraft(draft.items, defaultCategoryId(categories))
+      : [],
+    categories,
+    manualAmount: cost,
+    manualCategoryId: selected,
+  });
 
   const save = (event: FormEvent) => {
     event.preventDefault();
-    if (!selected || saving) return;
+    if (!selected || saving || !validate()) return;
     ctx.createRecurring({
       id: newRecurringId(),
       name: name.trim(),
-      cost,
+      cost: total,
       interval: frequency,
       startDate,
       endDate: endDate || null,
       active: true,
       paymentMethod: method.trim(),
-      categoryId: selected,
+      categoryId: derivedCategoryId,
+      items: products,
     });
   };
 
@@ -88,10 +118,14 @@ export const RecurringForm = () => {
               onChange={(e) => setName(e.target.value)}
             />
           </Field>
-          <Field label="Koszt płatności">
+          <Field
+            label="Koszt płatności"
+            hint={hasProducts ? 'Suma produktów poniżej.' : undefined}
+          >
             <NumberInput
               required
-              value={cost}
+              value={total}
+              readOnly={hasProducts}
               data-e2e="expenses-management:recurring-cost"
               onValueChange={setCost}
             />
@@ -130,17 +164,29 @@ export const RecurringForm = () => {
               onChange={(e) => setEndDate(e.target.value)}
             />
           </Field>
-          <Field label="Kategoria">
-            <Select
-              required
-              value={selected ?? ''}
-              data-e2e="expenses-management:recurring-category"
-              options={categories.map((c) => ({
-                value: c.id,
-                label: categoryLabel(c.name),
-              }))}
-              onValueChange={(id) => setCategoryId(id as CategoryId)}
-            />
+          <Field
+            label="Kategoria"
+            hint={hasProducts ? 'Wynika z kategorii produktów.' : undefined}
+          >
+            {hasProducts ? (
+              <p
+                className={inputClass}
+                data-e2e="expenses-management:recurring-category"
+              >
+                {derivedCategoryName}
+              </p>
+            ) : (
+              <Select
+                required
+                value={selected ?? ''}
+                data-e2e="expenses-management:recurring-category"
+                options={categories.map((c) => ({
+                  value: c.id,
+                  label: categoryLabel(c.name),
+                }))}
+                onValueChange={(id) => setCategoryId(id as CategoryId)}
+              />
+            )}
           </Field>
           <Field label="Metoda płatności">
             <ClearableInput
@@ -151,6 +197,19 @@ export const RecurringForm = () => {
             />
           </Field>
         </Card>
+
+        <div className="max-w-xl">
+          <ProductsSection
+            products={products}
+            categories={categories}
+            newProductCategoryId={selected ?? defaultCategoryId(categories)}
+            layout="dialog"
+            submitted={submitted}
+            openId={openId}
+            onOpenIdChange={setOpenId}
+            onChange={setProducts}
+          />
+        </div>
       </div>
 
       <div className="sticky bottom-0 -mx-4 mt-4 flex items-center justify-end border-t border-line bg-card px-4 py-3 md:-mx-8 md:px-8 lg:-mx-10 lg:px-10 xl:-mx-16 xl:px-16">

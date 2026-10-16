@@ -126,7 +126,12 @@ const ExpensesManagementView = () => {
                 />
               </ReceiptUpload>
             ) : (
-              <RecurringForm />
+              <ReceiptUpload>
+                <RecurringForm
+                  key={scanned?.id ?? 0}
+                  draft={scanned?.draft ?? null}
+                />
+              </ReceiptUpload>
             )}
           </>
         )}

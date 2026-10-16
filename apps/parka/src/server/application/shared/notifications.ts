@@ -60,7 +60,9 @@ export const recurringSnapshot = (
     row.interval === 'weekly' || row.interval === 'yearly'
       ? row.interval
       : 'monthly',
-  category: categoryNames.get(row.category_id) ?? null,
+  category: row.category_id
+    ? (categoryNames.get(row.category_id) ?? null)
+    : null,
   paymentMethod: row.payment_method,
 });
 

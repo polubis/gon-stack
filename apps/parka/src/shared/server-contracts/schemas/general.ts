@@ -103,7 +103,10 @@ export const recurring = () =>
     lastMaterializedDate: z.string().regex(DAY).nullable().default(null),
     active: z.boolean(),
     paymentMethod: z.string(),
-    categoryId: z.string().min(1),
+    /** `null` when products from different categories make up the rule. */
+    categoryId: z.string().min(1).nullable(),
+    /** Copied into every expense the rule makes. With products `cost` is their total. */
+    items: z.array(receiptItem()).default([]),
   });
 
 export const settings = () =>

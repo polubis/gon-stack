@@ -16,6 +16,7 @@ import type {
   ReceiptItemId,
   Recurring,
   RecurringId,
+  RecurringItemId,
   Summary,
 } from '../domain/models';
 
@@ -112,5 +113,13 @@ export const toRecurring = (dto: RecurringDto): Recurring => ({
   lastMaterializedDate: dto.lastMaterializedDate,
   active: dto.active,
   paymentMethod: dto.paymentMethod,
-  categoryId: dto.categoryId as CategoryId,
+  categoryId: dto.categoryId as CategoryId | null,
+  items: dto.items.map((item) => ({
+    id: item.id as RecurringItemId,
+    name: item.name,
+    unitPrice: item.unitPrice,
+    quantity: item.quantity,
+    discount: item.discount,
+    categoryId: item.categoryId as CategoryId,
+  })),
 });

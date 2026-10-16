@@ -2,8 +2,11 @@ import { ClearableInput } from '@/shared/ui/clearable';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { Trash2 } from 'lucide-react';
-import { Button, Field, Input, Select } from '@/shared/ui/controls';
+import { Button, Field, Input, Select, inputClass } from '@/shared/ui/controls';
 import { NumberInput } from '@/shared/ui/number-input';
+import { ProductsSection } from '@/shared/expense-form/presentation/products-section';
+import { useProducts } from '@/shared/expense-form/presentation/use-products';
+import { defaultCategoryId } from '@/shared/expense-form/domain/products';
 import type { Period } from '@/shared/period/period';
 import type {
   CategoryId,
@@ -47,18 +50,36 @@ export const RecurringForm = ({
   const selected = categories.some((c) => c.id === categoryId)
     ? categoryId
     : categories[0]?.id;
+  const {
+    products,
+    setProducts,
+    openId,
+    setOpenId,
+    submitted,
+    hasProducts,
+    total,
+    derivedCategoryId,
+    derivedCategoryName,
+    validate,
+  } = useProducts({
+    initial: recurring.items,
+    categories,
+    manualAmount: cost,
+    manualCategoryId: selected,
+  });
 
   const save = (event: FormEvent) => {
     event.preventDefault();
-    if (!selected) return;
+    if (!selected || !validate()) return;
     const values = {
       name: name.trim(),
-      cost,
+      cost: total,
       interval: frequency,
       startDate,
       endDate: endDate || null,
       paymentMethod: method.trim(),
-      categoryId: selected,
+      categoryId: derivedCategoryId,
+      items: products,
     };
     ctx.updateRecurring({ ...recurring, ...values }, period);
     onDone();
@@ -79,10 +100,14 @@ export const RecurringForm = ({
           onChange={(e) => setName(e.target.value)}
         />
       </Field>
-      <Field label="Koszt płatności">
+      <Field
+        label="Koszt płatności"
+        hint={hasProducts ? 'Suma produktów poniżej.' : undefined}
+      >
         <NumberInput
           required
-          value={cost}
+          value={total}
+          readOnly={hasProducts}
           data-e2e="dashboard:recurring-form-cost"
           onValueChange={setCost}
         />
@@ -122,17 +147,29 @@ export const RecurringForm = ({
           onChange={(e) => setEndDate(e.target.value)}
         />
       </Field>
-      <Field label="Kategoria">
-        <Select
-          required
-          value={selected ?? ''}
-          data-e2e="dashboard:recurring-form-category"
-          options={categories.map((c) => ({
-            value: c.id,
-            label: categoryLabel(c.name),
-          }))}
-          onValueChange={(id) => setCategoryId(id as CategoryId)}
-        />
+      <Field
+        label="Kategoria"
+        hint={hasProducts ? 'Wynika z kategorii produktów.' : undefined}
+      >
+        {hasProducts ? (
+          <p
+            className={inputClass}
+            data-e2e="dashboard:recurring-form-category"
+          >
+            {derivedCategoryName}
+          </p>
+        ) : (
+          <Select
+            required
+            value={selected ?? ''}
+            data-e2e="dashboard:recurring-form-category"
+            options={categories.map((c) => ({
+              value: c.id,
+              label: categoryLabel(c.name),
+            }))}
+            onValueChange={(id) => setCategoryId(id as CategoryId)}
+          />
+        )}
       </Field>
       <Field label="Metoda płatności">
         <ClearableInput
@@ -142,6 +179,16 @@ export const RecurringForm = ({
           onChange={(e) => setMethod(e.target.value)}
         />
       </Field>
+      <ProductsSection
+        products={products}
+        categories={categories}
+        newProductCategoryId={selected ?? defaultCategoryId(categories)}
+        layout="dialog"
+        submitted={submitted}
+        openId={openId}
+        onOpenIdChange={setOpenId}
+        onChange={setProducts}
+      />
       {children}
       <DialogActions
         danger={

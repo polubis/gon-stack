@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { addDays, periodContaining, todayDay } from '@/shared/period/period';
 import { Main } from '../presentation/main';
+import { http, HttpResponse } from 'msw';
 import { answerApi, readBody, startBackend } from './dashboard-backend';
 
 const CATEGORY = {
@@ -23,6 +24,7 @@ const rule = () => ({
   active: true,
   paymentMethod: 'Karta',
   categoryId: 'c-1',
+  items: [],
 });
 
 const charged = () => ({
@@ -116,6 +118,75 @@ describe('upcoming payment', () => {
     expect(deletes()[0]!.url).toBe('/api/recurring/r-1/');
     // Closing steps Back asynchronously: let it land before the next test.
     await waitFor(() => expect(window.location.search).toBe(''));
+  });
+});
+
+describe('upcoming payment with products', () => {
+  const BREAD = {
+    id: 'i-1',
+    name: 'Chleb',
+    unitPrice: 12,
+    quantity: 2,
+    discount: 1,
+    categoryId: 'c-1',
+  };
+
+  beforeEach(() => {
+    window.history.replaceState(null, '', '/app/');
+    stubApi({
+      recurring: [{ ...rule(), cost: 23, items: [BREAD] }],
+      categories: [CATEGORY],
+    });
+  });
+
+  it('shows the products and a cost that follows them', async () => {
+    const user = userEvent.setup();
+    render(<Main />);
+    await user.click(await screen.findByRole('button', { name: /Netflix/ }));
+    const dialog = within(await screen.findByRole('dialog'));
+
+    expect(dialog.getByText('Produkty (1)')).toBeVisible();
+    expect(dialog.getByLabelText('Koszt płatności')).toHaveValue('23');
+    expect(dialog.getByLabelText('Koszt płatności')).toHaveAttribute(
+      'readonly',
+    );
+  });
+
+  it('saves an added product and the new total', async () => {
+    const user = userEvent.setup();
+    let saved: Record<string, unknown> | null = null;
+    server.use(
+      http.put('/api/recurring/:id/', async ({ request }) => {
+        saved = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json({ code: 200, data: saved });
+      }),
+    );
+    render(<Main />);
+    await user.click(await screen.findByRole('button', { name: /Netflix/ }));
+    const dialog = within(await screen.findByRole('dialog'));
+
+    await user.click(dialog.getByRole('button', { name: /Dodaj produkt/ }));
+    await user.type(dialog.getByLabelText('Nazwa produktu'), 'Masło');
+    await user.type(dialog.getByLabelText('Cena'), '7');
+    await user.click(dialog.getByRole('button', { name: 'Zapisz zmiany' }));
+
+    await waitFor(() => expect(saved).not.toBeNull());
+    expect(saved).toMatchObject({ cost: 30, categoryId: 'c-1' });
+    expect((saved as unknown as { items: unknown[] }).items).toHaveLength(2);
+  });
+
+  it('turns back to a manual cost when the last product goes', async () => {
+    const user = userEvent.setup();
+    render(<Main />);
+    await user.click(await screen.findByRole('button', { name: /Netflix/ }));
+    const dialog = within(await screen.findByRole('dialog'));
+
+    await user.click(dialog.getByRole('button', { name: /Chleb/ }));
+    await user.click(dialog.getByRole('button', { name: /Usuń produkt/ }));
+
+    expect(dialog.getByLabelText('Koszt płatności')).not.toHaveAttribute(
+      'readonly',
+    );
   });
 });
 

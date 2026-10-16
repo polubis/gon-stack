@@ -240,6 +240,24 @@ const commands = {
     await getByE2e('dashboard:recurring-form-save').click();
     await expect(getByE2e('dashboard:recurring-form')).toHaveCount(0);
   },
+  'i add a product of 12 to the upcoming payment': async ({
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
+    await getByE2ePrefix('dashboard:upcoming:').first().click();
+    await getByE2e('expense-form:add-product').click();
+    await getByE2ePrefix('expense-form:product-name:').fill('Chleb');
+    await getByE2ePrefix('expense-form:product-price:').fill('12');
+    await expect(getByE2e('dashboard:recurring-form-cost')).toHaveAttribute(
+      'readonly',
+      '',
+    );
+    await getByE2e('dashboard:recurring-form-save').click();
+    await expect(getByE2e('dashboard:recurring-form')).toHaveCount(0);
+  },
+  'the upcoming payment shows 12,00': async ({ getByE2e }) => {
+    await expect(getByE2e('dashboard:upcoming')).toContainText('12,00');
+  },
   'the upcoming payment shows 45,00': async ({ getByE2e }) => {
     await expect(getByE2e('dashboard:upcoming')).toContainText('45,00');
   },
@@ -445,6 +463,14 @@ test.describe('dashboard values after changes', () => {
       ['the month change is +100% against last month'],
       ['i switch to last month'],
       ['last month shows 50,00 over 1 expense'],
+    );
+  });
+
+  test('products of a rule set its cost', async ({ e2e }) => {
+    await interpreter(commands, e2e)(
+      ['i open a dashboard with a recurring expense'],
+      ['i add a product of 12 to the upcoming payment'],
+      ['the upcoming payment shows 12,00'],
     );
   });
 

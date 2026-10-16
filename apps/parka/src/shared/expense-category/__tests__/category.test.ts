@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { categoryShares, deriveExpenseCategory } from '../category';
+import { categoryShares, deriveExpenseCategory, itemsTotal } from '../category';
 
 const item = (
   categoryId: string,
@@ -51,5 +51,17 @@ describe('expense category', () => {
       { categoryId: 'food', amount: 25 },
       { categoryId: 'home', amount: 16 },
     ]);
+  });
+});
+
+describe('items total', () => {
+  it('sums price times quantity minus discount to the cent', () => {
+    expect(
+      itemsTotal([item('a', 10, 2, 1), item('b', 0.1, 3, 0), item('c', 5)]),
+    ).toBe(24.3);
+  });
+
+  it('is zero without items', () => {
+    expect(itemsTotal([])).toBe(0);
   });
 });

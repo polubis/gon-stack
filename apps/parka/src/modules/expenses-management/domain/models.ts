@@ -79,7 +79,10 @@ export type NewRecurring = {
   endDate: string | null;
   active: true;
   paymentMethod: string;
-  categoryId: CategoryId;
+  /** `null` when the products come from different categories. */
+  categoryId: CategoryId | null;
+  /** Copied into every expense the rule makes; `cost` is their total. */
+  items: Product[];
 };
 
 /** A receipt photo being read, or the reason it could not be. */

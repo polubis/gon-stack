@@ -19,6 +19,14 @@ export const deriveExpenseCategory = (
   return items.every((item) => item.categoryId === first) ? first : null;
 };
 
+/** Sum of the items' lines (price x quantity - discount), to the cent. */
+export const itemsTotal = (
+  items: Omit<CategorizedItem, 'categoryId'>[],
+): number =>
+  round(
+    items.reduce((sum, i) => sum + i.unitPrice * i.quantity - i.discount, 0),
+  );
+
 /** How an expense amount splits across categories, largest first. */
 export const categoryShares = (expense: {
   amount: number;

@@ -1,10 +1,7 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
-import { Check, LoaderCircle, Plus } from 'lucide-react';
+import { Check, LoaderCircle } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
-import {
-  categoryLabel,
-  MIXED_CATEGORY_LABEL,
-} from '@/shared/i18n/category-label';
+import { categoryLabel } from '@/shared/i18n/category-label';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { Button, Field, Input, Select, inputClass } from '@/shared/ui/controls';
 import { useRememberedField } from '@/shared/form-memory/presentation/use-remembered-field';
@@ -15,21 +12,10 @@ import { Card } from '@/shared/ui/layout';
 import { NumberInput } from '@/shared/ui/number-input';
 import { money, toTimestamp } from '../domain/format';
 import { nowDateTimeInput, toDateTimeInput } from '@/shared/date/date';
-import {
-  createProduct,
-  defaultCategoryId,
-  expenseCategoryId,
-  patchProduct,
-  productsTotal,
-} from '../domain/products';
-import type {
-  Category,
-  CategoryId,
-  ExpenseFormValues,
-  Product,
-  ProductId,
-} from '../domain/models';
-import { ProductCard } from './product-card';
+import { defaultCategoryId } from '../domain/products';
+import type { Category, CategoryId, ExpenseFormValues } from '../domain/models';
+import { ProductsSection } from './products-section';
+import { useProducts } from './use-products';
 
 type Props = {
   /** Starting values; `null` = a blank new expense. */
@@ -84,38 +70,32 @@ export const ExpenseForm = ({
     base?.categoryId ?? (categoryMemory.recalled as CategoryId | null),
   );
   const [amount, setAmount] = useState(base?.amount ?? 0);
-  const [products, setProducts] = useState<Product[]>(base?.items ?? []);
-  const [openId, setOpenId] = useState<ProductId | null>(null);
-  const [submitted, setSubmitted] = useState(false);
 
   const selected = categories.some((c) => c.id === categoryId)
     ? categoryId
     : categories[0]?.id;
-  const hasProducts = products.length > 0;
-  const total = hasProducts ? productsTotal(products) : amount;
-  const derived = expenseCategoryId(products, selected);
-  const derivedName = derived
-    ? categoryLabel(categories.find((c) => c.id === derived)?.name ?? '')
-    : MIXED_CATEGORY_LABEL;
-
-  const addProduct = () => {
-    const product = createProduct(
-      selected ?? defaultCategoryId(categories),
-      '',
-    );
-    setProducts([...products, product]);
-    setOpenId(product.id);
-  };
+  const {
+    products,
+    setProducts,
+    openId,
+    setOpenId,
+    submitted,
+    hasProducts,
+    total,
+    derivedCategoryId: derived,
+    derivedCategoryName: derivedName,
+    validate,
+  } = useProducts({
+    initial: base?.items ?? [],
+    categories,
+    manualAmount: amount,
+    manualCategoryId: selected,
+  });
 
   const save = (event: FormEvent) => {
     event.preventDefault();
     if (!selected || saving) return;
-    const unnamed = products.find((p) => !p.name.trim());
-    if (unnamed) {
-      setSubmitted(true);
-      setOpenId(unnamed.id);
-      return;
-    }
+    if (!validate()) return;
     const timestamp = toTimestamp(date, base?.date);
     if (!timestamp) return;
     suggestions.recordUse([
@@ -230,60 +210,16 @@ export const ExpenseForm = ({
           </Field>
         </Card>
 
-        <section
-          aria-labelledby="products-heading"
-          className={cn('space-y-2', !dialog && 'lg:col-span-2')}
-        >
-          <div className="flex items-center justify-between">
-            <h2
-              id="products-heading"
-              className="text-sm font-semibold text-ink-soft"
-            >
-              Produkty ({products.length})
-            </h2>
-            <button
-              type="button"
-              data-e2e="expense-form:add-product"
-              onClick={addProduct}
-              className="inline-flex items-center gap-1 text-sm font-medium text-brand-dark"
-            >
-              <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj produkt
-            </button>
-          </div>
-
-          {hasProducts ? (
-            <ul
-              className={cn(
-                'space-y-2',
-                !dialog &&
-                  'md:grid md:grid-cols-2 md:items-start md:gap-4 md:space-y-0',
-              )}
-            >
-              {products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  categories={categories}
-                  open={openId === product.id}
-                  invalid={submitted && !product.name.trim()}
-                  onToggle={() =>
-                    setOpenId(openId === product.id ? null : product.id)
-                  }
-                  onPatch={(patch) =>
-                    setProducts(patchProduct(products, product.id, patch))
-                  }
-                  onRemove={() =>
-                    setProducts(products.filter((p) => p.id !== product.id))
-                  }
-                />
-              ))}
-            </ul>
-          ) : (
-            <p className="rounded-2xl border border-dashed border-line-strong px-4 py-6 text-center text-sm text-ink-soft">
-              Opcjonalnie dodaj produkty. Wtedy kwota policzy się sama.
-            </p>
-          )}
-        </section>
+        <ProductsSection
+          products={products}
+          categories={categories}
+          newProductCategoryId={selected ?? defaultCategoryId(categories)}
+          layout={layout}
+          submitted={submitted}
+          openId={openId}
+          onOpenIdChange={setOpenId}
+          onChange={setProducts}
+        />
       </div>
 
       <div

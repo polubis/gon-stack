@@ -2,7 +2,7 @@ import { updateRecurringSchema } from '@schemas/recurring';
 import { InternalServer, NotFound } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
-import { toRule } from '../../shared/recurring';
+import { replaceRuleItems, ruleTotals, toRule } from '../../shared/recurring';
 
 /**
  * Edits the rule only: expenses it already created stay as they are, so a
@@ -12,18 +12,19 @@ import { toRule } from '../../shared/recurring';
 export const updateRecurring = privateProcedure({
   schema: withZodSchema({ schema: updateRecurringSchema }),
 })({
-  handler: async (input, { db }) => {
+  handler: async (input, { db, user }) => {
+    const { cost, categoryId } = ruleTotals(input);
     const { data, error } = await db
       .from('recurring_expenses')
       .update({
         name: input.name,
-        cost: input.cost,
+        cost,
         interval: input.interval,
         start_date: input.startDate,
         end_date: input.endDate,
         active: input.active,
         payment_method: input.paymentMethod,
-        category_id: input.categoryId,
+        category_id: categoryId,
       })
       .eq('id', input.id)
       .select()
@@ -31,6 +32,8 @@ export const updateRecurring = privateProcedure({
     if (error) throw new InternalServer(error);
     if (!data) throw new NotFound(undefined, 'Recurring expense not found');
 
-    return { code: 200 as const, data: toRule(data) };
+    const items = await replaceRuleItems(db, user.id, input.id, input.items);
+
+    return { code: 200 as const, data: toRule(data, items) };
   },
 });

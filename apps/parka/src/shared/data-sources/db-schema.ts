@@ -389,10 +389,51 @@ export type Database = {
           },
         ];
       };
+      recurring_items: {
+        Row: {
+          category_id: string;
+          discount: number;
+          id: string;
+          name: string;
+          quantity: number;
+          recurring_id: string;
+          unit_price: number;
+          user_id: string;
+        };
+        Insert: {
+          category_id: string;
+          discount?: number;
+          id: string;
+          name: string;
+          quantity?: number;
+          recurring_id: string;
+          unit_price?: number;
+          user_id: string;
+        };
+        Update: {
+          category_id?: string;
+          discount?: number;
+          id?: string;
+          name?: string;
+          quantity?: number;
+          recurring_id?: string;
+          unit_price?: number;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'recurring_items_user_id_recurring_id_fkey';
+            columns: ['user_id', 'recurring_id'];
+            isOneToOne: false;
+            referencedRelation: 'recurring_expenses';
+            referencedColumns: ['user_id', 'id'];
+          },
+        ];
+      };
       recurring_expenses: {
         Row: {
           active: boolean;
-          category_id: string;
+          category_id: string | null;
           cost: number;
           end_date: string | null;
           id: string;
@@ -405,7 +446,7 @@ export type Database = {
         };
         Insert: {
           active?: boolean;
-          category_id: string;
+          category_id?: string | null;
           cost?: number;
           end_date?: string | null;
           id: string;
@@ -418,7 +459,7 @@ export type Database = {
         };
         Update: {
           active?: boolean;
-          category_id?: string;
+          category_id?: string | null;
           cost?: number;
           end_date?: string | null;
           id?: string;
