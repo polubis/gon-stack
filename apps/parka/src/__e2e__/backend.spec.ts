@@ -38,9 +38,32 @@ const reload = async (page: Page): Promise<void> => {
 
 const commands = {
   'i register a new account': async (ctx) => {
-    await registerAndConfirm(ctx, EMAIL, PASSWORD);
+    await registerAndConfirm(ctx, EMAIL, PASSWORD, true);
     await ctx.page.waitForLoadState('networkidle');
     await ctx.page.waitForTimeout(150);
+  },
+
+  'the finance tour greets the new account': async ({ getByE2e, page }) => {
+    await expect(getByE2e('finance-tour:dialog')).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Witaj w Parce' }),
+    ).toBeVisible();
+  },
+  'i walk the tour to the end': async ({ getByE2e, page }) => {
+    await getByE2e('walkthrough:primary').click();
+    await getByE2e('walkthrough:prev').click();
+    await expect(
+      page.getByRole('heading', { name: 'Witaj w Parce' }),
+    ).toBeVisible();
+    for (let step = 0; step < 6; step++)
+      await getByE2e('walkthrough:primary').click();
+    await expect(getByE2e('finance-tour:dialog')).toBeHidden();
+  },
+  'the tour never comes back after a reload': async ({ getByE2e, page }) => {
+    await reload(page);
+    await expect(getByE2e('dashboard:total')).toBeVisible();
+    await expect(getByE2e('finance-tour:dialog')).toBeHidden();
+    expect(new URL(page.url()).searchParams.getAll('modal')).toEqual([]);
   },
 
   'the dashboard opens on the current month': async ({ page, getByE2e }) => {
@@ -224,6 +247,9 @@ test.skip('every feature works against the real Supabase backend', async ({
 }) => {
   await interpreter(commands, e2e)(
     ['i register a new account'],
+    ['the finance tour greets the new account'],
+    ['i walk the tour to the end'],
+    ['the tour never comes back after a reload'],
     ['the dashboard opens on the current month'],
     ['month navigation reads other months from the db'],
     ['i add suggested categories and they survive a reload'],

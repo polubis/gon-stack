@@ -15,6 +15,7 @@ import type { ExpenseFormE2eId } from '@/shared/expense-form/configuration/e2e-i
 import type { CookiesE2eId } from '@/shared/cookies/configuration/e2e-ids';
 import type { ImageEditorE2eId } from '@/shared/image-editor/configuration/e2e-ids';
 import type { PublicNavE2eId } from '@/shared/navigation/public-nav/configuration/e2e-ids';
+import type { FinanceTourE2eId } from '@/modules/finance-tour/configuration/e2e-ids';
 import type { WalkthroughE2eId } from '@/shared/walkthrough/configuration/e2e-ids';
 
 // Combines every module's own `data-e2e` id union into one type used for
@@ -25,6 +26,7 @@ import type { WalkthroughE2eId } from '@/shared/walkthrough/configuration/e2e-id
 export type E2eId =
   | HomeE2eId
   | WalkthroughE2eId
+  | FinanceTourE2eId
   | SignInE2eId
   | SignUpE2eId
   | DashboardE2eId

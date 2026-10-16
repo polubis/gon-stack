@@ -5,7 +5,8 @@ export type WalkthroughStepId = Brand<number, 'WalkthroughStepId'>;
 
 export type WalkthroughStep = {
   id: WalkthroughStepId;
-  icon: ComponentType<{ className?: string; 'aria-hidden'?: boolean }>;
+  /** Picture of what the step talks about; decorative for screen readers. */
+  illustration: ComponentType;
   title: string;
   body: string;
   cta: string;

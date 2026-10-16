@@ -4,16 +4,7 @@ import type { Store } from './store';
 
 export const createFacade = (store: Store, trigger: Registry['trigger']) => {
   return {
-    init: (
-      steps: WalkthroughStep[],
-      persistenceKey: string,
-      resumePersistedOutcome = false,
-    ) =>
-      trigger('[TRIGGER]_INIT', {
-        steps,
-        persistenceKey,
-        resumePersistedOutcome,
-      }),
+    init: (steps: WalkthroughStep[]) => trigger('[TRIGGER]_INIT', { steps }),
     next: () => trigger('[TRIGGER]_NEXT'),
     prev: () => trigger('[TRIGGER]_PREV'),
     skip: () => trigger('[TRIGGER]_SKIP'),

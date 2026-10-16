@@ -147,6 +147,7 @@ export const API_ROUTER = {
   ),
   recurringById: routeById('/api/recurring/'),
   settings: route('/api/settings/'),
+  financeTour: route('/api/finance-tour/'),
   push: route('/api/push/'),
   avatar: route('/api/avatar/'),
   devicePhoto: route('/api/device-photo/'),

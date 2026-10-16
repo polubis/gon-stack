@@ -5,13 +5,11 @@ export const createStore = () => {
   const $steps = atom<WalkthroughStep[]>([]);
   const $activeStepIndex = atom(0);
   const $outcome = atom<WalkthroughOutcome | null>(null);
-  const $persistenceKey = atom('');
 
   return {
     $steps,
     $activeStepIndex,
     $outcome,
-    $persistenceKey,
     $totalSteps: computed([$steps], (steps) => steps.length),
     $activeStep: computed(
       [$activeStepIndex, $steps],

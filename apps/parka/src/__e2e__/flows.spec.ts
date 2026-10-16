@@ -119,16 +119,12 @@ const mockState = async (
 const currentTotalByPage = new WeakMap<Page, string>();
 
 const commands = {
-  'i complete onboarding and reach sign-up': async ({ page, getByE2e }) => {
+  'i reach sign-up from the landing': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.home());
-    // The cookie banner sits at the bottom, over the walkthrough actions.
+    // The cookie banner sits at the bottom, over the landing actions.
     await getByE2e('cookies:accept-all').click();
     await expect(getByE2e('cookies:banner')).toBeHidden();
-    // Step through the product introduction, then hand off to sign-up.
-    await getByE2e('walkthrough:primary').click();
-    await getByE2e('walkthrough:primary').click();
-    await getByE2e('walkthrough:primary').click();
-    await getByE2e('walkthrough:primary').click();
+    await getByE2e('home:primary').click();
     await page.waitForURL(`**${APP_ROUTER.signUp()}`);
     await expect(getByE2e('auth:main')).toBeVisible();
   },
@@ -754,7 +750,7 @@ const commands = {
 test('onboarding leads an anonymous visitor to registration', async ({
   e2e,
 }) => {
-  await interpreter(commands, e2e)(['i complete onboarding and reach sign-up']);
+  await interpreter(commands, e2e)(['i reach sign-up from the landing']);
 });
 
 test('month selection changes the spending overview period', async ({

@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useEffectEvent, type KeyboardEvent } from 'react';
 import { cn } from '@repo/react-kit/cn';
 import type { WalkthroughOutcome, WalkthroughStep } from '../domain/models';
 import { Provider, useContext } from './context';
@@ -6,47 +6,37 @@ import { Router } from './router';
 
 type MainProps = {
   steps: WalkthroughStep[];
-  persistenceKey: string;
+  /** Fires once the walkthrough ends; persisting the outcome is up to the caller. */
   onFinish: (outcome: WalkthroughOutcome) => void;
   skipLabel?: string;
-  lastStepFooter?: ReactNode;
   className?: string;
-  /**
-   * When true, a walkthrough already completed/skipped under this
-   * `persistenceKey` stays finished (and `onFinish` fires immediately) on
-   * remount instead of showing step one again. Off by default: most
-   * callers (e.g. a first-run product intro) want the full walkthrough on
-   * every visit to the screen that hosts it.
-   */
-  resumePersistedOutcome?: boolean;
 };
 
-const Content = ({
-  steps,
-  persistenceKey,
-  onFinish,
-  skipLabel,
-  lastStepFooter,
-  className,
-  resumePersistedOutcome = false,
-}: MainProps) => {
+const Content = ({ steps, onFinish, skipLabel, className }: MainProps) => {
   const ctx = useContext();
   const isFinished = ctx.useIsFinished();
   const outcome = ctx.useOutcome();
+  const isLastStep = ctx.useIsLastStep();
+  const finish = useEffectEvent(onFinish);
 
   useEffect(() => {
-    ctx.init(steps, persistenceKey, resumePersistedOutcome);
-    // Runs once per mount: `steps`/`persistenceKey`/`resumePersistedOutcome`
-    // are the caller's static walkthrough config, not reactive inputs this
-    // effect should re-run on.
+    ctx.init(steps);
+    // Runs once per mount: `steps` is the caller's static walkthrough
+    // config, not a reactive input this effect should re-run on.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [persistenceKey]);
+  }, []);
 
   useEffect(() => {
     if (isFinished && outcome) {
-      onFinish(outcome);
+      finish(outcome);
     }
-  }, [isFinished, outcome, onFinish]);
+  }, [isFinished, outcome]);
+
+  // Arrows page through the steps; finishing stays an explicit click.
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'ArrowLeft') ctx.prev();
+    if (event.key === 'ArrowRight' && !isLastStep) ctx.next();
+  };
 
   if (isFinished) {
     return null;
@@ -55,9 +45,10 @@ const Content = ({
   return (
     <div
       data-e2e="walkthrough:main"
+      onKeyDown={onKeyDown}
       className={cn('flex flex-1 flex-col justify-between', className)}
     >
-      <Router skipLabel={skipLabel} lastStepFooter={lastStepFooter} />
+      <Router skipLabel={skipLabel} />
     </div>
   );
 };

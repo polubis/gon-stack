@@ -177,6 +177,18 @@
     }
   }
 
+  /* Receipt scanner beam; pair with `motion-reduce:animate-none`. */
+  --animate-scan: scan 2.4s ease-in-out infinite;
+  @keyframes scan {
+    0%,
+    100% {
+      top: 0.5rem;
+    }
+    50% {
+      top: calc(100% - 0.75rem);
+    }
+  }
+
   --animate-view-enter: view-enter 0.3s ease-out;
   @keyframes view-enter {
     from {

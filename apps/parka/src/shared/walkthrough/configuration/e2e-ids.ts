@@ -5,6 +5,7 @@
 export const WALKTHROUGH_E2E_IDS = [
   'walkthrough:main',
   'walkthrough:primary',
+  'walkthrough:prev',
   'walkthrough:skip',
 ] as const;
 

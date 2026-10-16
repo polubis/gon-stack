@@ -1,5 +1,6 @@
 import { Outlet, useRouter, useRouterState } from '@tanstack/react-router';
 import { useEffect } from 'react';
+import { Main as FinanceTour } from '@/modules/finance-tour/presentation/main';
 import { AccountSwitchToast } from '@/shared/auth/presentation/account-switch-toast';
 import { ProtectedScreen } from '@/shared/auth/presentation/protected-screen';
 import { withAuth } from '@/shared/auth/presentation/with-auth';
@@ -76,6 +77,7 @@ const Shell = () => {
         </div>
       </div>
       <AccountSwitchToast />
+      <FinanceTour />
     </div>
   );
 };

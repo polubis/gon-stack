@@ -30,12 +30,14 @@ const findConfirmLink = async (
 /**
  * Registers `email` through the sign-up form, then follows the confirmation
  * link from the local mailbox in the same browser context (the PKCE verifier
- * cookie lives there) so the session lands on `/app/`.
+ * cookie lives there) so the session lands on `/app/`. A new account opens
+ * the one-time finance tour there; it is closed unless `keepTour` is set.
  */
 export const registerAndConfirm = async (
   { page, getByE2e }: Ctx,
   email: string,
   password: string,
+  keepTour = false,
 ): Promise<void> => {
   await page.goto(APP_ROUTER.signUp());
   await page.waitForLoadState('networkidle');
@@ -55,5 +57,9 @@ export const registerAndConfirm = async (
     .not.toBeNull();
 
   await page.goto(link!);
-  await page.waitForURL(`**${APP_ROUTER.dashboard()}`);
+  // The tour adds `?modal=tour` as soon as it opens.
+  await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
+  if (keepTour) return;
+  await getByE2e('finance-tour:close').click();
+  await expect(getByE2e('finance-tour:dialog')).toBeHidden();
 };

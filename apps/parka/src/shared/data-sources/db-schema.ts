@@ -180,6 +180,27 @@ export type Database = {
         };
         Relationships: [];
       };
+      finance_tours: {
+        Row: {
+          expires_at: string;
+          finished_at: string;
+          outcome: string;
+          user_id: string;
+        };
+        Insert: {
+          expires_at?: string;
+          finished_at?: string;
+          outcome: string;
+          user_id: string;
+        };
+        Update: {
+          expires_at?: string;
+          finished_at?: string;
+          outcome?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       limits: {
         Row: {
           alert_at80: boolean;

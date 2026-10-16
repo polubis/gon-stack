@@ -80,6 +80,12 @@ const walkNotifications = async (
   return pages;
 };
 
+const tourOf = async (page: Page) =>
+  (await page.request.get(API_ROUTER.financeTour())).json();
+
+const daysUntil = (iso: string): number =>
+  (Date.parse(iso) - Date.now()) / (24 * 60 * 60 * 1000);
+
 const categoryIdByPage = new WeakMap<Page, string>();
 const settingsEmailByPage = new WeakMap<Page, string>();
 
@@ -636,6 +642,30 @@ const commands = {
     expect(res.status()).toBe(400);
   },
 
+  'closing the finance tour on sign-up is remembered for 30 days': async ({
+    page,
+  }) => {
+    const { data } = await tourOf(page);
+    expect(data.outcome).toBe('skipped');
+    expect(daysUntil(data.expiresAt)).toBeCloseTo(30, 0);
+  },
+  'finishing the tour again extends it': async ({ page }) => {
+    const before = (await tourOf(page)).data.expiresAt;
+    const res = await page.request.put(API_ROUTER.financeTour(), {
+      data: { outcome: 'completed' },
+    });
+    expect(res.ok()).toBe(true);
+    const { data } = await tourOf(page);
+    expect(data.outcome).toBe('completed');
+    expect(Date.parse(data.expiresAt)).toBeGreaterThan(Date.parse(before));
+  },
+  'an unknown finance tour outcome is refused': async ({ page }) => {
+    const res = await page.request.put(API_ROUTER.financeTour(), {
+      data: { outcome: 'later' },
+    });
+    expect(res.status()).toBe(400);
+  },
+
   'settings are readable': async ({ page }) => {
     const body = await (await page.request.get(API_ROUTER.settings())).json();
     expect(body.data.profile.email).toBeDefined();
@@ -702,6 +732,9 @@ test('REST endpoints CRUD each finance entity through Postgres', async ({
     ['i use "Biedronka" twice and "Lidl" once as shops'],
     ['the shops come back most used first'],
     ['a blank value is refused'],
+    ['closing the finance tour on sign-up is remembered for 30 days'],
+    ['finishing the tour again extends it'],
+    ['an unknown finance tour outcome is refused'],
     ['settings are readable'],
     ['the settings profile name is updated'],
   );
