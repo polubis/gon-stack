@@ -49,7 +49,7 @@ export const DashboardSkeleton = () => (
     </div>
 
     <Card
-      className="space-y-3 xl:col-span-6 xl:col-start-1 xl:row-start-3"
+      className="space-y-4 xl:col-span-6 xl:col-start-1 xl:row-start-3"
       aria-hidden="true"
     >
       <div className="flex items-baseline justify-between gap-3">

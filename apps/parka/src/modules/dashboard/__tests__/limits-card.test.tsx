@@ -173,4 +173,28 @@ describe('limits card', () => {
       ).toBeInTheDocument();
     });
   });
+
+  describe('limits card of a new user', () => {
+    it('offers one empty state that sets the monthly limit', async () => {
+      mockBackend([]);
+      const user = userEvent.setup();
+      render(
+        <Provider>
+          <Harness />
+        </Provider>,
+      );
+
+      const empty = await screen.findByRole('status');
+      expect(
+        within(empty).getByRole('heading', { name: 'Brak limitów' }),
+      ).toBeInTheDocument();
+
+      await user.click(
+        within(empty).getByRole('button', { name: /Ustaw limit miesięczny/ }),
+      );
+      expect(
+        await screen.findByRole('dialog', { name: 'Ustaw limit miesięczny' }),
+      ).toBeInTheDocument();
+    });
+  });
 });

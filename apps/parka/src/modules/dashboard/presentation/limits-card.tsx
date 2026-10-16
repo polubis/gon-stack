@@ -1,3 +1,6 @@
+import { Gauge, Plus } from 'lucide-react';
+import { Button } from '@/shared/ui/controls';
+import { EmptyState } from '@/shared/ui/empty-state';
 import { Card } from '@/shared/ui/layout';
 import { LIMITS_SECTION_ID } from '../configuration/constraints';
 import type { Period } from '@/shared/period/period';
@@ -31,6 +34,8 @@ export const LimitsCard = ({ period }: { period: Period }) => {
   const editing = sheet?.startsWith('edit:')
     ? limits.find((l) => isCategoryLimit(l) && `edit:${l.id}` === sheet)
     : undefined;
+  const progress = categoryProgress(limits, expenses, period);
+  const totalProg = totalProgress(limits, expenses, period);
   const allCategoriesLimited =
     categories.length > 0 && withoutLimit(categories, limits).length === 0;
 
@@ -47,30 +52,56 @@ export const LimitsCard = ({ period }: { period: Period }) => {
         inert={sheet ? true : undefined}
         className="flex min-h-0 flex-1 flex-col gap-4"
       >
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex min-h-9 items-center justify-between gap-3">
           <h2 id="limits-title" className="text-base font-semibold">
             Limity
           </h2>
-          <AddLimitButton
-            blocked={allCategoriesLimited}
-            onClick={() => open('limit')}
-          />
+          {progress.length > 0 || !total ? (
+            <AddLimitButton
+              blocked={allCategoriesLimited}
+              onClick={() => open('limit')}
+            />
+          ) : null}
         </div>
 
-        <TotalLimit
-          progress={totalProgress(limits, expenses, period)}
-          period={period}
-          monthly={total?.amount}
-          onEdit={() => open('total')}
-        />
-        <div className="min-h-0 flex-1 overflow-y-auto pr-2">
-          <CategoryLimits
-            progress={categoryProgress(limits, expenses, period)}
-            period={period}
-            categories={categories}
-            onEdit={(id) => open(`edit:${id}`)}
+        {!totalProg && progress.length === 0 ? (
+          <EmptyState
+            variant="card"
+            data-e2e="dashboard:limits-empty"
+            className="min-h-0 flex-1"
+            icon={Gauge}
+            title="Brak limitów"
+            description="Ustaw limit miesięczny, a potem ogranicz wydatki w wybranych kategoriach."
+            action={
+              <Button
+                data-e2e="dashboard:limit-total-new"
+                className="w-auto px-3 py-1.5"
+                onClick={() => open('total')}
+              >
+                <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
+                Ustaw limit miesięczny
+              </Button>
+            }
           />
-        </div>
+        ) : (
+          <>
+            <TotalLimit
+              progress={totalProg}
+              period={period}
+              monthly={total?.amount}
+              onEdit={() => open('total')}
+            />
+            <div className="min-h-0 flex-1 overflow-y-auto pr-2">
+              <CategoryLimits
+                progress={progress}
+                period={period}
+                categories={categories}
+                onAdd={() => open('limit')}
+                onEdit={(id) => open(`edit:${id}`)}
+              />
+            </div>
+          </>
+        )}
       </div>
 
       {sheet === 'total' ? (

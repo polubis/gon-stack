@@ -605,11 +605,11 @@ const commands = {
     await expect(getByE2e('dashboard:limit-form')).toHaveCount(0);
     await expect(getByE2e('dashboard:limit-list')).toContainText('900,00');
   },
-  'i remove the category limit': async ({ page, getByE2e }) => {
+  'i remove the category limit': async ({ getByE2e }) => {
     await getByE2e('dashboard:limit-edit:limit-1').click();
     await getByE2e('dashboard:limit-delete').click();
     await expect(getByE2e('dashboard:limit-form')).toHaveCount(0);
-    await expect(page.getByText('Brak limitów kategorii.')).toBeVisible();
+    await expect(getByE2e('dashboard:limits-empty')).toBeVisible();
   },
   'a new category appears in the list': async ({ page, getByE2e }) => {
     await mockState(page);

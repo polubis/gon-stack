@@ -1,4 +1,8 @@
+import { ChartColumn } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { Button } from '@/shared/ui/controls';
+import { EmptyState } from '@/shared/ui/empty-state';
 import { Card } from '@/shared/ui/layout';
 import { shiftPeriod, type Period } from '@/shared/period/period';
 import { CHART_TICKS } from '../configuration/constraints';
@@ -146,12 +150,37 @@ export const SpendingChart = ({
 }: {
   period: Period;
   summary: Summary;
-}) => (
-  <Card className="space-y-4 xl:col-span-12 xl:row-start-4">
-    <div className="flex flex-col items-start gap-2 md:flex-row md:items-center md:justify-between">
-      <h2 className="text-base font-semibold">Wydatki w czasie</h2>
-      <Legend period={period} />
-    </div>
-    <Chart period={period} summary={summary} />
-  </Card>
-);
+}) => {
+  const empty = [...summary.series, ...summary.previousSeries].every(
+    (d) => d.total === 0,
+  );
+  return (
+    <Card className="space-y-4 xl:col-span-12 xl:row-start-4">
+      <div className="flex flex-col items-start gap-2 md:flex-row md:items-center md:justify-between">
+        <h2 className="text-base font-semibold">Wydatki w czasie</h2>
+        <Legend period={period} />
+      </div>
+      {empty ? (
+        // Same height as the chart with its labels: the card never jumps.
+        <EmptyState
+          variant="card"
+          data-e2e="dashboard:chart-empty"
+          className="h-57 md:h-61"
+          icon={ChartColumn}
+          title="Brak danych do wykresu"
+          description={`Wykres pojawi się po dodaniu wydatków: ${periodTitle(period)}.`}
+          action={
+            <Button
+              href={APP_ROUTER.newExpense()}
+              className="w-auto px-3 py-1.5"
+            >
+              Dodaj wydatek
+            </Button>
+          }
+        />
+      ) : (
+        <Chart period={period} summary={summary} />
+      )}
+    </Card>
+  );
+};

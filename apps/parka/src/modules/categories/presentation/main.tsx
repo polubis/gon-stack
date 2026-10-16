@@ -1,7 +1,8 @@
-import { ChevronRight, Plus } from 'lucide-react';
+import { ChevronRight, Plus, Tags } from 'lucide-react';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { Button } from '@/shared/ui/controls';
+import { EmptyState } from '@/shared/ui/empty-state';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { CategoryIcon } from '@/shared/ui/icon';
 import { ScreenHeader } from '@/shared/ui/layout';
@@ -51,10 +52,20 @@ export const Main = () => {
         {initializing ? (
           <ListSkeleton />
         ) : categories.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-line-strong px-4 py-6 text-center text-sm text-ink-soft">
-            Nie masz jeszcze kategorii. Dodaj własną albo wybierz jedną z
-            sugestii poniżej.
-          </p>
+          <EmptyState
+            data-e2e="categories:empty"
+            icon={Tags}
+            title="Nie masz jeszcze kategorii"
+            description="Dodaj własną albo wybierz jedną z sugestii poniżej."
+            action={
+              <Button
+                href={APP_ROUTER.categoryNew()}
+                className="w-auto px-3 py-2"
+              >
+                <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj kategorię
+              </Button>
+            }
+          />
         ) : (
           <ul
             className="overflow-hidden rounded-2xl border border-line bg-card"

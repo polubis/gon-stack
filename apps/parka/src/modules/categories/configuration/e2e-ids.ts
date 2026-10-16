@@ -1,6 +1,7 @@
 export const CATEGORIES_E2E_IDS = [
   'categories:main',
   'categories:list',
+  'categories:empty',
   'categories:add',
   'categories:form',
   'categories:form-name-error',

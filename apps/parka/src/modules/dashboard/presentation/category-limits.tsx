@@ -1,34 +1,37 @@
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { Layers, Pencil } from 'lucide-react';
+import { EmptyState } from '@/shared/ui/empty-state';
 import { Button, ProgressBar } from '@/shared/ui/controls';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { money } from '../domain/format';
 import type { Period } from '@/shared/period/period';
 import type { Category, CategoryProgress, LimitId } from '../domain/models';
 import { LIMIT_NOUN } from '../domain/period';
+import { AddLimitButton } from './add-limit-button';
 import { categoryOf, limitTone } from './selectors';
 
 export const CategoryLimits = ({
   progress,
   period,
   categories,
+  onAdd,
   onEdit,
 }: {
   progress: CategoryProgress[];
   period: Period;
   categories: Category[];
+  onAdd: () => void;
   onEdit: (id: LimitId) => void;
 }) =>
   progress.length === 0 ? (
-    <div className="grid h-full min-h-32 place-items-center rounded-xl border border-dashed border-line p-4 text-center">
-      <div className="space-y-1">
-        <Layers className="mx-auto h-6 w-6 text-ink-soft" aria-hidden="true" />
-        <p className="text-sm font-medium">Brak limitów kategorii.</p>
-        <p className="text-xs text-ink-soft">
-          Ogranicz wydatki w wybranej kategorii przyciskiem Dodaj limit.
-        </p>
-      </div>
-    </div>
+    <EmptyState
+      variant="card"
+      className="h-full min-h-32"
+      icon={Layers}
+      title="Brak limitów kategorii."
+      description="Ogranicz wydatki w wybranej kategorii."
+      action={<AddLimitButton blocked={false} onClick={onAdd} />}
+    />
   ) : (
     <ul
       className="grid gap-3 md:grid-cols-2 xl:grid-cols-1"

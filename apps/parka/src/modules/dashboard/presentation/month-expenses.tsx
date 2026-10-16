@@ -1,7 +1,11 @@
 import { useState, type ReactNode } from 'react';
+import { Plus, Receipt } from 'lucide-react';
 import { useModal } from '@/shared/router/modal-stack';
 import { categoryLabel } from '@/shared/i18n/category-label';
+import { APP_ROUTER } from '@/shared/router/routes';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
+import { Button } from '@/shared/ui/controls';
+import { EmptyState } from '@/shared/ui/empty-state';
 import { Card } from '@/shared/ui/layout';
 import { cn } from '@repo/react-kit/cn';
 import {
@@ -231,7 +235,7 @@ export const MonthExpenses = ({
     <Card
       as="section"
       aria-labelledby="month-expenses"
-      className="space-y-3 xl:col-span-6 xl:col-start-1 xl:row-start-3"
+      className="space-y-4 xl:col-span-6 xl:col-start-1 xl:row-start-3"
       data-e2e="dashboard:expenses"
     >
       <div className="flex items-baseline justify-between gap-3">
@@ -283,9 +287,24 @@ export const MonthExpenses = ({
 
         <div className={cn('relative overflow-hidden', EXPENSES_LIST_HEIGHT)}>
           {visible.length === 0 ? (
-            <p className="py-2 text-sm text-ink-soft">
-              Brak wydatków w tym okresie.
-            </p>
+            <EmptyState
+              variant="card"
+              data-e2e="dashboard:expenses-empty"
+              className="h-full"
+              icon={Receipt}
+              title="Brak wydatków w tym okresie."
+              description={`Nie dodano jeszcze wydatków: ${periodTitle(period)}.`}
+              action={
+                <Button
+                  href={APP_ROUTER.newExpense()}
+                  data-e2e="dashboard:expense-empty-new"
+                  className="w-auto px-3 py-1.5"
+                >
+                  <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  Dodaj wydatek
+                </Button>
+              }
+            />
           ) : (
             <ExpenseList
               expenses={visible.slice(0, MAX_VISIBLE_EXPENSES)}
