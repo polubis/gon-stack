@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url';
-import type { Rule } from '../config.js';
+import type { RuleUnit } from '../config.js';
 
 type Options = { scopes: RegExp[] };
 type Fields = Record<string, string | string[]>;
@@ -386,14 +386,13 @@ export const validateDecisionLog = (
       ];
 };
 
-export const decisionLog = (options: Options): Rule<never> => ({
-  id: 'decision-log',
-  group: 'general',
+export const decisionLog = (options: Options): RuleUnit => ({
+  importance: 'A',
   fix: `Add exactly one new file to the commit and stage it (a commit that only moves or edits files in decisions/ needs none). Template:\n${TEMPLATE}\nSummary ${SUMMARY.min}-${SUMMARY.max} chars, why ${WHY.min}-${WHY.max} chars, slug ${SLUG.min}-${SLUG.max} chars, ${BULLETS.min}-${BULLETS.max} bullets of max ${LINE_MAX} chars. Allowed scopes: ${options.scopes.map(String).join(' ')}`,
-  instruction: {
+  doc: {
     file: fileURLToPath(new URL('decision-log.md', import.meta.url)),
   },
-  check: async ({ files, git, readText, report }) => {
+  run: async ({ files, git, readText, report }) => {
     for (const file of git.stagedAddedFiles.filter((item) =>
       WRONG_LOCATION.test(item),
     ))

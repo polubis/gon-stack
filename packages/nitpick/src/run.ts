@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, relative, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { pathToFileURL } from 'node:url';
-import { resolveRules } from './config.js';
+import { listRules } from './config.js';
 import type { Config } from './config.js';
 import { buildDocs } from './docs.js';
 import { createSnapshot } from './snapshot.js';
@@ -49,12 +49,12 @@ export const run = async (
 
   const configDir = resolve(projectRoot, '.nitpick');
   let config: Config;
-  let docs: Awaited<ReturnType<typeof buildDocs>>;
+  let docs: ReturnType<typeof buildDocs>;
   try {
     ({ default: config } = (await import(
       pathToFileURL(resolve(configDir, 'config.ts')).href
     )) as { default: Config });
-    docs = await buildDocs(config, configDir, projectRoot);
+    docs = buildDocs(config, configDir, projectRoot);
   } catch (error) {
     return print(EXIT_CONFIG, [`Config error: ${messageOf(error)}`]);
   }
@@ -91,10 +91,10 @@ export const run = async (
   } catch (error) {
     return print(EXIT_USAGE, [`Cannot read input: ${messageOf(error)}`]);
   }
-  for (const rule of resolveRules(config)) {
+  for (const rule of listRules(config)) {
     const before = problems.length;
     try {
-      await rule.check?.(
+      await rule.run?.(
         snapshot.contextFor(rule, (message) => {
           problems.push(`[${rule.id}] ${message}`);
         }),

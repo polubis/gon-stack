@@ -1,7 +1,8 @@
-import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { basename, dirname, join, posix, relative, resolve } from 'node:path';
-import { resolveRules } from './config.js';
-import type { Config, DocsText, Rule } from './config.js';
+import { fileURLToPath } from 'node:url';
+import { listRules } from './config.js';
+import type { Config, EntryDoc } from './config.js';
 import { buildSettings } from './settings.js';
 
 type Docs = {
@@ -15,21 +16,29 @@ type Output = { path: string; root: string };
 const DEFAULT_OUTPUT: Output[] = [{ path: '.ai', root: 'AGENTS.md' }];
 const REF = /\{\{ref:([^}\s]+)\}\}/g;
 
-export const AODI_LEGEND = [
-  '## AODI framework',
-  '',
-  'Rules meaning:',
-  '',
-  '| Tag | Meaning                                     |',
-  '| --- | ------------------------------------------- |',
-  '| `A` | always - apply every task                   |',
-  '| `O` | optional - use when helpful                 |',
-  '| `D` | when directly mentioned - only if user asks |',
-  '| `I` | infer during task - apply when context fits |',
-].join('\n');
+const BACKSLASH = String.fromCharCode(92);
 
-const readSource = async (configDir: string, file: string): Promise<string> =>
-  (await readFile(resolve(configDir, file), 'utf8')).replaceAll('\r\n', '\n');
+const readSource = (configDir: string, file: string): string =>
+  readFileSync(resolve(configDir, file), 'utf8').replaceAll('\r\n', '\n');
+
+const FENCE = /^\s*(```|~~~)/;
+const HEADING = /^(#{1,5})(\s)/;
+
+const shiftHeadings = (text: string): string => {
+  let fenced = false;
+  return text
+    .split('\n')
+    .map((line) => {
+      if (FENCE.test(line)) fenced = !fenced;
+      return fenced ? line : line.replace(HEADING, '$1#$2');
+    })
+    .join('\n');
+};
+
+export const AODI_LEGEND = readSource(
+  fileURLToPath(new URL('rules/aodi-framework.md', import.meta.url)),
+  '.',
+).trim();
 
 const instructionPath = (id: string): string => posix.join('rules', `${id}.md`);
 
@@ -39,15 +48,15 @@ const keysIn = (text: string): string[] =>
 const link = (from: string, to: string, label: string): string =>
   `[${label}](${posix.relative(posix.dirname(from), to)})`;
 
-const readSources = async (
+const readSources = (
   refs: Record<string, string>,
   configDir: string,
   problems: string[],
-): Promise<Map<string, string>> => {
+): Map<string, string> => {
   const sources = new Map<string, string>();
   for (const [key, source] of Object.entries(refs)) {
     try {
-      sources.set(key, await readSource(configDir, source));
+      sources.set(key, readSource(configDir, source));
     } catch {
       problems.push(`Knowledge "${key}": missing file ${source}`);
     }
@@ -96,37 +105,86 @@ const validateRefs = (
   return [...problems, ...findCycles(graph)];
 };
 
-type Resolve = (
-  text: DocsText<string> | undefined,
-  label: string,
-  from: string,
-  meta?: { group?: string },
-) => Promise<string | undefined>;
-
-type Rendered = { root: string; groups: Map<string, string> };
+type Doc = EntryDoc<string, string>;
 
 const GROUP_NAME = /^[\w-]+$/;
 
+const agentPath = (id: string): string => posix.join('agents', `${id}.md`);
+
 const groupPath = (group: string): string => posix.join('rules', `${group}.md`);
 
-const renderRules = async (
-  rules: Rule[],
-  describe: (rule: Rule, from: string) => string,
-  problems: string[],
-  docs: NonNullable<Config['docs']>,
-  resolveText: Resolve,
-): Promise<Rendered> => {
+export const buildDocs = (
+  config: Config,
+  configDir: string,
+  projectRoot: string,
+): Docs => {
+  const problems: string[] = [];
+  const files = new Map<string, string>();
+  const refs = config.refs ?? {};
+  const target = (key: string): string => posix.join('references', `${key}.md`);
+
+  const sources = readSources(refs, configDir, problems);
+  problems.push(...validateRefs(refs, sources));
+
+  const [primary = DEFAULT_OUTPUT[0] as Output, ...others] =
+    config.output ?? [];
+  const rules = listRules(config);
+  const agents = Object.entries(config.agents ?? {}).map(([id, unit]) => ({
+    ...unit,
+    id,
+  }));
+  const unitTargets = new Map<string, string>([
+    ...rules.map(({ id, group, doc }): [string, string] => [
+      id,
+      typeof doc === 'object' ? instructionPath(id) : groupPath(group),
+    ]),
+    ...agents.map(({ id }): [string, string] => [id, agentPath(id)]),
+  ]);
+
+  const resolveDoc = (
+    doc: Doc,
+    label: string,
+    from: string,
+    extra = { header: '' },
+  ): string | undefined => {
+    if (typeof doc === 'string') return doc;
+    const read = (path: string): string | undefined => {
+      try {
+        return readSource(configDir, path);
+      } catch {
+        problems.push(`${label}: missing file ${path}`);
+        return undefined;
+      }
+    };
+    const unknown = (key: string): string => {
+      problems.push(`${label}: unknown ref "${key}"`);
+      return key;
+    };
+    const ctx = {
+      ref: (id: string): string => {
+        const to = unitTargets.get(id);
+        return to === undefined ? unknown(id) : link(from, to, id);
+      },
+      file: (key: string): string =>
+        key in refs ? link(from, target(key), key) : unknown(key),
+      insert: (key: string): string => {
+        if (!(key in refs)) return unknown(key);
+        return shiftHeadings(sources.get(key) ?? '')
+          .replace(REF, (_, ref: string) => ctx.file(ref))
+          .trim();
+      },
+      ...extra,
+    };
+    if (typeof doc === 'function') return doc(ctx);
+    return read(doc.file)?.replace(REF, (_, key: string) => ctx.file(key));
+  };
+
   const ids = new Set<string>();
-  for (const { id } of rules) {
-    if (ids.has(id)) problems.push(`Duplicate rule id "${id}"`);
+  for (const { id } of [...rules, ...agents]) {
+    if (ids.has(id)) problems.push(`Duplicate id "${id}"`);
     ids.add(id);
   }
-  const groups = new Set(rules.flatMap(({ group }) => (group ? [group] : [])));
-  for (const key of Object.keys(docs.groups ?? {})) {
-    if (!groups.has(key))
-      problems.push(`Docs groups "${key}": no rule uses it`);
-  }
-  for (const group of groups) {
+  for (const group of Object.keys(config.rules)) {
     if (!GROUP_NAME.test(group)) {
       problems.push(`Group "${group}": use letters, digits, "_" or "-"`);
     }
@@ -135,144 +193,86 @@ const renderRules = async (
     }
   }
 
-  const list = (items: Rule[], from: string): string =>
-    items
+  const instructionFiles = new Map<string, string>();
+  for (const { id, doc, run, fix } of rules) {
+    if (run && !fix) {
+      problems.push(`Rule "${id}": fix is required when run is defined`);
+    }
+    if (typeof doc !== 'object') continue;
+    const text = resolveDoc(doc, `Rule "${id}"`, instructionPath(id));
+    if (text !== undefined) instructionFiles.set(instructionPath(id), text);
+  }
+
+  const list = (group: string, from: string): string =>
+    rules
+      .filter((rule) => rule.group === group)
       .map(
         (rule, index) =>
-          `${index + 1}. (${rule.importance ?? 'A'}) ${describe(rule, from)}`,
+          `${index + 1}. (${rule.importance}) ${
+            typeof rule.doc === 'object'
+              ? link(from, instructionPath(rule.id), rule.id)
+              : resolveDoc(rule.doc, `Rule "${rule.id}"`, from)
+          }`,
       )
       .join('\n');
 
-  const sections: string[] = [
-    `# ${docs.header ?? 'Information for AI'}`,
-    AODI_LEGEND,
-  ];
-  const intro = await resolveText(docs.intro, 'intro', 'root.md');
-  if (intro) sections.push(intro);
+  const header = '# Information for AI';
+  const entry = config.entry
+    ? resolveDoc(config.entry.doc, 'Entry', 'root.md', { header })
+    : undefined;
+  const sections: string[] = config.entry ? [(entry ?? '').trim()] : [header];
 
-  const ungrouped = rules.filter(({ group }) => !group);
-  if (ungrouped.length > 0) {
-    const slot = docs.ungrouped;
-    const text = await resolveText(slot?.text, 'ungrouped', 'root.md');
-    sections.push(
-      `## ${slot?.title ?? 'Rules'}`,
-      ...(text ? [text] : []),
-      list(ungrouped, 'root.md'),
-    );
-  }
-
-  const files = new Map<string, string>();
-  for (const group of groups) {
-    const slot = docs.groups?.[group];
+  const groupFiles = new Map<string, string>();
+  for (const group of Object.keys(config.rules)) {
     const file = groupPath(group);
-    const text = await resolveText(slot?.text, `groups "${group}"`, file, {
-      group,
-    });
-    const title = slot?.title ?? `${group[0]?.toUpperCase()}${group.slice(1)}`;
-    files.set(
-      file,
-      [
-        `## ${title}`,
-        ...(text ? [text] : []),
-        list(
-          rules.filter((rule) => rule.group === group),
-          file,
-        ),
-      ].join('\n\n') + '\n',
-    );
+    const title = group
+      .split('-')
+      .map((word) => `${word[0]?.toUpperCase()}${word.slice(1)}`)
+      .join(' ');
+    groupFiles.set(file, `## ${title}\n\n${list(group, file)}\n`);
   }
-  if (files.size > 0) {
+  if (groupFiles.size > 0) {
     sections.push(
       '## Rule files',
-      [...files.keys()]
+      AODI_LEGEND,
+      [...groupFiles.keys()]
         .map((file) => `- ${link('root.md', file, file)}`)
         .join('\n'),
     );
   }
-  return { root: sections.join('\n\n') + '\n', groups: files };
-};
-
-export const buildDocs = async <K extends string>(
-  config: Config<K>,
-  configDir: string,
-  projectRoot: string,
-): Promise<Docs> => {
-  const problems: string[] = [];
-  const files = new Map<string, string>();
-  const refs: Record<string, string> = config.knowledge?.refs ?? {};
-  const dir = config.knowledge?.dir ?? 'references';
-  const target = (key: string): string => posix.join(dir, `${key}.md`);
-
-  const sources = await readSources(refs, configDir, problems);
-  problems.push(...validateRefs(refs, sources));
-
-  const refFrom =
-    (from: string) =>
-    (key: string): string => {
-      if (!(key in refs)) {
-        problems.push(`Rule instruction: unknown ref "${key}"`);
-        return key;
-      }
-      return link(from, target(key), key);
-    };
-  const rules = resolveRules(config) as Rule[];
-  const instructionFiles = new Map<string, string>();
-  for (const { id, instruction, check, fix } of rules) {
-    if (check && !fix) {
-      problems.push(`Rule "${id}": fix is required when check is defined`);
-    }
-    if (typeof instruction === 'function') continue;
-    try {
-      const text = await readSource(configDir, instruction.file);
-      for (const key of keysIn(text)) {
-        if (!(key in refs)) problems.push(`Rule "${id}": unknown ref "${key}"`);
-      }
-      instructionFiles.set(instructionPath(id), text);
-    } catch {
-      problems.push(`Rule "${id}": missing file ${instruction.file}`);
+  if (agents.length > 0) {
+    const agentFiles = agents.map(({ id }) => agentPath(id));
+    sections.push(
+      '## Agent files',
+      agentFiles.map((file) => `- ${link('root.md', file, file)}`).join('\n'),
+    );
+    for (const [index, { id, doc, frontmatter }] of agents.entries()) {
+      const file = agentFiles[index] as string;
+      const head = frontmatter
+        ? `---\n${Object.entries(frontmatter)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join('\n')}\n---\n\n`
+        : '';
+      const body = resolveDoc(doc, `Agent "${id}"`, file)?.trim() ?? '';
+      groupFiles.set(file, `${head}${body}\n`);
     }
   }
-  const resolveText: Resolve = async (text, label, from, meta) => {
-    if (!text) return undefined;
-    const docsRef = (key: string): string => {
-      if (key in refs) return link(from, target(key), key);
-      problems.push(`Docs ${label}: unknown ref "${key}"`);
-      return key;
-    };
-    if (typeof text === 'function')
-      return text({ ref: docsRef, ...meta }).trim();
-    try {
-      return (await readSource(configDir, text.file))
-        .replace(REF, (_, key: string) => docsRef(key))
-        .trim();
-    } catch {
-      problems.push(`Docs ${label}: missing file ${text.file}`);
-      return undefined;
-    }
-  };
-  const { root: markdown, groups: groupFiles } = await renderRules(
-    rules,
-    ({ id, instruction }, from) =>
-      typeof instruction === 'function'
-        ? instruction({ ref: refFrom(from) })
-        : link(from, instructionPath(id), id),
-    problems,
-    config.docs ?? {},
-    resolveText,
-  );
+  if (sources.size > 0) {
+    sections.push(
+      '## Reference files',
+      [...sources.keys()]
+        .map((key) => `- ${link('root.md', target(key), target(key))}`)
+        .join('\n'),
+    );
+  }
 
-  const [primary = DEFAULT_OUTPUT[0] as Output, ...others] =
-    config.output ?? [];
   const primaryPath = join(projectRoot, primary.path, primary.root);
-  files.set(primaryPath, markdown);
+  files.set(primaryPath, sections.join('\n\n') + '\n');
   for (const [from, text] of groupFiles) {
     files.set(join(projectRoot, primary.path, from), text);
   }
   for (const [from, text] of instructionFiles) {
-    files.set(
-      join(projectRoot, primary.path, from),
-      text.replace(REF, (_, key: string) => link(from, target(key), key)),
-    );
+    files.set(join(projectRoot, primary.path, from), text);
   }
   for (const [key, text] of sources) {
     files.set(
@@ -284,7 +284,7 @@ export const buildDocs = async <K extends string>(
   }
   for (const { path, root } of others) {
     const file = join(projectRoot, path, root);
-    const to = relative(dirname(file), primaryPath).replaceAll('\\', '/');
+    const to = relative(dirname(file), primaryPath).replaceAll(BACKSLASH, '/');
     files.set(
       file,
       `Follow instructions here: [${basename(primaryPath)}](${to})\n`,
@@ -298,17 +298,12 @@ export const buildDocs = async <K extends string>(
   }
 
   const rulePaths = new Map(
-    rules.map(({ id, group, instruction }) => [
-      id,
-      posix.join(
-        primary.path.replaceAll('\\', '/'),
-        typeof instruction === 'function'
-          ? group
-            ? groupPath(group)
-            : primary.root
-          : instructionPath(id),
-      ),
-    ]),
+    [...unitTargets]
+      .filter(([id]) => rules.some((rule) => rule.id === id))
+      .map(([id, path]) => [
+        id,
+        posix.join(primary.path.replaceAll(BACKSLASH, '/'), path),
+      ]),
   );
 
   return { files, problems, rulePaths };

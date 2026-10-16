@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url';
-import type { Rule } from '../config.js';
+import type { RuleUnit } from '../config.js';
 
 const COMMIT_TYPES = [
   'feat',
@@ -64,14 +64,13 @@ const validateRichCommit = (
   return problems;
 };
 
-export const richCommit: Rule<never> = {
-  id: 'rich-commit',
-  group: 'git',
+export const richCommit: RuleUnit = {
+  importance: 'A',
   fix: FIX,
-  instruction: {
+  doc: {
     file: fileURLToPath(new URL('rich-commit.md', import.meta.url)),
   },
-  check: ({ git, report }) => {
+  run: ({ git, report }) => {
     for (const message of git.commitMessages)
       for (const problem of validateRichCommit(message, {
         types: COMMIT_TYPES,

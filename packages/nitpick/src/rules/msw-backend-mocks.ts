@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url';
-import type { Rule } from '../config.js';
+import type { RuleUnit } from '../config.js';
 
 const FETCH_MOCKS = [
   /\bvi\.stubGlobal\(\s*['"`]fetch['"`]/g,
@@ -20,9 +20,7 @@ Per test override: server.use(http.post('/api/expenses', () => HttpResponse.json
 const lineOf = (text: string, index: number): number =>
   text.slice(0, index).split('\n').length;
 
-export const mswBackendMocks: Rule<never> = {
-  id: 'msw-backend-mocks',
-  group: 'testing',
+export const mswBackendMocks: RuleUnit = {
   importance: 'A',
   include: [
     'apps/*/src/**/*.test.ts',
@@ -32,10 +30,10 @@ export const mswBackendMocks: Rule<never> = {
   ],
   exclude: ['**/__e2e__/**'],
   fix: FIX,
-  instruction: {
+  doc: {
     file: fileURLToPath(new URL('msw-backend-mocks.md', import.meta.url)),
   },
-  check: async ({ files, readText, report }) => {
+  run: async ({ files, readText, report }) => {
     for (const file of files) {
       const text = await readText(file);
       for (const pattern of FETCH_MOCKS)

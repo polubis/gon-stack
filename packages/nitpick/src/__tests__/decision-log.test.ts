@@ -10,14 +10,21 @@ const rulePath = join(import.meta.dirname, '..', 'rules', 'decision-log.ts')
   .split(String.fromCharCode(92))
   .join('/');
 
-const CONFIG = String.raw`import { decisionLog } from '${rulePath}';
-export default {
-  rules: [
-    decisionLog({
-      scopes: [/^(repo|claude|nitpick)$/, /^(parka|uih)(\/[a-z0-9-]+)*$/],
-    }),
-  ],
-};`;
+const configPath = join(import.meta.dirname, '..', 'config.ts')
+  .split(String.fromCharCode(92))
+  .join('/');
+
+const CONFIG = String.raw`import { config } from '${configPath}';
+import { decisionLog } from '${rulePath}';
+export default config({
+  rules: {
+    general: {
+      'decision-log': decisionLog({
+        scopes: [/^(repo|claude|nitpick)$/, /^(parka|uih)(\/[a-z0-9-]+)*$/],
+      }),
+    },
+  },
+});`;
 
 const NAME = 'decisions/0001-parka-add-thing.md';
 

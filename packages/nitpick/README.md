@@ -8,11 +8,11 @@ Implemented:
 
 - `--sync` and `--check` (default) modes, exit codes 0/1/2/3
 - AODI docs output (default `.ai/AGENTS.md`)
-- `knowledge.refs` with `ref()` and `{{ref:key}}` inside knowledge files
+- `refs` with `file()` and `{{ref:key}}` inside ref files; typed `ref()` between rules and agents
 - Config validation: missing file, self reference, unknown ref, cycle, duplicate rule `id`
 - Check snapshot: `files`, `readText`, `git`, `meta`
 - Per-rule `include` / `exclude`
-- `rules` as an array or a function
+- Typed `doc` forms: string, `{ file }`, or callback with `ref` / `file` / `insert`
 - Ready-made rules: `richCommit`, `decisionLog`
 - Claude Code settings: `settings` option generates `settings.json` / `settings.local.json` and `.mcp.json`
 
@@ -24,14 +24,15 @@ Not wired yet:
 
 ## Rules
 
-A rule has an `id`, an `instruction` function returning Markdown, and an optional `check`.
+Rules live under `rules.<group>.<id>`. Group = key, id = key, nothing else to author.
 
-- `group`: optional "area" of the root docs. Rules sharing a group are written to their own file `<path>/rules/<group>.md` (`## <Title>` + numbered list `N. (A) text` in config order, same as `.claude/rules`). The root file lists the files under `## Rule files`; ungrouped rules stay in the root under `## Rules`. Groups appear in order of first use. Group name: letters, digits, `_`, `-`; must not equal a rule id with a file instruction. Instruction files still go to `<path>/rules/<id>.md`.
-- `instruction`: a function returning Markdown, or `{ file: './path.md' }` pointing to a Markdown file (relative to `.nitpick/`, absolute paths allowed). A file instruction is written to `<path>/rules/<id>.md`, supports `{{ref:key}}`, and the docs link to it: `N. (A) [id](id.md)` (from a group file) or `rules/id.md` (from the root). Missing file or unknown ref is a config error.
-- `fix`: text shown after the problems of this rule (`Fix: ...`). Required when the rule has a `check` (type error and config error otherwise). Tell the reader how to correct a violation; include an example.
-- `importance`: `A | O | D | I`. Printed as the tag in front of the rule, e.g. `1. (I) text`. Default `A`.
-- `include` / `exclude`: globs (`path.matchesGlob`), rule level only. They filter `files` passed to `check`. No `include` means all files.
-- `id` must be unique.
+- `importance`: `A | O | D | I`, required. Printed as tag, e.g. `1. (I) text`.
+- `doc`: see [Doc forms](#doc-forms). A `{ file }` doc is written to `<path>/rules/<id>.md` and linked as `N. (A) [id](id.md)`; string and callback docs are inlined in the group file.
+- `run`: optional check script (was `check`). Gets `CheckContext`. Needs `fix`.
+- `fix`: text after the problems of the rule (`Fix: ...`). Required with `run`.
+- `include` / `exclude`: globs (`path.matchesGlob`) filtering `files` passed to `run`.
+- Group files: rules of one group go to `<path>/rules/<group>.md`, groups in order of first key. Group name: letters, digits, `_`, `-`; must not equal a rule id with file doc.
+- Ids unique across all groups and agents. Duplicate = `config()` throws `Duplicate unit id "x"`; raw configs get `Duplicate id "x"` from verification (exit 3).
 - Rules run in config order.
 
 ## Configuration
@@ -43,81 +44,60 @@ import { richCommit } from '@repo/nitpick/rules/rich-commit';
 
 export default config({
   output: [{ path: '.claude', root: 'CLAUDE.md' }], // default: [{ path: '.ai', root: 'AGENTS.md' }]
-
-  docs: {
-    header: 'Project rules', // default 'Information for AI'
-    intro: ({ ref }) => `Start with ${ref('react/state')}.`, // or { file: './intro.md' }
-    ungrouped: { title: 'Basics', text: () => 'Applies everywhere.' },
-    groups: {
-      git: {
-        title: 'Version control',
-        text: ({ group }) => `Rules of ${group}.`,
+  entry: { doc: ({ header, ref }) => `${header}\n\n${ref('react-hooks')}` },
+  settings: { permissions: { allow: ['Bash(pnpm test:*)'] } },
+  rules: {
+    git: { 'rich-commit': richCommit },
+    react: {
+      'react-hooks': {
+        importance: 'A',
+        include: ['apps/*/src/**/*.tsx'],
+        doc: ({ ref, file }) =>
+          `Follow ${file('react-state')}, then ${ref('rich-commit')}.`,
+        run: ({ files, readText, report }) => report('message'), // exit 1
+        fix: 'How to correct it, with an example',
       },
     },
   },
-
-  settings: {
-    name: 'settings.json', // or 'settings.local.json'; default 'settings.json'
-    permissions: { allow: ['Bash(pnpm test:*)'] },
-    env: { API_URL: '${API_URL}' },
-    mcp: {
-      files: {
-        command: 'npx',
-        args: ['-y', 'some-mcp'],
-        env: { TOKEN: '${TOKEN}' },
-      },
-      docs: {
-        type: 'http',
-        url: 'https://example.com/mcp',
-        headers: { Authorization: 'Bearer ${DOCS_TOKEN}' },
-      },
+  agents: {
+    repo: { doc: 'Repo agent' },
+    claude: {
+      doc: ({ ref }) => `Use ${ref('repo')} and ${ref('react-hooks')}`,
     },
   },
-
-  knowledge: {
-    dir: 'references', // default: 'references'
-    refs: { 'react/state': './knowledge/react/state.md' },
-  },
-
-  rules: ({ rule }) => [
-    richCommit,
-    rule({
-      id: 'react-hooks',
-      importance: 'A',
-      include: ['apps/*/src/**/*.tsx'],
-      exclude: ['**/*.test.tsx'],
-      instruction: ({ ref }) =>
-        `Follow hooks rules. See ${ref('react/state')}.`,
-      check: async ({ files, readText, git, report, meta }) => {
-        report('message'); // every report is a problem, exit 1
-      },
-    }),
-  ],
+  refs: { 'react-state': './knowledge/react/state.md' },
 });
 ```
 
-`rules` is an array or a function `({ rule }) => Rule[]`. The function form makes `ref()` suggest keys from `knowledge.refs`. There are no check categories or schedules; `group` only splits the docs into files.
-
-Override a ready-made rule by spreading it: `{ ...richCommit, importance: 'D' }`.
+- Ids come from keys. `ref(id)` takes the union of all rule and agent ids (typo = compile error). `file(key)` takes the union of `refs` keys. Inferred, no manual generics.
+- `ref(id)` links to the file that documents the unit (group file, rule file or `agents/<id>.md`). It never inlines, so cycles are harmless and cannot hang.
+- Unknown or extra fields, missing `importance`/`doc`, `run` on an agent, `run` without `fix`: compile errors.
+- `entry.doc` replaces header and intro of the root file (`header` = `# Information for AI`).
+- Override a ready-made rule by spreading it: `{ ...richCommit, importance: 'D' }`.
+- `agents`: each writes `<path>/agents/<id>.md` and is listed under `## Agent files` in the root. Optional `frontmatter: Record<string, string>` renders as a `---` block before the doc. No `run`. Agent ids are typed even when every agent `doc` is a callback.
+- `refs`: id -> markdown file (relative to `.nitpick/`), written to `<path>/references/<key>.md`; `{{ref:key}}` links inside files; missing file, self ref, unknown ref, cycle = config error.
 
 ### Docs
 
-The root docs always include a built-in `## AODI framework` legend (tag meanings, not configurable) right below the header, before the intro.
+Without `entry` the root docs start with `# Information for AI`. The built-in AODI tag legend (`src/rules/aodi-framework.md`, not configurable) is always written under `## Rule files`, above the file list. `entry.doc` replaces the head only.
 
-Optional `docs` customizes the root docs of the first `output` entry. Defaults give the same output as without it.
+- Group file title comes from the group key: split on `-`, words capitalized (`unit-testing` -> `Unit Testing`).
 
-- `header`: `# ` title. Default `Information for AI`.
-- `intro`: text right below the header.
-- `ungrouped`: `{ title?, text? }` for rules without `group`. Default title `Rules`.
-- `groups`: per `Rule.group`, `{ title?, text? }`. Default title `<Group>`; the text goes in the group file. A key no rule uses is a config error.
-- `text` is a function `({ ref, group? }) => string` or `{ file }` (relative to `.nitpick/`). `group` is set in group texts. File text supports `{{ref:key}}`. Text is inlined in the root or group file, not linked.
-- Missing file or unknown ref is a config error.
+### Doc forms
+
+Same for rules, agents and `entry`:
+
+- `string`: used as is.
+- `{ file: './path.md' }`: content of the file, CRLF normalized to LF, `{{ref:key}}` replaced by links to `refs` keys. Missing file = verification problem (exit 3).
+- `(ctx) => string`: `ctx` has `ref(id)` (rule or agent id), `file(key)` (`refs` key) and `insert(key)` (`refs` key). `entry` also gets `header`.
+- `insert(key)` inlines the content of the `refs` file at generation time (trimmed, CRLF normalized, `{{ref:key}}` replaced); `file(key)` only links it. Missing file = verification problem (exit 3) and an empty string is inlined.
+- Base of every path (`doc` files, `refs`): the `.nitpick/` directory; absolute paths allowed.
 
 ### Output
 
 - With `settings`, `<name>` is written under the first `output` entry; `.mcp.json` goes to the project root. Other entries are unaffected. `--check` reports them as `[sync] <path> is out of date, run nitpick --sync`.
-- The first `output` entry gets the full docs: `<path>/<root>` (root docs), `<path>/rules/<id>.md` (file instructions) and `<path>/<knowledge.dir>/<key>.md` (knowledge). Every next entry is a single file with `Follow instructions here: [<first root>](<relative path>)`.
-- `ref(key)` in `instruction` becomes a markdown link relative to the root file. Unknown key is a config error.
+- The first `output` entry gets the full docs: `<path>/<root>` (root docs), `<path>/rules/<id>.md` (file instructions) and `<path>/references/<key>.md` (knowledge). Every next entry is a single file with `Follow instructions here: [<first root>](<relative path>)`.
+- `ref(id)` / `file(key)` in `doc` become markdown links relative to the file that holds them. Unknown id or key is a config error.
 - `{{ref:key}}` in a knowledge file becomes a link relative to that file.
 - Source paths in `refs` are relative to `.nitpick/`. `output.path` and globs are relative to the project root.
 
@@ -181,7 +161,7 @@ Violated rule: rich-commit. Read .ai/rules/rich-commit.md
 Fix: Rewrite the commit message as ...
 ```
 
-The path is the rule's instruction file under the first `output` entry (rules with a function instruction point to the root file). `Fix:` is the rule's `fix` text.
+The path is the rule file (`<path>/rules/<id>.md`) for a `{ file }` doc, otherwise the group file (`<path>/rules/<group>.md`). `Fix:` is the rule `fix` text.
 
 Where to run it (commit hook, pre-push, CI) is up to the consumer.
 
@@ -223,6 +203,7 @@ The engine gives repeatable input and stable result order. A `check` must avoid 
 
 ## Package
 
+- Built-in references: `import { aodiFramework } from '@repo/nitpick/rules/aodi-framework'` gives the absolute path of the framework doc (`src/rules/aodi-framework.md`; copied to `dist` with the other `.md` files in `src/rules`); use it as a `refs` value: `refs: { 'aodi-framework': aodiFramework }`, then `file('aodi-framework')` / `insert('aodi-framework')`.
 - Imports: `@repo/nitpick/<module>` (`config`, `rules/rich-commit`), exported from `dist`.
 - Bin: `nitpick` (`dist/cli.js`).
 - Scripts: `build`, `dev`, `check-types`, `lint`, `test`, `test:coverage`.

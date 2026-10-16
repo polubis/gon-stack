@@ -4,7 +4,7 @@ import { mswBackendMocks } from '../rules/msw-backend-mocks.js';
 
 const problemsOf = async (sources: Record<string, string>) => {
   const reports: string[] = [];
-  await mswBackendMocks.check?.({
+  await mswBackendMocks.run?.({
     files: Object.keys(sources),
     readText: async (file) => sources[file] ?? '',
     git: {
@@ -14,7 +14,7 @@ const problemsOf = async (sources: Record<string, string>) => {
       lastCommitMessages: async () => [],
     },
     report: (problem) => reports.push(problem),
-    meta: { ruleId: mswBackendMocks.id, projectRoot: '' },
+    meta: { ruleId: 'msw-backend-mocks', projectRoot: '' },
   });
   return reports;
 };
@@ -60,15 +60,14 @@ describe('Msw rule accepts', () => {
 
 describe('Msw rule metadata works when', () => {
   it('scopes to unit tests and skips e2e', () => {
-    expect(mswBackendMocks.group).toBe('testing');
     expect(mswBackendMocks.include).toContain('apps/*/src/**/*.test.tsx');
     expect(mswBackendMocks.exclude).toEqual(['**/__e2e__/**']);
   });
 
   it('describes the rule in an instruction file', async () => {
-    const { instruction } = mswBackendMocks;
-    if (typeof instruction === 'function') throw new Error('expected file');
-    expect(await readFile(instruction.file, 'utf8')).toContain('msw');
+    const { doc } = mswBackendMocks;
+    if (typeof doc !== 'object') throw new Error('expected file');
+    expect(await readFile(doc.file, 'utf8')).toContain('msw');
   });
 
   it('shows an msw example as the fix', () => {

@@ -3,7 +3,7 @@ import { richCommit } from '../rules/rich-commit.js';
 
 const check = async (...messages: string[]) => {
   const reports: string[] = [];
-  await richCommit.check?.({
+  await richCommit.run?.({
     files: [],
     readText: async () => '',
     git: {
@@ -13,7 +13,7 @@ const check = async (...messages: string[]) => {
       lastCommitMessages: async () => [],
     },
     report: (problem) => reports.push(problem),
-    meta: { ruleId: richCommit.id, projectRoot: '' },
+    meta: { ruleId: 'rich-commit', projectRoot: '' },
   });
   return reports;
 };
@@ -202,16 +202,14 @@ describe('Message handling works when', () => {
 });
 
 describe('Rule definition works when', () => {
-  it('has a stable id, group and importance default', () => {
-    expect(richCommit.id).toBe('rich-commit');
-    expect(richCommit.group).toBe('git');
-    expect(richCommit.importance).toBeUndefined();
+  it('has an explicit importance', () => {
+    expect(richCommit.importance).toBe('A');
   });
 
   it('points to an absolute instruction file', () => {
-    expect(typeof richCommit.instruction).toBe('object');
-    if (typeof richCommit.instruction === 'function') return;
-    expect(richCommit.instruction.file).toMatch(/rich-commit\.md$/);
-    expect(richCommit.instruction.file).toMatch(/^([a-zA-Z]:)?[\\/]/);
+    expect(typeof richCommit.doc).toBe('object');
+    if (typeof richCommit.doc !== 'object') return;
+    expect(richCommit.doc.file).toMatch(/rich-commit\.md$/);
+    expect(richCommit.doc.file).toMatch(/^([a-zA-Z]:)?[\\/]/);
   });
 });

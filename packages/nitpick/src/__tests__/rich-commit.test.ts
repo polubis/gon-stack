@@ -4,7 +4,7 @@ import { richCommit } from '../rules/rich-commit.js';
 
 const run = async (rule: typeof richCommit, message: string) => {
   const reports: string[] = [];
-  await rule.check?.({
+  await rule.run?.({
     files: [],
     readText: async () => '',
     git: {
@@ -14,7 +14,7 @@ const run = async (rule: typeof richCommit, message: string) => {
       lastCommitMessages: async () => [],
     },
     report: (problem) => reports.push(problem),
-    meta: { ruleId: rule.id, projectRoot: '' },
+    meta: { ruleId: 'rich-commit', projectRoot: '' },
   });
   return reports;
 };
@@ -30,7 +30,7 @@ describe('Rule works when', () => {
   it('can be overridden by spread', async () => {
     expect(await commitProblems('oops')).not.toEqual([]);
     expect(
-      await run({ ...richCommit, check: () => {}, fix: 'x' }, 'oops'),
+      await run({ ...richCommit, run: () => {}, fix: 'x' }, 'oops'),
     ).toEqual([]);
   });
 });
@@ -94,9 +94,9 @@ describe('Commit validation works when', () => {
 
 describe('Rule metadata works when', () => {
   it('describes the commit format in an instruction file', async () => {
-    const { instruction } = richCommit;
-    if (typeof instruction === 'function') throw new Error('expected file');
-    expect(await readFile(instruction.file, 'utf8')).toContain(
+    const { doc } = richCommit;
+    if (typeof doc !== 'object') throw new Error('expected file');
+    expect(await readFile(doc.file, 'utf8')).toContain(
       'fix(repo)!: prevent racing of requests',
     );
   });

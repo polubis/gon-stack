@@ -1,322 +1,393 @@
-import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { config } from '../config.js';
+import type { Config } from '../config.js';
 import { AODI_LEGEND, buildDocs } from '../docs.js';
 
-const setup = async (knowledge: Record<string, string>) => {
+const A = 'A' as const;
+
+const build = async (value: Config, sources: Record<string, string> = {}) => {
   const root = await mkdtemp(join(tmpdir(), 'nitpick-'));
   await mkdir(join(root, '.nitpick'), { recursive: true });
-  for (const [name, text] of Object.entries(knowledge)) {
+  for (const [name, text] of Object.entries(sources)) {
+    await mkdir(join(root, '.nitpick', name, '..'), { recursive: true });
     await writeFile(join(root, '.nitpick', name), text);
   }
-  return root;
+  const result = buildDocs(value, join(root, '.nitpick'), root);
+  return {
+    ...result,
+    keys: [...result.files.keys()].map((key) => key.slice(root.length + 1)),
+    read: (...parts: string[]) => result.files.get(join(root, ...parts)),
+  };
 };
 
-describe('Docs generation works when', () => {
-  it('numbers rules in config order and defaults to A', async () => {
-    const root = await setup({});
-    const { files } = await buildDocs(
-      config({
-        output: [{ path: 'out', root: 'RULES.md' }],
-        rules: ({ rule }) => [
-          rule({ id: 'late', importance: 'I', instruction: () => 'third' }),
-          rule({ id: 'first', instruction: () => 'first' }),
-        ],
-      }),
-      join(root, '.nitpick'),
-      root,
-    );
-    const text = files.get(join(root, 'out', 'RULES.md')) ?? '';
-    expect(text).toContain('1. (I) third\n2. (A) first');
-  });
-
-  it('links refs and writes knowledge files', async () => {
-    const root = await setup({ 'a.md': 'see {{ref:b}}', 'b.md': 'leaf' });
-    const { files, problems } = await buildDocs(
-      config({
-        output: [{ path: 'out', root: 'RULES.md' }],
-        knowledge: { refs: { a: './a.md', b: './b.md' } },
-        rules: ({ rule }) => [
-          rule({ id: 'x', instruction: ({ ref }) => `read ${ref('a')}` }),
-        ],
-      }),
-      join(root, '.nitpick'),
-      root,
-    );
-    expect(problems).toEqual([]);
-    expect(files.get(join(root, 'out', 'RULES.md'))).toContain(
-      '[a](references/a.md)',
-    );
-    expect(files.get(join(root, 'out', 'references', 'a.md'))).toBe(
-      'see [b](b.md)',
-    );
-  });
-
-  it('reports missing files, self refs and cycles', async () => {
-    const root = await setup({
-      'a.md': '{{ref:b}}',
-      'b.md': '{{ref:a}}',
-      'c.md': '{{ref:c}}',
-    });
-    const { problems } = await buildDocs(
-      config({
-        knowledge: {
-          refs: { a: './a.md', b: './b.md', c: './c.md', d: './nope.md' },
-        },
-        rules: () => [],
-      }),
-      join(root, '.nitpick'),
-      root,
-    );
-    expect(problems).toEqual([
-      'Knowledge "d": missing file ./nope.md',
-      'Knowledge "c": references itself',
-      'Reference cycle: a -> b -> a',
-    ]);
-  });
+const oneRule = (doc: Config['rules'][string][string]['doc']): Config => ({
+  rules: { g: { r: { importance: A, doc } } },
 });
 
-describe('Instruction files work when', () => {
-  it('links the rule to a generated markdown file with resolved refs', async () => {
-    const root = await setup({ 'a.md': 'leaf', 'x.md': 'read {{ref:a}}' });
-    const { files, problems } = await buildDocs(
-      config({
-        output: [{ path: 'out', root: 'RULES.md' }],
-        knowledge: { refs: { a: './a.md' } },
-        rules: [{ id: 'x', instruction: { file: './x.md' } }],
-      }),
-      join(root, '.nitpick'),
-      root,
-    );
+describe('Root docs work when', () => {
+  it('start with the default heading', async () => {
+    const { read } = await build({ rules: {} });
+    expect(read('.ai', 'AGENTS.md')).toBe('# Information for AI\n');
+  });
+
+  it('are replaced by an entry string', async () => {
+    const { read } = await build({
+      rules: {},
+      entry: { doc: '\n# Own\n\n' },
+    });
+    expect(read('.ai', 'AGENTS.md')).toBe('# Own\n');
+  });
+
+  it('are replaced by an entry callback with header and links', async () => {
+    const { read, problems } = await build({
+      rules: { g: { r: { importance: A, doc: 'x' } } },
+      entry: { doc: ({ header, ref }) => `${header} ${ref('r')}` },
+    });
     expect(problems).toEqual([]);
-    expect(files.get(join(root, 'out', 'RULES.md'))).toContain(
-      '1. (A) [x](rules/x.md)',
-    );
-    expect(files.get(join(root, 'out', 'rules', 'x.md'))).toBe(
-      'read [a](../references/a.md)',
+    expect(read('.ai', 'AGENTS.md')).toBe(
+      `# Information for AI [r](rules/g.md)\n\n## Rule files\n\n${AODI_LEGEND}\n\n- [rules/g.md](rules/g.md)\n`,
     );
   });
 
-  it('reports missing files and unknown refs', async () => {
-    const root = await setup({ 'y.md': '{{ref:ghost}}' });
-    const { problems } = await buildDocs(
-      config({
-        rules: [
-          { id: 'x', instruction: { file: './nope.md' } },
-          { id: 'y', instruction: { file: './y.md' } },
-        ],
-      }),
-      join(root, '.nitpick'),
-      root,
+  it('are replaced by an entry file with resolved refs', async () => {
+    const { read, problems } = await build(
+      {
+        rules: {},
+        refs: { k: './k.md' },
+        entry: { doc: { file: './entry.md' } },
+      },
+      { 'entry.md': '# E {{ref:k}}\r\n', 'k.md': 'k' },
     );
-    expect(problems).toEqual([
-      'Rule "x": missing file ./nope.md',
-      'Rule "y": unknown ref "ghost"',
-    ]);
+    expect(problems).toEqual([]);
+    expect(read('.ai', 'AGENTS.md')).toBe(
+      '# E [k](references/k.md)\n\n## Reference files\n\n- [references/k.md](references/k.md)\n',
+    );
+  });
+
+  it('report a missing entry file and write an empty entry', async () => {
+    const { read, problems } = await build({
+      rules: {},
+      entry: { doc: { file: './gone.md' } },
+    });
+    expect(problems).toEqual(['Entry: missing file ./gone.md']);
+    expect(read('.ai', 'AGENTS.md')).toBe('\n');
   });
 });
 
 describe('Rule groups work when', () => {
-  const build = async (rules: Parameters<typeof config>[0]['rules']) => {
-    const root = await setup({ 'a.md': 'a text' });
-    const result = await buildDocs(
-      config({ output: [{ path: 'out', root: 'RULES.md' }], rules }),
-      join(root, '.nitpick'),
-      root,
+  it('renders a group file with tagged numbered rules in config order', async () => {
+    const { read, keys } = await build({
+      rules: {
+        git: {
+          late: { importance: 'I', doc: 'third' },
+          first: { importance: A, doc: 'first' },
+        },
+        ui: { x: { importance: 'D', doc: 'x' } },
+      },
+    });
+    expect(read('.ai', 'rules', 'git.md')).toBe(
+      '## Git\n\n1. (I) third\n2. (A) first\n',
     );
-    return {
-      ...result,
-      read: (...parts: string[]) => result.files.get(join(root, ...parts)),
-      text: result.files.get(join(root, 'out', 'RULES.md')) ?? '',
-      keys: [...result.files.keys()].map((key) => key.slice(root.length + 1)),
-    };
-  };
-
-  it('renders ungrouped rules under a plain Rules heading', async () => {
-    const { text } = await build([{ id: 'x', instruction: () => 'y' }]);
-    expect(text).toBe(
-      '# Information for AI\n\n' + AODI_LEGEND + '\n\n## Rules\n\n1. (A) y\n',
+    expect(read('.ai', 'AGENTS.md')).toContain(
+      `## Rule files\n\n${AODI_LEGEND}\n\n- [rules/git.md](rules/git.md)\n- [rules/ui.md](rules/ui.md)\n`,
     );
-  });
-
-  it('renders a group as its own file with tagged numbered rules', async () => {
-    const { text, read } = await build([
-      { id: 'a', group: 'git', instruction: () => 'one' },
-      { id: 'b', group: 'git', importance: 'I', instruction: () => 'two' },
-    ]);
-    expect(text).toBe(
-      '# Information for AI\n\n' +
-        AODI_LEGEND +
-        '\n\n## Rule files\n\n- [rules/git.md](rules/git.md)\n',
-    );
-    expect(read('out', 'rules', 'git.md')).toBe(
-      '## Git\n\n1. (A) one\n2. (I) two\n',
-    );
-  });
-
-  it('keeps ungrouped rules in the root and groups in order of appearance', async () => {
-    const { text } = await build([
-      { id: 'g1', group: 'git', instruction: () => '1' },
-      { id: 'f1', group: 'files', instruction: () => '2' },
-      { id: 'x', instruction: () => '3' },
-    ]);
-    const at = (heading: string) => text.indexOf(heading);
-    expect(at('1. (A) 3')).toBeLessThan(at('## Rule files'));
-    expect(at('rules/git.md')).toBeLessThan(at('rules/files.md'));
-  });
-
-  it('links instruction files from the group file and keeps their path', async () => {
-    const { read, keys } = await build([
-      { id: 'a', group: 'git', instruction: { file: './a.md' } },
-    ]);
-    expect(read('out', 'rules', 'git.md')).toContain('1. (A) [a](a.md)');
     expect(keys).toEqual([
-      join('out', 'RULES.md'),
-      join('out', 'rules', 'git.md'),
-      join('out', 'rules', 'a.md'),
+      join('.ai', 'AGENTS.md'),
+      join('.ai', 'rules', 'git.md'),
+      join('.ai', 'rules', 'ui.md'),
     ]);
   });
 
-  it('links knowledge from the group file relative to rules', async () => {
-    const root = await setup({ 'k.md': 'leaf' });
-    const { files, problems } = await buildDocs(
-      config({
-        knowledge: { refs: { k: './k.md' } },
-        rules: [{ id: 'a', group: 'git', instruction: ({ ref }) => ref('k') }],
-      }),
-      join(root, '.nitpick'),
-      root,
+  it('derives the title from the group key', async () => {
+    const { read } = await build({
+      rules: { 'unit-testing': { r: { importance: A, doc: 'x' } } },
+    });
+    expect(read('.ai', 'rules', 'unit-testing.md')).toBe(
+      '## Unit Testing\n\n1. (A) x\n',
+    );
+  });
+
+  it('reports bad group names', async () => {
+    const { problems } = await build({
+      rules: {
+        'bad name': { r: { importance: A, doc: 'x' } },
+        same: { same: { importance: A, doc: 'x' } },
+      },
+    });
+    expect(problems).toEqual([
+      'Group "bad name": use letters, digits, "_" or "-"',
+      'Group "same": same name as a rule id file',
+    ]);
+  });
+});
+
+describe('Rule docs work when', () => {
+  it('inline strings and callbacks in the group file', async () => {
+    const { read } = await build({
+      rules: {
+        g: {
+          a: { importance: A, doc: 'plain' },
+          b: { importance: A, doc: ({ ref }) => `to ${ref('a')}` },
+        },
+      },
+    });
+    expect(read('.ai', 'rules', 'g.md')).toBe(
+      '## G\n\n1. (A) plain\n2. (A) to [a](g.md)\n',
+    );
+  });
+
+  it('write a file doc as its own file and link it from the group', async () => {
+    const { read, problems } = await build(
+      {
+        rules: { g: { r: { importance: A, doc: { file: './r.md' } } } },
+        refs: { 'x/k': './k.md' },
+      },
+      { 'r.md': 'see {{ref:x/k}} and {{ref:x/k}}\r\n', 'k.md': '' },
     );
     expect(problems).toEqual([]);
-    expect(files.get(join(root, '.ai', 'rules', 'git.md'))).toContain(
-      '1. (A) [k](../references/k.md)',
+    expect(read('.ai', 'rules', 'g.md')).toContain('1. (A) [r](r.md)');
+    expect(read('.ai', 'rules', 'r.md')).toBe(
+      'see [x/k](../references/x/k.md) and [x/k](../references/x/k.md)\n',
     );
+    expect(read('.ai', 'AGENTS.md')).not.toContain('r.md');
   });
 
-  it('reports a group named like a rule file and an unsafe group name', async () => {
-    const { problems } = await build([
-      { id: 'git', instruction: { file: './a.md' } },
-      { id: 'b', group: 'git', instruction: () => '1' },
-      { id: 'c', group: '../x', instruction: () => '2' },
-    ]);
-    expect(problems).toEqual([
-      'Group "git": same name as a rule id file',
-      'Group "../x": use letters, digits, "_" or "-"',
-    ]);
-  });
-});
-
-describe('Rules as array work when', () => {
-  it('accepts a plain list', async () => {
-    const root = await setup({});
-    const { files } = await buildDocs(
-      config({ rules: [{ id: 'x', instruction: () => 'y' }] }),
-      join(root, '.nitpick'),
-      root,
-    );
-    expect([...files.values()][0]).toContain('1. (A) y');
-  });
-});
-
-describe('Default output works when', () => {
-  it('writes .ai/AGENTS.md without output config', async () => {
-    const root = await setup({});
-    const { files } = await buildDocs(
-      config({
-        rules: ({ rule }) => [rule({ id: 'x', instruction: () => 'y' })],
-      }),
-      join(root, '.nitpick'),
-      root,
-    );
-    expect([...files.keys()]).toEqual([join(root, '.ai', 'AGENTS.md')]);
-  });
-});
-
-describe('Ref validation works when', () => {
-  it('reports unknown refs in knowledge and in instructions', async () => {
-    const root = await setup({ 'a.md': '{{ref:ghost}}' });
-    const { problems } = await buildDocs(
-      config({
-        knowledge: { refs: { a: './a.md' } },
-        rules: [{ id: 'x', instruction: ({ ref }) => ref('nope' as 'a') }],
-      }),
-      join(root, '.nitpick'),
-      root,
+  it('report a missing doc file and unknown refs per occurrence', async () => {
+    const { problems } = await build(
+      {
+        rules: {
+          g: {
+            a: { importance: A, doc: { file: './gone.md' } },
+            b: { importance: A, doc: { file: './b.md' } },
+          },
+        },
+      },
+      { 'b.md': '{{ref:q}} {{ref:q}}' },
     );
     expect(problems).toEqual([
-      'Knowledge "a": unknown ref "ghost"',
-      'Rule instruction: unknown ref "nope"',
+      'Rule "a": missing file ./gone.md',
+      'Rule "b": unknown ref "q"',
+      'Rule "b": unknown ref "q"',
     ]);
   });
 
-  it('reports duplicate rule ids', async () => {
-    const root = await setup({});
-    const { problems } = await buildDocs(
-      config({
-        rules: [
-          { id: 'x', instruction: () => 'a' },
-          { id: 'x', instruction: () => 'b' },
-        ],
-      }),
-      join(root, '.nitpick'),
-      root,
-    );
-    expect(problems).toEqual(['Duplicate rule id "x"']);
+  it('require fix next to run', async () => {
+    const { problems } = await build({
+      rules: {
+        g: {
+          a: { importance: A, doc: 'a', run: () => {} },
+          b: { importance: A, doc: 'b', run: () => {}, fix: 'f' },
+        },
+      },
+    } as unknown as Config);
+    expect(problems).toEqual(['Rule "a": fix is required when run is defined']);
   });
 
-  it('writes knowledge under a custom dir', async () => {
-    const root = await setup({ 'a.md': 'leaf' });
-    const { files } = await buildDocs(
-      config({
-        knowledge: { dir: 'kb', refs: { 'x/a': './a.md' } },
-        rules: [],
-      }),
-      join(root, '.nitpick'),
-      root,
+  it('report ref ids and file keys that are unknown at runtime', async () => {
+    const { problems, read } = await build(
+      oneRule(({ ref, file }) => `${ref('ghost')} ${file('nope')}`),
     );
-    expect([...files.keys()]).toContain(join(root, '.ai', 'kb', 'x', 'a.md'));
+    expect(problems).toEqual([
+      'Rule "r": unknown ref "ghost"',
+      'Rule "r": unknown ref "nope"',
+    ]);
+    expect(read('.ai', 'rules', 'g.md')).toContain('ghost nope');
   });
 });
 
-describe('Multiple outputs work when', () => {
-  const build = async (output: { path: string; root: string }[]) => {
-    const root = await setup({ 'k.md': 'leaf', 'x.md': 'x' });
-    const { files, problems } = await buildDocs(
-      config({
+describe('Insert works when', () => {
+  it('inlines a trimmed file with LF endings and resolved refs', async () => {
+    const { read, problems } = await build(
+      {
+        rules: {
+          g: {
+            r: {
+              importance: A,
+              doc: ({ insert }) => `a ${insert('i')} b`,
+            },
+          },
+        },
+        refs: { i: './i.md', k: './k.md' },
+      },
+      { 'i.md': '\r\nbody {{ref:k}}\r\n\r\n', 'k.md': 'k' },
+    );
+    expect(problems).toEqual([]);
+    expect(read('.ai', 'rules', 'g.md')).toContain(
+      '1. (A) a body [k](../references/k.md) b',
+    );
+  });
+
+  it('lowers headings one level and keeps fenced code as is', async () => {
+    const { read } = await build(
+      {
+        rules: {},
+        agents: { a: { doc: ({ insert }) => insert('i') } },
+        refs: { i: './i.md' },
+      },
+      { 'i.md': '# T\n\n```md\n# keep\n```\n\n## S\n' },
+    );
+    expect(read('.ai', 'agents', 'a.md')).toBe(
+      '## T\n\n```md\n# keep\n```\n\n### S\n',
+    );
+  });
+
+  it('reports an unknown key at runtime', async () => {
+    const { problems } = await build(
+      oneRule(({ insert }) => insert('ghost' as never)),
+    );
+    expect(problems).toEqual(['Rule "r": unknown ref "ghost"']);
+  });
+
+  it('reports a missing file and inlines nothing', async () => {
+    const { read, problems } = await build({
+      rules: {},
+      agents: { a: { doc: ({ insert }) => `[${insert('gone')}]` } },
+      refs: { gone: './gone.md' },
+    });
+    expect(problems).toEqual(['Knowledge "gone": missing file ./gone.md']);
+    expect(read('.ai', 'agents', 'a.md')).toBe('[]\n');
+  });
+});
+
+describe('Agents work when', () => {
+  it('writes one file per agent and lists them in the root', async () => {
+    const { read, problems } = await build(
+      {
+        rules: { g: { r: { importance: A, doc: 'r' } } },
+        agents: {
+          plain: { doc: ' Plain ' },
+          fn: { doc: ({ ref }) => `to ${ref('plain')} ${ref('r')}` },
+          file: { doc: { file: './a.md' } },
+        },
+      },
+      { 'a.md': 'from file' },
+    );
+    expect(problems).toEqual([]);
+    expect(read('.ai', 'agents', 'plain.md')).toBe('Plain\n');
+    expect(read('.ai', 'agents', 'fn.md')).toBe(
+      'to [plain](plain.md) [r](../rules/g.md)\n',
+    );
+    expect(read('.ai', 'agents', 'file.md')).toBe('from file\n');
+    expect(read('.ai', 'AGENTS.md')).toContain(
+      '## Agent files\n\n- [agents/plain.md](agents/plain.md)\n- [agents/fn.md](agents/fn.md)\n- [agents/file.md](agents/file.md)\n',
+    );
+  });
+
+  it('renders frontmatter before the body', async () => {
+    const { read } = await build({
+      rules: {},
+      agents: {
+        a: { doc: 'Body', frontmatter: { name: 'a', description: 'An agent' } },
+      },
+    });
+    expect(read('.ai', 'agents', 'a.md')).toBe(
+      '---\nname: a\ndescription: An agent\n---\n\nBody\n',
+    );
+  });
+
+  it('writes an empty body for a missing doc file', async () => {
+    const { read, problems } = await build({
+      rules: {},
+      agents: { a: { doc: { file: './gone.md' } } },
+    });
+    expect(problems).toEqual(['Agent "a": missing file ./gone.md']);
+    expect(read('.ai', 'agents', 'a.md')).toBe('\n');
+  });
+
+  it('reports an id shared by rules and agents', async () => {
+    const { problems } = await build({
+      rules: {
+        a: { x: { importance: A, doc: '1' } },
+        b: { x: { importance: A, doc: '2' } },
+      },
+      agents: { x: { doc: '3' } },
+    });
+    expect(problems).toEqual(['Duplicate id "x"', 'Duplicate id "x"']);
+  });
+});
+
+describe('Refs work when', () => {
+  it('link nested keys relative to their own folders and keep lookalikes', async () => {
+    const { read, problems } = await build(
+      { rules: {}, refs: { 'x/a': './a.md', b: './b.md', c: './c.md' } },
+      {
+        'a.md': '{{ref:b}} {{ref:b}}',
+        'b.md': '{{ref:}} {{ref: b}} {{ref:x/a}}',
+        'c.md': '',
+      },
+    );
+    expect(problems).toEqual(['Reference cycle: x/a -> b -> x/a']);
+    expect(read('.ai', 'references', 'x', 'a.md')).toBe(
+      '[b](../b.md) [b](../b.md)',
+    );
+    expect(read('.ai', 'references', 'b.md')).toBe(
+      '{{ref:}} {{ref: b}} [x/a](x/a.md)',
+    );
+    expect(read('.ai', 'references', 'c.md')).toBe('');
+  });
+
+  it('allow a diamond and report a self reference, unknown refs and cycles once', async () => {
+    const diamond = await build(
+      {
+        rules: {},
+        refs: { a: './a.md', b: './b.md', c: './c.md', d: './d.md' },
+      },
+      {
+        'a.md': '{{ref:b}}{{ref:c}}',
+        'b.md': '{{ref:d}}',
+        'c.md': '{{ref:d}}',
+        'd.md': '',
+      },
+    );
+    expect(diamond.problems).toEqual([]);
+    const bad = await build(
+      { rules: {}, refs: { a: './a.md', b: './b.md' } },
+      { 'a.md': '{{ref:a}} {{ref:x}}', 'b.md': '{{ref:a}}' },
+    );
+    expect(bad.problems).toEqual([
+      'Knowledge "a": references itself',
+      'Knowledge "a": unknown ref "x"',
+    ]);
+  });
+
+  it('report a missing file only once', async () => {
+    const { problems } = await build({ rules: {}, refs: { a: './gone.md' } });
+    expect(problems).toEqual(['Knowledge "a": missing file ./gone.md']);
+  });
+});
+
+describe('Outputs work when', () => {
+  const setup = (output: { path: string; root: string }[]) =>
+    build(
+      {
         output,
-        knowledge: { refs: { k: './k.md' } },
-        rules: [{ id: 'x', instruction: { file: './x.md' } }],
-      }),
-      join(root, '.nitpick'),
-      root,
+        rules: { g: { x: { importance: A, doc: { file: './x.md' } } } },
+        refs: { k: './k.md' },
+      },
+      { 'k.md': 'leaf', 'x.md': 'x' },
     );
-    return {
-      problems,
-      files,
-      keys: [...files.keys()].map((key) => key.slice(root.length + 1)),
-      read: (...parts: string[]) => files.get(join(root, ...parts)),
-    };
-  };
 
   it('writes full docs only for the first output', async () => {
-    const { problems, keys, read } = await build([
+    const { problems, keys, read } = await setup([
       { path: '.ai', root: 'CLAUDE.md' },
       { path: '.ai', root: 'AGENTS.md' },
     ]);
     expect(problems).toEqual([]);
     expect(keys).toEqual([
       join('.ai', 'CLAUDE.md'),
+      join('.ai', 'rules', 'g.md'),
       join('.ai', 'rules', 'x.md'),
       join('.ai', 'references', 'k.md'),
       join('.ai', 'AGENTS.md'),
     ]);
-    expect(read('.ai', 'CLAUDE.md')).toContain('1. (A) [x](rules/x.md)');
+    expect(read('.ai', 'rules', 'g.md')).toContain('1. (A) [x](x.md)');
   });
 
   it('makes every next output reference the first one', async () => {
-    const { read } = await build([
+    const { read } = await setup([
       { path: '.ai', root: 'CLAUDE.md' },
       { path: '.ai', root: 'AGENTS.md' },
       { path: 'docs/nested', root: 'RULES.md' },
@@ -328,75 +399,100 @@ describe('Multiple outputs work when', () => {
       'Follow instructions here: [CLAUDE.md](../../.ai/CLAUDE.md)\n',
     );
   });
+
+  it('falls back to the default output for an empty list', async () => {
+    const { read } = await setup([]);
+    expect(read('.ai', 'AGENTS.md')).toContain('## Rule files');
+  });
+
+  it('reports the written path of each rule', async () => {
+    const { rulePaths } = await build(
+      {
+        output: [{ path: 'out\\dir', root: 'R.md' }],
+        rules: {
+          g: {
+            a: { importance: A, doc: 'a' },
+            b: { importance: A, doc: { file: './b.md' } },
+          },
+        },
+      },
+      { 'b.md': 'b' },
+    );
+    expect(Object.fromEntries(rulePaths)).toEqual({
+      a: 'out/dir/rules/g.md',
+      b: 'out/dir/rules/b.md',
+    });
+  });
 });
 
 describe('Settings generation works when', () => {
-  const build = async (settings: Parameters<typeof config>[0]['settings']) => {
-    const root = await setup({});
-    const docs = await buildDocs(
-      config({
-        output: [
-          { path: 'out', root: 'A.md' },
-          { path: 'other', root: 'B.md' },
-        ],
-        settings,
-        rules: () => [],
-      }),
-      join(root, '.nitpick'),
-      root,
-    );
-    return { root, ...docs };
+  const setup = async (settings: Config['settings']) => {
+    const { files, problems, keys } = await build({
+      output: [
+        { path: 'out', root: 'A.md' },
+        { path: 'other', root: 'B.md' },
+      ],
+      settings,
+      rules: {},
+    });
+    return { files, problems, keys };
   };
+  const find = (keys: string[], name: string) =>
+    keys.find((key) => key.endsWith(name));
 
   it('writes settings only under the first output', async () => {
-    const { root, files, problems } = await build({
+    const { files, keys, problems } = await setup({
       permissions: { allow: ['Bash(ls)'] },
       env: { MODE: 'dev' },
     });
     expect(problems).toEqual([]);
-    expect(files.get(join(root, 'out', 'settings.json'))).toBe(
+    expect(keys.filter((key) => key.includes('settings'))).toHaveLength(1);
+    expect(
+      [...files].find(([file]) => file.endsWith('settings.json'))?.[1],
+    ).toBe(
       '{\n  "permissions": {\n    "allow": [\n      "Bash(ls)"\n    ]\n  },\n  "env": {\n    "MODE": "dev"\n  }\n}\n',
     );
-    expect(files.has(join(root, 'other', 'settings.json'))).toBe(false);
-    expect(files.has(join(root, '.mcp.json'))).toBe(false);
+    expect(find(keys, '.mcp.json')).toBeUndefined();
   });
 
   it('uses the local name and passes extra keys through', async () => {
-    const { root, files } = await build({
+    const { files } = await setup({
       name: 'settings.local.json',
       model: 'opus',
     });
-    expect(files.get(join(root, 'out', 'settings.local.json'))).toBe(
-      '{\n  "model": "opus"\n}\n',
-    );
+    expect(
+      [...files].find(([file]) => file.endsWith('settings.local.json'))?.[1],
+    ).toBe('{\n  "model": "opus"\n}\n');
   });
 
   it('writes .mcp.json and enables its servers', async () => {
-    const { root, files, problems } = await build({
+    const { files, problems } = await setup({
       mcp: {
         local: { command: 'npx', args: ['x'], env: { TOKEN: '${TOKEN}' } },
         remote: { type: 'http', url: 'https://a.b', headers: { A: '${A:-x}' } },
       },
     });
     expect(problems).toEqual([]);
-    expect(JSON.parse(files.get(join(root, '.mcp.json')) ?? '')).toEqual({
+    const text = (name: string) =>
+      [...files].find(([file]) => file.endsWith(name))?.[1] ?? '';
+    expect(JSON.parse(text('.mcp.json'))).toEqual({
       mcpServers: {
         local: { command: 'npx', args: ['x'], env: { TOKEN: '${TOKEN}' } },
         remote: { type: 'http', url: 'https://a.b', headers: { A: '${A:-x}' } },
       },
     });
-    expect(
-      JSON.parse(files.get(join(root, 'out', 'settings.json')) ?? ''),
-    ).toEqual({ enabledMcpjsonServers: ['local', 'remote'] });
+    expect(JSON.parse(text('settings.json'))).toEqual({
+      enabledMcpjsonServers: ['local', 'remote'],
+    });
   });
 
   it('skips .mcp.json for empty mcp', async () => {
-    const { root, files } = await build({ mcp: {} });
-    expect(files.has(join(root, '.mcp.json'))).toBe(false);
+    const { keys } = await setup({ mcp: {} });
+    expect(find(keys, '.mcp.json')).toBeUndefined();
   });
 
   it('reports literal secrets, bad name and empty server name', async () => {
-    const { problems } = await build({
+    const { problems } = await setup({
       name: 'x.json' as 'settings.json',
       env: { API_KEY: 'abc', LONG: 'abcdefghijklmnopqrstuvwxyz' },
       mcp: {
@@ -412,5 +508,12 @@ describe('Settings generation works when', () => {
       'Settings env "API_KEY": looks like a literal secret, use ${VAR} expansion',
       'Settings env "LONG": looks like a literal secret, use ${VAR} expansion',
     ]);
+  });
+});
+
+describe('Config helper works when', () => {
+  it('returns the given rules untouched', () => {
+    const value = config({ rules: { g: { r: { importance: A, doc: 'x' } } } });
+    expect(Object.keys(value.rules)).toEqual(['g']);
   });
 });

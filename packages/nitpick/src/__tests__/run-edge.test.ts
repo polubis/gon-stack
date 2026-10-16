@@ -6,6 +6,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AODI_LEGEND } from '../docs.js';
 import { EXIT_CONFIG, EXIT_PROBLEMS, EXIT_USAGE, run } from '../run.js';
 
+const configPath = join(import.meta.dirname, '..', 'config.ts')
+  .split(String.fromCharCode(92))
+  .join('/');
+
 const richCommitPath = join(
   import.meta.dirname,
   '..',
@@ -45,10 +49,10 @@ const project = async (
 };
 
 const rule = (body: string, extra = '') =>
-  `{ id: 'r', instruction: () => 'do r', ${extra} fix: 'f', check: async (c) => { ${body} } }`;
+  `'r': { importance: 'A', doc: () => 'do r', ${extra} fix: 'f', run: async (c) => { ${body} } }`;
 
 const source = (...rules: string[]) =>
-  `export default { rules: [${rules.join(',')}] };`;
+  `export default { rules: { g: { ${rules.join(',')} } } };`;
 
 let errors: string[];
 let guidance: string[];
@@ -133,21 +137,21 @@ describe('CLI config works when', () => {
 
   it('prefixes every config problem and reports all of them', async () => {
     const root = await project(
-      `export default { rules: [
-        { id: 'a', instruction: () => '' },
-        { id: 'a', instruction: { file: './missing.md' } },
-      ] };`,
+      `export default { rules: {
+        g: { a: { importance: 'A', doc: '' } },
+        h: { a: { importance: 'A', doc: { file: './missing.md' } } },
+      } };`,
     );
     expect(await run(['--sync'], root)).toBe(EXIT_CONFIG);
     expect(errors).toEqual([
+      '[config] Duplicate id "a"',
       '[config] Rule "a": missing file ./missing.md',
-      '[config] Duplicate rule id "a"',
     ]);
   });
 
   it('writes nothing when the config is invalid', async () => {
     const root = await project(
-      source(`{ id: 'a', instruction: { file: './nope.md' } }`),
+      source(`'a': { importance: 'A', doc: { file: './nope.md' } }`),
     );
     await run(['--sync'], root);
     await expect(readFile(join(root, '.ai', 'AGENTS.md'))).rejects.toThrow();
@@ -165,11 +169,11 @@ describe('CLI sync works when', () => {
 
   it('creates nested output folders', async () => {
     const root = await project(
-      `export default { output: [{ path: 'a/b/c', root: 'X.md' }], rules: [] };`,
+      `export default { output: [{ path: 'a/b/c', root: 'X.md' }], rules: {} };`,
     );
     expect(await run(['--sync'], root)).toBe(0);
     expect(await readFile(join(root, 'a', 'b', 'c', 'X.md'), 'utf8')).toBe(
-      '# Information for AI\n\n' + AODI_LEGEND + '\n',
+      '# Information for AI\n',
     );
   });
 
@@ -189,7 +193,7 @@ describe('CLI sync works when', () => {
     const root = await project(
       `export default {
         output: [{ path: '.ai', root: 'CLAUDE.md' }, { path: '.ai', root: 'AGENTS.md' }],
-        rules: [],
+        rules: {},
       };`,
     );
     await run(['--sync'], root);
@@ -220,7 +224,7 @@ describe('CLI drift detection works when', () => {
     const root = await synced(
       `export default {
         output: [{ path: '.ai', root: 'A.md' }, { path: 'docs', root: 'B.md' }],
-        rules: [],
+        rules: {},
       };`,
     );
     await writeFile(join(root, 'docs', 'B.md'), 'stale');
@@ -232,7 +236,11 @@ describe('CLI drift detection works when', () => {
   it('lists drift before rule problems and keeps exit 1', async () => {
     const root = await project(source(rule('c.report("bad");')));
     expect(await run(['--check'], root)).toBe(EXIT_PROBLEMS);
-    expect(errors).toEqual([expect.stringContaining('[sync]'), '[r] bad']);
+    expect(errors).toEqual([
+      expect.stringContaining('[sync]'),
+      expect.stringContaining('[sync]'),
+      '[r] bad',
+    ]);
   });
 
   it('does not write anything while checking', async () => {
@@ -246,8 +254,8 @@ describe('Check execution works when', () => {
   it('runs rules in config order and reports in that order', async () => {
     const root = await synced(
       source(
-        `{ id: 'one', instruction: () => '1', fix: 'f', check: ({ report }) => report('a') }`,
-        `{ id: 'two', instruction: () => '2', fix: 'f', check: ({ report }) => report('b') }`,
+        `'one': { importance: 'A', doc: () => '1', fix: 'f', run: ({ report }) => report('a') }`,
+        `'two': { importance: 'A', doc: () => '2', fix: 'f', run: ({ report }) => report('b') }`,
       ),
     );
     await run(['--check'], root);
@@ -255,7 +263,9 @@ describe('Check execution works when', () => {
   });
 
   it('skips rules without a check', async () => {
-    const root = await synced(source(`{ id: 'x', instruction: () => 'x' }`));
+    const root = await synced(
+      source(`'x': { importance: 'A', doc: () => 'x' }`),
+    );
     expect(await run(['--check'], root)).toBe(0);
   });
 
@@ -279,7 +289,7 @@ describe('Check execution works when', () => {
     const root = await synced(
       source(
         rule('throw new Error("boom");'),
-        `{ id: 'next', instruction: () => 'n', fix: 'f', check: ({ report }) => report('still ran') }`,
+        `'next': { importance: 'A', doc: () => 'n', fix: 'f', run: ({ report }) => report('still ran') }`,
       ),
     );
     expect(await run(['--check'], root)).toBe(EXIT_PROBLEMS);
@@ -290,7 +300,7 @@ describe('Check execution works when', () => {
     const root = await synced(
       source(
         rule('return Promise.reject(new Error("nope"));'),
-        `{ id: 's', instruction: () => 's', fix: 'f', check: () => { throw 'text'; } }`,
+        `'s': { importance: 'A', doc: () => 's', fix: 'f', run: () => { throw 'text'; } }`,
       ),
     );
     await run(['--check'], root);
@@ -317,7 +327,7 @@ describe('Check execution works when', () => {
   it('gives each rule its own id and the project root in meta', async () => {
     const root = await synced(
       source(
-        `{ id: 'x', instruction: () => '', fix: 'f', check: ({ report, meta }) => report(meta.ruleId + '@' + meta.projectRoot) }`,
+        `'x': { importance: 'A', doc: () => '', fix: 'f', run: ({ report, meta }) => report(meta.ruleId + '@' + meta.projectRoot) }`,
       ),
     );
     await run(['--check'], root);
@@ -405,7 +415,9 @@ describe('Files snapshot works when', () => {
     );
     await run(['--check'], root);
     expect(errors[0]).toContain('a.txt');
-    expect(errors).toEqual(['[r] .ai/AGENTS.md,.nitpick/config.ts,a.txt']);
+    expect(errors).toEqual([
+      '[r] .ai/AGENTS.md,.ai/rules/g.md,.nitpick/config.ts,a.txt',
+    ]);
   });
 
   it('lets exclude win over include and supports several include globs', async () => {
@@ -432,19 +444,22 @@ describe('Files snapshot works when', () => {
     const root = await synced(
       source(
         rule('c.report(c.files.join(","));', 'include: ["**/*.md"],'),
-        `{ id: 'dot', instruction: () => '', include: ['.ai/**'], fix: 'f', check: ({ files, report }) => report(files.join()) }`,
+        `'dot': { importance: 'A', doc: () => '', include: ['.ai/**'], fix: 'f', run: ({ files, report }) => report(files.join()) }`,
       ),
       { 'docs/a.md': '' },
     );
     await run(['--check'], root);
-    expect(errors).toEqual(['[r] docs/a.md', '[dot] .ai/AGENTS.md']);
+    expect(errors).toEqual([
+      '[r] docs/a.md',
+      '[dot] .ai/AGENTS.md,.ai/rules/g.md',
+    ]);
   });
 
   it('gives different rules different file lists', async () => {
     const root = await synced(
       source(
-        `{ id: 'ts', instruction: () => '', include: ['**/*.ts'], fix: 'f', check: ({ files, report }) => report(files.join()) }`,
-        `{ id: 'md', instruction: () => '', include: ['docs/*.md'], fix: 'f', check: ({ files, report }) => report(files.join()) }`,
+        `'ts': { importance: 'A', doc: () => '', include: ['**/*.ts'], fix: 'f', run: ({ files, report }) => report(files.join()) }`,
+        `'md': { importance: 'A', doc: () => '', include: ['docs/*.md'], fix: 'f', run: ({ files, report }) => report(files.join()) }`,
       ),
       { 'a.ts': '', 'docs/b.md': '' },
     );
@@ -518,7 +533,8 @@ describe('Commit messages work when', () => {
   it('accepts a real commit message file with git comments through rich-commit', async () => {
     const root = await synced(
       `import { richCommit } from '${richCommitPath}';
-       export default { rules: [richCommit] };`,
+       import { config } from '${configPath}';
+       export default config({ rules: { git: { 'rich-commit': richCommit } } });`,
     );
     await writeFile(
       join(root, 'm.txt'),
@@ -633,7 +649,8 @@ describe('Commit messages work when', () => {
 
 describe('Rich commit through the CLI works when', () => {
   const rich = `import { richCommit } from '${richCommitPath}';
-    export default { rules: [richCommit] };`;
+    import { config } from '${configPath}';
+       export default config({ rules: { git: { 'rich-commit': richCommit } } });`;
 
   it('accepts a real commit and rejects a real bad commit', async () => {
     const root = await synced(rich);
@@ -661,9 +678,9 @@ describe('Rich commit through the CLI works when', () => {
   it('writes the rule instruction file and a group heading on sync', async () => {
     const root = await synced(rich);
     expect(await readFile(join(root, '.ai', 'AGENTS.md'), 'utf8')).toBe(
-      '# Information for AI\n\n' +
+      '# Information for AI\n\n## Rule files\n\n' +
         AODI_LEGEND +
-        '\n\n## Rule files\n\n- [rules/git.md](rules/git.md)\n',
+        '\n\n- [rules/git.md](rules/git.md)\n',
     );
     expect(await readFile(join(root, '.ai', 'rules', 'git.md'), 'utf8')).toBe(
       '## Git\n\n1. (A) [rich-commit](rich-commit.md)\n',

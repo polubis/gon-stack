@@ -13,22 +13,6 @@ export type CheckContext = {
   meta: { ruleId: string; projectRoot: string };
 };
 
-type RuleBase<K extends string> = {
-  id: string;
-  group?: string;
-  importance?: Importance;
-  include?: string[];
-  exclude?: string[];
-  instruction:
-    ((helpers: { ref: (key: K) => string }) => string) | { file: string };
-};
-
-export type Rule<K extends string = string> = RuleBase<K> &
-  (
-    | { check: (context: CheckContext) => void | Promise<void>; fix: string }
-    | { check?: undefined; fix?: string }
-  );
-
 export type McpServer =
   | {
       type?: 'stdio';
@@ -53,30 +37,84 @@ export type Settings = {
   [key: string]: unknown;
 };
 
-export type DocsText<K extends string> =
-  | ((helpers: { ref: (key: K) => string; group?: string }) => string)
-  | { file: string };
-
-type DocsSlot<K extends string> = { title?: string; text?: DocsText<K> };
-
-export type Config<K extends string = string> = {
-  docs?: {
-    header?: string;
-    intro?: DocsText<K>;
-    ungrouped?: DocsSlot<K>;
-    groups?: Record<string, DocsSlot<K>>;
-  };
-  output?: { path: string; root: string }[];
-  settings?: Settings;
-  knowledge?: { dir?: string; refs?: Record<K, string> };
-  rules:
-    Rule<K>[] | ((helpers: { rule: (rule: Rule<K>) => Rule<K> }) => Rule<K>[]);
+type Ctx<I extends string, K extends string> = {
+  ref: (id: I) => string;
+  file: (key: K) => string;
+  insert: (key: K) => string;
 };
 
-export const config = <K extends string = never>(value: Config<K>): Config<K> =>
-  value;
+type UnitIds<
+  R extends Record<string, Record<string, unknown>>,
+  A extends string,
+> = { [G in keyof R]: keyof R[G] & string }[keyof R] | A;
 
-export const resolveRules = <K extends string>(value: Config<K>): Rule<K>[] =>
-  typeof value.rules === 'function'
-    ? value.rules({ rule: (item) => item })
-    : value.rules;
+type Doc<I extends string, K extends string> =
+  string | { file: string } | ((ctx: Ctx<I, K>) => string);
+
+type Check =
+  | { run: (context: CheckContext) => void | Promise<void>; fix: string }
+  | { run?: undefined; fix?: string };
+
+type Output = { path: string; root: string };
+
+export type RuleUnit<I extends string = never, K extends string = never> = {
+  importance: Importance;
+  doc: Doc<I, K>;
+  include?: string[];
+  exclude?: string[];
+} & Check;
+
+export type EntryDoc<I extends string, K extends string> =
+  string | { file: string } | ((ctx: Ctx<I, K> & { header: string }) => string);
+
+type AgentUnit<I extends string, K extends string> = {
+  doc: Doc<I, K>;
+  frontmatter?: Record<string, string>;
+};
+
+export type Config = {
+  settings?: Settings;
+  entry?: { doc: EntryDoc<string, string> };
+  rules: Record<string, Record<string, RuleUnit<string, string>>>;
+  agents?: Record<string, AgentUnit<string, string>>;
+  refs?: Record<string, string>;
+  output?: Output[];
+};
+
+export type ListedRule = RuleUnit<string, string> & {
+  id: string;
+  group: string;
+};
+
+export const listRules = (value: Config): ListedRule[] =>
+  Object.entries(value.rules).flatMap(([group, units]) =>
+    Object.entries(units).map(([id, unit]) => ({ ...unit, id, group })),
+  );
+
+export const config = <
+  const R extends Record<string, Record<string, unknown>>,
+  const A extends string = never,
+  const F extends Record<string, string> = Record<never, never>,
+>(value: {
+  settings?: Settings;
+  entry?: { doc: EntryDoc<UnitIds<R, A>, keyof F & string> };
+  rules: {
+    [G in keyof R]: {
+      [I in keyof R[G]]: RuleUnit<UnitIds<R, A>, keyof F & string>;
+    };
+  };
+  agents?: { [I in A]: AgentUnit<UnitIds<R, A>, keyof F & string> };
+  refs?: F;
+  output?: Output[];
+}): Config => {
+  const result = value as unknown as Config;
+  const seen = new Set<string>();
+  for (const id of [
+    ...listRules(result).map((rule) => rule.id),
+    ...Object.keys(result.agents ?? {}),
+  ]) {
+    if (seen.has(id)) throw new Error(`Duplicate unit id "${id}"`);
+    seen.add(id);
+  }
+  return result;
+};
