@@ -116,7 +116,7 @@ describe('CLI sync works when', () => {
     );
     expect(await run(['--sync'], root)).toBe(0);
     expect(await readFile(join(root, '.ai', 'AGENTS.md'), 'utf8')).toContain(
-      '`r`: do r',
+      '1. (A) do r',
     );
     expect(
       await readFile(join(root, '.ai', 'references', 'a.md'), 'utf8'),

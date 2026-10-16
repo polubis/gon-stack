@@ -26,10 +26,10 @@ Not wired yet:
 
 A rule has an `id`, an `instruction` function returning Markdown, and an optional `check`.
 
-- `group`: optional "area" of the root docs. Rules sharing a group are rendered under their own `## Rules for <Group>` heading (with the importance sections inside); ungrouped rules stay under `## Rules`, listed first. Groups appear in order of first use. It does not change where instruction files go (always `<path>/rules/<id>.md`).
-- `instruction`: a function returning Markdown, or `{ file: './path.md' }` pointing to a Markdown file (relative to `.nitpick/`, absolute paths allowed). A file instruction is written to `<path>/rules/<id>.md`, supports `{{ref:key}}`, and the root docs link to it: `- [id](rules/id.md)`. Missing file or unknown ref is a config error.
+- `group`: optional "area" of the root docs. Rules sharing a group are written to their own file `<path>/rules/<group>.md` (`## <Title>` + numbered list `N. (A) text` in config order, same as `.claude/rules`). The root file lists the files under `## Rule files`; ungrouped rules stay in the root under `## Rules`. Groups appear in order of first use. Group name: letters, digits, `_`, `-`; must not equal a rule id with a file instruction. Instruction files still go to `<path>/rules/<id>.md`.
+- `instruction`: a function returning Markdown, or `{ file: './path.md' }` pointing to a Markdown file (relative to `.nitpick/`, absolute paths allowed). A file instruction is written to `<path>/rules/<id>.md`, supports `{{ref:key}}`, and the docs link to it: `N. (A) [id](id.md)` (from a group file) or `rules/id.md` (from the root). Missing file or unknown ref is a config error.
 - `fix`: text shown after the problems of this rule (`Fix: ...`). Required when the rule has a `check` (type error and config error otherwise). Tell the reader how to correct a violation; include an example.
-- `importance`: `A | O | D | I`. Only decides the docs section. Default `A`. Sections: (A) Always, (O) Optional, (D) When directly mentioned, (I) Infer during task. Empty sections are skipped.
+- `importance`: `A | O | D | I`. Printed as the tag in front of the rule, e.g. `1. (I) text`. Default `A`.
 - `include` / `exclude`: globs (`path.matchesGlob`), rule level only. They filter `files` passed to `check`. No `include` means all files.
 - `id` must be unique.
 - Rules run in config order.
@@ -52,12 +52,6 @@ export default config({
       git: {
         title: 'Version control',
         text: ({ group }) => `Rules of ${group}.`,
-      },
-    },
-    importances: {
-      A: {
-        title: 'Must follow',
-        text: ({ group, importance }) => `${group}/${importance}`,
       },
     },
   },
@@ -102,7 +96,7 @@ export default config({
 });
 ```
 
-`rules` is an array or a function `({ rule }) => Rule[]`. The function form makes `ref()` suggest keys from `knowledge.refs`. There are no check categories or schedules; `group` only splits the root docs into areas.
+`rules` is an array or a function `({ rule }) => Rule[]`. The function form makes `ref()` suggest keys from `knowledge.refs`. There are no check categories or schedules; `group` only splits the docs into files.
 
 Override a ready-made rule by spreading it: `{ ...richCommit, importance: 'D' }`.
 
@@ -115,9 +109,8 @@ Optional `docs` customizes the root docs of the first `output` entry. Defaults g
 - `header`: `# ` title. Default `Information for AI`.
 - `intro`: text right below the header.
 - `ungrouped`: `{ title?, text? }` for rules without `group`. Default title `Rules`.
-- `groups`: per `Rule.group`, `{ title?, text? }`. Default title `Rules for <Group>`. A key no rule uses is a config error.
-- `importances`: per tag `A | O | D | I`, `{ title?, text? }`. Text goes under the `### ` title, in every area. Default titles `(A) Always`, ...
-- `text` is a function `({ ref, group?, importance? }) => string` or `{ file }` (relative to `.nitpick/`). `group` is set in group, ungrouped and importance texts, `importance` only in importance texts. File text supports `{{ref:key}}`. Text is inlined in the root docs, not linked.
+- `groups`: per `Rule.group`, `{ title?, text? }`. Default title `<Group>`; the text goes in the group file. A key no rule uses is a config error.
+- `text` is a function `({ ref, group? }) => string` or `{ file }` (relative to `.nitpick/`). `group` is set in group texts. File text supports `{{ref:key}}`. Text is inlined in the root or group file, not linked.
 - Missing file or unknown ref is a config error.
 
 ### Output

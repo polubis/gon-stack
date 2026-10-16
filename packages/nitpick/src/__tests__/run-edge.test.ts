@@ -663,7 +663,10 @@ describe('Rich commit through the CLI works when', () => {
     expect(await readFile(join(root, '.ai', 'AGENTS.md'), 'utf8')).toBe(
       '# Information for AI\n\n' +
         AODI_LEGEND +
-        '\n\n## Rules for Git\n\n### (A) Always\n\n- [rich-commit](rules/rich-commit.md)\n',
+        '\n\n## Rule files\n\n- [rules/git.md](rules/git.md)\n',
+    );
+    expect(await readFile(join(root, '.ai', 'rules', 'git.md'), 'utf8')).toBe(
+      '## Git\n\n1. (A) [rich-commit](rich-commit.md)\n',
     );
     expect(
       await readFile(join(root, '.ai', 'rules', 'rich-commit.md'), 'utf8'),

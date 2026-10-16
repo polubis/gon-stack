@@ -15,7 +15,7 @@ const setup = async (knowledge: Record<string, string>) => {
 };
 
 describe('Docs generation works when', () => {
-  it('orders rules by importance and defaults to A', async () => {
+  it('numbers rules in config order and defaults to A', async () => {
     const root = await setup({});
     const { files } = await buildDocs(
       config({
@@ -29,8 +29,7 @@ describe('Docs generation works when', () => {
       root,
     );
     const text = files.get(join(root, 'out', 'RULES.md')) ?? '';
-    expect(text.indexOf('first')).toBeLessThan(text.indexOf('third'));
-    expect(text).toContain('### (A) Always');
+    expect(text).toContain('1. (I) third\n2. (A) first');
   });
 
   it('links refs and writes knowledge files', async () => {
@@ -93,7 +92,7 @@ describe('Instruction files work when', () => {
     );
     expect(problems).toEqual([]);
     expect(files.get(join(root, 'out', 'RULES.md'))).toContain(
-      '- [x](rules/x.md)',
+      '1. (A) [x](rules/x.md)',
     );
     expect(files.get(join(root, 'out', 'rules', 'x.md'))).toBe(
       'read [a](../references/a.md)',
@@ -129,6 +128,7 @@ describe('Rule groups work when', () => {
     );
     return {
       ...result,
+      read: (...parts: string[]) => result.files.get(join(root, ...parts)),
       text: result.files.get(join(root, 'out', 'RULES.md')) ?? '',
       keys: [...result.files.keys()].map((key) => key.slice(root.length + 1)),
     };
@@ -137,43 +137,73 @@ describe('Rule groups work when', () => {
   it('renders ungrouped rules under a plain Rules heading', async () => {
     const { text } = await build([{ id: 'x', instruction: () => 'y' }]);
     expect(text).toBe(
-      '# Information for AI\n\n' +
-        AODI_LEGEND +
-        '\n\n## Rules\n\n### (A) Always\n\n- `x`: y\n',
+      '# Information for AI\n\n' + AODI_LEGEND + '\n\n## Rules\n\n1. (A) y\n',
     );
   });
 
-  it('renders a group as its own area with importance sections', async () => {
-    const { text } = await build([
+  it('renders a group as its own file with tagged numbered rules', async () => {
+    const { text, read } = await build([
       { id: 'a', group: 'git', instruction: () => 'one' },
       { id: 'b', group: 'git', importance: 'I', instruction: () => 'two' },
     ]);
     expect(text).toBe(
       '# Information for AI\n\n' +
         AODI_LEGEND +
-        '\n\n## Rules for Git\n\n### (A) Always\n\n- `a`: one\n\n### (I) Infer during task\n\n- `b`: two\n',
+        '\n\n## Rule files\n\n- [rules/git.md](rules/git.md)\n',
+    );
+    expect(read('out', 'rules', 'git.md')).toBe(
+      '## Git\n\n1. (A) one\n2. (I) two\n',
     );
   });
 
-  it('puts ungrouped rules first and keeps group order of appearance', async () => {
+  it('keeps ungrouped rules in the root and groups in order of appearance', async () => {
     const { text } = await build([
       { id: 'g1', group: 'git', instruction: () => '1' },
       { id: 'f1', group: 'files', instruction: () => '2' },
       { id: 'x', instruction: () => '3' },
     ]);
     const at = (heading: string) => text.indexOf(heading);
-    expect(at('## Rules\n')).toBeLessThan(at('## Rules for Git'));
-    expect(at('## Rules for Git')).toBeLessThan(at('## Rules for Files'));
+    expect(at('1. (A) 3')).toBeLessThan(at('## Rule files'));
+    expect(at('rules/git.md')).toBeLessThan(at('rules/files.md'));
   });
 
-  it('does not affect where instruction files are written', async () => {
-    const { text, keys } = await build([
+  it('links instruction files from the group file and keeps their path', async () => {
+    const { read, keys } = await build([
       { id: 'a', group: 'git', instruction: { file: './a.md' } },
     ]);
-    expect(text).toContain('- [a](rules/a.md)');
+    expect(read('out', 'rules', 'git.md')).toContain('1. (A) [a](a.md)');
     expect(keys).toEqual([
       join('out', 'RULES.md'),
+      join('out', 'rules', 'git.md'),
       join('out', 'rules', 'a.md'),
+    ]);
+  });
+
+  it('links knowledge from the group file relative to rules', async () => {
+    const root = await setup({ 'k.md': 'leaf' });
+    const { files, problems } = await buildDocs(
+      config({
+        knowledge: { refs: { k: './k.md' } },
+        rules: [{ id: 'a', group: 'git', instruction: ({ ref }) => ref('k') }],
+      }),
+      join(root, '.nitpick'),
+      root,
+    );
+    expect(problems).toEqual([]);
+    expect(files.get(join(root, '.ai', 'rules', 'git.md'))).toContain(
+      '1. (A) [k](../references/k.md)',
+    );
+  });
+
+  it('reports a group named like a rule file and an unsafe group name', async () => {
+    const { problems } = await build([
+      { id: 'git', instruction: { file: './a.md' } },
+      { id: 'b', group: 'git', instruction: () => '1' },
+      { id: 'c', group: '../x', instruction: () => '2' },
+    ]);
+    expect(problems).toEqual([
+      'Group "git": same name as a rule id file',
+      'Group "../x": use letters, digits, "_" or "-"',
     ]);
   });
 });
@@ -186,7 +216,7 @@ describe('Rules as array work when', () => {
       join(root, '.nitpick'),
       root,
     );
-    expect([...files.values()][0]).toContain('- `x`: y');
+    expect([...files.values()][0]).toContain('1. (A) y');
   });
 });
 
@@ -282,7 +312,7 @@ describe('Multiple outputs work when', () => {
       join('.ai', 'references', 'k.md'),
       join('.ai', 'AGENTS.md'),
     ]);
-    expect(read('.ai', 'CLAUDE.md')).toContain('- [x](rules/x.md)');
+    expect(read('.ai', 'CLAUDE.md')).toContain('1. (A) [x](rules/x.md)');
   });
 
   it('makes every next output reference the first one', async () => {

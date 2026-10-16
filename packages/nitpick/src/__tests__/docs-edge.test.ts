@@ -57,7 +57,7 @@ describe('Root docs layout works when', () => {
     );
   });
 
-  it('renders all importance sections in A, O, D, I order', async () => {
+  it('tags each rule with its importance and numbers them in config order', async () => {
     expect(
       await render([
         inline('i', { importance: 'I' }),
@@ -69,10 +69,7 @@ describe('Root docs layout works when', () => {
       [
         '# Information for AI',
         AODI_LEGEND,
-        '## Rules\n\n### (A) Always\n\n- `a`: a',
-        '### (O) Optional\n\n- `o`: o',
-        '### (D) When directly mentioned\n\n- `d`: d',
-        '### (I) Infer during task\n\n- `i`: i',
+        '## Rules\n\n1. (I) i\n2. (D) d\n3. (O) o\n4. (A) a',
       ].join('\n\n') + '\n',
     );
   });
@@ -82,21 +79,24 @@ describe('Root docs layout works when', () => {
     expect(text.indexOf('second')).toBeLessThan(text.indexOf('first'));
   });
 
+  const group = async (rules: Rule[], name: string) =>
+    (await build({}, config({ rules }))).read('.ai', 'rules', name);
+
   it('capitalizes only the first letter of a group', async () => {
-    const text = await render([
+    const rules = [
       inline('a', { group: 'x' }),
       inline('b', { group: 'myArea' }),
-    ]);
-    expect(text).toContain('## Rules for X\n');
-    expect(text).toContain('## Rules for MyArea\n');
+    ];
+    expect(await group(rules, 'x.md')).toContain('## X\n');
+    expect(await group(rules, 'myArea.md')).toContain('## MyArea\n');
   });
 
-  it('lists ungrouped rules first even when configured last', async () => {
+  it('lists ungrouped rules in the root and groups only as links', async () => {
     const text =
       (await render([inline('g', { group: 'git' }), inline('u')])) ?? '';
-    expect(text.indexOf('## Rules\n')).toBeLessThan(
-      text.indexOf('## Rules for Git'),
-    );
+    expect(text).toContain('## Rules\n\n1. (A) u');
+    expect(text).not.toContain('1. (A) g');
+    expect(text).toContain('- [rules/git.md](rules/git.md)');
   });
 
   it('omits the plain Rules heading when every rule is grouped', async () => {
@@ -105,19 +105,20 @@ describe('Root docs layout works when', () => {
     );
   });
 
-  it('renders each group once even when its rules are not adjacent', async () => {
-    const text =
-      (await render([
-        inline('a', { group: 'git' }),
-        inline('b', { group: 'ui' }),
-        inline('c', { group: 'git' }),
-      ])) ?? '';
-    expect(text.match(/## Rules for Git/g)).toHaveLength(1);
-    expect(text.indexOf('`c`')).toBeLessThan(text.indexOf('Rules for Ui'));
+  it('writes each group once even when its rules are not adjacent', async () => {
+    const rules = [
+      inline('a', { group: 'git' }),
+      inline('b', { group: 'ui' }),
+      inline('c', { group: 'git' }),
+    ];
+    expect(await group(rules, 'git.md')).toBe('## Git\n\n1. (A) a\n2. (A) c\n');
+    expect(await group(rules, 'ui.md')).toBe('## Ui\n\n1. (A) b\n');
   });
 
-  it('renders function instructions in groups with their id', async () => {
-    expect(await render([inline('a', { group: 'git' })])).toContain('- `a`: a');
+  it('renders function instructions in groups as plain text', async () => {
+    expect(await group([inline('a', { group: 'git' })], 'git.md')).toContain(
+      '1. (A) a',
+    );
   });
 
   it('treats an empty group name as no group', async () => {
@@ -236,14 +237,14 @@ describe('Refs work when', () => {
       'kb',
     );
     expect(problems).toEqual([]);
-    expect(first).toContain('- `r`: [x/a](kb/x/a.md)');
+    expect(first).toContain('1. (A) [x/a](kb/x/a.md)');
   });
 
   it('returns the key and reports a problem for an unknown instruction ref', async () => {
     const { first, problems } = await run({}, {}, [
       { id: 'r', instruction: ({ ref }) => ref('ghost') },
     ]);
-    expect(first).toContain('- `r`: ghost');
+    expect(first).toContain('1. (A) ghost');
     expect(problems).toEqual(['Rule instruction: unknown ref "ghost"']);
   });
 
@@ -254,7 +255,7 @@ describe('Refs work when', () => {
       [{ id: 'r', instruction: ({ ref }) => `${ref('a')} + ${ref('b')}` }],
     );
     expect(first).toContain(
-      '- `r`: [a](references/a.md) + [b](references/b.md)',
+      '1. (A) [a](references/a.md) + [b](references/b.md)',
     );
   });
 });
@@ -355,7 +356,7 @@ describe('Instruction files work when', () => {
       inline('a'),
       file('b', './f.md'),
     ]);
-    expect(first).toContain('- `a`: a\n- [b](rules/b.md)');
+    expect(first).toContain('1. (A) a\n2. (A) [b](rules/b.md)');
   });
 });
 
@@ -463,25 +464,24 @@ describe('Docs customization works when', () => {
   ];
 
   it('defaults keep the heading and section titles', async () => {
-    const { first } = await build({}, { rules });
+    const { first, read } = await build({}, { rules });
     expect(first).toBe(
       [
         '# Information for AI',
         AODI_LEGEND,
         '## Rules',
-        '### (A) Always',
-        '- `b`: b',
-        '## Rules for Git',
-        '### (A) Always',
-        '- `c`: c',
-        '### (D) When directly mentioned',
-        '- `a`: a',
+        '1. (A) b',
+        '## Rule files',
+        '- [rules/git.md](rules/git.md)',
       ].join('\n\n') + '\n',
+    );
+    expect(read('.ai', 'rules', 'git.md')).toBe(
+      '## Git\n\n1. (D) a\n2. (A) c\n',
     );
   });
 
   it('renders header, intro, titles and texts in place', async () => {
-    const { first, problems } = await build(
+    const { first, read, problems } = await build(
       { 'intro.md': 'Hello {{ref:k}}\r\n', 'k.md': 'k' },
       {
         docs: {
@@ -489,7 +489,6 @@ describe('Docs customization works when', () => {
           intro: { file: './intro.md' },
           ungrouped: { title: 'Core', text: () => 'core text' },
           groups: { git: { title: 'VCS', text: () => 'git text' } },
-          importances: { D: { title: 'Rare', text: () => 'rare text' } },
         },
         knowledge: { refs: { k: './k.md' } },
         rules,
@@ -503,39 +502,41 @@ describe('Docs customization works when', () => {
         'Hello [k](references/k.md)',
         '## Core',
         'core text',
-        '### (A) Always',
-        '- `b`: b',
-        '## VCS',
-        'git text',
-        '### (A) Always',
-        '- `c`: c',
-        '### Rare',
-        'rare text',
-        '- `a`: a',
+        '1. (A) b',
+        '## Rule files',
+        '- [rules/git.md](rules/git.md)',
       ].join('\n\n') + '\n',
+    );
+    expect(read('.ai', 'rules', 'git.md')).toBe(
+      '## VCS\n\ngit text\n\n1. (D) a\n2. (A) c\n',
     );
   });
 
-  it('passes group and importance metadata to function texts', async () => {
-    const { first } = await build(
+  it('passes group metadata to function texts', async () => {
+    const { first, read } = await build(
       {},
       {
         docs: {
-          intro: ({ group, importance }) => `${group}|${importance}`,
+          intro: ({ group }) => `${group}`,
           groups: { git: { text: ({ group }) => `g:${group}` } },
-          importances: {
-            A: {
-              text: ({ group, importance }) => `i:${group}:${importance}`,
-            },
-          },
         },
         rules,
       },
     );
-    expect(first).toContain('undefined|undefined');
-    expect(first).toContain('g:git');
-    expect(first).toContain('i:git:A');
-    expect(first).toContain('i:undefined:A');
+    expect(first).toContain('undefined');
+    expect(read('.ai', 'rules', 'git.md')).toContain('g:git');
+  });
+
+  it('links refs from group texts relative to the rules folder', async () => {
+    const { read } = await build(
+      { 'k.md': 'k' },
+      {
+        docs: { groups: { git: { text: ({ ref }) => ref('k') } } },
+        knowledge: { refs: { k: './k.md' } },
+        rules,
+      },
+    );
+    expect(read('.ai', 'rules', 'git.md')).toContain('[k](../references/k.md)');
   });
 
   it('links refs from function texts relative to the root', async () => {
@@ -559,7 +560,6 @@ describe('Docs customization works when', () => {
           intro: { file: './gone.md' },
           ungrouped: { text: { file: './bad.md' } },
           groups: { ghost: { title: 'Ghost' } },
-          importances: { O: { title: 'Unused' } },
         },
         rules,
       },
