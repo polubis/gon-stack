@@ -12,6 +12,7 @@ const deviceUse = base.projects![0]!.use;
 const REAL_BACKEND_SPECS = [
   '**/__e2e__/backend.spec.ts',
   '**/__e2e__/accounts.spec.ts',
+  '**/modules/time/__e2e__/time.spec.ts',
   '**/server/__e2e__/rest-endpoints.spec.ts',
 ];
 

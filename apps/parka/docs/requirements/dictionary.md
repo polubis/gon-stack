@@ -53,3 +53,9 @@ deps:
 - **[privacy_policy]** - Document describing platform data handling and user privacy.
 - **[ai_receipt_analysis]** - AI processing that extracts and categorizes **[receipt]** data.
 - **[data_export]** - Exportable copy of the **[user]**'s financial data.
+
+## Time
+
+- **[task]** - Item the **[user]** plans for a day, optionally pinned to an hour, with a **[task_category]** and **[task_priority]**.
+- **[task_category]** - Named, coloured and iconed label of a **[task]**; separate from expense **[category]**.
+- **[task_priority]** - Named weight from 1 (least) to 10 (most) important attached to a **[task]**.

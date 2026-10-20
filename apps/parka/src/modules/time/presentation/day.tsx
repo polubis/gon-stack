@@ -1,30 +1,39 @@
 import { Fragment } from 'react';
 import { Card } from '@/shared/ui/layout';
-import { DAY_TASKS } from '../configuration/constraints';
-import { NowMarker, nowIndexOf } from './now-marker';
+import { isTimed, nowIndexOf, tasksOn } from '../domain/schedule';
+import { useContext } from './context';
+import { EmptyPeriod } from './empty-period';
+import { NowMarker } from './now-marker';
 import { TaskRow } from './task-row';
-import { TimeScreen } from './screen';
-
-const scheduled = DAY_TASKS.filter((task) => task.slot.kind === 'timed');
-const unscheduled = DAY_TASKS.filter((task) => task.slot.kind === 'allDay');
-const nowIndex = nowIndexOf(scheduled);
 
 /** Day view: tasks with a time, then tasks without one. */
-export const Main = () => (
-  <TimeScreen kind="day">
+export const Main = () => {
+  const { tasks, viewAnchor: anchor, now } = useContext();
+  const day = tasksOn(tasks, anchor);
+  if (day.length === 0) return <EmptyPeriod kind="day" />;
+
+  const scheduled = day.filter(isTimed);
+  const unscheduled = day.filter((task) => task.at === null);
+  const nowIndex = anchor === now.day ? nowIndexOf(scheduled, now.time) : -1;
+
+  return (
     <div className="grid gap-4 lg:grid-cols-3 lg:items-start">
       <Card as="section" aria-labelledby="day-plan" className="lg:col-span-2">
         <h2 id="day-plan" className="mb-3 text-sm font-semibold">
-          Zadania na dziś
+          {anchor === now.day ? 'Zadania na dziś' : 'Zadania na ten dzień'}
         </h2>
-        <ol className="flex flex-col gap-2">
-          {scheduled.map((task, index) => (
-            <Fragment key={task.title}>
-              <TaskRow {...task} now={index === nowIndex} step={index} />
-              {index === nowIndex ? <NowMarker /> : null}
-            </Fragment>
-          ))}
-        </ol>
+        {scheduled.length ? (
+          <ol className="flex flex-col gap-2">
+            {scheduled.map((task, index) => (
+              <Fragment key={task.id}>
+                <TaskRow task={task} now={index === nowIndex} step={index} />
+                {index === nowIndex ? <NowMarker time={now.time} /> : null}
+              </Fragment>
+            ))}
+          </ol>
+        ) : (
+          <p className="text-xs text-ink-soft">Brak zadań z godziną.</p>
+        )}
       </Card>
       <Card as="section" aria-labelledby="day-loose">
         <h2 id="day-loose" className="mb-1 text-sm font-semibold">
@@ -33,12 +42,16 @@ export const Main = () => (
         <p className="mb-3 text-xs text-ink-soft">
           Do zrobienia kiedykolwiek w ciągu dnia.
         </p>
-        <ul className="flex flex-col gap-2">
-          {unscheduled.map((task, index) => (
-            <TaskRow key={task.title} {...task} step={index} />
-          ))}
-        </ul>
+        {unscheduled.length ? (
+          <ul className="flex flex-col gap-2">
+            {unscheduled.map((task, index) => (
+              <TaskRow key={task.id} task={task} step={index} />
+            ))}
+          </ul>
+        ) : (
+          <p className="text-xs text-ink-soft">Brak zadań bez godziny.</p>
+        )}
       </Card>
     </div>
-  </TimeScreen>
-);
+  );
+};

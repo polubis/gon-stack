@@ -1,28 +1,77 @@
-import { useModalStack } from '@/shared/router/modal-stack';
+import { useEffect } from 'react';
+import {
+  closeModal,
+  closeModalThen,
+  useModalStack,
+} from '@/shared/router/modal-stack';
 import { CategoriesDialog } from './categories-dialog';
 import { CategoryDialog } from './category-dialog';
+import { useContext } from './context';
+import { DeleteDialog } from './delete-dialog';
 import {
   CATEGORIES_MODAL,
-  editedTitleOf,
+  deletedIdOf,
+  editedIdOf,
+  editTaskModal,
   NEW_CATEGORY_MODAL,
   NEW_PRIORITY_MODAL,
   NEW_TASK_MODAL,
 } from './modal-ids';
 import { PriorityDialog } from './priority-dialog';
-import { findTask, TaskDialog } from './task-dialog';
-
-const dialog = (modal: string) => {
-  if (modal === NEW_TASK_MODAL) return <TaskDialog key={modal} modal={modal} />;
-  if (modal === NEW_CATEGORY_MODAL)
-    return <CategoryDialog key={modal} modal={modal} />;
-  if (modal === NEW_PRIORITY_MODAL)
-    return <PriorityDialog key={modal} modal={modal} />;
-  if (modal === CATEGORIES_MODAL)
-    return <CategoriesDialog key={modal} modal={modal} />;
-  const title = editedTitleOf(modal);
-  const task = title === null ? undefined : findTask(title);
-  return task ? <TaskDialog key={modal} modal={modal} task={task} /> : null;
-};
+import { TaskDialog } from './task-dialog';
 
 /** Renders the popups that are open in the URL stack. */
-export const TaskModals = () => <>{useModalStack().map(dialog)}</>;
+export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
+  const { tasks, deleteTask, initializing, isLoading } = useContext();
+  const stack = useModalStack();
+
+  // A deep link to a task that is gone must not leave a dead `modal=` param.
+  useEffect(() => {
+    if (initializing || isLoading) return;
+    for (const modal of stack) {
+      const id = editedIdOf(modal) ?? deletedIdOf(modal);
+      if (id !== null && !tasks.some((task) => task.id === id))
+        closeModal(modal);
+    }
+  }, [initializing, isLoading, stack, tasks]);
+
+  const dialog = (modal: string) => {
+    if (modal === NEW_TASK_MODAL)
+      return <TaskDialog key={modal} modal={modal} defaultDay={defaultDay} />;
+    if (modal === NEW_CATEGORY_MODAL)
+      return <CategoryDialog key={modal} modal={modal} />;
+    if (modal === NEW_PRIORITY_MODAL)
+      return <PriorityDialog key={modal} modal={modal} />;
+    if (modal === CATEGORIES_MODAL)
+      return <CategoriesDialog key={modal} modal={modal} />;
+
+    const editedId = editedIdOf(modal);
+    const edited = tasks.find((task) => task.id === editedId);
+    if (edited)
+      return (
+        <TaskDialog
+          key={modal}
+          modal={modal}
+          task={edited}
+          defaultDay={defaultDay}
+        />
+      );
+
+    const deleted = tasks.find((task) => task.id === deletedIdOf(modal));
+    if (deleted)
+      return (
+        <DeleteDialog
+          key={modal}
+          modal={modal}
+          task={deleted}
+          onConfirm={() => {
+            deleteTask(deleted.id);
+            closeModalThen(modal, () => closeModal(editTaskModal(deleted.id)));
+          }}
+        />
+      );
+    return null;
+  };
+
+  return <>{stack.map(dialog)}</>;
+};

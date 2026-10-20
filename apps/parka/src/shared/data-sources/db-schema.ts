@@ -42,6 +42,7 @@ export type Database = {
           name: string;
           user_id: string;
         };
+        ComputedFields: never;
         Insert: {
           color?: string;
           icon?: string;
@@ -66,6 +67,7 @@ export type Database = {
           photo_updated_at: string | null;
           user_id: string;
         };
+        ComputedFields: never;
         Insert: {
           avatar?: string | null;
           custom_name?: string | null;
@@ -103,9 +105,10 @@ export type Database = {
           source: string;
           user_id: string;
         };
+        ComputedFields: never;
         Insert: {
           amount?: number;
-          category_id: string | null;
+          category_id?: string | null;
           date: string;
           device_browser?: string | null;
           device_id?: string | null;
@@ -145,6 +148,13 @@ export type Database = {
         };
         Relationships: [
           {
+            foreignKeyName: 'expenses_category_fk';
+            columns: ['user_id', 'category_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['user_id', 'id'];
+          },
+          {
             foreignKeyName: 'expenses_recurring_fk';
             columns: ['user_id', 'recurring_id'];
             isOneToOne: false;
@@ -162,6 +172,7 @@ export type Database = {
           value: string;
           value_key: string;
         };
+        ComputedFields: never;
         Insert: {
           field: string;
           last_used?: string | null;
@@ -187,6 +198,7 @@ export type Database = {
           outcome: string;
           user_id: string;
         };
+        ComputedFields: never;
         Insert: {
           expires_at?: string;
           finished_at?: string;
@@ -211,6 +223,7 @@ export type Database = {
           scope: string;
           user_id: string;
         };
+        ComputedFields: never;
         Insert: {
           alert_at80?: boolean;
           amount?: number;
@@ -229,7 +242,15 @@ export type Database = {
           scope?: string;
           user_id?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: 'limits_category_fk';
+            columns: ['user_id', 'category_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['user_id', 'id'];
+          },
+        ];
       };
       notification_preferences: {
         Row: {
@@ -240,6 +261,7 @@ export type Database = {
           receipt_confirmations: boolean;
           user_id: string;
         };
+        ComputedFields: never;
         Insert: {
           email?: boolean;
           limit_alerts?: boolean;
@@ -264,17 +286,18 @@ export type Database = {
           created_at: string;
           id: string;
           kind: string;
-          payload: Json;
+          payload: NonNullable<Json>;
           read_at: string | null;
           title: string;
           user_id: string;
         };
+        ComputedFields: never;
         Insert: {
           body?: string;
           created_at?: string;
           id: string;
           kind: string;
-          payload?: Json;
+          payload?: NonNullable<Json>;
           read_at?: string | null;
           title: string;
           user_id: string;
@@ -284,7 +307,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           kind?: string;
-          payload?: Json;
+          payload?: NonNullable<Json>;
           read_at?: string | null;
           title?: string;
           user_id?: string;
@@ -296,6 +319,7 @@ export type Database = {
           updated_at: string;
           user_id: string;
         };
+        ComputedFields: never;
         Insert: {
           updated_at?: string;
           user_id: string;
@@ -313,6 +337,7 @@ export type Database = {
           name: string;
           user_id: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           email?: string;
@@ -335,6 +360,7 @@ export type Database = {
           p256dh: string;
           user_id: string;
         };
+        ComputedFields: never;
         Insert: {
           auth: string;
           created_at?: string;
@@ -351,24 +377,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      receipt_scans: {
-        Row: {
-          created_at: string;
-          id: number;
-          user_id: string;
-        };
-        Insert: {
-          created_at?: string;
-          id?: never;
-          user_id: string;
-        };
-        Update: {
-          created_at?: string;
-          id?: never;
-          user_id?: string;
-        };
-        Relationships: [];
-      };
       receipt_items: {
         Row: {
           category_id: string;
@@ -380,6 +388,7 @@ export type Database = {
           unit_price: number;
           user_id: string;
         };
+        ComputedFields: never;
         Insert: {
           category_id: string;
           discount?: number;
@@ -402,6 +411,13 @@ export type Database = {
         };
         Relationships: [
           {
+            foreignKeyName: 'receipt_items_category_fk';
+            columns: ['user_id', 'category_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['user_id', 'id'];
+          },
+          {
             foreignKeyName: 'receipt_items_user_id_expense_id_fkey';
             columns: ['user_id', 'expense_id'];
             isOneToOne: false;
@@ -410,46 +426,24 @@ export type Database = {
           },
         ];
       };
-      recurring_items: {
+      receipt_scans: {
         Row: {
-          category_id: string;
-          discount: number;
-          id: string;
-          name: string;
-          quantity: number;
-          recurring_id: string;
-          unit_price: number;
+          created_at: string;
+          id: number;
           user_id: string;
         };
+        ComputedFields: never;
         Insert: {
-          category_id: string;
-          discount?: number;
-          id: string;
-          name: string;
-          quantity?: number;
-          recurring_id: string;
-          unit_price?: number;
+          created_at?: string;
+          id?: never;
           user_id: string;
         };
         Update: {
-          category_id?: string;
-          discount?: number;
-          id?: string;
-          name?: string;
-          quantity?: number;
-          recurring_id?: string;
-          unit_price?: number;
+          created_at?: string;
+          id?: never;
           user_id?: string;
         };
-        Relationships: [
-          {
-            foreignKeyName: 'recurring_items_user_id_recurring_id_fkey';
-            columns: ['user_id', 'recurring_id'];
-            isOneToOne: false;
-            referencedRelation: 'recurring_expenses';
-            referencedColumns: ['user_id', 'id'];
-          },
-        ];
+        Relationships: [];
       };
       recurring_expenses: {
         Row: {
@@ -465,6 +459,7 @@ export type Database = {
           start_date: string;
           user_id: string;
         };
+        ComputedFields: never;
         Insert: {
           active?: boolean;
           category_id?: string | null;
@@ -491,7 +486,163 @@ export type Database = {
           start_date?: string;
           user_id?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'recurring_expenses_category_fk';
+            columns: ['user_id', 'category_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['user_id', 'id'];
+          },
+        ];
+      };
+      recurring_items: {
+        Row: {
+          category_id: string;
+          discount: number;
+          id: string;
+          name: string;
+          quantity: number;
+          recurring_id: string;
+          unit_price: number;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          category_id: string;
+          discount?: number;
+          id: string;
+          name: string;
+          quantity?: number;
+          recurring_id: string;
+          unit_price?: number;
+          user_id: string;
+        };
+        Update: {
+          category_id?: string;
+          discount?: number;
+          id?: string;
+          name?: string;
+          quantity?: number;
+          recurring_id?: string;
+          unit_price?: number;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'recurring_items_category_fk';
+            columns: ['user_id', 'category_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['user_id', 'id'];
+          },
+          {
+            foreignKeyName: 'recurring_items_user_id_recurring_id_fkey';
+            columns: ['user_id', 'recurring_id'];
+            isOneToOne: false;
+            referencedRelation: 'recurring_expenses';
+            referencedColumns: ['user_id', 'id'];
+          },
+        ];
+      };
+      time_categories: {
+        Row: {
+          color: string;
+          icon: string;
+          id: string;
+          name: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          color?: string;
+          icon?: string;
+          id: string;
+          name: string;
+          user_id: string;
+        };
+        Update: {
+          color?: string;
+          icon?: string;
+          id?: string;
+          name?: string;
+          user_id?: string;
+        };
         Relationships: [];
+      };
+      time_priorities: {
+        Row: {
+          id: string;
+          name: string;
+          user_id: string;
+          value: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          id: string;
+          name: string;
+          user_id: string;
+          value: number;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          user_id?: string;
+          value?: number;
+        };
+        Relationships: [];
+      };
+      time_tasks: {
+        Row: {
+          at: string | null;
+          category_id: string;
+          created_at: string;
+          day: string;
+          done: boolean;
+          id: string;
+          priority_id: string;
+          title: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          at?: string | null;
+          category_id: string;
+          created_at?: string;
+          day: string;
+          done?: boolean;
+          id: string;
+          priority_id: string;
+          title: string;
+          user_id: string;
+        };
+        Update: {
+          at?: string | null;
+          category_id?: string;
+          created_at?: string;
+          day?: string;
+          done?: boolean;
+          id?: string;
+          priority_id?: string;
+          title?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'time_tasks_category_fk';
+            columns: ['user_id', 'category_id'];
+            isOneToOne: false;
+            referencedRelation: 'time_categories';
+            referencedColumns: ['user_id', 'id'];
+          },
+          {
+            foreignKeyName: 'time_tasks_priority_fk';
+            columns: ['user_id', 'priority_id'];
+            isOneToOne: false;
+            referencedRelation: 'time_priorities';
+            referencedColumns: ['user_id', 'id'];
+          },
+        ];
       };
     };
     Views: {
@@ -499,13 +650,14 @@ export type Database = {
     };
     Functions: {
       claim_receipt_scan: {
-        Args: never;
+        Args: Record<PropertyKey, never>;
         Returns: boolean;
       };
       record_field_use: {
         Args: { p_field: string; p_value: string };
         Returns: undefined;
       };
+      seed_time_defaults: { Args: { target: string }; Returns: undefined };
     };
     Enums: {
       [_ in never]: never;

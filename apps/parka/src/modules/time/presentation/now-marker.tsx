@@ -1,17 +1,13 @@
-import { NOW_TIME, type Task } from '../configuration/constraints';
+/** Share of the hour already elapsed at `time` (`HH:MM`), e.g. `67%`. */
+export const hourOffset = (time: string): string =>
+  `${Math.round((Number(time.slice(3)) / 60) * 100)}%`;
 
-/** Index of the last timed task already started at `NOW_TIME` (the "now" row), or -1. */
-export const nowIndexOf = (tasks: readonly Task[]) =>
-  tasks.findLastIndex(
-    (task) => task.slot.kind === 'timed' && task.slot.at <= NOW_TIME,
-  );
-
-/** Static current-time line between two task rows (`li`). */
-export const NowMarker = () => (
+/** Current-time line between two task rows (`li`). */
+export const NowMarker = ({ time }: { time: string }) => (
   <li className="flex items-center gap-2 text-danger">
-    <span className="sr-only">Teraz {NOW_TIME}</span>
+    <span className="sr-only">Teraz {time}</span>
     <span className="text-xs font-semibold tabular-nums" aria-hidden="true">
-      {NOW_TIME}
+      {time}
     </span>
     <span
       className="h-2.5 w-2.5 shrink-0 animate-now-pulse rounded-full bg-danger-strong motion-reduce:animate-none"
@@ -24,7 +20,7 @@ export const NowMarker = () => (
   </li>
 );
 
-/** Decorative line across an hour-grid cell at the minute of `NOW_TIME`. */
+/** Decorative line across an hour-grid cell at the minute of the current time. */
 export const NowLine = ({ offset }: { offset: string }) => (
   <span
     aria-hidden="true"
@@ -37,12 +33,18 @@ export const NowLine = ({ offset }: { offset: string }) => (
 );
 
 /** Time label for the hour-axis cell, aligned with the line. */
-export const NowAxisLabel = ({ offset }: { offset: string }) => (
+export const NowAxisLabel = ({
+  offset,
+  time,
+}: {
+  offset: string;
+  time: string;
+}) => (
   <span
     style={{ top: offset }}
     className="pointer-events-none absolute right-1 -translate-y-1/2 text-xs font-semibold tabular-nums text-danger"
   >
     <span className="sr-only">Teraz </span>
-    {NOW_TIME}
+    {time}
   </span>
 );

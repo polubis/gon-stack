@@ -56,6 +56,11 @@ export type DashboardQuery = {
   to?: string;
 };
 
+export type TimeQuery = {
+  /** Any day (`YYYY-MM-DD`) inside the viewed period. */
+  date?: string;
+};
+
 export type CategoryEditQuery = {
   id?: string;
 };
@@ -86,10 +91,10 @@ export const APP_ROUTER = {
     '/app/categories/edit/',
   ),
   reports: route('/app/reports/'),
-  time: route('/app/time/'),
-  timeWeek: route('/app/time/week/'),
-  timeMonth: route('/app/time/month/'),
-  timeYear: route('/app/time/year/'),
+  time: routeWithQuery<'/app/time/', TimeQuery>('/app/time/'),
+  timeWeek: routeWithQuery<'/app/time/week/', TimeQuery>('/app/time/week/'),
+  timeMonth: routeWithQuery<'/app/time/month/', TimeQuery>('/app/time/month/'),
+  timeYear: routeWithQuery<'/app/time/year/', TimeQuery>('/app/time/year/'),
   notifications: route('/app/notifications/'),
   privacy: route('/app/privacy/'),
   privacyPolicy: route('/privacy-policy/'),
@@ -150,6 +155,13 @@ export const API_ROUTER = {
     '/api/recurring/',
   ),
   recurringById: routeById('/api/recurring/'),
+  time: routeWithRequiredQuery<'/api/time/', { from: string; to: string }>(
+    '/api/time/',
+  ),
+  timeTasks: route('/api/time/tasks/'),
+  timeTaskById: routeById('/api/time/tasks/'),
+  timeCategories: route('/api/time/categories/'),
+  timePriorities: route('/api/time/priorities/'),
   settings: route('/api/settings/'),
   financeTour: route('/api/finance-tour/'),
   push: route('/api/push/'),

@@ -6,7 +6,8 @@ import {
   priorityLevel,
   type PriorityLevel,
 } from '../domain/priority';
-import { useContext } from './lists-context';
+import type { PriorityId } from '../domain/models';
+import { useContext } from './context';
 import { NEW_PRIORITY_MODAL } from './modal-ids';
 import { PICKER_LINK } from './picker-link';
 
@@ -27,8 +28,8 @@ export const PriorityPicker = ({
   value,
   onChange,
 }: {
-  value: string;
-  onChange: (id: string) => void;
+  value: PriorityId | undefined;
+  onChange: (id: PriorityId) => void;
 }) => {
   const { priorities } = useContext();
   return (

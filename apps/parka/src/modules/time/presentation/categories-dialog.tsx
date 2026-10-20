@@ -3,7 +3,7 @@ import { openModal } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { EmptyState } from '@/shared/ui/empty-state';
-import { useContext } from './lists-context';
+import { useContext } from './context';
 import { NEW_CATEGORY_MODAL } from './modal-ids';
 import { ModalShell } from './modal-shell';
 

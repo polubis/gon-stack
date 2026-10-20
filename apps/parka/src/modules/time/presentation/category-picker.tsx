@@ -2,7 +2,8 @@ import { List, Plus } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { openModal } from '@/shared/router/modal-stack';
 import { CategoryIcon } from '@/shared/ui/icon';
-import { useContext } from './lists-context';
+import type { CategoryId } from '../domain/models';
+import { useContext } from './context';
 import { CATEGORIES_MODAL, NEW_CATEGORY_MODAL } from './modal-ids';
 import { PICKER_LINK } from './picker-link';
 
@@ -11,8 +12,8 @@ export const CategoryPicker = ({
   value,
   onChange,
 }: {
-  value: string | undefined;
-  onChange: (id: string) => void;
+  value: CategoryId | undefined;
+  onChange: (id: CategoryId) => void;
 }) => {
   const { categories } = useContext();
   return (

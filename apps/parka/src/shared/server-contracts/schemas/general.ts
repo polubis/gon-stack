@@ -1,4 +1,6 @@
 import z from 'zod';
+import { CATEGORY_ICON_IDS } from '../../ui/category-icon-ids';
+import { isDay } from '../../period/period';
 import { AVATAR_SIZES } from '../../avatar/domain/rules';
 import { DEVICE_AVATAR_IDS } from '../../device/domain/avatars';
 
@@ -16,6 +18,42 @@ export const category = () =>
     name: z.string().min(1),
     icon: z.string().min(1),
     color: z.string().min(1),
+  });
+
+/** Task label of the time module (own set, separate from expense categories). */
+export const timeCategory = () =>
+  z.object({
+    id: z.string().min(1),
+    name: z.string().trim().min(1).max(40),
+    icon: z.string().min(1),
+    color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+  });
+
+/** Writable shape: only known icons may be stored. */
+export const timeCategoryInput = () =>
+  timeCategory().extend({ icon: z.enum(CATEGORY_ICON_IDS) });
+
+/** Weight of a task: 1 (least) .. 10 (most) important. */
+export const timePriority = () =>
+  z.object({
+    id: z.string().min(1),
+    name: z.string().trim().min(1).max(40),
+    value: z.number().int().min(1).max(10),
+  });
+
+export const timeTask = () =>
+  z.object({
+    id: z.string().min(1),
+    title: z.string().trim().min(1).max(40),
+    categoryId: z.string().min(1),
+    priorityId: z.string().min(1),
+    day: z.string().refine(isDay, 'Invalid day'),
+    /** `HH:MM`; `null` lasts the whole day. */
+    at: z
+      .string()
+      .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+      .nullable(),
+    done: z.boolean(),
   });
 
 export const receiptItem = () =>

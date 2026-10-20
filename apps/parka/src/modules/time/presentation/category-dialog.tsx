@@ -7,7 +7,7 @@ import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
 import { CATEGORY_COLORS, NAME_MAX_LENGTH } from '../configuration/constraints';
 import { ColorPicker } from './color-picker';
 import { IconPicker } from './icon-picker';
-import { useContext } from './lists-context';
+import { useContext } from './context';
 import { ModalShell } from './modal-shell';
 
 /**

@@ -4,7 +4,7 @@ import { closeModal } from '@/shared/router/modal-stack';
 import { Button, Field } from '@/shared/ui/controls';
 import { ClearableInput } from '@/shared/ui/clearable';
 import { NAME_MAX_LENGTH, PRIORITY_VALUES } from '../configuration/constraints';
-import { useContext } from './lists-context';
+import { useContext } from './context';
 import { ModalShell } from './modal-shell';
 
 /** New priority form: a name and a value from 1 to 10. */

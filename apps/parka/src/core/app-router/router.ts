@@ -55,6 +55,42 @@ const categoriesTree = categoriesRoute.addChildren([
   ),
 ]);
 
+/** Time views share one layout route (and store), like the categories pages. */
+const timeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: 'time-layout',
+  component: lazyRouteComponent(
+    () => import('@/modules/time/presentation/shell'),
+    'Main',
+  ),
+});
+
+const timeChild = (
+  path: string,
+  load: () => Promise<{ Main: ComponentType }>,
+) =>
+  createRoute({
+    getParentRoute: () => timeRoute,
+    path,
+    component: lazyRouteComponent(load, 'Main'),
+  });
+
+const timeTree = timeRoute.addChildren([
+  timeChild(APP_ROUTER.time(), () => import('@/modules/time/presentation/day')),
+  timeChild(
+    APP_ROUTER.timeWeek(),
+    () => import('@/modules/time/presentation/week'),
+  ),
+  timeChild(
+    APP_ROUTER.timeMonth(),
+    () => import('@/modules/time/presentation/month'),
+  ),
+  timeChild(
+    APP_ROUTER.timeYear(),
+    () => import('@/modules/time/presentation/year'),
+  ),
+]);
+
 export const router = createRouter({
   routeTree: rootRoute.addChildren([
     page(
@@ -70,19 +106,7 @@ export const router = createRouter({
       APP_ROUTER.reports(),
       () => import('@/modules/reports/presentation/main'),
     ),
-    page(APP_ROUTER.time(), () => import('@/modules/time/presentation/day')),
-    page(
-      APP_ROUTER.timeWeek(),
-      () => import('@/modules/time/presentation/week'),
-    ),
-    page(
-      APP_ROUTER.timeMonth(),
-      () => import('@/modules/time/presentation/month'),
-    ),
-    page(
-      APP_ROUTER.timeYear(),
-      () => import('@/modules/time/presentation/year'),
-    ),
+    timeTree,
     page(
       APP_ROUTER.notifications(),
       () => import('@/modules/notifications/presentation/main'),

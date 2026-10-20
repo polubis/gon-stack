@@ -1,10 +1,11 @@
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { priorityLevel } from '../domain/priority';
-import { useContext } from './lists-context';
+import type { PriorityId } from '../domain/models';
+import { useContext } from './context';
 
 /** Small arrow for high (>= 8) and low (<= 3) priorities; medium shows nothing. */
-export const PriorityMark = ({ id }: { id?: string }) => {
+export const PriorityMark = ({ id }: { id?: PriorityId }) => {
   const priority = useContext().priorities.find((item) => item.id === id);
   const level = priority ? priorityLevel(priority.value) : 'medium';
   if (!priority || level === 'medium') return null;
