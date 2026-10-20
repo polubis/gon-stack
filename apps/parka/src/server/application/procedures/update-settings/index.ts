@@ -5,12 +5,17 @@ import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 
 const getOwnDeviceIds = async (db: SupabaseServer): Promise<string[]> => {
-  const { data, error } = await db
-    .from('expenses')
-    .select('device_id')
-    .not('device_id', 'is', null);
-  if (error) throw new InternalServer(error);
-  return [...new Set(data.map((r) => r.device_id as string))];
+  const [expenses, tasks] = await Promise.all([
+    db.from('expenses').select('device_id').not('device_id', 'is', null),
+    db.from('time_tasks').select('device_id').not('device_id', 'is', null),
+  ]);
+  if (expenses.error) throw new InternalServer(expenses.error);
+  if (tasks.error) throw new InternalServer(tasks.error);
+  return [
+    ...new Set(
+      [...expenses.data, ...tasks.data].map((r) => r.device_id as string),
+    ),
+  ];
 };
 
 export const updateSettings = privateProcedure({

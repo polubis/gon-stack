@@ -8,7 +8,7 @@ export const getSettings = privateProcedure({
   schema: withZodSchema({ schema: getSettingsSchema }),
 })({
   handler: async (_input, { db }) => {
-    const [profile, prefs, rows, profiles] = await Promise.all([
+    const [profile, prefs, rows, taskRows, profiles] = await Promise.all([
       db.from('profiles').select('*').maybeSingle(),
       db.from('notification_preferences').select('*').maybeSingle(),
       db
@@ -18,15 +18,23 @@ export const getSettings = privateProcedure({
         )
         .not('device_id', 'is', null)
         .order('date', { ascending: false }),
+      db
+        .from('time_tasks')
+        .select(
+          'device_id, device_name, device_type, device_model, device_os, device_browser, device_screen',
+        )
+        .not('device_id', 'is', null)
+        .order('day', { ascending: false }),
       loadProfiles(db),
     ]);
     if (profile.error) throw new InternalServer(profile.error);
     if (prefs.error) throw new InternalServer(prefs.error);
     if (rows.error) throw new InternalServer(rows.error);
+    if (taskRows.error) throw new InternalServer(taskRows.error);
 
-    // One entry per device, named by its most recent expense.
+    // One entry per device, named by its most recent expense, else task.
     const devices = new Map<string, NonNullable<ReturnType<typeof toDevice>>>();
-    for (const row of rows.data) {
+    for (const row of [...rows.data, ...taskRows.data]) {
       const device = toDevice(row, profiles);
       if (device && !devices.has(device.id)) devices.set(device.id, device);
     }

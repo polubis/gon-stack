@@ -3,6 +3,7 @@ import { BadRequest } from '../../core/error-handling';
 import { fromSupabaseError } from '../../adapter/supabase';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
+import { deviceColumns, loadProfiles } from '../../shared/device';
 import { toTimeTask } from '../../shared/time';
 
 export const createTimeTask = privateProcedure({
@@ -21,6 +22,7 @@ export const createTimeTask = privateProcedure({
           day: input.day,
           at: input.at,
           done: input.done,
+          ...deviceColumns(input.device),
         },
         { onConflict: 'user_id,id' },
       )
@@ -30,6 +32,9 @@ export const createTimeTask = privateProcedure({
       throw new BadRequest(error, 'Unknown category or priority');
     if (error) throw fromSupabaseError(error);
 
-    return { code: 201 as const, data: toTimeTask(data) };
+    return {
+      code: 201 as const,
+      data: toTimeTask(data, await loadProfiles(db)),
+    };
   },
 });

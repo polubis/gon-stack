@@ -3,6 +3,8 @@ import { load } from './handlers/load';
 import { createTask } from './handlers/create-task';
 import { updateTask } from './handlers/update-task';
 import { deleteTask } from './handlers/delete-task';
+import { createRecurring } from './handlers/create-recurring';
+import { stopRecurring } from './handlers/stop-recurring';
 import { createCategory } from './handlers/create-category';
 import { createPriority } from './handlers/create-priority';
 import { dismissNotice } from './handlers/dismiss-notice';
@@ -16,6 +18,8 @@ export const createRegistry = (store: Store) => {
     createTask(store, bus),
     updateTask(store, bus),
     deleteTask(store, bus),
+    createRecurring(store, bus),
+    stopRecurring(store, bus),
     createCategory(store, bus),
     createPriority(store, bus),
     dismissNotice(store, bus),

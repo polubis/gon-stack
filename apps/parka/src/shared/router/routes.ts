@@ -160,6 +160,8 @@ export const API_ROUTER = {
   ),
   timeTasks: route('/api/time/tasks/'),
   timeTaskById: routeById('/api/time/tasks/'),
+  timeRecurring: route('/api/time/recurring/'),
+  timeRecurringById: routeById('/api/time/recurring/'),
   timeCategories: route('/api/time/categories/'),
   timePriorities: route('/api/time/priorities/'),
   settings: route('/api/settings/'),

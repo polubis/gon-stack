@@ -39,12 +39,12 @@ const STEP_BUTTON =
 const OPTION =
   'flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
 
-/** Arrow, Home and End keys move focus between the options of a list. */
+/** Arrow, Home and End keys move focus between the options, "Dziś" included. */
 const moveFocus = (e: KeyboardEvent<HTMLElement>) => {
   const keys = ['ArrowDown', 'ArrowUp', 'Home', 'End'];
   if (!keys.includes(e.key)) return;
-  const items = [...e.currentTarget.querySelectorAll('a')];
-  const at = items.indexOf(document.activeElement as HTMLAnchorElement);
+  const items = [...e.currentTarget.querySelectorAll<HTMLElement>('a, button')];
+  const at = items.indexOf(document.activeElement as HTMLElement);
   const target =
     e.key === 'Home'
       ? 0
@@ -109,16 +109,13 @@ const RangeControl = ({ kind }: { kind: TimeKind }) => {
           <Popover.Portal>
             <Popover.Content
               onOpenAutoFocus={focusCurrent}
+              onKeyDown={moveFocus}
               align="end"
               sideOffset={4}
               collisionPadding={16}
               className="z-(--z-modal) w-44 rounded-xl border border-line-strong bg-card p-2 shadow-lg focus:outline-none"
             >
-              <ul
-                aria-label="Zakres"
-                onKeyDown={moveFocus}
-                className="space-y-1"
-              >
+              <ul aria-label="Zakres" className="space-y-1">
                 {TIME_KINDS.map((item) => (
                   <li key={item.kind}>
                     <Popover.Close asChild>

@@ -3,8 +3,10 @@ import { BadRequest, NotFound } from '../../core/error-handling';
 import { fromSupabaseError } from '../../adapter/supabase';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
+import { loadProfiles } from '../../shared/device';
 import { toTimeTask } from '../../shared/time';
 
+/** The device and the rule of a task belong to its creation: never taken from the request. */
 export const updateTimeTask = privateProcedure({
   schema: withZodSchema({ schema: updateTimeTaskSchema }),
 })({
@@ -28,6 +30,9 @@ export const updateTimeTask = privateProcedure({
     if (error) throw fromSupabaseError(error);
     if (!data) throw new NotFound(undefined, 'Task not found');
 
-    return { code: 200 as const, data: toTimeTask(data) };
+    return {
+      code: 200 as const,
+      data: toTimeTask(data, await loadProfiles(db)),
+    };
   },
 });

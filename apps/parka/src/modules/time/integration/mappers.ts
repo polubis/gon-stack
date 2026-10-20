@@ -10,6 +10,7 @@ import type {
   CategoryId,
   Priority,
   PriorityId,
+  RecurringId,
   Task,
   TaskId,
 } from '../domain/models';
@@ -49,4 +50,6 @@ export const toTask = (dto: TaskDto): Task => ({
   day: dto.day,
   at: dto.at,
   done: dto.done,
+  device: dto.device,
+  recurringId: dto.recurringId as RecurringId | null,
 });

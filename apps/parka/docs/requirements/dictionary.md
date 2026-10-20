@@ -21,7 +21,7 @@ deps:
 - **[receipt_item]** - Single line item extracted from a **[receipt]**.
 - **[category]** - Classification label applied to an **[expense]** or **[receipt_item]**.
 - **[profile_avatar]** - Image uploaded by **[user]** as their picture; stored as WebP variants of 32, 64, 128 and 256 pixels.
-- **[device]** - Browser installation an **[expense]** was created from: stable id, readable name, type (mobile, desktop, tablet).
+- **[device]** - Browser installation an **[expense]** or a **[task]** was created from: stable id, readable name, type (mobile, desktop, tablet).
 - **[device_avatar]** - Picture chosen by **[user]** to recognise a **[device]**; one of a fixed set, stored per account.
 - **[device_photo]** - Image uploaded by **[user]** to recognise a **[device]**; stored as WebP variants of 32, 64, 128 and 256 pixels, shown instead of **[device_avatar]**.
 - **[image_editor]** - Dialog opened after a valid image is picked: **[user]** selects the square area, zoom and rotation; confirming uploads the edited image.
@@ -59,3 +59,4 @@ deps:
 - **[task]** - Item the **[user]** plans for a day, optionally pinned to an hour, with a **[task_category]** and **[task_priority]**.
 - **[task_category]** - Named, coloured and iconed label of a **[task]**; separate from expense **[category]**.
 - **[task_priority]** - Named weight from 1 (least) to 10 (most) important attached to a **[task]**.
+- **[recurring_task]** - Rule of a **[task]** that repeats weekly, monthly or yearly; makes ordinary **[task]** entries, like a recurring **[expense]**.

@@ -6,6 +6,7 @@ import {
   timeCategory,
   timeCategoryInput,
   timePriority,
+  timeRecurring,
   timeTask,
 } from './general';
 
@@ -58,6 +59,24 @@ export const updateTimeTaskSchema = () =>
   });
 
 export const deleteTimeTaskSchema = () =>
+  z.object({
+    in: z.object({ id: z.string().min(1) }),
+    out: z.union([
+      z.object({ code: z.literal(200), ok: z.literal(true) }),
+      writeErrors,
+    ]),
+  });
+
+export const createTimeRecurringSchema = () =>
+  z.object({
+    in: timeRecurring(),
+    out: z.union([
+      z.object({ code: z.literal(201), data: timeRecurring() }),
+      errorOut(),
+    ]),
+  });
+
+export const deleteTimeRecurringSchema = () =>
   z.object({
     in: z.object({ id: z.string().min(1) }),
     out: z.union([

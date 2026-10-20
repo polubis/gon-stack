@@ -64,6 +64,8 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
     createTask: facade.createTask,
     updateTask: facade.updateTask,
     deleteTask: facade.deleteTask,
+    createRecurring: facade.createRecurring,
+    stopRecurring: facade.stopRecurring,
     dismissNotice: facade.dismissNotice,
     createCategory: (input: Omit<Category, 'id'>) => {
       const category = { ...input, id: newCategoryId() };

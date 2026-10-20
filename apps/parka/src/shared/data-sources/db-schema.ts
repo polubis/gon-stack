@@ -592,15 +592,82 @@ export type Database = {
         };
         Relationships: [];
       };
+      time_recurring: {
+        Row: {
+          active: boolean;
+          at: string | null;
+          category_id: string;
+          end_date: string | null;
+          id: string;
+          interval: string;
+          last_materialized_date: string | null;
+          priority_id: string;
+          start_date: string;
+          title: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          active?: boolean;
+          at?: string | null;
+          category_id: string;
+          end_date?: string | null;
+          id: string;
+          interval?: string;
+          last_materialized_date?: string | null;
+          priority_id: string;
+          start_date: string;
+          title: string;
+          user_id: string;
+        };
+        Update: {
+          active?: boolean;
+          at?: string | null;
+          category_id?: string;
+          end_date?: string | null;
+          id?: string;
+          interval?: string;
+          last_materialized_date?: string | null;
+          priority_id?: string;
+          start_date?: string;
+          title?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'time_recurring_category_fk';
+            columns: ['user_id', 'category_id'];
+            isOneToOne: false;
+            referencedRelation: 'time_categories';
+            referencedColumns: ['user_id', 'id'];
+          },
+          {
+            foreignKeyName: 'time_recurring_priority_fk';
+            columns: ['user_id', 'priority_id'];
+            isOneToOne: false;
+            referencedRelation: 'time_priorities';
+            referencedColumns: ['user_id', 'id'];
+          },
+        ];
+      };
       time_tasks: {
         Row: {
           at: string | null;
           category_id: string;
           created_at: string;
           day: string;
+          device_browser: string | null;
+          device_id: string | null;
+          device_model: string | null;
+          device_name: string | null;
+          device_os: string | null;
+          device_screen: string | null;
+          device_type: string | null;
           done: boolean;
           id: string;
+          occurrence_date: string | null;
           priority_id: string;
+          recurring_id: string | null;
           title: string;
           user_id: string;
         };
@@ -610,9 +677,18 @@ export type Database = {
           category_id: string;
           created_at?: string;
           day: string;
+          device_browser?: string | null;
+          device_id?: string | null;
+          device_model?: string | null;
+          device_name?: string | null;
+          device_os?: string | null;
+          device_screen?: string | null;
+          device_type?: string | null;
           done?: boolean;
           id: string;
+          occurrence_date?: string | null;
           priority_id: string;
+          recurring_id?: string | null;
           title: string;
           user_id: string;
         };
@@ -621,9 +697,18 @@ export type Database = {
           category_id?: string;
           created_at?: string;
           day?: string;
+          device_browser?: string | null;
+          device_id?: string | null;
+          device_model?: string | null;
+          device_name?: string | null;
+          device_os?: string | null;
+          device_screen?: string | null;
+          device_type?: string | null;
           done?: boolean;
           id?: string;
+          occurrence_date?: string | null;
           priority_id?: string;
+          recurring_id?: string | null;
           title?: string;
           user_id?: string;
         };
@@ -640,6 +725,13 @@ export type Database = {
             columns: ['user_id', 'priority_id'];
             isOneToOne: false;
             referencedRelation: 'time_priorities';
+            referencedColumns: ['user_id', 'id'];
+          },
+          {
+            foreignKeyName: 'time_tasks_recurring_fk';
+            columns: ['user_id', 'recurring_id'];
+            isOneToOne: false;
+            referencedRelation: 'time_recurring';
             referencedColumns: ['user_id', 'id'];
           },
         ];

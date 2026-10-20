@@ -1,6 +1,13 @@
 import type { Registry } from './registry';
 import type { Store } from './store';
-import type { Category, Priority, Task, TaskId } from '../domain/models';
+import type {
+  Category,
+  Priority,
+  Recurring,
+  RecurringId,
+  Task,
+  TaskId,
+} from '../domain/models';
 
 export const createFacade = (store: Store, trigger: Registry['trigger']) => {
   return {
@@ -8,6 +15,10 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
     createTask: (task: Task) => trigger('[TRIGGER]_CREATE_TASK', { task }),
     updateTask: (task: Task) => trigger('[TRIGGER]_UPDATE_TASK', { task }),
     deleteTask: (id: TaskId) => trigger('[TRIGGER]_DELETE_TASK', { id }),
+    createRecurring: (recurring: Recurring) =>
+      trigger('[TRIGGER]_CREATE_RECURRING', { recurring }),
+    stopRecurring: (id: RecurringId) =>
+      trigger('[TRIGGER]_STOP_RECURRING', { id }),
     createCategory: (category: Category) =>
       trigger('[TRIGGER]_CREATE_CATEGORY', { category }),
     createPriority: (priority: Priority) =>

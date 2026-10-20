@@ -1,22 +1,29 @@
 export type RecurringInterval = 'weekly' | 'monthly' | 'yearly';
 
 /**
- * A recurring rule is an instruction, never an expense: it says when a cost
- * is due. Days are plain calendar days (`YYYY-MM-DD`), compared as strings.
+ * When a series happens, whatever it makes (an expense, a task). Days are
+ * plain calendar days (`YYYY-MM-DD`), compared as strings.
  */
-export type RecurringRule = {
-  id: string;
-  name: string;
-  cost: number;
+export type RecurringSchedule = {
   interval: RecurringInterval;
   /** First occurrence. */
   startDate: string;
   /** Last day an occurrence may fall on; `null` = never ends. */
   endDate: string | null;
-  /** Newest occurrence already turned into an expense; `null` = none yet. */
+  /** Newest occurrence already materialized; `null` = none yet. */
   lastMaterializedDate: string | null;
-  /** Paused rules neither charge nor announce anything. */
+  /** Paused rules neither create nor announce anything. */
   active: boolean;
+};
+
+/**
+ * A recurring rule is an instruction, never an expense: it says when a cost
+ * is due.
+ */
+export type RecurringRule = RecurringSchedule & {
+  id: string;
+  name: string;
+  cost: number;
   categoryId: string | null;
 };
 
@@ -49,7 +56,7 @@ const addMonths = (day: string, months: number): string => {
  * The `step`-th occurrence of the series, counted from the start date (always
  * from the start, so a clamped 28th of February does not drift the series).
  */
-const occurrenceAt = (rule: RecurringRule, step: number): string => {
+const occurrenceAt = (rule: RecurringSchedule, step: number): string => {
   switch (rule.interval) {
     case 'weekly':
       return toDay(
@@ -67,7 +74,10 @@ const occurrenceAt = (rule: RecurringRule, step: number): string => {
 };
 
 /** Occurrences from the start date on, in order, up to `limit` day (inclusive). */
-function* occurrences(rule: RecurringRule, limit: string): Generator<string> {
+function* occurrences(
+  rule: RecurringSchedule,
+  limit: string,
+): Generator<string> {
   const last =
     rule.endDate !== null && rule.endDate < limit ? rule.endDate : limit;
   for (let step = 0; ; step++) {
@@ -84,7 +94,7 @@ function* occurrences(rule: RecurringRule, limit: string): Generator<string> {
  * returned, which is why a deleted expense does not come back.
  */
 export const dueOccurrences = (
-  rule: RecurringRule,
+  rule: RecurringSchedule,
   today: string,
 ): string[] => {
   if (!rule.active) return [];
@@ -103,7 +113,7 @@ export const dueOccurrences = (
  * never counted anywhere.
  */
 export const upcomingOccurrences = (
-  rule: RecurringRule,
+  rule: RecurringSchedule,
   today: string,
   count = 3,
 ): string[] => {

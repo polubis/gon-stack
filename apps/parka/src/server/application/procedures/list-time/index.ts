@@ -2,12 +2,15 @@ import { listTimeSchema } from '@schemas/time';
 import { InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
-import { toTimeTask } from '../../shared/time';
+import { loadProfiles } from '../../shared/device';
+import { materializeTimeRecurring, toTimeTask } from '../../shared/time';
 
 export const listTime = privateProcedure({
   schema: withZodSchema({ schema: listTimeSchema }),
 })({
-  handler: async (input, { db }) => {
+  handler: async (input, { db, user }) => {
+    await materializeTimeRecurring(db, user.id, input.to);
+    const profiles = await loadProfiles(db);
     const [categories, priorities, tasks] = await Promise.all([
       db.from('time_categories').select('*').order('name'),
       db.from('time_priorities').select('*').order('value'),
@@ -37,7 +40,7 @@ export const listTime = privateProcedure({
           name: p.name,
           value: p.value,
         })),
-        tasks: tasks.data.map(toTimeTask),
+        tasks: tasks.data.map((row) => toTimeTask(row, profiles)),
       },
     };
   },

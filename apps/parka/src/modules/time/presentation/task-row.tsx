@@ -5,7 +5,9 @@ import type { Task } from '../domain/models';
 import { useContext } from './context';
 import { editTaskModal } from './modal-ids';
 import { PriorityMark } from './priority-mark';
+import { RecurringMark } from './recurring-mark';
 import { stagger } from './stagger';
+import { TaskDeviceBadge } from './task-device';
 
 type Props = {
   task: Task;
@@ -56,6 +58,8 @@ export const TaskRow = ({ task, now, step }: Props) => {
       >
         <span className="break-words">{task.title}</span>
       </button>
+      {task.recurringId !== null ? <RecurringMark /> : null}
+      {task.device ? <TaskDeviceBadge device={task.device} /> : null}
       <PriorityMark id={task.priorityId} />
       {task.at !== null ? (
         <time className="shrink-0 text-xs tabular-nums text-ink-soft">

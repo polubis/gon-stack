@@ -54,6 +54,32 @@ export const timeTask = () =>
       .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
       .nullable(),
     done: z.boolean(),
+    /** Device the task was created from; `null` for older tasks and rule occurrences. */
+    device: device().nullable().default(null),
+    /** Rule this task came from; `null` for an ordinary one. Server-set. */
+    recurringId: z.string().min(1).nullable().default(null),
+    /** Day of the rule's series this task stands for. Server-set. */
+    occurrenceDate: z.string().regex(DAY).nullable().default(null),
+  });
+
+/** A task rule is an instruction: the server makes plain tasks from it. */
+export const timeRecurring = () =>
+  z.object({
+    id: z.string().min(1),
+    title: z.string().trim().min(1).max(40),
+    categoryId: z.string().min(1),
+    priorityId: z.string().min(1),
+    /** `HH:MM`; `null` lasts the whole day. */
+    at: z
+      .string()
+      .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+      .nullable(),
+    interval: recurringInterval(),
+    startDate: z.string().refine(isDay, 'Invalid day'),
+    endDate: z.string().refine(isDay, 'Invalid day').nullable().default(null),
+    active: z.boolean().default(true),
+    /** Set by the server as occurrences become tasks; input is ignored. */
+    lastMaterializedDate: z.string().regex(DAY).nullable().default(null),
   });
 
 export const receiptItem = () =>

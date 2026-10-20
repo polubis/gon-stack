@@ -28,6 +28,9 @@ export const task = (overrides: Json = {}): Json => ({
   day: '2026-10-20',
   at: '09:00',
   done: false,
+  device: null,
+  recurringId: null,
+  occurrenceDate: null,
   ...overrides,
 });
 
@@ -96,6 +99,32 @@ export const setupTimeBackend = () => {
       await record(request);
       if (state.failWrites) return HttpResponse.json(FAILURE);
       state.tasks = state.tasks.filter((t) => t.id !== params.id);
+      return HttpResponse.json({ code: 200, ok: true });
+    }),
+    // The server turns the rule's first occurrence into a plain task.
+    http.post('/api/time/recurring/', async ({ request }) => {
+      const body = await record(request);
+      if (state.failWrites) return HttpResponse.json(FAILURE);
+      state.tasks.push(
+        task({
+          id: `${body!.id as string}:${body!.startDate as string}`,
+          title: body!.title,
+          categoryId: body!.categoryId,
+          priorityId: body!.priorityId,
+          day: body!.startDate,
+          at: body!.at,
+          recurringId: body!.id,
+          occurrenceDate: body!.startDate,
+        }),
+      );
+      return HttpResponse.json({ code: 201, data: body });
+    }),
+    http.delete('/api/time/recurring/:id/', async ({ request, params }) => {
+      await record(request);
+      if (state.failWrites) return HttpResponse.json(FAILURE);
+      state.tasks = state.tasks.map((t) =>
+        t.recurringId === params.id ? { ...t, recurringId: null } : t,
+      );
       return HttpResponse.json({ code: 200, ok: true });
     }),
     http.post('/api/time/categories/', async ({ request }) => {

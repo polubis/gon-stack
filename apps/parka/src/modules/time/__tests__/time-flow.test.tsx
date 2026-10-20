@@ -109,6 +109,55 @@ describe('time navigation', () => {
     expect(window.location.search).toContain('date=2026-10-20');
   });
 
+  it('returns to the current week with the Dziś option in the week view', async () => {
+    const user = userEvent.setup();
+    renderTime('week', '2026-11-05');
+    await screen.findByRole('heading', { name: 'Brak zadań' });
+
+    await user.click(screen.getByRole('button', { name: /Zakres:/ }));
+    await user.click(await screen.findByRole('button', { name: 'Dziś' }));
+
+    expect(
+      await screen.findByRole('group', { name: 'Zakres czasu' }),
+    ).toHaveTextContent('19 – 25 października 2026');
+    expect(window.location.search).toContain('date=2026-10-20');
+    await waitFor(() => {
+      const last = backend.reads().at(-1)!;
+      expect(queryParams(last.url).get('from')).toBe('2026-10-19');
+    });
+  });
+
+  it('reaches Dziś with the keyboard and returns to today', async () => {
+    const user = userEvent.setup();
+    renderTime('day', '2026-11-05');
+    await screen.findByRole('heading', { name: 'Brak zadań' });
+
+    await user.click(screen.getByRole('button', { name: /Zakres:/ }));
+    await screen.findByRole('list', { name: 'Zakres' });
+    await user.keyboard('{End}');
+    expect(screen.getByRole('button', { name: 'Dziś' })).toHaveFocus();
+    await user.keyboard('{Enter}');
+
+    expect(
+      await screen.findByText(
+        'Nic nie zaplanowano: wtorek, 20 października 2026.',
+      ),
+    ).toBeVisible();
+  });
+
+  it('closes the range list after Dziś', async () => {
+    const user = userEvent.setup();
+    renderTime('day', '2026-11-05');
+    await screen.findByRole('heading', { name: 'Brak zadań' });
+
+    await user.click(screen.getByRole('button', { name: /Zakres:/ }));
+    await user.click(await screen.findByRole('button', { name: 'Dziś' }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole('list', { name: 'Zakres' })).toBeNull(),
+    );
+  });
+
   it('asks for the whole week in the week view', async () => {
     renderTime('week');
     await screen.findByRole('heading', { name: 'Brak zadań' });

@@ -17,14 +17,23 @@ export const uploadDevicePhoto = privateProcedure({
   schema: withZodSchema({ schema: uploadDevicePhotoSchema }),
 })({
   handler: async ({ deviceId, file }, { db, user }) => {
-    // Only a device the user made an expense from can get a photo.
-    const owned = await db
-      .from('expenses')
-      .select('device_id')
-      .eq('device_id', deviceId)
-      .limit(1);
-    if (owned.error) throw new InternalServer(owned.error);
-    if (owned.data.length === 0) throw new BadRequest(null, 'Unknown device');
+    // Only a device the user made an expense or a task from can get a photo.
+    const [expenses, tasks] = await Promise.all([
+      db
+        .from('expenses')
+        .select('device_id')
+        .eq('device_id', deviceId)
+        .limit(1),
+      db
+        .from('time_tasks')
+        .select('device_id')
+        .eq('device_id', deviceId)
+        .limit(1),
+    ]);
+    if (expenses.error) throw new InternalServer(expenses.error);
+    if (tasks.error) throw new InternalServer(tasks.error);
+    if (expenses.data.length + tasks.data.length === 0)
+      throw new BadRequest(null, 'Unknown device');
 
     const variants = await buildAvatarVariants(
       env.IMAGES as ImagesBinding,

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   createTimePrioritySchema,
+  createTimeRecurringSchema,
   createTimeTaskSchema,
   listTimeSchema,
 } from '../schemas/time';
@@ -56,6 +57,59 @@ describe('time contracts', () => {
   it('requires the range of a listing', () => {
     expect(
       listTimeSchema().shape.in.safeParse({ from: '2026-10-19' }).success,
+    ).toBe(false);
+  });
+
+  it('defaults the device and the rule of a task to none', () => {
+    const parsed = createTimeTaskSchema().shape.in.parse(TASK);
+
+    expect(parsed).toMatchObject({
+      device: null,
+      recurringId: null,
+      occurrenceDate: null,
+    });
+  });
+
+  it('accepts a task with a device', () => {
+    const parsed = createTimeTaskSchema().shape.in.parse({
+      ...TASK,
+      device: { id: 'device-1', name: 'Chrome on Windows', type: 'desktop' },
+    });
+
+    expect(parsed.device).toMatchObject({ id: 'device-1', type: 'desktop' });
+  });
+});
+
+describe('time recurring contracts', () => {
+  const RULE = {
+    id: 'r-1',
+    title: 'Siłownia',
+    categoryId: 'health',
+    priorityId: 'medium',
+    at: '18:00',
+    interval: 'weekly',
+    startDate: '2026-10-20',
+  };
+
+  it('defaults a rule to active without an end', () => {
+    const parsed = createTimeRecurringSchema().shape.in.parse(RULE);
+
+    expect(parsed).toMatchObject({
+      active: true,
+      endDate: null,
+      lastMaterializedDate: null,
+    });
+  });
+
+  it.each([
+    ['an unknown interval', { interval: 'daily' }],
+    ['a blank title', { title: ' ' }],
+    ['a malformed start', { startDate: '20.10.2026' }],
+    ['an hour out of range', { at: '25:00' }],
+  ])('rejects a rule with %s', (_, patch) => {
+    expect(
+      createTimeRecurringSchema().shape.in.safeParse({ ...RULE, ...patch })
+        .success,
     ).toBe(false);
   });
 });

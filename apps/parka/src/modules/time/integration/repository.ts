@@ -2,13 +2,22 @@ import type { z } from 'zod';
 import type {
   createTimeCategorySchema,
   createTimePrioritySchema,
+  createTimeRecurringSchema,
   createTimeTaskSchema,
+  deleteTimeRecurringSchema,
   deleteTimeTaskSchema,
   listTimeSchema,
   updateTimeTaskSchema,
 } from '@schemas/time';
 import { API_ROUTER } from '@/shared/router/routes';
-import type { Category, Priority, Task, TaskId } from '../domain/models';
+import type {
+  Category,
+  Priority,
+  Recurring,
+  RecurringId,
+  Task,
+  TaskId,
+} from '../domain/models';
 import { toCategory, toPriority, toTask } from './mappers';
 
 type Out<T extends () => z.ZodType<{ out: unknown }>> = z.infer<
@@ -93,4 +102,23 @@ export const postPriority = async (priority: Priority): Promise<Priority> => {
   const json = (await response.json()) as Out<typeof createTimePrioritySchema>;
   if (json.code !== 201) throw new Error(json.message);
   return toPriority(json.data);
+};
+
+export const postRecurring = async (recurring: Recurring): Promise<void> => {
+  const response = await fetch(API_ROUTER.timeRecurring(), {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    body: JSON.stringify(recurring),
+  });
+  const json = (await response.json()) as Out<typeof createTimeRecurringSchema>;
+  if (json.code !== 201) throw new Error(json.message);
+};
+
+export const removeRecurring = async (id: RecurringId): Promise<void> => {
+  const response = await fetch(API_ROUTER.timeRecurringById(id), {
+    method: 'DELETE',
+    headers: JSON_HEADERS,
+  });
+  const json = (await response.json()) as Out<typeof deleteTimeRecurringSchema>;
+  if (json.code !== 200) throw new Error(json.message);
 };

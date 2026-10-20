@@ -1,7 +1,10 @@
 import type { Brand } from '@repo/type-beast/brand';
+import type { Device } from '@/shared/device/domain/models';
+import type { RecurringInterval } from '@/shared/recurring/occurrences';
 import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
 
 export type TaskId = Brand<string, 'TaskId'>;
+export type RecurringId = Brand<string, 'TimeRecurringId'>;
 export type CategoryId = Brand<string, 'TimeCategoryId'>;
 export type PriorityId = Brand<string, 'TimePriorityId'>;
 
@@ -26,6 +29,25 @@ export type Task = {
   /** `HH:MM`; `null` lasts the whole day. */
   at: string | null;
   done: boolean;
+  /** Browser the task was created in; `null` for older tasks and rule occurrences. */
+  device: Device | null;
+  /** Rule the task came from; `null` for an ordinary one. */
+  recurringId: RecurringId | null;
+};
+
+/** Instruction that makes a task on each day of its series. */
+export type Recurring = {
+  id: RecurringId;
+  title: string;
+  categoryId: CategoryId;
+  priorityId: PriorityId;
+  /** `HH:MM`; `null` lasts the whole day. */
+  at: string | null;
+  interval: RecurringInterval;
+  /** `YYYY-MM-DD`, first occurrence. */
+  startDate: string;
+  /** `YYYY-MM-DD`; `null` never ends. */
+  endDate: string | null;
 };
 
 export type TimeKind = 'day' | 'week' | 'month' | 'year';
