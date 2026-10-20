@@ -91,8 +91,8 @@ const pickKind = async (
   getByE2e: GetByE2e,
   kind: PeriodKind,
 ): Promise<void> => {
-  await getByE2e('dashboard:period-kind').click();
-  await getByE2e(`dashboard:period-preset:${kind}`).click();
+  await getByE2e('period-control:kind').click();
+  await getByE2e(`period-control:preset:${kind}`).click();
   await expect(page.getByRole('list', { name: 'Zakres' })).toBeHidden();
 };
 
@@ -115,7 +115,7 @@ const commands = {
     pickKind(page, getByE2e, 'year'),
   'i pick the last year preset': async ({ page, getByE2e }) => {
     await pickKind(page, getByE2e, 'year');
-    await getByE2e('dashboard:period-prev').click();
+    await getByE2e('period-control:prev').click();
   },
   'i pick the own range': ({ page, getByE2e }) =>
     pickKind(page, getByE2e, 'custom'),
@@ -175,14 +175,14 @@ const commands = {
     await expect(getByE2e('dashboard:period-range-dialog')).toBeHidden();
   },
   'the label shows the June range': async ({ getByE2e }) => {
-    await expect(getByE2e('dashboard:period-label')).toContainText(
-      `1 cze – 30 cze ${lastYear}`,
+    await expect(getByE2e('period-control:label')).toContainText(
+      `01.06.${lastYear} – 30.06.${lastYear}`,
     );
   },
   'i go back one period': ({ getByE2e }) =>
-    getByE2e('dashboard:period-prev').click(),
+    getByE2e('period-control:prev').click(),
   'i go forward one period': ({ getByE2e }) =>
-    getByE2e('dashboard:period-next').click(),
+    getByE2e('period-control:next').click(),
   'i reload the page': async ({ page }) => {
     await page.reload();
     await page.waitForLoadState('networkidle');
@@ -202,7 +202,7 @@ const commands = {
   'i use a wide screen': ({ page }) =>
     page.setViewportSize({ width: 1280, height: 860 }),
   'the month range is selected': async ({ getByE2e }) => {
-    await expect(getByE2e('dashboard:period-kind')).toHaveAttribute(
+    await expect(getByE2e('period-control:kind')).toHaveAttribute(
       'aria-label',
       'Zakres: Miesiąc',
     );
@@ -210,10 +210,10 @@ const commands = {
   'the period sits between the arrows next to the range icon': async ({
     getByE2e,
   }) => {
-    const prev = await getByE2e('dashboard:period-prev').boundingBox();
-    const value = await getByE2e('dashboard:period-value').boundingBox();
-    const kind = await getByE2e('dashboard:period-kind').boundingBox();
-    const next = await getByE2e('dashboard:period-next').boundingBox();
+    const prev = await getByE2e('period-control:prev').boundingBox();
+    const value = await getByE2e('period-control:value').boundingBox();
+    const kind = await getByE2e('period-control:kind').boundingBox();
+    const next = await getByE2e('period-control:next').boundingBox();
     if (!prev || !value || !kind || !next) throw new Error('Missing controls.');
     expect(value.x).toBeGreaterThan(prev.x + prev.width);
     expect(kind.x).toBeGreaterThan(value.x + value.width - 1);
@@ -223,21 +223,19 @@ const commands = {
     expect(value.width / kind.width).toBeLessThan(3.2);
   },
   'i open the period picker': ({ getByE2e }) =>
-    getByE2e('dashboard:period-value').click(),
+    getByE2e('period-control:value').click(),
   'i jump to the first month of last year': ({ getByE2e }) =>
-    getByE2e(`dashboard:period-option:${lastYear}-03`).click(),
+    getByE2e(`period-control:option:${lastYear}-03`).click(),
   'the label shows March of last year': async ({ getByE2e }) => {
-    await expect(getByE2e('dashboard:period-label')).toHaveText(
-      `Marzec ${lastYear}`,
-    );
+    await expect(getByE2e('period-control:label')).toHaveText(`03.${lastYear}`);
   },
   'the picker cannot reach the future': async ({ page }) => {
     const values = await page
-      .locator('[data-e2e^="dashboard:period-option:"]')
+      .locator('[data-e2e^="period-control:option:"]')
       .evaluateAll((els) =>
         els.map((el) =>
           (el.getAttribute('data-e2e') ?? '').replace(
-            'dashboard:period-option:',
+            'period-control:option:',
             '',
           ),
         ),
@@ -246,7 +244,7 @@ const commands = {
     expect(values.every((v) => v <= todayDay().slice(0, 7))).toBe(true);
   },
   'i jump to a year picked from the list': ({ getByE2e }) =>
-    getByE2e(`dashboard:period-option:${lastYear}`).click(),
+    getByE2e(`period-control:option:${lastYear}`).click(),
   'the limit left is scaled to the day': async ({ getByE2e }) => {
     await expect(getByE2e('dashboard:limit-left')).toContainText(
       leftFor('day'),
@@ -280,10 +278,10 @@ const commands = {
     );
   },
   'forward is blocked': async ({ getByE2e }) => {
-    await expect(getByE2e('dashboard:period-next')).toBeDisabled();
+    await expect(getByE2e('period-control:next')).toBeDisabled();
   },
   'forward is possible': async ({ getByE2e }) => {
-    await expect(getByE2e('dashboard:period-next')).toBeEnabled();
+    await expect(getByE2e('period-control:next')).toBeEnabled();
   },
   'the total is 65,00': async ({ getByE2e }) => {
     await expect(getByE2e('dashboard:total')).toContainText('65,00');
@@ -296,12 +294,10 @@ const commands = {
     await expect(getByE2e('dashboard:total')).not.toContainText('65,00');
   },
   'the label shows last year': async ({ getByE2e }) => {
-    await expect(getByE2e('dashboard:period-label')).toHaveText(
-      String(lastYear),
-    );
+    await expect(getByE2e('period-control:label')).toHaveText(String(lastYear));
   },
   'the week preset stays selected': async ({ getByE2e }) => {
-    await expect(getByE2e('dashboard:period-kind')).toHaveAttribute(
+    await expect(getByE2e('period-control:kind')).toHaveAttribute(
       'aria-label',
       'Zakres: Tydzień',
     );

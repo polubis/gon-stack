@@ -46,7 +46,7 @@ const asked = (calls: ReturnType<typeof stubApi>) =>
   calls.map(({ url }) => url).filter((url) => url.includes('/api/dashboard'));
 
 const label = () => {
-  const el = document.querySelector('[data-e2e="dashboard:period-label"]');
+  const el = document.querySelector('[data-e2e="period-control:label"]');
   if (!el) throw new Error('No period label.');
   return el;
 };
@@ -85,7 +85,7 @@ describe('dashboard period control', () => {
   it('opens on the current month and cannot go forward', async () => {
     await open();
 
-    expect(label().textContent).toBe('Październik 2026');
+    expect(label().textContent).toBe('10.2026');
     expect(kindButton().getAttribute('aria-label')).toBe('Zakres: Miesiąc');
     expect(next().disabled).toBe(true);
   });
@@ -95,7 +95,7 @@ describe('dashboard period control', () => {
 
     await userEvent.click(prev());
 
-    expect(label().textContent).toBe('Wrzesień 2026');
+    expect(label().textContent).toBe('09.2026');
     expect(next().disabled).toBe(false);
     await waitFor(() =>
       expect(asked(calls).at(-1)).toContain('kind=month&from=2026-09-01'),
@@ -103,7 +103,7 @@ describe('dashboard period control', () => {
 
     await userEvent.click(next());
 
-    expect(label().textContent).toBe('Październik 2026');
+    expect(label().textContent).toBe('10.2026');
     expect(next().disabled).toBe(true);
   });
 
@@ -114,7 +114,7 @@ describe('dashboard period control', () => {
     await userEvent.click(next());
 
     expect(asked(calls)).toHaveLength(before);
-    expect(label().textContent).toBe('Październik 2026');
+    expect(label().textContent).toBe('10.2026');
   });
 
   it('shows the current week, Monday to Sunday, and steps by week', async () => {
@@ -122,7 +122,7 @@ describe('dashboard period control', () => {
 
     await kind('Tydzień');
 
-    expect(label().textContent).toBe('Tydzień 5–11 paź 2026');
+    expect(label().textContent).toBe('05.10.2026 – 11.10.2026');
     expect(screen.getByText('Wydatki w tym tygodniu')).toBeTruthy();
     await waitFor(() =>
       expect(asked(calls).at(-1)).toContain('kind=week&from=2026-10-05'),
@@ -130,7 +130,7 @@ describe('dashboard period control', () => {
 
     await userEvent.click(prev());
 
-    expect(label().textContent).toMatch(/^Tydzień 28 wrz–4 paź 2026$/);
+    expect(label().textContent).toMatch(/^28.09.2026 – 04.10.2026$/);
     expect(next().disabled).toBe(false);
   });
 
@@ -139,12 +139,24 @@ describe('dashboard period control', () => {
 
     await kind('Dzień');
 
-    expect(label().textContent).toBe('10 października 2026');
+    expect(label().textContent).toBe('10.10.2026');
     expect(next().disabled).toBe(true);
 
     await userEvent.click(prev());
 
-    expect(label().textContent).toBe('9 października 2026');
+    expect(label().textContent).toBe('09.10.2026');
+  });
+
+  it('returns to the present with Dziś', async () => {
+    await open();
+    await userEvent.click(prev());
+    expect(label().textContent).toBe('09.2026');
+
+    await userEvent.click(kindButton());
+    await userEvent.click(screen.getByRole('button', { name: 'Dziś' }));
+
+    expect(label().textContent).toBe('10.2026');
+    expect(next().disabled).toBe(true);
   });
 
   it('shows the current year, then last year, then back to this one', async () => {
@@ -198,7 +210,7 @@ describe('dashboard period control', () => {
 
     await userEvent.keyboard('{Enter}');
 
-    expect(label().textContent).toBe('Wrzesień 2026');
+    expect(label().textContent).toBe('09.2026');
     expect(document.activeElement).toBe(prev());
   });
 
@@ -221,7 +233,7 @@ describe('dashboard period control', () => {
   it('snaps a future period from the address back to the present', async () => {
     const calls = await open('?month=2030-01');
 
-    expect(label().textContent).toBe('Październik 2026');
+    expect(label().textContent).toBe('10.2026');
     expect(asked(calls).every((url) => !url.includes('2030'))).toBe(true);
   });
 
@@ -255,14 +267,14 @@ describe('dashboard period control', () => {
       const calls = await open();
       const list = await openPicker('Wybierz miesiąc');
       const names = optionNames(list);
-      expect(names[0]).toBe('Październik 2026');
+      expect(names[0]).toBe('10.2026');
       expect(names).not.toContain('Listopad 2026');
 
       await userEvent.click(
-        within(list).getByRole('button', { name: 'Marzec 2026' }),
+        within(list).getByRole('button', { name: '03.2026' }),
       );
 
-      expect(label().textContent).toBe('Marzec 2026');
+      expect(label().textContent).toBe('03.2026');
       expect(screen.queryByLabelText('Wybierz miesiąc')).toBeNull();
       await waitFor(() =>
         expect(asked(calls).at(-1)).toContain('kind=month&from=2026-03-01'),
@@ -275,7 +287,7 @@ describe('dashboard period control', () => {
 
       const list = await openPicker('Wybierz tydzień');
 
-      expect(optionNames(list)[0]).toBe('Tydzień 5–11 paź 2026');
+      expect(optionNames(list)[0]).toBe('05.10.2026 – 11.10.2026');
     });
 
     it('jumps to a chosen day', async () => {
@@ -287,7 +299,7 @@ describe('dashboard period control', () => {
 
       fireEvent.change(input, { target: { value: '2026-02-14' } });
 
-      expect(label().textContent).toBe('14 lutego 2026');
+      expect(label().textContent).toBe('14.02.2026');
     });
 
     it('jumps to a chosen week', async () => {
@@ -296,10 +308,10 @@ describe('dashboard period control', () => {
       const list = await openPicker('Wybierz tydzień');
 
       await userEvent.click(
-        within(list).getByRole('button', { name: 'Tydzień 2–8 mar 2026' }),
+        within(list).getByRole('button', { name: '02.03.2026 – 08.03.2026' }),
       );
 
-      expect(label().textContent).toBe('Tydzień 2–8 mar 2026');
+      expect(label().textContent).toBe('02.03.2026 – 08.03.2026');
     });
 
     it('lists only years up to the present and jumps to one', async () => {
@@ -372,7 +384,7 @@ describe('dashboard period control', () => {
       await apply(1, '1 września 2026', '30 września 2026');
 
       await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-      expect(label().textContent).toBe('1 wrz – 30 wrz 2026');
+      expect(label().textContent).toBe('01.09.2026 – 30.09.2026');
       await waitFor(() =>
         expect(asked(calls).at(-1)).toContain(
           'kind=custom&from=2026-09-01&to=2026-09-30',
@@ -403,9 +415,9 @@ describe('dashboard period control', () => {
 
       await userEvent.click(prev());
 
-      expect(label().textContent).toBe('2 sie – 31 sie 2026');
+      expect(label().textContent).toBe('02.08.2026 – 31.08.2026');
       await userEvent.click(next());
-      expect(label().textContent).toBe('1 wrz – 30 wrz 2026');
+      expect(label().textContent).toBe('01.09.2026 – 30.09.2026');
     });
 
     it('waits for both days before it can be applied', async () => {
@@ -482,7 +494,7 @@ describe('dashboard period control', () => {
       await userEvent.click(applyButton());
 
       await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-      expect(label().textContent).toBe('3 cze – 9 cze 2025');
+      expect(label().textContent).toBe('03.06.2025 – 09.06.2025');
     });
 
     it('steps the year with arrows and never past the present', async () => {
@@ -559,19 +571,19 @@ describe('dashboard period control', () => {
       );
 
       await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-      expect(label().textContent).toBe('4 paź – 10 paź 2026');
+      expect(label().textContent).toBe('04.10.2026 – 10.10.2026');
     });
 
     it('restores the range from the address', async () => {
       await open('?range=custom&from=2026-08-10&to=2026-08-20');
 
-      expect(label().textContent).toBe('10 sie – 20 sie 2026');
+      expect(label().textContent).toBe('10.08.2026 – 20.08.2026');
     });
 
     it('cuts the end of a range at the present', async () => {
       await open('?range=custom&from=2026-10-01&to=2027-01-01');
 
-      expect(label().textContent).toBe('1 paź – 10 paź 2026');
+      expect(label().textContent).toBe('01.10.2026 – 10.10.2026');
     });
   });
 

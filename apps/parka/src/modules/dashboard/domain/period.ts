@@ -1,24 +1,14 @@
 import {
-  toInputValue,
   bucketOf,
   clampPeriod,
   currentPeriod,
   isDay,
   periodContaining,
   resolvePeriod,
-  shiftPeriod,
   PERIOD_KINDS,
   type Period,
   type PeriodKind,
 } from '@/shared/period/period';
-
-export const PERIOD_KIND_LABELS: Record<PeriodKind, string> = {
-  day: 'Dzień',
-  week: 'Tydzień',
-  month: 'Miesiąc',
-  year: 'Rok',
-  custom: 'Własny',
-};
 
 const plLong = new Intl.DateTimeFormat('pl-PL', {
   day: 'numeric',
@@ -153,27 +143,4 @@ export const periodFromQuery = (
     if (isDay(day)) return clampPeriod(periodContaining('month', day), today);
   }
   return currentPeriod('month', today);
-};
-
-/** How far back the pickers reach, per kind that is chosen from a list. */
-const LISTED = { week: 53, month: 60, year: 10 } as const;
-
-export type PickerOption = { value: string; label: string };
-
-/** Choices of a list picker, newest first; never later than the present. */
-export const pickerOptions = (
-  period: Period,
-  today: string,
-): PickerOption[] => {
-  if (period.kind === 'day' || period.kind === 'custom') return [];
-  const count = LISTED[period.kind];
-  const present = currentPeriod(period.kind, today);
-  const periods = Array.from({ length: count }, (_, i) =>
-    shiftPeriod(present, -i),
-  );
-  if (!periods.some((p) => p.from === period.from)) periods.push(period);
-  return periods.map((p) => ({
-    value: toInputValue(p),
-    label: periodTitle(p),
-  }));
 };

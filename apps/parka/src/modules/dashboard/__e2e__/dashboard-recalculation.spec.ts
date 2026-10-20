@@ -318,7 +318,7 @@ const commands = {
   },
 
   'i switch to last month': async ({ getByE2e }) => {
-    await getByE2e('dashboard:period-prev').click();
+    await getByE2e('period-control:prev').click();
   },
   'last month shows 50,00 over 1 expense': async ({ getByE2e }) => {
     await expect(getByE2e('dashboard:total')).toContainText('50,00');

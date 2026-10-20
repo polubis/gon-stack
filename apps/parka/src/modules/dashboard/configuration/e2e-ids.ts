@@ -1,13 +1,6 @@
 export const DASHBOARD_E2E_IDS = [
   'dashboard:main',
   'dashboard:avatar-image',
-  'dashboard:period-prev',
-  'dashboard:period-next',
-  'dashboard:period-label',
-  'dashboard:period-jump',
-  'dashboard:period-value',
-  'dashboard:period-kind',
-  'dashboard:period-day',
   'dashboard:period-range-dialog',
   'dashboard:period-range-prev',
   'dashboard:period-range-next',
@@ -81,10 +74,8 @@ export type DashboardDynamicE2eId =
   | `dashboard:upcoming:${string}`
   | `dashboard:limit-edit:${string | number}`
   | `dashboard:filter:${string | number}`
-  | `dashboard:period-preset:${string}`
   | `dashboard:period-range-day:${string}`
-  | `dashboard:period-range-month-option:${string}`
-  | `dashboard:period-option:${string}`;
+  | `dashboard:period-range-month-option:${string}`;
 
 export type DashboardE2eId =
   (typeof DASHBOARD_E2E_IDS)[number] | DashboardDynamicE2eId;

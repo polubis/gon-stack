@@ -68,15 +68,15 @@ const commands = {
 
   'the dashboard opens on the current month': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.dashboard());
-    await expect(getByE2e('dashboard:period-next')).toBeDisabled();
+    await expect(getByE2e('period-control:next')).toBeDisabled();
     await expect(getByE2e('dashboard:total')).toContainText('zł');
   },
   'month navigation reads other months from the db': async ({ getByE2e }) => {
-    await getByE2e('dashboard:period-prev').click();
-    await expect(getByE2e('dashboard:period-next')).toBeEnabled();
+    await getByE2e('period-control:prev').click();
+    await expect(getByE2e('period-control:next')).toBeEnabled();
     await expect(getByE2e('dashboard:total')).toContainText('zł');
-    await getByE2e('dashboard:period-next').click();
-    await expect(getByE2e('dashboard:period-next')).toBeDisabled();
+    await getByE2e('period-control:next').click();
+    await expect(getByE2e('period-control:next')).toBeDisabled();
   },
 
   'i add suggested categories and they survive a reload': async ({

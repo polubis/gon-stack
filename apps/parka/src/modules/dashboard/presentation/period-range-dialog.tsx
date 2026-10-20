@@ -11,7 +11,7 @@ import {
 } from '@/shared/period/period';
 import { Select } from '@/shared/ui/controls';
 import { DetailDialog } from './detail-dialog';
-import { PERIOD_RANGE_MODAL } from './modal-ids';
+import { PERIOD_RANGE_MODAL } from '@/shared/period-control/configuration/constraints';
 
 const WEEKDAYS = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'] as const;
 

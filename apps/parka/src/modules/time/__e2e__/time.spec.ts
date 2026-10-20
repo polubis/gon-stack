@@ -154,7 +154,7 @@ const commands = {
     getByE2e,
   }) => {
     await open(page, APP_ROUTER.time({ date: DAY }));
-    await getByE2e('time:next').click();
+    await getByE2e('period-control:next').click();
     await expect(getByE2e('time:empty')).toContainText(
       'środa, 21 października 2026',
     );
@@ -168,7 +168,7 @@ const commands = {
     await open(page, APP_ROUTER.timeWeek({ date: '2026-05-05' }));
     await page.getByRole('button', { name: /Zakres:/ }).click();
     await page.keyboard.press('End');
-    await expect(getByE2e('time:today')).toBeFocused();
+    await expect(getByE2e('period-control:today')).toBeFocused();
     await page.keyboard.press('Enter');
     await expect(page).toHaveURL(new RegExp(`date=${localDay(new Date())}`));
     await expect(page.getByRole('list', { name: 'Zakres' })).toBeHidden();

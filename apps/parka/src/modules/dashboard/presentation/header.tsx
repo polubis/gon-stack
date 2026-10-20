@@ -4,7 +4,8 @@ import type { Period } from '@/shared/period/period';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { Button } from '@/shared/ui/controls';
 import { UnreadLink } from '@/modules/notifications/presentation/unread-link';
-import { PeriodControl } from './period-control';
+import { PeriodControl } from '@/shared/period-control/presentation/period-control';
+import { PeriodRangeDialog } from './period-range-dialog';
 
 export const Header = ({
   period,
@@ -61,7 +62,12 @@ export const Header = ({
           Dodaj wydatek
         </Button>
       </header>
-      <PeriodControl period={period} today={today} onChange={onPeriodChange} />
+      <PeriodControl
+        period={period}
+        today={today}
+        onChange={onPeriodChange}
+        renderRange={(range) => <PeriodRangeDialog {...range} />}
+      />
     </div>
   );
 };

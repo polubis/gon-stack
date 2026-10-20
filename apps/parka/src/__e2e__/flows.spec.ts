@@ -176,14 +176,14 @@ const commands = {
   }) => {
     const current = new Date();
     await open(page, APP_ROUTER.dashboard());
-    await expect(getByE2e('dashboard:period-label')).toContainText(
+    await expect(getByE2e('period-control:label')).toContainText(
       String(current.getUTCFullYear()),
     );
     const total = await getByE2e('dashboard:total').textContent();
     currentTotalByPage.set(page, total ?? '');
   },
   'the previous month shows a different total': async ({ page, getByE2e }) => {
-    await getByE2e('dashboard:period-prev').click();
+    await getByE2e('period-control:prev').click();
     await expect(getByE2e('dashboard:total')).not.toHaveText(
       currentTotalByPage.get(page) ?? '',
     );
