@@ -189,6 +189,54 @@
     }
   }
 
+  /* Staggered rows/cards; set `animation-delay` per item. Pair with `motion-reduce:animate-none`. */
+  --animate-item-in: item-in 0.3s ease-out both;
+  @keyframes item-in {
+    from {
+      opacity: 0;
+      transform: translateY(-0.25rem);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* View switch: gentle zoom + fade. Pair with `motion-reduce:animate-none`. */
+  --animate-view-zoom: view-zoom 0.35s ease-out;
+  @keyframes view-zoom {
+    from {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Floating action button entrance. Pair with `motion-reduce:animate-none`. */
+  --animate-pop-in: pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Current-time dot; pair with `motion-reduce:animate-none`. */
+  --animate-now-pulse: now-pulse 2s ease-in-out 3;
+  @keyframes now-pulse {
+    50% {
+      opacity: 0.45;
+      transform: scale(1.4);
+    }
+  }
+
   --animate-view-enter: view-enter 0.3s ease-out;
   @keyframes view-enter {
     from {

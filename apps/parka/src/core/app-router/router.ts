@@ -70,6 +70,19 @@ export const router = createRouter({
       APP_ROUTER.reports(),
       () => import('@/modules/reports/presentation/main'),
     ),
+    page(APP_ROUTER.time(), () => import('@/modules/time/presentation/day')),
+    page(
+      APP_ROUTER.timeWeek(),
+      () => import('@/modules/time/presentation/week'),
+    ),
+    page(
+      APP_ROUTER.timeMonth(),
+      () => import('@/modules/time/presentation/month'),
+    ),
+    page(
+      APP_ROUTER.timeYear(),
+      () => import('@/modules/time/presentation/year'),
+    ),
     page(
       APP_ROUTER.notifications(),
       () => import('@/modules/notifications/presentation/main'),

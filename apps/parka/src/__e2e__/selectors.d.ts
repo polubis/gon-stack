@@ -9,6 +9,7 @@ import type { PrivacyE2eId } from '@/modules/privacy/configuration/e2e-ids';
 import type { NotificationsE2eId } from '@/modules/notifications/configuration/e2e-ids';
 import type { ExpensesManagementE2eId } from '@/modules/expenses-management/configuration/e2e-ids';
 import type { ReportsE2eId } from '@/modules/reports/configuration/e2e-ids';
+import type { TimeE2eId } from '@/modules/time/configuration/e2e-ids';
 import type { AuthE2eId } from '@/shared/auth/configuration/e2e-ids';
 import type { SettingsE2eId } from '@/modules/settings/configuration/e2e-ids';
 import type { ExpenseFormE2eId } from '@/shared/expense-form/configuration/e2e-ids';
@@ -33,6 +34,7 @@ export type E2eId =
   | ExpensesManagementE2eId
   | ExpenseFormE2eId
   | ReportsE2eId
+  | TimeE2eId
   | NotificationsE2eId
   | SettingsE2eId
   | CategoriesE2eId

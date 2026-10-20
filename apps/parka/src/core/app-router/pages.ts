@@ -38,6 +38,26 @@ export const APP_PAGES: readonly AppPage[] = [
     description: 'Miesięczny raport wydatków.',
   },
   {
+    url: APP_ROUTER.time(),
+    title: 'Czas — dzień | Parka',
+    description: 'Zadania na dziś.',
+  },
+  {
+    url: APP_ROUTER.timeWeek(),
+    title: 'Czas — tydzień | Parka',
+    description: 'Zadania w tygodniu.',
+  },
+  {
+    url: APP_ROUTER.timeMonth(),
+    title: 'Czas — miesiąc | Parka',
+    description: 'Zadania w miesiącu.',
+  },
+  {
+    url: APP_ROUTER.timeYear(),
+    title: 'Czas — rok | Parka',
+    description: 'Zadania w roku.',
+  },
+  {
     url: APP_ROUTER.notifications(),
     title: 'Powiadomienia | Parka',
     description: 'Alerty o limitach i paragonach.',

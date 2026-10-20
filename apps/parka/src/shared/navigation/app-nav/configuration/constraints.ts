@@ -1,4 +1,4 @@
-import { Wallet, LayoutGrid } from 'lucide-react';
+import { Wallet, Clock, LayoutGrid } from 'lucide-react';
 import { moreSectionPaths, APP_ROUTER } from '@/shared/router/routes';
 import type { NavKey } from '../domain/models';
 
@@ -17,6 +17,13 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Finanse',
     href: APP_ROUTER.dashboard(),
     icon: Wallet,
+    mobile: true,
+  },
+  {
+    key: 'time',
+    label: 'Czas',
+    href: APP_ROUTER.time(),
+    icon: Clock,
     mobile: true,
   },
   {

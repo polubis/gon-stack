@@ -9,6 +9,8 @@ export const activeNavKeyFromPathname = (pathname: string): NavKey | null => {
   // other `/app/*` page is a prefix-match of it.
   if (p === APP_ROUTER.dashboard()) return 'finances';
 
+  if (p.startsWith(APP_ROUTER.time())) return 'time';
+
   if (MORE_SECTION_PATHS.some((m) => p === m || p.startsWith(m))) {
     return 'more';
   }
