@@ -1,9 +1,6 @@
 import { useEffect } from 'react';
 import { ExpenseForm } from '@/shared/expense-form/presentation/expense-form';
-import {
-  defaultCategoryId,
-  productsFromDraft,
-} from '@/shared/expense-form/domain/products';
+import { productsFromDraft } from '@/shared/expense-form/domain/products';
 import type { ExpenseFormValues } from '@/shared/expense-form/domain/models';
 import { dayAtCurrentTime } from '@/shared/date/date';
 import {
@@ -32,7 +29,7 @@ export const NewExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
         amount: draft.amount,
         categoryId: null,
         paymentMethod: draft.paymentMethod ?? '',
-        items: productsFromDraft(draft.items, defaultCategoryId(categories)),
+        items: productsFromDraft(draft.items, categories),
       }
     : null;
 

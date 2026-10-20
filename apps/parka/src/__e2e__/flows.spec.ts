@@ -217,7 +217,13 @@ const commands = {
             amount: 3.2,
             paymentMethod: 'Karta',
             items: [
-              { name: 'Chleb', unitPrice: 3.2, quantity: 1, discount: 0 },
+              {
+                name: 'Chleb',
+                unitPrice: 3.2,
+                quantity: 1,
+                discount: 0,
+                category: { status: 'assigned', categoryId: CATEGORY.id },
+              },
             ],
           },
         }),

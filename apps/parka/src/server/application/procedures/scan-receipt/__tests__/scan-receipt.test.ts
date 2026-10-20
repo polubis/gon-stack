@@ -9,12 +9,13 @@ const signedIn = {
   error: null,
 };
 const getUser = vi.fn();
+let categories: { id: string; name: string }[] = [];
 
 vi.mock('@/shared/data-sources/supabase-server', () => ({
   supabaseServer: () => ({
     auth: { getUser },
     rpc,
-    from: () => ({ select: async () => ({ data: [], error: null }) }),
+    from: () => ({ select: async () => ({ data: categories, error: null }) }),
   }),
 }));
 
@@ -39,6 +40,7 @@ const unreadBody = async (): Promise<unknown> => {
 
 describe('scan receipt quota', () => {
   beforeEach(() => {
+    categories = [{ id: 'c-1', name: 'Groceries' }];
     rpc.mockReset();
     readReceipt.mockReset();
     getUser.mockReset().mockResolvedValue(signedIn);
@@ -93,6 +95,17 @@ describe('scan receipt quota', () => {
       code: 200,
       data: { merchant: 'Biedronka', amount: 5.5 },
     });
+  });
+
+  it('refuses with 409 and keeps the quota when the user has no categories', async () => {
+    categories = [];
+    rpc.mockResolvedValue({ data: true, error: null });
+
+    const response = await scan(async () => ({ file: jpeg() }));
+
+    expect(response).toMatchObject({ code: 409, type: 'conflict' });
+    expect(rpc).not.toHaveBeenCalled();
+    expect(readReceipt).not.toHaveBeenCalled();
   });
 
   it('fails when the quota check itself fails', async () => {

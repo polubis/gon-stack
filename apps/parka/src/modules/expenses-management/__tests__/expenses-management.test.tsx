@@ -36,7 +36,15 @@ const DRAFT = {
   date: '2025-04-10T10:00:00.000Z',
   amount: 42.5,
   paymentMethod: 'Karta',
-  items: [{ name: 'Chleb', unitPrice: 42.5, quantity: 1, discount: 0 }],
+  items: [
+    {
+      name: 'Chleb',
+      unitPrice: 42.5,
+      quantity: 1,
+      discount: 0,
+      category: { status: 'unknown', suggestion: null },
+    },
+  ],
 };
 
 const server = setupServer();
@@ -640,6 +648,98 @@ describe('adding an expense on its own page', () => {
         amount: 42.5,
         source: 'receipt',
       });
+    });
+
+    it('saves each scanned item under the category matched from the user own', async () => {
+      server.use(
+        http.post('/api/receipts/scan/', () =>
+          HttpResponse.json({
+            code: 200,
+            data: {
+              ...DRAFT,
+              items: [
+                {
+                  name: 'Kino',
+                  unitPrice: 20,
+                  quantity: 1,
+                  discount: 0,
+                  category: { status: 'assigned', categoryId: 'c-2' },
+                },
+                {
+                  name: 'Chleb',
+                  unitPrice: 5,
+                  quantity: 1,
+                  discount: 0,
+                  category: { status: 'assigned', categoryId: 'c-1' },
+                },
+              ],
+            },
+          }),
+        ),
+      );
+      const written = mockBackend([CATEGORY, OTHER]);
+      const user = await open();
+
+      await upload(user, photo());
+      await screen.findByDisplayValue('Biedronka');
+      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+
+      await waitFor(() => expect(written).toHaveLength(1));
+      const items = written[0]!.body.items as { categoryId: string }[];
+      expect(items.map((i) => i.categoryId)).toEqual(['c-2', 'c-1']);
+    });
+
+    it('saves a scanned item under the user category when its match is not the user own', async () => {
+      server.use(
+        http.post('/api/receipts/scan/', () =>
+          HttpResponse.json({
+            code: 200,
+            data: {
+              ...DRAFT,
+              items: [
+                {
+                  name: 'Kino',
+                  unitPrice: 20,
+                  quantity: 1,
+                  discount: 0,
+                  category: { status: 'assigned', categoryId: 'foreign' },
+                },
+              ],
+            },
+          }),
+        ),
+      );
+      const written = mockBackend([CATEGORY]);
+      const user = await open();
+
+      await upload(user, photo());
+      await screen.findByDisplayValue('Biedronka');
+      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+
+      await waitFor(() => expect(written).toHaveLength(1));
+      const items = written[0]!.body.items as { categoryId: string }[];
+      expect(items.map((i) => i.categoryId)).toEqual(['c-1']);
+    });
+
+    it('explains that a category is needed when the user has none', async () => {
+      server.use(
+        http.post('/api/receipts/scan/', () =>
+          HttpResponse.json({
+            code: 409,
+            type: 'conflict',
+            message: 'Add a category before scanning receipts',
+          }),
+        ),
+      );
+      mockBackend([]);
+      const user = await open();
+
+      await upload(user, photo());
+
+      const alert = await screen.findByRole('alert');
+      expect(alert).toHaveTextContent(
+        'Add a category before scanning receipts',
+      );
     });
 
     it('keeps the scanned timestamp when the day is unchanged', async () => {

@@ -58,9 +58,7 @@ export const RecurringForm = ({ draft }: { draft: ReceiptDraft | null }) => {
     derivedCategoryName,
     validate,
   } = useProducts({
-    initial: draft
-      ? productsFromDraft(draft.items, defaultCategoryId(categories))
-      : [],
+    initial: draft ? productsFromDraft(draft.items, categories) : [],
     categories,
     manualAmount: cost,
     manualCategoryId: selected,

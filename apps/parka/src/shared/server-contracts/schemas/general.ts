@@ -150,6 +150,11 @@ export const errorOut = () =>
       message: z.string(),
     }),
     z.object({
+      code: z.literal(409),
+      type: z.literal('conflict'),
+      message: z.string(),
+    }),
+    z.object({
       code: z.literal(429),
       type: z.literal('too-many-requests'),
       message: z.string(),

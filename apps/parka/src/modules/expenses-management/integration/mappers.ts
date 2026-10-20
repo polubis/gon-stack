@@ -54,11 +54,15 @@ export const toReceiptDraft = (dto: ReceiptDraftDto): ReceiptDraft => ({
   date: dto.date,
   amount: dto.amount,
   paymentMethod: dto.paymentMethod,
-  items: dto.items.map(({ name, unitPrice, quantity, discount }) => ({
+  items: dto.items.map(({ name, unitPrice, quantity, discount, category }) => ({
     name,
     unitPrice,
     quantity,
     discount,
+    categoryId:
+      category.status === 'assigned'
+        ? (category.categoryId as CategoryId)
+        : null,
   })),
 });
 

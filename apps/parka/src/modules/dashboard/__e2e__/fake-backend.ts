@@ -81,7 +81,15 @@ const SCANNED_RECEIPT = {
   date: new Date().toISOString(),
   amount: 42.5,
   paymentMethod: 'Karta',
-  items: [{ name: 'Chleb', unitPrice: 42.5, quantity: 1, discount: 0 }],
+  items: [
+    {
+      name: 'Chleb',
+      unitPrice: 42.5,
+      quantity: 1,
+      discount: 0,
+      category: { status: 'unknown', suggestion: 'Spożywcze' },
+    },
+  ],
 };
 
 const json = (route: Route, body: unknown) =>

@@ -34,11 +34,20 @@ export const createProduct = (
   categoryId,
 });
 
+/** A scanned item keeps its category when the user owns it, else the first one. */
 export const productsFromDraft = (
-  items: Omit<Product, 'id' | 'categoryId'>[],
-  categoryId: CategoryId,
+  items: (Omit<Product, 'id' | 'categoryId'> & {
+    categoryId: CategoryId | null;
+  })[],
+  categories: Category[],
 ): Product[] =>
-  items.map((item) => ({ ...item, id: newProductId(), categoryId }));
+  items.map((item) => ({
+    ...item,
+    id: newProductId(),
+    categoryId: categories.some((c) => c.id === item.categoryId)
+      ? (item.categoryId as CategoryId)
+      : defaultCategoryId(categories),
+  }));
 
 export const patchProduct = (
   products: Product[],

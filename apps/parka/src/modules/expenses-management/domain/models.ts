@@ -38,7 +38,10 @@ export type ReceiptDraft = {
   date: string;
   amount: number;
   paymentMethod: string | null;
-  items: Omit<Product, 'id' | 'categoryId'>[];
+  items: (Omit<Product, 'id' | 'categoryId'> & {
+    /** Category the scan matched among the user's own; `null` when none fits. */
+    categoryId: CategoryId | null;
+  })[];
 };
 
 export type NewExpense = {
