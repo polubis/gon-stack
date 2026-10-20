@@ -44,16 +44,18 @@ const setup = (suggestions: Suggestion[] = SUGGESTIONS, initial = '') => {
   };
 };
 
+const star = () => screen.getByRole('button', { name: 'Podpowiedzi: Sklep' });
+
 const optionNames = () =>
   screen
     .queryAllByRole('option')
     .map((o) => o.textContent?.replace(/\d+×$/, ''));
 
 describe('typeahead', () => {
-  it('offers the most used values first on focus', async () => {
-    const { user, input } = setup();
+  it('offers the most used values first from the star button', async () => {
+    const { user } = setup();
 
-    await user.click(input);
+    await user.click(star());
 
     expect(optionNames()).toEqual(['Biedronka', 'Lidl', 'Bistro']);
   });
@@ -77,17 +79,17 @@ describe('typeahead', () => {
   });
 
   it('shows no list for an account without remembered values', async () => {
-    const { user, input } = setup([]);
+    setup([]);
 
-    await user.click(input);
-
-    expect(input).toHaveAttribute('aria-expanded', 'false');
+    expect(
+      screen.queryByRole('button', { name: 'Podpowiedzi: Sklep' }),
+    ).not.toBeInTheDocument();
   });
 
   it('fills the field with the clicked value', async () => {
     const { user, input } = setup();
 
-    await user.click(input);
+    await user.click(star());
     await user.click(screen.getByRole('option', { name: /Lidl/ }));
 
     expect(input).toHaveValue('Lidl');
@@ -115,9 +117,9 @@ describe('typeahead', () => {
   });
 
   it('wraps the highlight around with the arrows', async () => {
-    const { user, input } = setup();
+    const { user } = setup();
 
-    await user.click(input);
+    await user.click(star());
     await user.keyboard('{ArrowUp}');
 
     expect(screen.getByRole('option', { selected: true })).toHaveTextContent(
@@ -161,26 +163,46 @@ describe('typeahead', () => {
     expect(input).toHaveFocus();
   });
 
-  it('marks a frequently used value with a star that cannot be pressed', () => {
-    setup([item('Lidl', { useCount: 5 })], 'Lidl');
-
-    expect(screen.getByText('Często używane')).toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: /używane/ }),
-    ).not.toBeInTheDocument();
-  });
-
-  it('shows no star for a rarely used value', () => {
-    setup([item('Lidl', { useCount: 1 })], 'Lidl');
-
-    expect(screen.queryByText('Często używane')).not.toBeInTheDocument();
-  });
-
-  it('shows no star on the listed values', async () => {
+  it('does not open the list by merely focusing the field', async () => {
     const { user, input } = setup();
 
     await user.click(input);
 
-    expect(screen.queryByText('Często używane')).not.toBeInTheDocument();
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+  });
+
+  it('lists every value from the star even when the field holds one of them', async () => {
+    const { user } = setup(SUGGESTIONS, 'Lidl');
+
+    await user.click(star());
+
+    expect(optionNames()).toEqual(['Biedronka', 'Lidl', 'Bistro']);
+  });
+
+  it('closes the list when the star is pressed again', async () => {
+    const { user } = setup();
+
+    await user.click(star());
+    await user.click(star());
+
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+  });
+
+  it('moves the focus to the field after opening the list with the star', async () => {
+    const { user, input } = setup();
+
+    await user.click(star());
+
+    expect(input).toHaveFocus();
+    expect(star()).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('keeps the star next to the clear button when filled', () => {
+    setup(SUGGESTIONS, 'Lidl');
+
+    expect(star()).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Wyczyść: Sklep' }),
+    ).toBeInTheDocument();
   });
 });

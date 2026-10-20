@@ -1,5 +1,6 @@
 import {
   useId,
+  useRef,
   useState,
   type ComponentProps,
   type FocusEvent,
@@ -8,8 +9,8 @@ import {
 import { Star } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { ClearableInput } from '@/shared/ui/clearable';
+import { useField } from '@/shared/ui/controls';
 import {
-  isFrequent,
   rankSuggestions,
   type Suggestion,
   type SuggestionField,
@@ -31,7 +32,7 @@ const same = (a: string, b: string): boolean =>
 
 /**
  * Text input with a combobox list of remembered values: filtered as you type,
- * most used first. A small star inside the field marks a frequently used value.
+ * most used first. A star button inside the field opens the list on demand.
  */
 export const Typeahead = ({
   value,
@@ -47,23 +48,38 @@ export const Typeahead = ({
   const listId = useId();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
+  const [browse, setBrowse] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const fieldCtx = useField();
 
-  const ranked = rankSuggestions(suggestions, field, value);
-  const settled = ranked.length === 1 && same(ranked[0].value, value);
+  const ranked = rankSuggestions(suggestions, field, browse ? '' : value);
+  const settled =
+    !browse && ranked.length === 1 && same(ranked[0].value, value);
   const expanded =
     open && !disabled && !readOnly && ranked.length > 0 && !settled;
   const activeOption = expanded ? ranked[active] : undefined;
-  const frequent = isFrequent(suggestions, field, value);
+  const hasAny = rankSuggestions(suggestions, field, '').length > 0;
+  const label =
+    props['aria-label'] ?? fieldCtx?.label ?? props.placeholder ?? 'pole';
+
+  const toggle = () => {
+    wrapRef.current?.querySelector('input')?.focus();
+    setActive(-1);
+    setBrowse(true);
+    setOpen(!expanded);
+  };
 
   const change = (next: string) => {
     onValueChange(next);
     setActive(-1);
+    setBrowse(false);
     setOpen(true);
   };
 
   const choose = (next: string) => {
     onValueChange(next);
     setActive(-1);
+    setBrowse(false);
     setOpen(false);
   };
 
@@ -107,7 +123,7 @@ export const Typeahead = ({
   };
 
   return (
-    <div className="relative" onBlur={focusOut}>
+    <div ref={wrapRef} className="relative" onBlur={focusOut}>
       <ClearableInput
         {...props}
         value={value}
@@ -120,17 +136,21 @@ export const Typeahead = ({
         aria-controls={expanded ? listId : undefined}
         aria-activedescendant={activeOption ? `${listId}-${active}` : undefined}
         onChange={(e) => change(e.target.value)}
-        onFocus={(e) => {
-          onFocus?.(e);
-          setOpen(true);
-        }}
+        onFocus={onFocus}
         onKeyDown={keyDown}
         trailing={
-          frequent && !disabled && !readOnly ? (
-            <span className="pointer-events-none grid h-6 w-4 place-items-center text-ink-soft">
-              <Star className="h-3 w-3" aria-hidden="true" />
-              <span className="sr-only">Często używane</span>
-            </span>
+          hasAny && !disabled && !readOnly ? (
+            <button
+              type="button"
+              aria-label={`Podpowiedzi: ${label}`}
+              aria-haspopup="listbox"
+              aria-expanded={expanded}
+              aria-controls={expanded ? listId : undefined}
+              onClick={toggle}
+              className="grid h-6 w-6 place-items-center rounded-full text-ink-soft hover:bg-brand-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            >
+              <Star className="h-4 w-4" aria-hidden="true" />
+            </button>
           ) : null
         }
       />

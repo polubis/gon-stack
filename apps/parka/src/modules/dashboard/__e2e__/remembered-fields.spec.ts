@@ -57,6 +57,9 @@ const commands = {
   'i type "bi" in the shop': async ({ getByE2e }) => {
     await getByE2e('expense-form:merchant').fill('bi');
   },
+  'i open the shop suggestions with the star': async ({ page }) => {
+    await page.getByRole('button', { name: 'Podpowiedzi: Sklep' }).click();
+  },
   'i type "Rossmann" in the shop': async ({ getByE2e }) => {
     await getByE2e('expense-form:merchant').fill('Rossmann');
   },
@@ -103,6 +106,15 @@ const commands = {
   'the shop suggestions are "Biedronka" then "Bistro"': async ({ page }) => {
     await expect(page.getByRole('option')).toHaveText([
       /^Biedronka/,
+      /^Bistro/,
+    ]);
+  },
+  'the shop suggestions are "Biedronka", "Lidl" and "Bistro"': async ({
+    page,
+  }) => {
+    await expect(page.getByRole('option')).toHaveText([
+      /^Biedronka/,
+      /^Lidl/,
       /^Bistro/,
     ]);
   },
@@ -162,6 +174,18 @@ test.describe('remembered expense form fields', () => {
       ['the shop is "Biedronka"'],
       ['i type "bi" in the shop'],
       ['the shop suggestions are "Biedronka" then "Bistro"'],
+      ['i pick the shop "Bistro" from the suggestions'],
+      ['the shop is "Bistro"'],
+    );
+  });
+
+  test('the star in the shop field opens all remembered shops', async ({
+    e2e,
+  }) => {
+    await interpreter(commands, e2e)(
+      ['i open the page for adding an expense with remembered shops'],
+      ['i open the shop suggestions with the star'],
+      ['the shop suggestions are "Biedronka", "Lidl" and "Bistro"'],
       ['i pick the shop "Bistro" from the suggestions'],
       ['the shop is "Bistro"'],
     );
