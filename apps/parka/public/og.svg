@@ -1,14 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Parka">
-  <defs>
-    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0%" stop-color="#0f172a" />
-      <stop offset="100%" stop-color="#1e293b" />
-    </linearGradient>
-  </defs>
-  <rect width="1200" height="630" fill="url(#bg)" />
-  <circle cx="600" cy="315" r="120" fill="none" stroke="#2563eb" stroke-width="24" />
-  <circle cx="710" cy="225" r="28" fill="#38bdf8" />
-  <text x="600" y="455" fill="#e2e8f0" font-size="64" text-anchor="middle" font-family="Inter, Arial, sans-serif">
+  <rect width="1200" height="630" fill="#0b6e46" />
+  <g transform="translate(485 160) scale(10)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M11 20a10 10 0 0010-10 25.9 25.9 0 00-1.04-7.281 1 1 0 00-1.755-.325C15.833 5.5 13 5.5 9.8 6.1A7 7 0 0011 20" />
+    <path d="M2 21a5 5 0 012.911-4.544C7.613 15.212 8.351 15.24 11 13" />
+  </g>
+  <text x="600" y="480" fill="#fff" font-size="72" font-weight="600" text-anchor="middle" font-family="Inter, Arial, sans-serif">
     Parka
   </text>
 </svg>
