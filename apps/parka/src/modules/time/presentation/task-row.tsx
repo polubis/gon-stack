@@ -52,7 +52,7 @@ export const TaskRow = ({ task, now, step }: Props) => {
         aria-label={`Edytuj zadanie: ${task.title}`}
         onClick={() => openModal(editTaskModal(task.id))}
         className={cn(
-          'min-w-0 flex-1 rounded-md text-left text-sm font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+          'min-w-24 flex-1 rounded-md text-left text-sm font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
           task.done && 'text-ink-soft line-through',
         )}
       >

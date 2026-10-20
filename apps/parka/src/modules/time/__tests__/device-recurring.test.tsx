@@ -58,6 +58,19 @@ describe('task device', () => {
     expect(dialog.getByText('device-phone-1')).toBeVisible();
   });
 
+  it('names the device on a week block of a task', async () => {
+    backend.seed([task({ device: DEVICE })]);
+    renderTime('week');
+
+    expect(
+      (
+        await screen.findAllByRole('button', {
+          name: 'Edytuj zadanie: Raport miesięczny, urządzenie: Telefon Ani',
+        })
+      ).length,
+    ).toBeGreaterThan(0);
+  });
+
   it('keeps the original device when a task is edited', async () => {
     const user = userEvent.setup();
     backend.seed([task({ device: DEVICE })]);

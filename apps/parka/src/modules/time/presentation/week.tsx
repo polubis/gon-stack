@@ -1,6 +1,8 @@
 import { Fragment } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
+import { deviceLabel } from '@/shared/device/domain/label';
+import { DeviceBubble } from '@/shared/device/presentation/device-bubble';
 import { openModal } from '@/shared/router/modal-stack';
 import { ALL_DAY_LABEL } from '../configuration/constraints';
 import type { Task } from '../domain/models';
@@ -37,7 +39,7 @@ const Chip = ({ task }: { task: Task }) => {
   return (
     <button
       type="button"
-      aria-label={`Edytuj zadanie: ${task.title}`}
+      aria-label={`Edytuj zadanie: ${task.title}${task.device ? `, urządzenie: ${deviceLabel(task.device)}` : ''}`}
       onClick={() => openModal(editTaskModal(task.id))}
       style={{ borderLeftColor: category?.color }}
       className={cn(
@@ -54,7 +56,14 @@ const Chip = ({ task }: { task: Task }) => {
           <span className="sr-only">Zrobione: </span>
         </>
       ) : null}
-      <span className="min-w-0 break-words">{task.title}</span>
+      <span className="min-w-0 flex-1 break-words">{task.title}</span>
+      {task.device ? (
+        <DeviceBubble
+          device={task.device}
+          className="h-4 w-4"
+          iconClassName="h-2.5 w-2.5"
+        />
+      ) : null}
     </button>
   );
 };
