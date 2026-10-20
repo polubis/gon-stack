@@ -10,7 +10,6 @@ import {
 import type { KeyboardEvent } from 'react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import { cn } from '@repo/react-kit/cn';
-import { Button } from '@/shared/ui/controls';
 import { ErrorState } from '@/shared/ui/error-state';
 import { ScreenHeader } from '@/shared/ui/layout';
 import { APP_ROUTER } from '@/shared/router/routes';
@@ -20,11 +19,17 @@ import {
   type TimeKind,
 } from '../configuration/constraints';
 import type { TimeE2eId } from '../configuration/e2e-ids';
+import { AddMenu } from './add-menu';
+import { Provider } from './lists-context';
+import { TaskModals } from './task-modals';
 
 type Props = {
   kind: TimeKind;
   children: ReactNode;
 };
+
+const ADD_BUTTON =
+  'inline-flex items-center justify-center gap-2 rounded-xl bg-brand text-sm font-semibold text-on-brand transition-colors hover:bg-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2';
 
 const STEP_BUTTON =
   'grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-line-strong bg-card text-ink transition-colors hover:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
@@ -154,36 +159,46 @@ export const TimeScreen = ({ kind, children }: Props) => {
         />
       )}
     >
-      <div
-        data-e2e={id}
-        className="relative flex flex-1 animate-view-zoom flex-col motion-reduce:animate-none"
-      >
-        <div className="md:px-4 lg:px-6 xl:px-12">
-          <ScreenHeader
-            title="Czas"
-            action={
-              <Button className="h-11 w-auto shrink-0 py-0 max-md:hidden">
-                <Plus className="h-4 w-4" aria-hidden="true" />
-                Dodaj zadanie
-              </Button>
-            }
-          />
-        </div>
-        <main className="flex flex-1 flex-col gap-4 px-4 pb-24 pt-2 md:gap-6 md:px-8 md:pb-6 lg:px-10 xl:px-16">
-          <RangeControl kind={kind} />
-          {children}
-        </main>
-        {/* Zero-height sticky rail (as in finance): the button floats above the
+      <Provider>
+        <div
+          data-e2e={id}
+          className="relative flex flex-1 animate-view-zoom flex-col motion-reduce:animate-none"
+        >
+          <div className="md:px-4 lg:px-6 xl:px-12">
+            <ScreenHeader
+              title="Czas"
+              action={
+                <AddMenu
+                  side="bottom"
+                  className={cn(ADD_BUTTON, 'h-11 shrink-0 px-4 max-md:hidden')}
+                >
+                  <Plus className="h-4 w-4" aria-hidden="true" />
+                  Dodaj
+                </AddMenu>
+              }
+            />
+          </div>
+          <main className="flex flex-1 flex-col gap-4 px-4 pb-24 pt-2 md:gap-6 md:px-8 md:pb-6 lg:px-10 xl:px-16">
+            <RangeControl kind={kind} />
+            {children}
+          </main>
+          {/* Zero-height sticky rail (as in finance): the button floats above the
           content, which scrolls clear of it thanks to <main> bottom padding. */}
-        <div className="pointer-events-none sticky bottom-4 z-(--z-nav) h-0 md:hidden">
-          <Button
-            aria-label="Dodaj zadanie"
-            className="pointer-events-auto absolute bottom-0 right-4 h-14 w-14 animate-pop-in rounded-full p-0 shadow-popover motion-reduce:animate-none"
-          >
-            <Plus className="h-6 w-6" aria-hidden="true" />
-          </Button>
+          <div className="pointer-events-none sticky bottom-4 z-(--z-nav) h-0 md:hidden">
+            <AddMenu
+              side="top"
+              aria-label="Dodaj"
+              className={cn(
+                ADD_BUTTON,
+                'pointer-events-auto absolute bottom-0 right-4 h-14 w-14 animate-pop-in rounded-full shadow-popover motion-reduce:animate-none',
+              )}
+            >
+              <Plus className="h-6 w-6" aria-hidden="true" />
+            </AddMenu>
+          </div>
+          <TaskModals />
         </div>
-      </div>
+      </Provider>
     </ErrorBoundary>
   );
 };

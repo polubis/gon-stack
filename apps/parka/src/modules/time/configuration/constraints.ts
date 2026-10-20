@@ -1,3 +1,4 @@
+import type { Category, Priority } from '../domain/models';
 import { APP_ROUTER } from '@/shared/router/routes';
 
 export type TimeKind = 'day' | 'week' | 'month' | 'year';
@@ -31,6 +32,40 @@ export const TONE_CLASS: Record<TimeTone, string> = {
   rest: 'bg-device-6 text-on-device-6',
 };
 
+export const NAME_MAX_LENGTH = 40;
+
+/** Colour presets of a category (same palette as the finance categories). */
+export const CATEGORY_COLORS = [
+  '#0f7a4f',
+  '#2563eb',
+  '#7c3aed',
+  '#c2410c',
+  '#be123c',
+  '#0891b2',
+  '#a16207',
+  '#4b5a52',
+  '#dc2626',
+  '#ea580c',
+  '#ca8a04',
+  '#65a30d',
+  '#0d9488',
+  '#0284c7',
+  '#4f46e5',
+  '#c026d3',
+  '#db2777',
+  '#57534e',
+  '#0f172a',
+] as const;
+
+/** Seed list; ids match `TimeTone` so the dummy tasks resolve to one. */
+export const CATEGORIES: readonly Category[] = [
+  { id: 'work', name: 'Praca', icon: 'briefcase', color: '#2563eb' },
+  { id: 'home', name: 'Dom', icon: 'home', color: '#c2410c' },
+  { id: 'health', name: 'Zdrowie', icon: 'heart', color: '#0d9488' },
+  { id: 'learn', name: 'Nauka', icon: 'graduation', color: '#7c3aed' },
+  { id: 'rest', name: 'Odpoczynek', icon: 'coffee', color: '#ca8a04' },
+];
+
 export const TONE_DOT_CLASS: Record<TimeTone, string> = {
   work: 'bg-on-device-1',
   home: 'bg-on-device-4',
@@ -42,8 +77,23 @@ export const TONE_DOT_CLASS: Record<TimeTone, string> = {
 /** A task is pinned to an hour (`HH:00`) or lasts the whole day. */
 export type Slot = { kind: 'timed'; at: string } | { kind: 'allDay' };
 
+export const PRIORITY_VALUES: readonly number[] = Array.from(
+  { length: 10 },
+  (_, i) => i + 1,
+);
+
+export const DEFAULT_PRIORITY = 'medium';
+
+export const PRIORITIES: readonly Priority[] = [
+  { id: 'low', name: 'Niski', value: 2 },
+  { id: 'medium', name: 'Średni', value: 5 },
+  { id: 'high', name: 'Wysoki', value: 9 },
+];
+
 export type Task = {
   title: string;
+  /** Missing means `DEFAULT_PRIORITY`. */
+  priority?: string;
   tone: TimeTone;
   done: boolean;
   slot: Slot;
@@ -67,6 +117,7 @@ export const DAY_TASKS: readonly Task[] = [
   {
     slot: timed('09:00'),
     title: 'Raport miesięczny',
+    priority: 'high',
     tone: 'work',
     done: true,
   },
@@ -76,10 +127,17 @@ export const DAY_TASKS: readonly Task[] = [
     tone: 'work',
     done: true,
   },
-  { slot: timed('13:00'), title: 'Obiad i spacer', tone: 'rest', done: false },
+  {
+    slot: timed('13:00'),
+    title: 'Obiad i spacer',
+    priority: 'low',
+    tone: 'rest',
+    done: false,
+  },
   {
     slot: timed('15:00'),
     title: 'Kurs angielskiego',
+    priority: 'high',
     tone: 'learn',
     done: false,
   },
@@ -188,6 +246,12 @@ export const WEEK_DAYS: readonly {
       { slot: allDay, title: 'Dzień bez planów', tone: 'rest', done: false },
     ],
   },
+];
+
+/** Every dummy task, for looking one up by title. */
+export const ALL_TASKS: readonly Task[] = [
+  ...DAY_TASKS,
+  ...WEEK_DAYS.flatMap((day) => day.tasks),
 ];
 
 const timedHours = WEEK_DAYS.flatMap((day) =>
