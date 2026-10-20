@@ -89,6 +89,22 @@ describe('diff of a notification', () => {
 
     expect(days?.after).toBe('12.09.2026, 12.10.2026');
   });
+
+  it('has no change rows for the unfinished tasks summary', () => {
+    const n: Notification = {
+      ...base,
+      kind: 'time-day-unfinished',
+      payload: {
+        day: '2026-10-20',
+        tasks: [
+          { title: 'Raport', at: '09:00' },
+          { title: 'Zakupy', at: null },
+        ],
+      },
+    };
+
+    expect(diffRows(n)).toEqual([]);
+  });
 });
 
 describe('inline text diff', () => {

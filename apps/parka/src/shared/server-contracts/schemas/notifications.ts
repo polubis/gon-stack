@@ -31,6 +31,13 @@ const recurringSnapshot = () =>
     paymentMethod: z.string(),
   });
 
+const unfinishedTask = () =>
+  z.object({
+    title: z.string(),
+    /** `HH:MM`; `null` for a task that lasts the whole day. */
+    at: z.string().nullable(),
+  });
+
 /**
  * One entry per notification type, each with its own payload. Shared by the
  * internal write endpoint (input) and the list endpoint (output).
@@ -54,6 +61,14 @@ export const notificationEvent = () =>
       z.object({ before: categorySnapshot(), after: categorySnapshot() }),
     ),
     typed('category-deleted', z.object({ category: categorySnapshot() })),
+    typed(
+      'time-day-unfinished',
+      z.object({
+        /** The day (`YYYY-MM-DD`) that is about to end. */
+        day: z.string(),
+        tasks: z.array(unfinishedTask()).min(1),
+      }),
+    ),
     typed(
       'recurring-accrued',
       z.object({

@@ -1,8 +1,11 @@
 import type { Database } from '@/shared/data-sources/db-schema';
+import { localDay, localHour } from '@/shared/date/date';
 import { dueOccurrences } from '@/shared/recurring/occurrences';
 import type { SupabaseServer } from '@/shared/data-sources/supabase-server';
 import { InternalServer } from '../core/error-handling';
+import { logger } from '../core/logger';
 import { toDevice, type ProfilesByDevice } from './device';
+import { recordNotificationOnce } from './notifications';
 
 type TaskRow = Database['public']['Tables']['time_tasks']['Row'];
 type RuleRow = Database['public']['Tables']['time_recurring']['Row'];
@@ -89,5 +92,45 @@ export const materializeTimeRecurring = async (
       .eq('id', row.id)
       .or(`last_materialized_date.is.null,last_materialized_date.lt.${newest}`);
     if (markError) throw new InternalServer(markError);
+  }
+};
+
+/** From this local hour on, the day counts as nearly over. */
+export const END_OF_DAY_HOUR = 20;
+
+/**
+ * Near the end of the caller's day, warns once about tasks of that day still
+ * not done. The notification id is the day, so any number of requests (or
+ * parallel ones) leave exactly one. Never fails the read it piggybacks on.
+ */
+export const notifyUnfinishedTasks = async (
+  db: SupabaseServer,
+  userId: string,
+  timeZone: string,
+  now: Date = new Date(),
+): Promise<void> => {
+  if (localHour(now, timeZone) < END_OF_DAY_HOUR) return;
+  try {
+    const day = localDay(now, timeZone);
+    const { data, error } = await db
+      .from('time_tasks')
+      .select('title, at')
+      .eq('day', day)
+      .eq('done', false)
+      .order('at', { nullsFirst: true });
+    if (error) throw new InternalServer(error);
+    if (data.length === 0) return;
+    await recordNotificationOnce(db, userId, `time-day-unfinished:${day}`, {
+      kind: 'time-day-unfinished',
+      payload: {
+        day,
+        tasks: data.map((row) => ({
+          title: row.title,
+          at: toHourMinute(row.at),
+        })),
+      },
+    });
+  } catch (error) {
+    logger(error, 'error');
   }
 };

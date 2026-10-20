@@ -155,9 +155,7 @@ const DashboardView = () => {
           <Header
             period={period}
             today={today}
-            userName={summary?.userName}
             avatar={avatar}
-            initializing={!ready}
             onPeriodChange={goToPeriod}
           />
         </div>

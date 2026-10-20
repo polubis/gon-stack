@@ -16,4 +16,5 @@ export type NotificationsE2eId =
   | `notifications:row:${string}`
   | `notifications:mark-read:${string}`
   | `notifications:read:${string}`
-  | `notifications:diff:${string}`;
+  | `notifications:diff:${string}`
+  | `notifications:open-tasks:${string}`;

@@ -12,7 +12,7 @@ const SCREENS: Screen[] = [
   { path: APP_ROUTER.home(), root: 'home:main', heading: /Parka/ },
   { path: APP_ROUTER.signIn(), root: 'auth:main', heading: /Witaj ponownie/ },
   { path: APP_ROUTER.signUp(), root: 'auth:main', heading: /Załóż konto/ },
-  { path: APP_ROUTER.dashboard(), root: 'dashboard:main', heading: /Cześć/ },
+  { path: APP_ROUTER.dashboard(), root: 'dashboard:main', heading: /Finanse/ },
   {
     path: APP_ROUTER.dashboard(),
     root: 'dashboard:limits',

@@ -3,13 +3,18 @@ import { InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { loadProfiles } from '../../shared/device';
-import { materializeTimeRecurring, toTimeTask } from '../../shared/time';
+import {
+  materializeTimeRecurring,
+  notifyUnfinishedTasks,
+  toTimeTask,
+} from '../../shared/time';
 
 export const listTime = privateProcedure({
   schema: withZodSchema({ schema: listTimeSchema }),
 })({
   handler: async (input, { db, user }) => {
     await materializeTimeRecurring(db, user.id, input.to);
+    if (input.tz) await notifyUnfinishedTasks(db, user.id, input.tz);
     const profiles = await loadProfiles(db);
     const [categories, priorities, tasks] = await Promise.all([
       db.from('time_categories').select('*').order('name'),

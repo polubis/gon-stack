@@ -1,4 +1,5 @@
 import z from 'zod';
+import { isTimeZone } from '../../date/date';
 import { daysBetween, isDay } from '../../period/period';
 import {
   errorOut,
@@ -22,6 +23,8 @@ export const listTimeSchema = () =>
       .object({
         from: z.string().refine(isDay, 'Invalid day'),
         to: z.string().refine(isDay, 'Invalid day'),
+        /** Zone whose clock decides when today is over. */
+        tz: z.string().refine(isTimeZone, 'Unknown time zone').optional(),
       })
       .refine(
         ({ from, to }) => from <= to && daysBetween(from, to) <= MAX_RANGE_DAYS,

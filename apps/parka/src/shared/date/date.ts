@@ -59,6 +59,10 @@ export const localDay = (value: string | Date, timeZone?: string): string => {
 export const localMonth = (value: string | Date, timeZone?: string): string =>
   localDay(value, timeZone).slice(0, 7);
 
+/** Hour of day (0-23) an instant falls on in `timeZone` (default: local). */
+export const localHour = (value: Date, timeZone?: string): number =>
+  Number(partsOf(value, timeZone).hour);
+
 /** Today (`YYYY-MM-DD`) in `timeZone` (default: local). */
 export const today = (timeZone?: string): string =>
   localDay(new Date(), timeZone);

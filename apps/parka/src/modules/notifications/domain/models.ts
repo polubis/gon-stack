@@ -27,6 +27,12 @@ export type RecurringSnapshot = {
   paymentMethod: string;
 };
 
+export type UnfinishedTaskSnapshot = {
+  title: string;
+  /** `HH:MM`; `null` for a task that lasts the whole day. */
+  at: string | null;
+};
+
 type Base = {
   id: NotificationId;
   title: string;
@@ -54,6 +60,10 @@ export type Notification = Base &
     | {
         kind: 'recurring-accrued';
         payload: { rule: RecurringSnapshot; days: string[] };
+      }
+    | {
+        kind: 'time-day-unfinished';
+        payload: { day: string; tasks: UnfinishedTaskSnapshot[] };
       }
     /** Rows from before typed payloads: text only, nothing to diff. */
     | { kind: 'other'; payload: null }

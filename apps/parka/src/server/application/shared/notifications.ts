@@ -103,6 +103,13 @@ const text = (event: NotificationEvent): { title: string; body: string } => {
         title: 'Naliczono wydatek cykliczny',
         body: `${event.payload.rule.name} · ${money.format(event.payload.rule.cost)}`,
       };
+    case 'time-day-unfinished': {
+      const count = event.payload.tasks.length;
+      return {
+        title: 'Dzień się kończy, a zadania czekają',
+        body: `Niezrobione zadania: ${count}`,
+      };
+    }
     default: {
       const unreachable: never = event;
       return unreachable;
@@ -134,6 +141,37 @@ export const recordNotifications = async (
   if (error) throw new InternalServer(error);
   await deliverPush(db, userId, messages);
   return events.length;
+};
+
+/**
+ * Records `event` under a fixed `id`: a repeat call with the same id is a
+ * no-op (and pushes nothing), so one condition notifies once however often
+ * it is noticed. Returns whether a notification was created.
+ */
+export const recordNotificationOnce = async (
+  db: Db,
+  userId: string,
+  id: string,
+  event: NotificationEvent,
+): Promise<boolean> => {
+  const message = text(event);
+  const { data, error } = await db
+    .from('notifications')
+    .upsert(
+      {
+        user_id: userId,
+        id,
+        kind: event.kind,
+        payload: event.payload,
+        ...message,
+      },
+      { onConflict: 'user_id,id', ignoreDuplicates: true },
+    )
+    .select('id');
+  if (error) throw new InternalServer(error);
+  if (data.length === 0) return false;
+  await deliverPush(db, userId, [message]);
+  return true;
 };
 
 /** A missing notification must never fail the change the user actually made. */

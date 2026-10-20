@@ -48,13 +48,13 @@ const stubApi = (failing = false, overrides: Partial<typeof SUMMARY> = {}) =>
   );
 
 describe('dashboard screen', () => {
-  it('greets the user and shows the month total with its change', async () => {
+  it('shows the month total with its change', async () => {
     stubApi();
 
     render(<Main />);
 
     await waitFor(() =>
-      expect(screen.getByRole('heading', { name: /Cześć, Anna/ })).toBeTruthy(),
+      expect(screen.getByRole('heading', { name: 'Finanse' })).toBeTruthy(),
     );
     expect(screen.getByText(/10,00/)).toBeTruthy();
     expect(screen.getByText('+25%')).toBeTruthy();

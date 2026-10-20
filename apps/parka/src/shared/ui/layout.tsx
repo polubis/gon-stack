@@ -7,12 +7,14 @@ type ScreenHeaderProps = {
   title: string;
   backHref?: string;
   action?: ReactNode;
+  titleClassName?: string;
 };
 
 export const ScreenHeader = ({
   title,
   backHref,
   action,
+  titleClassName,
 }: ScreenHeaderProps) => (
   <header className="flex items-center gap-2 px-4 py-4">
     {backHref ? (
@@ -25,7 +27,9 @@ export const ScreenHeader = ({
         <ArrowLeft className="h-5 w-5" aria-hidden="true" />
       </a>
     ) : null}
-    <h1 className="flex-1 text-lg font-semibold">{title}</h1>
+    <h1 className={cn('flex-1 text-lg font-semibold', titleClassName)}>
+      {title}
+    </h1>
     {action}
   </header>
 );

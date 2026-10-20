@@ -9,6 +9,7 @@ import type {
   listTimeSchema,
   updateTimeTaskSchema,
 } from '@schemas/time';
+import { browserTimeZone } from '@/shared/date/date';
 import { API_ROUTER } from '@/shared/router/routes';
 import type {
   Category,
@@ -38,10 +39,13 @@ export const fetchTime = async (
   to: string,
   signal: AbortSignal,
 ): Promise<TimeData> => {
-  const response = await fetch(API_ROUTER.time({ from, to }), {
-    headers: { Accept: 'application/json' },
-    signal,
-  });
+  const response = await fetch(
+    API_ROUTER.time({ from, to, tz: browserTimeZone() }),
+    {
+      headers: { Accept: 'application/json' },
+      signal,
+    },
+  );
   const json = (await response.json()) as Out<typeof listTimeSchema>;
   if (json.code !== 200) throw new Error(json.message);
   return {

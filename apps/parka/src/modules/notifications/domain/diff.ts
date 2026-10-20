@@ -85,6 +85,9 @@ export const diffRows = (notification: Notification): DiffRow[] => {
       return added(
         recurringFields(notification.payload.rule, notification.payload.days),
       );
+    /** A summary with a link, not a change: nothing to diff. */
+    case 'time-day-unfinished':
+      return [];
     case 'other':
       return [];
     default: {

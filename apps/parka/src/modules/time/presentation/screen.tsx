@@ -18,6 +18,7 @@ import { periodContaining, shiftPeriod } from '@/shared/period/period';
 import { ERROR_CODES, TIME_KINDS } from '../configuration/constraints';
 import type { TimeE2eId } from '../configuration/e2e-ids';
 import type { TimeKind } from '../domain/models';
+import { UnreadLink } from '@/modules/notifications/presentation/unread-link';
 import { periodTitle } from '../domain/period-title';
 import { rangeOf } from '../domain/schedule';
 import { AddMenu } from './add-menu';
@@ -194,14 +195,18 @@ const Screen = ({ kind, children }: Props) => {
       <div className="md:px-4 lg:px-6 xl:px-12">
         <ScreenHeader
           title="Czas"
+          titleClassName="text-2xl font-bold tracking-tight lg:text-3xl"
           action={
-            <AddMenu
-              side="bottom"
-              className={cn(ADD_BUTTON, 'h-11 shrink-0 px-4 max-md:hidden')}
-            >
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              Dodaj
-            </AddMenu>
+            <>
+              <UnreadLink />
+              <AddMenu
+                side="bottom"
+                className={cn(ADD_BUTTON, 'h-11 shrink-0 px-4 max-md:hidden')}
+              >
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                Dodaj
+              </AddMenu>
+            </>
           }
         />
       </div>

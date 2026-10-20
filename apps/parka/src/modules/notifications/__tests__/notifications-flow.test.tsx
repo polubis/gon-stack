@@ -48,7 +48,27 @@ const created = (id = 'n-2', read = false) => ({
   payload: { category: { name: 'Kawa', icon: 'coffee', color: '#aabbcc' } },
 });
 
-type Item = ReturnType<typeof updated> | ReturnType<typeof created>;
+const unfinished = (id = 'n-3') => ({
+  id,
+  kind: 'time-day-unfinished',
+  title: 'Dzień się kończy, a zadania czekają',
+  body: 'Niezrobione zadania: 3',
+  createdAt: CREATED_AT,
+  read: false,
+  payload: {
+    day: '2026-10-20',
+    tasks: [
+      { title: 'Siłownia', at: '18:00' },
+      { title: 'Zakupy', at: null },
+      { title: 'Bank', at: '16:30' },
+    ],
+  },
+});
+
+type Item =
+  | ReturnType<typeof updated>
+  | ReturnType<typeof created>
+  | ReturnType<typeof unfinished>;
 type Page = {
   code: 200;
   data: Item[];
@@ -152,6 +172,20 @@ describe('notifications screen', () => {
     const diff = await screen.findByRole('group', { name: /Zmiany:/ });
     expect(diff.querySelector('del')).toBeNull();
     expect(within(diff).getByText(/Kawa/)).toBeTruthy();
+  });
+
+  it('summarises unfinished tasks and links to them, without a diff', async () => {
+    stubApi({ pages: { first: page([unfinished()]) } });
+
+    render(<Main />);
+
+    expect(await screen.findByText('Do zrobienia: 3 zadania')).toBeTruthy();
+    expect(screen.queryByRole('group', { name: /Zmiany:/ })).toBeNull();
+    expect(
+      screen
+        .getByRole('link', { name: 'Przejdź do zadań' })
+        .getAttribute('href'),
+    ).toBe('/app/time/?date=2026-10-20');
   });
 
   it('shows card placeholders while loading, not the empty state', async () => {

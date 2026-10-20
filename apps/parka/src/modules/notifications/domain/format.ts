@@ -12,6 +12,16 @@ export const ageLabel = (createdAt: string, now: number): string => {
   return days === 1 ? '1 dzień temu' : `${days} dni temu`;
 };
 
+const TASK_FORMS = new Intl.PluralRules('pl');
+
+/** `1 zadanie`, `2 zadania`, `5 zadań`. */
+export const taskCount = (count: number): string => {
+  const rule = TASK_FORMS.select(count);
+  const form =
+    rule === 'one' ? 'zadanie' : rule === 'many' ? 'zadań' : 'zadania';
+  return `${count} ${form}`;
+};
+
 const money = new Intl.NumberFormat('pl-PL', {
   style: 'currency',
   currency: 'PLN',

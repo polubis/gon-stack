@@ -2,14 +2,17 @@ import {
   Bell,
   Check,
   CheckCheck,
+  ArrowRight,
   FolderPen,
+  Hourglass,
   Receipt,
   Repeat,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { Card } from '@/shared/ui/layout';
-import { ageLabel } from '../domain/format';
+import { APP_ROUTER } from '@/shared/router/routes';
+import { ageLabel, taskCount } from '../domain/format';
 import type { Notification, NotificationKind } from '../domain/models';
 import { useContext } from './context';
 import { DiffView } from './diff-view';
@@ -22,6 +25,7 @@ const ICON: Record<NotificationKind, LucideIcon> = {
   'category-updated': FolderPen,
   'category-deleted': FolderPen,
   'recurring-accrued': Repeat,
+  'time-day-unfinished': Hourglass,
   other: Bell,
 };
 
@@ -67,7 +71,9 @@ export const NotificationRow = ({
             {notification.title}
           </p>
           <p className="wrap-anywhere text-xs text-ink-soft">
-            {notification.body}
+            {notification.kind === 'time-day-unfinished'
+              ? `Do zrobienia: ${taskCount(notification.payload.tasks.length)}`
+              : notification.body}
           </p>
         </div>
         <time
@@ -82,6 +88,16 @@ export const NotificationRow = ({
         aria-label={`Zmiany: ${notification.title}`}
         data-e2e={`notifications:diff:${notification.id}`}
       />
+      {notification.kind === 'time-day-unfinished' ? (
+        <a
+          href={APP_ROUTER.time({ date: notification.payload.day })}
+          data-e2e={`notifications:open-tasks:${notification.id}`}
+          className="mt-1 inline-flex items-center justify-between gap-2 rounded-xl bg-brand-soft px-3 py-2 text-sm font-semibold text-brand-dark hover:bg-brand-softer"
+        >
+          Przejdź do zadań
+          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        </a>
+      ) : null}
       <div className="flex justify-end pt-1">
         {notification.read ? (
           <span
