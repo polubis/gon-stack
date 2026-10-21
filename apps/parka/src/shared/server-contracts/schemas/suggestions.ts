@@ -1,5 +1,5 @@
 import z from 'zod';
-import { errorOut } from './general';
+import { conflictOut, errorOut, notFoundOut } from './general';
 
 export const SUGGESTION_FIELDS = ['merchant', 'paymentMethod'] as const;
 
@@ -32,4 +32,22 @@ export const recordSuggestionUseSchema = () =>
   z.object({
     in: z.object({ field: suggestionField(), value: suggestionValue() }),
     out: z.union([okOut(), errorOut()]),
+  });
+
+/** Renames a remembered value, keeping its use count. A taken name is a 409. */
+export const renameSuggestionSchema = () =>
+  z.object({
+    in: z.object({
+      field: suggestionField(),
+      value: suggestionValue(),
+      newValue: suggestionValue(),
+    }),
+    out: z.union([okOut(), notFoundOut(), conflictOut(), errorOut()]),
+  });
+
+/** Forgets a remembered value (past expenses keep their text). */
+export const deleteSuggestionSchema = () =>
+  z.object({
+    in: z.object({ field: suggestionField(), value: suggestionValue() }),
+    out: z.union([okOut(), notFoundOut(), errorOut()]),
   });

@@ -220,6 +220,21 @@ export const installBackend = async (
     if (collection === 'suggestions') {
       if (method === 'GET')
         return json(route, { code: 200, data: suggestions });
+      if (method === 'DELETE' || method === 'PUT') {
+        const edit = request.postDataJSON() as Suggestion & {
+          newValue?: string;
+        };
+        const same = (x: Suggestion) =>
+          x.field === edit.field &&
+          x.value.toLowerCase() === edit.value.trim().toLowerCase();
+        suggestions =
+          method === 'DELETE'
+            ? suggestions.filter((x) => !same(x))
+            : suggestions.map((x) =>
+                same(x) ? { ...x, value: edit.newValue ?? x.value } : x,
+              );
+        return json(route, { code: 200, ok: true });
+      }
       const body = request.postDataJSON() as Suggestion;
       const key = body.value.trim().toLowerCase();
       const known = suggestions.find(

@@ -30,6 +30,35 @@ export const fakeSuggestions = (seed: Suggestion[] = []) => {
   };
 
   const handlers = [
+    http.put('/api/suggestions/', async ({ request }) => {
+      const body = (await request.json()) as Body & { newValue: string };
+      calls.push({ method: 'PUT', body });
+      if (
+        !same(body.value, body.newValue) &&
+        items.some(
+          (i) => i.field === body.field && same(i.value, body.newValue),
+        )
+      )
+        return HttpResponse.json({
+          code: 409,
+          type: 'conflict',
+          message: 'Value already exists',
+        });
+      items = items.map((i) =>
+        i.field === body.field && same(i.value, body.value)
+          ? { ...i, value: body.newValue }
+          : i,
+      );
+      return HttpResponse.json({ code: 200, ok: true });
+    }),
+    http.delete('/api/suggestions/', async ({ request }) => {
+      const body = (await request.json()) as Body;
+      calls.push({ method: 'DELETE', body });
+      items = items.filter(
+        (i) => !(i.field === body.field && same(i.value, body.value)),
+      );
+      return HttpResponse.json({ code: 200, ok: true });
+    }),
     http.get('/api/suggestions/', () =>
       HttpResponse.json({ code: 200, data: items }),
     ),

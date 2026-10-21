@@ -6,7 +6,7 @@ import {
   type FocusEvent,
   type KeyboardEvent,
 } from 'react';
-import { Star } from 'lucide-react';
+import { Settings2, Star } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { ClearableInput } from '@/shared/ui/clearable';
 import { useField } from '@/shared/ui/controls';
@@ -25,6 +25,8 @@ type Props = Omit<
   field: SuggestionField;
   /** Everything remembered for the account; ranked and filtered as the user types. */
   suggestions: Suggestion[];
+  /** Adds a "Zarządzaj" button at the bottom of the list that opens the manage popup. */
+  onManage?: () => void;
 };
 
 const same = (a: string, b: string): boolean =>
@@ -39,6 +41,7 @@ export const Typeahead = ({
   onValueChange,
   field,
   suggestions,
+  onManage,
   onKeyDown,
   onFocus,
   disabled,
@@ -184,6 +187,24 @@ export const Typeahead = ({
               </li>
             ))}
           </ul>
+          {onManage ? (
+            <div className="border-t border-line p-1">
+              <button
+                type="button"
+                data-e2e={`form-memory:manage:${field}`}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  setOpen(false);
+                  setActive(-1);
+                  onManage();
+                }}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-brand-dark transition-colors hover:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+              >
+                <Settings2 className="h-4 w-4" aria-hidden="true" />
+                Zarządzaj
+              </button>
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>

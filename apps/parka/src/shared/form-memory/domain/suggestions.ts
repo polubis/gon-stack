@@ -53,3 +53,39 @@ export const isFrequent = (
       item.useCount >= FREQUENT_USES &&
       normalize(item.value) === normalize(value),
   );
+
+export const sameValue = (a: string, b: string): boolean =>
+  normalize(a) === normalize(b);
+
+/** The list with one value renamed (count kept). */
+export const renameSuggestion = (
+  items: Suggestion[],
+  field: SuggestionField,
+  value: string,
+  newValue: string,
+): Suggestion[] =>
+  items.map((item) =>
+    item.field === field && sameValue(item.value, value)
+      ? { ...item, value: newValue.trim() }
+      : item,
+  );
+
+/** The list without one value. */
+export const removeSuggestion = (
+  items: Suggestion[],
+  field: SuggestionField,
+  value: string,
+): Suggestion[] =>
+  items.filter(
+    (item) => !(item.field === field && sameValue(item.value, value)),
+  );
+
+/** Whether renaming `value` to `newValue` would collide with another value. */
+export const isTaken = (
+  items: Suggestion[],
+  field: SuggestionField,
+  value: string,
+  newValue: string,
+): boolean =>
+  !sameValue(value, newValue) &&
+  items.some((item) => item.field === field && sameValue(item.value, newValue));

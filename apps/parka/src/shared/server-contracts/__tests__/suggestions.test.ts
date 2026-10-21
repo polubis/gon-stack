@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { recordSuggestionUseSchema } from '../schemas/suggestions';
+import {
+  deleteSuggestionSchema,
+  recordSuggestionUseSchema,
+  renameSuggestionSchema,
+} from '../schemas/suggestions';
 
 describe('suggestion contracts', () => {
   it('trims the value of a recorded use', () => {
@@ -19,5 +23,40 @@ describe('suggestion contracts', () => {
     expect(recordSuggestionUseSchema().shape.in.safeParse(input).success).toBe(
       false,
     );
+  });
+});
+
+describe('suggestion management contracts', () => {
+  it('trims both names of a rename', () => {
+    const parsed = renameSuggestionSchema().shape.in.parse({
+      field: 'paymentMethod',
+      value: ' Karta ',
+      newValue: ' BLIK ',
+    });
+
+    expect(parsed).toEqual({
+      field: 'paymentMethod',
+      value: 'Karta',
+      newValue: 'BLIK',
+    });
+  });
+
+  it('rejects a blank new name', () => {
+    expect(
+      renameSuggestionSchema().shape.in.safeParse({
+        field: 'merchant',
+        value: 'Lidl',
+        newValue: '  ',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejects deleting an unknown field', () => {
+    expect(
+      deleteSuggestionSchema().shape.in.safeParse({
+        field: 'category',
+        value: 'Karta',
+      }).success,
+    ).toBe(false);
   });
 });

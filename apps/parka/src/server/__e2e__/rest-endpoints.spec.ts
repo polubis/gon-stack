@@ -642,6 +642,55 @@ const commands = {
     expect(res.status()).toBe(400);
   },
 
+  'renaming a shop keeps its use count': async ({ page }) => {
+    const res = await page.request.put(API_ROUTER.suggestions(), {
+      data: { field: 'merchant', value: 'Lidl', newValue: 'Lidl Plus' },
+    });
+    expect(res.ok()).toBe(true);
+    const body = await (
+      await page.request.get(API_ROUTER.suggestions())
+    ).json();
+    expect(
+      body.data.map((s: { value: string; useCount: number }) => [
+        s.value,
+        s.useCount,
+      ]),
+    ).toEqual([
+      ['biedronka', 2],
+      ['Lidl Plus', 1],
+    ]);
+  },
+  'renaming a shop to a taken name is a conflict': async ({ page }) => {
+    const res = await page.request.put(API_ROUTER.suggestions(), {
+      data: { field: 'merchant', value: 'Lidl Plus', newValue: ' BIEDRONKA ' },
+    });
+    expect(res.status()).toBe(409);
+  },
+  'renaming an unknown shop is not found': async ({ page }) => {
+    const res = await page.request.put(API_ROUTER.suggestions(), {
+      data: { field: 'merchant', value: 'Nieznany', newValue: 'Inny' },
+    });
+    expect(res.status()).toBe(404);
+  },
+  'deleting shops forgets them': async ({ page }) => {
+    for (const value of ['Lidl Plus', ' BIEDRONKA ']) {
+      const res = await page.request.delete(API_ROUTER.suggestions(), {
+        data: { field: 'merchant', value },
+      });
+      expect(res.ok()).toBe(true);
+    }
+    const body = await (
+      await page.request.get(API_ROUTER.suggestions())
+    ).json();
+    expect(body.data).toEqual([]);
+  },
+  'deleting a forgotten shop is not found': async ({ page }) => {
+    const res = await page.request.delete(API_ROUTER.suggestions(), {
+      data: { field: 'merchant', value: 'Lidl Plus' },
+    });
+    expect(res.status()).toBe(404);
+  },
+
   'closing the finance tour on sign-up is remembered for 30 days': async ({
     page,
   }) => {
@@ -732,6 +781,11 @@ test('REST endpoints CRUD each finance entity through Postgres', async ({
     ['i use "Biedronka" twice and "Lidl" once as shops'],
     ['the shops come back most used first'],
     ['a blank value is refused'],
+    ['renaming a shop keeps its use count'],
+    ['renaming a shop to a taken name is a conflict'],
+    ['renaming an unknown shop is not found'],
+    ['deleting shops forgets them'],
+    ['deleting a forgotten shop is not found'],
     ['closing the finance tour on sign-up is remembered for 30 days'],
     ['finishing the tour again extends it'],
     ['an unknown finance tour outcome is refused'],

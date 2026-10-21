@@ -13,6 +13,7 @@ import type { TimeE2eId } from '@/modules/time/configuration/e2e-ids';
 import type { AuthE2eId } from '@/shared/auth/configuration/e2e-ids';
 import type { SettingsE2eId } from '@/modules/settings/configuration/e2e-ids';
 import type { ExpenseFormE2eId } from '@/shared/expense-form/configuration/e2e-ids';
+import type { FormMemoryE2eId } from '@/shared/form-memory/configuration/e2e-ids';
 import type { CookiesE2eId } from '@/shared/cookies/configuration/e2e-ids';
 import type { ImageEditorE2eId } from '@/shared/image-editor/configuration/e2e-ids';
 import type { PublicNavE2eId } from '@/shared/navigation/public-nav/configuration/e2e-ids';
@@ -34,6 +35,7 @@ export type E2eId =
   | DashboardE2eId
   | ExpensesManagementE2eId
   | ExpenseFormE2eId
+  | FormMemoryE2eId
   | ReportsE2eId
   | TimeE2eId
   | PeriodControlE2eId

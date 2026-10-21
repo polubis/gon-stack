@@ -34,3 +34,24 @@ export const postSuggestionUse = async (
   const json = (await response.json()) as RecordOut;
   if (json.code !== 200) throw new Error(json.message);
 };
+
+const write = async (method: 'PUT' | 'DELETE', body: object): Promise<void> => {
+  const response = await fetch(API_ROUTER.suggestions(), {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const json = (await response.json()) as { code: number; message?: string };
+  if (json.code !== 200) throw new Error(json.message ?? 'Request failed');
+};
+
+export const putSuggestionName = (
+  field: SuggestionField,
+  value: string,
+  newValue: string,
+): Promise<void> => write('PUT', { field, value, newValue });
+
+export const deleteSuggestionValue = (
+  field: SuggestionField,
+  value: string,
+): Promise<void> => write('DELETE', { field, value });
