@@ -3,7 +3,8 @@ import { Plus } from 'lucide-react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import { ErrorState } from '@/shared/ui/error-state';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
-import { Button } from '@/shared/ui/controls';
+import { cn } from '@repo/react-kit/cn';
+import { CategoryModals } from '@/modules/categories/presentation/category-modals';
 import { Toast } from '@/shared/ui/toast';
 import {
   closeModal,
@@ -15,6 +16,7 @@ import { clampPeriod, todayDay, type Period } from '@/shared/period/period';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { ERROR_CODES } from '../configuration/constraints';
 import { periodFromQuery, periodToQuery } from '../domain/period';
+import { AddMenu, ADD_BUTTON } from './add-menu';
 import { CategoriesCard } from './categories-card';
 import { Provider, useContext } from './context';
 import { ExpenseDetail } from './expense-detail';
@@ -178,17 +180,21 @@ const DashboardView = () => {
           <DashboardSkeleton />
         )}
       </main>
+      <CategoryModals />
       {/* Zero-height sticky rail: the button floats above the content, which
           scrolls clear of it thanks to the bottom padding of <main>. */}
       <div className="pointer-events-none sticky bottom-4 z-(--z-nav) h-0 md:hidden">
-        <Button
-          href={APP_ROUTER.newExpense()}
+        <AddMenu
+          side="top"
           data-e2e="dashboard:expense-fab"
-          aria-label="Dodaj wydatek"
-          className="pointer-events-auto absolute bottom-0 right-4 h-14 w-14 rounded-full p-0 shadow-popover"
+          aria-label="Dodaj"
+          className={cn(
+            ADD_BUTTON,
+            'pointer-events-auto absolute bottom-0 right-4 h-14 w-14 animate-pop-in rounded-full shadow-popover motion-reduce:animate-none',
+          )}
         >
           <Plus className="h-6 w-6" aria-hidden="true" />
-        </Button>
+        </AddMenu>
       </div>
     </div>
   );

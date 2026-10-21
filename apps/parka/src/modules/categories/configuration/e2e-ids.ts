@@ -18,6 +18,8 @@ export const CATEGORIES_E2E_IDS = [
   'categories:add-defaults',
   'categories:load-error',
   'categories:toast',
+  'categories:new-dialog',
+  'categories:list-dialog',
 ] as const;
 
 export type CategoriesE2eDynamicId =

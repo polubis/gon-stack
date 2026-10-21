@@ -2,9 +2,10 @@ import { Plus, User } from 'lucide-react';
 import type { Avatar } from '@/shared/avatar/domain/models';
 import type { Period } from '@/shared/period/period';
 import { APP_ROUTER } from '@/shared/router/routes';
-import { Button } from '@/shared/ui/controls';
+import { cn } from '@repo/react-kit/cn';
 import { UnreadLink } from '@/modules/notifications/presentation/unread-link';
 import { PeriodControl } from '@/shared/period-control/presentation/period-control';
+import { AddMenu, ADD_BUTTON } from './add-menu';
 import { PeriodRangeDialog } from './period-range-dialog';
 
 export const Header = ({
@@ -53,14 +54,14 @@ export const Header = ({
           )}
         </a>
 
-        <Button
-          href={APP_ROUTER.newExpense()}
+        <AddMenu
+          side="bottom"
           data-e2e="dashboard:expense-new"
-          className="h-11 w-auto shrink-0 py-0 max-md:hidden"
+          className={cn(ADD_BUTTON, 'h-11 shrink-0 px-4 max-md:hidden')}
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
-          Dodaj wydatek
-        </Button>
+          Dodaj
+        </AddMenu>
       </header>
       <PeriodControl
         period={period}

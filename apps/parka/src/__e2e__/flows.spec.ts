@@ -664,6 +664,7 @@ const commands = {
     });
     await open(page, APP_ROUTER.dashboard());
     await getByE2e('dashboard:expense-new').click();
+    await page.getByRole('menuitem', { name: 'Wydatek', exact: true }).click();
     await page.getByRole('tab', { name: 'Cykliczny' }).click();
     await getByE2e('expenses-management:recurring-name').fill('Siłownia');
     await getByE2e('expenses-management:recurring-cost').fill('99');
@@ -717,6 +718,7 @@ const commands = {
     await mockState(page);
     await open(page, APP_ROUTER.dashboard());
     await getByE2e('dashboard:expense-new').click();
+    await page.getByRole('menuitem', { name: 'Wydatek', exact: true }).click();
     await page.getByRole('tab', { name: 'Cykliczny' }).click();
     await expect(getByE2e('expenses-management:recurring-form')).toBeVisible();
   },

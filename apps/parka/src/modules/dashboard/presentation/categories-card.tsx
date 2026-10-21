@@ -1,7 +1,10 @@
-import { ChartPie, Plus } from 'lucide-react';
+import { ChartPie, Plus, Tags } from 'lucide-react';
+import {
+  CATEGORIES_LIST_MODAL,
+  NEW_CATEGORY_MODAL,
+} from '@/modules/categories/presentation/modal-ids';
 import { categoryLabel } from '@/shared/i18n/category-label';
-import { useModal } from '@/shared/router/modal-stack';
-import { APP_ROUTER } from '@/shared/router/routes';
+import { openModal, useModal } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
 import { EmptyState } from '@/shared/ui/empty-state';
 import { Card } from '@/shared/ui/layout';
@@ -16,7 +19,7 @@ import { CATEGORIES_MODAL } from './modal-ids';
 const NewCategory = ({ label = 'Dodaj' }: { label?: string }) => (
   <Button
     variant="ghost"
-    href={APP_ROUTER.categories()}
+    onClick={() => openModal(NEW_CATEGORY_MODAL)}
     className="w-auto min-w-0 px-3 py-1.5"
     data-e2e="dashboard:category-new"
   >
@@ -44,7 +47,18 @@ export const CategoriesCard = ({
     <Card className="space-y-4 xl:col-span-6 xl:col-start-7 xl:row-start-2">
       <div className="flex min-h-9 items-center justify-between gap-2">
         <h2 className="text-base font-semibold">Kategorie wydatków</h2>
-        {slices.length > 0 ? <NewCategory /> : null}
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            onClick={() => openModal(CATEGORIES_LIST_MODAL)}
+            className="w-auto min-w-0 px-3 py-1.5"
+            data-e2e="dashboard:categories-manage"
+          >
+            <Tags className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="truncate">Kategorie</span>
+          </Button>
+          {slices.length > 0 ? <NewCategory /> : null}
+        </div>
       </div>
       {slices.length === 0 ? (
         <EmptyState

@@ -136,6 +136,7 @@ const commands = {
     getByE2ePrefix,
   }) => {
     await getByE2e('dashboard:expense-new').click();
+    await page.getByRole('menuitem', { name: 'Wydatek', exact: true }).click();
     await expect(getByE2e('expenses-management:main')).toBeVisible();
     await getByE2e('expense-form:merchant').fill('Piekarnia');
     await getByE2e('expense-form:add-product').click();
@@ -180,6 +181,7 @@ const commands = {
 
   'i add a recurring expense of 50': async ({ page, getByE2e }) => {
     await getByE2e('dashboard:expense-new').click();
+    await page.getByRole('menuitem', { name: 'Wydatek', exact: true }).click();
     await page.getByRole('tab', { name: 'Cykliczny' }).click();
     await getByE2e('expenses-management:recurring-name').fill('Siłownia');
     await getByE2e('expenses-management:recurring-cost').fill('50');
@@ -191,6 +193,7 @@ const commands = {
     getByE2e,
   }) => {
     await getByE2e('dashboard:expense-new').click();
+    await page.getByRole('menuitem', { name: 'Wydatek', exact: true }).click();
     await page.getByRole('tab', { name: 'Cykliczny' }).click();
     await getByE2e('expenses-management:recurring-name').fill('Siłownia');
     await getByE2e('expenses-management:recurring-cost').fill('50');
@@ -200,6 +203,7 @@ const commands = {
   },
   'i add a normal expense of 25': async ({ page, getByE2e }) => {
     await getByE2e('dashboard:expense-new').click();
+    await page.getByRole('menuitem', { name: 'Wydatek', exact: true }).click();
     await getByE2e('expense-form:merchant').fill('Piekarnia');
     await getByE2e('expense-form:amount').fill('25');
     await getByE2e('expense-form:save').click();
@@ -207,6 +211,7 @@ const commands = {
   },
   'i add an expense from an uploaded receipt': async ({ page, getByE2e }) => {
     await getByE2e('dashboard:expense-new').click();
+    await page.getByRole('menuitem', { name: 'Wydatek', exact: true }).click();
     await getByE2e('expenses-management:upload-input').setInputFiles({
       name: 'receipt.png',
       mimeType: 'image/png',
