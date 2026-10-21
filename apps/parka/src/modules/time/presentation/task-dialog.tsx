@@ -73,7 +73,7 @@ export const TaskDialog = ({ modal, task, defaultDay }: Props) => {
     if (newPriority) setPriorityId(newPriority.id);
   }
   const [day, setDay] = useState(task?.day ?? defaultDay);
-  const [allDay, setAllDay] = useState(editing && task.at === null);
+  const [allDay, setAllDay] = useState(!editing || task.at === null);
   const [at, setAt] = useState(task?.at ?? DEFAULT_TIME);
   const [done, setDone] = useState(task?.done ?? false);
   const [repeat, setRepeat] = useState(false);

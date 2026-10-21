@@ -10,10 +10,20 @@ export const NEW_CATEGORY_MODAL = 'category-new';
 export const NEW_PRIORITY_MODAL = 'priority-new';
 export const CATEGORIES_MODAL = 'categories';
 
+const NEW_TASK_ON_PREFIX = 'task-new:';
 const EDIT_BACKLOG_PREFIX = 'backlog-edit:';
 const EDIT_PREFIX = 'task-edit:';
 const DELETE_PREFIX = 'task-delete:';
 const STOP_SERIES_PREFIX = 'series-stop:';
+
+/** Add-task form with the day already filled in. */
+export const newTaskOnModal = (day: string): string =>
+  `${NEW_TASK_ON_PREFIX}${day}`;
+
+export const newTaskDayOf = (modal: string): string | null =>
+  modal.startsWith(NEW_TASK_ON_PREFIX)
+    ? modal.slice(NEW_TASK_ON_PREFIX.length)
+    : null;
 
 export const editTaskModal = (id: TaskId): string => `${EDIT_PREFIX}${id}`;
 

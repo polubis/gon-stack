@@ -9,6 +9,7 @@ import {
   tasksOn,
   weekDays,
 } from '../domain/schedule';
+import { AddDayButton } from './add-day-button';
 import { useContext } from './context';
 import { EmptyPeriod } from './empty-period';
 import { hourOffset, NowAxisLabel, NowLine, NowMarker } from './now-marker';
@@ -47,9 +48,14 @@ const DayCards = ({ days }: { days: string[] }) => {
               today ? 'border-brand' : 'border-line',
             )}
           >
-            <h2 className={cn('text-sm font-semibold', today && 'text-brand')}>
-              <DayName day={day} />
-            </h2>
+            <div className="flex items-center justify-between gap-2">
+              <h2
+                className={cn('text-sm font-semibold', today && 'text-brand')}
+              >
+                <DayName day={day} />
+              </h2>
+              <AddDayButton day={day} />
+            </div>
             {allDay.length ? (
               <div className="flex flex-col gap-1">
                 <h3
@@ -118,7 +124,12 @@ const HourGrid = ({ days }: { days: string[] }) => {
                   day === now.day && 'bg-brand-softer text-brand',
                 )}
               >
-                <DayName day={day} />
+                <span className="flex items-center justify-between gap-1">
+                  <span>
+                    <DayName day={day} />
+                  </span>
+                  <AddDayButton day={day} />
+                </span>
               </th>
             ))}
           </tr>

@@ -18,6 +18,7 @@ import {
   editedBacklogIdOf,
   editedIdOf,
   editTaskModal,
+  newTaskDayOf,
   NEW_CATEGORY_MODAL,
   NEW_PRIORITY_MODAL,
   NEW_TASK_MODAL,
@@ -63,6 +64,10 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
       return <PriorityDialog key={modal} modal={modal} />;
     if (modal === CATEGORIES_MODAL)
       return <CategoriesDialog key={modal} modal={modal} />;
+
+    const newDay = newTaskDayOf(modal);
+    if (newDay !== null)
+      return <TaskDialog key={modal} modal={modal} defaultDay={newDay} />;
 
     const editedBacklog = backlog.find(
       (task) => task.id === editedBacklogIdOf(modal),

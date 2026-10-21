@@ -4,6 +4,7 @@ import { WEEKDAY_SHORT } from '../configuration/constraints';
 import { pluralTasks } from '../domain/plural';
 import { fullDate } from '../domain/period-title';
 import { monthGrid, tasksOn } from '../domain/schedule';
+import { AddDayButton } from './add-day-button';
 import { useContext } from './context';
 import { EmptyPeriod } from './empty-period';
 import { stagger } from './stagger';
@@ -47,8 +48,11 @@ export const Main = () => {
                   : 'border-line',
               )}
             >
-              <span className="text-sm tabular-nums">
-                {Number(day.slice(8))}
+              <span className="flex w-full items-center justify-center gap-1 md:justify-between">
+                <span className="text-sm tabular-nums">
+                  {Number(day.slice(8))}
+                </span>
+                <AddDayButton day={day} />
               </span>
               <span
                 className="flex flex-wrap justify-center gap-1"

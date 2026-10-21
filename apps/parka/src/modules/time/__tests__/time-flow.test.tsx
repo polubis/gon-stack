@@ -182,6 +182,7 @@ describe('time task creation', () => {
     const dialog = within(await screen.findByRole('dialog'));
     await user.type(dialog.getByRole('textbox', { name: 'Nazwa' }), 'Kurs');
     await user.click(dialog.getByRole('radio', { name: '9 - Wysoki' }));
+    await user.click(dialog.getByRole('switch', { name: 'Cały dzień' }));
     await user.click(dialog.getByRole('button', { name: 'Dodaj' }));
 
     expect(await row('Kurs')).toBeVisible();
@@ -209,7 +210,7 @@ describe('time task creation', () => {
 
     const dialog = within(await screen.findByRole('dialog'));
     await user.type(dialog.getByRole('textbox', { name: 'Nazwa' }), 'Rachunek');
-    await user.click(dialog.getByRole('switch', { name: 'Cały dzień' }));
+    expect(dialog.getByRole('switch', { name: 'Cały dzień' })).toBeChecked();
     await user.click(dialog.getByRole('button', { name: 'Dodaj' }));
 
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
@@ -439,5 +440,26 @@ describe('time reloading', () => {
     await screen.findByRole('heading', { name: 'Brak zadań' });
 
     await waitFor(() => expect(window.location.search).not.toContain('modal'));
+  });
+});
+
+describe('time add on list item', () => {
+  it('opens the form with the day of the item and whole day checked', async () => {
+    const user = userEvent.setup();
+    backend.seed([task({ day: '2026-10-21' })]);
+    renderTime('week');
+    await screen.findAllByRole('button', {
+      name: 'Edytuj zadanie: Raport miesięczny',
+    });
+
+    await user.click(
+      screen.getAllByRole('button', {
+        name: /Dodaj zadanie na .*22 października/,
+      })[0]!,
+    );
+
+    const dialog = within(await screen.findByRole('dialog'));
+    expect(dialog.getByLabelText('Dzień')).toHaveValue('2026-10-22');
+    expect(dialog.getByRole('switch', { name: 'Cały dzień' })).toBeChecked();
   });
 });

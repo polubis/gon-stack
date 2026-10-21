@@ -126,7 +126,7 @@ describe('recurring tasks', () => {
         interval: 'weekly',
         startDate: '2026-10-20',
         endDate: null,
-        at: '12:00',
+        at: null,
       },
     });
     expect(screen.getByText('Cykliczne')).toBeInTheDocument();
