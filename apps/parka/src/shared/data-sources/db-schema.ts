@@ -655,7 +655,7 @@ export type Database = {
           at: string | null;
           category_id: string;
           created_at: string;
-          day: string;
+          day: string | null;
           device_browser: string | null;
           device_id: string | null;
           device_model: string | null;
@@ -676,7 +676,7 @@ export type Database = {
           at?: string | null;
           category_id: string;
           created_at?: string;
-          day: string;
+          day?: string | null;
           device_browser?: string | null;
           device_id?: string | null;
           device_model?: string | null;
@@ -696,7 +696,7 @@ export type Database = {
           at?: string | null;
           category_id?: string;
           created_at?: string;
-          day?: string;
+          day?: string | null;
           device_browser?: string | null;
           device_id?: string | null;
           device_model?: string | null;

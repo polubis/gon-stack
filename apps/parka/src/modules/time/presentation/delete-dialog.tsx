@@ -3,6 +3,8 @@ import { closeModal, useModalMounted } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
 import type { Task } from '../domain/models';
 
+type Titled = Pick<Task, 'title'>;
+
 /** Destructive confirmation stacked over the task popup it came from. */
 export const DeleteDialog = ({
   modal,
@@ -14,7 +16,7 @@ export const DeleteDialog = ({
 }: {
   /** Its id in the URL modal stack. */
   modal: string;
-  task: Task;
+  task: Titled;
   onConfirm: () => void;
   title?: string;
   description?: string;

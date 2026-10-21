@@ -13,11 +13,13 @@ export const deleteTask = (store: Store, bus: Bus) => {
     map(({ id }) => ({
       id,
       previous: store.$tasks.get().find((t) => t.id === id),
+      previousBacklog: store.$backlog.get().find((t) => t.id === id),
     })),
     tap(({ id }) => {
       store.$tasks.set(store.$tasks.get().filter((t) => t.id !== id));
+      store.$backlog.set(store.$backlog.get().filter((t) => t.id !== id));
     }),
-    concatMap(({ id, previous }) =>
+    concatMap(({ id, previous, previousBacklog }) =>
       from(write(store, bus, () => removeTask(id))).pipe(
         tap(() =>
           notify(store, { tone: 'success', message: 'Usunięto zadanie.' }),
@@ -25,6 +27,8 @@ export const deleteTask = (store: Store, bus: Bus) => {
         catchError((error: unknown) => {
           if (previous)
             store.$tasks.set(sortTasks([...store.$tasks.get(), previous]));
+          if (previousBacklog)
+            store.$backlog.set([...store.$backlog.get(), previousBacklog]);
           notify(store, {
             tone: 'error',
             title: 'Nie udało się usunąć zadania',

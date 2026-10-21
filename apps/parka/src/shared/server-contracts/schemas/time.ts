@@ -4,6 +4,7 @@ import { daysBetween, isDay } from '../../period/period';
 import {
   errorOut,
   notFoundOut,
+  timeBacklogTask,
   timeCategory,
   timeCategoryInput,
   timePriority,
@@ -37,6 +38,8 @@ export const listTimeSchema = () =>
           categories: z.array(timeCategory()),
           priorities: z.array(timePriority()),
           tasks: z.array(timeTask()),
+          /** Tasks without a day, whatever the range. */
+          backlog: z.array(timeBacklogTask()),
         }),
       }),
       errorOut(),
@@ -49,6 +52,24 @@ export const createTimeTaskSchema = () =>
     out: z.union([
       z.object({ code: z.literal(201), data: timeTask() }),
       errorOut(),
+    ]),
+  });
+
+export const createTimeBacklogTaskSchema = () =>
+  z.object({
+    in: timeBacklogTask(),
+    out: z.union([
+      z.object({ code: z.literal(201), data: timeBacklogTask() }),
+      errorOut(),
+    ]),
+  });
+
+export const updateTimeBacklogTaskSchema = () =>
+  z.object({
+    in: timeBacklogTask(),
+    out: z.union([
+      z.object({ code: z.literal(200), data: timeBacklogTask() }),
+      writeErrors,
     ]),
   });
 

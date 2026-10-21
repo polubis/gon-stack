@@ -8,9 +8,14 @@ import { CategoriesDialog } from './categories-dialog';
 import { CategoryDialog } from './category-dialog';
 import { useContext } from './context';
 import { DeleteDialog } from './delete-dialog';
+import { BacklogAddDialog } from './backlog-add-dialog';
+import { BacklogDialog } from './backlog-dialog';
 import {
+  BACKLOG_MODAL,
+  NEW_BACKLOG_MODAL,
   CATEGORIES_MODAL,
   deletedIdOf,
+  editedBacklogIdOf,
   editedIdOf,
   editTaskModal,
   NEW_CATEGORY_MODAL,
@@ -23,7 +28,7 @@ import { TaskDialog } from './task-dialog';
 
 /** Renders the popups that are open in the URL stack. */
 export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
-  const { tasks, deleteTask, stopRecurring, initializing, isLoading } =
+  const { tasks, backlog, deleteTask, stopRecurring, initializing, isLoading } =
     useContext();
   const stack = useModalStack();
 
@@ -31,21 +36,41 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
   useEffect(() => {
     if (initializing || isLoading) return;
     for (const modal of stack) {
-      const id = editedIdOf(modal) ?? deletedIdOf(modal) ?? stoppedIdOf(modal);
-      if (id !== null && !tasks.some((task) => task.id === id))
+      const id =
+        editedIdOf(modal) ??
+        editedBacklogIdOf(modal) ??
+        deletedIdOf(modal) ??
+        stoppedIdOf(modal);
+      if (
+        id !== null &&
+        !tasks.some((task) => task.id === id) &&
+        !backlog.some((task) => task.id === id)
+      )
         closeModal(modal);
     }
-  }, [initializing, isLoading, stack, tasks]);
+  }, [initializing, isLoading, stack, tasks, backlog]);
 
   const dialog = (modal: string) => {
     if (modal === NEW_TASK_MODAL)
       return <TaskDialog key={modal} modal={modal} defaultDay={defaultDay} />;
+    if (modal === BACKLOG_MODAL)
+      return <BacklogDialog key={modal} modal={modal} />;
+    if (modal === NEW_BACKLOG_MODAL)
+      return <BacklogAddDialog key={modal} modal={modal} />;
     if (modal === NEW_CATEGORY_MODAL)
       return <CategoryDialog key={modal} modal={modal} />;
     if (modal === NEW_PRIORITY_MODAL)
       return <PriorityDialog key={modal} modal={modal} />;
     if (modal === CATEGORIES_MODAL)
       return <CategoriesDialog key={modal} modal={modal} />;
+
+    const editedBacklog = backlog.find(
+      (task) => task.id === editedBacklogIdOf(modal),
+    );
+    if (editedBacklog)
+      return (
+        <BacklogAddDialog key={modal} modal={modal} task={editedBacklog} />
+      );
 
     const editedId = editedIdOf(modal);
     const edited = tasks.find((task) => task.id === editedId);
@@ -59,7 +84,9 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
         />
       );
 
-    const deleted = tasks.find((task) => task.id === deletedIdOf(modal));
+    const deleted = [...tasks, ...backlog].find(
+      (task) => task.id === deletedIdOf(modal),
+    );
     if (deleted)
       return (
         <DeleteDialog

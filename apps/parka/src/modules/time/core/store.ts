@@ -1,10 +1,17 @@
 import { atom } from '@repo/react-kit/supa-store';
-import type { Category, Notice, Priority, Task } from '../domain/models';
+import type {
+  BacklogTask,
+  Category,
+  Notice,
+  Priority,
+  Task,
+} from '../domain/models';
 
 export type Range = { from: string; to: string };
 
 export const createStore = () => {
   const $tasks = atom<Task[]>([]);
+  const $backlog = atom<BacklogTask[]>([]);
   const $categories = atom<Category[]>([]);
   const $priorities = atom<Priority[]>([]);
   const $initializing = atom(true);
@@ -31,6 +38,7 @@ export const createStore = () => {
 
   return {
     $tasks,
+    $backlog,
     $categories,
     $priorities,
     $initializing,

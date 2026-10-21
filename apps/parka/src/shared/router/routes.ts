@@ -160,6 +160,8 @@ export const API_ROUTER = {
     { from: string; to: string; tz?: string }
   >('/api/time/'),
   timeTasks: route('/api/time/tasks/'),
+  timeBacklog: route('/api/time/backlog/'),
+  timeBacklogById: routeById('/api/time/backlog/'),
   timeTaskById: routeById('/api/time/tasks/'),
   timeRecurring: route('/api/time/recurring/'),
   timeRecurringById: routeById('/api/time/recurring/'),

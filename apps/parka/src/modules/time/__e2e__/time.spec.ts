@@ -13,6 +13,7 @@ import { API_ROUTER, APP_ROUTER } from '@/shared/router/routes';
 
 const EMAIL = `e2e-time-${Date.now()}@parka.test`;
 const RECURRING_EMAIL = `e2e-time-recurring-${Date.now()}@parka.test`;
+const BACKLOG_EMAIL = `e2e-time-backlog-${Date.now()}@parka.test`;
 const PASSWORD = 'secret123';
 const DAY = '2026-10-20';
 const NEXT_WEEK = '2026-10-27';
@@ -43,6 +44,111 @@ const commands = {
   'i register a new account': async (ctx) => {
     await registerAndConfirm(ctx, EMAIL, PASSWORD);
     await ctx.page.waitForLoadState('networkidle');
+  },
+
+  'i register an account for the backlog': async (ctx) => {
+    await registerAndConfirm(ctx, BACKLOG_EMAIL, PASSWORD);
+    await ctx.page.waitForLoadState('networkidle');
+  },
+
+  'i add a task to the backlog and it survives a reload': async ({
+    page,
+    getByE2e,
+  }) => {
+    await open(page, APP_ROUTER.time({ date: DAY }));
+    await page
+      .getByRole('button', { name: 'Dodaj', exact: true })
+      .first()
+      .click();
+    await page.getByRole('menuitem', { name: 'Do backlogu' }).click();
+    const form = getByE2e('time:backlog-form');
+    await form.getByRole('textbox', { name: 'Nazwa' }).fill('Dentysta E2E');
+    await Promise.all([
+      synced(page, 'POST', 201),
+      getByE2e('time:backlog-save').click(),
+    ]);
+    await expect(getByE2e('time:toast')).toHaveText('Dodano do backlogu.');
+    await expect(getByE2e('time:empty')).toBeVisible();
+    await reload(page);
+    await expect(getByE2e('time:backlog-open')).toHaveAccessibleName(
+      'Backlog, zadań: 1',
+    );
+  },
+
+  'i edit the backlog task and it stays in the backlog': async ({
+    page,
+    getByE2e,
+  }) => {
+    await getByE2e('time:backlog-open').click();
+    await page
+      .getByRole('button', { name: 'Edytuj zadanie z backlogu: Dentysta E2E' })
+      .click();
+    const form = getByE2e('time:backlog-form');
+    await form
+      .getByRole('textbox', { name: 'Nazwa' })
+      .fill('Dentysta piątek E2E');
+    await Promise.all([
+      synced(page, 'PUT', 200),
+      getByE2e('time:backlog-save').click(),
+    ]);
+    await reload(page);
+    await expect(page).toHaveURL(/modal=backlog/);
+    await expect(
+      page.getByRole('button', {
+        name: 'Edytuj zadanie z backlogu: Dentysta piątek E2E',
+      }),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Zamknij' }).click();
+  },
+
+  'one click moves the backlog task to today and it stays there': async ({
+    page,
+    getByE2e,
+  }) => {
+    await getByE2e('time:backlog-open').click();
+    await expect(page).toHaveURL(/modal=backlog/);
+    await Promise.all([
+      synced(page, 'PUT', 200),
+      page
+        .getByRole('button', { name: 'Przenieś na dziś: Dentysta piątek E2E' })
+        .click(),
+    ]);
+    await expect(getByE2e('time:backlog-empty')).toBeVisible();
+    await page.getByRole('button', { name: 'Zamknij' }).click();
+    await open(page, APP_ROUTER.time({ date: localDay(new Date()) }));
+    await expect(
+      page.getByRole('button', { name: 'Edytuj zadanie: Dentysta piątek E2E' }),
+    ).toBeVisible();
+    await expect(getByE2e('time:backlog-open')).toHaveAccessibleName('Backlog');
+  },
+
+  'a picked day moves another backlog task there': async ({
+    page,
+    getByE2e,
+  }) => {
+    await open(page, APP_ROUTER.time({ date: DAY }));
+    await page
+      .getByRole('button', { name: 'Dodaj', exact: true })
+      .first()
+      .click();
+    await page.getByRole('menuitem', { name: 'Do backlogu' }).click();
+    await getByE2e('time:backlog-form')
+      .getByRole('textbox', { name: 'Nazwa' })
+      .fill('Auto E2E');
+    await Promise.all([
+      synced(page, 'POST', 201),
+      getByE2e('time:backlog-save').click(),
+    ]);
+    await getByE2e('time:backlog-open').click();
+    await Promise.all([
+      synced(page, 'PUT', 200),
+      page.getByLabel('Przenieś na wybrany dzień: Auto E2E').fill(NEXT_WEEK),
+    ]);
+    await expect(getByE2e('time:backlog-empty')).toBeVisible();
+    await open(page, APP_ROUTER.time({ date: NEXT_WEEK }));
+    await expect(
+      page.getByRole('button', { name: 'Edytuj zadanie: Auto E2E' }),
+    ).toBeVisible();
   },
 
   'i register an account for recurring tasks': async (ctx) => {
@@ -279,6 +385,16 @@ test('time works against the real Supabase backend', async ({ e2e }) => {
     ['the range menu returns to today from another period'],
     ['i delete the task after confirming'],
     ['the api lists no tasks after the delete'],
+  );
+});
+
+test('backlog tasks move to the board on the real backend', async ({ e2e }) => {
+  await interpreter(commands, e2e)(
+    ['i register an account for the backlog'],
+    ['i add a task to the backlog and it survives a reload'],
+    ['i edit the backlog task and it stays in the backlog'],
+    ['one click moves the backlog task to today and it stays there'],
+    ['a picked day moves another backlog task there'],
   );
 });
 

@@ -23,6 +23,13 @@ export const TIME_E2E_IDS = [
   'time:priority-dialog',
   'time:categories-dialog',
   'time:add-menu',
+  'time:backlog-open',
+  'time:backlog-dialog',
+  'time:backlog-add',
+  'time:backlog-empty',
+  'time:backlog-skeleton',
+  'time:backlog-form',
+  'time:backlog-save',
   'time:form-icons',
   'time:form-icon-search',
   'time:form-icon-groups',
@@ -33,6 +40,11 @@ export type TimeDynamicE2eId =
   | `time:form-icon:${string}`
   | `time:form-color-option:${string}`
   | `time:task:${string | number}`
-  | `time:task-done:${string | number}`;
+  | `time:task-done:${string | number}`
+  | `time:backlog-task:${string | number}`
+  | `time:backlog-move:${string | number}`
+  | `time:backlog-delete:${string | number}`
+  | `time:backlog-edit:${string | number}`
+  | `time:backlog-date:${string | number}`;
 
 export type TimeE2eId = (typeof TIME_E2E_IDS)[number] | TimeDynamicE2eId;

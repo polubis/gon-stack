@@ -1,6 +1,8 @@
 import type { z } from 'zod';
 import type {
+  createTimeBacklogTaskSchema,
   createTimeCategorySchema,
+  updateTimeBacklogTaskSchema,
   createTimePrioritySchema,
   createTimeRecurringSchema,
   createTimeTaskSchema,
@@ -12,6 +14,7 @@ import type {
 import { browserTimeZone } from '@/shared/date/date';
 import { API_ROUTER } from '@/shared/router/routes';
 import type {
+  BacklogTask,
   Category,
   Priority,
   Recurring,
@@ -19,7 +22,7 @@ import type {
   Task,
   TaskId,
 } from '../domain/models';
-import { toCategory, toPriority, toTask } from './mappers';
+import { toBacklogTask, toCategory, toPriority, toTask } from './mappers';
 
 type Out<T extends () => z.ZodType<{ out: unknown }>> = z.infer<
   ReturnType<T>
@@ -31,6 +34,7 @@ export type TimeData = {
   categories: Category[];
   priorities: Priority[];
   tasks: Task[];
+  backlog: BacklogTask[];
 };
 
 /** Nothing else in this module fetches. */
@@ -52,6 +56,7 @@ export const fetchTime = async (
     categories: json.data.categories.map(toCategory),
     priorities: json.data.priorities.map(toPriority),
     tasks: json.data.tasks.map(toTask),
+    backlog: json.data.backlog.map(toBacklogTask),
   };
 };
 
@@ -64,6 +69,36 @@ export const postTask = async (task: Task): Promise<Task> => {
   const json = (await response.json()) as Out<typeof createTimeTaskSchema>;
   if (json.code !== 201) throw new Error(json.message);
   return toTask(json.data);
+};
+
+export const postBacklogTask = async (
+  task: BacklogTask,
+): Promise<BacklogTask> => {
+  const response = await fetch(API_ROUTER.timeBacklog(), {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    body: JSON.stringify(task),
+  });
+  const json = (await response.json()) as Out<
+    typeof createTimeBacklogTaskSchema
+  >;
+  if (json.code !== 201) throw new Error(json.message);
+  return toBacklogTask(json.data);
+};
+
+export const putBacklogTask = async (
+  task: BacklogTask,
+): Promise<BacklogTask> => {
+  const response = await fetch(API_ROUTER.timeBacklogById(task.id), {
+    method: 'PUT',
+    headers: JSON_HEADERS,
+    body: JSON.stringify(task),
+  });
+  const json = (await response.json()) as Out<
+    typeof updateTimeBacklogTaskSchema
+  >;
+  if (json.code !== 200) throw new Error(json.message);
+  return toBacklogTask(json.data);
 };
 
 export const putTask = async (task: Task): Promise<Task> => {

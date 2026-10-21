@@ -20,6 +20,15 @@ export const PRIORITIES = [
   { id: 'high', name: 'Wysoki', value: 9 },
 ];
 
+export const backlogTask = (overrides: Json = {}): Json => ({
+  id: 'b-1',
+  title: 'Umówić dentystę',
+  categoryId: 'health',
+  priorityId: 'medium',
+  device: null,
+  ...overrides,
+});
+
 export const task = (overrides: Json = {}): Json => ({
   id: 't-1',
   title: 'Raport miesięczny',
@@ -48,6 +57,7 @@ export const setupTimeBackend = () => {
   const calls: Call[] = [];
   const state = {
     tasks: [] as Json[],
+    backlog: [] as Json[],
     categories: [...CATEGORIES] as Json[],
     priorities: [...PRIORITIES] as Json[],
     failWrites: false,
@@ -80,8 +90,21 @@ export const setupTimeBackend = () => {
           tasks: state.tasks.filter(
             (t) => (t.day as string) >= from && (t.day as string) <= to,
           ),
+          backlog: state.backlog,
         },
       });
+    }),
+    http.post('/api/time/backlog/', async ({ request }) => {
+      const body = await record(request);
+      if (state.failWrites) return HttpResponse.json(FAILURE);
+      state.backlog.push(body!);
+      return HttpResponse.json({ code: 201, data: body });
+    }),
+    http.put('/api/time/backlog/:id/', async ({ request }) => {
+      const body = await record(request);
+      if (state.failWrites) return HttpResponse.json(FAILURE);
+      state.backlog = state.backlog.map((t) => (t.id === body!.id ? body! : t));
+      return HttpResponse.json({ code: 200, data: body });
     }),
     http.post('/api/time/tasks/', async ({ request }) => {
       const body = await record(request);
@@ -92,13 +115,18 @@ export const setupTimeBackend = () => {
     http.put('/api/time/tasks/:id/', async ({ request }) => {
       const body = await record(request);
       if (state.failWrites) return HttpResponse.json(FAILURE);
-      state.tasks = state.tasks.map((t) => (t.id === body!.id ? body! : t));
+      // Giving a backlog task a day moves it onto the board.
+      state.backlog = state.backlog.filter((t) => t.id !== body!.id);
+      state.tasks = state.tasks.some((t) => t.id === body!.id)
+        ? state.tasks.map((t) => (t.id === body!.id ? body! : t))
+        : [...state.tasks, body!];
       return HttpResponse.json({ code: 200, data: body });
     }),
     http.delete('/api/time/tasks/:id/', async ({ request, params }) => {
       await record(request);
       if (state.failWrites) return HttpResponse.json(FAILURE);
       state.tasks = state.tasks.filter((t) => t.id !== params.id);
+      state.backlog = state.backlog.filter((t) => t.id !== params.id);
       return HttpResponse.json({ code: 200, ok: true });
     }),
     // The server turns the rule's first occurrence into a plain task.
@@ -144,6 +172,7 @@ export const setupTimeBackend = () => {
   beforeEach(() => {
     calls.length = 0;
     state.tasks = [];
+    state.backlog = [];
     state.categories = [...CATEGORIES];
     state.priorities = [...PRIORITIES];
     state.failWrites = false;
@@ -158,6 +187,9 @@ export const setupTimeBackend = () => {
     state,
     seed: (tasks: Json[]) => {
       state.tasks = [...tasks];
+    },
+    seedBacklog: (tasks: Json[]) => {
+      state.backlog = [...tasks];
     },
     calls,
     writes: () => calls.filter((call) => call.method !== 'GET'),

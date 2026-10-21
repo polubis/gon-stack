@@ -20,6 +20,7 @@ import type { TimeKind } from '../domain/models';
 import { UnreadLink } from '@/modules/notifications/presentation/unread-link';
 import { rangeOf } from '../domain/schedule';
 import { AddMenu } from './add-menu';
+import { BacklogButton } from './backlog-button';
 import { Provider, useContext } from './context';
 import { ViewSkeleton } from './skeleton';
 import { TaskModals } from './task-modals';
@@ -91,6 +92,7 @@ const Screen = ({ kind, children }: Props) => {
           titleClassName="text-2xl font-bold tracking-tight lg:text-3xl"
           action={
             <>
+              <BacklogButton />
               <UnreadLink />
               <AddMenu
                 side="bottom"

@@ -31,6 +31,7 @@ export const load = (store: Store, { ofType }: Bus) => {
           store.$categories.set(data.categories);
           store.$priorities.set(sortPriorities(data.priorities));
           store.$tasks.set(sortTasks(data.tasks));
+          store.$backlog.set(data.backlog);
           store.$loaded.set({ from: event.from, to: event.to });
         }),
         catchError((error: unknown) => {

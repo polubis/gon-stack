@@ -35,6 +35,12 @@ export type Task = {
   recurringId: RecurringId | null;
 };
 
+/** A task waiting for a day: same data as a task, nothing about time. */
+export type BacklogTask = Pick<
+  Task,
+  'id' | 'title' | 'categoryId' | 'priorityId' | 'device'
+>;
+
 /** Instruction that makes a task on each day of its series. */
 export type Recurring = {
   id: RecurringId;

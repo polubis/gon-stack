@@ -1,9 +1,10 @@
 import { useState, type ComponentProps, type KeyboardEvent } from 'react';
 import * as Popover from '@radix-ui/react-popover';
-import { Flag, ListChecks, Tag, type LucideIcon } from 'lucide-react';
+import { Flag, Inbox, ListChecks, Tag, type LucideIcon } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { openModal } from '@/shared/router/modal-stack';
 import {
+  NEW_BACKLOG_MODAL,
   NEW_CATEGORY_MODAL,
   NEW_PRIORITY_MODAL,
   NEW_TASK_MODAL,
@@ -11,6 +12,7 @@ import {
 
 const OPTIONS: readonly { label: string; modal: string; icon: LucideIcon }[] = [
   { label: 'Zadanie', modal: NEW_TASK_MODAL, icon: ListChecks },
+  { label: 'Do backlogu', modal: NEW_BACKLOG_MODAL, icon: Inbox },
   { label: 'Kategoria', modal: NEW_CATEGORY_MODAL, icon: Tag },
   { label: 'Priorytet', modal: NEW_PRIORITY_MODAL, icon: Flag },
 ];
@@ -64,7 +66,7 @@ export const AddMenu = ({
               .querySelector<HTMLElement>('[role="menuitem"]')
               ?.focus();
           }}
-          className="z-(--z-modal) w-48 animate-pop-in rounded-xl border border-line-strong bg-card p-2 shadow-popover focus:outline-none motion-reduce:animate-none"
+          className="z-(--z-modal) w-52 animate-pop-in rounded-xl border border-line-strong bg-card p-2 shadow-popover focus:outline-none motion-reduce:animate-none"
         >
           <div
             role="menu"

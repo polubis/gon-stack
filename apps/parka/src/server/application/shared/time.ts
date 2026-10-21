@@ -17,12 +17,24 @@ const toHourMinute = (value: string | null): string | null =>
 const toInterval = (value: string): 'weekly' | 'monthly' | 'yearly' =>
   value === 'monthly' || value === 'yearly' ? value : 'weekly';
 
+export const toTimeBacklogTask = (
+  row: TaskRow,
+  profiles?: ProfilesByDevice,
+) => ({
+  id: row.id,
+  title: row.title,
+  categoryId: row.category_id,
+  priorityId: row.priority_id,
+  device: toDevice(row, profiles),
+});
+
 export const toTimeTask = (row: TaskRow, profiles?: ProfilesByDevice) => ({
   id: row.id,
   title: row.title,
   categoryId: row.category_id,
   priorityId: row.priority_id,
-  day: row.day,
+  // Only tasks of the board are mapped; the backlog has its own shape.
+  day: row.day ?? '',
   at: toHourMinute(row.at),
   done: row.done,
   device: toDevice(row, profiles),

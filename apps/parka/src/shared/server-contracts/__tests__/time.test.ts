@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  createTimeBacklogTaskSchema,
+  updateTimeBacklogTaskSchema,
   createTimePrioritySchema,
   createTimeRecurringSchema,
   createTimeTaskSchema,
@@ -110,6 +112,40 @@ describe('time recurring contracts', () => {
     expect(
       createTimeRecurringSchema().shape.in.safeParse({ ...RULE, ...patch })
         .success,
+    ).toBe(false);
+  });
+});
+
+describe('time backlog contract', () => {
+  const BACKLOG_TASK = {
+    id: 'b-1',
+    title: 'Dentysta',
+    categoryId: 'health',
+    priorityId: 'medium',
+  };
+
+  it('accepts a task without a day or an hour', () => {
+    expect(
+      createTimeBacklogTaskSchema().shape.in.safeParse(BACKLOG_TASK).success,
+    ).toBe(true);
+  });
+
+  it('accepts an edit of a backlog task', () => {
+    expect(
+      updateTimeBacklogTaskSchema().shape.in.safeParse(BACKLOG_TASK).success,
+    ).toBe(true);
+  });
+
+  it.each([
+    ['a blank title', { title: '  ' }],
+    ['a too long title', { title: 'x'.repeat(41) }],
+    ['a missing category', { categoryId: '' }],
+  ])('rejects a backlog task with %s', (_, patch) => {
+    expect(
+      createTimeBacklogTaskSchema().shape.in.safeParse({
+        ...BACKLOG_TASK,
+        ...patch,
+      }).success,
     ).toBe(false);
   });
 });

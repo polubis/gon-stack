@@ -6,6 +6,7 @@ import { loadProfiles } from '../../shared/device';
 import {
   materializeTimeRecurring,
   notifyUnfinishedTasks,
+  toTimeBacklogTask,
   toTimeTask,
 } from '../../shared/time';
 
@@ -16,7 +17,7 @@ export const listTime = privateProcedure({
     await materializeTimeRecurring(db, user.id, input.to);
     if (input.tz) await notifyUnfinishedTasks(db, user.id, input.tz);
     const profiles = await loadProfiles(db);
-    const [categories, priorities, tasks] = await Promise.all([
+    const [categories, priorities, tasks, backlog] = await Promise.all([
       db.from('time_categories').select('*').order('name'),
       db.from('time_priorities').select('*').order('value'),
       db
@@ -26,10 +27,17 @@ export const listTime = privateProcedure({
         .lte('day', input.to)
         .order('day')
         .order('at', { nullsFirst: false }),
+      db
+        .from('time_tasks')
+        .select('*')
+        .is('day', null)
+        .order('created_at')
+        .order('id'),
     ]);
     if (categories.error) throw new InternalServer(categories.error);
     if (priorities.error) throw new InternalServer(priorities.error);
     if (tasks.error) throw new InternalServer(tasks.error);
+    if (backlog.error) throw new InternalServer(backlog.error);
 
     return {
       code: 200 as const,
@@ -46,6 +54,7 @@ export const listTime = privateProcedure({
           value: p.value,
         })),
         tasks: tasks.data.map((row) => toTimeTask(row, profiles)),
+        backlog: backlog.data.map((row) => toTimeBacklogTask(row, profiles)),
       },
     };
   },

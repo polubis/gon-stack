@@ -62,6 +62,17 @@ export const timeTask = () =>
     occurrenceDate: z.string().regex(DAY).nullable().default(null),
   });
 
+/** A task without a day: same data as a task, nothing about time. */
+export const timeBacklogTask = () =>
+  z.object({
+    id: z.string().min(1),
+    title: z.string().trim().min(1).max(40),
+    categoryId: z.string().min(1),
+    priorityId: z.string().min(1),
+    /** Device the task was created from; `null` for older tasks. */
+    device: device().nullable().default(null),
+  });
+
 /** A task rule is an instruction: the server makes plain tasks from it. */
 export const timeRecurring = () =>
   z.object({

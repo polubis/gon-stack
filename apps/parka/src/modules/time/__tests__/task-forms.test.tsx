@@ -40,7 +40,7 @@ const openFromMenu = async (
 };
 
 describe('time add menu', () => {
-  it('offers task, category and priority', async () => {
+  it('offers task, backlog, category and priority', async () => {
     const user = userEvent.setup();
     await ready();
 
@@ -49,6 +49,7 @@ describe('time add menu', () => {
     const items = await screen.findAllByRole('menuitem');
     expect(items.map((item) => item.textContent)).toEqual([
       'Zadanie',
+      'Do backlogu',
       'Kategoria',
       'Priorytet',
     ]);
@@ -61,7 +62,7 @@ describe('time add menu', () => {
     await user.click(screen.getAllByRole('button', { name: /^Dodaj$/ })[0]!);
     await screen.findAllByRole('menuitem');
     await user.keyboard('{ArrowDown}');
-    expect(screen.getByRole('menuitem', { name: 'Kategoria' })).toHaveFocus();
+    expect(screen.getByRole('menuitem', { name: 'Do backlogu' })).toHaveFocus();
 
     await user.keyboard('{Escape}');
     await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());

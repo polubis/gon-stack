@@ -1,6 +1,7 @@
 import type { Registry } from './registry';
 import type { Store } from './store';
 import type {
+  BacklogTask,
   Category,
   Priority,
   Recurring,
@@ -13,6 +14,12 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
   return {
     load: (from: string, to: string) => trigger('[TRIGGER]_LOAD', { from, to }),
     createTask: (task: Task) => trigger('[TRIGGER]_CREATE_TASK', { task }),
+    createBacklogTask: (task: BacklogTask) =>
+      trigger('[TRIGGER]_CREATE_BACKLOG_TASK', { task }),
+    updateBacklogTask: (task: BacklogTask) =>
+      trigger('[TRIGGER]_UPDATE_BACKLOG_TASK', { task }),
+    moveBacklogTask: (id: TaskId, day: string, label: string) =>
+      trigger('[TRIGGER]_MOVE_BACKLOG_TASK', { id, day, label }),
     updateTask: (task: Task) => trigger('[TRIGGER]_UPDATE_TASK', { task }),
     deleteTask: (id: TaskId) => trigger('[TRIGGER]_DELETE_TASK', { id }),
     createRecurring: (recurring: Recurring) =>
@@ -25,6 +32,7 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
       trigger('[TRIGGER]_CREATE_PRIORITY', { priority }),
     dismissNotice: () => trigger('[TRIGGER]_DISMISS_NOTICE'),
     useTasks: () => store.$tasks.use(),
+    useBacklog: () => store.$backlog.use(),
     useCategories: () => store.$categories.use(),
     usePriorities: () => store.$priorities.use(),
     useLoaded: () => store.$loaded.use(),

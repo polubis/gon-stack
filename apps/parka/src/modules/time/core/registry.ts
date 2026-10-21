@@ -1,6 +1,9 @@
 import type { Store } from './store';
 import { load } from './handlers/load';
 import { createTask } from './handlers/create-task';
+import { createBacklogTask } from './handlers/create-backlog-task';
+import { updateBacklogTask } from './handlers/update-backlog-task';
+import { moveBacklogTask } from './handlers/move-backlog-task';
 import { updateTask } from './handlers/update-task';
 import { deleteTask } from './handlers/delete-task';
 import { createRecurring } from './handlers/create-recurring';
@@ -16,6 +19,9 @@ export const createRegistry = (store: Store) => {
   const register = bus.createRegistry(
     load(store, bus),
     createTask(store, bus),
+    createBacklogTask(store, bus),
+    updateBacklogTask(store, bus),
+    moveBacklogTask(store, bus),
     updateTask(store, bus),
     deleteTask(store, bus),
     createRecurring(store, bus),
