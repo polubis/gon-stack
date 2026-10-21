@@ -55,7 +55,7 @@ export const DetailDialog = ({
         <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-overlay" />
         <Dialog.Content
           data-e2e={dataE2e}
-          className="fixed inset-x-4 bottom-4 z-(--z-modal) mx-auto max-h-[calc(100dvh-2rem)] max-w-md overflow-y-auto rounded-2xl bg-card p-4 focus:outline-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2"
+          className="fixed inset-x-4 bottom-4 z-(--z-modal) mx-auto max-h-[calc(100dvh-2rem)] max-w-md animate-pop-in overflow-y-auto rounded-2xl bg-card p-4 shadow-popover focus:outline-none motion-reduce:animate-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2"
         >
           <div className="mb-3 flex items-center gap-3">
             {avatar}
@@ -70,7 +70,7 @@ export const DetailDialog = ({
             </div>
             <Dialog.Close
               aria-label="Zamknij"
-              className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink-soft hover:bg-hover"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink-soft transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             >
               <X className="h-4 w-4" aria-hidden="true" />
             </Dialog.Close>

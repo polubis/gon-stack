@@ -11,6 +11,7 @@ import { ERROR_CODES } from '../configuration/constraints';
 import { useContext } from './context';
 import { NEW_CATEGORY_MODAL } from './modal-ids';
 import { ModalShell } from './modal-shell';
+import { stagger } from './stagger';
 
 /** Browse list of the categories; a row opens its editor, "Dodaj" stacks the form. */
 export const CategoriesDialog = ({ modal }: { modal: string }) => {
@@ -65,13 +66,17 @@ export const CategoriesDialog = ({ modal }: { modal: string }) => {
             data-e2e="categories:list"
             className="max-h-80 overflow-y-auto overflow-x-hidden rounded-2xl border border-line bg-card"
           >
-            {categories.map((c) => (
-              <li key={c.id} className="border-b border-line last:border-0">
+            {categories.map((c, index) => (
+              <li
+                key={c.id}
+                style={stagger(index)}
+                className="animate-item-in border-b border-line last:border-0 motion-reduce:animate-none"
+              >
                 <a
                   href={APP_ROUTER.categoryEdit({ id: c.id })}
                   data-e2e={`categories:row:${c.id}`}
                   aria-label={`Edytuj kategorię ${categoryLabel(c.name)}`}
-                  className="flex w-full items-center gap-3 px-3 py-3 hover:bg-hover-soft"
+                  className="flex w-full items-center gap-3 px-3 py-3 transition-colors hover:bg-hover-soft focus-visible:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand"
                 >
                   <CategoryAvatar category={c} />
                   <span className="min-w-0 flex-1 truncate text-sm font-medium">

@@ -44,7 +44,7 @@ export const ModalShell = ({
             </div>
             <Dialog.Close
               aria-label="Zamknij"
-              className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink-soft hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink-soft transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             >
               <X className="h-4 w-4" aria-hidden="true" />
             </Dialog.Close>

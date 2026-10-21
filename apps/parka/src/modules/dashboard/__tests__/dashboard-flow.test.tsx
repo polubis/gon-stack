@@ -92,7 +92,7 @@ describe('dashboard screen', () => {
 
     render(<Main />);
 
-    await screen.findByText('Kategorie wydatków');
+    await screen.findByRole('heading', { name: 'Kategorie' });
     expect(screen.queryByText(/^[+-]d+%$/)).toBeNull();
   });
 

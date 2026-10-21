@@ -46,7 +46,7 @@ export const CategoriesCard = ({
   return (
     <Card className="space-y-4 xl:col-span-6 xl:col-start-7 xl:row-start-2">
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <h2 className="text-base font-semibold">Kategorie wydatków</h2>
+        <h2 className="text-base font-semibold">Kategorie</h2>
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
@@ -55,9 +55,8 @@ export const CategoriesCard = ({
             data-e2e="dashboard:categories-manage"
           >
             <Tags className="h-4 w-4 shrink-0" aria-hidden="true" />
-            <span className="truncate">Kategorie</span>
+            <span className="truncate">Zarządzaj</span>
           </Button>
-          {slices.length > 0 ? <NewCategory /> : null}
         </div>
       </div>
       {slices.length === 0 ? (
@@ -82,7 +81,7 @@ export const CategoriesCard = ({
         <DetailDialog
           modal={CATEGORIES_MODAL}
           data-e2e="dashboard:categories-dialog"
-          title="Kategorie wydatków"
+          title="Kategorie"
           description={periodTitle(period)}
           onClose={all.close}
         >

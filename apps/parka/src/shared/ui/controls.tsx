@@ -138,7 +138,7 @@ export const Button = ({
   'data-e2e'?: E2eId;
 } & Record<string, unknown>) => {
   const base =
-    'inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-colors';
+    'inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
   const styles =
     variant === 'primary'
       ? 'bg-brand text-on-brand hover:bg-brand-dark'

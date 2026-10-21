@@ -68,8 +68,12 @@ export const Donut = ({
         )}
       >
         <ul className="space-y-1.5 text-sm">
-          {slices.slice(0, rows).map((s) => (
-            <li key={s.label} className="flex h-5 items-center gap-2">
+          {slices.slice(0, rows).map((s, index) => (
+            <li
+              key={s.label}
+              style={{ animationDelay: `${Math.min(index, 8) * 30}ms` }}
+              className="flex h-5 animate-item-in items-center gap-2 motion-reduce:animate-none"
+            >
               <span
                 className="h-2.5 w-2.5 shrink-0 rounded-full"
                 style={{ backgroundColor: s.color }}

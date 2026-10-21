@@ -158,7 +158,7 @@ const STARTS = SHARES.map((_, i) =>
   SHARES.slice(0, i).reduce((sum, { pct }) => sum + pct, 0),
 );
 
-/** Dashboard "Kategorie wydatków": donut + legend, filter chips. */
+/** Dashboard "Kategorie": donut + legend, filter chips. */
 export const CategoriesIllustration = () => (
   <Frame className="flex-col gap-3">
     <Card className="flex w-full max-w-72 items-center gap-4 shadow-popover">

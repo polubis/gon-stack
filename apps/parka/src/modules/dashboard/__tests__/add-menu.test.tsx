@@ -12,7 +12,7 @@ const modalsInUrl = () =>
 
 const openMenu = async (user: ReturnType<typeof userEvent.setup>) => {
   render(<Main />);
-  await screen.findByText('Kategorie wydatków');
+  await screen.findByRole('heading', { name: 'Kategorie' });
   await user.click(screen.getAllByRole('button', { name: /^Dodaj$/ })[0]!);
 };
 
@@ -69,9 +69,9 @@ describe('dashboard add menu', () => {
     );
     const user = userEvent.setup();
     render(<Main />);
-    await screen.findByText('Kategorie wydatków');
+    await screen.findByRole('heading', { name: 'Kategorie' });
 
-    await user.click(screen.getByRole('button', { name: 'Kategorie' }));
+    await user.click(screen.getByRole('button', { name: 'Zarządzaj' }));
     expect(
       await screen.findByRole('link', { name: 'Edytuj kategorię Spożywcze' }),
     ).toBeInTheDocument();
