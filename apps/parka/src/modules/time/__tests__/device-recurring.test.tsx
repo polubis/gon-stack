@@ -58,17 +58,28 @@ describe('task device', () => {
     expect(dialog.getByText('device-phone-1')).toBeVisible();
   });
 
-  it('names the device on a week block of a task', async () => {
-    backend.seed([task({ device: DEVICE })]);
+  it('shows the same row with a done toggle on a week day', async () => {
+    const user = userEvent.setup();
+    backend.seed([task({ device: DEVICE, at: null })]);
     renderTime('week');
 
+    const box = (
+      await screen.findAllByRole('checkbox', {
+        name: 'Zrobione: Raport miesięczny',
+      })
+    )[0]!;
+    expect(box).toHaveAttribute('aria-checked', 'false');
+    await user.click(box);
+    await waitFor(() =>
+      expect(
+        screen.getAllByRole('checkbox', {
+          name: 'Zrobione: Raport miesięczny',
+        })[0],
+      ).toHaveAttribute('aria-checked', 'true'),
+    );
     expect(
-      (
-        await screen.findAllByRole('button', {
-          name: 'Edytuj zadanie: Raport miesięczny, urządzenie: Telefon Ani',
-        })
-      ).length,
-    ).toBeGreaterThan(0);
+      within(box.closest('li')!).getByText('Telefon Ani'),
+    ).toBeInTheDocument();
   });
 
   it('keeps the original device when a task is edited', async () => {

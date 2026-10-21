@@ -1,11 +1,6 @@
 import { Fragment } from 'react';
-import { CheckCircle2 } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
-import { deviceLabel } from '@/shared/device/domain/label';
-import { DeviceBubble } from '@/shared/device/presentation/device-bubble';
-import { openModal } from '@/shared/router/modal-stack';
 import { ALL_DAY_LABEL } from '../configuration/constraints';
-import type { Task } from '../domain/models';
 import { weekdayLong, weekdayShort } from '../domain/period-title';
 import {
   gridHours,
@@ -16,7 +11,6 @@ import {
 } from '../domain/schedule';
 import { useContext } from './context';
 import { EmptyPeriod } from './empty-period';
-import { editTaskModal } from './modal-ids';
 import { hourOffset, NowAxisLabel, NowLine, NowMarker } from './now-marker';
 import { TaskRow } from './task-row';
 import { stagger } from './stagger';
@@ -31,42 +25,6 @@ const DayName = ({ day }: { day: string }) => (
     <span className="font-normal text-ink-soft">{Number(day.slice(8))}</span>
   </>
 );
-
-/** Block used inside the hour grid; category colour + done state, never colour alone. */
-const Chip = ({ task }: { task: Task }) => {
-  const { categories } = useContext();
-  const category = categories.find((item) => item.id === task.categoryId);
-  return (
-    <button
-      type="button"
-      aria-label={`Edytuj zadanie: ${task.title}${task.device ? `, urządzenie: ${deviceLabel(task.device)}` : ''}`}
-      onClick={() => openModal(editTaskModal(task.id))}
-      style={{ borderLeftColor: category?.color }}
-      className={cn(
-        'flex w-full items-start gap-1 rounded-lg border-l-4 bg-hover-soft px-2 py-1 text-left text-xs font-medium hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
-        task.done && 'line-through',
-      )}
-    >
-      {task.done ? (
-        <>
-          <CheckCircle2
-            className="mt-0.5 h-3 w-3 shrink-0"
-            aria-hidden="true"
-          />
-          <span className="sr-only">Zrobione: </span>
-        </>
-      ) : null}
-      <span className="min-w-0 flex-1 break-words">{task.title}</span>
-      {task.device ? (
-        <DeviceBubble
-          device={task.device}
-          className="h-4 w-4"
-          iconClassName="h-2.5 w-2.5"
-        />
-      ) : null}
-    </button>
-  );
-};
 
 /** Phone and tablet: one card per day, all-day chips first, then hour rows. */
 const DayCards = ({ days }: { days: string[] }) => {
@@ -102,12 +60,10 @@ const DayCards = ({ days }: { days: string[] }) => {
                 </h3>
                 <ul
                   aria-labelledby={`week-all-day-${day}`}
-                  className="flex flex-wrap gap-1"
+                  className="flex flex-col gap-2"
                 >
                   {allDay.map((task) => (
-                    <li key={task.id}>
-                      <Chip task={task} />
-                    </li>
+                    <TaskRow key={task.id} task={task} />
                   ))}
                 </ul>
               </div>
@@ -177,13 +133,11 @@ const HourGrid = ({ days }: { days: string[] }) => {
             </th>
             {days.map((day) => (
               <td key={day} className="p-1 align-top">
-                <ul className="flex min-h-9 flex-col gap-1">
+                <ul className="flex min-h-9 flex-col gap-2">
                   {tasksOn(tasks, day)
                     .filter((task) => task.at === null)
                     .map((task) => (
-                      <li key={task.id}>
-                        <Chip task={task} />
-                      </li>
+                      <TaskRow key={task.id} task={task} />
                     ))}
                 </ul>
               </td>
@@ -221,11 +175,9 @@ const HourGrid = ({ days }: { days: string[] }) => {
                         <NowLine offset={hourOffset(now.time)} />
                       ) : null}
                       {ofHour.length ? (
-                        <ul className="flex flex-col gap-1">
+                        <ul className="flex flex-col gap-2">
                           {ofHour.map((task) => (
-                            <li key={task.id}>
-                              <Chip task={task} />
-                            </li>
+                            <TaskRow key={task.id} task={task} />
                           ))}
                         </ul>
                       ) : null}

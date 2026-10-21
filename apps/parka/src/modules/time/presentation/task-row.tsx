@@ -28,7 +28,7 @@ export const TaskRow = ({ task, now, step }: Props) => {
       data-e2e={`time:task:${task.id}`}
       style={step === undefined ? undefined : stagger(step)}
       className={cn(
-        'flex items-center gap-3 rounded-xl border p-3',
+        'flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border p-3',
         step !== undefined && 'animate-item-in motion-reduce:animate-none',
         now ? 'border-brand bg-brand-softer' : 'border-line',
       )}
