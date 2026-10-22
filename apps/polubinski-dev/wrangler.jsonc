@@ -15,6 +15,13 @@
 		"binding": "ASSETS",
 		"directory": "./dist"
 	},
+	"kv_namespaces": [
+		{ "binding": "SESSION", "id": "2ff6952e458946169cd63de99e37865e" }
+	],
+	"routes": [
+		{ "pattern": "polubinski.dev", "custom_domain": true },
+		{ "pattern": "www.polubinski.dev", "custom_domain": true }
+	],
 	"observability": {
 		"enabled": true
 	}

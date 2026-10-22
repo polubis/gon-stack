@@ -48,8 +48,10 @@ pnpm lint
 ## Deployment
 
 ```bash
-pnpm deploy
+pnpm run deploy
 ```
+
+`pnpm deploy` is a built-in pnpm command and does not run this script.
 
 ## Tech Stack
 
