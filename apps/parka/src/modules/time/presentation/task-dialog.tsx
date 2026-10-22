@@ -31,10 +31,17 @@ type Props = {
   task?: Task;
   /** Day a new task starts on. */
   defaultDay: string;
+  /** Opens with "Powtarzaj" already on. */
+  startRepeating?: boolean;
 };
 
 /** Add / edit task popup; saving is optimistic (see the store handlers). */
-export const TaskDialog = ({ modal, task, defaultDay }: Props) => {
+export const TaskDialog = ({
+  modal,
+  task,
+  defaultDay,
+  startRepeating = false,
+}: Props) => {
   const {
     categories,
     priorities,
@@ -76,7 +83,7 @@ export const TaskDialog = ({ modal, task, defaultDay }: Props) => {
   const [allDay, setAllDay] = useState(!editing || task.at === null);
   const [at, setAt] = useState(task?.at ?? DEFAULT_TIME);
   const [done, setDone] = useState(task?.done ?? false);
-  const [repeat, setRepeat] = useState(false);
+  const [repeat, setRepeat] = useState(startRepeating);
   const [interval, setInterval] = useState<RecurringInterval>('weekly');
   const [endDate, setEndDate] = useState('');
   const [touched, setTouched] = useState(false);

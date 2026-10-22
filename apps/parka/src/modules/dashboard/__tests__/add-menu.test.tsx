@@ -17,14 +17,16 @@ const openMenu = async (user: ReturnType<typeof userEvent.setup>) => {
 };
 
 describe('dashboard add menu', () => {
-  it('offers expense, recurring expense and category', async () => {
+  it('offers expense, recurring expense, photo, file and category', async () => {
     server.use(...readHandlers());
     const user = userEvent.setup();
     await openMenu(user);
 
     const menu = await screen.findByRole('menu', { name: 'Dodaj' });
 
-    expect(menu.textContent).toBe('WydatekWydatek cyklicznyKategoria');
+    expect(menu.textContent).toBe(
+      'WydatekWydatek cyklicznyZe zdjęciaZ plikuKategoria',
+    );
     expect(
       screen.getByRole('menuitem', { name: 'Wydatek cykliczny' }),
     ).toHaveAttribute('href', expect.stringContaining('type=recurring'));

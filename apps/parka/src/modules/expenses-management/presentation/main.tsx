@@ -6,6 +6,7 @@ import {
   writeQueryParam,
 } from '@/shared/router/navigation';
 import { APP_ROUTER } from '@/shared/router/routes';
+import { takeReceipt } from '@/shared/receipt-handoff/receipt-handoff';
 import { Segmented } from '@/shared/ui/controls';
 import { ErrorState } from '@/shared/ui/error-state';
 import { ScreenHeader } from '@/shared/ui/layout';
@@ -51,6 +52,11 @@ const ExpensesManagementView = () => {
   useEffect(() => {
     ctx.load();
   }, [ctx]);
+
+  useEffect(() => {
+    if (editing) return;
+    void takeReceipt().then((file) => file && ctx.scanReceipt(file));
+  }, [ctx, editing]);
 
   useEffect(() => {
     if (expenseId) ctx.loadExpense(expenseId);

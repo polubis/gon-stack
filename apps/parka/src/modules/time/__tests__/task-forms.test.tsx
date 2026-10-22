@@ -30,7 +30,7 @@ const ready = async () => {
 
 const openFromMenu = async (
   user: ReturnType<typeof userEvent.setup>,
-  option: 'Zadanie' | 'Kategoria' | 'Priorytet',
+  option: 'Zadanie' | 'Zadanie cykliczne' | 'Kategoria' | 'Priorytet',
 ) => {
   await ready();
   const [trigger] = screen.getAllByRole('button', { name: /^Dodaj$/ });
@@ -40,7 +40,7 @@ const openFromMenu = async (
 };
 
 describe('time add menu', () => {
-  it('offers task, backlog, category and priority', async () => {
+  it('offers task, recurring task, backlog, category and priority', async () => {
     const user = userEvent.setup();
     await ready();
 
@@ -49,6 +49,7 @@ describe('time add menu', () => {
     const items = await screen.findAllByRole('menuitem');
     expect(items.map((item) => item.textContent)).toEqual([
       'Zadanie',
+      'Zadanie cykliczne',
       'Do backlogu',
       'Kategoria',
       'Priorytet',
@@ -62,7 +63,9 @@ describe('time add menu', () => {
     await user.click(screen.getAllByRole('button', { name: /^Dodaj$/ })[0]!);
     await screen.findAllByRole('menuitem');
     await user.keyboard('{ArrowDown}');
-    expect(screen.getByRole('menuitem', { name: 'Do backlogu' })).toHaveFocus();
+    expect(
+      screen.getByRole('menuitem', { name: 'Zadanie cykliczne' }),
+    ).toHaveFocus();
 
     await user.keyboard('{Escape}');
     await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
@@ -79,6 +82,16 @@ describe('time add menu', () => {
 });
 
 describe('time task form', () => {
+  it('opens the recurring task form with repeating on', async () => {
+    const user = userEvent.setup();
+    await openFromMenu(user, 'Zadanie cykliczne');
+
+    expect(
+      topDialog().getByRole('switch', { name: 'Powtarzaj' }),
+    ).toBeChecked();
+    expect(topDialog().getByText('Częstotliwość')).toBeVisible();
+  });
+
   it('asks for a title before saving', async () => {
     const user = userEvent.setup();
     await openFromMenu(user, 'Zadanie');

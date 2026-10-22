@@ -21,6 +21,7 @@ import {
   newTaskDayOf,
   NEW_CATEGORY_MODAL,
   NEW_PRIORITY_MODAL,
+  NEW_RECURRING_TASK_MODAL,
   NEW_TASK_MODAL,
   stoppedIdOf,
 } from './modal-ids';
@@ -54,6 +55,15 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
   const dialog = (modal: string) => {
     if (modal === NEW_TASK_MODAL)
       return <TaskDialog key={modal} modal={modal} defaultDay={defaultDay} />;
+    if (modal === NEW_RECURRING_TASK_MODAL)
+      return (
+        <TaskDialog
+          key={modal}
+          modal={modal}
+          defaultDay={defaultDay}
+          startRepeating
+        />
+      );
     if (modal === BACKLOG_MODAL)
       return <BacklogDialog key={modal} modal={modal} />;
     if (modal === NEW_BACKLOG_MODAL)

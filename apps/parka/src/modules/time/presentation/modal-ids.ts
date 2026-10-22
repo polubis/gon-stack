@@ -2,6 +2,7 @@ import type { TaskId } from '../domain/models';
 
 /** URL ids of the time modals (see `shared/router/modal-stack`). */
 export const NEW_TASK_MODAL = 'task-new';
+export const NEW_RECURRING_TASK_MODAL = 'task-new-recurring';
 
 export const BACKLOG_MODAL = 'backlog';
 export const NEW_BACKLOG_MODAL = 'backlog-new';
