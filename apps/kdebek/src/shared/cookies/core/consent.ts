@@ -4,27 +4,20 @@ import type {
   ConsentRecord,
 } from '../domain/models';
 
-export const CONSENT_VERSION = 1;
+export const CONSENT_VERSION = 2;
 
-export const categoryOrder: ConsentCategoryId[] = [
-  'necessary',
-  'performance',
-  'functional',
-  'marketing',
-];
+export const CONSENT_MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000;
+
+export const categoryOrder: ConsentCategoryId[] = ['necessary', 'performance'];
 
 export const defaultPreferences: ConsentPreferences = {
   necessary: true,
   performance: false,
-  functional: false,
-  marketing: false,
 };
 
 export const acceptAllPreferences = (): ConsentPreferences => ({
   necessary: true,
   performance: true,
-  functional: true,
-  marketing: true,
 });
 
 export const toggleCategoryPreference = (
@@ -34,6 +27,12 @@ export const toggleCategoryPreference = (
   if (id === 'necessary') return preferences;
 
   return { ...preferences, [id]: !preferences[id] };
+};
+
+export const isConsentExpired = (record: ConsentRecord): boolean => {
+  const updatedAt = Date.parse(record.updatedAt);
+
+  return Number.isNaN(updatedAt) || Date.now() - updatedAt > CONSENT_MAX_AGE_MS;
 };
 
 export const createConsentRecord = (

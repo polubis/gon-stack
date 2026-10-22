@@ -42,9 +42,8 @@ const sections = [
     id: 'cookies',
     title: '5. Pliki cookie i podobne technologie',
     paragraphs: [
-      'Strona wykorzystuje pliki cookie w czterech kategoriach: niezbędne (konieczne do prawidłowego działania strony, zawsze aktywne), wydajnościowe (pozwalające liczyć odwiedziny i źródła ruchu), funkcjonalne (umożliwiające zapamiętywanie Twoich preferencji) oraz marketingowe (wykorzystywane do dopasowania treści marketingowych do Twoich zainteresowań).',
-      'Cookies inne niż niezbędne są instalowane wyłącznie po wyrażeniu przez Ciebie zgody w banerze cookies. Swoje preferencje możesz w każdej chwili zmienić za pomocą przycisku ustawień cookies dostępnego na stronie.',
-      'Szczegółowe informacje o poszczególnych kategoriach cookies oraz możliwość zarządzania zgodami znajdziesz w panelu ustawień cookies dostępnym na stronie.',
+      'Strona wykorzystuje dwie kategorie: niezbędne (zapamiętanie Twojego wyboru zgód w localStorage, klucz kdebek:cookie-consent, do 12 miesięcy; zawsze aktywne) oraz wydajnościowe (Cloudflare Web Analytics — statystyki odwiedzin i źródeł ruchu; ładowane wyłącznie po Twojej zgodzie). Nie stosujemy cookies marketingowych ani reklamowych.',
+      'Zgodę możesz udzielić lub odrzucić jednym kliknięciem w banerze, a następnie w każdej chwili zmienić za pomocą przycisku ustawień cookies dostępnego na stronie. Odmowa nie ogranicza działania strony.',
     ],
   },
   {
@@ -113,7 +112,7 @@ export const copy = {
   header: {
     eyebrow: 'DOKUMENT PRAWNY',
     heading: 'Polityka prywatności',
-    lastUpdated: 'Ostatnia aktualizacja: 23 lipca 2026',
+    lastUpdated: 'Ostatnia aktualizacja: 22 października 2026',
   },
 
   sections,

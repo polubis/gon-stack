@@ -12,7 +12,7 @@ export const seedConsent = (page: Page, preferences: ConsentPreferences) =>
       window.localStorage.setItem(
         key,
         JSON.stringify({
-          version: 1,
+          version: 2,
           preferences,
           updatedAt: new Date().toISOString(),
         }),
@@ -25,6 +25,23 @@ export const seedAcceptedConsent = (page: Page) =>
   seedConsent(page, {
     necessary: true,
     performance: true,
-    functional: true,
-    marketing: true,
   });
+
+// A consent record older than the 12-month validity window, with optional
+// categories granted: it must be ignored and the banner must ask again.
+export const seedExpiredConsent = (page: Page) =>
+  page.addInitScript(
+    ({ key }) => {
+      const thirteenMonthsMs = 395 * 24 * 60 * 60 * 1000;
+
+      window.localStorage.setItem(
+        key,
+        JSON.stringify({
+          version: 2,
+          preferences: { necessary: true, performance: true },
+          updatedAt: new Date(Date.now() - thirteenMonthsMs).toISOString(),
+        }),
+      );
+    },
+    { key: COOKIE_CONSENT_STORAGE_KEY },
+  );

@@ -11,8 +11,6 @@ const { describe } = test;
 const categoryLabel = {
   necessary: 'Niezbędne',
   performance: 'Wydajnościowe',
-  functional: 'Funkcjonalne',
-  marketing: 'Marketingowe',
 } as const;
 
 const readStoredPreferences = (page: Page) =>
@@ -37,6 +35,8 @@ const commands = {
 
   'i click accept all': ({ getByE2e }) =>
     getByE2e('cookies:accept-all').click(),
+  'i click reject all': ({ getByE2e }) =>
+    getByE2e('cookies:reject-all').click(),
   'i click customize': ({ getByE2e }) => getByE2e('cookies:customize').click(),
   'the policy link should point to the privacy policy page': ({ getByE2e }) =>
     expect(getByE2e('cookies:policy-link')).toHaveAttribute(
@@ -63,21 +63,17 @@ const commands = {
     expect(
       page.getByRole('switch', { name: categoryLabel.performance }),
     ).toHaveAttribute('aria-checked', 'true'),
-  'the functional category should be unchecked': ({ page }) =>
-    expect(
-      page.getByRole('switch', { name: categoryLabel.functional }),
-    ).toHaveAttribute('aria-checked', 'false'),
-  'the marketing category should be unchecked': ({ page }) =>
-    expect(
-      page.getByRole('switch', { name: categoryLabel.marketing }),
-    ).toHaveAttribute('aria-checked', 'false'),
+  'no optional category should be stored as accepted': async ({ page }) => {
+    expect(await readStoredPreferences(page)).toEqual({
+      necessary: true,
+      performance: false,
+    });
+  },
 
   'all cookie categories should be stored as accepted': async ({ page }) => {
     expect(await readStoredPreferences(page)).toEqual({
       necessary: true,
       performance: true,
-      functional: true,
-      marketing: true,
     });
   },
   'only the performance category should be stored as accepted': async ({
@@ -86,8 +82,6 @@ const commands = {
     expect(await readStoredPreferences(page)).toEqual({
       necessary: true,
       performance: true,
-      functional: false,
-      marketing: false,
     });
   },
 } satisfies CommandRegistry<Ctx>;
@@ -151,8 +145,6 @@ describe('cookies consent navigation', () => {
       ['i click customize'],
       ['i toggle the performance category'],
       ['the performance category should be checked'],
-      ['the functional category should be unchecked'],
-      ['the marketing category should be unchecked'],
     );
   });
 
@@ -167,6 +159,20 @@ describe('cookies consent navigation', () => {
       ['the cookie dialog should be closed'],
       ['the cookie reopen trigger should be visible'],
       ['all cookie categories should be stored as accepted'],
+    );
+  });
+
+  test('rejects optional cookies from the banner in one click', async ({
+    page,
+    getByE2e,
+  }) => {
+    await interpreter(commands, { page, getByE2e })(
+      ['im on the home page'],
+      ['the cookie banner should be visible'],
+      ['i click reject all'],
+      ['the cookie dialog should be closed'],
+      ['the cookie reopen trigger should be visible'],
+      ['no optional category should be stored as accepted'],
     );
   });
 

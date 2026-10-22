@@ -1,6 +1,10 @@
 import { expect, type Page } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
-import { seedAcceptedConsent, seedConsent } from '@/__e2e__/cookie-consent';
+import {
+  seedAcceptedConsent,
+  seedConsent,
+  seedExpiredConsent,
+} from '@/__e2e__/cookie-consent';
 import { test, type Ctx } from '@/__e2e__/test';
 
 const { describe } = test;
@@ -12,6 +16,7 @@ const SCRIPT_SELECTOR = 'script#cloudflare-web-analytics';
 // triggering action) sidesteps the case where the browser fires the request
 // before the test gets around to starting the wait.
 const beaconRequestCounts = new WeakMap<Page, number>();
+const beaconRequestBaselines = new WeakMap<Page, number>();
 
 const commands = {
   'i intercept the analytics beacon': ({ page }) => {
@@ -30,12 +35,11 @@ const commands = {
   'im on the home page': ({ page }) => page.goto('/'),
   'i have already accepted all cookies': ({ page }) =>
     seedAcceptedConsent(page),
+  'i have an expired cookie consent': ({ page }) => seedExpiredConsent(page),
   'i have declined optional cookies': ({ page }) =>
     seedConsent(page, {
       necessary: true,
       performance: false,
-      functional: false,
-      marketing: false,
     }),
 
   'the cookie banner should be visible': ({ getByE2e }) =>
@@ -46,6 +50,13 @@ const commands = {
   'i click customize': ({ getByE2e }) => getByE2e('cookies:customize').click(),
   'i click accept all': ({ getByE2e }) =>
     getByE2e('cookies:accept-all').click(),
+  'i click reject all': ({ getByE2e }) =>
+    getByE2e('cookies:reject-all').click(),
+  'i click the reopen trigger': ({ getByE2e }) =>
+    getByE2e('cookies:reopen').click(),
+  'i note how many times the beacon was requested': ({ page }) => {
+    beaconRequestBaselines.set(page, beaconRequestCounts.get(page) ?? 0);
+  },
   'i click save preferences': ({ getByE2e }) =>
     getByE2e('cookies:save-preferences').click(),
   'i toggle the performance category': ({ page }) =>
@@ -70,6 +81,14 @@ const commands = {
     expect
       .poll(() => beaconRequestCounts.get(page) ?? 0, { timeout: 5000 })
       .toBeGreaterThan(0),
+  'the analytics beacon should not have been requested again': async ({
+    page,
+  }) => {
+    await page.waitForTimeout(1000);
+    expect(beaconRequestCounts.get(page) ?? 0).toBe(
+      beaconRequestBaselines.get(page),
+    );
+  },
   'the analytics beacon should not have been requested': async ({ page }) => {
     await page.waitForTimeout(1000);
     expect(beaconRequestCounts.get(page) ?? 0).toBe(0);
@@ -133,6 +152,56 @@ describe('cloudflare web analytics consent gating', () => {
       ['i click save preferences'],
       ['the analytics script should not be injected'],
       ['the analytics beacon should not have been requested'],
+    );
+  });
+
+  test('never loads the beacon after rejecting all cookies from the banner', async ({
+    page,
+    getByE2e,
+  }) => {
+    await interpreter(commands, { page, getByE2e })(
+      ['i intercept the analytics beacon'],
+      ['im on the home page'],
+      ['the cookie banner should be visible'],
+      ['i click reject all'],
+      ['the cookie reopen trigger should be visible'],
+      ['the analytics script should not be injected'],
+      ['the analytics beacon should not have been requested'],
+    );
+  });
+
+  test('asks again and does not load the beacon when the stored consent is older than 12 months', async ({
+    page,
+    getByE2e,
+  }) => {
+    await interpreter(commands, { page, getByE2e })(
+      ['i intercept the analytics beacon'],
+      ['i have an expired cookie consent'],
+      ['im on the home page'],
+      ['the cookie banner should be visible'],
+      ['the analytics script should not be injected'],
+      ['the analytics beacon should not have been requested'],
+    );
+  });
+
+  test('stops the beacon after performance consent is withdrawn', async ({
+    page,
+    getByE2e,
+  }) => {
+    await interpreter(commands, { page, getByE2e })(
+      ['i intercept the analytics beacon'],
+      ['im on the home page'],
+      ['the cookie banner should be visible'],
+      ['i click accept all'],
+      ['the analytics script should be injected'],
+      ['the analytics beacon should have been requested'],
+      ['i note how many times the beacon was requested'],
+      ['i click the reopen trigger'],
+      ['i toggle the performance category'],
+      ['i click save preferences'],
+      ['the cookie reopen trigger should be visible'],
+      ['the analytics script should not be injected'],
+      ['the analytics beacon should not have been requested again'],
     );
   });
 

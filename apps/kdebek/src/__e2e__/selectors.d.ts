@@ -10,6 +10,7 @@ export type E2eId =
   | 'cookies:policy-link'
   | 'cookies:customize'
   | 'cookies:accept-all'
+  | 'cookies:reject-all'
   | 'cookies:back'
   | 'cookies:save-preferences'
   | 'cookies:reopen';

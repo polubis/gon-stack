@@ -2,9 +2,10 @@ export const copy = {
   banner: {
     title: 'Twoja prywatność ma znaczenie',
     description:
-      'Klikając „Akceptuj”, wyrażasz zgodę na wykorzystanie plików cookie zgodnie z naszą polityką prywatności. Cookies pomagają nam zapewnić poprawne działanie strony, analizować ruch oraz dostosowywać treści.',
+      'Używamy niezbędnych plików cookie i pamięci przeglądarki. Za Twoją zgodą korzystamy też z analityki ruchu (Cloudflare Web Analytics). Możesz zaakceptować lub odrzucić analitykę — odmowa nie ogranicza działania strony.',
     policyLinkLabel: 'Przeczytaj naszą politykę prywatności',
     customize: 'Dostosuj',
+    reject: 'Odrzuć',
     accept: 'Akceptuj',
   },
 
@@ -12,27 +13,17 @@ export const copy = {
     title: 'Zarządzaj preferencjami cookies',
     description: 'Włącz lub wyłącz poszczególne kategorie plików cookie.',
     back: 'Wstecz',
-    accept: 'Akceptuj',
+    accept: 'Zapisz wybór',
     categories: {
       necessary: {
         title: 'Niezbędne',
         description:
-          'Te pliki cookie są konieczne do prawidłowego działania strony i nie można ich wyłączyć.',
+          'Konieczne do działania strony, np. zapamiętanie Twojego wyboru zgód (localStorage: kdebek:cookie-consent, do 12 miesięcy). Nie można ich wyłączyć.',
       },
       performance: {
         title: 'Wydajnościowe',
         description:
-          'Pozwalają liczyć odwiedziny i źródła ruchu, dzięki czemu możemy mierzyć i poprawiać wydajność strony.',
-      },
-      functional: {
-        title: 'Funkcjonalne',
-        description:
-          'Umożliwiają rozszerzoną funkcjonalność strony i zapamiętywanie Twoich preferencji.',
-      },
-      marketing: {
-        title: 'Marketingowe',
-        description:
-          'Mogą być wykorzystywane, aby dopasować treści marketingowe do Twoich zainteresowań.',
+          'Cloudflare Web Analytics (Cloudflare, Inc.) — statystyki odwiedzin i źródeł ruchu, ładowane wyłącznie po Twojej zgodzie.',
       },
     },
   },

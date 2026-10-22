@@ -1,4 +1,8 @@
-import { CONSENT_VERSION, createConsentRecord } from '../core/consent';
+import {
+  CONSENT_VERSION,
+  createConsentRecord,
+  isConsentExpired,
+} from '../core/consent';
 import type { ConsentPreferences, ConsentRecord } from '../domain/models';
 
 const STORAGE_KEY = 'kdebek:cookie-consent';
@@ -12,6 +16,7 @@ export const readConsent = (): ConsentRecord | null => {
 
     const parsed = JSON.parse(raw) as ConsentRecord;
     if (parsed.version !== CONSENT_VERSION) return null;
+    if (isConsentExpired(parsed)) return null;
 
     return parsed;
   } catch {

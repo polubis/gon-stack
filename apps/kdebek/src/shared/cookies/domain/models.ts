@@ -1,5 +1,4 @@
-export type ConsentCategoryId =
-  'necessary' | 'performance' | 'functional' | 'marketing';
+export type ConsentCategoryId = 'necessary' | 'performance';
 
 export type ConsentPreferences = Record<ConsentCategoryId, boolean>;
 

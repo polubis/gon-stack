@@ -54,6 +54,14 @@ const { privacyPolicyUrl }: Props = Astro.props;
         </button>
         <button
           type="button"
+          id="cookies-reject-all"
+          data-e2e="cookies:reject-all"
+          class="rounded-full bg-primary-dark px-5 py-2.5 text-sm font-bold text-white"
+        >
+          {copy.banner.reject}
+        </button>
+        <button
+          type="button"
           id="cookies-accept-all"
           data-e2e="cookies:accept-all"
           class="rounded-full bg-primary-dark px-5 py-2.5 text-sm font-bold text-white"
@@ -178,6 +186,7 @@ const { privacyPolicyUrl }: Props = Astro.props;
     let preferences: ConsentPreferences = defaultPreferences;
     let view: CookiesView | null = null;
     let hasConsented = false;
+    let analyticsLoaded = false;
     let wasOpen = false;
 
     const getFocusable = (container: HTMLElement) =>
@@ -259,6 +268,7 @@ const { privacyPolicyUrl }: Props = Astro.props;
       if (stored) {
         preferences = stored.preferences;
         hasConsented = true;
+        analyticsLoaded = stored.preferences.performance;
         loadAnalyticsIfConsented(stored.preferences);
       } else {
         view = 'banner';
@@ -269,24 +279,43 @@ const { privacyPolicyUrl }: Props = Astro.props;
 
     window.requestIdleCallback(reveal, { timeout: 2000 });
 
+    // An already-running analytics script cannot be unloaded, so withdrawing
+    // performance consent reloads the page: the next load reads the stored
+    // choice and never injects the script.
+    const commitConsent = () => {
+      const withdrewPerformance =
+        analyticsLoaded && !preferences.performance;
+
+      writeConsent(preferences);
+      hasConsented = true;
+      setView(null);
+
+      if (withdrewPerformance) {
+        window.location.reload();
+        return;
+      }
+
+      analyticsLoaded = preferences.performance;
+      loadAnalyticsIfConsented(preferences);
+    };
+
     document
       .getElementById('cookies-accept-all')
       ?.addEventListener('click', () => {
         preferences = acceptAllPreferences();
-        writeConsent(preferences);
-        hasConsented = true;
-        setView(null);
-        loadAnalyticsIfConsented(preferences);
+        commitConsent();
+      });
+
+    document
+      .getElementById('cookies-reject-all')
+      ?.addEventListener('click', () => {
+        preferences = defaultPreferences;
+        commitConsent();
       });
 
     document
       .getElementById('cookies-save-preferences')
-      ?.addEventListener('click', () => {
-        writeConsent(preferences);
-        hasConsented = true;
-        setView(null);
-        loadAnalyticsIfConsented(preferences);
-      });
+      ?.addEventListener('click', commitConsent);
 
     document
       .getElementById('cookies-customize')
