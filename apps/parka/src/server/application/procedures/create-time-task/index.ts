@@ -17,6 +17,7 @@ export const createTimeTask = privateProcedure({
           user_id: user.id,
           id: input.id,
           title: input.title,
+          description: input.description || null,
           category_id: input.categoryId,
           priority_id: input.priorityId,
           day: input.day,

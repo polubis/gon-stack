@@ -15,6 +15,7 @@ export const updateTimeTask = privateProcedure({
       .from('time_tasks')
       .update({
         title: input.title,
+        description: input.description || null,
         category_id: input.categoryId,
         priority_id: input.priorityId,
         day: input.day,

@@ -597,6 +597,7 @@ export type Database = {
           active: boolean;
           at: string | null;
           category_id: string;
+          description: string | null;
           end_date: string | null;
           id: string;
           interval: string;
@@ -611,6 +612,7 @@ export type Database = {
           active?: boolean;
           at?: string | null;
           category_id: string;
+          description?: string | null;
           end_date?: string | null;
           id: string;
           interval?: string;
@@ -624,6 +626,7 @@ export type Database = {
           active?: boolean;
           at?: string | null;
           category_id?: string;
+          description?: string | null;
           end_date?: string | null;
           id?: string;
           interval?: string;
@@ -656,6 +659,7 @@ export type Database = {
           category_id: string;
           created_at: string;
           day: string | null;
+          description: string | null;
           device_browser: string | null;
           device_id: string | null;
           device_model: string | null;
@@ -677,6 +681,7 @@ export type Database = {
           category_id: string;
           created_at?: string;
           day?: string | null;
+          description?: string | null;
           device_browser?: string | null;
           device_id?: string | null;
           device_model?: string | null;
@@ -697,6 +702,7 @@ export type Database = {
           category_id?: string;
           created_at?: string;
           day?: string | null;
+          description?: string | null;
           device_browser?: string | null;
           device_id?: string | null;
           device_model?: string | null;

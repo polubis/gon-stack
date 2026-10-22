@@ -1,4 +1,4 @@
-import { Inbox, Plus, Trash2 } from 'lucide-react';
+import { Inbox, Info, Plus, Trash2 } from 'lucide-react';
 import { openModal } from '@/shared/router/modal-stack';
 import { Button, Input } from '@/shared/ui/controls';
 import { EmptyState } from '@/shared/ui/empty-state';
@@ -11,6 +11,7 @@ import {
   deleteTaskModal,
   editBacklogModal,
   NEW_BACKLOG_MODAL,
+  viewTaskModal,
 } from './modal-ids';
 import { ModalShell } from './modal-shell';
 import { PriorityMark } from './priority-mark';
@@ -56,6 +57,15 @@ const Row = ({ task }: { task: BacklogTask }) => {
         className="min-w-24 flex-1 rounded-md text-left text-sm font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
       >
         <span className="break-words">{task.title}</span>
+      </button>
+      <button
+        type="button"
+        aria-label={`Szczegóły zadania: ${task.title}`}
+        data-e2e={`time:task-info:${task.id}`}
+        onClick={() => openModal(viewTaskModal(task.id))}
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink-soft hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+      >
+        <Info className="h-4 w-4" aria-hidden="true" />
       </button>
       <PriorityMark id={task.priorityId} />
       <div className="flex w-full flex-wrap items-center gap-1.5">

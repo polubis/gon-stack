@@ -7,6 +7,9 @@ export const NEW_RECURRING_TASK_MODAL = 'task-new-recurring';
 export const BACKLOG_MODAL = 'backlog';
 export const NEW_BACKLOG_MODAL = 'backlog-new';
 
+/** Fullscreen editor of a task description, stacked over the task form. */
+export const DESCRIPTION_EDITOR_MODAL = 'description-editor';
+
 export const NEW_CATEGORY_MODAL = 'category-new';
 export const NEW_PRIORITY_MODAL = 'priority-new';
 export const CATEGORIES_MODAL = 'categories';
@@ -16,6 +19,8 @@ const EDIT_BACKLOG_PREFIX = 'backlog-edit:';
 const EDIT_PREFIX = 'task-edit:';
 const DELETE_PREFIX = 'task-delete:';
 const STOP_SERIES_PREFIX = 'series-stop:';
+const VIEW_PREFIX = 'task-view:';
+const DESCRIPTION_PREFIX = 'task-description:';
 
 /** Add-task form with the day already filled in. */
 export const newTaskOnModal = (day: string): string =>
@@ -54,4 +59,21 @@ export const deletedIdOf = (modal: string): TaskId | null =>
 export const stoppedIdOf = (modal: string): TaskId | null =>
   modal.startsWith(STOP_SERIES_PREFIX)
     ? (modal.slice(STOP_SERIES_PREFIX.length) as TaskId)
+    : null;
+
+/** Read-only details of a task or backlog task. */
+export const viewTaskModal = (id: TaskId): string => `${VIEW_PREFIX}${id}`;
+
+export const viewedIdOf = (modal: string): TaskId | null =>
+  modal.startsWith(VIEW_PREFIX)
+    ? (modal.slice(VIEW_PREFIX.length) as TaskId)
+    : null;
+
+/** Whole description of a task, scrollable. */
+export const descriptionModal = (id: TaskId): string =>
+  `${DESCRIPTION_PREFIX}${id}`;
+
+export const describedIdOf = (modal: string): TaskId | null =>
+  modal.startsWith(DESCRIPTION_PREFIX)
+    ? (modal.slice(DESCRIPTION_PREFIX.length) as TaskId)
     : null;

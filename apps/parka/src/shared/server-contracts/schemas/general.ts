@@ -44,7 +44,9 @@ export const timePriority = () =>
 export const timeTask = () =>
   z.object({
     id: z.string().min(1),
-    title: z.string().trim().min(1).max(40),
+    title: z.string().trim().min(1).max(160),
+    /** Longer notes; `null` when there are none. */
+    description: z.string().trim().max(5000).nullable().default(null),
     categoryId: z.string().min(1),
     priorityId: z.string().min(1),
     day: z.string().refine(isDay, 'Invalid day'),
@@ -66,7 +68,8 @@ export const timeTask = () =>
 export const timeBacklogTask = () =>
   z.object({
     id: z.string().min(1),
-    title: z.string().trim().min(1).max(40),
+    title: z.string().trim().min(1).max(160),
+    description: z.string().trim().max(5000).nullable().default(null),
     categoryId: z.string().min(1),
     priorityId: z.string().min(1),
     /** Device the task was created from; `null` for older tasks. */
@@ -77,7 +80,8 @@ export const timeBacklogTask = () =>
 export const timeRecurring = () =>
   z.object({
     id: z.string().min(1),
-    title: z.string().trim().min(1).max(40),
+    title: z.string().trim().min(1).max(160),
+    description: z.string().trim().max(5000).nullable().default(null),
     categoryId: z.string().min(1),
     priorityId: z.string().min(1),
     /** `HH:MM`; `null` lasts the whole day. */

@@ -8,12 +8,13 @@ import { ClearableInput } from '@/shared/ui/clearable';
 import { closeModal } from '@/shared/router/modal-stack';
 import {
   DEFAULT_PRIORITY_ID,
-  NAME_MAX_LENGTH,
+  TASK_TITLE_MAX_LENGTH,
 } from '../configuration/constraints';
 import { newTaskId } from '../domain/ids';
 import type { BacklogTask, CategoryId, PriorityId } from '../domain/models';
 import { CategoryPicker } from './category-picker';
 import { useContext } from './context';
+import { DescriptionField } from './description-field';
 import { ModalShell } from './modal-shell';
 import { PriorityPicker } from './priority-picker';
 
@@ -61,6 +62,7 @@ export const BacklogAddDialog = ({
     setSeenPriority(newPriority);
     if (newPriority) setPriorityId(newPriority.id);
   }
+  const [description, setDescription] = useState(task?.description ?? '');
   const [touched, setTouched] = useState(false);
 
   // The model code is async; have it by the time the user submits.
@@ -84,6 +86,7 @@ export const BacklogAddDialog = ({
     const next: BacklogTask = {
       id: task?.id ?? newTaskId(),
       title: title.trim(),
+      description: description.trim() || null,
       categoryId,
       priorityId,
       device: task?.device ?? currentDevice(),
@@ -109,7 +112,7 @@ export const BacklogAddDialog = ({
           <ClearableInput
             type="text"
             value={title}
-            maxLength={NAME_MAX_LENGTH}
+            maxLength={TASK_TITLE_MAX_LENGTH}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="np. Umówić wizytę u dentysty"
             autoComplete="off"
@@ -128,6 +131,7 @@ export const BacklogAddDialog = ({
             </span>
           ) : null}
         </Field>
+        <DescriptionField value={description} onChange={setDescription} />
         <CategoryPicker value={categoryId} onChange={setCategoryId} />
         <PriorityPicker value={priorityId} onChange={setPriorityId} />
         {touched && pickError ? (

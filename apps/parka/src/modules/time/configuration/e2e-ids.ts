@@ -34,6 +34,14 @@ export const TIME_E2E_IDS = [
   'time:form-icon-search',
   'time:form-icon-groups',
   'time:form-color',
+  'time:description-field',
+  'time:description-expand',
+  'time:description-editor',
+  'time:task-details',
+  'time:task-details-edit',
+  'time:description-clamp',
+  'time:description-more',
+  'time:description-full',
 ] as const;
 
 export type TimeDynamicE2eId =
@@ -42,6 +50,7 @@ export type TimeDynamicE2eId =
   | `time:add-day:${string}`
   | `time:task:${string | number}`
   | `time:task-done:${string | number}`
+  | `time:task-info:${string | number}`
   | `time:backlog-task:${string | number}`
   | `time:backlog-move:${string | number}`
   | `time:backlog-delete:${string | number}`

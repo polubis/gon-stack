@@ -1,9 +1,9 @@
-import { CheckCircle2, Circle } from 'lucide-react';
+import { CheckCircle2, Circle, Info } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { openModal } from '@/shared/router/modal-stack';
 import type { Task } from '../domain/models';
 import { useContext } from './context';
-import { editTaskModal } from './modal-ids';
+import { editTaskModal, viewTaskModal } from './modal-ids';
 import { PriorityMark } from './priority-mark';
 import { RecurringMark } from './recurring-mark';
 import { stagger } from './stagger';
@@ -57,6 +57,15 @@ export const TaskRow = ({ task, now, step }: Props) => {
         )}
       >
         <span className="break-words">{task.title}</span>
+      </button>
+      <button
+        type="button"
+        aria-label={`Szczegóły zadania: ${task.title}`}
+        data-e2e={`time:task-info:${task.id}`}
+        onClick={() => openModal(viewTaskModal(task.id))}
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink-soft hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+      >
+        <Info className="h-4 w-4" aria-hidden="true" />
       </button>
       {task.recurringId !== null ? <RecurringMark /> : null}
       {task.device ? <TaskDeviceBadge device={task.device} /> : null}

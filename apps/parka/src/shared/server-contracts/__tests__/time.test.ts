@@ -28,6 +28,49 @@ describe('time contracts', () => {
     expect(parsed.title).toBe('Raport');
   });
 
+  it('accepts a title of 160 characters', () => {
+    expect(
+      createTimeTaskSchema().shape.in.safeParse({
+        ...TASK,
+        title: 'x'.repeat(160),
+      }).success,
+    ).toBe(true);
+  });
+
+  it('treats a missing description as none', () => {
+    expect(createTimeTaskSchema().shape.in.parse(TASK).description).toBeNull();
+  });
+
+  it('trims the description of a task', () => {
+    const parsed = createTimeTaskSchema().shape.in.parse({
+      ...TASK,
+      description: '  notatki \n',
+    });
+
+    expect(parsed.description).toBe('notatki');
+  });
+
+  it('accepts a description of 5000 characters and rejects 5001', () => {
+    const parse = (description: string) =>
+      createTimeTaskSchema().shape.in.safeParse({ ...TASK, description })
+        .success;
+
+    expect(parse('x'.repeat(5000))).toBe(true);
+    expect(parse('x'.repeat(5001))).toBe(false);
+  });
+
+  it('accepts a description on a backlog task and a rule', () => {
+    expect(
+      createTimeBacklogTaskSchema().shape.in.parse({
+        id: 'b-1',
+        title: 'Dentysta',
+        categoryId: 'health',
+        priorityId: 'medium',
+        description: 'Zadzwonić rano',
+      }).description,
+    ).toBe('Zadzwonić rano');
+  });
+
   it('accepts a whole-day task', () => {
     expect(
       createTimeTaskSchema().shape.in.safeParse({ ...TASK, at: null }).success,
@@ -36,7 +79,7 @@ describe('time contracts', () => {
 
   it.each([
     ['a blank title', { title: '   ' }],
-    ['a too long title', { title: 'x'.repeat(41) }],
+    ['a too long title', { title: 'x'.repeat(161) }],
     ['a malformed day', { day: '20.10.2026' }],
     ['an hour out of range', { at: '24:00' }],
     ['a time with seconds', { at: '09:00:00' }],
@@ -138,7 +181,7 @@ describe('time backlog contract', () => {
 
   it.each([
     ['a blank title', { title: '  ' }],
-    ['a too long title', { title: 'x'.repeat(41) }],
+    ['a too long title', { title: 'x'.repeat(161) }],
     ['a missing category', { categoryId: '' }],
   ])('rejects a backlog task with %s', (_, patch) => {
     expect(

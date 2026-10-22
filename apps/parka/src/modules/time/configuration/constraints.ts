@@ -28,6 +28,14 @@ export const DATE_PARAM = 'date';
 
 export const NAME_MAX_LENGTH = 40;
 
+/** Longer than a name: a task title may be a whole sentence. */
+export const TASK_TITLE_MAX_LENGTH = 160;
+
+export const TASK_DESCRIPTION_MAX_LENGTH = 5000;
+
+/** Lines of the description shown in the details before "show more". */
+export const DESCRIPTION_CLAMP_LINES = 3;
+
 /** Colour presets of a category (same palette as the finance categories). */
 export const CATEGORY_COLORS = [
   '#0f7a4f',

@@ -23,6 +23,7 @@ export const toTimeBacklogTask = (
 ) => ({
   id: row.id,
   title: row.title,
+  description: row.description,
   categoryId: row.category_id,
   priorityId: row.priority_id,
   device: toDevice(row, profiles),
@@ -31,6 +32,7 @@ export const toTimeBacklogTask = (
 export const toTimeTask = (row: TaskRow, profiles?: ProfilesByDevice) => ({
   id: row.id,
   title: row.title,
+  description: row.description,
   categoryId: row.category_id,
   priorityId: row.priority_id,
   // Only tasks of the board are mapped; the backlog has its own shape.
@@ -45,6 +47,7 @@ export const toTimeTask = (row: TaskRow, profiles?: ProfilesByDevice) => ({
 export const toTimeRecurring = (row: RuleRow) => ({
   id: row.id,
   title: row.title,
+  description: row.description,
   categoryId: row.category_id,
   priorityId: row.priority_id,
   at: toHourMinute(row.at),
@@ -82,6 +85,7 @@ export const materializeTimeRecurring = async (
         user_id: userId,
         id: `${row.id}:${day}`,
         title: row.title,
+        description: row.description,
         category_id: row.category_id,
         priority_id: row.priority_id,
         day,

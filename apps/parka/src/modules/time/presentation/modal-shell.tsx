@@ -38,7 +38,7 @@ export const ModalShell = ({
               <Dialog.Title className="truncate text-base font-semibold">
                 {title}
               </Dialog.Title>
-              <Dialog.Description className="mt-0.5 text-xs text-ink-soft">
+              <Dialog.Description className="mt-0.5 break-words text-xs text-ink-soft">
                 {description}
               </Dialog.Description>
             </div>

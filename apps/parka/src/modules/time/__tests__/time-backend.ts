@@ -23,6 +23,7 @@ export const PRIORITIES = [
 export const backlogTask = (overrides: Json = {}): Json => ({
   id: 'b-1',
   title: 'Umówić dentystę',
+  description: null,
   categoryId: 'health',
   priorityId: 'medium',
   device: null,
@@ -32,6 +33,7 @@ export const backlogTask = (overrides: Json = {}): Json => ({
 export const task = (overrides: Json = {}): Json => ({
   id: 't-1',
   title: 'Raport miesięczny',
+  description: null,
   categoryId: 'work',
   priorityId: 'high',
   day: '2026-10-20',
@@ -137,6 +139,7 @@ export const setupTimeBackend = () => {
         task({
           id: `${body!.id as string}:${body!.startDate as string}`,
           title: body!.title,
+          description: body!.description ?? null,
           categoryId: body!.categoryId,
           priorityId: body!.priorityId,
           day: body!.startDate,

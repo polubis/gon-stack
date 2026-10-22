@@ -12,12 +12,13 @@ import {
   DEFAULT_PRIORITY_ID,
   DEFAULT_TIME,
   INTERVALS,
-  NAME_MAX_LENGTH,
+  TASK_TITLE_MAX_LENGTH,
 } from '../configuration/constraints';
 import { newRecurringId, newTaskId } from '../domain/ids';
 import type { CategoryId, PriorityId, Task } from '../domain/models';
 import { CategoryPicker } from './category-picker';
 import { useContext } from './context';
+import { DescriptionField } from './description-field';
 import { deleteTaskModal, stopSeriesModal } from './modal-ids';
 import { ModalShell } from './modal-shell';
 import { PriorityPicker } from './priority-picker';
@@ -79,6 +80,7 @@ export const TaskDialog = ({
     setSeenPriority(newPriority);
     if (newPriority) setPriorityId(newPriority.id);
   }
+  const [description, setDescription] = useState(task?.description ?? '');
   const [day, setDay] = useState(task?.day ?? defaultDay);
   const [allDay, setAllDay] = useState(!editing || task.at === null);
   const [at, setAt] = useState(task?.at ?? DEFAULT_TIME);
@@ -122,6 +124,7 @@ export const TaskDialog = ({
       createRecurring({
         id: newRecurringId(),
         title: title.trim(),
+        description: description.trim() || null,
         categoryId,
         priorityId,
         at: allDay ? null : at,
@@ -135,6 +138,7 @@ export const TaskDialog = ({
     const next: Task = {
       id: task?.id ?? newTaskId(),
       title: title.trim(),
+      description: description.trim() || null,
       categoryId,
       priorityId,
       day,
@@ -162,7 +166,7 @@ export const TaskDialog = ({
           <ClearableInput
             type="text"
             value={title}
-            maxLength={NAME_MAX_LENGTH}
+            maxLength={TASK_TITLE_MAX_LENGTH}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="np. Kurs angielskiego"
             autoComplete="off"
@@ -181,6 +185,7 @@ export const TaskDialog = ({
             </span>
           ) : null}
         </Field>
+        <DescriptionField value={description} onChange={setDescription} />
         <CategoryPicker value={categoryId} onChange={setCategoryId} />
         <PriorityPicker value={priorityId} onChange={setPriorityId} />
         <div className="grid grid-cols-2 gap-3">

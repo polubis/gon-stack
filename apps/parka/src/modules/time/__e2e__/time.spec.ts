@@ -14,7 +14,13 @@ import { API_ROUTER, APP_ROUTER } from '@/shared/router/routes';
 const EMAIL = `e2e-time-${Date.now()}@parka.test`;
 const RECURRING_EMAIL = `e2e-time-recurring-${Date.now()}@parka.test`;
 const BACKLOG_EMAIL = `e2e-time-backlog-${Date.now()}@parka.test`;
+const DESCRIPTION_EMAIL = `e2e-time-description-${Date.now()}@parka.test`;
 const PASSWORD = 'secret123';
+const LONG_TITLE = `Długi tytuł ${'x'.repeat(147)}`;
+const LONG_DESCRIPTION = Array.from(
+  { length: 12 },
+  (_, i) => `Linia ${i + 1}`,
+).join('\n');
 const DAY = '2026-10-20';
 const NEXT_WEEK = '2026-10-27';
 const LATER = '2026-11-03';
@@ -369,6 +375,49 @@ const commands = {
     await open(page, APP_ROUTER.time({ date: AFTER_LATER }));
     await expect(getByE2e('time:empty')).toBeVisible();
   },
+
+  'i register an account for descriptions': async (ctx) => {
+    await registerAndConfirm(ctx, DESCRIPTION_EMAIL, PASSWORD);
+    await ctx.page.waitForLoadState('networkidle');
+  },
+
+  'i add a task with a 160 characters title and a description': async ({
+    page,
+    getByE2e,
+  }) => {
+    await open(page, APP_ROUTER.time({ date: DAY }));
+    await page
+      .getByRole('button', { name: 'Dodaj', exact: true })
+      .first()
+      .click();
+    await page.getByRole('menuitem', { name: 'Zadanie', exact: true }).click();
+    const dialog = getByE2e('time:task-dialog');
+    await dialog.getByRole('textbox', { name: 'Nazwa' }).fill(LONG_TITLE);
+    await dialog
+      .getByRole('textbox', { name: 'Opis (opcjonalnie)' })
+      .fill(LONG_DESCRIPTION);
+    await Promise.all([
+      synced(page, 'POST', 201),
+      getByE2e('time:task-save').click(),
+    ]);
+    await reload(page);
+    await expect(
+      page.getByRole('button', { name: `Edytuj zadanie: ${LONG_TITLE}` }),
+    ).toBeVisible();
+  },
+
+  'the description shows only in the details and opens in full': async ({
+    page,
+    getByE2e,
+  }) => {
+    await expect(page.getByText('Linia 1', { exact: true })).toHaveCount(0);
+    await page
+      .getByRole('button', { name: `Szczegóły zadania: ${LONG_TITLE}` })
+      .click();
+    await expect(getByE2e('time:description-clamp')).toBeVisible();
+    await getByE2e('time:description-more').click();
+    await expect(getByE2e('time:description-full')).toContainText('Linia 12');
+  },
 } satisfies CommandRegistry<Ctx>;
 
 test('time works against the real Supabase backend', async ({ e2e }) => {
@@ -385,6 +434,16 @@ test('time works against the real Supabase backend', async ({ e2e }) => {
     ['the range menu returns to today from another period'],
     ['i delete the task after confirming'],
     ['the api lists no tasks after the delete'],
+  );
+});
+
+test('task description and long title survive the real backend', async ({
+  e2e,
+}) => {
+  await interpreter(commands, e2e)(
+    ['i register an account for descriptions'],
+    ['i add a task with a 160 characters title and a description'],
+    ['the description shows only in the details and opens in full'],
   );
 });
 

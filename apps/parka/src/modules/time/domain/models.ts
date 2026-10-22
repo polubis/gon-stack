@@ -22,6 +22,8 @@ export type Priority = { id: PriorityId; name: string; value: number };
 export type Task = {
   id: TaskId;
   title: string;
+  /** Longer notes; `null` when there are none. */
+  description: string | null;
   categoryId: CategoryId;
   priorityId: PriorityId;
   /** `YYYY-MM-DD`. */
@@ -38,13 +40,14 @@ export type Task = {
 /** A task waiting for a day: same data as a task, nothing about time. */
 export type BacklogTask = Pick<
   Task,
-  'id' | 'title' | 'categoryId' | 'priorityId' | 'device'
+  'id' | 'title' | 'description' | 'categoryId' | 'priorityId' | 'device'
 >;
 
 /** Instruction that makes a task on each day of its series. */
 export type Recurring = {
   id: RecurringId;
   title: string;
+  description: string | null;
   categoryId: CategoryId;
   priorityId: PriorityId;
   /** `HH:MM`; `null` lasts the whole day. */
