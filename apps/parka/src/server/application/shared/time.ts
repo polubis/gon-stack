@@ -39,6 +39,7 @@ export const toTimeTask = (row: TaskRow, profiles?: ProfilesByDevice) => ({
   day: row.day ?? '',
   at: toHourMinute(row.at),
   done: row.done,
+  inProgress: row.in_progress,
   device: toDevice(row, profiles),
   recurringId: row.recurring_id,
   occurrenceDate: row.occurrence_date,

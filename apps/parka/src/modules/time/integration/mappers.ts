@@ -62,6 +62,7 @@ export const toTask = (dto: TaskDto): Task => ({
   day: dto.day,
   at: dto.at,
   done: dto.done,
+  inProgress: dto.inProgress,
   device: dto.device,
   recurringId: dto.recurringId as RecurringId | null,
 });

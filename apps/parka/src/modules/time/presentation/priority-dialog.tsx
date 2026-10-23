@@ -41,7 +41,6 @@ export const PriorityDialog = ({ modal }: { modal: string }) => {
       <form onSubmit={submit} noValidate className="space-y-5">
         <Field label="Nazwa">
           <ClearableInput
-            autoFocus
             type="text"
             value={name}
             maxLength={NAME_MAX_LENGTH}

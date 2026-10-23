@@ -21,6 +21,7 @@ export const updateTimeTask = privateProcedure({
         day: input.day,
         at: input.at,
         done: input.done,
+        in_progress: input.inProgress && !input.done,
       })
       .eq('id', input.id)
       .eq('user_id', user.id)

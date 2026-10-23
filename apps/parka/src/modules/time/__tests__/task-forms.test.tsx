@@ -39,6 +39,37 @@ const openFromMenu = async (
   return screen.findByRole('dialog');
 };
 
+describe('time dialogs focus', () => {
+  it('does not focus any text input when a form opens', async () => {
+    const user = userEvent.setup();
+
+    const dialog = await openFromMenu(user, 'Zadanie');
+
+    expect(
+      within(dialog).getByRole('textbox', { name: 'Nazwa' }),
+    ).not.toHaveFocus();
+    expect(dialog.contains(document.activeElement)).toBe(true);
+    expect(document.activeElement?.tagName).not.toBe('INPUT');
+  });
+
+  it('does not focus the name when a category or priority form opens', async () => {
+    const user = userEvent.setup();
+
+    const dialog = await openFromMenu(user, 'Kategoria');
+
+    expect(document.activeElement?.tagName).not.toBe('INPUT');
+    expect(dialog.contains(document.activeElement)).toBe(true);
+  });
+
+  it('keeps long forms scrollable', async () => {
+    const user = userEvent.setup();
+
+    const dialog = await openFromMenu(user, 'Zadanie');
+
+    expect(dialog).toHaveClass('overflow-y-auto');
+  });
+});
+
 describe('time add menu', () => {
   it('offers task, recurring task, backlog, category and priority', async () => {
     const user = userEvent.setup();

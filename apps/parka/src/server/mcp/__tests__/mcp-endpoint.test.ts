@@ -294,6 +294,31 @@ describe('mcp status change', () => {
     expect(calls).toEqual([{ name: 'setTaskStatus', args: ['t-1', 'done'] }]);
   });
 
+  it('marks a task in progress', async () => {
+    const { rpc, calls } = setup();
+
+    const { json } = await rpc('tools/call', {
+      name: 'set_task_status',
+      arguments: { id: 't-1', status: 'in_progress' },
+    });
+
+    expect(json.result.structuredContent.status).toBe('in_progress');
+    expect(calls).toEqual([
+      { name: 'setTaskStatus', args: ['t-1', 'in_progress'] },
+    ]);
+  });
+
+  it('lists only tasks in progress', async () => {
+    const { rpc, calls } = setup();
+
+    await rpc('tools/call', {
+      name: 'list_tasks',
+      arguments: { status: 'in_progress' },
+    });
+
+    expect(calls[0]?.args).toMatchObject([{ status: 'in_progress' }]);
+  });
+
   it('refuses any field besides the status', async () => {
     const { rpc, calls } = setup();
 
@@ -306,7 +331,7 @@ describe('mcp status change', () => {
     expect(calls).toEqual([]);
   });
 
-  it('refuses a status other than open or done', async () => {
+  it('refuses a status other than open, in progress or done', async () => {
     const { rpc, calls } = setup();
 
     const { json } = await rpc('tools/call', {

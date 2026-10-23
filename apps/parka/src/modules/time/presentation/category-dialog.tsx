@@ -58,7 +58,6 @@ export const CategoryDialog = ({ modal }: { modal: string }) => {
                 <CategoryIcon id={icon} className="h-4 w-4" />
               </span>
             }
-            autoFocus
             className="pl-12"
             value={name}
             maxLength={NAME_MAX_LENGTH}

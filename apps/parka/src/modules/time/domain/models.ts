@@ -31,6 +31,8 @@ export type Task = {
   /** `HH:MM`; `null` lasts the whole day. */
   at: string | null;
   done: boolean;
+  /** Being worked on now; never together with `done`. */
+  inProgress: boolean;
   /** Browser the task was created in; `null` for older tasks and rule occurrences. */
   device: Device | null;
   /** Rule the task came from; `null` for an ordinary one. */

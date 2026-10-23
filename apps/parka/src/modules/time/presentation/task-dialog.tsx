@@ -85,6 +85,7 @@ export const TaskDialog = ({
   const [allDay, setAllDay] = useState(!editing || task.at === null);
   const [at, setAt] = useState(task?.at ?? DEFAULT_TIME);
   const [done, setDone] = useState(task?.done ?? false);
+  const [inProgress, setInProgress] = useState(task?.inProgress ?? false);
   const [repeat, setRepeat] = useState(startRepeating);
   const [interval, setInterval] = useState<RecurringInterval>('weekly');
   const [endDate, setEndDate] = useState('');
@@ -144,6 +145,7 @@ export const TaskDialog = ({
       day,
       at: allDay ? null : at,
       done,
+      inProgress: inProgress && !done,
       device: task?.device ?? currentDevice(),
       recurringId: task?.recurringId ?? null,
     };
@@ -281,7 +283,27 @@ export const TaskDialog = ({
         {editing ? (
           <div className="flex items-center justify-between gap-3">
             <span className="text-sm font-medium">Zrobione</span>
-            <Toggle label="Zrobione" checked={done} onChange={setDone} />
+            <Toggle
+              label="Zrobione"
+              checked={done}
+              onChange={(value) => {
+                setDone(value);
+                if (value) setInProgress(false);
+              }}
+            />
+          </div>
+        ) : null}
+        {editing ? (
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm font-medium">W trakcie</span>
+            <Toggle
+              label="W trakcie"
+              checked={inProgress}
+              onChange={(value) => {
+                setInProgress(value);
+                if (value) setDone(false);
+              }}
+            />
           </div>
         ) : null}
         <div className="mt-1 flex items-center gap-2">

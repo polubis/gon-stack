@@ -12,7 +12,7 @@ export const MCP_PROTOCOL_VERSIONS = [
 const SERVER_INFO = { name: 'parka', title: 'Parka', version: '1.0.0' };
 
 const INSTRUCTIONS =
-  'Parka personal finance and tasks. Read tasks and expenses; the only change you can make is marking a task done or open.';
+  'Parka personal finance and tasks. Read tasks and expenses; the only change you can make is setting a task open, in progress or done.';
 
 const ERROR = {
   parse: -32700,

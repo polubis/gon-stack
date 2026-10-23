@@ -4,8 +4,10 @@ import type { Database } from '@/shared/data-sources/db-schema';
 /** The presented token is unknown, expired or disabled. */
 export class McpAuthError extends Error {}
 
+export type TaskStatus = 'open' | 'in_progress' | 'done';
+
 export type TaskQuery = {
-  status: 'open' | 'done' | 'all';
+  status: TaskStatus | 'all';
   from: string | null;
   to: string | null;
   /** `true` backlog only, `false` scheduled only, `null` both. */
@@ -30,7 +32,7 @@ export type McpGateway = {
   authenticate: () => Promise<void>;
   listTasks: (query: TaskQuery) => Promise<unknown>;
   getTask: (id: string) => Promise<unknown>;
-  setTaskStatus: (id: string, status: 'open' | 'done') => Promise<unknown>;
+  setTaskStatus: (id: string, status: TaskStatus) => Promise<unknown>;
   listExpenses: (query: ExpenseQuery) => Promise<unknown>;
   getExpense: (id: string) => Promise<unknown>;
 };

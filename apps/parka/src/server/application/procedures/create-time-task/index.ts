@@ -23,6 +23,7 @@ export const createTimeTask = privateProcedure({
           day: input.day,
           at: input.at,
           done: input.done,
+          in_progress: input.inProgress && !input.done,
           ...deviceColumns(input.device),
         },
         { onConflict: 'user_id,id' },

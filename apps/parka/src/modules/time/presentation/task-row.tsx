@@ -1,4 +1,4 @@
-import { CheckCircle2, Circle, Info } from 'lucide-react';
+import { CheckCircle2, Circle, Info, Play } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { openModal } from '@/shared/router/modal-stack';
 import type { Task } from '../domain/models';
@@ -31,6 +31,7 @@ export const TaskRow = ({ task, now, step }: Props) => {
         'flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border p-3',
         step !== undefined && 'animate-item-in motion-reduce:animate-none',
         now ? 'border-brand bg-brand-softer' : 'border-line',
+        task.inProgress && 'border-l-4 border-l-brand',
       )}
     >
       <button
@@ -39,7 +40,9 @@ export const TaskRow = ({ task, now, step }: Props) => {
         aria-checked={task.done}
         aria-label={`Zrobione: ${task.title}`}
         data-e2e={`time:task-done:${task.id}`}
-        onClick={() => updateTask({ ...task, done: !task.done })}
+        onClick={() =>
+          updateTask({ ...task, done: !task.done, inProgress: false })
+        }
         className="grid h-8 w-8 shrink-0 place-items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
       >
         <Status
@@ -67,6 +70,33 @@ export const TaskRow = ({ task, now, step }: Props) => {
       >
         <Info className="h-4 w-4" aria-hidden="true" />
       </button>
+      <button
+        type="button"
+        aria-pressed={task.inProgress}
+        aria-label={`W trakcie: ${task.title}`}
+        data-e2e={`time:task-progress:${task.id}`}
+        onClick={() =>
+          updateTask({ ...task, inProgress: !task.inProgress, done: false })
+        }
+        className={cn(
+          'grid h-8 w-8 shrink-0 place-items-center rounded-full hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+          task.inProgress ? 'text-brand' : 'text-ink-soft',
+        )}
+      >
+        <Play
+          className="h-4 w-4"
+          fill={task.inProgress ? 'currentColor' : 'none'}
+          aria-hidden="true"
+        />
+      </button>
+      {task.inProgress ? (
+        <span
+          data-e2e={`time:task-progress-badge:${task.id}`}
+          className="shrink-0 rounded-full bg-brand-softer px-2 py-0.5 text-xs font-medium text-brand"
+        >
+          W trakcie
+        </span>
+      ) : null}
       {task.recurringId !== null ? <RecurringMark /> : null}
       {task.device ? <TaskDeviceBadge device={task.device} /> : null}
       <PriorityMark id={task.priorityId} />

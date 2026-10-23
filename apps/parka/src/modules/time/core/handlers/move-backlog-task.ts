@@ -20,6 +20,7 @@ export const moveBacklogTask = (store: Store, bus: Bus) => {
         day,
         at: null,
         done: false,
+        inProgress: false,
         recurringId: null,
       };
       return [{ id, day, label, item, task }];

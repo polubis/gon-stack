@@ -263,6 +263,44 @@ describe('time task maintenance', () => {
     });
   });
 
+  it('marks a task in progress, shows it and saves it', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    renderTime();
+
+    const start = await screen.findByRole('button', {
+      name: 'W trakcie: Raport miesięczny',
+    });
+    expect(start).toHaveAttribute('aria-pressed', 'false');
+    await user.click(start);
+
+    expect(start).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('W trakcie')).toBeVisible();
+    await waitFor(() => expect(backend.writes()).toHaveLength(1));
+    expect(backend.writes()[0]).toMatchObject({
+      method: 'PUT',
+      body: { id: 't-1', inProgress: true, done: false },
+    });
+  });
+
+  it('finishing a task in progress clears the in progress mark', async () => {
+    const user = userEvent.setup();
+    backend.seed([task({ inProgress: true })]);
+    renderTime();
+
+    await user.click(
+      await screen.findByRole('checkbox', {
+        name: 'Zrobione: Raport miesięczny',
+      }),
+    );
+
+    expect(screen.queryByText('W trakcie')).not.toBeInTheDocument();
+    await waitFor(() => expect(backend.writes()).toHaveLength(1));
+    expect(backend.writes()[0]).toMatchObject({
+      body: { id: 't-1', done: true, inProgress: false },
+    });
+  });
+
   it('edits the title and moves the task to another day', async () => {
     const user = userEvent.setup();
     backend.seed([task()]);

@@ -35,9 +35,8 @@ export const Sheet = ({
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    ref.current
-      ?.querySelector<HTMLElement>(':is(input, select):not(:disabled)')
-      ?.focus();
+    // The panel itself, not an input: no mobile keyboard pops up on open.
+    ref.current?.focus();
   }, []);
 
   return (
@@ -46,11 +45,12 @@ export const Sheet = ({
       role="dialog"
       aria-modal="true"
       aria-label={title}
+      tabIndex={-1}
       onKeyDown={(e) => {
         if (e.key === 'Escape') onClose();
         if (e.key === 'Tab') trapFocus(e, ref.current);
       }}
-      className="absolute inset-0 flex flex-col gap-3 overflow-y-auto rounded-2xl bg-card p-4"
+      className="absolute inset-0 flex flex-col gap-3 touch-pan-y overflow-y-auto overscroll-contain rounded-2xl bg-card p-4 focus:outline-none"
     >
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-base font-semibold">{title}</h3>

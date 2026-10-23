@@ -39,6 +39,7 @@ export const task = (overrides: Json = {}): Json => ({
   day: '2026-10-20',
   at: '09:00',
   done: false,
+  inProgress: false,
   device: null,
   recurringId: null,
   occurrenceDate: null,

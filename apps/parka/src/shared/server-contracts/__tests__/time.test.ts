@@ -28,6 +28,17 @@ describe('time contracts', () => {
     expect(parsed.title).toBe('Raport');
   });
 
+  it('treats a task as not in progress by default', () => {
+    expect(createTimeTaskSchema().shape.in.parse(TASK).inProgress).toBe(false);
+  });
+
+  it('accepts a task in progress', () => {
+    expect(
+      createTimeTaskSchema().shape.in.parse({ ...TASK, inProgress: true })
+        .inProgress,
+    ).toBe(true);
+  });
+
   it('accepts a title of 160 characters', () => {
     expect(
       createTimeTaskSchema().shape.in.safeParse({

@@ -96,6 +96,7 @@ export const TaskDetails = ({
             </span>
           ) : null}
           {isBoardTask(task) && task.done ? <span>Zrobione</span> : null}
+          {isBoardTask(task) && task.inProgress ? <span>W trakcie</span> : null}
         </p>
         {task.description ? <ClampedDescription task={task} /> : null}
         <div className="mt-1 flex justify-end">

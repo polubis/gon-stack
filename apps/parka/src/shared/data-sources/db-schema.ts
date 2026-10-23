@@ -714,6 +714,7 @@ export type Database = {
           device_screen: string | null;
           device_type: string | null;
           done: boolean;
+          in_progress: boolean;
           id: string;
           occurrence_date: string | null;
           priority_id: string;
@@ -736,6 +737,7 @@ export type Database = {
           device_screen?: string | null;
           device_type?: string | null;
           done?: boolean;
+          in_progress?: boolean;
           id: string;
           occurrence_date?: string | null;
           priority_id: string;
@@ -757,6 +759,7 @@ export type Database = {
           device_screen?: string | null;
           device_type?: string | null;
           done?: boolean;
+          in_progress?: boolean;
           id?: string;
           occurrence_date?: string | null;
           priority_id?: string;

@@ -48,7 +48,6 @@ export const CreateDialog = ({ modal }: { modal: string }) => {
             value={name}
             maxLength={NAME_MAX_LENGTH}
             autoComplete="off"
-            autoFocus
             data-e2e="access-tokens:name"
             onChange={(e) => setName(e.target.value)}
           />

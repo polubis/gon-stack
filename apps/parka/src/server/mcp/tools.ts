@@ -135,7 +135,7 @@ const task = () =>
     id: z.string(),
     title: z.string(),
     description: z.string().nullable(),
-    status: z.enum(['open', 'done']),
+    status: z.enum(['open', 'in_progress', 'done']),
     day: z.string().nullable().describe('Null for a backlog task'),
     at: z.string().nullable().describe('HH:MM; null lasts the whole day'),
     categoryId: z.string(),
@@ -203,7 +203,7 @@ export const MCP_TOOLS: readonly RegisteredTool[] = [
     description:
       "Lists the signed-in user's tasks, scheduled ones by day and time, then backlog ones. Filter by status, day range or scope. Paginated.",
     input: z.strictObject({
-      status: z.enum(['open', 'done', 'all']).default('all'),
+      status: z.enum(['open', 'in_progress', 'done', 'all']).default('all'),
       from: day().optional().describe('First day, inclusive'),
       to: day().optional().describe('Last day, inclusive'),
       scope: z
@@ -244,10 +244,10 @@ export const MCP_TOOLS: readonly RegisteredTool[] = [
     name: 'set_task_status',
     title: 'Set task status',
     description:
-      'Marks a task as done or open again. This is the only change the server allows: titles, dates and other fields cannot be edited and tasks cannot be created or deleted. Safe to repeat.',
+      'Sets a task to open, in_progress (started, not finished) or done. This is the only change the server allows: titles, dates and other fields cannot be edited and tasks cannot be created or deleted. Safe to repeat.',
     input: z.strictObject({
       id: id(),
-      status: z.enum(['open', 'done']),
+      status: z.enum(['open', 'in_progress', 'done']),
     }),
     output: task(),
     annotations: {

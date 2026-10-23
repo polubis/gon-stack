@@ -171,7 +171,6 @@ const ManageDialog = ({
                       <div className="flex items-center gap-1">
                         <div className="min-w-0 flex-1">
                           <ClearableInput
-                            autoFocus
                             value={draft}
                             maxLength={100}
                             aria-label={`Nowa nazwa: ${row.value}`}

@@ -56,6 +56,8 @@ export const timeTask = () =>
       .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
       .nullable(),
     done: z.boolean(),
+    /** Being worked on now; never together with `done`. */
+    inProgress: z.boolean().default(false),
     /** Device the task was created from; `null` for older tasks and rule occurrences. */
     device: device().nullable().default(null),
     /** Rule this task came from; `null` for an ordinary one. Server-set. */

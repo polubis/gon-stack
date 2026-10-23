@@ -50,6 +50,8 @@ export type TimeDynamicE2eId =
   | `time:add-day:${string}`
   | `time:task:${string | number}`
   | `time:task-done:${string | number}`
+  | `time:task-progress:${string | number}`
+  | `time:task-progress-badge:${string | number}`
   | `time:task-info:${string | number}`
   | `time:backlog-task:${string | number}`
   | `time:backlog-move:${string | number}`
