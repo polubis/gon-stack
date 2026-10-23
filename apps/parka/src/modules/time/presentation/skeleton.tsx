@@ -6,12 +6,9 @@ import type { TimeKind } from '../domain/models';
 const rows = Array.from({ length: SKELETON_ROWS }, (_, i) => i);
 
 const TaskRows = () => (
-  <ul className="flex flex-col gap-2">
+  <ul className="flex flex-col">
     {rows.map((i) => (
-      <li
-        key={i}
-        className="flex items-center gap-3 rounded-xl border border-line p-3"
-      >
+      <li key={i} className="flex items-center gap-3 p-2">
         <Skeleton className="h-5 w-5 shrink-0 rounded-full" />
         <Skeleton className="h-4 flex-1" />
         <Skeleton className="h-3 w-10 shrink-0" />
@@ -51,8 +48,8 @@ export const ViewSkeleton = ({ kind }: { kind: TimeKind }) => (
     ) : kind === 'year' ? (
       <Year />
     ) : (
-      <Card>
-        <Skeleton className="mb-3 h-4 w-32" />
+      <Card className="mx-auto w-full max-w-3xl p-2 md:p-4">
+        <Skeleton className="mx-2 mb-3 h-4 w-32" />
         <TaskRows />
       </Card>
     )}

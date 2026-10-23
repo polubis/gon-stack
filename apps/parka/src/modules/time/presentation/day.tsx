@@ -17,13 +17,13 @@ export const Main = () => {
   const nowIndex = anchor === now.day ? nowIndexOf(scheduled, now.time) : -1;
 
   return (
-    <div className="grid gap-4 lg:grid-cols-3 lg:items-start">
-      <Card as="section" aria-labelledby="day-plan" className="lg:col-span-2">
-        <h2 id="day-plan" className="mb-3 text-sm font-semibold">
+    <Card className="mx-auto flex w-full max-w-3xl flex-col gap-3 p-2 md:p-4">
+      <section aria-labelledby="day-plan" className="flex flex-col gap-1">
+        <h2 id="day-plan" className="px-2 pt-1 text-sm font-semibold">
           {anchor === now.day ? 'Zadania na dziś' : 'Zadania na ten dzień'}
         </h2>
         {scheduled.length ? (
-          <ol className="flex flex-col gap-2">
+          <ol className="flex flex-col">
             {scheduled.map((task, index) => (
               <Fragment key={task.id}>
                 <TaskRow task={task} now={index === nowIndex} step={index} />
@@ -31,27 +31,33 @@ export const Main = () => {
               </Fragment>
             ))}
           </ol>
-        ) : (
-          <p className="text-xs text-ink-soft">Brak zadań z godziną.</p>
-        )}
-      </Card>
-      <Card as="section" aria-labelledby="day-loose">
-        <h2 id="day-loose" className="mb-1 text-sm font-semibold">
-          Bez godziny
-        </h2>
-        <p className="mb-3 text-xs text-ink-soft">
-          Do zrobienia kiedykolwiek w ciągu dnia.
-        </p>
-        {unscheduled.length ? (
-          <ul className="flex flex-col gap-2">
+        ) : null}
+      </section>
+      {unscheduled.length ? (
+        <section aria-labelledby="day-loose" className="flex flex-col gap-1">
+          {scheduled.length ? (
+            <h3
+              id="day-loose"
+              className="border-t border-line px-2 pt-3 text-xs font-medium text-ink-soft"
+            >
+              Bez godziny
+            </h3>
+          ) : (
+            <h3 id="day-loose" className="sr-only">
+              Bez godziny
+            </h3>
+          )}
+          <ul className="flex flex-col">
             {unscheduled.map((task, index) => (
-              <TaskRow key={task.id} task={task} step={index} />
+              <TaskRow
+                key={task.id}
+                task={task}
+                step={scheduled.length + index}
+              />
             ))}
           </ul>
-        ) : (
-          <p className="text-xs text-ink-soft">Brak zadań bez godziny.</p>
-        )}
-      </Card>
-    </div>
+        </section>
+      ) : null}
+    </Card>
   );
 };

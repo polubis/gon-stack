@@ -167,7 +167,10 @@ describe('task details', () => {
     title = 'Raport miesięczny',
   ) => {
     await user.click(
-      await screen.findByRole('button', {
+      await screen.findByRole('button', { name: `Więcej: ${title}` }),
+    );
+    await user.click(
+      await screen.findByRole('menuitem', {
         name: `Szczegóły zadania: ${title}`,
       }),
     );

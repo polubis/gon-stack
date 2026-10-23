@@ -53,6 +53,7 @@ export type TimeDynamicE2eId =
   | `time:task-progress:${string | number}`
   | `time:task-progress-badge:${string | number}`
   | `time:task-info:${string | number}`
+  | `time:task-more:${string | number}`
   | `time:backlog-task:${string | number}`
   | `time:backlog-move:${string | number}`
   | `time:backlog-delete:${string | number}`

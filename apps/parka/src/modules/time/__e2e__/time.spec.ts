@@ -209,9 +209,14 @@ const commands = {
   },
 
   'the task keeps the device it was created on': async ({ page, getByE2e }) => {
+    const more = page.getByRole('button', { name: 'Więcej: Raport E2E' });
+    await more.click();
     await expect(getByE2e('time:task-row-device').first()).toBeVisible();
+    await page.keyboard.press('Escape');
     await reload(page);
+    await more.click();
     await expect(getByE2e('time:task-row-device').first()).toBeVisible();
+    await page.keyboard.press('Escape');
     await page
       .getByRole('button', { name: 'Edytuj zadanie: Raport E2E' })
       .click();
@@ -330,7 +335,9 @@ const commands = {
       await expect(getByE2e('time:recurring-mark')).toHaveCount(1);
       await reload(page);
       await expect(occurrence).toHaveCount(1);
+      await page.getByRole('button', { name: 'Więcej: Siłownia E2E' }).click();
       await expect(getByE2e('time:task-row-device')).toHaveCount(0);
+      await page.keyboard.press('Escape');
     },
 
   'the series reaches the following weeks and never revives a deleted task':
@@ -411,8 +418,9 @@ const commands = {
     getByE2e,
   }) => {
     await expect(page.getByText('Linia 1', { exact: true })).toHaveCount(0);
+    await page.getByRole('button', { name: `Więcej: ${LONG_TITLE}` }).click();
     await page
-      .getByRole('button', { name: `Szczegóły zadania: ${LONG_TITLE}` })
+      .getByRole('menuitem', { name: `Szczegóły zadania: ${LONG_TITLE}` })
       .click();
     await expect(getByE2e('time:description-clamp')).toBeVisible();
     await getByE2e('time:description-more').click();

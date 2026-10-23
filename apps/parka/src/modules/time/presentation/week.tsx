@@ -27,11 +27,11 @@ const DayName = ({ day }: { day: string }) => (
   </>
 );
 
-/** Phone and tablet: one card per day, all-day chips first, then hour rows. */
+/** Phone to desktop: one light card per day, tasks in time order (all-day first). */
 const DayCards = ({ days }: { days: string[] }) => {
   const { tasks, now } = useContext();
   return (
-    <ol className="grid gap-2 md:grid-cols-2 md:gap-3 xl:hidden">
+    <ol className="grid gap-3 md:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:hidden">
       {days.map((day, dayIndex) => {
         const today = day === now.day;
         const ofDay = tasksOn(tasks, day);
@@ -44,11 +44,11 @@ const DayCards = ({ days }: { days: string[] }) => {
             style={stagger(dayIndex)}
             aria-current={today ? 'date' : undefined}
             className={cn(
-              'flex animate-item-in flex-col gap-3 rounded-2xl border bg-card p-3 shadow-card motion-reduce:animate-none',
+              'flex animate-item-in flex-col gap-1 rounded-2xl border bg-card p-2 motion-reduce:animate-none',
               today ? 'border-brand' : 'border-line',
             )}
           >
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center justify-between gap-2 pl-2">
               <h2
                 className={cn('text-sm font-semibold', today && 'text-brand')}
               >
@@ -56,26 +56,11 @@ const DayCards = ({ days }: { days: string[] }) => {
               </h2>
               <AddDayButton day={day} />
             </div>
-            {allDay.length ? (
-              <div className="flex flex-col gap-1">
-                <h3
-                  id={`week-all-day-${day}`}
-                  className="text-xs font-medium text-ink-soft"
-                >
-                  {ALL_DAY_LABEL}
-                </h3>
-                <ul
-                  aria-labelledby={`week-all-day-${day}`}
-                  className="flex flex-col gap-2"
-                >
-                  {allDay.map((task) => (
-                    <TaskRow key={task.id} task={task} />
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-            {timed.length ? (
-              <ul className="flex flex-col gap-2">
+            {ofDay.length ? (
+              <ul className="flex flex-col">
+                {allDay.map((task) => (
+                  <TaskRow key={task.id} task={task} />
+                ))}
                 {timed.map((task, index) => (
                   <Fragment key={task.id}>
                     <TaskRow task={task} now={index === nowIndex} />
@@ -83,10 +68,9 @@ const DayCards = ({ days }: { days: string[] }) => {
                   </Fragment>
                 ))}
               </ul>
-            ) : null}
-            {ofDay.length === 0 ? (
-              <p className="text-xs text-ink-soft">Brak zadań.</p>
-            ) : null}
+            ) : (
+              <p className="pb-2 pl-2 text-xs text-ink-soft">Brak zadań.</p>
+            )}
           </li>
         );
       })}
@@ -94,13 +78,13 @@ const DayCards = ({ days }: { days: string[] }) => {
   );
 };
 
-/** Wide screens: all-day row on top, then an hour axis with tasks at their hour. */
+/** Extra wide screens (2xl+): all-day row on top, then an hour axis with tasks at their hour. */
 const HourGrid = ({ days }: { days: string[] }) => {
   const { tasks, now } = useContext();
   const timedOf = (day: string) => tasksOn(tasks, day).filter(isTimed);
   const nowHour = hourLabel(Number(now.time.slice(0, 2)));
   return (
-    <div className="hidden overflow-hidden rounded-2xl border border-line bg-card shadow-card xl:block">
+    <div className="hidden overflow-hidden rounded-2xl border border-line bg-card 2xl:block">
       <table className="w-full table-fixed border-collapse text-left">
         <caption className="sr-only">Zadania w tygodniu według godzin</caption>
         <colgroup>
@@ -144,7 +128,7 @@ const HourGrid = ({ days }: { days: string[] }) => {
             </th>
             {days.map((day) => (
               <td key={day} className="p-1 align-top">
-                <ul className="flex min-h-9 flex-col gap-2">
+                <ul className="flex min-h-9 flex-col">
                   {tasksOn(tasks, day)
                     .filter((task) => task.at === null)
                     .map((task) => (
@@ -186,7 +170,7 @@ const HourGrid = ({ days }: { days: string[] }) => {
                         <NowLine offset={hourOffset(now.time)} />
                       ) : null}
                       {ofHour.length ? (
-                        <ul className="flex flex-col gap-2">
+                        <ul className="flex flex-col">
                           {ofHour.map((task) => (
                             <TaskRow key={task.id} task={task} />
                           ))}

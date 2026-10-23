@@ -268,14 +268,16 @@ describe('time task maintenance', () => {
     backend.seed([task()]);
     renderTime();
 
-    const start = await screen.findByRole('button', {
-      name: 'W trakcie: Raport miesięczny',
-    });
-    expect(start).toHaveAttribute('aria-pressed', 'false');
-    await user.click(start);
+    await user.click(
+      await screen.findByRole('button', { name: 'Więcej: Raport miesięczny' }),
+    );
+    await user.click(
+      await screen.findByRole('menuitem', {
+        name: 'Rozpocznij: Raport miesięczny',
+      }),
+    );
 
-    expect(start).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByText('W trakcie')).toBeVisible();
+    expect(await screen.findByText('W trakcie')).toBeVisible();
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     expect(backend.writes()[0]).toMatchObject({
       method: 'PUT',

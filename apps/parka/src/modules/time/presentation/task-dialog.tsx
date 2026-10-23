@@ -266,7 +266,7 @@ export const TaskDialog = ({
         ) : null}
         {editing && task.recurringId !== null ? (
           <div className="flex items-center justify-between gap-3">
-            <RecurringMark />
+            <RecurringMark labelled />
             <Button
               variant="ghost"
               data-e2e="time:recurring-stop"

@@ -45,13 +45,16 @@ describe('task device', () => {
     });
   });
 
-  it('shows the device of a task in the row and in its popup', async () => {
+  it('shows the device of a task in the more menu and in its popup', async () => {
     const user = userEvent.setup();
     backend.seed([task({ device: DEVICE })]);
     renderTime();
 
-    const line = (await row('Raport miesięczny')).closest('li')!;
-    expect(within(line).getByText('Telefon Ani')).toBeInTheDocument();
+    await user.click(
+      await screen.findByRole('button', { name: 'Więcej: Raport miesięczny' }),
+    );
+    expect(await screen.findByText('Telefon Ani')).toBeInTheDocument();
+    await user.keyboard('{Escape}');
 
     await user.click(await row('Raport miesięczny'));
     const dialog = within(await screen.findByRole('dialog'));
@@ -77,9 +80,12 @@ describe('task device', () => {
         })[0],
       ).toHaveAttribute('aria-checked', 'true'),
     );
-    expect(
-      within(box.closest('li')!).getByText('Telefon Ani'),
-    ).toBeInTheDocument();
+    await user.click(
+      within(box.closest('li')!).getByRole('button', {
+        name: 'Więcej: Raport miesięczny',
+      }),
+    );
+    expect(await screen.findByText('Telefon Ani')).toBeInTheDocument();
   });
 
   it('keeps the original device when a task is edited', async () => {

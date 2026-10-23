@@ -9,6 +9,8 @@ import { useContext } from './context';
 import { EmptyPeriod } from './empty-period';
 import { stagger } from './stagger';
 
+const MAX_DOTS = 4;
+
 /** Month view: calendar grid, a dot in the category colour per task. */
 export const Main = () => {
   const { tasks, categories, viewAnchor: anchor, now } = useContext();
@@ -42,29 +44,36 @@ export const Main = () => {
               aria-current={today ? 'date' : undefined}
               aria-label={`${fullDate(day)}, ${marks.length ? pluralTasks(marks.length) : 'brak zadań'}`}
               className={cn(
-                'flex min-h-14 animate-item-in flex-col items-center gap-1 rounded-lg border p-1 md:min-h-24 md:items-start md:p-2 motion-reduce:animate-none',
+                'flex min-h-14 min-w-0 animate-item-in flex-col items-center gap-1 rounded-lg border p-1 md:min-h-24 md:items-start md:p-2 motion-reduce:animate-none',
                 today
                   ? 'border-brand bg-brand-softer font-semibold text-brand'
-                  : 'border-line',
+                  : 'border-transparent bg-hover-soft',
               )}
             >
               <span className="flex w-full items-center justify-center gap-1 md:justify-between">
                 <span className="text-sm tabular-nums">
                   {Number(day.slice(8))}
                 </span>
-                <AddDayButton day={day} />
+                <span className="max-md:hidden">
+                  <AddDayButton day={day} />
+                </span>
               </span>
               <span
-                className="flex flex-wrap justify-center gap-1"
+                className="flex flex-wrap items-center justify-center gap-1"
                 aria-hidden="true"
               >
-                {marks.map((task) => (
+                {marks.slice(0, MAX_DOTS).map((task) => (
                   <span
                     key={task.id}
                     className="h-2 w-2 rounded-full"
                     style={{ backgroundColor: colorOf(task.categoryId) }}
                   />
                 ))}
+                {marks.length > MAX_DOTS ? (
+                  <span className="text-xs font-normal tabular-nums text-ink-soft">
+                    +{marks.length - MAX_DOTS}
+                  </span>
+                ) : null}
               </span>
             </li>
           );

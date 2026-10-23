@@ -29,7 +29,7 @@ const OPTIONS: readonly { label: string; modal: string; icon: LucideIcon }[] = [
 const KEYS = ['ArrowDown', 'ArrowUp', 'Home', 'End'];
 
 /** Arrow, Home and End keys move focus between the menu items. */
-const moveFocus = (e: KeyboardEvent<HTMLElement>) => {
+export const moveFocus = (e: KeyboardEvent<HTMLElement>) => {
   if (!KEYS.includes(e.key)) return;
   const items = [
     ...e.currentTarget.querySelectorAll<HTMLElement>('[role="menuitem"]'),

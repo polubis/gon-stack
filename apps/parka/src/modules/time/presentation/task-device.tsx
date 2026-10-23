@@ -6,15 +6,15 @@ import {
 import type { Device } from '@/shared/device/domain/models';
 import { DeviceBubble } from '@/shared/device/presentation/device-bubble';
 
-/** Where a task was created, on one line of a list row (picture only on narrow screens). */
+/** Where a task was created, one line in the row's "more" popover. */
 export const TaskDeviceBadge = ({ device }: { device: Device }) => (
   <span
     className="flex min-w-0 shrink items-center gap-1 text-xs text-ink-soft"
     data-e2e="time:task-row-device"
   >
     <DeviceBubble device={device} className="h-5 w-5" iconClassName="h-3 w-3" />
-    <span className="truncate max-sm:sr-only">{deviceLabel(device)}</span>
-    <span className="shrink-0 max-sm:sr-only">{deviceShortId(device.id)}</span>
+    <span className="truncate">{deviceLabel(device)}</span>
+    <span className="shrink-0">{deviceShortId(device.id)}</span>
   </span>
 );
 
