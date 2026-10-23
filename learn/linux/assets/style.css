@@ -1,0 +1,5 @@
+body{font:1rem/1.6 system-ui,sans-serif;max-width:42rem;margin:0 auto;padding:1rem;color:#111;background:#fff}
+@media (prefers-color-scheme:dark){body{color:#eee;background:#111}code,pre{background:#222}a{color:#8cf}}
+code,pre{background:#eee;padding:.1rem .3rem;border-radius:.25rem}
+pre{padding:.75rem;overflow:auto}
+.win{border-left:.25rem solid #3a3;padding-left:.75rem}

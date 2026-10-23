@@ -1,0 +1,27 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lekcja 01: serwer i SSH</title><link rel="stylesheet" href="../assets/style.css"></head><body>
+<h1>Lekcja 01: serwer i SSH</h1>
+<p><b>Po co:</b> VPS to komputer w datacenter bez ekranu. Wszystko robisz zdalnie przez terminal. Bez tego nie postawisz Dockera ani Supabase.</p>
+<p class="win"><b>Wygrana:</b> logujesz sie na VPS i widzisz jego nazwe, system i uzytkownika.</p>
+<h2>Pojecia (5)</h2>
+<ul>
+<li><b>VPS</b> - wirtualny serwer z wlasnym Linuxem i adresem IP.</li>
+<li><b>Terminal</b> - okno, w ktorym wpisujesz komendy tekstowe.</li>
+<li><b>Shell</b> - program czytajacy komendy (u Ciebie <code>bash</code>).</li>
+<li><b>SSH</b> - szyfrowane polaczenie z terminalem zdalnej maszyny.</li>
+<li><b>root</b> - superuzytkownik, moze wszystko, tez zepsuc wszystko.</li>
+</ul>
+<h2>Cwiczenie</h2>
+<ol>
+<li>W panelu Hostinger (hPanel) wybierz system <b>Ubuntu 24.04 LTS</b> bez paneli (czysty Ubuntu). Zapisz IP i ustaw haslo root.</li>
+<li>Na swoim komputerze otworz terminal (Windows: PowerShell; Mac/Linux: Terminal).</li>
+<li>Polacz sie:<pre>ssh root@TWOJE_IP</pre> Przy pytaniu o fingerprint wpisz <code>yes</code>, potem haslo (nie widac znakow).</li>
+<li>Wpisz po kolei:<pre>whoami
+hostname
+cat /etc/os-release
+pwd</pre></li>
+<li>Wyloguj: <code>exit</code>.</li>
+</ol>
+<h2>Sprawdz sie (bez zagladania)</h2>
+<ol><li>Co zwrocilo <code>whoami</code> i dlaczego?</li><li>Do czego sluzy fingerprint?</li><li>Dlaczego root na stale to zly pomysl? (odpowiemy w lekcji 02)</li></ol>
+<p>Zrodlo: <a href="https://www.openssh.com/manual.html">OpenSSH manual</a>, na serwerze <code>man ssh</code>.</p>
+</body></html>
