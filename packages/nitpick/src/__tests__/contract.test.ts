@@ -212,6 +212,30 @@ describe('Config contract runtime works when', () => {
     ).toThrow('Duplicate unit id "x"');
   });
 
+  it('throws on an id shared by an agent and a skill', () => {
+    expect(() =>
+      config({
+        rules: {},
+        agents: { x: { doc: 'x' } },
+        skills: { x: { doc: 'x' } },
+      }),
+    ).toThrow('Duplicate unit id "x"');
+  });
+
+  it('suggests skill ids in ref and rejects typos', () => {
+    config({
+      rules: { g: { r: { importance: 'A', doc: ({ ref }) => ref('s') } } },
+      skills: { s: { doc: ({ ref }) => ref('r') } },
+    });
+    config({
+      rules: { g: { r: { importance: 'A', doc: 'r' } } },
+      skills: {
+        // @ts-expect-error unknown id in skill
+        s: { doc: ({ ref }) => ref('nope') },
+      },
+    });
+  });
+
   it('reports a missing refs file in the docs verification step', async () => {
     const { problems } = await build(
       config({
