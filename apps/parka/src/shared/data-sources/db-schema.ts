@@ -252,6 +252,52 @@ export type Database = {
           },
         ];
       };
+      mcp_tokens: {
+        Row: {
+          created_at: string;
+          expires_at: string | null;
+          id: string;
+          last_used_at: string | null;
+          name: string;
+          revoked_at: string | null;
+          rotated_at: string | null;
+          token_hash: string;
+          token_hint: string;
+          token_tail: string;
+          ttl_days: number | null;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          expires_at?: string | null;
+          id?: string;
+          last_used_at?: string | null;
+          name: string;
+          revoked_at?: string | null;
+          rotated_at?: string | null;
+          token_hash: string;
+          token_hint: string;
+          token_tail: string;
+          ttl_days?: number | null;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          expires_at?: string | null;
+          id?: string;
+          last_used_at?: string | null;
+          name?: string;
+          revoked_at?: string | null;
+          rotated_at?: string | null;
+          token_hash?: string;
+          token_hint?: string;
+          token_tail?: string;
+          ttl_days?: number | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       notification_preferences: {
         Row: {
           email: boolean;
@@ -751,6 +797,40 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
       };
+      mcp_authenticate: { Args: { p_token: string }; Returns: boolean };
+      mcp_get_expense: {
+        Args: { p_id: string; p_token: string };
+        Returns: Json;
+      };
+      mcp_get_task: { Args: { p_id: string; p_token: string }; Returns: Json };
+      mcp_list_expenses: {
+        Args: {
+          p_category_id?: string;
+          p_from?: string;
+          p_limit?: number;
+          p_offset?: number;
+          p_to?: string;
+          p_token: string;
+        };
+        Returns: Json;
+      };
+      mcp_list_tasks: {
+        Args: {
+          p_backlog?: boolean;
+          p_from?: string;
+          p_limit?: number;
+          p_offset?: number;
+          p_status?: string;
+          p_to?: string;
+          p_token: string;
+        };
+        Returns: Json;
+      };
+      mcp_set_task_status: {
+        Args: { p_id: string; p_status: string; p_token: string };
+        Returns: Json;
+      };
+      mcp_token_user: { Args: { p_token: string }; Returns: string };
       record_field_use: {
         Args: { p_field: string; p_value: string };
         Returns: undefined;

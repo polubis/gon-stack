@@ -124,6 +124,10 @@ export const router = createRouter({
       () => import('@/modules/data-export/presentation/main'),
     ),
     page(
+      APP_ROUTER.accessTokens(),
+      () => import('@/modules/access-tokens/presentation/main'),
+    ),
+    page(
       APP_ROUTER.newExpense(),
       () => import('@/modules/expenses-management/presentation/main'),
     ),

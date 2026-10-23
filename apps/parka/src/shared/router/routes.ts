@@ -100,6 +100,7 @@ export const APP_ROUTER = {
   privacyPolicy: route('/privacy-policy/'),
   aiInfo: route('/app/ai-info/'),
   dataExport: route('/app/data-export/'),
+  accessTokens: route('/app/access-tokens/'),
   newExpense: routeWithQuery<'/app/expenses/new/', NewExpenseQuery>(
     '/app/expenses/new/',
   ),
@@ -126,6 +127,7 @@ export const moreSectionPaths = (): readonly string[] => [
   APP_ROUTER.privacy(),
   APP_ROUTER.aiInfo(),
   APP_ROUTER.dataExport(),
+  APP_ROUTER.accessTokens(),
 ];
 
 /**
@@ -168,6 +170,11 @@ export const API_ROUTER = {
   timeCategories: route('/api/time/categories/'),
   timePriorities: route('/api/time/priorities/'),
   settings: route('/api/settings/'),
+  mcpTokens: route('/api/mcp-tokens/'),
+  mcpTokenById: routeById('/api/mcp-tokens/'),
+  mcpTokenRotate: (id: string) => `/api/mcp-tokens/${id}/rotate/` as const,
+  mcpTokenRevoke: (id: string) => `/api/mcp-tokens/${id}/revoke/` as const,
+  mcp: route('/api/mcp/'),
   financeTour: route('/api/finance-tour/'),
   push: route('/api/push/'),
   avatar: route('/api/avatar/'),

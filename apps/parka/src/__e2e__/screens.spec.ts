@@ -50,6 +50,11 @@ const SCREENS: Screen[] = [
     root: 'data-export:main',
     heading: /Eksport danych/,
   },
+  {
+    path: APP_ROUTER.accessTokens(),
+    root: 'access-tokens:main',
+    heading: /Tokeny MCP/,
+  },
 ];
 
 const commands = {

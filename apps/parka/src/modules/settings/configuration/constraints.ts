@@ -1,6 +1,7 @@
 import {
   Download,
   FileText,
+  KeyRound,
   LayoutGrid,
   ShieldCheck,
   Sparkles,
@@ -22,6 +23,7 @@ export const LINKS: { label: string; href: string; icon: LucideIcon }[] = [
   { label: 'Kategorie', href: APP_ROUTER.categories(), icon: LayoutGrid },
   { label: 'Raport miesięczny', href: APP_ROUTER.reports(), icon: FileText },
   { label: 'Eksport danych', href: APP_ROUTER.dataExport(), icon: Download },
+  { label: 'Tokeny MCP', href: APP_ROUTER.accessTokens(), icon: KeyRound },
 ];
 
 /** Why push cannot be switched on in this browser; absent when it can. */

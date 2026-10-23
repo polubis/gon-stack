@@ -19,6 +19,7 @@ import type { ImageEditorE2eId } from '@/shared/image-editor/configuration/e2e-i
 import type { PublicNavE2eId } from '@/shared/navigation/public-nav/configuration/e2e-ids';
 import type { FinanceTourE2eId } from '@/modules/finance-tour/configuration/e2e-ids';
 import type { PeriodControlE2eId } from '@/shared/period-control/configuration/e2e-ids';
+import type { AccessTokensE2eId } from '@/modules/access-tokens/configuration/e2e-ids';
 import type { WalkthroughE2eId } from '@/shared/walkthrough/configuration/e2e-ids';
 
 // Combines every module's own `data-e2e` id union into one type used for
@@ -42,6 +43,7 @@ export type E2eId =
   | NotificationsE2eId
   | SettingsE2eId
   | CategoriesE2eId
+  | AccessTokensE2eId
   | PrivacyE2eId
   | AiInfoE2eId
   | DataExportE2eId
