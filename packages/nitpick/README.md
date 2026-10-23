@@ -32,7 +32,7 @@ Rules live under `rules.<group>.<id>`. Group = key, id = key, nothing else to au
 - `fix`: text after the problems of the rule (`Fix: ...`). Required with `run`.
 - `include` / `exclude`: globs (`path.matchesGlob`) filtering `files` passed to `run`.
 - Group files: rules of one group go to `<path>/rules/<group>.md`, groups in order of first key. Group name: letters, digits, `_`, `-`; must not equal a rule id with file doc.
-- Ids unique across all groups and agents. Duplicate = `config()` throws `Duplicate unit id "x"`; raw configs get `Duplicate id "x"` from verification (exit 3).
+- Ids unique across all groups, agents and skills. Duplicate = `config()` throws `Duplicate unit id "x"`; raw configs get `Duplicate id "x"` from verification (exit 3).
 - Rules run in config order.
 
 ## Configuration
@@ -65,16 +65,23 @@ export default config({
       doc: ({ ref }) => `Use ${ref('repo')} and ${ref('react-hooks')}`,
     },
   },
+  skills: {
+    review: {
+      frontmatter: { name: 'review', description: 'Review a diff' },
+      doc: ({ ref }) => `Check ${ref('react-hooks')}`,
+    },
+  },
   refs: { 'react-state': './knowledge/react/state.md' },
 });
 ```
 
-- Ids come from keys. `ref(id)` takes the union of all rule and agent ids (typo = compile error). `file(key)` takes the union of `refs` keys. Inferred, no manual generics.
-- `ref(id)` links to the file that documents the unit (group file, rule file or `agents/<id>.md`). It never inlines, so cycles are harmless and cannot hang.
+- Ids come from keys. `ref(id)` takes the union of all rule, agent and skill ids (typo = compile error). `file(key)` takes the union of `refs` keys. Inferred, no manual generics.
+- `ref(id)` links to the file that documents the unit (group file, rule file, `agents/<id>.md` or `skills/<id>/SKILL.md`). It never inlines, so cycles are harmless and cannot hang.
 - Unknown or extra fields, missing `importance`/`doc`, `run` on an agent, `run` without `fix`: compile errors.
 - `entry.doc` replaces header and intro of the root file (`header` = `# Information for AI`).
 - Override a ready-made rule by spreading it: `{ ...richCommit, importance: 'D' }`.
 - `agents`: each writes `<path>/agents/<id>.md` and is listed under `## Agent files` in the root. Optional `frontmatter: Record<string, string>` renders as a `---` block before the doc. No `run`. Agent ids are typed even when every agent `doc` is a callback.
+- `skills`: same shape as `agents` (`doc`, optional `frontmatter`, no `run`); each writes `<path>/skills/<id>/SKILL.md` and is listed under `## Skill files` in the root.
 - `refs`: id -> markdown file (relative to `.nitpick/`), written to `<path>/references/<key>.md`; `{{ref:key}}` links inside files; missing file, self ref, unknown ref, cycle = config error.
 
 ### Docs
@@ -85,7 +92,7 @@ Without `entry` the root docs start with `# Information for AI`. The built-in AO
 
 ### Doc forms
 
-Same for rules, agents and `entry`:
+Same for rules, agents, skills and `entry`:
 
 - `string`: used as is.
 - `{ file: './path.md' }`: content of the file, CRLF normalized to LF, `{{ref:key}}` replaced by links to `refs` keys. Missing file = verification problem (exit 3).

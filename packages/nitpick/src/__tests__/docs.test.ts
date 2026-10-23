@@ -252,6 +252,47 @@ describe('Insert works when', () => {
   });
 });
 
+describe('Skills work when', () => {
+  it('writes one SKILL.md per skill and lists them in the root', async () => {
+    const { read, problems } = await build({
+      rules: { g: { r: { importance: A, doc: 'r' } } },
+      agents: { ag: { doc: 'Agent' } },
+      skills: {
+        plain: { doc: ' Plain ' },
+        fn: {
+          doc: ({ ref }) => `to ${ref('r')} ${ref('ag')} ${ref('plain')}`,
+          frontmatter: { name: 'fn', description: 'A skill' },
+        },
+      },
+    });
+    expect(problems).toEqual([]);
+    expect(read('.ai', 'skills', 'plain', 'SKILL.md')).toBe('Plain\n');
+    expect(read('.ai', 'skills', 'fn', 'SKILL.md')).toBe(
+      '---\nname: fn\ndescription: A skill\n---\n\nto [r](../../rules/g.md) [ag](../../agents/ag.md) [plain](../plain/SKILL.md)\n',
+    );
+    expect(read('.ai', 'AGENTS.md')).toContain(
+      '## Skill files\n\n- [skills/plain/SKILL.md](skills/plain/SKILL.md)\n- [skills/fn/SKILL.md](skills/fn/SKILL.md)\n',
+    );
+  });
+
+  it('reports an id shared by agents and skills', async () => {
+    const { problems } = await build({
+      rules: {},
+      agents: { x: { doc: 'a' } },
+      skills: { x: { doc: 's' } },
+    });
+    expect(problems).toEqual(['Duplicate id "x"']);
+  });
+
+  it('reports a missing doc file', async () => {
+    const { problems } = await build({
+      rules: {},
+      skills: { s: { doc: { file: './gone.md' } } },
+    });
+    expect(problems).toEqual(['Skill "s": missing file ./gone.md']);
+  });
+});
+
 describe('Agents work when', () => {
   it('writes one file per agent and lists them in the root', async () => {
     const { read, problems } = await build(

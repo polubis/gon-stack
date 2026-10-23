@@ -111,6 +111,8 @@ const GROUP_NAME = /^[\w-]+$/;
 
 const agentPath = (id: string): string => posix.join('agents', `${id}.md`);
 
+const skillPath = (id: string): string => posix.join('skills', id, 'SKILL.md');
+
 const groupPath = (group: string): string => posix.join('rules', `${group}.md`);
 
 export const buildDocs = (
@@ -133,12 +135,17 @@ export const buildDocs = (
     ...unit,
     id,
   }));
+  const skills = Object.entries(config.skills ?? {}).map(([id, unit]) => ({
+    ...unit,
+    id,
+  }));
   const unitTargets = new Map<string, string>([
     ...rules.map(({ id, group, doc }): [string, string] => [
       id,
       typeof doc === 'object' ? instructionPath(id) : groupPath(group),
     ]),
     ...agents.map(({ id }): [string, string] => [id, agentPath(id)]),
+    ...skills.map(({ id }): [string, string] => [id, skillPath(id)]),
   ]);
 
   const resolveDoc = (
@@ -180,7 +187,7 @@ export const buildDocs = (
   };
 
   const ids = new Set<string>();
-  for (const { id } of [...rules, ...agents]) {
+  for (const { id } of [...rules, ...agents, ...skills]) {
     if (ids.has(id)) problems.push(`Duplicate id "${id}"`);
     ids.add(id);
   }
@@ -240,23 +247,31 @@ export const buildDocs = (
         .join('\n'),
     );
   }
-  if (agents.length > 0) {
-    const agentFiles = agents.map(({ id }) => agentPath(id));
+  const addUnits = (
+    title: string,
+    label: string,
+    units: typeof agents,
+    pathOf: (id: string) => string,
+  ): void => {
+    if (units.length === 0) return;
+    const unitFiles = units.map(({ id }) => pathOf(id));
     sections.push(
-      '## Agent files',
-      agentFiles.map((file) => `- ${link('root.md', file, file)}`).join('\n'),
+      `## ${title} files`,
+      unitFiles.map((file) => `- ${link('root.md', file, file)}`).join('\n'),
     );
-    for (const [index, { id, doc, frontmatter }] of agents.entries()) {
-      const file = agentFiles[index] as string;
+    for (const [index, { id, doc, frontmatter }] of units.entries()) {
+      const file = unitFiles[index] as string;
       const head = frontmatter
         ? `---\n${Object.entries(frontmatter)
             .map(([key, value]) => `${key}: ${value}`)
             .join('\n')}\n---\n\n`
         : '';
-      const body = resolveDoc(doc, `Agent "${id}"`, file)?.trim() ?? '';
+      const body = resolveDoc(doc, `${label} "${id}"`, file)?.trim() ?? '';
       groupFiles.set(file, `${head}${body}\n`);
     }
-  }
+  };
+  addUnits('Agent', 'Agent', agents, agentPath);
+  addUnits('Skill', 'Skill', skills, skillPath);
   if (sources.size > 0) {
     sections.push(
       '## Reference files',
