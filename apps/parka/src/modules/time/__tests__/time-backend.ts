@@ -175,6 +175,27 @@ export const setupTimeBackend = () => {
       state.categories.push(body!);
       return HttpResponse.json({ code: 201, data: body });
     }),
+    http.put('/api/time/categories/:id/', async ({ request }) => {
+      const body = await record(request);
+      if (state.failWrites) return HttpResponse.json(FAILURE);
+      state.categories = state.categories.map((c) =>
+        c.id === body!.id ? body! : c,
+      );
+      return HttpResponse.json({ code: 200, data: body });
+    }),
+    // A category that tasks still use stays, like the foreign key does.
+    http.delete('/api/time/categories/:id/', async ({ request, params }) => {
+      await record(request);
+      if (state.failWrites) return HttpResponse.json(FAILURE);
+      if (state.tasks.some((t) => t.categoryId === params.id))
+        return HttpResponse.json({
+          code: 409,
+          type: 'conflict',
+          message: 'Still referenced by other records',
+        });
+      state.categories = state.categories.filter((c) => c.id !== params.id);
+      return HttpResponse.json({ code: 200, ok: true });
+    }),
     http.post('/api/time/priorities/', async ({ request }) => {
       const body = await record(request);
       if (state.failWrites) return HttpResponse.json(FAILURE);

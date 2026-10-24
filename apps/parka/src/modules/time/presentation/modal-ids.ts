@@ -1,4 +1,4 @@
-import type { TaskId } from '../domain/models';
+import type { CategoryId, TaskId } from '../domain/models';
 
 /** URL ids of the time modals (see `shared/router/modal-stack`). */
 export const NEW_TASK_MODAL = 'task-new';
@@ -14,6 +14,8 @@ export const NEW_CATEGORY_MODAL = 'category-new';
 export const NEW_PRIORITY_MODAL = 'priority-new';
 export const CATEGORIES_MODAL = 'categories';
 
+const EDIT_CATEGORY_PREFIX = 'category-edit:';
+const DELETE_CATEGORY_PREFIX = 'category-delete:';
 const NEW_TASK_ON_PREFIX = 'task-new:';
 const EDIT_BACKLOG_PREFIX = 'backlog-edit:';
 const EDIT_PREFIX = 'task-edit:';
@@ -76,4 +78,20 @@ export const descriptionModal = (id: TaskId): string =>
 export const describedIdOf = (modal: string): TaskId | null =>
   modal.startsWith(DESCRIPTION_PREFIX)
     ? (modal.slice(DESCRIPTION_PREFIX.length) as TaskId)
+    : null;
+
+export const editCategoryModal = (id: CategoryId): string =>
+  `${EDIT_CATEGORY_PREFIX}${id}`;
+
+export const editedCategoryIdOf = (modal: string): CategoryId | null =>
+  modal.startsWith(EDIT_CATEGORY_PREFIX)
+    ? (modal.slice(EDIT_CATEGORY_PREFIX.length) as CategoryId)
+    : null;
+
+export const deleteCategoryModal = (id: CategoryId): string =>
+  `${DELETE_CATEGORY_PREFIX}${id}`;
+
+export const deletedCategoryIdOf = (modal: string): CategoryId | null =>
+  modal.startsWith(DELETE_CATEGORY_PREFIX)
+    ? (modal.slice(DELETE_CATEGORY_PREFIX.length) as CategoryId)
     : null;

@@ -2,6 +2,7 @@ import z from 'zod';
 import { isTimeZone } from '../../date/date';
 import { daysBetween, isDay } from '../../period/period';
 import {
+  conflictOut,
   errorOut,
   notFoundOut,
   timeBacklogTask,
@@ -115,6 +116,25 @@ export const createTimeCategorySchema = () =>
     out: z.union([
       z.object({ code: z.literal(201), data: timeCategory() }),
       errorOut(),
+    ]),
+  });
+
+export const updateTimeCategorySchema = () =>
+  z.object({
+    in: timeCategoryInput(),
+    out: z.union([
+      z.object({ code: z.literal(200), data: timeCategory() }),
+      writeErrors,
+    ]),
+  });
+
+export const deleteTimeCategorySchema = () =>
+  z.object({
+    in: z.object({ id: z.string().min(1) }),
+    out: z.union([
+      z.object({ code: z.literal(200), ok: z.literal(true) }),
+      writeErrors,
+      conflictOut(),
     ]),
   });
 

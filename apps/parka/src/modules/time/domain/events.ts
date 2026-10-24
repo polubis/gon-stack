@@ -2,6 +2,7 @@ import type { TriggerEvent } from '@/libs/eda';
 import type {
   BacklogTask,
   Category,
+  CategoryId,
   Priority,
   Recurring,
   RecurringId,
@@ -23,5 +24,7 @@ export type Event =
   | TriggerEvent<'[TRIGGER]_CREATE_RECURRING', { recurring: Recurring }>
   | TriggerEvent<'[TRIGGER]_STOP_RECURRING', { id: RecurringId }>
   | TriggerEvent<'[TRIGGER]_CREATE_CATEGORY', { category: Category }>
+  | TriggerEvent<'[TRIGGER]_UPDATE_CATEGORY', { category: Category }>
+  | TriggerEvent<'[TRIGGER]_DELETE_CATEGORY', { id: CategoryId }>
   | TriggerEvent<'[TRIGGER]_CREATE_PRIORITY', { priority: Priority }>
   | TriggerEvent<'[TRIGGER]_DISMISS_NOTICE'>;

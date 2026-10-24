@@ -43,7 +43,7 @@ export const Toast = ({ notice, onClose, 'data-e2e': dataE2e }: Props) => {
       role={notice.tone === 'error' ? 'alert' : 'status'}
       data-e2e={dataE2e}
       className={cn(
-        'fixed inset-x-4 bottom-24 z-(--z-modal) mx-auto max-w-md rounded-xl px-4 py-3 text-sm shadow-lg',
+        'fixed inset-x-4 bottom-24 z-(--z-tooltip) mx-auto max-w-md rounded-xl px-4 py-3 text-sm shadow-lg',
         notice.tone === 'error'
           ? 'border border-danger-line bg-danger-soft text-danger'
           : 'bg-brand font-medium text-on-brand',

@@ -3,9 +3,11 @@ import type {
   createTimeBacklogTaskSchema,
   createTimeCategorySchema,
   updateTimeBacklogTaskSchema,
+  updateTimeCategorySchema,
   createTimePrioritySchema,
   createTimeRecurringSchema,
   createTimeTaskSchema,
+  deleteTimeCategorySchema,
   deleteTimeRecurringSchema,
   deleteTimeTaskSchema,
   listTimeSchema,
@@ -16,6 +18,7 @@ import { API_ROUTER } from '@/shared/router/routes';
 import type {
   BacklogTask,
   Category,
+  CategoryId,
   Priority,
   Recurring,
   RecurringId,
@@ -130,6 +133,29 @@ export const postCategory = async (category: Category): Promise<Category> => {
   const json = (await response.json()) as Out<typeof createTimeCategorySchema>;
   if (json.code !== 201) throw new Error(json.message);
   return toCategory(json.data);
+};
+
+export const putCategory = async (category: Category): Promise<Category> => {
+  const response = await fetch(API_ROUTER.timeCategoryById(category.id), {
+    method: 'PUT',
+    headers: JSON_HEADERS,
+    body: JSON.stringify(category),
+  });
+  const json = (await response.json()) as Out<typeof updateTimeCategorySchema>;
+  if (json.code !== 200) throw new Error(json.message);
+  return toCategory(json.data);
+};
+
+export class CategoryInUseError extends Error {}
+
+export const removeCategory = async (id: CategoryId): Promise<void> => {
+  const response = await fetch(API_ROUTER.timeCategoryById(id), {
+    method: 'DELETE',
+    headers: JSON_HEADERS,
+  });
+  const json = (await response.json()) as Out<typeof deleteTimeCategorySchema>;
+  if (json.code === 409) throw new CategoryInUseError(json.message);
+  if (json.code !== 200) throw new Error(json.message);
 };
 
 export const postPriority = async (priority: Priority): Promise<Priority> => {

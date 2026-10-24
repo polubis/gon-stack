@@ -3,6 +3,7 @@ import type { Store } from './store';
 import type {
   BacklogTask,
   Category,
+  CategoryId,
   Priority,
   Recurring,
   RecurringId,
@@ -28,6 +29,10 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
       trigger('[TRIGGER]_STOP_RECURRING', { id }),
     createCategory: (category: Category) =>
       trigger('[TRIGGER]_CREATE_CATEGORY', { category }),
+    updateCategory: (category: Category) =>
+      trigger('[TRIGGER]_UPDATE_CATEGORY', { category }),
+    deleteCategory: (id: CategoryId) =>
+      trigger('[TRIGGER]_DELETE_CATEGORY', { id }),
     createPriority: (priority: Priority) =>
       trigger('[TRIGGER]_CREATE_PRIORITY', { priority }),
     dismissNotice: () => trigger('[TRIGGER]_DISMISS_NOTICE'),

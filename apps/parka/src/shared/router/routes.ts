@@ -168,6 +168,7 @@ export const API_ROUTER = {
   timeRecurring: route('/api/time/recurring/'),
   timeRecurringById: routeById('/api/time/recurring/'),
   timeCategories: route('/api/time/categories/'),
+  timeCategoryById: routeById('/api/time/categories/'),
   timePriorities: route('/api/time/priorities/'),
   settings: route('/api/settings/'),
   mcpTokens: route('/api/mcp-tokens/'),

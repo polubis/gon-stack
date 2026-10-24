@@ -20,6 +20,8 @@ export const TIME_E2E_IDS = [
   'time:delete-dialog',
   'time:delete-confirm',
   'time:category-dialog',
+  'time:category-save',
+  'time:category-delete',
   'time:priority-dialog',
   'time:categories-dialog',
   'time:add-menu',

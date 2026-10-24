@@ -14,9 +14,12 @@ import {
   BACKLOG_MODAL,
   NEW_BACKLOG_MODAL,
   CATEGORIES_MODAL,
+  deletedCategoryIdOf,
   deletedIdOf,
   describedIdOf,
+  editCategoryModal,
   editedBacklogIdOf,
+  editedCategoryIdOf,
   editedIdOf,
   editTaskModal,
   newTaskDayOf,
@@ -33,8 +36,16 @@ import { TaskDescription, TaskDetails } from './task-details';
 
 /** Renders the popups that are open in the URL stack. */
 export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
-  const { tasks, backlog, deleteTask, stopRecurring, initializing, isLoading } =
-    useContext();
+  const {
+    tasks,
+    backlog,
+    categories,
+    deleteTask,
+    deleteCategory,
+    stopRecurring,
+    initializing,
+    isLoading,
+  } = useContext();
   const stack = useModalStack();
 
   // A deep link to a task that is gone must not leave a dead `modal=` param.
@@ -56,6 +67,16 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
         closeModal(modal);
     }
   }, [initializing, isLoading, stack, tasks, backlog]);
+
+  // Same for a category that is gone (deleted, or never existed).
+  useEffect(() => {
+    if (initializing) return;
+    for (const modal of stack) {
+      const id = editedCategoryIdOf(modal) ?? deletedCategoryIdOf(modal);
+      if (id !== null && !categories.some((category) => category.id === id))
+        closeModal(modal);
+    }
+  }, [initializing, stack, categories]);
 
   const dialog = (modal: string) => {
     if (modal === NEW_TASK_MODAL)
@@ -79,6 +100,34 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
       return <PriorityDialog key={modal} modal={modal} />;
     if (modal === CATEGORIES_MODAL)
       return <CategoriesDialog key={modal} modal={modal} />;
+
+    const editedCategory = categories.find(
+      (category) => category.id === editedCategoryIdOf(modal),
+    );
+    if (editedCategory)
+      return (
+        <CategoryDialog key={modal} modal={modal} category={editedCategory} />
+      );
+
+    const deletedCategory = categories.find(
+      (category) => category.id === deletedCategoryIdOf(modal),
+    );
+    if (deletedCategory)
+      return (
+        <DeleteDialog
+          key={modal}
+          modal={modal}
+          task={{ title: deletedCategory.name }}
+          title="Usunąć kategorię?"
+          description={`Kategorii „${deletedCategory.name}” nie da się usunąć, dopóki używają jej zadania lub cykle.`}
+          onConfirm={() => {
+            deleteCategory(deletedCategory.id);
+            closeModalThen(modal, () =>
+              closeModal(editCategoryModal(deletedCategory.id)),
+            );
+          }}
+        />
+      );
 
     const newDay = newTaskDayOf(modal);
     if (newDay !== null)

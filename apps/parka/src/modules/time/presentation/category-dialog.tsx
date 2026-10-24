@@ -1,28 +1,41 @@
+import { Trash2 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
-import { closeModal } from '@/shared/router/modal-stack';
+import { closeModal, openModal } from '@/shared/router/modal-stack';
 import { Button, Field } from '@/shared/ui/controls';
 import { ClearableInput } from '@/shared/ui/clearable';
 import { CategoryIcon } from '@/shared/ui/icon';
 import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
+import type { Category } from '../domain/models';
 import { CATEGORY_COLORS, NAME_MAX_LENGTH } from '../configuration/constraints';
 import { ColorPicker } from './color-picker';
 import { IconPicker } from './icon-picker';
 import { useContext } from './context';
+import { deleteCategoryModal } from './modal-ids';
 import { ModalShell } from './modal-shell';
 
 /**
- * New category form, a stacked-modal twin of the finance category editor:
+ * Category form (new, or `category` being edited), a stacked-modal twin of the finance category editor:
  * name with the icon preview, colour picker, icon picker, same validation.
  */
-export const CategoryDialog = ({ modal }: { modal: string }) => {
-  const { categories, createCategory } = useContext();
-  const [name, setName] = useState('');
-  const [icon, setIcon] = useState<CategoryIconId>('cart');
-  const [color, setColor] = useState<string>(CATEGORY_COLORS[0]);
+export const CategoryDialog = ({
+  modal,
+  category,
+}: {
+  modal: string;
+  category?: Category;
+}) => {
+  const { categories, createCategory, updateCategory } = useContext();
+  const [name, setName] = useState(category?.name ?? '');
+  const [icon, setIcon] = useState<CategoryIconId>(category?.icon ?? 'cart');
+  const [color, setColor] = useState<string>(
+    category?.color ?? CATEGORY_COLORS[0],
+  );
   const [showErrors, setShowErrors] = useState(false);
 
   const trimmed = name.trim();
-  const duplicate = categories.some((c) => c.name === trimmed);
+  const duplicate = categories.some(
+    (c) => c.id !== category?.id && c.name === trimmed,
+  );
   const nameError = !trimmed
     ? 'Podaj nazwę kategorii.'
     : duplicate
@@ -35,7 +48,8 @@ export const CategoryDialog = ({ modal }: { modal: string }) => {
       setShowErrors(true);
       return;
     }
-    createCategory({ name: trimmed, icon, color });
+    if (category) updateCategory({ ...category, name: trimmed, icon, color });
+    else createCategory({ name: trimmed, icon, color });
     closeModal(modal);
   };
 
@@ -43,7 +57,7 @@ export const CategoryDialog = ({ modal }: { modal: string }) => {
     <ModalShell
       modal={modal}
       data-e2e="time:category-dialog"
-      title="Nowa kategoria"
+      title={category ? 'Edytuj kategorię' : 'Nowa kategoria'}
       description="Nazwa, kolor i ikona kategorii."
     >
       <form onSubmit={submit} noValidate className="space-y-5">
@@ -86,8 +100,22 @@ export const CategoryDialog = ({ modal }: { modal: string }) => {
           <Button variant="ghost" onClick={() => closeModal(modal)}>
             Anuluj
           </Button>
-          <Button type="submit">Dodaj kategorię</Button>
+          <Button type="submit" data-e2e="time:category-save">
+            {category ? 'Zapisz zmiany' : 'Dodaj kategorię'}
+          </Button>
         </div>
+
+        {category ? (
+          <div className="border-t border-line pt-5">
+            <Button
+              variant="danger"
+              data-e2e="time:category-delete"
+              onClick={() => openModal(deleteCategoryModal(category.id))}
+            >
+              <Trash2 className="h-4 w-4" aria-hidden="true" /> Usuń kategorię
+            </Button>
+          </div>
+        ) : null}
       </form>
     </ModalShell>
   );

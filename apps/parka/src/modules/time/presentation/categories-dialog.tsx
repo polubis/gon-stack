@@ -1,10 +1,10 @@
-import { Plus, Tags } from 'lucide-react';
+import { ChevronRight, Plus, Tags } from 'lucide-react';
 import { openModal } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { EmptyState } from '@/shared/ui/empty-state';
 import { useContext } from './context';
-import { NEW_CATEGORY_MODAL } from './modal-ids';
+import { editCategoryModal, NEW_CATEGORY_MODAL } from './modal-ids';
 import { ModalShell } from './modal-shell';
 
 /** Browse list of the categories, same rows as the finance categories list. */
@@ -38,14 +38,22 @@ export const CategoriesDialog = ({ modal }: { modal: string }) => {
           <div className="mb-3 flex justify-end">{add}</div>
           <ul className="max-h-80 overflow-y-auto overflow-x-hidden rounded-2xl border border-line bg-card">
             {categories.map((c) => (
-              <li
-                key={c.id}
-                className="flex items-center gap-3 border-b border-line px-3 py-3 last:border-0"
-              >
-                <CategoryAvatar category={c} />
-                <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                  {c.name}
-                </span>
+              <li key={c.id} className="border-b border-line last:border-0">
+                <button
+                  type="button"
+                  aria-label={`Edytuj kategorię ${c.name}`}
+                  onClick={() => openModal(editCategoryModal(c.id))}
+                  className="flex w-full items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-hover-soft focus-visible:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand"
+                >
+                  <CategoryAvatar category={c} />
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                    {c.name}
+                  </span>
+                  <ChevronRight
+                    className="h-5 w-5 text-ink-soft"
+                    aria-hidden="true"
+                  />
+                </button>
               </li>
             ))}
           </ul>
