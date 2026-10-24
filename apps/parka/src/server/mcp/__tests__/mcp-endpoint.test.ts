@@ -359,6 +359,31 @@ describe('mcp access control', () => {
     expect(response.headers.get('www-authenticate')).toMatch(/^Bearer/);
   });
 
+  it.each([
+    ['a foreign origin', { Origin: 'https://evil.example' }, 403],
+    ['a missing token', { Authorization: '' }, 401],
+    ['a wrong content type', { 'Content-Type': 'text/plain' }, 415],
+  ])(
+    'reads the whole request before refusing %s',
+    async (_, headers, status) => {
+      const { deps } = setup();
+      const request = new Request(URL_, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${TOKEN}`,
+          ...headers,
+        },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'ping' }),
+      });
+
+      const response = await handleMcpRequest(request, deps);
+
+      expect(response.status).toBe(status);
+      expect(request.bodyUsed).toBe(true);
+    },
+  );
+
   it('rejects a token the database does not accept', async () => {
     const { rpc } = setup({ valid: false });
 

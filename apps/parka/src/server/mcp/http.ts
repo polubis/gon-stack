@@ -74,13 +74,11 @@ const tooMany = (retryAfterSeconds: number): Response =>
     'Retry-After': String(retryAfterSeconds),
   });
 
-const readBody = async (request: Request): Promise<string | null> => {
-  if (Number(request.headers.get('content-length') ?? 0) > MAX_BODY_BYTES)
-    return null;
-  if (!request.body) return '';
-
-  // Chunked bodies declare no length: stop reading at the cap, not after it.
-  const reader = request.body.getReader();
+// Chunked bodies declare no length: stop reading at the cap, not after it.
+const readChunks = async (
+  body: ReadableStream<Uint8Array>,
+): Promise<Uint8Array<ArrayBuffer>[] | null> => {
+  const reader = body.getReader();
   const chunks: Uint8Array<ArrayBuffer>[] = [];
   let size = 0;
   for (;;) {
@@ -93,15 +91,28 @@ const readBody = async (request: Request): Promise<string | null> => {
     }
     chunks.push(value as Uint8Array<ArrayBuffer>);
   }
-  return new Blob(chunks).text();
+  return chunks;
+};
+
+const readBody = async (request: Request): Promise<string | null> => {
+  if (Number(request.headers.get('content-length') ?? 0) > MAX_BODY_BYTES)
+    return null;
+  if (!request.body) return '';
+
+  const chunks = await readChunks(request.body);
+  return chunks === null ? null : new Blob(chunks).text();
 };
 
 /**
- * MCP Streamable HTTP endpoint, stateless JSON mode: `POST` carries one
- * JSON-RPC message and is answered with `application/json`. There is no
- * server-initiated stream, so `GET` is refused with 405 as the spec allows.
+ * A response sent while the request body is still unread makes the runtime drop
+ * a kept-alive connection (`Network connection lost`, surfaced as a 500 on the
+ * next request), so every path consumes what the client sent before replying.
  */
-export const handleMcpRequest = async (
+const discardBody = async (request: Request): Promise<void> => {
+  if (request.body && !request.bodyUsed) await readChunks(request.body);
+};
+
+const respond = async (
   request: Request,
   {
     gatewayFor,
@@ -166,4 +177,18 @@ export const handleMcpRequest = async (
     return failed.allowed ? unauthorized() : tooMany(failed.retryAfterSeconds);
   }
   return json(outcome.status, outcome.body);
+};
+
+/**
+ * MCP Streamable HTTP endpoint, stateless JSON mode: `POST` carries one
+ * JSON-RPC message and is answered with `application/json`. There is no
+ * server-initiated stream, so `GET` is refused with 405 as the spec allows.
+ */
+export const handleMcpRequest = async (
+  request: Request,
+  deps: McpHttpDeps,
+): Promise<Response> => {
+  const response = await respond(request, deps);
+  await discardBody(request);
+  return response;
 };
