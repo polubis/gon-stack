@@ -92,6 +92,7 @@ describe('task device', () => {
     )[0]!;
     expect(box).toHaveAttribute('aria-checked', 'false');
     await user.click(box);
+    await user.click(box);
     await waitFor(() =>
       expect(
         screen.getAllByRole('checkbox', {

@@ -21,7 +21,10 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
       trigger('[TRIGGER]_UPDATE_BACKLOG_TASK', { task }),
     moveBacklogTask: (id: TaskId, day: string, label: string) =>
       trigger('[TRIGGER]_MOVE_BACKLOG_TASK', { id, day, label }),
-    updateTask: (task: Task) => trigger('[TRIGGER]_UPDATE_TASK', { task }),
+    updateTask: (task: Task, message?: string) =>
+      trigger('[TRIGGER]_UPDATE_TASK', { task, message }),
+    sendTaskToBacklog: (id: TaskId) =>
+      trigger('[TRIGGER]_SEND_TASK_TO_BACKLOG', { id }),
     deleteTask: (id: TaskId) => trigger('[TRIGGER]_DELETE_TASK', { id }),
     createRecurring: (recurring: Recurring) =>
       trigger('[TRIGGER]_CREATE_RECURRING', { recurring }),

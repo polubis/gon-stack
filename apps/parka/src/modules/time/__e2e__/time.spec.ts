@@ -113,10 +113,15 @@ const commands = {
   }) => {
     await getByE2e('time:backlog-open').click();
     await expect(page).toHaveURL(/modal=backlog/);
+    await page
+      .getByRole('button', { name: 'Więcej: Dentysta piątek E2E' })
+      .click();
     await Promise.all([
       synced(page, 'PUT', 200),
       page
-        .getByRole('button', { name: 'Przenieś na dziś: Dentysta piątek E2E' })
+        .getByRole('menuitem', {
+          name: 'Przenieś na dziś: Dentysta piątek E2E',
+        })
         .click(),
     ]);
     await expect(getByE2e('time:backlog-empty')).toBeVisible();
@@ -146,6 +151,7 @@ const commands = {
       getByE2e('time:backlog-save').click(),
     ]);
     await getByE2e('time:backlog-open').click();
+    await page.getByRole('button', { name: 'Więcej: Auto E2E' }).click();
     await Promise.all([
       synced(page, 'PUT', 200),
       page.getByLabel('Przenieś na wybrany dzień: Auto E2E').fill(NEXT_WEEK),
@@ -228,6 +234,8 @@ const commands = {
 
   'i complete the task and it stays done after a reload': async ({ page }) => {
     const box = page.getByRole('checkbox', { name: 'Zrobione: Raport E2E' });
+    await Promise.all([synced(page, 'PUT', 200), box.click()]);
+    await expect(box).toHaveAttribute('aria-checked', 'mixed');
     await Promise.all([synced(page, 'PUT', 200), box.click()]);
     await expect(box).toBeChecked();
     await reload(page);
@@ -418,9 +426,8 @@ const commands = {
     getByE2e,
   }) => {
     await expect(page.getByText('Linia 1', { exact: true })).toHaveCount(0);
-    await page.getByRole('button', { name: `Więcej: ${LONG_TITLE}` }).click();
     await page
-      .getByRole('menuitem', { name: `Szczegóły zadania: ${LONG_TITLE}` })
+      .getByRole('button', { name: `Szczegóły zadania: ${LONG_TITLE}` })
       .click();
     await expect(getByE2e('time:description-clamp')).toBeVisible();
     await getByE2e('time:description-more').click();

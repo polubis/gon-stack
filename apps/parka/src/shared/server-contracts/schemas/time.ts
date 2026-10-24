@@ -74,6 +74,15 @@ export const updateTimeBacklogTaskSchema = () =>
     ]),
   });
 
+export const sendTimeTaskToBacklogSchema = () =>
+  z.object({
+    in: z.object({ id: z.string().min(1) }),
+    out: z.union([
+      z.object({ code: z.literal(200), data: timeBacklogTask() }),
+      writeErrors,
+    ]),
+  });
+
 export const updateTimeTaskSchema = () =>
   z.object({
     in: timeTask(),

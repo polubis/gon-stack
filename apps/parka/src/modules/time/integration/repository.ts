@@ -11,6 +11,7 @@ import type {
   deleteTimeRecurringSchema,
   deleteTimeTaskSchema,
   listTimeSchema,
+  sendTimeTaskToBacklogSchema,
   updateTimeTaskSchema,
 } from '@schemas/time';
 import { browserTimeZone } from '@/shared/date/date';
@@ -99,6 +100,20 @@ export const putBacklogTask = async (
   });
   const json = (await response.json()) as Out<
     typeof updateTimeBacklogTaskSchema
+  >;
+  if (json.code !== 200) throw new Error(json.message);
+  return toBacklogTask(json.data);
+};
+
+/** Takes a task off the board: it keeps its id, loses its day and hour. */
+export const postTaskToBacklog = async (id: TaskId): Promise<BacklogTask> => {
+  const response = await fetch(API_ROUTER.timeBacklogById(id), {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ id }),
+  });
+  const json = (await response.json()) as Out<
+    typeof sendTimeTaskToBacklogSchema
   >;
   if (json.code !== 200) throw new Error(json.message);
   return toBacklogTask(json.data);

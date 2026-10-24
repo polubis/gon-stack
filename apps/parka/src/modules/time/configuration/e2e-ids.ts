@@ -52,14 +52,13 @@ export type TimeDynamicE2eId =
   | `time:add-day:${string}`
   | `time:task:${string | number}`
   | `time:task-done:${string | number}`
-  | `time:task-progress:${string | number}`
   | `time:task-progress-badge:${string | number}`
   | `time:task-info:${string | number}`
+  | `time:task-edit:${string | number}`
+  | `time:task-move:${string | number}`
+  | `time:task-backlog:${string | number}`
+  | `time:task-delete:${string | number}`
   | `time:task-more:${string | number}`
-  | `time:backlog-task:${string | number}`
-  | `time:backlog-move:${string | number}`
-  | `time:backlog-delete:${string | number}`
-  | `time:backlog-edit:${string | number}`
-  | `time:backlog-date:${string | number}`;
+  | `time:task-date:${string | number}`;
 
 export type TimeE2eId = (typeof TIME_E2E_IDS)[number] | TimeDynamicE2eId;

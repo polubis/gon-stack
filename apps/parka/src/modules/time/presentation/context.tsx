@@ -67,6 +67,7 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
     updateBacklogTask: facade.updateBacklogTask,
     moveBacklogTask: facade.moveBacklogTask,
     updateTask: facade.updateTask,
+    sendTaskToBacklog: facade.sendTaskToBacklog,
     deleteTask: facade.deleteTask,
     createRecurring: facade.createRecurring,
     stopRecurring: facade.stopRecurring,

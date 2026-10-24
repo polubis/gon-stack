@@ -140,18 +140,28 @@ describe('backlog list', () => {
   });
 });
 
+const pickFromMenu = async (
+  user: ReturnType<typeof userEvent.setup>,
+  list: ReturnType<typeof within>,
+  item: string,
+  title = 'Umówić dentystę',
+) => {
+  await user.click(
+    await list.findByRole('button', { name: `Więcej: ${title}` }),
+  );
+  await user.click(
+    await screen.findByRole('menuitem', { name: `${item}: ${title}` }),
+  );
+};
+
 describe('backlog moving', () => {
-  it('puts a task on today with one click', async () => {
+  it('puts a task on today from the row menu', async () => {
     const user = userEvent.setup();
     backend.seedBacklog([backlogTask()]);
     renderTime();
     const list = await openBacklog(user);
 
-    await user.click(
-      await list.findByRole('button', {
-        name: 'Przenieś na dziś: Umówić dentystę',
-      }),
-    );
+    await pickFromMenu(user, list, 'Przenieś na dziś');
 
     expect(
       await screen.findByText('Przeniesiono „Umówić dentystę” na dziś.'),
@@ -178,36 +188,22 @@ describe('backlog moving', () => {
     renderTime();
     const list = await openBacklog(user);
 
-    await user.click(
-      await list.findByRole('button', {
-        name: 'Przenieś na jutro: Umówić dentystę',
-      }),
-    );
+    await pickFromMenu(user, list, 'Przenieś na jutro');
 
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     expect(backend.writes()[0]!.body).toMatchObject({ day: '2026-10-21' });
   });
 
-  it('offers the viewed day when it is not today or tomorrow', async () => {
+  it('puts a task on the next week', async () => {
     const user = userEvent.setup();
     backend.seedBacklog([backlogTask()]);
-    renderTime('week', '2026-10-24');
+    renderTime();
     const list = await openBacklog(user);
 
-    await user.click(
-      await list.findByRole('button', {
-        name: 'Przenieś na 24.10: Umówić dentystę',
-      }),
-    );
+    await pickFromMenu(user, list, 'Przenieś na następny tydzień');
 
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
-    expect(backend.writes()[0]!.body).toMatchObject({ day: '2026-10-24' });
-    await closeBacklog(user);
-    expect(
-      await screen.findAllByRole('button', {
-        name: 'Edytuj zadanie: Umówić dentystę',
-      }),
-    ).not.toHaveLength(0);
+    expect(backend.writes()[0]!.body).toMatchObject({ day: '2026-10-26' });
   });
 
   it('keeps the task in the backlog when moving fails', async () => {
@@ -217,11 +213,7 @@ describe('backlog moving', () => {
     renderTime();
     const list = await openBacklog(user);
 
-    await user.click(
-      await list.findByRole('button', {
-        name: 'Przenieś na dziś: Umówić dentystę',
-      }),
-    );
+    await pickFromMenu(user, list, 'Przenieś na dziś');
 
     expect(await screen.findByText('BACKLOG_MOVE_FAILED')).toBeVisible();
     expect(await list.findByText('Umówić dentystę')).toBeVisible();
@@ -237,14 +229,12 @@ describe('backlog moving', () => {
     renderTime();
     const list = await openBacklog(user);
 
-    await user.click(
-      await list.findByRole('button', {
-        name: 'Przenieś na dziś: Umówić dentystę',
-      }),
-    );
+    await pickFromMenu(user, list, 'Przenieś na dziś');
 
     await closeBacklog(user);
-    const rows = await screen.findAllByRole('button', { name: /^Edytuj/ });
+    const rows = await screen.findAllByRole('button', {
+      name: /^Szczegóły zadania:/,
+    });
     expect(rows.map((b) => b.textContent)).toEqual([
       'Raport',
       'Umówić dentystę',
@@ -314,8 +304,13 @@ describe('backlog custom date', () => {
     renderTime();
     const list = await openBacklog(user);
 
+    await user.click(
+      await list.findByRole('button', { name: 'Więcej: Umówić dentystę' }),
+    );
     fireEvent.change(
-      await list.findByLabelText('Przenieś na wybrany dzień: Umówić dentystę'),
+      await screen.findByLabelText(
+        'Przenieś na wybrany dzień: Umówić dentystę',
+      ),
       { target: { value: '2026-10-30' } },
     );
 
@@ -340,11 +335,7 @@ describe('backlog deleting', () => {
     renderTime();
     const list = await openBacklog(user);
 
-    await user.click(
-      await list.findByRole('button', {
-        name: 'Usuń z backlogu: Umówić dentystę',
-      }),
-    );
+    await pickFromMenu(user, list, 'Usuń');
 
     expect(await screen.findByText('Usunąć zadanie?')).toBeVisible();
     expect(backend.writes()).toHaveLength(0);

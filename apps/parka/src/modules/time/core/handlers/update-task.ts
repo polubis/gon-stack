@@ -10,8 +10,9 @@ import { putTask } from '../../integration/repository';
 export const updateTask = (store: Store, bus: Bus) => {
   const { ofType, emit } = bus;
   return ofType('[TRIGGER]_UPDATE_TASK').pipe(
-    map(({ task }) => ({
+    map(({ task, message }) => ({
       task,
+      message,
       previous: store.$tasks.get().find((t) => t.id === task.id),
     })),
     tap(({ task }) => {
@@ -19,10 +20,13 @@ export const updateTask = (store: Store, bus: Bus) => {
         sortTasks(store.$tasks.get().map((t) => (t.id === task.id ? task : t))),
       );
     }),
-    concatMap(({ task, previous }) =>
+    concatMap(({ task, previous, message }) =>
       from(write(store, bus, () => putTask(task))).pipe(
         tap(() =>
-          notify(store, { tone: 'success', message: 'Zapisano zmiany.' }),
+          notify(store, {
+            tone: 'success',
+            message: message ?? 'Zapisano zmiany.',
+          }),
         ),
         catchError((error: unknown) => {
           const current = store.$tasks.get().find((t) => t.id === task.id);
@@ -41,7 +45,7 @@ export const updateTask = (store: Store, bus: Bus) => {
             title: 'Nie udało się zapisać zadania',
             code: 'TASK_UPDATE_FAILED',
             description: errorMessage(error),
-            retry: () => emit('[TRIGGER]_UPDATE_TASK', { task }),
+            retry: () => emit('[TRIGGER]_UPDATE_TASK', { task, message }),
           });
           return EMPTY;
         }),

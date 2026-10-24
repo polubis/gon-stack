@@ -119,6 +119,23 @@ export const setupTimeBackend = () => {
       state.backlog = state.backlog.map((t) => (t.id === body!.id ? body! : t));
       return HttpResponse.json({ code: 200, data: body });
     }),
+    // A plain task leaves the board and keeps its id.
+    http.post('/api/time/backlog/:id/', async ({ request, params }) => {
+      await record(request);
+      if (state.failWrites) return HttpResponse.json(FAILURE);
+      const full = state.tasks.find((t) => t.id === params.id)!;
+      const rest = {
+        id: full.id,
+        title: full.title,
+        description: full.description,
+        categoryId: full.categoryId,
+        priorityId: full.priorityId,
+        device: full.device,
+      };
+      state.tasks = state.tasks.filter((t) => t.id !== params.id);
+      state.backlog.push(rest);
+      return HttpResponse.json({ code: 200, data: rest });
+    }),
     http.post('/api/time/tasks/', async ({ request }) => {
       const body = await record(request);
       if (state.failWrites) return HttpResponse.json(FAILURE);

@@ -30,7 +30,7 @@ describe('time loading', () => {
     );
     expect(
       plan
-        .getAllByRole('button', { name: /^Edytuj/ })
+        .getAllByRole('button', { name: /^Szczegóły zadania:/ })
         .map((b) => b.textContent),
     ).toEqual(['Raport', 'Obiad']);
     expect(plan.getByText('Teraz 13:40')).toBeInTheDocument();
@@ -252,15 +252,39 @@ describe('time task maintenance', () => {
     const box = await screen.findByRole('checkbox', {
       name: 'Zrobione: Raport miesięczny',
     });
-    expect(box).not.toBeChecked();
+    expect(box).toHaveAttribute('aria-checked', 'false');
+    await user.click(box);
+    expect(box).toHaveAttribute('aria-checked', 'mixed');
     await user.click(box);
 
     expect(box).toBeChecked();
-    await waitFor(() => expect(backend.writes()).toHaveLength(1));
-    expect(backend.writes()[0]).toMatchObject({
+    expect(await screen.findByText('Zadanie zrobione.')).toBeVisible();
+    await waitFor(() => expect(backend.writes()).toHaveLength(2));
+    expect(backend.writes()[1]).toMatchObject({
       method: 'PUT',
-      body: { id: 't-1', done: true },
+      body: { id: 't-1', done: true, inProgress: false },
     });
+  });
+
+  it('cycles a task through todo, in progress, done and back', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    renderTime();
+
+    const box = await screen.findByRole('checkbox', {
+      name: 'Zrobione: Raport miesięczny',
+    });
+    await user.click(box);
+    await user.click(box);
+    await user.click(box);
+
+    expect(box).toHaveAttribute('aria-checked', 'false');
+    await waitFor(() => expect(backend.writes()).toHaveLength(3));
+    expect(backend.writes().map((w) => w.body)).toMatchObject([
+      { inProgress: true, done: false },
+      { inProgress: false, done: true },
+      { inProgress: false, done: false },
+    ]);
   });
 
   it('marks a task in progress, shows it and saves it', async () => {
@@ -269,11 +293,8 @@ describe('time task maintenance', () => {
     renderTime();
 
     await user.click(
-      await screen.findByRole('button', { name: 'Więcej: Raport miesięczny' }),
-    );
-    await user.click(
-      await screen.findByRole('menuitem', {
-        name: 'Rozpocznij: Raport miesięczny',
+      await screen.findByRole('checkbox', {
+        name: 'Zrobione: Raport miesięczny',
       }),
     );
 
@@ -368,6 +389,126 @@ describe('time task maintenance', () => {
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     expect(backend.writes()[0]).toMatchObject({ method: 'DELETE' });
     expect(backend.writes()[0]!.url).toContain('/api/time/tasks/t-1/');
+  });
+
+  it('opens details, not the editor, when the row is clicked', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    renderTime();
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: 'Szczegóły zadania: Raport miesięczny',
+      }),
+    );
+
+    expect(
+      await screen.findByRole('dialog', { name: 'Szczegóły zadania' }),
+    ).toBeVisible();
+    expect(backend.writes()).toHaveLength(0);
+  });
+
+  it('moves a task to tomorrow from the menu', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    renderTime();
+    await user.click(
+      await screen.findByRole('button', { name: 'Więcej: Raport miesięczny' }),
+    );
+    await user.click(
+      await screen.findByRole('menuitem', {
+        name: 'Przenieś na jutro: Raport miesięczny',
+      }),
+    );
+
+    expect(
+      await screen.findByText('Przeniesiono „Raport miesięczny” na jutro.'),
+    ).toBeVisible();
+    await waitFor(() => expect(backend.writes()).toHaveLength(1));
+    expect(backend.writes()[0]!.body).toMatchObject({
+      id: 't-1',
+      day: '2026-10-21',
+    });
+  });
+
+  it('moves a task to the next week from the menu', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    renderTime();
+    await user.click(
+      await screen.findByRole('button', { name: 'Więcej: Raport miesięczny' }),
+    );
+    await user.click(
+      await screen.findByRole('menuitem', {
+        name: 'Przenieś na następny tydzień: Raport miesięczny',
+      }),
+    );
+
+    await waitFor(() => expect(backend.writes()).toHaveLength(1));
+    expect(backend.writes()[0]!.body).toMatchObject({ day: '2026-10-26' });
+  });
+
+  it('puts a task in the backlog from the menu', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    renderTime();
+    await user.click(
+      await screen.findByRole('button', { name: 'Więcej: Raport miesięczny' }),
+    );
+    await user.click(
+      await screen.findByRole('menuitem', {
+        name: 'Wrzuć do backlogu: Raport miesięczny',
+      }),
+    );
+
+    expect(
+      await screen.findByText('Wrzucono „Raport miesięczny” do backlogu.'),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole('button', { name: 'Więcej: Raport miesięczny' }),
+    ).toBeNull();
+    expect(
+      screen.getByRole('button', { name: 'Backlog, zadań: 1' }),
+    ).toBeVisible();
+    await waitFor(() => expect(backend.writes()).toHaveLength(1));
+    expect(backend.writes()[0]).toMatchObject({ method: 'POST' });
+    expect(backend.writes()[0]!.url).toContain('/api/time/backlog/t-1/');
+  });
+
+  it('keeps the task on the board when the backlog move fails', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    backend.state.failWrites = true;
+    renderTime();
+    await user.click(
+      await screen.findByRole('button', { name: 'Więcej: Raport miesięczny' }),
+    );
+    await user.click(
+      await screen.findByRole('menuitem', {
+        name: 'Wrzuć do backlogu: Raport miesięczny',
+      }),
+    );
+
+    expect(await screen.findByText('TASK_BACKLOG_FAILED')).toBeVisible();
+    expect(await row('Raport miesięczny')).toBeVisible();
+  });
+
+  it('offers no backlog move for a task made by a series', async () => {
+    const user = userEvent.setup();
+    backend.seed([task({ recurringId: 'r-1' })]);
+    renderTime();
+    await user.click(
+      await screen.findByRole('button', { name: 'Więcej: Raport miesięczny' }),
+    );
+
+    expect(
+      await screen.findByRole('menuitem', {
+        name: 'Przenieś na jutro: Raport miesięczny',
+      }),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole('menuitem', { name: /^Wrzuć do backlogu/ }),
+    ).toBeNull();
   });
 
   it('keeps the task when deleting fails', async () => {

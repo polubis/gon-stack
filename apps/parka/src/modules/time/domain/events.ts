@@ -19,7 +19,8 @@ export type Event =
       '[TRIGGER]_MOVE_BACKLOG_TASK',
       { id: TaskId; day: string; label: string }
     >
-  | TriggerEvent<'[TRIGGER]_UPDATE_TASK', { task: Task }>
+  | TriggerEvent<'[TRIGGER]_UPDATE_TASK', { task: Task; message?: string }>
+  | TriggerEvent<'[TRIGGER]_SEND_TASK_TO_BACKLOG', { id: TaskId }>
   | TriggerEvent<'[TRIGGER]_DELETE_TASK', { id: TaskId }>
   | TriggerEvent<'[TRIGGER]_CREATE_RECURRING', { recurring: Recurring }>
   | TriggerEvent<'[TRIGGER]_STOP_RECURRING', { id: RecurringId }>
