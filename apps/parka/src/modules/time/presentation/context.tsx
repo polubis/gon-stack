@@ -4,6 +4,7 @@ import { readQueryParam, writeQueryParam } from '@/shared/router/navigation';
 import { isDay, todayDay } from '@/shared/period/period';
 import { createMediator } from '../core/mediator';
 import { DATE_PARAM, FEATURE_NAME } from '../configuration/constraints';
+import { sortByUsage } from '../domain/category-usage';
 import { newCategoryId, newPriorityId } from '../domain/ids';
 import type { Category, Priority } from '../domain/models';
 import { useClock } from './clock';
@@ -25,6 +26,9 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
   const [newPriority, setNewPriority] = useState<Priority>();
   const now = useClock();
   const loaded = facade.useLoaded();
+  const tasks = facade.useTasks();
+  const backlog = facade.useBacklog();
+  const categories = facade.useCategories();
 
   useLayoutEffect(() => {
     const unsub = register();
@@ -52,9 +56,10 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
     now,
     newCategory,
     newPriority,
-    tasks: facade.useTasks(),
-    backlog: facade.useBacklog(),
-    categories: facade.useCategories(),
+    tasks,
+    backlog,
+    /** Most used first (loaded tasks and backlog), ties keep stored order. */
+    categories: sortByUsage(categories, [...tasks, ...backlog]),
     priorities: facade.usePriorities(),
     initializing: facade.useInitializing(),
     loaded,

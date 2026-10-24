@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { List, Plus } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { openModal } from '@/shared/router/modal-stack';
@@ -16,6 +17,12 @@ export const CategoryPicker = ({
   onChange: (id: CategoryId) => void;
 }) => {
   const { categories } = useContext();
+  // Order frozen while the form is open so chips do not jump; new ones go last.
+  const [order] = useState(() => categories.map((c) => c.id));
+  const rank = (id: CategoryId) => {
+    const at = order.indexOf(id);
+    return at === -1 ? order.length : at;
+  };
   return (
     <fieldset className="min-w-0">
       <div className="mb-1 flex items-center justify-between gap-2">
@@ -40,30 +47,32 @@ export const CategoryPicker = ({
         </div>
       </div>
       <div className="flex flex-wrap gap-2">
-        {categories.map((item) => (
-          <label
-            key={item.id}
-            className={cn(
-              'flex h-9 cursor-pointer items-center gap-2 rounded-full border px-3 text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand',
-              item.id === value
-                ? 'border-brand bg-brand-soft font-semibold text-brand'
-                : 'border-line-strong hover:bg-hover-soft',
-            )}
-          >
-            <input
-              type="radio"
-              name="task-category"
-              value={item.id}
-              checked={item.id === value}
-              onChange={() => onChange(item.id)}
-              className="sr-only"
-            />
-            <span style={{ color: item.color }}>
-              <CategoryIcon id={item.icon} className="h-4 w-4" />
-            </span>
-            {item.name}
-          </label>
-        ))}
+        {[...categories]
+          .sort((a, b) => rank(a.id) - rank(b.id))
+          .map((item) => (
+            <label
+              key={item.id}
+              className={cn(
+                'flex h-9 cursor-pointer items-center gap-2 rounded-full border px-3 text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand',
+                item.id === value
+                  ? 'border-brand bg-brand-soft font-semibold text-brand'
+                  : 'border-line-strong hover:bg-hover-soft',
+              )}
+            >
+              <input
+                type="radio"
+                name="task-category"
+                value={item.id}
+                checked={item.id === value}
+                onChange={() => onChange(item.id)}
+                className="sr-only"
+              />
+              <span style={{ color: item.color }}>
+                <CategoryIcon id={item.icon} className="h-4 w-4" />
+              </span>
+              {item.name}
+            </label>
+          ))}
       </div>
     </fieldset>
   );

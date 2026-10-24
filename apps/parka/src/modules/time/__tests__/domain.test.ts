@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { sortByUsage } from '../domain/category-usage';
 import { periodTitle } from '../domain/period-title';
-import type { Task } from '../domain/models';
+import type { Category, Task } from '../domain/models';
 import {
   countsByMonth,
   gridHours,
@@ -88,5 +89,21 @@ describe('schedule', () => {
     expect(gridHours([])).toEqual(Array.from({ length: 13 }, (_, i) => 8 + i));
     expect(gridHours([task('a', '2026-10-20', '06:30')])[0]).toBe(6);
     expect(gridHours([task('a', '2026-10-20', '22:00')]).at(-1)).toBe(22);
+  });
+});
+
+describe('categories by usage', () => {
+  const category = (name: string) => ({ id: name, name }) as Category;
+  const used = (...ids: string[]) => ids.map((categoryId) => ({ categoryId }));
+
+  it('puts the most used first and keeps the given order on ties', () => {
+    const list = [category('Zakupy'), category('Dom'), category('Praca')];
+    const sorted = sortByUsage(list, used('Praca', 'Zakupy', 'Praca') as never);
+    expect(sorted.map((c) => c.name)).toEqual(['Praca', 'Zakupy', 'Dom']);
+    expect(sortByUsage(list, []).map((c) => c.name)).toEqual([
+      'Zakupy',
+      'Dom',
+      'Praca',
+    ]);
   });
 });
