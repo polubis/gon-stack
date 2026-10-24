@@ -22,6 +22,29 @@ self.addEventListener('push', (event) => {
   );
 });
 
+// The push service rotated or expired the subscription: take a new one and
+// register it, so notifications keep arriving without opening the app.
+self.addEventListener('pushsubscriptionchange', (event) => {
+  event.waitUntil(
+    (async () => {
+      const options = event.oldSubscription?.options ?? {
+        userVisibleOnly: true,
+      };
+      const subscription =
+        event.newSubscription ??
+        (await self.registration.pushManager.subscribe(options));
+      const { endpoint, keys } = subscription.toJSON();
+      if (!endpoint || !keys) return;
+      await fetch('/api/push/', {
+        method: 'PUT',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint, keys }),
+      });
+    })().catch(() => {}),
+  );
+});
+
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const url = new URL(

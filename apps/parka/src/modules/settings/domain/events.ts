@@ -10,4 +10,5 @@ export type Event =
       { deviceId: string; file: File }
     >
   | TriggerEvent<'[TRIGGER]_TOGGLE_PUSH', { enabled: boolean }>
+  | TriggerEvent<'[TRIGGER]_SYNC_PUSH'>
   | TriggerEvent<'[TRIGGER]_DISMISS_NOTICE'>;

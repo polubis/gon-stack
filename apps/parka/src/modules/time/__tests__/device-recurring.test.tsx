@@ -45,6 +45,25 @@ describe('task device', () => {
     });
   });
 
+  it('shows the chosen device avatar on a new task without a reload', async () => {
+    const user = userEvent.setup();
+    backend.state.deviceProfile = { avatar: 'cat', customName: 'Kocia' };
+    renderTime();
+    const dialog = await openAddDialog(user);
+    await user.type(dialog.getByRole('textbox', { name: 'Nazwa' }), 'Kurs');
+    await user.click(dialog.getByRole('button', { name: 'Dodaj' }));
+
+    await user.click(
+      await screen.findByRole('button', { name: 'Więcej: Kurs' }),
+    );
+    expect(await screen.findByText('Kocia')).toBeInTheDocument();
+    expect(
+      document.querySelector(
+        '[data-e2e="time:task-row-device"] [data-avatar="cat"]',
+      ),
+    ).not.toBeNull();
+  });
+
   it('shows the device of a task in the more menu and in its popup', async () => {
     const user = userEvent.setup();
     backend.seed([task({ device: DEVICE })]);

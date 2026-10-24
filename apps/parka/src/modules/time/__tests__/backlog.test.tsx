@@ -362,3 +362,17 @@ describe('backlog deleting', () => {
     ).toBeVisible();
   });
 });
+
+describe('backlog dialog scrolling', () => {
+  it('has no scroll area of its own, the dialog is the only scroller', async () => {
+    const user = userEvent.setup();
+    backend.seedBacklog([backlogTask({ id: 'b1', title: 'Pierwsze' })]);
+    renderTime();
+
+    const dialog = await openBacklog(user);
+
+    const list = dialog.getByRole('list');
+    expect(list.className).not.toMatch(/overflow-y-(auto|scroll)/);
+    expect(list.className).not.toMatch(/max-h-/);
+  });
+});

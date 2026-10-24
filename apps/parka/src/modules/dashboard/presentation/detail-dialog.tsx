@@ -55,7 +55,7 @@ export const DetailDialog = ({
         <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-overlay" />
         <Dialog.Content
           data-e2e={dataE2e}
-          className="fixed inset-x-4 bottom-4 z-(--z-modal) mx-auto max-h-[calc(100dvh-2rem)] max-w-md animate-pop-in overflow-y-auto rounded-2xl bg-card p-4 shadow-popover focus:outline-none motion-reduce:animate-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2"
+          className="fixed inset-x-4 bottom-[calc(var(--kb-inset,0rem)+1rem)] z-(--z-modal) mx-auto max-h-[calc(100dvh-var(--kb-inset,0rem)-2rem)] max-w-md animate-pop-in overflow-y-auto rounded-2xl bg-card p-4 shadow-popover focus:outline-none motion-reduce:animate-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2"
         >
           <div className="mb-3 flex items-center gap-3">
             {avatar}

@@ -7,6 +7,7 @@ import { withAuth } from '@/shared/auth/presentation/with-auth';
 import { SyncedAppNav } from '@/shared/navigation/app-nav/presentation/synced-app-nav';
 import { navigateTo, registerNavigator } from '@/shared/router/navigation';
 import { normalizePath } from '@/shared/router/routes';
+import { trackKeyboardInset } from '@/shared/ui/keyboard-inset';
 import { APP_PAGES } from './pages';
 
 const pathOf = (url: string): string => url.split('?')[0];
@@ -55,6 +56,8 @@ const Shell = () => {
       document.removeEventListener('click', onDocumentClick);
     };
   }, [router]);
+
+  useEffect(() => trackKeyboardInset(), []);
 
   useEffect(() => {
     const page = APP_PAGES.find(

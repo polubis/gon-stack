@@ -28,6 +28,13 @@ const isSupported = (): boolean =>
   'PushManager' in window &&
   'Notification' in window;
 
+const toDto = (subscription: PushSubscription): PushSubscriptionDto => {
+  const { endpoint, keys } = subscription.toJSON();
+  if (!endpoint || !keys?.p256dh || !keys.auth)
+    throw new Error('Browser returned an incomplete push subscription');
+  return { endpoint, keys: { p256dh: keys.p256dh, auth: keys.auth } };
+};
+
 export const readPushState = async (): Promise<PushState> => {
   if (!isSupported()) return 'unsupported';
   if (!import.meta.env.PUBLIC_PARKA_VAPID_PUBLIC_KEY) return 'unconfigured';
@@ -36,6 +43,23 @@ export const readPushState = async (): Promise<PushState> => {
   const registration = await navigator.serviceWorker.getRegistration();
   const subscription = await registration?.pushManager.getSubscription();
   return subscription && Notification.permission === 'granted' ? 'on' : 'off';
+};
+
+/**
+ * The device's live subscription; subscribes silently when the browser
+ * dropped it (permission already granted, so no prompt appears).
+ */
+export const resubscribePush = async (): Promise<PushSubscriptionDto> => {
+  const registration =
+    await navigator.serviceWorker.register(SERVICE_WORKER_URL);
+  await navigator.serviceWorker.ready;
+  const subscription =
+    (await registration.pushManager.getSubscription()) ??
+    (await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: applicationServerKey(),
+    }));
+  return toDto(subscription);
 };
 
 /** Asks the browser permission, registers the worker and subscribes this device. */
@@ -50,10 +74,7 @@ export const enablePush = async (): Promise<PushSubscriptionDto> => {
     applicationServerKey: applicationServerKey(),
   });
 
-  const { endpoint, keys } = subscription.toJSON();
-  if (!endpoint || !keys?.p256dh || !keys.auth)
-    throw new Error('Browser returned an incomplete push subscription');
-  return { endpoint, keys: { p256dh: keys.p256dh, auth: keys.auth } };
+  return toDto(subscription);
 };
 
 export const disablePush = async (): Promise<void> => {

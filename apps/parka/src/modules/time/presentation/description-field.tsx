@@ -45,7 +45,7 @@ const FullscreenEditor = ({ value, onChange }: Props) => {
             e.preventDefault();
             ref.current?.focus();
           }}
-          className="fixed inset-0 z-(--z-modal) flex animate-pop-in flex-col gap-3 bg-card p-4 focus:outline-none motion-reduce:animate-none"
+          className="fixed inset-0 bottom-[var(--kb-inset,0rem)] z-(--z-modal) flex animate-pop-in flex-col gap-3 bg-card p-4 focus:outline-none motion-reduce:animate-none"
         >
           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">

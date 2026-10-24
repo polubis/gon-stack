@@ -169,6 +169,34 @@ describe('push notifications setting', () => {
     );
   });
 
+  it('keeps push on after the browser lost the subscription', async () => {
+    stubBrowser('granted');
+    vi.stubGlobal('Notification', {
+      permission: 'granted',
+      requestPermission: vi.fn(async () => 'granted'),
+    });
+    const calls = stubApi();
+    server.use(
+      http.get('/api/settings/', () =>
+        HttpResponse.json({
+          code: 200,
+          data: {
+            ...SETTINGS,
+            notifications: { ...SETTINGS.notifications, push: true },
+          },
+        }),
+      ),
+    );
+    const view = await setup();
+
+    await waitFor(() => expect(view.result.current.push).toBe('on'));
+    expect(view.result.current.settings?.notifications.push).toBe(true);
+    expect(calls.find((c) => c.url.includes('/api/push/'))).toMatchObject({
+      method: 'PUT',
+      body: SUBSCRIPTION,
+    });
+  });
+
   it('reports an unsupported browser', async () => {
     stubApi();
     const view = await setup();

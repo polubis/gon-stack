@@ -14,9 +14,17 @@ export const createBacklogTask = (store: Store, bus: Bus) => {
     }),
     concatMap(({ task }) =>
       from(write(store, bus, () => postBacklogTask(task))).pipe(
-        tap(() =>
-          notify(store, { tone: 'success', message: 'Dodano do backlogu.' }),
-        ),
+        tap((saved) => {
+          // The server knows the device's picture and name; the draft did not.
+          store.$backlog.set(
+            store.$backlog
+              .get()
+              .map((t) =>
+                t.id === task.id ? { ...t, device: saved.device } : t,
+              ),
+          );
+          notify(store, { tone: 'success', message: 'Dodano do backlogu.' });
+        }),
         catchError((error: unknown) => {
           store.$backlog.set(
             store.$backlog.get().filter((t) => t.id !== task.id),

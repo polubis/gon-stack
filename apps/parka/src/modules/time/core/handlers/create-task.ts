@@ -15,9 +15,17 @@ export const createTask = (store: Store, bus: Bus) => {
     }),
     concatMap(({ task }) =>
       from(write(store, bus, () => postTask(task))).pipe(
-        tap(() =>
-          notify(store, { tone: 'success', message: 'Dodano zadanie.' }),
-        ),
+        tap((saved) => {
+          // The server knows the device's picture and name; the draft did not.
+          store.$tasks.set(
+            store.$tasks
+              .get()
+              .map((t) =>
+                t.id === task.id ? { ...t, device: saved.device } : t,
+              ),
+          );
+          notify(store, { tone: 'success', message: 'Dodano zadanie.' });
+        }),
         catchError((error: unknown) => {
           store.$tasks.set(store.$tasks.get().filter((t) => t.id !== task.id));
           notify(store, {

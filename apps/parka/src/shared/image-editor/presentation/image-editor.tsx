@@ -140,7 +140,7 @@ export const ImageEditor = ({
         <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-overlay" />
         <Dialog.Content
           data-e2e="image-editor:dialog"
-          className="fixed inset-x-4 top-1/2 z-(--z-modal) mx-auto max-h-[calc(100dvh-2rem)] max-w-md -translate-y-1/2 space-y-4 overflow-y-auto rounded-2xl bg-card p-4 focus:outline-none"
+          className="fixed inset-x-4 top-[calc((100dvh-var(--kb-inset,0rem))/2)] z-(--z-modal) mx-auto max-h-[calc(100dvh-var(--kb-inset,0rem)-2rem)] max-w-md -translate-y-1/2 space-y-4 overflow-y-auto rounded-2xl bg-card p-4 focus:outline-none"
         >
           <Dialog.Title className="text-base font-semibold">
             Przytnij zdjęcie

@@ -153,7 +153,7 @@ export const BacklogDialog = ({ modal }: { modal: string }) => {
           />
         ) : (
           <>
-            <ul className="flex max-h-[60dvh] flex-col gap-2 overflow-y-auto py-0.5 pr-2">
+            <ul className="flex flex-col gap-2">
               {backlog.map((task) => (
                 <Row key={task.id} task={task} />
               ))}

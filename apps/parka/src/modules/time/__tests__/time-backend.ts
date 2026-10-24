@@ -64,6 +64,8 @@ export const setupTimeBackend = () => {
     categories: [...CATEGORIES] as Json[],
     priorities: [...PRIORITIES] as Json[],
     failWrites: false,
+    /** What the user set for the creating device; the server adds it on create. */
+    deviceProfile: null as Json | null,
     failReads: false,
     delayMs: 0,
   };
@@ -76,6 +78,14 @@ export const setupTimeBackend = () => {
     calls.push({ method: request.method, url: request.url, body });
     return body;
   };
+
+  const withProfile = (body: Json): Json =>
+    state.deviceProfile && body.device
+      ? {
+          ...body,
+          device: { ...(body.device as Json), ...state.deviceProfile },
+        }
+      : body;
 
   const server = setupServer(
     http.get('/api/time/', async ({ request }) => {
@@ -101,7 +111,7 @@ export const setupTimeBackend = () => {
       const body = await record(request);
       if (state.failWrites) return HttpResponse.json(FAILURE);
       state.backlog.push(body!);
-      return HttpResponse.json({ code: 201, data: body });
+      return HttpResponse.json({ code: 201, data: withProfile(body!) });
     }),
     http.put('/api/time/backlog/:id/', async ({ request }) => {
       const body = await record(request);
@@ -113,7 +123,7 @@ export const setupTimeBackend = () => {
       const body = await record(request);
       if (state.failWrites) return HttpResponse.json(FAILURE);
       state.tasks.push(body!);
-      return HttpResponse.json({ code: 201, data: body });
+      return HttpResponse.json({ code: 201, data: withProfile(body!) });
     }),
     http.put('/api/time/tasks/:id/', async ({ request }) => {
       const body = await record(request);
@@ -180,6 +190,7 @@ export const setupTimeBackend = () => {
     state.categories = [...CATEGORIES];
     state.priorities = [...PRIORITIES];
     state.failWrites = false;
+    state.deviceProfile = null;
     state.failReads = false;
     state.delayMs = 0;
   });

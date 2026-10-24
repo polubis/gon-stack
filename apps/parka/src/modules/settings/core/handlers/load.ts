@@ -3,7 +3,7 @@ import type { Store } from '../store';
 import type { Bus } from '../bus';
 import { fetchSettings } from '../../integration/repository';
 
-export const load = (store: Store, { ofType }: Bus) =>
+export const load = (store: Store, { ofType, emit }: Bus) =>
   ofType('[TRIGGER]_LOAD').pipe(
     tap(() => {
       store.$isLoading.set(true);
@@ -14,6 +14,7 @@ export const load = (store: Store, { ofType }: Bus) =>
       from(fetchSettings(ctrl.signal)).pipe(
         tap((settings) => {
           store.$settings.set(settings);
+          emit('[TRIGGER]_SYNC_PUSH');
         }),
         catchError((error) => {
           const isAbort =

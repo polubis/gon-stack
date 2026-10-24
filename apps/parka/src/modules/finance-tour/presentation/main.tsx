@@ -51,7 +51,7 @@ const TourDialog = ({
             event.preventDefault();
             primary.focus();
           }}
-          className="fixed inset-x-4 bottom-4 z-(--z-modal) mx-auto flex max-h-[calc(100dvh-2rem)] max-w-md animate-view-enter flex-col overflow-y-auto rounded-3xl bg-card p-5 shadow-popover focus:outline-none motion-reduce:animate-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2"
+          className="fixed inset-x-4 bottom-[calc(var(--kb-inset,0rem)+1rem)] z-(--z-modal) mx-auto flex max-h-[calc(100dvh-var(--kb-inset,0rem)-2rem)] max-w-md animate-view-enter flex-col overflow-y-auto rounded-3xl bg-card p-5 shadow-popover focus:outline-none motion-reduce:animate-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2"
         >
           <div className="mb-4 flex items-center justify-between gap-3">
             <Dialog.Title className="text-xs font-semibold tracking-wide text-brand-dark uppercase">

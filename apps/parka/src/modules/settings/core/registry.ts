@@ -6,6 +6,7 @@ import { uploadAvatar } from './handlers/upload-avatar';
 import { uploadDevicePhoto } from './handlers/upload-device-photo';
 import { loadPush } from './handlers/load-push';
 import { togglePush } from './handlers/toggle-push';
+import { syncPush } from './handlers/sync-push';
 import { dismissNotice } from './handlers/dismiss-notice';
 import { createBus } from './bus';
 
@@ -20,6 +21,7 @@ export const createRegistry = (store: Store) => {
     uploadDevicePhoto(store, bus),
     loadPush(store, bus),
     togglePush(store, bus),
+    syncPush(store, bus),
     dismissNotice(store, bus),
   );
 

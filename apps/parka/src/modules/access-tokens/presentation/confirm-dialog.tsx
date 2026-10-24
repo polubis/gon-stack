@@ -33,7 +33,7 @@ export const ConfirmDialog = ({
         <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-overlay" />
         <Dialog.Content
           data-e2e="access-tokens:confirm-dialog"
-          className="fixed inset-x-4 bottom-4 z-(--z-modal) mx-auto max-w-md animate-pop-in rounded-2xl bg-card p-4 shadow-popover focus:outline-none motion-reduce:animate-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2"
+          className="fixed inset-x-4 bottom-[calc(var(--kb-inset,0rem)+1rem)] z-(--z-modal) mx-auto max-w-md animate-pop-in rounded-2xl bg-card p-4 shadow-popover focus:outline-none motion-reduce:animate-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2"
         >
           <Dialog.Title className="text-base font-semibold">
             {title}
