@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderTime, TODAY } from './render-time';
@@ -12,6 +12,12 @@ const row = (title: string) =>
   screen.findByRole('button', { name: `Edytuj zadanie: ${title}` });
 
 const queryParams = (url: string) => new URL(url).searchParams;
+
+const readsOf = (from: string, to: string) =>
+  backend.reads().filter(({ url }) => {
+    const params = queryParams(url);
+    return params.get('from') === from && params.get('to') === to;
+  });
 
 describe('time loading', () => {
   it('shows tasks of the day in time order with the current hour marked', async () => {
@@ -88,9 +94,7 @@ describe('time navigation', () => {
       screen.getByRole('group', { name: 'Zakres czasu' }),
     ).toHaveTextContent('21.10.2026');
     expect(window.location.search).toContain('date=2026-10-21');
-    const last = backend.reads().at(-1)!;
-    expect(queryParams(last.url).get('from')).toBe('2026-10-21');
-    expect(queryParams(last.url).get('to')).toBe('2026-10-21');
+    expect(readsOf('2026-10-21', '2026-10-21')).toHaveLength(1);
   });
 
   it('returns to today with the Dziś option', async () => {
@@ -121,10 +125,9 @@ describe('time navigation', () => {
       await screen.findByRole('group', { name: 'Zakres czasu' }),
     ).toHaveTextContent('19.10.2026 – 25.10.2026');
     expect(window.location.search).toContain('date=2026-10-20');
-    await waitFor(() => {
-      const last = backend.reads().at(-1)!;
-      expect(queryParams(last.url).get('from')).toBe('2026-10-19');
-    });
+    await waitFor(() =>
+      expect(readsOf('2026-10-19', '2026-10-25')).toHaveLength(1),
+    );
   });
 
   it('reaches Dziś with the keyboard and returns to today', async () => {
@@ -168,6 +171,79 @@ describe('time navigation', () => {
     expect(
       screen.getByRole('group', { name: 'Zakres czasu' }),
     ).toHaveTextContent('19.10.2026 – 25.10.2026');
+  });
+});
+
+describe('time swipe and prefetch', () => {
+  const swipe = (target: HTMLElement, from: number, to: number) => {
+    fireEvent.touchStart(target, {
+      touches: [{ clientX: from, clientY: 200 }],
+    });
+    fireEvent.touchEnd(target, {
+      changedTouches: [{ clientX: to, clientY: 205 }],
+    });
+  };
+
+  it('swipes left to the next day and right back', async () => {
+    backend.seed([
+      task(),
+      task({ id: 't-2', title: 'Jutro', day: '2026-10-21' }),
+    ]);
+    renderTime();
+    await row('Raport miesięczny');
+    const main = screen.getByRole('main');
+
+    swipe(main, 300, 100);
+    expect(await row('Jutro')).toBeVisible();
+    expect(window.location.search).toContain('date=2026-10-21');
+
+    swipe(main, 100, 300);
+    expect(await row('Raport miesięczny')).toBeVisible();
+    expect(window.location.search).toContain('date=2026-10-20');
+  });
+
+  it('moves the content with the finger and snaps back on a short swipe', async () => {
+    renderTime();
+    await screen.findByRole('heading', { name: 'Brak zadań' });
+    const main = screen.getByRole('main');
+
+    fireEvent.touchStart(main, { touches: [{ clientX: 300, clientY: 200 }] });
+    fireEvent.touchMove(main, { touches: [{ clientX: 250, clientY: 202 }] });
+    expect(main.style.transform).toBe('translateX(-30px)');
+
+    fireEvent.touchEnd(main, {
+      changedTouches: [{ clientX: 250, clientY: 202 }],
+    });
+    expect(main.style.transform).toBe('');
+    expect(window.location.search).toContain('date=2026-10-20');
+  });
+
+  it('ignores a short or mostly vertical swipe', async () => {
+    renderTime();
+    await screen.findByRole('heading', { name: 'Brak zadań' });
+    const main = screen.getByRole('main');
+
+    swipe(main, 200, 170);
+    fireEvent.touchStart(main, { touches: [{ clientX: 300, clientY: 100 }] });
+    fireEvent.touchEnd(main, {
+      changedTouches: [{ clientX: 150, clientY: 400 }],
+    });
+
+    expect(window.location.search).toContain('date=2026-10-20');
+  });
+
+  it('opens a neighbouring day without asking for it again', async () => {
+    const user = userEvent.setup();
+    renderTime();
+    await screen.findByRole('heading', { name: 'Brak zadań' });
+    await waitFor(() =>
+      expect(readsOf('2026-10-21', '2026-10-21')).toHaveLength(1),
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Następny okres' }));
+
+    await screen.findByText(/21 października 2026/);
+    expect(readsOf('2026-10-21', '2026-10-21')).toHaveLength(1);
   });
 });
 

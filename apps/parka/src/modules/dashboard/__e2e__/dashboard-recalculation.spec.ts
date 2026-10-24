@@ -331,27 +331,39 @@ const commands = {
   },
 
   'the dashboard loaded everything once': async ({ page }) => {
-    const paths = [
-      '/api/dashboard/',
+    // The summary of the neighbouring month is fetched ahead, so it may be
+    // read twice in all: the shown month and the one before it.
+    const shared = [
       '/api/expenses/',
       '/api/categories/',
       '/api/limits/',
       '/api/recurring/',
     ];
-    for (const path of paths)
+    for (const path of shared)
       await expect
         .poll(() => backendOf(page).count('GET', path), { message: path })
         .toBe(1);
+    await expect
+      .poll(() => backendOf(page).count('GET', '/api/dashboard/'))
+      .toBeGreaterThanOrEqual(1);
     // Nothing else follows: a repeated read would show up after a settle.
     await page.waitForTimeout(500);
-    for (const path of paths)
+    for (const path of shared)
       expect(backendOf(page).count('GET', path), path).toBe(1);
+    expect(backendOf(page).count('GET', '/api/dashboard/')).toBeLessThanOrEqual(
+      2,
+    );
   },
   'the dashboard loaded everything twice': async ({ page }) => {
     await expect
-      .poll(() => backendOf(page).count('GET', '/api/dashboard/'))
+      .poll(() => backendOf(page).count('GET', '/api/recurring/'))
       .toBe(2);
+    await page.waitForTimeout(500);
     expect(backendOf(page).count('GET', '/api/recurring/')).toBe(2);
+    // Each load may also fetch the previous month ahead: two loads, at most four.
+    const summaries = backendOf(page).count('GET', '/api/dashboard/');
+    expect(summaries).toBeGreaterThanOrEqual(2);
+    expect(summaries).toBeLessThanOrEqual(4);
   },
 } satisfies CommandRegistry<Ctx>;
 

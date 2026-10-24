@@ -210,7 +210,8 @@ describe('dashboard screen', () => {
     const dashboardCalls = calls.filter(
       ({ url }) => !url.includes('/api/notifications'),
     );
-    expect(dashboardCalls).toHaveLength(6);
+    // Five reads for the month plus the summary of the month before it.
+    expect(dashboardCalls).toHaveLength(7);
   });
 
   it('shows only the failure screen when any part fails to load', async () => {

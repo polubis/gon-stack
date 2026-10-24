@@ -5,6 +5,7 @@ import type {
   Notice,
   Priority,
   Task,
+  TimeKind,
 } from '../domain/models';
 
 export type Range = { from: string; to: string };
@@ -21,7 +22,7 @@ export const createStore = () => {
   /** Range the data in `$tasks` was loaded for. */
   const $loaded = atom<Range | null>(null);
   /** Range asked for last. */
-  const $range = atom<Range | null>(null);
+  const $range = atom<(Range & { kind: TimeKind }) | null>(null);
   /** Writes in flight; a load answered meanwhile is dropped and repeated. */
   const $pending = atom(0);
   const $stale = atom(false);

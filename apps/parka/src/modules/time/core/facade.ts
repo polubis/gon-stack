@@ -9,11 +9,13 @@ import type {
   RecurringId,
   Task,
   TaskId,
+  TimeKind,
 } from '../domain/models';
 
 export const createFacade = (store: Store, trigger: Registry['trigger']) => {
   return {
-    load: (from: string, to: string) => trigger('[TRIGGER]_LOAD', { from, to }),
+    load: (kind: TimeKind, from: string, to: string) =>
+      trigger('[TRIGGER]_LOAD', { kind, from, to }),
     createTask: (task: Task) => trigger('[TRIGGER]_CREATE_TASK', { task }),
     createBacklogTask: (task: BacklogTask) =>
       trigger('[TRIGGER]_CREATE_BACKLOG_TASK', { task }),

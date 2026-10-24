@@ -19,6 +19,7 @@ import {
 } from '@schemas/recurring';
 import { browserTimeZone } from '@/shared/date/date';
 import { API_ROUTER } from '@/shared/router/routes';
+import { createRequestCache } from '@/shared/request-cache/request-cache';
 import type {
   Category,
   DashboardData,
@@ -38,6 +39,24 @@ import {
   toRecurring,
   toSummary,
 } from './mappers';
+
+const cache = createRequestCache();
+
+/** Reads are shared and kept briefly; any write drops them, also when it ends. */
+const send = async (...args: Parameters<typeof fetch>) => {
+  cache.clear();
+  try {
+    return await fetch(...args);
+  } finally {
+    cache.clear();
+  }
+};
+
+/** A cached read is shared between views, so no single view may abort it. */
+const SHARED = new AbortController().signal;
+
+/** A freshly opened dashboard never starts from reads another module outdated. */
+export const resetDashboardReads = () => cache.clear();
 
 type ListExpensesOut = z.infer<ReturnType<typeof listExpensesSchema>>['out'];
 type UpdateExpenseOut = z.infer<ReturnType<typeof updateExpenseSchema>>['out'];
@@ -108,7 +127,7 @@ export const fetchCategories = async (
 };
 
 export const putExpense = async (expense: Expense): Promise<Expense> => {
-  const response = await fetch(API_ROUTER.expenseById(expense.id), {
+  const response = await send(API_ROUTER.expenseById(expense.id), {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(expense),
@@ -119,7 +138,7 @@ export const putExpense = async (expense: Expense): Promise<Expense> => {
 };
 
 export const deleteExpense = async (id: ExpenseId): Promise<void> => {
-  const response = await fetch(API_ROUTER.expenseById(id), {
+  const response = await send(API_ROUTER.expenseById(id), {
     method: 'DELETE',
   });
   const json = (await response.json()) as DeleteExpenseOut;
@@ -137,7 +156,7 @@ export const fetchLimits = async (signal: AbortSignal): Promise<Limit[]> => {
 };
 
 export const postLimit = async (limit: Limit): Promise<Limit> => {
-  const response = await fetch(API_ROUTER.limits(), {
+  const response = await send(API_ROUTER.limits(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(limit),
@@ -148,7 +167,7 @@ export const postLimit = async (limit: Limit): Promise<Limit> => {
 };
 
 export const putLimit = async (limit: Limit): Promise<Limit> => {
-  const response = await fetch(API_ROUTER.limitById(limit.id), {
+  const response = await send(API_ROUTER.limitById(limit.id), {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(limit),
@@ -159,7 +178,7 @@ export const putLimit = async (limit: Limit): Promise<Limit> => {
 };
 
 export const deleteLimit = async (id: LimitId): Promise<void> => {
-  const response = await fetch(API_ROUTER.limitById(id), { method: 'DELETE' });
+  const response = await send(API_ROUTER.limitById(id), { method: 'DELETE' });
   const json = (await response.json()) as DeleteLimitOut;
   if (json.code !== 200) throw new Error(json.message);
 };
@@ -182,7 +201,7 @@ export const fetchRecurring = async (
 export const putRecurring = async (
   recurring: Recurring,
 ): Promise<Recurring> => {
-  const response = await fetch(API_ROUTER.recurringById(recurring.id), {
+  const response = await send(API_ROUTER.recurringById(recurring.id), {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(recurring),
@@ -193,28 +212,35 @@ export const putRecurring = async (
 };
 
 export const deleteRecurring = async (id: RecurringId): Promise<void> => {
-  const response = await fetch(API_ROUTER.recurringById(id), {
+  const response = await send(API_ROUTER.recurringById(id), {
     method: 'DELETE',
   });
   const json = (await response.json()) as DeleteRecurringOut;
   if (json.code !== 200) throw new Error(json.message);
 };
 
+const summaryKey = (period: Period) =>
+  `summary:${period.kind}:${period.from}:${period.to}`;
+
+/** Warms the summary of a period the user is likely to open next. */
+export const prefetchSummary = (period: Period) =>
+  cache.prefetch(summaryKey(period), () => fetchSummary(period, SHARED));
+
 /**
  * Single entry point for reading: every read of the dashboard in parallel.
  * Each read first turns due recurring charges into expenses on the server;
- * that is idempotent, so parallel reads never double a charge.
+ * that is idempotent, so parallel reads never double a charge. Only the
+ * summary depends on the period; the rest is shared between periods.
  */
 export const fetchDashboard = async (
   period: Period,
-  signal: AbortSignal,
 ): Promise<DashboardData> => {
   const [summary, expenses, categories, limits, recurring] = await Promise.all([
-    fetchSummary(period, signal),
-    fetchExpenses(signal),
-    fetchCategories(signal),
-    fetchLimits(signal),
-    fetchRecurring(signal),
+    cache.read(summaryKey(period), () => fetchSummary(period, SHARED)),
+    cache.read('expenses', () => fetchExpenses(SHARED)),
+    cache.read('categories', () => fetchCategories(SHARED)),
+    cache.read('limits', () => fetchLimits(SHARED)),
+    cache.read('recurring', () => fetchRecurring(SHARED)),
   ]);
 
   return { summary, expenses, categories, limits, recurring };

@@ -16,6 +16,7 @@ import type {
 } from '@schemas/time';
 import { browserTimeZone } from '@/shared/date/date';
 import { API_ROUTER } from '@/shared/router/routes';
+import { createRequestCache } from '@/shared/request-cache/request-cache';
 import type {
   BacklogTask,
   Category,
@@ -41,18 +42,25 @@ export type TimeData = {
   backlog: BacklogTask[];
 };
 
-/** Nothing else in this module fetches. */
-export const fetchTime = async (
-  from: string,
-  to: string,
-  signal: AbortSignal,
-): Promise<TimeData> => {
+const cache = createRequestCache();
+
+/** Reads are shared and kept briefly; any write drops them, also when it ends. */
+const send = async (...args: Parameters<typeof fetch>) => {
+  cache.clear();
+  try {
+    return await fetch(...args);
+  } finally {
+    cache.clear();
+  }
+};
+
+/** A freshly opened module never starts from reads another module outdated. */
+export const resetTimeReads = () => cache.clear();
+
+const readTime = async (from: string, to: string): Promise<TimeData> => {
   const response = await fetch(
     API_ROUTER.time({ from, to, tz: browserTimeZone() }),
-    {
-      headers: { Accept: 'application/json' },
-      signal,
-    },
+    { headers: { Accept: 'application/json' } },
   );
   const json = (await response.json()) as Out<typeof listTimeSchema>;
   if (json.code !== 200) throw new Error(json.message);
@@ -64,8 +72,18 @@ export const fetchTime = async (
   };
 };
 
+const timeKey = (from: string, to: string) => `${from}:${to}`;
+
+/** Warms a range the user is likely to open next. */
+export const prefetchTime = (from: string, to: string) =>
+  cache.prefetch(timeKey(from, to), () => readTime(from, to));
+
+/** Nothing else in this module reads. */
+export const fetchTime = (from: string, to: string): Promise<TimeData> =>
+  cache.read(timeKey(from, to), () => readTime(from, to));
+
 export const postTask = async (task: Task): Promise<Task> => {
-  const response = await fetch(API_ROUTER.timeTasks(), {
+  const response = await send(API_ROUTER.timeTasks(), {
     method: 'POST',
     headers: JSON_HEADERS,
     body: JSON.stringify(task),
@@ -78,7 +96,7 @@ export const postTask = async (task: Task): Promise<Task> => {
 export const postBacklogTask = async (
   task: BacklogTask,
 ): Promise<BacklogTask> => {
-  const response = await fetch(API_ROUTER.timeBacklog(), {
+  const response = await send(API_ROUTER.timeBacklog(), {
     method: 'POST',
     headers: JSON_HEADERS,
     body: JSON.stringify(task),
@@ -93,7 +111,7 @@ export const postBacklogTask = async (
 export const putBacklogTask = async (
   task: BacklogTask,
 ): Promise<BacklogTask> => {
-  const response = await fetch(API_ROUTER.timeBacklogById(task.id), {
+  const response = await send(API_ROUTER.timeBacklogById(task.id), {
     method: 'PUT',
     headers: JSON_HEADERS,
     body: JSON.stringify(task),
@@ -107,7 +125,7 @@ export const putBacklogTask = async (
 
 /** Takes a task off the board: it keeps its id, loses its day and hour. */
 export const postTaskToBacklog = async (id: TaskId): Promise<BacklogTask> => {
-  const response = await fetch(API_ROUTER.timeBacklogById(id), {
+  const response = await send(API_ROUTER.timeBacklogById(id), {
     method: 'POST',
     headers: JSON_HEADERS,
     body: JSON.stringify({ id }),
@@ -120,7 +138,7 @@ export const postTaskToBacklog = async (id: TaskId): Promise<BacklogTask> => {
 };
 
 export const putTask = async (task: Task): Promise<Task> => {
-  const response = await fetch(API_ROUTER.timeTaskById(task.id), {
+  const response = await send(API_ROUTER.timeTaskById(task.id), {
     method: 'PUT',
     headers: JSON_HEADERS,
     body: JSON.stringify(task),
@@ -131,7 +149,7 @@ export const putTask = async (task: Task): Promise<Task> => {
 };
 
 export const removeTask = async (id: TaskId): Promise<void> => {
-  const response = await fetch(API_ROUTER.timeTaskById(id), {
+  const response = await send(API_ROUTER.timeTaskById(id), {
     method: 'DELETE',
     headers: JSON_HEADERS,
   });
@@ -140,7 +158,7 @@ export const removeTask = async (id: TaskId): Promise<void> => {
 };
 
 export const postCategory = async (category: Category): Promise<Category> => {
-  const response = await fetch(API_ROUTER.timeCategories(), {
+  const response = await send(API_ROUTER.timeCategories(), {
     method: 'POST',
     headers: JSON_HEADERS,
     body: JSON.stringify(category),
@@ -151,7 +169,7 @@ export const postCategory = async (category: Category): Promise<Category> => {
 };
 
 export const putCategory = async (category: Category): Promise<Category> => {
-  const response = await fetch(API_ROUTER.timeCategoryById(category.id), {
+  const response = await send(API_ROUTER.timeCategoryById(category.id), {
     method: 'PUT',
     headers: JSON_HEADERS,
     body: JSON.stringify(category),
@@ -164,7 +182,7 @@ export const putCategory = async (category: Category): Promise<Category> => {
 export class CategoryInUseError extends Error {}
 
 export const removeCategory = async (id: CategoryId): Promise<void> => {
-  const response = await fetch(API_ROUTER.timeCategoryById(id), {
+  const response = await send(API_ROUTER.timeCategoryById(id), {
     method: 'DELETE',
     headers: JSON_HEADERS,
   });
@@ -174,7 +192,7 @@ export const removeCategory = async (id: CategoryId): Promise<void> => {
 };
 
 export const postPriority = async (priority: Priority): Promise<Priority> => {
-  const response = await fetch(API_ROUTER.timePriorities(), {
+  const response = await send(API_ROUTER.timePriorities(), {
     method: 'POST',
     headers: JSON_HEADERS,
     body: JSON.stringify(priority),
@@ -185,7 +203,7 @@ export const postPriority = async (priority: Priority): Promise<Priority> => {
 };
 
 export const postRecurring = async (recurring: Recurring): Promise<void> => {
-  const response = await fetch(API_ROUTER.timeRecurring(), {
+  const response = await send(API_ROUTER.timeRecurring(), {
     method: 'POST',
     headers: JSON_HEADERS,
     body: JSON.stringify(recurring),
@@ -195,7 +213,7 @@ export const postRecurring = async (recurring: Recurring): Promise<void> => {
 };
 
 export const removeRecurring = async (id: RecurringId): Promise<void> => {
-  const response = await fetch(API_ROUTER.timeRecurringById(id), {
+  const response = await send(API_ROUTER.timeRecurringById(id), {
     method: 'DELETE',
     headers: JSON_HEADERS,
   });

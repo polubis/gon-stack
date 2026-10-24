@@ -8,6 +8,7 @@ import { LoadingBanner } from '@/shared/ui/loading-banner';
 import { Toast } from '@/shared/ui/toast';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { PeriodControl } from '@/shared/period-control/presentation/period-control';
+import { usePeriodSwipe } from '@/shared/period-control/presentation/use-period-swipe';
 import {
   containsDay,
   periodContaining,
@@ -37,10 +38,10 @@ const ADD_BUTTON =
 const anchorOf = (period: Period, today: string): string =>
   containsDay(period, today) ? today : period.from;
 
-/** Shared period control; the route holds the kind, the store the anchor. */
-const RangeControl = ({ kind }: { kind: TimeKind }) => {
-  const { anchor, setAnchor, now } = useContext();
-  const change = (period: Period) => {
+/** Moves to a period: same kind keeps the route, another kind switches it. */
+const usePeriodChange = (kind: TimeKind) => {
+  const { setAnchor, now } = useContext();
+  return (period: Period) => {
     const day = anchorOf(period, now.day);
     if (period.kind === kind) {
       setAnchor(day);
@@ -49,15 +50,23 @@ const RangeControl = ({ kind }: { kind: TimeKind }) => {
     const target = TIME_KINDS.find((item) => item.kind === period.kind);
     if (target) navigateTo(target.href(day));
   };
-  return (
-    <PeriodControl
-      period={periodContaining(kind, anchor)}
-      today={now.day}
-      onChange={change}
-      allowFuture
-    />
-  );
 };
+
+/** Shared period control; the route holds the kind, the store the anchor. */
+const RangeControl = ({
+  period,
+  onChange,
+}: {
+  period: Period;
+  onChange: (period: Period) => void;
+}) => (
+  <PeriodControl
+    period={period}
+    today={useContext().now.day}
+    onChange={onChange}
+    allowFuture
+  />
+);
 
 const Screen = ({ kind, children }: Props) => {
   const {
@@ -71,19 +80,26 @@ const Screen = ({ kind, children }: Props) => {
     load,
     dismissNotice,
   } = useContext();
+  const period = periodContaining(kind, anchor);
+  const { gesture, go } = usePeriodSwipe({
+    period,
+    today: now.day,
+    onChange: usePeriodChange(kind),
+    allowFuture: true,
+  });
   const id: TimeE2eId = `time:${kind}`;
   const { from, to } = rangeOf(kind, anchor);
   const defaultDay =
     kind === 'day' ? anchor : now.day >= from && now.day <= to ? now.day : from;
 
   useEffect(() => {
-    load(from, to);
-  }, [load, from, to]);
+    load(kind, from, to);
+  }, [load, kind, from, to]);
 
   return (
     <div
       data-e2e={id}
-      className="relative flex flex-1 animate-view-zoom flex-col motion-reduce:animate-none"
+      className="relative flex flex-1 animate-view-zoom flex-col overflow-x-clip motion-reduce:animate-none"
     >
       <LoadingBanner active={isLoading && !initializing} />
       <div className="md:px-4 lg:px-6 xl:px-12">
@@ -105,15 +121,18 @@ const Screen = ({ kind, children }: Props) => {
           }
         />
       </div>
-      <main className="flex flex-1 flex-col gap-4 px-4 pb-24 pt-2 md:gap-6 md:px-8 md:pb-6 lg:px-10 xl:px-16">
-        <RangeControl kind={kind} />
+      <main
+        {...gesture}
+        className="flex flex-1 flex-col gap-4 px-4 pb-24 pt-2 md:gap-6 md:px-8 md:pb-6 lg:px-10 xl:px-16"
+      >
+        <RangeControl period={period} onChange={go} />
         {error ? (
           <ErrorState
             data-e2e="time:load-error"
             title="Nie udało się wczytać zadań"
             code={ERROR_CODES.load}
             description={error}
-            onRetry={() => load(from, to)}
+            onRetry={() => load(kind, from, to)}
             backHref={APP_ROUTER.dashboard()}
           />
         ) : initializing || (isLoading && !loaded) ? (

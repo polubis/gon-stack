@@ -128,6 +128,26 @@ export const shiftPeriod = (period: Period, steps: number): Period => {
 export const canGoNext = (period: Period, today: string): boolean =>
   period.to < today;
 
+/**
+ * Periods the user is most likely to open next, nearest first: one step back
+ * and forward (two for a day). Past `today` only when `allowFuture`.
+ */
+export const neighbourPeriods = (
+  period: Period,
+  today: string,
+  allowFuture: boolean,
+): Period[] => {
+  if (period.kind === 'custom') return [];
+  const reach = period.kind === 'day' ? 2 : 1;
+  const steps = Array.from({ length: reach }, (_, i) => i + 1).flatMap((n) => [
+    -n,
+    n,
+  ]);
+  return steps
+    .map((step) => shiftPeriod(period, step))
+    .filter((next) => allowFuture || next.from <= today);
+};
+
 /** Nothing lives in the future: such a period snaps to the present one. */
 export const clampPeriod = (period: Period, today: string): Period => {
   if (period.from > today) return currentPeriod(period.kind, today);

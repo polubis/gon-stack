@@ -17,6 +17,7 @@ import { APP_ROUTER } from '@/shared/router/routes';
 import { ERROR_CODES } from '../configuration/constraints';
 import { periodFromQuery, periodToQuery } from '../domain/period';
 import { AddMenu, ADD_BUTTON } from './add-menu';
+import { usePeriodSwipe } from '@/shared/period-control/presentation/use-period-swipe';
 import { CategoriesCard } from './categories-card';
 import { Provider, useContext } from './context';
 import { ExpenseDetail } from './expense-detail';
@@ -70,6 +71,12 @@ const DashboardView = () => {
     });
     setPeriod(target);
   };
+
+  const { gesture, go } = usePeriodSwipe({
+    period,
+    today,
+    onChange: goToPeriod,
+  });
 
   const upcoming = upcomingCharges(recurring, today);
 
@@ -149,16 +156,19 @@ const DashboardView = () => {
   return (
     <div
       data-e2e="dashboard:main"
-      className="relative flex flex-1 animate-view-enter flex-col motion-reduce:animate-none"
+      className="relative flex flex-1 animate-view-enter flex-col overflow-x-clip motion-reduce:animate-none"
     >
       <LoadingBanner active={loading && ready} />
-      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-3 px-4 pb-24 pt-4 md:gap-4 md:px-8 md:pb-6 lg:px-10 lg:pt-8 xl:grid xl:grid-cols-12 xl:content-start xl:px-16">
+      <main
+        {...gesture}
+        className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-3 px-4 pb-24 pt-4 md:gap-4 md:px-8 md:pb-6 lg:px-10 lg:pt-8 xl:grid xl:grid-cols-12 xl:content-start xl:px-16"
+      >
         <div className="xl:col-span-12">
           <Header
             period={period}
             today={today}
             avatar={avatar}
-            onPeriodChange={goToPeriod}
+            onPeriodChange={go}
           />
         </div>
 

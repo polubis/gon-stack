@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   canGoNext,
+  neighbourPeriods,
   limitForPeriod,
   clampPeriod,
   currentPeriod,
@@ -150,5 +151,42 @@ describe('limit scaled to a period', () => {
     expect(limitForPeriod(500, periodContaining('year', '2026-06-01'))).toBe(
       6000,
     );
+  });
+});
+
+describe('neighbourPeriods', () => {
+  const day = periodContaining('day', '2026-10-10');
+  const month = periodContaining('month', '2026-10-10');
+  const froms = (periods: { from: string }[]) => periods.map((p) => p.from);
+
+  it('lists two days around a day, nearest first', () => {
+    expect(froms(neighbourPeriods(day, '2026-10-20', true))).toEqual([
+      '2026-10-09',
+      '2026-10-11',
+      '2026-10-08',
+      '2026-10-12',
+    ]);
+  });
+
+  it('lists one month around a month', () => {
+    expect(froms(neighbourPeriods(month, '2026-10-20', true))).toEqual([
+      '2026-09-01',
+      '2026-11-01',
+    ]);
+  });
+
+  it('leaves out the future unless it is allowed', () => {
+    expect(froms(neighbourPeriods(month, '2026-10-20', false))).toEqual([
+      '2026-09-01',
+    ]);
+  });
+
+  it('has no neighbours for an own range', () => {
+    const own = {
+      kind: 'custom' as const,
+      from: '2026-10-01',
+      to: '2026-10-05',
+    };
+    expect(neighbourPeriods(own, '2026-10-20', true)).toEqual([]);
   });
 });

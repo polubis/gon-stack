@@ -82,6 +82,57 @@ describe('dashboard period control', () => {
     vi.useRealTimers();
   });
 
+  it('swipes right to the previous month and left to come back', async () => {
+    await open();
+    const main = screen.getByRole('main');
+    const swipe = (from: number, to: number) => {
+      fireEvent.touchStart(main, {
+        touches: [{ clientX: from, clientY: 200 }],
+      });
+      fireEvent.touchEnd(main, {
+        changedTouches: [{ clientX: to, clientY: 205 }],
+      });
+    };
+
+    swipe(300, 100);
+    expect(label().textContent).toBe('10.2026');
+
+    swipe(100, 300);
+    await waitFor(() => expect(label().textContent).toBe('09.2026'));
+
+    swipe(300, 100);
+    await waitFor(() => expect(label().textContent).toBe('10.2026'));
+  });
+
+  it('resists a drag towards the future and snaps back', async () => {
+    await open();
+    const main = screen.getByRole('main');
+
+    fireEvent.touchStart(main, { touches: [{ clientX: 300, clientY: 200 }] });
+    fireEvent.touchMove(main, { touches: [{ clientX: 200, clientY: 200 }] });
+    expect(main.style.transform).toBe('translateX(-20px)');
+
+    fireEvent.touchEnd(main, {
+      changedTouches: [{ clientX: 200, clientY: 200 }],
+    });
+    expect(main.style.transform).toBe('');
+    expect(label().textContent).toBe('10.2026');
+  });
+
+  it('opens the previous month without asking for it again', async () => {
+    const calls = await open();
+    await waitFor(() =>
+      expect(asked(calls).join(' ')).toContain('from=2026-09-01'),
+    );
+
+    await userEvent.click(prev());
+
+    await waitFor(() => expect(label().textContent).toBe('09.2026'));
+    expect(
+      asked(calls).filter((url) => url.includes('from=2026-09-01')),
+    ).toHaveLength(1);
+  });
+
   it('opens on the current month and cannot go forward', async () => {
     await open();
 
@@ -98,7 +149,7 @@ describe('dashboard period control', () => {
     expect(label().textContent).toBe('09.2026');
     expect(next().disabled).toBe(false);
     await waitFor(() =>
-      expect(asked(calls).at(-1)).toContain('kind=month&from=2026-09-01'),
+      expect(asked(calls).join(' ')).toContain('kind=month&from=2026-09-01'),
     );
 
     await userEvent.click(next());
@@ -125,7 +176,7 @@ describe('dashboard period control', () => {
     expect(label().textContent).toBe('05.10.2026 – 11.10.2026');
     expect(screen.getByText('Wydatki w tym tygodniu')).toBeTruthy();
     await waitFor(() =>
-      expect(asked(calls).at(-1)).toContain('kind=week&from=2026-10-05'),
+      expect(asked(calls).join(' ')).toContain('kind=week&from=2026-10-05'),
     );
 
     await userEvent.click(prev());
@@ -169,7 +220,7 @@ describe('dashboard period control', () => {
     await userEvent.click(prev());
     expect(label().textContent).toBe('2025');
     await waitFor(() =>
-      expect(asked(calls).at(-1)).toContain('kind=year&from=2025-01-01'),
+      expect(asked(calls).join(' ')).toContain('kind=year&from=2025-01-01'),
     );
 
     await userEvent.click(next());
@@ -251,6 +302,7 @@ describe('dashboard period control', () => {
     );
 
     await userEvent.click(prev());
+    await userEvent.click(prev());
 
     expect(screen.getByText('Wydatki w tym miesiącu')).toBeTruthy();
     expect(screen.getByText('Ładowanie danych')).toBeTruthy();
@@ -277,7 +329,7 @@ describe('dashboard period control', () => {
       expect(label().textContent).toBe('03.2026');
       expect(screen.queryByLabelText('Wybierz miesiąc')).toBeNull();
       await waitFor(() =>
-        expect(asked(calls).at(-1)).toContain('kind=month&from=2026-03-01'),
+        expect(asked(calls).join(' ')).toContain('kind=month&from=2026-03-01'),
       );
     });
 
@@ -386,7 +438,7 @@ describe('dashboard period control', () => {
       await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
       expect(label().textContent).toBe('01.09.2026 – 30.09.2026');
       await waitFor(() =>
-        expect(asked(calls).at(-1)).toContain(
+        expect(asked(calls).join(' ')).toContain(
           'kind=custom&from=2026-09-01&to=2026-09-30',
         ),
       );
