@@ -139,12 +139,8 @@ describe('time task form', () => {
 
     const dialog = within(await openFromMenu(user, 'Zadanie'));
 
-    expect(priorityLabels(dialog)).toEqual([
-      '2 - Niski',
-      '5 - Średni',
-      '9 - Wysoki',
-    ]);
-    expect(dialog.getByRole('radio', { name: '5 - Średni' })).toBeChecked();
+    expect(priorityLabels(dialog)).toEqual(['Niski', 'Średni', 'Wysoki']);
+    expect(dialog.getByRole('radio', { name: 'Średni' })).toBeChecked();
   });
 
   it('selects a new priority created over the task form', async () => {
@@ -162,12 +158,12 @@ describe('time task form', () => {
 
     await waitFor(() => expect(modalsInUrl()).toEqual(['task-new']));
     const form2 = within(screen.getByRole('dialog'));
-    expect(form2.getByRole('radio', { name: '7 - Pilny' })).toBeChecked();
+    expect(form2.getByRole('radio', { name: 'Pilny' })).toBeChecked();
     expect(priorityLabels(form2)).toEqual([
-      '2 - Niski',
-      '5 - Średni',
-      '7 - Pilny',
-      '9 - Wysoki',
+      'Niski',
+      'Średni',
+      'Pilny',
+      'Wysoki',
     ]);
     await waitFor(() =>
       expect(backend.writes().map((call) => call.body)).toEqual([
@@ -228,7 +224,7 @@ describe('time task edit', () => {
     );
 
     const dialog = within(await screen.findByRole('dialog'));
-    expect(dialog.getByRole('radio', { name: '9 - Wysoki' })).toBeChecked();
+    expect(dialog.getByRole('radio', { name: 'Wysoki' })).toBeChecked();
     expect(dialog.getByRole('button', { name: 'Zapisz' })).toBeVisible();
   });
 
@@ -239,8 +235,8 @@ describe('time task edit', () => {
     ]);
     renderTime();
 
-    expect(await screen.findByText('Priorytet 9: Wysoki')).toBeInTheDocument();
-    expect(screen.getByText('Priorytet 2: Niski')).toBeInTheDocument();
+    expect(await screen.findByText('Wysoki')).toBeInTheDocument();
+    expect(screen.getByText('Niski')).toBeInTheDocument();
   });
 });
 

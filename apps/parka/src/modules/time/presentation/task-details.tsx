@@ -3,6 +3,7 @@ import { closeModalThen, openModal } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
 import { DESCRIPTION_CLAMP_LINES } from '../configuration/constraints';
 import type { BacklogTask, Task } from '../domain/models';
+import { PriorityBadge } from './priority-badge';
 import { useContext } from './context';
 import { descriptionModal, editBacklogModal, editTaskModal } from './modal-ids';
 import { ModalShell } from './modal-shell';
@@ -90,11 +91,7 @@ export const TaskDetails = ({
               {category.name}
             </span>
           ) : null}
-          {priority ? (
-            <span>
-              Priorytet {priority.value}: {priority.name}
-            </span>
-          ) : null}
+          {priority ? <PriorityBadge priority={priority} /> : null}
           {isBoardTask(task) && task.done ? <span>Zrobione</span> : null}
           {isBoardTask(task) && task.inProgress ? <span>W trakcie</span> : null}
         </p>

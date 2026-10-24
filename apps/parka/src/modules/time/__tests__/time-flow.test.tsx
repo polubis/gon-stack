@@ -257,7 +257,7 @@ describe('time task creation', () => {
 
     const dialog = within(await screen.findByRole('dialog'));
     await user.type(dialog.getByRole('textbox', { name: 'Nazwa' }), 'Kurs');
-    await user.click(dialog.getByRole('radio', { name: '9 - Wysoki' }));
+    await user.click(dialog.getByRole('radio', { name: 'Wysoki' }));
     await user.click(dialog.getByRole('switch', { name: 'Cały dzień' }));
     await user.click(dialog.getByRole('button', { name: 'Dodaj' }));
 

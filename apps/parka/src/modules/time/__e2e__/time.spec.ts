@@ -188,18 +188,14 @@ const commands = {
     await expect(
       dialog.getByRole('radio', { name: 'Odpoczynek' }),
     ).toBeVisible();
-    await expect(
-      dialog.getByRole('radio', { name: '5 - Średni' }),
-    ).toBeChecked();
+    await expect(dialog.getByRole('radio', { name: 'Średni' })).toBeChecked();
     await expect(page).toHaveURL(/modal=task-new/);
   },
 
   'i add a task and it survives a reload': async ({ page, getByE2e }) => {
     const dialog = getByE2e('time:task-dialog');
     await dialog.getByRole('textbox', { name: 'Nazwa' }).fill('Raport E2E');
-    await dialog
-      .getByRole('radio', { name: '9 - Wysoki' })
-      .check({ force: true });
+    await dialog.getByRole('radio', { name: 'Wysoki' }).check({ force: true });
     await Promise.all([
       synced(page, 'POST', 201),
       getByE2e('time:task-save').click(),

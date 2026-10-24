@@ -4,7 +4,7 @@ import { openModal } from '@/shared/router/modal-stack';
 import type { BacklogTask, Task } from '../domain/models';
 import { useContext } from './context';
 import { editBacklogModal, editTaskModal, viewTaskModal } from './modal-ids';
-import { PriorityMark } from './priority-mark';
+import { PriorityBadge } from './priority-badge';
 import { RecurringMark } from './recurring-mark';
 import { stagger } from './stagger';
 import { TaskMenu } from './task-menu';
@@ -36,9 +36,10 @@ const nextStatus = (task: Task): { task: Task; message: string } =>
 
 /** Task line: status cycle, title (opens details), a muted meta line, edit and a "more" menu. Backlog tasks have no status. */
 export const TaskRow = ({ task, now, step }: Props) => {
-  const { categories, updateTask } = useContext();
+  const { categories, priorities, updateTask } = useContext();
   const board = 'day' in task ? task : null;
   const category = categories.find((item) => item.id === task.categoryId);
+  const priority = priorities.find((item) => item.id === task.priorityId);
   const hasMeta =
     board?.at != null ||
     board?.inProgress ||
@@ -120,11 +121,11 @@ export const TaskRow = ({ task, now, step }: Props) => {
               </span>
             ) : null}
             {board?.recurringId != null ? <RecurringMark /> : null}
-            <PriorityMark id={task.priorityId} />
+            {priority ? <PriorityBadge priority={priority} /> : null}
           </p>
-        ) : (
-          <PriorityMark id={task.priorityId} />
-        )}
+        ) : priority ? (
+          <PriorityBadge priority={priority} />
+        ) : null}
       </div>
       <button
         type="button"
