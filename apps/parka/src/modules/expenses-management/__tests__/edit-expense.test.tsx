@@ -56,6 +56,11 @@ const mockBackend = (stored: object[] = [STORED], putStatus = 200) => {
     http.get('/api/expenses/', () =>
       HttpResponse.json({ code: 200, data: stored }),
     ),
+    http.post('/api/expenses/', async ({ request }) => {
+      const body = (await request.json()) as Record<string, unknown>;
+      written.push(body);
+      return HttpResponse.json({ code: 201, data: body });
+    }),
     http.put('/api/expenses/:id/', async ({ request }) => {
       const body = (await request.json()) as Record<string, unknown>;
       written.push(body);
@@ -190,5 +195,51 @@ describe('editing an expense on its own page', () => {
     await open('?id=gone&month=2025-04');
 
     expect(await screen.findByText('Nie znaleziono wydatku')).toBeVisible();
+  });
+});
+
+describe('duplicating an expense', () => {
+  beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+  beforeEach(() => navigateTo.mockClear());
+  afterEach(() => server.resetHandlers());
+  afterAll(() => server.close());
+
+  const duplicate = async () => {
+    const written = mockBackend();
+    window.history.replaceState(
+      null,
+      '',
+      '/app/expenses/new/?duplicate=e-1&month=2025-04',
+    );
+    const user = userEvent.setup();
+    render(<Main />);
+    await screen.findByLabelText('Sklep');
+    return { user, written };
+  };
+
+  it('opens the add form filled with the expense', async () => {
+    await duplicate();
+
+    expect(screen.getByLabelText('Sklep')).toHaveValue('Piekarnia');
+    expect(screen.getByLabelText('Metoda płatności')).toHaveValue('Karta');
+    expect(screen.getByRole('button', { name: /Chleb/ })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Dodaj wydatek' })).toBeEnabled();
+  });
+
+  it('saves a new expense dated today and keeps the original', async () => {
+    const { user, written } = await duplicate();
+
+    await user.click(screen.getByRole('button', { name: 'Dodaj wydatek' }));
+
+    await waitFor(() => expect(written).toHaveLength(1));
+    expect(written[0]).toMatchObject({
+      merchant: 'Piekarnia',
+      amount: 3.2,
+      categoryId: 'c-1',
+      items: [{ name: 'Chleb', unitPrice: 3.2 }],
+    });
+    expect(written[0]?.id).not.toBe('e-1');
+    expect(written[0]?.date).not.toBe(STORED.date);
+    expect((written[0]?.items as { id: string }[])[0]?.id).not.toBe('i-1');
   });
 });

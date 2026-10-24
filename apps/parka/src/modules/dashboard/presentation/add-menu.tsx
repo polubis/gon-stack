@@ -38,11 +38,11 @@ const OPTIONS: readonly Option[] = [
 
 const KEYS = ['ArrowDown', 'ArrowUp', 'Home', 'End'];
 
-const ITEM =
+export const ITEM =
   'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-hover-soft focus-visible:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
 
 /** Arrow, Home and End keys move focus between the menu items. */
-const moveFocus = (e: KeyboardEvent<HTMLElement>) => {
+export const moveFocus = (e: KeyboardEvent<HTMLElement>) => {
   if (!KEYS.includes(e.key)) return;
   const items = [
     ...e.currentTarget.querySelectorAll<HTMLElement>('[role="menuitem"]'),

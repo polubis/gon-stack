@@ -233,7 +233,7 @@ describe('dashboard period control', () => {
 
     await kind('Dzień');
     expect(
-      screen.getByRole('button', { name: /Sklep Dzisiejszy/ }),
+      screen.getByRole('button', { name: /^Sklep Dzisiejszy/ }),
     ).toBeTruthy();
     expect(
       screen.queryByRole('button', { name: /Zeszłotygodniowy/ }),
@@ -242,7 +242,7 @@ describe('dashboard period control', () => {
     await kind('Miesiąc');
     await userEvent.click(prev());
     expect(
-      screen.queryByRole('button', { name: /Sklep Dzisiejszy/ }),
+      screen.queryByRole('button', { name: /^Sklep Dzisiejszy/ }),
     ).toBeNull();
     expect(
       within(screen.getByRole('region', { name: 'Wydatki' })).getByText(
@@ -252,7 +252,9 @@ describe('dashboard period control', () => {
 
     await kind('Rok');
     await userEvent.click(prev());
-    expect(screen.getByRole('button', { name: /Zeszłoroczny/ })).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: /^(?!Więcej).*Zeszłoroczny/ }),
+    ).toBeTruthy();
   });
 
   it('works from the keyboard', async () => {

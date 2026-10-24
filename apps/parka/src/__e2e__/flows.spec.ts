@@ -520,15 +520,15 @@ const commands = {
   'expenses can be filtered by category': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.dashboard());
     await getByE2e('dashboard:filter:cat-1').click();
-    await expect(page.getByRole('button', { name: /Tauron/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Kino Helios/ })).toHaveCount(
-      0,
-    );
+    await expect(page.getByRole('button', { name: /^Tauron/ })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: /^Kino Helios/ }),
+    ).toHaveCount(0);
   },
 
   'i open an expense on its edit page': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.dashboard());
-    await page.getByRole('button', { name: /Kino Helios/ }).click();
+    await page.getByRole('button', { name: /^Kino Helios/ }).click();
     await expect(getByE2e('dashboard:detail')).toBeVisible();
     await getByE2e('dashboard:edit').click();
     await page.waitForURL('**/app/expenses/edit/**');
@@ -559,7 +559,7 @@ const commands = {
     getByE2e,
   }) => {
     await page.waitForLoadState('networkidle');
-    await page.getByRole('button', { name: /Kino Nowe Horyzonty/ }).click();
+    await page.getByRole('button', { name: /^Kino Nowe Horyzonty/ }).click();
     await expect(
       getByE2e('dashboard:detail').getByText('Popcorn'),
     ).toBeVisible();
@@ -568,7 +568,7 @@ const commands = {
     await expect(getByE2e('dashboard:detail')).toHaveCount(0);
   },
   'i delete the updated expense': async ({ page, getByE2e }) => {
-    await page.getByRole('button', { name: /Kino Nowe Horyzonty/ }).click();
+    await page.getByRole('button', { name: /^Kino Nowe Horyzonty/ }).click();
     await getByE2e('dashboard:delete').click();
     await getByE2e('dashboard:delete-confirm').click();
     await expect(page.getByText('Kino Nowe Horyzonty')).toHaveCount(0);

@@ -72,6 +72,9 @@ export type ExpenseEditQuery = {
 
 export type NewExpenseQuery = {
   type?: 'normal' | 'recurring';
+  /** Id of a stored expense whose data pre-fills the new one. */
+  duplicate?: string;
+  month?: string;
 };
 
 /**

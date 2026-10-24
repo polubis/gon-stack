@@ -1,4 +1,5 @@
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { currentMonth } from '../domain/format';
 import { Main } from '../presentation/main';
@@ -91,5 +92,32 @@ describe('expense popup', () => {
       'href',
       `/app/expenses/edit/?id=e-1&month=${currentMonth()}`,
     );
+  });
+
+  it('has no Duplicate in the popup; it lives under the row menu', async () => {
+    render(<Main />);
+    const dialog = within(await screen.findByRole('dialog'));
+
+    expect(
+      dialog.queryByRole('link', { name: /Duplikuj/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('duplicates from the row menu without opening the popup', async () => {
+    window.history.replaceState(null, '', '/app/');
+    const user = userEvent.setup();
+    render(<Main />);
+
+    await user.click(
+      await screen.findByRole('button', { name: 'Więcej: Piekarnia' }),
+    );
+
+    expect(
+      await screen.findByRole('menuitem', { name: 'Duplikuj: Piekarnia' }),
+    ).toHaveAttribute(
+      'href',
+      `/app/expenses/new/?duplicate=e-1&month=${currentMonth()}`,
+    );
+    expect(screen.queryByText('Produkty (1)')).not.toBeInTheDocument();
   });
 });

@@ -54,7 +54,7 @@ describe('expense device in the list', () => {
 
   it('names the device on a row that has one', async () => {
     render(<Main />);
-    const row = await screen.findByRole('button', { name: /Piekarnia/ });
+    const row = await screen.findByRole('button', { name: /^Piekarnia/ });
 
     expect(
       within(row).getByText('SM-S918B · iOS 17 · Safari'),
@@ -65,28 +65,28 @@ describe('expense device in the list', () => {
   it('shows the custom name instead of the built one', async () => {
     custom = 'Telefon Ani';
     render(<Main />);
-    const row = await screen.findByRole('button', { name: /Piekarnia/ });
+    const row = await screen.findByRole('button', { name: /^Piekarnia/ });
 
     expect(within(row).getByText('Telefon Ani')).toBeInTheDocument();
   });
 
   it('colors the avatar by the device id', async () => {
     render(<Main />);
-    const row = await screen.findByRole('button', { name: /Piekarnia/ });
+    const row = await screen.findByRole('button', { name: /^Piekarnia/ });
 
     expect(row.querySelector('[data-device-color]')).not.toBeNull();
   });
 
   it('shows the avatar chosen for the device', async () => {
     render(<Main />);
-    const row = await screen.findByRole('button', { name: /Piekarnia/ });
+    const row = await screen.findByRole('button', { name: /^Piekarnia/ });
 
     expect(row.querySelector('[data-avatar="rocket"]')).not.toBeNull();
   });
 
   it('shows no device on a row created before devices were tracked', async () => {
     render(<Main />);
-    const row = await screen.findByRole('button', { name: /Kiosk/ });
+    const row = await screen.findByRole('button', { name: /^Kiosk/ });
 
     expect(within(row).queryByText(/ on /)).not.toBeInTheDocument();
   });

@@ -8,11 +8,17 @@ import {
   loadDeviceHints,
 } from '@/shared/device/integration/current-device';
 import { newExpenseId } from '../domain/ids';
-import type { ReceiptDraft } from '../domain/models';
+import type { ReceiptDraft, StoredExpense } from '../domain/models';
 import { useContext } from './context';
 
-/** Adds an expense through the shared form; starts from a scan when given. */
-export const NewExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
+/** Adds an expense through the shared form; starts from a scan or a copied expense. */
+export const NewExpenseForm = ({
+  draft,
+  source,
+}: {
+  draft: ReceiptDraft | null;
+  source: StoredExpense | null;
+}) => {
   const ctx = useContext();
   const categories = ctx.useCategories();
   const saving = ctx.useSaving();
@@ -22,16 +28,26 @@ export const NewExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
     void loadDeviceHints();
   }, []);
 
-  const base: ExpenseFormValues | null = draft
+  // A copy keeps every field but gets today's date and fresh product ids.
+  const base: ExpenseFormValues | null = source
     ? {
-        merchant: draft.merchant,
-        date: dayAtCurrentTime(draft.date),
-        amount: draft.amount,
-        categoryId: null,
-        paymentMethod: draft.paymentMethod ?? '',
-        items: productsFromDraft(draft.items, categories),
+        merchant: source.merchant,
+        date: new Date().toISOString(),
+        amount: source.amount,
+        categoryId: source.categoryId,
+        paymentMethod: source.paymentMethod,
+        items: productsFromDraft(source.items, categories),
       }
-    : null;
+    : draft
+      ? {
+          merchant: draft.merchant,
+          date: dayAtCurrentTime(draft.date),
+          amount: draft.amount,
+          categoryId: null,
+          paymentMethod: draft.paymentMethod ?? '',
+          items: productsFromDraft(draft.items, categories),
+        }
+      : null;
 
   return (
     <ExpenseForm
@@ -39,7 +55,7 @@ export const NewExpenseForm = ({ draft }: { draft: ReceiptDraft | null }) => {
       categories={categories}
       saving={saving}
       layout="page"
-      prefill
+      prefill={!source}
       submitLabel="Dodaj wydatek"
       onSubmit={(values) =>
         ctx.createExpense({

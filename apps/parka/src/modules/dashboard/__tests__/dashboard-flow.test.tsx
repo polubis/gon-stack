@@ -297,23 +297,23 @@ describe('dashboard month expenses', () => {
 
     await openSeptember();
 
-    await screen.findByRole('button', { name: /Sklep Testowy/ });
-    expect(screen.getByRole('button', { name: /Kino Testowe/ })).toBeTruthy();
+    await screen.findByRole('button', { name: /^Sklep Testowy/ });
+    expect(screen.getByRole('button', { name: /^Kino Testowe/ })).toBeTruthy();
     expect(screen.queryByRole('button', { name: /Stary Sklep/ })).toBeNull();
   });
 
   it('narrows the list to the chosen category', async () => {
     stubWithExpenses();
     await openSeptember();
-    await screen.findByRole('button', { name: /Sklep Testowy/ });
+    await screen.findByRole('button', { name: /^Sklep Testowy/ });
 
     await userEvent.click(screen.getByRole('button', { name: /^Rozrywka 1/ }));
 
-    expect(screen.getByRole('button', { name: /Kino Testowe/ })).toBeTruthy();
-    expect(screen.queryByRole('button', { name: /Sklep Testowy/ })).toBeNull();
+    expect(screen.getByRole('button', { name: /^Kino Testowe/ })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /^Sklep Testowy/ })).toBeNull();
 
     await userEvent.click(screen.getByRole('button', { name: /^Wszystkie 2/ }));
 
-    expect(screen.getByRole('button', { name: /Sklep Testowy/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /^Sklep Testowy/ })).toBeTruthy();
   });
 });

@@ -73,6 +73,8 @@ export const DASHBOARD_E2E_IDS = [
 
 export type DashboardDynamicE2eId =
   | `dashboard:expense:${string | number}`
+  | `dashboard:expense-more:${string | number}`
+  | `dashboard:expense-duplicate:${string | number}`
   | `dashboard:upcoming:${string}`
   | `dashboard:limit-edit:${string | number}`
   | `dashboard:filter:${string | number}`

@@ -14,6 +14,9 @@ export const KIND_PARAM = 'type';
 /** Query param holding the id of the expense the edit page works on. */
 export const EXPENSE_ID_PARAM = 'id';
 
+/** Query param holding the id of the expense a new one is copied from. */
+export const DUPLICATE_PARAM = 'duplicate';
+
 /** Query param holding the dashboard month to come back to. */
 export const MONTH_PARAM = 'month';
 

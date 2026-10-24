@@ -41,7 +41,7 @@ describe('dashboard modals', () => {
     render(<Main />);
 
     const list = await openAllExpenses(user);
-    await user.click(list.getByRole('button', { name: /Sklep 0/ }));
+    await user.click(list.getByRole('button', { name: /^Sklep 0/ }));
 
     await waitFor(() => expect(dialogs()).toHaveLength(2));
     expect(modalsInUrl()).toEqual(['expenses', 'expense:e-0']);
@@ -52,7 +52,7 @@ describe('dashboard modals', () => {
     const user = userEvent.setup();
     render(<Main />);
     const list = await openAllExpenses(user);
-    await user.click(list.getByRole('button', { name: /Sklep 0/ }));
+    await user.click(list.getByRole('button', { name: /^Sklep 0/ }));
     await waitFor(() => expect(dialogs()).toHaveLength(2));
 
     window.history.back();
@@ -69,7 +69,7 @@ describe('dashboard modals', () => {
     const user = userEvent.setup();
     render(<Main />);
     const list = await openAllExpenses(user);
-    await user.click(list.getByRole('button', { name: /Sklep 0/ }));
+    await user.click(list.getByRole('button', { name: /^Sklep 0/ }));
     await waitFor(() => expect(dialogs()).toHaveLength(2));
 
     const top = within(screen.getByRole('dialog', { name: 'Sklep 0' }));
@@ -84,7 +84,7 @@ describe('dashboard modals', () => {
     const user = userEvent.setup();
     render(<Main />);
     const list = await openAllExpenses(user);
-    await user.click(list.getByRole('button', { name: /Sklep 0/ }));
+    await user.click(list.getByRole('button', { name: /^Sklep 0/ }));
     await waitFor(() => expect(dialogs()).toHaveLength(2));
 
     await user.keyboard('{Escape}');

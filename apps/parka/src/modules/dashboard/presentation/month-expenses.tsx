@@ -25,6 +25,7 @@ import type {
 import { DetailDialog } from './detail-dialog';
 import { DeviceBadge } from './device-badge';
 import { useContext } from './context';
+import { ExpenseMenu } from './expense-menu';
 import { EXPENSES_MODAL } from './modal-ids';
 import { RecurringMark, UpcomingBadge } from './recurring-badge';
 import { ShowAllFade } from './show-all-fade';
@@ -90,7 +91,7 @@ const Row = ({
     type="button"
     onClick={() => onSelect(id)}
     data-e2e={`dashboard:expense:${id}`}
-    className={cn(ROW_CLASS, 'hover:bg-hover-soft')}
+    className={cn(ROW_CLASS, 'min-w-0 flex-1 hover:bg-hover-soft')}
   >
     {children}
   </button>
@@ -110,7 +111,7 @@ const ExpenseList = ({
     {expenses.map((e) => {
       const category = categoryOf(categories, e.categoryId);
       return (
-        <li key={e.id} className="group">
+        <li key={e.id} className="group flex items-center gap-1">
           <Row id={e.id} onSelect={onSelect}>
             <span className="relative shrink-0">
               <CategoryAvatar category={category} className="h-10 w-10" />
@@ -138,6 +139,7 @@ const ExpenseList = ({
               </span>
             </span>
           </Row>
+          <ExpenseMenu expense={e} />
         </li>
       );
     })}

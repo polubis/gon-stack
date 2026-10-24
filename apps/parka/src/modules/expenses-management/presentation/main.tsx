@@ -13,6 +13,7 @@ import { ScreenHeader } from '@/shared/ui/layout';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
 import { Toast } from '@/shared/ui/toast';
 import {
+  DUPLICATE_PARAM,
   ERROR_CODES,
   EXPENSE_ID_PARAM,
   KIND_PARAM,
@@ -44,7 +45,11 @@ const ExpensesManagementView = () => {
   const saved = ctx.useSaved();
   const scanned = ctx.useScanned();
   const [editing] = useState(() => window.location.pathname.includes('/edit/'));
-  const expenseId = editing ? readQueryParam(EXPENSE_ID_PARAM) : null;
+  const [duplicateId] = useState(() =>
+    editing ? null : readQueryParam(DUPLICATE_PARAM),
+  );
+  const expenseId = editing ? readQueryParam(EXPENSE_ID_PARAM) : duplicateId;
+  const loadingSource = editing || duplicateId !== null;
   const month = readQueryParam(MONTH_PARAM);
   const expense = ctx.useExpense();
   const expenseLoading = ctx.useExpenseLoading();
@@ -54,9 +59,9 @@ const ExpensesManagementView = () => {
   }, [ctx]);
 
   useEffect(() => {
-    if (editing) return;
+    if (editing || duplicateId) return;
     void takeReceipt().then((file) => file && ctx.scanReceipt(file));
-  }, [ctx, editing]);
+  }, [ctx, editing, duplicateId]);
 
   useEffect(() => {
     if (expenseId) ctx.loadExpense(expenseId);
@@ -79,7 +84,13 @@ const ExpensesManagementView = () => {
       <LoadingBanner active={isLoading && !initializing} />
       <div className="md:px-4 lg:px-6 xl:px-12">
         <ScreenHeader
-          title={editing ? 'Edytuj wydatek' : 'Nowy wydatek'}
+          title={
+            editing
+              ? 'Edytuj wydatek'
+              : duplicateId
+                ? 'Duplikuj wydatek'
+                : 'Nowy wydatek'
+          }
           backHref={APP_ROUTER.dashboard({ month: month ?? undefined })}
         />
       </div>
@@ -95,11 +106,19 @@ const ExpensesManagementView = () => {
           />
         ) : null}
 
-        {initializing || (editing && expenseLoading) ? (
+        {initializing || (loadingSource && expenseLoading) ? (
           <PageSkeleton />
-        ) : editing ? (
+        ) : loadingSource ? (
           expense ? (
-            <EditExpenseForm key={expense.id} expense={expense} month={month} />
+            editing ? (
+              <EditExpenseForm
+                key={expense.id}
+                expense={expense}
+                month={month}
+              />
+            ) : (
+              <NewExpenseForm key={expense.id} draft={null} source={expense} />
+            )
           ) : error ? null : (
             <ErrorState
               data-e2e="expenses-management:not-found"
@@ -129,6 +148,7 @@ const ExpensesManagementView = () => {
                 <NewExpenseForm
                   key={scanned?.id ?? 0}
                   draft={scanned?.draft ?? null}
+                  source={null}
                 />
               </ReceiptUpload>
             ) : (
