@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { sortByUsage } from '../domain/category-usage';
 import { periodTitle } from '../domain/period-title';
-import type { Category, Task } from '../domain/models';
+import type { Category, Priority, PriorityId, Task } from '../domain/models';
 import {
   countsByMonth,
   gridHours,
@@ -10,6 +10,7 @@ import {
   sortTasks,
   weekDays,
 } from '../domain/schedule';
+import { sortByPriority } from '../domain/priority';
 
 const task = (title: string, day: string, at: string | null): Task =>
   ({ id: title, title, day, at }) as Task;
@@ -104,6 +105,64 @@ describe('categories by usage', () => {
       'Zakupy',
       'Dom',
       'Praca',
+    ]);
+  });
+});
+
+const PRIORITIES = [
+  { id: 'low', name: 'Niski', value: 2 },
+  { id: 'high', name: 'Wysoki', value: 9 },
+] as Priority[];
+
+const withPriority = (title: string, at: string | null, id: string): Task =>
+  ({ ...task(title, '2026-10-20', at), priorityId: id }) as Task;
+
+describe('priority order of tasks', () => {
+  it('puts the highest priority first among whole-day tasks', () => {
+    const sorted = sortTasks(
+      [
+        withPriority('a', null, 'low'),
+        withPriority('b', null, 'high'),
+        withPriority('c', null, 'gone'),
+      ],
+      PRIORITIES,
+    );
+
+    expect(sorted.map((t) => t.title)).toEqual(['b', 'a', 'c']);
+  });
+
+  it('keeps time order and ranks only within the same hour', () => {
+    const sorted = sortTasks(
+      [
+        withPriority('late', '18:00', 'high'),
+        withPriority('x', '09:00', 'low'),
+        withPriority('y', '09:00', 'high'),
+      ],
+      PRIORITIES,
+    );
+
+    expect(sorted.map((t) => t.title)).toEqual(['y', 'x', 'late']);
+  });
+
+  it('orders equal priorities by title', () => {
+    const sorted = sortTasks(
+      [withPriority('b', null, 'high'), withPriority('a', null, 'high')],
+      PRIORITIES,
+    );
+
+    expect(sorted.map((t) => t.title)).toEqual(['a', 'b']);
+  });
+
+  it('sorts any items by priority, ties keep their order', () => {
+    const items = [
+      { id: 1, priorityId: 'low' },
+      { id: 2, priorityId: 'high' },
+      { id: 3, priorityId: 'low' },
+      { id: 4, priorityId: 'none' },
+    ].map((item) => ({ ...item, priorityId: item.priorityId as PriorityId }));
+
+    expect(sortByPriority(items, PRIORITIES).map((i) => i.id)).toEqual([
+      2, 1, 3, 4,
     ]);
   });
 });

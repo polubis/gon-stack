@@ -29,12 +29,12 @@ const DayName = ({ day }: { day: string }) => (
 
 /** Phone to desktop: one light card per day, tasks in time order (all-day first). */
 const DayCards = ({ days }: { days: string[] }) => {
-  const { tasks, now } = useContext();
+  const { tasks, priorities, now } = useContext();
   return (
     <ol className="grid gap-3 md:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:hidden">
       {days.map((day, dayIndex) => {
         const today = day === now.day;
-        const ofDay = tasksOn(tasks, day);
+        const ofDay = tasksOn(tasks, day, priorities);
         const allDay = ofDay.filter((task) => task.at === null);
         const timed = ofDay.filter(isTimed);
         const nowIndex = today ? nowIndexOf(timed, now.time) : -1;
@@ -80,8 +80,9 @@ const DayCards = ({ days }: { days: string[] }) => {
 
 /** Extra wide screens (2xl+): all-day row on top, then an hour axis with tasks at their hour. */
 const HourGrid = ({ days }: { days: string[] }) => {
-  const { tasks, now } = useContext();
-  const timedOf = (day: string) => tasksOn(tasks, day).filter(isTimed);
+  const { tasks, priorities, now } = useContext();
+  const timedOf = (day: string) =>
+    tasksOn(tasks, day, priorities).filter(isTimed);
   const nowHour = hourLabel(Number(now.time.slice(0, 2)));
   return (
     <div className="hidden overflow-hidden rounded-2xl border border-line bg-card 2xl:block">
@@ -129,7 +130,7 @@ const HourGrid = ({ days }: { days: string[] }) => {
             {days.map((day) => (
               <td key={day} className="p-1 align-top">
                 <ul className="flex min-h-9 flex-col">
-                  {tasksOn(tasks, day)
+                  {tasksOn(tasks, day, priorities)
                     .filter((task) => task.at === null)
                     .map((task) => (
                       <TaskRow key={task.id} task={task} />

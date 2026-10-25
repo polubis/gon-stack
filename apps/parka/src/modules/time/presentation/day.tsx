@@ -8,8 +8,8 @@ import { TaskRow } from './task-row';
 
 /** Day view: tasks with a time, then tasks without one. */
 export const Main = () => {
-  const { tasks, viewAnchor: anchor, now } = useContext();
-  const day = tasksOn(tasks, anchor);
+  const { tasks, priorities, viewAnchor: anchor, now } = useContext();
+  const day = tasksOn(tasks, anchor, priorities);
   if (day.length === 0) return <EmptyPeriod kind="day" />;
 
   const scheduled = day.filter(isTimed);

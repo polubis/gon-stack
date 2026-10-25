@@ -4,6 +4,7 @@ import { Button } from '@/shared/ui/controls';
 import { EmptyState } from '@/shared/ui/empty-state';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { SKELETON_ROWS } from '../configuration/constraints';
+import { sortByPriority } from '../domain/priority';
 import { useContext } from './context';
 import { NEW_BACKLOG_MODAL } from './modal-ids';
 import { ModalShell } from './modal-shell';
@@ -13,7 +14,7 @@ const rows = Array.from({ length: SKELETON_ROWS }, (_, i) => i);
 
 /** Tasks without a day; the row menu puts a task on a day. */
 export const BacklogDialog = ({ modal }: { modal: string }) => {
-  const { backlog, initializing } = useContext();
+  const { backlog, priorities, initializing } = useContext();
   return (
     <ModalShell
       modal={modal}
@@ -58,7 +59,7 @@ export const BacklogDialog = ({ modal }: { modal: string }) => {
         ) : (
           <>
             <ul className="flex flex-col">
-              {backlog.map((task) => (
+              {sortByPriority(backlog, priorities).map((task) => (
                 <TaskRow key={task.id} task={task} />
               ))}
             </ul>

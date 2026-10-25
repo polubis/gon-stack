@@ -13,7 +13,13 @@ const MAX_DOTS = 4;
 
 /** Month view: calendar grid, a dot in the category colour per task. */
 export const Main = () => {
-  const { tasks, categories, viewAnchor: anchor, now } = useContext();
+  const {
+    tasks,
+    categories,
+    priorities,
+    viewAnchor: anchor,
+    now,
+  } = useContext();
   const { leadingBlanks, days } = monthGrid(anchor);
   if (!tasks.some((task) => days.includes(task.day)))
     return <EmptyPeriod kind="month" />;
@@ -35,7 +41,7 @@ export const Main = () => {
           <li key={`blank-${i}`} aria-hidden="true" />
         ))}
         {days.map((day, index) => {
-          const marks = tasksOn(tasks, day);
+          const marks = tasksOn(tasks, day, priorities);
           const today = day === now.day;
           return (
             <li

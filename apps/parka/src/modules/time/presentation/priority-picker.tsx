@@ -8,7 +8,7 @@ import { NEW_PRIORITY_MODAL } from './modal-ids';
 import { PICKER_LINK } from './picker-link';
 import { PRIORITY_ICON, PRIORITY_TONE } from './priority-badge';
 
-/** Radio segments of the priorities (sorted by value), with a link to add one. */
+/** Radio segments of the priorities (highest value first), with a link to add one. */
 export const PriorityPicker = ({
   value,
   onChange,

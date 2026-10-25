@@ -242,6 +242,28 @@ describe('backlog moving', () => {
   });
 });
 
+describe('backlog order', () => {
+  it('lists the highest priority first, ties in saved order', async () => {
+    const user = userEvent.setup();
+    backend.seedBacklog([
+      backlogTask({ id: 'b-1', title: 'Niski', priorityId: 'low' }),
+      backlogTask({ id: 'b-2', title: 'Wysoki', priorityId: 'high' }),
+      backlogTask({ id: 'b-3', title: 'Niski drugi', priorityId: 'low' }),
+    ]);
+    renderTime();
+    const list = await openBacklog(user);
+
+    const rows = await list.findAllByRole('button', {
+      name: /^Szczegóły zadania:/,
+    });
+    expect(rows.map((b) => b.textContent)).toEqual([
+      'Wysoki',
+      'Niski',
+      'Niski drugi',
+    ]);
+  });
+});
+
 describe('backlog editing', () => {
   it('edits a task and keeps it in the backlog', async () => {
     const user = userEvent.setup();

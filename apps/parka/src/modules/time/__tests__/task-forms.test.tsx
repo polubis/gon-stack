@@ -134,12 +134,12 @@ describe('time task form', () => {
     expect(backend.writes()).toHaveLength(0);
   });
 
-  it('lists priorities by value, medium selected by default', async () => {
+  it('lists priorities highest first, medium selected by default', async () => {
     const user = userEvent.setup();
 
     const dialog = within(await openFromMenu(user, 'Zadanie'));
 
-    expect(priorityLabels(dialog)).toEqual(['Niski', 'Średni', 'Wysoki']);
+    expect(priorityLabels(dialog)).toEqual(['Wysoki', 'Średni', 'Niski']);
     expect(dialog.getByRole('radio', { name: 'Średni' })).toBeChecked();
   });
 
@@ -160,10 +160,10 @@ describe('time task form', () => {
     const form2 = within(screen.getByRole('dialog'));
     expect(form2.getByRole('radio', { name: 'Pilny' })).toBeChecked();
     expect(priorityLabels(form2)).toEqual([
-      'Niski',
-      'Średni',
-      'Pilny',
       'Wysoki',
+      'Pilny',
+      'Średni',
+      'Niski',
     ]);
     await waitFor(() =>
       expect(backend.writes().map((call) => call.body)).toEqual([
@@ -241,7 +241,7 @@ describe('time task edit', () => {
 });
 
 describe('priority sorting', () => {
-  it('orders by value, then by name', () => {
+  it('orders by value descending, ties keep order', () => {
     const priority = (id: string, name: string, value: number): Priority => ({
       id: id as PriorityId,
       name,
@@ -252,8 +252,9 @@ describe('priority sorting', () => {
       priority('a', 'B', 5),
       priority('b', 'A', 5),
       priority('c', 'C', 1),
+      priority('d', 'D', 9),
     ]);
 
-    expect(sorted.map((p) => p.id)).toEqual(['c', 'b', 'a']);
+    expect(sorted.map((p) => p.id)).toEqual(['d', 'a', 'b', 'c']);
   });
 });
