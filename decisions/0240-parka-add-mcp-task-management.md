@@ -20,4 +20,4 @@ tags: [parka, mcp, time]
 - Migration `20261026090000_mcp_task_management.sql`: `mcp_*` functions, owner resolved from token, `PT400` for readable refusals
   - `McpInputError` turns `PT400` into a tool error the model can read
 - Not covered: recurring rules (materialized in server TS, not SQL)
-- Tests: mocked-gateway unit tests, plus black-box tests in the normal `pnpm test` (real MCP handler, PostgREST and migration on local Supabase; two throw-away accounts, cleaned up)
+- Tests: mocked-gateway unit tests for the new tools; access-tokens e2e updated for the 14-tool list
