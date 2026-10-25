@@ -1,9 +1,10 @@
-import { useId, useState, type ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import type { E2eId } from '@/__e2e__/selectors';
 import { inputClass } from './controls';
+import { useSelectOpen } from './use-select-open';
 
 type Props = {
   label: string;
@@ -21,7 +22,7 @@ export const SelectPopover = ({
   children,
   'data-e2e': e2e,
 }: Props) => {
-  const [open, setOpen] = useState(false);
+  const { open, setOpen } = useSelectOpen(label);
   const labelId = useId();
   const triggerId = useId();
 

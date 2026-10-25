@@ -9,6 +9,7 @@ import * as SelectPrimitive from '@radix-ui/react-select';
 import { Check, ChevronDown } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import type { E2eId } from '@/__e2e__/selectors';
+import { useSelectOpen } from './use-select-open';
 
 type SegmentedProps<T extends string> = {
   options: { value: T; label: string }[];
@@ -240,8 +241,13 @@ export const Select = ({
   placeholder?: string;
 }) => {
   const field = useField();
+  const { open, setOpen } = useSelectOpen(
+    props['data-e2e'] ?? id ?? field?.id ?? 'field',
+  );
   return (
     <SelectPrimitive.Root
+      open={open}
+      onOpenChange={setOpen}
       value={value}
       onValueChange={onValueChange}
       required={required}

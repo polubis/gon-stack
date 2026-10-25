@@ -655,13 +655,16 @@ const commands = {
 
   'i add and remove a recurring expense': async ({ page, getByE2e }) => {
     // Stateful: a rule change reloads the dashboard, which must read it back.
+    // Fixed mid-month present: next week stays inside the shown month.
+    const now = new Date();
+    const present = new Date(now.getFullYear(), now.getMonth(), 10, 12);
+    await page.clock.setFixedTime(present);
     await mockState(page);
-    await installBackend(page, {
-      categories: [CATEGORY],
-      expenses: [],
-      limits: [],
-      recurring: [],
-    });
+    await installBackend(
+      page,
+      { categories: [CATEGORY], expenses: [], limits: [], recurring: [] },
+      present.toLocaleDateString('en-CA'),
+    );
     await open(page, APP_ROUTER.dashboard());
     await getByE2e('dashboard:expense-new').click();
     await page.getByRole('menuitem', { name: 'Wydatek', exact: true }).click();
@@ -669,7 +672,7 @@ const commands = {
     await getByE2e('expenses-management:recurring-name').fill('Siłownia');
     await getByE2e('expenses-management:recurring-cost').fill('99');
     // Starts next week: announced, not charged yet.
-    const next = new Date();
+    const next = new Date(present);
     next.setDate(next.getDate() + 7);
     await getByE2e('expenses-management:recurring-date').fill(
       `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-${String(next.getDate()).padStart(2, '0')}`,
