@@ -65,6 +65,7 @@ Read `references/aodi-framework.md` for tag legend (`A` / `O` / `D` / `I`). Appl
 | [agents/coord.md](agents/coord.md)   | Simple solo / complex plan + workers + checks → hand off to doctor |
 | [agents/worker.md](agents/worker.md) | Task + context → precise implementation, report, done             |
 | [agents/doctor.md](agents/doctor.md) | Rules audit (fix), proof, commit?, cleanup, close dev ports       |
+| [agents/factory.md](agents/factory.md) | Backlog loop: tagged tasks → plan → coord + proof → accept → commit → done |
 
 ### Worktrees
 
