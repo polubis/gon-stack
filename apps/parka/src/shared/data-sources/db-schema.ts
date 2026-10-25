@@ -714,8 +714,8 @@ export type Database = {
           device_screen: string | null;
           device_type: string | null;
           done: boolean;
-          in_progress: boolean;
           id: string;
+          in_progress: boolean;
           occurrence_date: string | null;
           priority_id: string;
           recurring_id: string | null;
@@ -737,8 +737,8 @@ export type Database = {
           device_screen?: string | null;
           device_type?: string | null;
           done?: boolean;
-          in_progress?: boolean;
           id: string;
+          in_progress?: boolean;
           occurrence_date?: string | null;
           priority_id: string;
           recurring_id?: string | null;
@@ -759,8 +759,8 @@ export type Database = {
           device_screen?: string | null;
           device_type?: string | null;
           done?: boolean;
-          in_progress?: boolean;
           id?: string;
+          in_progress?: boolean;
           occurrence_date?: string | null;
           priority_id?: string;
           recurring_id?: string | null;
@@ -801,11 +801,45 @@ export type Database = {
         Returns: boolean;
       };
       mcp_authenticate: { Args: { p_token: string }; Returns: boolean };
+      mcp_create_category: {
+        Args: {
+          p_color: string;
+          p_icon: string;
+          p_name: string;
+          p_token: string;
+        };
+        Returns: Json;
+      };
+      mcp_create_priority: {
+        Args: { p_name: string; p_token: string; p_value: number };
+        Returns: Json;
+      };
+      mcp_create_task: {
+        Args: {
+          p_at?: string;
+          p_category: string;
+          p_day?: string;
+          p_description?: string;
+          p_priority: string;
+          p_title: string;
+          p_token: string;
+        };
+        Returns: Json;
+      };
+      mcp_delete_category: {
+        Args: { p_id: string; p_token: string };
+        Returns: boolean;
+      };
+      mcp_delete_task: {
+        Args: { p_id: string; p_token: string };
+        Returns: boolean;
+      };
       mcp_get_expense: {
         Args: { p_id: string; p_token: string };
         Returns: Json;
       };
       mcp_get_task: { Args: { p_id: string; p_token: string }; Returns: Json };
+      mcp_list_categories: { Args: { p_token: string }; Returns: Json };
       mcp_list_expenses: {
         Args: {
           p_category_id?: string;
@@ -817,9 +851,11 @@ export type Database = {
         };
         Returns: Json;
       };
+      mcp_list_priorities: { Args: { p_token: string }; Returns: Json };
       mcp_list_tasks: {
         Args: {
           p_backlog?: boolean;
+          p_category?: string;
           p_from?: string;
           p_limit?: number;
           p_offset?: number;
@@ -829,11 +865,29 @@ export type Database = {
         };
         Returns: Json;
       };
+      mcp_resolve_category: {
+        Args: { p_ref: string; p_user: string };
+        Returns: string;
+      };
+      mcp_resolve_priority: {
+        Args: { p_ref: string; p_user: string };
+        Returns: string;
+      };
       mcp_set_task_status: {
         Args: { p_id: string; p_status: string; p_token: string };
         Returns: Json;
       };
+      mcp_task_json: { Args: { p_id: string; p_user: string }; Returns: Json };
       mcp_token_user: { Args: { p_token: string }; Returns: string };
+      mcp_update_category: {
+        Args: { p_id: string; p_patch: Json; p_token: string };
+        Returns: Json;
+      };
+      mcp_update_task: {
+        Args: { p_id: string; p_patch: Json; p_token: string };
+        Returns: Json;
+      };
+      mcp_user: { Args: { p_token: string }; Returns: string };
       record_field_use: {
         Args: { p_field: string; p_value: string };
         Returns: undefined;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { issueMcpToken } from '../../domain/mcp-token';
-import { McpAuthError, type McpGateway } from '../gateway';
+import { McpAuthError, McpInputError, type McpGateway } from '../gateway';
 import { handleMcpRequest } from '../http';
 import { createRateLimiter } from '../rate-limit';
 
@@ -63,6 +63,42 @@ const fakeGateway = (calls: Calls, valid = true): McpGateway => {
     setTaskStatus: async (id, status) => {
       await record('setTaskStatus', id, status);
       return id === TASK.id ? { ...TASK, status } : null;
+    },
+    createTask: async (t) => {
+      await record('createTask', t);
+      return { ...TASK, id: 't-new', title: t.title, day: t.day };
+    },
+    updateTask: async (id, patch) => {
+      await record('updateTask', id, patch);
+      return id === TASK.id ? { ...TASK, ...patch } : null;
+    },
+    deleteTask: async (id) => {
+      await record('deleteTask', id);
+      return id === TASK.id;
+    },
+    listCategories: async () => {
+      await record('listCategories');
+      return { items: [] };
+    },
+    createCategory: async (c) => {
+      await record('createCategory', c);
+      return { id: 'c-1', ...c, taskCount: 0 };
+    },
+    updateCategory: async (id, patch) => {
+      await record('updateCategory', id, patch);
+      return null;
+    },
+    deleteCategory: async (id) => {
+      await record('deleteCategory', id);
+      throw new McpInputError('category is in use');
+    },
+    listPriorities: async () => {
+      await record('listPriorities');
+      return { items: [] };
+    },
+    createPriority: async (p) => {
+      await record('createPriority', p);
+      return { id: 'p-1', ...p };
     },
     listExpenses: async (q) => {
       await record('listExpenses', q);
@@ -169,28 +205,40 @@ describe('mcp tools list', () => {
     }[];
 
     expect(tools.map((t) => t.name).sort()).toEqual([
+      'create_category',
+      'create_priority',
+      'create_task',
+      'delete_category',
+      'delete_task',
       'get_expense',
       'get_task',
+      'list_categories',
       'list_expenses',
+      'list_priorities',
       'list_tasks',
       'set_task_status',
+      'update_category',
+      'update_task',
     ]);
     expect(tools.every((t) => t.inputSchema.type === 'object')).toBe(true);
     expect(tools.every((t) => t.outputSchema.type === 'object')).toBe(true);
-    const writers = tools.filter((t) => !t.annotations.readOnlyHint);
-    expect(writers.map((t) => t.name)).toEqual(['set_task_status']);
-    expect(writers[0]!.annotations.idempotentHint).toBe(true);
   });
 
-  it('offers no way to create, edit or delete anything else', async () => {
+  it('marks only the deleting tools as destructive', async () => {
     const { rpc } = setup();
 
     const { json } = await rpc('tools/list');
+    const tools = json.result.tools as {
+      name: string;
+      annotations: { destructiveHint: boolean };
+    }[];
 
-    const names = (json.result.tools as { name: string }[]).map((t) => t.name);
-    expect(names.some((n) => /create|update|delete|add|remove/.test(n))).toBe(
-      false,
-    );
+    expect(
+      tools
+        .filter((t) => t.annotations.destructiveHint)
+        .map((t) => t.name)
+        .sort(),
+    ).toEqual(['delete_category', 'delete_task']);
   });
 });
 
@@ -337,6 +385,129 @@ describe('mcp status change', () => {
     const { json } = await rpc('tools/call', {
       name: 'set_task_status',
       arguments: { id: 't-1', status: 'deleted' },
+    });
+
+    expect(json.result.isError).toBe(true);
+    expect(calls).toEqual([]);
+  });
+});
+
+describe('mcp task management', () => {
+  const call = (
+    rpc: ReturnType<typeof setup>['rpc'],
+    name: string,
+    args: unknown,
+  ) => rpc('tools/call', { name, arguments: args });
+
+  it('filters the list by category', async () => {
+    const { rpc, calls } = setup();
+
+    await call(rpc, 'list_tasks', { category: 'Automatyzacja' });
+
+    expect(calls[0]?.args).toMatchObject([{ category: 'Automatyzacja' }]);
+  });
+
+  it('creates a backlog task when no day is given', async () => {
+    const { rpc, calls } = setup();
+
+    const { json } = await call(rpc, 'create_task', {
+      title: 'Write docs',
+      category: 'work',
+      priority: 'high',
+    });
+
+    expect(json.result.isError).toBeUndefined();
+    expect(calls[0]?.args).toMatchObject([
+      { title: 'Write docs', day: null, at: null, description: null },
+    ]);
+  });
+
+  it('moves a backlog task to a day and changes its status', async () => {
+    const { rpc, calls } = setup();
+
+    const { json } = await call(rpc, 'update_task', {
+      id: 't-1',
+      day: '2026-10-27',
+      status: 'in_progress',
+    });
+
+    expect(json.result.structuredContent.status).toBe('in_progress');
+    expect(calls[0]?.args).toEqual([
+      't-1',
+      { day: '2026-10-27', status: 'in_progress' },
+    ]);
+  });
+
+  it('sends a task to the backlog with a null day', async () => {
+    const { rpc, calls } = setup();
+
+    await call(rpc, 'update_task', { id: 't-1', day: null });
+
+    expect(calls[0]?.args).toEqual(['t-1', { day: null }]);
+  });
+
+  it('refuses an update that changes nothing', async () => {
+    const { rpc, calls } = setup();
+
+    const { json } = await call(rpc, 'update_task', { id: 't-1' });
+
+    expect(json.result.isError).toBe(true);
+    expect(calls).toEqual([]);
+  });
+
+  it('refuses an invalid hour', async () => {
+    const { rpc, calls } = setup();
+
+    const { json } = await call(rpc, 'update_task', { id: 't-1', at: '25:00' });
+
+    expect(json.result.isError).toBe(true);
+    expect(calls).toEqual([]);
+  });
+
+  it('deletes a task only when confirmed', async () => {
+    const { rpc, calls } = setup();
+
+    const refused = await call(rpc, 'delete_task', { id: 't-1' });
+    const done = await call(rpc, 'delete_task', { id: 't-1', confirm: true });
+
+    expect(refused.json.result.isError).toBe(true);
+    expect(done.json.result.structuredContent).toEqual({
+      id: 't-1',
+      deleted: true,
+    });
+    expect(calls).toEqual([{ name: 'deleteTask', args: ['t-1'] }]);
+  });
+
+  it('says so when deleting a task that does not exist', async () => {
+    const { rpc } = setup();
+
+    const { json } = await call(rpc, 'delete_task', {
+      id: 'missing',
+      confirm: true,
+    });
+
+    expect(json.result.isError).toBe(true);
+    expect(json.result.content[0].text).toMatch(/not found/);
+  });
+
+  it('reports a refused category deletion as a readable tool error', async () => {
+    const { rpc } = setup();
+
+    const { json } = await call(rpc, 'delete_category', {
+      id: 'c-1',
+      confirm: true,
+    });
+
+    expect(json.result.isError).toBe(true);
+    expect(json.result.content[0].text).toBe('category is in use');
+  });
+
+  it('refuses an unknown category icon', async () => {
+    const { rpc, calls } = setup();
+
+    const { json } = await call(rpc, 'create_category', {
+      name: 'Auto',
+      icon: 'nope',
     });
 
     expect(json.result.isError).toBe(true);

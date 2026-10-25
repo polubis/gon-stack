@@ -1,6 +1,7 @@
 import z from 'zod';
 import { isDay } from '@/shared/period/period';
-import type { McpGateway } from './gateway';
+import { CATEGORY_ICON_IDS } from '@/shared/ui/category-icon-ids';
+import { McpInputError, type McpGateway } from './gateway';
 
 /** Raised by a tool for a failure the model should read and may act on. */
 export class ToolError extends Error {}
@@ -81,13 +82,21 @@ const defineTool = <I extends z.ZodType, O extends z.ZodType>(tool: {
         structuredContent: out.data as Record<string, unknown>,
       };
     } catch (error) {
-      if (error instanceof ToolError) return failure(error.message);
+      if (error instanceof ToolError || error instanceof McpInputError)
+        return failure(error.message);
       throw error;
     }
   },
 });
 
 const day = () => z.string().refine(isDay, 'Expected a day as YYYY-MM-DD');
+const at = () =>
+  z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Expected a time as HH:MM');
+const title = () => z.string().trim().min(1).max(160);
+const description = () => z.string().trim().max(5000);
+const ref = (what: string) =>
+  z.string().trim().min(1).max(100).describe(`${what} id or name`);
+const taskStatus = () => z.enum(['open', 'in_progress', 'done']);
 const id = () => z.string().trim().min(1).max(100);
 const limit = () => z.number().int().min(1).max(100).default(DEFAULT_LIMIT);
 const cursor = () =>
@@ -146,6 +155,27 @@ const task = () =>
     recurring: z.boolean(),
   });
 
+const category = () =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    icon: z.string(),
+    color: z.string(),
+    taskCount: z.number().int(),
+  });
+
+const priority = () =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    value: z.number().int().describe('1 (least) to 10 (most)'),
+  });
+
+const categoryName = () => z.string().trim().min(1).max(40);
+const categoryIcon = () => z.enum(CATEGORY_ICON_IDS);
+const categoryColor = () =>
+  z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Expected a colour as #rrggbb');
+
 const expense = () =>
   z.object({
     id: z.string(),
@@ -181,6 +211,20 @@ const pageOf = <T extends z.ZodType>(item: T) =>
       .describe('Pass as `cursor` to get the next page; null on the last page'),
   });
 
+const WRITE: ToolAnnotations = {
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: false,
+  openWorldHint: false,
+};
+
+const DESTRUCTIVE: ToolAnnotations = {
+  readOnlyHint: false,
+  destructiveHint: true,
+  idempotentHint: true,
+  openWorldHint: false,
+};
+
 const READ_ONLY: ToolAnnotations = {
   readOnlyHint: true,
   destructiveHint: false,
@@ -201,7 +245,7 @@ export const MCP_TOOLS: readonly RegisteredTool[] = [
     name: 'list_tasks',
     title: 'List tasks',
     description:
-      "Lists the signed-in user's tasks, scheduled ones by day and time, then backlog ones. Filter by status, day range or scope. Paginated.",
+      "Lists the signed-in user's tasks, scheduled ones by day and time, then backlog ones. Filter by status, day range, scope or category (the task's tag, e.g. Automatyzacja). Paginated.",
     input: z.strictObject({
       status: z.enum(['open', 'in_progress', 'done', 'all']).default('all'),
       from: day().optional().describe('First day, inclusive'),
@@ -210,6 +254,7 @@ export const MCP_TOOLS: readonly RegisteredTool[] = [
         .enum(['all', 'scheduled', 'backlog'])
         .default('all')
         .describe('Backlog tasks have no day'),
+      category: ref('Category (tag)').optional(),
       limit: limit(),
       cursor: cursor(),
     }),
@@ -222,6 +267,7 @@ export const MCP_TOOLS: readonly RegisteredTool[] = [
           from: args.from ?? null,
           to: args.to ?? null,
           backlog: args.scope === 'all' ? null : args.scope === 'backlog',
+          category: args.category ?? null,
           limit: args.limit,
           offset: decodeCursor(args.cursor),
         }),
@@ -244,10 +290,10 @@ export const MCP_TOOLS: readonly RegisteredTool[] = [
     name: 'set_task_status',
     title: 'Set task status',
     description:
-      'Sets a task to open, in_progress (started, not finished) or done. This is the only change the server allows: titles, dates and other fields cannot be edited and tasks cannot be created or deleted. Safe to repeat.',
+      'Sets a task to open, in_progress (started, not finished) or done. A backlog task (no day) can only be open: give it a day with update_task first. Safe to repeat.',
     input: z.strictObject({
       id: id(),
-      status: z.enum(['open', 'in_progress', 'done']),
+      status: taskStatus(),
     }),
     output: task(),
     annotations: {
@@ -261,6 +307,176 @@ export const MCP_TOOLS: readonly RegisteredTool[] = [
       if (!updated) throw new ToolError(`Task "${args.id}" not found`);
       return updated as z.input<ReturnType<typeof task>>;
     },
+  }),
+  defineTool({
+    name: 'create_task',
+    title: 'Create a task',
+    description:
+      'Creates a task. Without `day` it lands in the backlog (no hour, always open). `category` is the tag: an id or a name from list_categories; `priority` an id or a name from list_priorities.',
+    input: z.strictObject({
+      title: title(),
+      description: description().nullable().default(null),
+      category: ref('Category (tag)'),
+      priority: ref('Priority'),
+      day: day().nullable().default(null).describe('Null for the backlog'),
+      at: at()
+        .nullable()
+        .default(null)
+        .describe('HH:MM; null lasts the whole day'),
+    }),
+    output: task(),
+    annotations: WRITE,
+    run: async (args, gateway) =>
+      (await gateway.createTask(args)) as z.input<ReturnType<typeof task>>,
+  }),
+  defineTool({
+    name: 'update_task',
+    title: 'Update a task',
+    description:
+      'Changes the given fields of a task; the others stay. Covers title, description, category (tag), priority, status, day and hour. Setting `day` to null sends the task to the backlog (clears hour and status); setting a day moves a backlog task onto the board. Does not delete.',
+    input: z
+      .strictObject({
+        id: id(),
+        title: title().optional(),
+        description: description().nullable().optional(),
+        category: ref('Category (tag)').optional(),
+        priority: ref('Priority').optional(),
+        day: day()
+          .nullable()
+          .optional()
+          .describe('Null sends it to the backlog'),
+        at: at()
+          .nullable()
+          .optional()
+          .describe('HH:MM; null lasts the whole day'),
+        status: taskStatus().optional(),
+      })
+      .refine(
+        (v) => Object.keys(v).length > 1,
+        'Give at least one field to change',
+      ),
+    output: task(),
+    annotations: { ...WRITE, idempotentHint: true },
+    run: async ({ id: taskId, ...patch }, gateway) => {
+      const updated = await gateway.updateTask(taskId, patch);
+      if (!updated) throw new ToolError(`Task "${taskId}" not found`);
+      return updated as z.input<ReturnType<typeof task>>;
+    },
+  }),
+  defineTool({
+    name: 'delete_task',
+    title: 'Delete a task permanently',
+    description:
+      'PERMANENTLY deletes one task. It cannot be undone. Use only when the user explicitly asked to delete this task; to finish or park it use set_task_status or update_task. Requires `confirm: true`.',
+    input: z.strictObject({
+      id: id(),
+      confirm: z.literal(true).describe('Must be true: confirms the deletion'),
+    }),
+    output: z.object({ id: z.string(), deleted: z.literal(true) }),
+    annotations: DESTRUCTIVE,
+    run: async (args, gateway) => {
+      if (!(await gateway.deleteTask(args.id)))
+        throw new ToolError(`Task "${args.id}" not found`);
+      return { id: args.id, deleted: true as const };
+    },
+  }),
+  defineTool({
+    name: 'list_categories',
+    title: 'List categories',
+    description:
+      'Lists the task categories (the tags a task carries), with how many tasks use each.',
+    input: z.strictObject({}),
+    output: z.object({ items: z.array(category()) }),
+    annotations: READ_ONLY,
+    run: async (_args, gateway) =>
+      (await gateway.listCategories()) as {
+        items: z.input<ReturnType<typeof category>>[];
+      },
+  }),
+  defineTool({
+    name: 'create_category',
+    title: 'Create a category',
+    description:
+      'Creates a task category (tag). Names are unique, ignoring case.',
+    input: z.strictObject({
+      name: categoryName(),
+      icon: categoryIcon().default('sparkles'),
+      color: categoryColor().default('#4b5a52'),
+    }),
+    output: category(),
+    annotations: WRITE,
+    run: async (args, gateway) =>
+      (await gateway.createCategory(args)) as z.input<
+        ReturnType<typeof category>
+      >,
+  }),
+  defineTool({
+    name: 'update_category',
+    title: 'Update a category',
+    description: 'Renames a category or changes its icon or colour.',
+    input: z
+      .strictObject({
+        id: id(),
+        name: categoryName().optional(),
+        icon: categoryIcon().optional(),
+        color: categoryColor().optional(),
+      })
+      .refine(
+        (v) => Object.keys(v).length > 1,
+        'Give at least one field to change',
+      ),
+    output: category(),
+    annotations: { ...WRITE, idempotentHint: true },
+    run: async ({ id: categoryId, ...patch }, gateway) => {
+      const updated = await gateway.updateCategory(categoryId, patch);
+      if (!updated) throw new ToolError(`Category "${categoryId}" not found`);
+      return updated as z.input<ReturnType<typeof category>>;
+    },
+  }),
+  defineTool({
+    name: 'delete_category',
+    title: 'Delete a category permanently',
+    description:
+      'PERMANENTLY deletes an unused category. A category that still has tasks is refused: move them first with update_task. Requires `confirm: true`.',
+    input: z.strictObject({
+      id: id(),
+      confirm: z.literal(true).describe('Must be true: confirms the deletion'),
+    }),
+    output: z.object({ id: z.string(), deleted: z.literal(true) }),
+    annotations: DESTRUCTIVE,
+    run: async (args, gateway) => {
+      if (!(await gateway.deleteCategory(args.id)))
+        throw new ToolError(`Category "${args.id}" not found`);
+      return { id: args.id, deleted: true as const };
+    },
+  }),
+  defineTool({
+    name: 'list_priorities',
+    title: 'List priorities',
+    description: 'Lists the task priorities, most important first.',
+    input: z.strictObject({}),
+    output: z.object({ items: z.array(priority()) }),
+    annotations: READ_ONLY,
+    run: async (_args, gateway) =>
+      (await gateway.listPriorities()) as {
+        items: z.input<ReturnType<typeof priority>>[];
+      },
+  }),
+  defineTool({
+    name: 'create_priority',
+    title: 'Create a priority',
+    description:
+      'Creates a priority: a name plus a weight from 1 (least) to 10 (most important). Names are unique, ignoring case.',
+    input: z.strictObject({
+      name: categoryName(),
+      value: z.number().int().min(1).max(10),
+    }),
+    output: priority(),
+    annotations: WRITE,
+    run: async (args, gateway) =>
+      (await gateway.createPriority(args)) as z.input<
+        ReturnType<typeof priority>
+      >,
   }),
   defineTool({
     name: 'list_expenses',

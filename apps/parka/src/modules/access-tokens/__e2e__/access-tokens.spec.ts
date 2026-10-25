@@ -190,15 +190,24 @@ const commands = {
     await expect(page.locator('body')).not.toContainText(latest(page));
   },
 
-  'the client lists exactly the five tools': async ({ page }) => {
+  'the client lists exactly the fourteen tools': async ({ page }) => {
     const { status, json } = await mcp(page, latest(page), 'tools/list');
     expect(status).toBe(200);
     expect(json.result!.tools!.map((t) => t.name).sort()).toEqual([
+      'create_category',
+      'create_priority',
+      'create_task',
+      'delete_category',
+      'delete_task',
       'get_expense',
       'get_task',
+      'list_categories',
       'list_expenses',
+      'list_priorities',
       'list_tasks',
       'set_task_status',
+      'update_category',
+      'update_task',
     ]);
   },
 
@@ -241,14 +250,14 @@ const commands = {
     expect(tasks.find((t) => t.id === TASK_ID)?.done).toBe(true);
   },
 
-  'the client cannot change anything but the status': async ({ page }) => {
+  'the status tool changes nothing but the status': async ({ page }) => {
     const edit = await call(page, latest(page), 'set_task_status', {
       id: TASK_ID,
       status: 'open',
       title: 'Przejęte',
     });
     expect(edit.json.result!.isError).toBe(true);
-    const missing = await call(page, latest(page), 'create_task', {
+    const missing = await call(page, latest(page), 'delete_everything', {
       title: 'Nowe',
     });
     expect(missing.json.error!.code).toBe(-32602);
@@ -413,11 +422,11 @@ test.describe('mcp access tokens', () => {
       ['i close the secret dialog'],
       ['the token is listed only in masked form'],
       ['i reload and the secret is gone for good'],
-      ['the client lists exactly the five tools'],
+      ['the client lists exactly the fourteen tools'],
       ['the client reads the task and the expense'],
       ['the client marks the task done'],
       ['the app shows the task as done'],
-      ['the client cannot change anything but the status'],
+      ['the status tool changes nothing but the status'],
       ['the token shows when it was last used'],
       ['i rotate the token after confirming'],
       ['the old secret is refused and the new one works'],
