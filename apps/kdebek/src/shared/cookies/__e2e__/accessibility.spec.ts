@@ -7,6 +7,8 @@ import { test, type Ctx } from '@/__e2e__/test';
 const { describe } = test;
 
 const commands = {
+  'i prefer the dark color scheme': ({ page }) =>
+    page.emulateMedia({ colorScheme: 'dark' }),
   'im on the home page': ({ page }) => page.goto('/'),
   'i have already accepted all cookies': ({ page }) =>
     seedAcceptedConsent(page),
@@ -27,7 +29,7 @@ const commands = {
 
   'it should have no wcag violations': async ({ page }) => {
     const { violations } = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
       .analyze();
 
     expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
@@ -75,6 +77,45 @@ describe('cookies consent accessibility', () => {
     getByE2e,
   }) => {
     await interpreter(commands, { page, getByE2e })(
+      ['i have already accepted all cookies'],
+      ['im on the home page'],
+      ['the cookie reopen trigger should be visible'],
+      ['it should have no wcag violations'],
+    );
+  });
+
+  test('banner has no automatic wcag violations in dark mode', async ({
+    page,
+    getByE2e,
+  }) => {
+    await interpreter(commands, { page, getByE2e })(
+      ['i prefer the dark color scheme'],
+      ['im on the home page'],
+      ['the cookie banner should be visible'],
+      ['it should have no wcag violations'],
+    );
+  });
+
+  test('preferences view has no automatic wcag violations in dark mode', async ({
+    page,
+    getByE2e,
+  }) => {
+    await interpreter(commands, { page, getByE2e })(
+      ['i prefer the dark color scheme'],
+      ['im on the home page'],
+      ['the cookie banner should be visible'],
+      ['i click customize'],
+      ['the cookie preferences view should be visible'],
+      ['it should have no wcag violations'],
+    );
+  });
+
+  test('reopen trigger has no automatic wcag violations in dark mode', async ({
+    page,
+    getByE2e,
+  }) => {
+    await interpreter(commands, { page, getByE2e })(
+      ['i prefer the dark color scheme'],
       ['i have already accepted all cookies'],
       ['im on the home page'],
       ['the cookie reopen trigger should be visible'],

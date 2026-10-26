@@ -23,6 +23,8 @@ const createCommands = () => {
         return route.fulfill({ status: 200, body: '<html></html>' });
       });
     },
+    'i prefer the dark color scheme': ({ page }) =>
+      page.emulateMedia({ colorScheme: 'dark' }),
     'im on the home page': ({ page }) => page.goto('/'),
     'i open the company offer': async ({ page }) => {
       await page.getByRole('tab', { name: 'Dla firm' }).click();
@@ -69,7 +71,7 @@ const createCommands = () => {
       expect(getByE2e('home:offer-video-placeholder')).toHaveCount(0),
     'it should have no wcag violations': async ({ page }) => {
       const { violations } = await new AxeBuilder({ page })
-        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
         .analyze();
 
       expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
@@ -98,6 +100,20 @@ describe('home offer video consent', () => {
 
   test('placeholder has no wcag violations', async ({ page, getByE2e }) => {
     await interpreter(createCommands(), { page, getByE2e })(
+      ['i have already accepted cookies'],
+      ['im on the home page'],
+      ['i open the company offer'],
+      ['i see the video placeholder'],
+      ['it should have no wcag violations'],
+    );
+  });
+
+  test('placeholder has no wcag violations in dark mode', async ({
+    page,
+    getByE2e,
+  }) => {
+    await interpreter(createCommands(), { page, getByE2e })(
+      ['i prefer the dark color scheme'],
       ['i have already accepted cookies'],
       ['im on the home page'],
       ['i open the company offer'],

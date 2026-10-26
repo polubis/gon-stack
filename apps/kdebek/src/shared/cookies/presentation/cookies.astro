@@ -17,7 +17,7 @@ const { privacyPolicyUrl }: Props = Astro.props;
     role="dialog"
     aria-modal="true"
     tabindex="-1"
-    class="fixed inset-x-4 bottom-4 z-cookies mx-auto max-w-md rounded-3xl bg-white py-6 pl-6 shadow-md focus:outline-none sm:py-8 sm:pl-8"
+    class="fixed inset-x-4 bottom-4 z-cookies mx-auto max-w-md rounded-3xl bg-card py-6 pl-6 shadow-md focus:outline-none sm:py-8 sm:pl-8"
   >
     <div
       id="cookies-banner-view"
@@ -56,7 +56,7 @@ const { privacyPolicyUrl }: Props = Astro.props;
           type="button"
           id="cookies-reject-all"
           data-e2e="cookies:reject-all"
-          class="rounded-full bg-primary-dark px-5 py-2.5 text-sm font-bold text-white"
+          class="rounded-full bg-primary-dark px-5 py-2.5 text-sm font-bold text-on-primary"
         >
           {copy.banner.reject}
         </button>
@@ -64,7 +64,7 @@ const { privacyPolicyUrl }: Props = Astro.props;
           type="button"
           id="cookies-accept-all"
           data-e2e="cookies:accept-all"
-          class="rounded-full bg-primary-dark px-5 py-2.5 text-sm font-bold text-white"
+          class="rounded-full bg-primary-dark px-5 py-2.5 text-sm font-bold text-on-primary"
         >
           {copy.banner.accept}
         </button>
@@ -111,7 +111,7 @@ const { privacyPolicyUrl }: Props = Astro.props;
                   disabled={isNecessary}
                   data-category={id}
                 >
-                  <span class={`js-cookie-toggle-thumb absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform${isNecessary ? ' translate-x-5' : ''}`} />
+                  <span class={`js-cookie-toggle-thumb absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-card shadow-sm transition-transform${isNecessary ? ' translate-x-5' : ''}`} />
                 </button>
               </div>
             );
@@ -131,7 +131,7 @@ const { privacyPolicyUrl }: Props = Astro.props;
           type="button"
           id="cookies-save-preferences"
           data-e2e="cookies:save-preferences"
-          class="rounded-full bg-primary-dark px-5 py-2.5 text-sm font-bold text-white"
+          class="rounded-full bg-primary-dark px-5 py-2.5 text-sm font-bold text-on-primary"
         >
           {copy.preferences.accept}
         </button>
@@ -146,7 +146,7 @@ const { privacyPolicyUrl }: Props = Astro.props;
   data-e2e="cookies:reopen"
   aria-label={copy.reopenTrigger.ariaLabel}
   hidden
-  class="fixed bottom-4 left-4 z-cookies flex h-11 w-11 items-center justify-center rounded-full bg-white text-primary shadow-md ring-1 ring-line"
+  class="fixed bottom-4 left-4 z-cookies flex h-11 w-11 items-center justify-center rounded-full bg-card text-primary shadow-md ring-1 ring-line"
 >
   <Cookie className="h-5 w-5" aria-hidden="true" />
 </button>

@@ -15,15 +15,7 @@ type HeroProps = {
 export const Hero = ({ image }: HeroProps) => (
   <section className="relative">
     <div className="relative overflow-hidden">
-      <div
-        className="absolute left-6 top-10 h-24 w-24 opacity-40 sm:left-10"
-        // px required: background-image/background-size can't be expressed with Tailwind's spacing scale.
-        style={{
-          backgroundImage:
-            'radial-gradient(circle, var(--color-dot-grid) 1.5px, transparent 1.5px)',
-          backgroundSize: '12px 12px',
-        }}
-      />
+      <div className="absolute left-6 top-10 h-24 w-24 dot-grid-pattern opacity-40 sm:left-10" />
 
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 pb-24 pt-16 md:pb-10 lg:grid-cols-2 lg:pb-32 lg:pt-20">
         <div className="relative z-10">
@@ -48,7 +40,7 @@ export const Hero = ({ image }: HeroProps) => (
               href={BOOKING_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold uppercase text-white shadow-sm sm:w-auto sm:justify-start"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold uppercase text-on-primary shadow-sm sm:w-auto sm:justify-start"
             >
               <Calendar className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
               {copy.hero.ctaPrimary}

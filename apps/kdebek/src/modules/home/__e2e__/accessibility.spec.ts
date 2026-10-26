@@ -8,10 +8,12 @@ const { describe, use } = test;
 
 const commands = {
   'i have already accepted cookies': ({ page }) => seedAcceptedConsent(page),
+  'i prefer the dark color scheme': ({ page }) =>
+    page.emulateMedia({ colorScheme: 'dark' }),
   'im on the home page': ({ page }) => page.goto('/'),
   'it should have no wcag violations': async ({ page }) => {
     const { violations } = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
       .analyze();
 
     expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
@@ -55,6 +57,18 @@ const commands = {
 describe('home page accessibility', () => {
   test('has no automatic wcag violations', async ({ page, getByE2e }) => {
     await interpreter(commands, { page, getByE2e })(
+      ['i have already accepted cookies'],
+      ['im on the home page'],
+      ['it should have no wcag violations'],
+    );
+  });
+
+  test('has no automatic wcag violations in dark mode', async ({
+    page,
+    getByE2e,
+  }) => {
+    await interpreter(commands, { page, getByE2e })(
+      ['i prefer the dark color scheme'],
       ['i have already accepted cookies'],
       ['im on the home page'],
       ['it should have no wcag violations'],

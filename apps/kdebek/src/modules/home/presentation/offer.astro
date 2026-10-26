@@ -88,7 +88,7 @@ const defaultOpenServiceId = privateServices[0]?.id ?? null;
           href={BOOKING_URL}
           target="_blank"
           rel="noopener noreferrer"
-          class="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold tracking-wide text-white sm:w-auto"
+          class="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold tracking-wide text-on-primary sm:w-auto"
         >
           <Calendar className="h-4 w-4 shrink-0" />
           {copy.offerPanel.ctaPrimary}
@@ -105,7 +105,7 @@ const defaultOpenServiceId = privateServices[0]?.id ?? null;
         </a>
 
         <div class="mt-8">
-          <div class="rounded-2xl bg-white p-5 ring-1 ring-line sm:p-6">
+          <div class="rounded-2xl bg-card p-5 ring-1 ring-line sm:p-6">
             <h3 class="text-xs font-bold tracking-wide text-ink-light uppercase">
               {copy.offerPanel.openingHours.title}
             </h3>
@@ -133,7 +133,7 @@ const defaultOpenServiceId = privateServices[0]?.id ?? null;
 
       <div
         id="cennik"
-        class="scroll-mt-28 overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-line"
+        class="scroll-mt-28 overflow-hidden rounded-2xl bg-card shadow-md ring-1 ring-line"
       >
         <div class="border-b border-line p-3 sm:p-4">
           <div
@@ -156,8 +156,8 @@ const defaultOpenServiceId = privateServices[0]?.id ?? null;
                     aria-controls="offer-tabpanel"
                     class={`js-offer-tab flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-xs font-bold tracking-wide sm:text-2xs ${
                       isActive
-                        ? 'bg-primary text-white'
-                        : 'border border-line bg-white text-primary'
+                        ? 'bg-primary text-on-primary'
+                        : 'border border-line bg-card text-primary'
                     }`}
                   >
                     <TabIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -301,7 +301,7 @@ const defaultOpenServiceId = privateServices[0]?.id ?? null;
                                       </p>
                                       <button
                                         type="button"
-                                        class="js-offer-video-load inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-bold tracking-wide text-white"
+                                        class="js-offer-video-load inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-bold tracking-wide text-on-primary"
                                         data-e2e="home:offer-video-load"
                                       >
                                         <Play
@@ -339,7 +339,7 @@ const defaultOpenServiceId = privateServices[0]?.id ?? null;
                                   href={BOOKING_URL}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-bold tracking-wide text-white"
+                                  class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-bold tracking-wide text-on-primary"
                                 >
                                   <Calendar
                                     className="h-3.5 w-3.5 shrink-0"
@@ -457,10 +457,10 @@ const defaultOpenServiceId = privateServices[0]?.id ?? null;
         const isActive = btn === button;
         btn.setAttribute('aria-selected', String(isActive));
         btn.classList.toggle('bg-primary', isActive);
-        btn.classList.toggle('text-white', isActive);
+        btn.classList.toggle('text-on-primary', isActive);
         btn.classList.toggle('border', !isActive);
         btn.classList.toggle('border-line', !isActive);
-        btn.classList.toggle('bg-white', !isActive);
+        btn.classList.toggle('bg-card', !isActive);
         btn.classList.toggle('text-primary', !isActive);
       });
 

@@ -68,15 +68,15 @@ const bookingSteps = copy.onlineBookingCta.bookingSteps.map((step) => ({
     <div aria-hidden="true" class="@container relative py-2 sm:py-4 lg:py-6">
       <div class="relative mx-auto h-[calc(15rem*min(1,100cqw/25rem))]">
         <div class="absolute left-1/2 top-0 flex origin-top -translate-x-1/2 scale-[min(1,calc(100cqw/25rem))] items-start justify-center">
-          <div class="hidden w-80 rotate-2 rounded-lg bg-secondary p-2 pb-4 shadow-md md:block">
-            <div class="w-full rounded-xl bg-white p-3 text-3xs shadow-inner">
+          <div class="hidden w-80 rotate-2 rounded-lg bg-frame p-2 pb-4 shadow-md md:block">
+            <div class="w-full rounded-xl bg-card p-3 text-3xs shadow-inner">
               <ol class="flex items-center gap-1.5 whitespace-nowrap">
                 {
                   bookingSteps.map(({ label, active }, i) => (
                     <li class="flex items-center gap-1.5">
                       <span
                         class={`flex h-3 w-3 items-center justify-center rounded-full font-semibold ${
-                          active ? 'bg-primary text-white' : 'bg-surface text-ink-light'
+                          active ? 'bg-primary text-on-primary' : 'bg-surface text-ink-light'
                         }`}
                         aria-hidden="true"
                       >
@@ -112,7 +112,7 @@ const bookingSteps = copy.onlineBookingCta.bookingSteps.map((step) => ({
                         <span
                           class={`rounded border py-1 text-center ${
                             time === copy.onlineBookingCta.selectedTimeSlot
-                              ? 'border-primary bg-primary text-white'
+                              ? 'border-primary bg-primary text-on-primary'
                               : 'border-line text-ink-light'
                           }`}
                         >
@@ -125,9 +125,9 @@ const bookingSteps = copy.onlineBookingCta.bookingSteps.map((step) => ({
               </div>
             </div>
           </div>
-          <div class="w-40 shrink-0 -rotate-3 rounded-[1.4rem] bg-secondary p-1.5 pt-3 shadow-md md:-ml-20 md:mt-6">
+          <div class="w-40 shrink-0 -rotate-3 rounded-[1.4rem] bg-frame p-1.5 pt-3 shadow-md md:-ml-20 md:mt-6">
             <span class="mx-auto mb-1 block h-1 w-6 rounded-full bg-ink-light" />
-            <div class="w-full rounded-xl bg-white p-3 text-3xs shadow-inner">
+            <div class="w-full rounded-xl bg-card p-3 text-3xs shadow-inner">
               <div class="flex items-center justify-between text-primary">
                 <span class="font-semibold">
                   {copy.onlineBookingCta.chooseDateLabel}
@@ -145,7 +145,7 @@ const bookingSteps = copy.onlineBookingCta.bookingSteps.map((step) => ({
                     <span
                       class={`rounded border py-1 text-center ${
                         time === copy.onlineBookingCta.selectedTimeSlot
-                          ? 'border-primary bg-primary text-white'
+                          ? 'border-primary bg-primary text-on-primary'
                           : 'border-line text-ink-light'
                       }`}
                     >
@@ -176,7 +176,7 @@ const bookingSteps = copy.onlineBookingCta.bookingSteps.map((step) => ({
         href={BOOKING_URL}
         target="_blank"
         rel="noopener noreferrer"
-        class="w-full rounded-xl bg-primary px-5 py-3 text-center text-sm font-bold text-white sm:w-auto sm:whitespace-nowrap"
+        class="w-full rounded-xl bg-primary px-5 py-3 text-center text-sm font-bold text-on-primary sm:w-auto sm:whitespace-nowrap"
       >
         {copy.onlineBookingCta.finalCta}
       </a>

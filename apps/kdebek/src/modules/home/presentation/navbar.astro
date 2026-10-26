@@ -32,11 +32,11 @@ const navItems = copy.navbar.navItems.map((item) => ({
   class="sticky top-0 z-sticky-header px-3 pt-3 sm:px-4 sm:pt-4 @max-h-[800px]:pt-2 sm:@max-h-[800px]:pt-2.5"
 >
   <div
-    class="relative mx-auto max-w-7xl rounded-3xl bg-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+    class="relative mx-auto max-w-7xl rounded-3xl bg-card drop-shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
   >
     <div
       id="navbar-bar"
-      class="relative z-10 flex items-center justify-between gap-4 rounded-3xl bg-white px-4 py-3 sm:px-6 @max-h-[800px]:py-2"
+      class="relative z-10 flex items-center justify-between gap-4 rounded-3xl bg-card px-4 py-3 sm:px-6 @max-h-[800px]:py-2"
     >
       <a href="/" class="flex min-w-0 items-center gap-1 sm:gap-2">
         <LogoMark className="h-7 w-9 shrink-0" />
@@ -74,7 +74,7 @@ const navItems = copy.navbar.navItems.map((item) => ({
           href={BOOKING_URL}
           target="_blank"
           rel="noopener noreferrer"
-          class="hidden items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm sm:flex"
+          class="hidden items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-sm sm:flex"
         >
           <CalendarPlus className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
           {copy.navbar.cta}
@@ -84,7 +84,7 @@ const navItems = copy.navbar.navItems.map((item) => ({
           target="_blank"
           rel="noopener noreferrer"
           aria-label={copy.navbar.cta}
-          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-sm sm:hidden"
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary shadow-sm sm:hidden"
         >
           <CalendarPlus className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
         </a>
@@ -115,7 +115,7 @@ const navItems = copy.navbar.navItems.map((item) => ({
       aria-label={copy.navbar.ariaMobileNav}
       data-e2e="home:nav-menu-mobile"
       hidden
-      class="absolute left-0 right-0 top-full z-40 overflow-hidden rounded-b-3xl bg-white xl:hidden"
+      class="absolute left-0 right-0 top-full z-40 overflow-hidden rounded-b-3xl bg-card xl:hidden"
     >
       <div
         id="navbar-mobile-grid"
@@ -138,7 +138,7 @@ const navItems = copy.navbar.navItems.map((item) => ({
               href={BOOKING_URL}
               target="_blank"
               rel="noopener noreferrer"
-              class="mt-2 flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm sm:hidden"
+              class="mt-2 flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-on-primary shadow-sm sm:hidden"
             >
               <CalendarPlus className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
               {copy.navbar.cta}

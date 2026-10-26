@@ -93,7 +93,7 @@ export const Testimonials = ({ image }: TestimonialsProps) => (
           ({ id, name, subtitle, text, initials }) => (
             <article
               key={id}
-              className="flex flex-col rounded-2xl bg-white p-6 shadow-sm ring-1 ring-line"
+              className="flex flex-col rounded-2xl bg-card p-6 shadow-sm ring-1 ring-line"
             >
               <div
                 className="flex items-start justify-between"
@@ -108,7 +108,7 @@ export const Testimonials = ({ image }: TestimonialsProps) => (
               <div className="mt-5 flex items-center gap-3">
                 <span
                   aria-hidden
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-on-primary"
                 >
                   {initials}
                 </span>

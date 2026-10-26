@@ -139,7 +139,7 @@ export const Footer = () => (
     id="kontakt"
     className="scroll-mt-28 bg-footer px-4 py-6 sm:px-6 sm:py-8"
   >
-    <div className="mx-auto max-w-7xl rounded-3xl bg-white px-6 py-10 shadow-sm sm:px-8 lg:px-10">
+    <div className="mx-auto max-w-7xl rounded-3xl bg-card px-6 py-10 shadow-sm sm:px-8 lg:px-10">
       <h2 className="sr-only">Kontakt</h2>
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-[minmax(0,1.35fr)_repeat(4,minmax(0,1fr))] xl:gap-x-8 xl:gap-y-0">
         <div className="min-w-0 sm:col-span-2 lg:col-span-4 xl:col-span-1">
@@ -222,7 +222,7 @@ export const Footer = () => (
         </div>
 
         <div className="mx-auto flex w-full max-w-sm flex-col items-center gap-3 rounded-2xl bg-surface p-6 text-center ring-1 ring-line xl:mx-0 xl:max-w-none xl:self-start">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-primary shadow-sm">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-card text-primary shadow-sm">
             <CalendarPlus className="h-6 w-6 shrink-0" />
           </span>
           <p className="font-display text-lg font-bold text-secondary">
@@ -235,7 +235,7 @@ export const Footer = () => (
             href={BOOKING_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-1 block w-full rounded-xl bg-primary-dark px-4 py-3 text-center text-xs font-bold text-white"
+            className="mt-1 block w-full rounded-xl bg-primary-dark px-4 py-3 text-center text-xs font-bold text-on-primary"
           >
             {copy.footer.bookingCard.cta}
           </a>
