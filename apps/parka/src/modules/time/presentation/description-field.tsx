@@ -8,6 +8,7 @@ import {
   useModalMounted,
   useModalStack,
 } from '@/shared/router/modal-stack';
+import { DictationButton } from '@/shared/dictation/dictation-button';
 import { Button, inputClass } from '@/shared/ui/controls';
 import { TASK_DESCRIPTION_MAX_LENGTH } from '../configuration/constraints';
 import { DESCRIPTION_EDITOR_MODAL } from './modal-ids';
@@ -73,7 +74,10 @@ const FullscreenEditor = ({ value, onChange }: Props) => {
             className={cn(inputClass, 'min-h-0 flex-1 resize-none')}
           />
           <div className="flex items-center justify-between gap-3">
-            <Counter id={counterId} value={value} />
+            <div className="flex items-center gap-2">
+              <DictationButton target={ref} label="Opis w pełnym ekranie" />
+              <Counter id={counterId} value={value} />
+            </div>
             <Button onClick={close} className="w-auto">
               Gotowe
             </Button>
@@ -108,7 +112,12 @@ export const DescriptionField = ({ value, onChange }: Props) => {
           aria-describedby={counterId}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Dodatkowe informacje o zadaniu"
-          className={cn(inputClass, 'max-h-48 resize-y pr-10')}
+          className={cn(inputClass, 'max-h-48 resize-y pr-16')}
+        />
+        <DictationButton
+          target={ref}
+          label="Opis"
+          className="absolute right-8 top-2"
         />
         {value !== '' ? (
           <button
