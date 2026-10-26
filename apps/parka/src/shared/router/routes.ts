@@ -168,6 +168,9 @@ export const API_ROUTER = {
   timeBacklog: route('/api/time/backlog/'),
   timeBacklogById: routeById('/api/time/backlog/'),
   timeTaskById: routeById('/api/time/tasks/'),
+  timeTaskAttachments: (taskId: string) =>
+    `/api/time/tasks/${taskId}/attachments/` as const,
+  timeAttachmentById: routeById('/api/time/attachments/'),
   timeRecurring: route('/api/time/recurring/'),
   timeRecurringById: routeById('/api/time/recurring/'),
   timeCategories: route('/api/time/categories/'),

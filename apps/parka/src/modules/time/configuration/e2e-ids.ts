@@ -44,6 +44,12 @@ export const TIME_E2E_IDS = [
   'time:description-clamp',
   'time:description-more',
   'time:description-full',
+  'time:attachments',
+  'time:attachments-skeleton',
+  'time:attachments-error',
+  'time:attachment-add',
+  'time:attachment-input',
+  'time:attachment-viewer',
 ] as const;
 
 export type TimeDynamicE2eId =
@@ -59,6 +65,9 @@ export type TimeDynamicE2eId =
   | `time:task-backlog:${string | number}`
   | `time:task-delete:${string | number}`
   | `time:task-more:${string | number}`
-  | `time:task-date:${string | number}`;
+  | `time:task-date:${string | number}`
+  | `time:attachment:${string}`
+  | `time:attachment-thumb:${string}`
+  | `time:attachment-delete:${string}`;
 
 export type TimeE2eId = (typeof TIME_E2E_IDS)[number] | TimeDynamicE2eId;

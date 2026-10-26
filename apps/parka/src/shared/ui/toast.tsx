@@ -20,6 +20,8 @@ export type ToastNotice =
 type Props = {
   notice: ToastNotice;
   onClose: () => void;
+  /** Extra classes, e.g. to move it clear of a popup. */
+  className?: string;
   'data-e2e'?: E2eId;
 };
 
@@ -28,7 +30,12 @@ type Props = {
  * message. Success: plain message, auto-dismissed. Failure pattern:
  * `title : tech-code : description : close : retry`, kept until closed.
  */
-export const Toast = ({ notice, onClose, 'data-e2e': dataE2e }: Props) => {
+export const Toast = ({
+  notice,
+  onClose,
+  className,
+  'data-e2e': dataE2e,
+}: Props) => {
   const close = useEffectEvent(onClose);
   const isError = notice.tone === 'error';
 
@@ -43,10 +50,11 @@ export const Toast = ({ notice, onClose, 'data-e2e': dataE2e }: Props) => {
       role={notice.tone === 'error' ? 'alert' : 'status'}
       data-e2e={dataE2e}
       className={cn(
-        'fixed inset-x-4 bottom-24 z-(--z-tooltip) mx-auto max-w-md rounded-xl px-4 py-3 text-sm shadow-lg',
+        'pointer-events-auto fixed inset-x-4 bottom-24 z-(--z-tooltip) mx-auto max-w-md rounded-xl px-4 py-3 text-sm shadow-lg',
         notice.tone === 'error'
           ? 'border border-danger-line bg-danger-soft text-danger'
           : 'bg-brand font-medium text-on-brand',
+        className,
       )}
     >
       {notice.tone === 'error' ? (

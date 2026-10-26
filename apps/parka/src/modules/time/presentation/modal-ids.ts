@@ -95,3 +95,24 @@ export const deletedCategoryIdOf = (modal: string): CategoryId | null =>
   modal.startsWith(DELETE_CATEGORY_PREFIX)
     ? (modal.slice(DELETE_CATEGORY_PREFIX.length) as CategoryId)
     : null;
+
+const DELETE_ATTACHMENT_PREFIX = 'attachment-delete:';
+
+export const deleteAttachmentModal = (id: string): string =>
+  `${DELETE_ATTACHMENT_PREFIX}${id}`;
+
+export const deletedAttachmentIdOf = (modal: string): string | null =>
+  modal.startsWith(DELETE_ATTACHMENT_PREFIX)
+    ? modal.slice(DELETE_ATTACHMENT_PREFIX.length)
+    : null;
+
+const VIEW_ATTACHMENT_PREFIX = 'attachment-view:';
+
+/** Full-screen view of an image attachment. */
+export const viewAttachmentModal = (id: string): string =>
+  `${VIEW_ATTACHMENT_PREFIX}${id}`;
+
+export const viewedAttachmentIdOf = (modal: string): string | null =>
+  modal.startsWith(VIEW_ATTACHMENT_PREFIX)
+    ? modal.slice(VIEW_ATTACHMENT_PREFIX.length)
+    : null;

@@ -699,6 +699,45 @@ export type Database = {
           },
         ];
       };
+      time_task_attachments: {
+        Row: {
+          created_at: string;
+          id: string;
+          mime: string;
+          name: string;
+          size: number;
+          task_id: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          mime: string;
+          name: string;
+          size: number;
+          task_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          mime?: string;
+          name?: string;
+          size?: number;
+          task_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'time_task_attachments_task_fk';
+            columns: ['user_id', 'task_id'];
+            isOneToOne: false;
+            referencedRelation: 'time_tasks';
+            referencedColumns: ['user_id', 'id'];
+          },
+        ];
+      };
       time_tasks: {
         Row: {
           at: string | null;
@@ -800,6 +839,17 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
       };
+      mcp_add_task_attachment: {
+        Args: {
+          p_id: string;
+          p_mime: string;
+          p_name: string;
+          p_size: number;
+          p_task_id: string;
+          p_token: string;
+        };
+        Returns: Json;
+      };
       mcp_authenticate: { Args: { p_token: string }; Returns: boolean };
       mcp_create_category: {
         Args: {
@@ -834,6 +884,10 @@ export type Database = {
         Args: { p_id: string; p_token: string };
         Returns: boolean;
       };
+      mcp_delete_task_attachment: {
+        Args: { p_id: string; p_token: string };
+        Returns: string;
+      };
       mcp_get_expense: {
         Args: { p_id: string; p_token: string };
         Returns: Json;
@@ -852,6 +906,10 @@ export type Database = {
         Returns: Json;
       };
       mcp_list_priorities: { Args: { p_token: string }; Returns: Json };
+      mcp_list_task_attachments: {
+        Args: { p_task_id: string; p_token: string };
+        Returns: Json;
+      };
       mcp_list_tasks: {
         Args: {
           p_backlog?: boolean;

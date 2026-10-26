@@ -68,6 +68,16 @@ export const setupTimeBackend = () => {
     deviceProfile: null as Json | null,
     failReads: false,
     delayMs: 0,
+    /** Files per task id; the real server keeps them in storage. */
+    attachments: {} as Record<string, Json[]>,
+    failAttachmentReads: false,
+    failAttachmentWrites: false,
+    uploadResult: {
+      id: 'a-new',
+      name: 'file',
+      size: 1,
+      mime: 'text/plain',
+    } as Json,
   };
 
   const record = async (request: Request): Promise<Json | undefined> => {
@@ -106,6 +116,40 @@ export const setupTimeBackend = () => {
           backlog: state.backlog,
         },
       });
+    }),
+    http.get(
+      '/api/time/tasks/:id/attachments/',
+      async ({ request, params }) => {
+        calls.push({ method: 'GET', url: request.url });
+        if (state.failAttachmentReads) return HttpResponse.json(FAILURE);
+        return HttpResponse.json({
+          code: 200,
+          data: state.attachments[params.id as string] ?? [],
+        });
+      },
+    ),
+    http.post(
+      '/api/time/tasks/:id/attachments/',
+      async ({ request, params }) => {
+        calls.push({ method: 'POST', url: request.url });
+        if (state.failAttachmentWrites) return HttpResponse.json(FAILURE);
+
+        // jsdom files do not survive the fetch form encoder: the test says
+        // what the server would have stored.
+        const added = state.uploadResult;
+        const id = params.id as string;
+        state.attachments[id] = [...(state.attachments[id] ?? []), added];
+        return HttpResponse.json({ code: 201, data: added });
+      },
+    ),
+    http.delete('/api/time/attachments/:id/', async ({ request, params }) => {
+      calls.push({ method: 'DELETE', url: request.url });
+      if (state.failAttachmentWrites) return HttpResponse.json(FAILURE);
+      for (const key of Object.keys(state.attachments))
+        state.attachments[key] = state.attachments[key]!.filter(
+          (item) => item.id !== params.id,
+        );
+      return HttpResponse.json({ code: 200, ok: true });
     }),
     http.post('/api/time/backlog/', async ({ request }) => {
       const body = await record(request);
@@ -231,6 +275,9 @@ export const setupTimeBackend = () => {
     state.deviceProfile = null;
     state.failReads = false;
     state.delayMs = 0;
+    state.attachments = {};
+    state.failAttachmentReads = false;
+    state.failAttachmentWrites = false;
   });
   beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
   afterEach(() => server.resetHandlers());

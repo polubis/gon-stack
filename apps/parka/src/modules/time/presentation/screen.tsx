@@ -15,6 +15,7 @@ import {
   type Period,
 } from '@/shared/period/period';
 import { navigateTo } from '@/shared/router/navigation';
+import { useModalStack } from '@/shared/router/modal-stack';
 import { ERROR_CODES, TIME_KINDS } from '../configuration/constraints';
 import type { TimeE2eId } from '../configuration/e2e-ids';
 import type { TimeKind } from '../domain/models';
@@ -80,6 +81,7 @@ const Screen = ({ kind, children }: Props) => {
     load,
     dismissNotice,
   } = useContext();
+  const modalOpen = useModalStack().length > 0;
   const period = periodContaining(kind, anchor);
   const { gesture, go } = usePeriodSwipe({
     period,
@@ -165,6 +167,8 @@ const Screen = ({ kind, children }: Props) => {
         <Toast
           key={notice.id}
           data-e2e="time:toast"
+          // A popup sits at the bottom: keep the message off its content.
+          className={modalOpen ? 'bottom-auto top-4' : undefined}
           notice={notice}
           onClose={dismissNotice}
         />

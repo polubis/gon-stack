@@ -1,3 +1,5 @@
+import type { NoticeBody } from '../domain/models';
+import { notify } from './actions/notify';
 import type { Registry } from './registry';
 import type { Store } from './store';
 import type {
@@ -40,6 +42,7 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
       trigger('[TRIGGER]_DELETE_CATEGORY', { id }),
     createPriority: (priority: Priority) =>
       trigger('[TRIGGER]_CREATE_PRIORITY', { priority }),
+    notify: (notice: NoticeBody) => notify(store, notice),
     dismissNotice: () => trigger('[TRIGGER]_DISMISS_NOTICE'),
     useTasks: () => store.$tasks.use(),
     useBacklog: () => store.$backlog.use(),

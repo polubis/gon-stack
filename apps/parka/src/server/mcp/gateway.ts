@@ -1,5 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/shared/data-sources/db-schema';
+import {
+  prepareAttachment,
+  type AttachmentImages,
+} from '../application/shared/attachment-image';
+import {
+  TASK_ATTACHMENT_BUCKET,
+  taskAttachmentPath,
+} from '../application/shared/task-attachment';
 
 /** The presented token is unknown, expired or disabled. */
 export class McpAuthError extends Error {}
@@ -54,6 +62,8 @@ export type NewTask = {
 
 export type CategoryPatch = { name?: string; icon?: string; color?: string };
 
+export type NewAttachment = { name: string; mime: string; bytes: ArrayBuffer };
+
 /**
  * Everything the MCP surface may do with the data: what the tasks UI does
  * (tasks, categories, priorities) and reading expenses.
@@ -66,6 +76,9 @@ export type McpGateway = {
   createTask: (task: NewTask) => Promise<unknown>;
   updateTask: (id: string, patch: TaskPatch) => Promise<unknown>;
   deleteTask: (id: string) => Promise<unknown>;
+  listTaskAttachments: (taskId: string) => Promise<unknown>;
+  addTaskAttachment: (taskId: string, file: NewAttachment) => Promise<unknown>;
+  deleteTaskAttachment: (id: string) => Promise<unknown>;
   listCategories: () => Promise<unknown>;
   createCategory: (input: {
     name: string;
@@ -101,13 +114,36 @@ const unwrap = ({ data, error, status }: RpcResult): unknown => {
  * and every function filters by that owner, so no other account's rows are
  * reachable.
  */
-export const createSupabaseGateway = (token: string): McpGateway => {
+export const createSupabaseGateway = (
+  token: string,
+  images: AttachmentImages,
+): McpGateway => {
   const db = createClient<Database>(
     import.meta.env.PUBLIC_PARKA_SUPABASE_URL,
     import.meta.env.PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY,
     { auth: { persistSession: false, autoRefreshToken: false } },
   );
   const p_token = token;
+
+  // Storage has no token login: files are reached as `anon` with the token in
+  // a header; storage policies resolve its owner and allow only that folder.
+  const files = () =>
+    createClient<Database>(
+      import.meta.env.PUBLIC_PARKA_SUPABASE_URL,
+      import.meta.env.PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY,
+      {
+        auth: { persistSession: false, autoRefreshToken: false },
+        global: { headers: { 'x-mcp-token': token } },
+      },
+    ).storage.from(TASK_ATTACHMENT_BUCKET);
+
+  const attachmentsOf = async (taskId: string) =>
+    unwrap(
+      await db.rpc('mcp_list_task_attachments', {
+        p_token,
+        p_task_id: taskId,
+      }),
+    ) as { userId: string; items: { id: string }[] } | null;
 
   return {
     authenticate: async () => {
@@ -146,8 +182,74 @@ export const createSupabaseGateway = (token: string): McpGateway => {
       unwrap(
         await db.rpc('mcp_update_task', { p_token, p_id, p_patch: patch }),
       ),
-    deleteTask: async (p_id) =>
-      unwrap(await db.rpc('mcp_delete_task', { p_token, p_id })),
+    deleteTask: async (p_id) => {
+      // Rows go with the task, files do not: collect them first.
+      const attachments = await attachmentsOf(p_id);
+      const deleted = unwrap(
+        await db.rpc('mcp_delete_task', { p_token, p_id }),
+      );
+      if (deleted && attachments && attachments.items.length > 0)
+        await files().remove(
+          attachments.items.map((a) =>
+            taskAttachmentPath(attachments.userId, a.id),
+          ),
+        );
+      return deleted;
+    },
+    listTaskAttachments: async (taskId) => {
+      const found = await attachmentsOf(taskId);
+      return found ? { items: found.items } : null;
+    },
+    addTaskAttachment: async (taskId, file) => {
+      const found = await attachmentsOf(taskId);
+      if (!found) return null;
+      const prepared = await prepareAttachment(images, {
+        bytes: file.bytes,
+        name: file.name,
+        mime: file.mime,
+      }).catch((error: unknown) => {
+        throw new McpInputError(
+          error instanceof Error ? error.message : 'Invalid file',
+        );
+      });
+      const id = crypto.randomUUID();
+      const path = taskAttachmentPath(found.userId, id);
+      const upload = await files().upload(path, prepared.bytes, {
+        contentType: prepared.mime,
+      });
+      if (upload.error) throw new Error('MCP file upload failed');
+      try {
+        const row = unwrap(
+          await db.rpc('mcp_add_task_attachment', {
+            p_token,
+            p_task_id: taskId,
+            p_id: id,
+            p_name: prepared.name,
+            p_size: prepared.bytes.byteLength,
+            p_mime: prepared.mime,
+          }),
+        ) as { id: string; name: string; size: number; mime: string };
+        return {
+          id: row.id,
+          name: row.name,
+          size: row.size,
+          mime: row.mime,
+          originalSize: prepared.originalSize,
+        };
+      } catch (error) {
+        // Never leave a file nobody points at.
+        await files().remove([path]);
+        throw error;
+      }
+    },
+    deleteTaskAttachment: async (p_id) => {
+      const owner = unwrap(
+        await db.rpc('mcp_delete_task_attachment', { p_token, p_id }),
+      ) as string | null;
+      if (!owner) return false;
+      await files().remove([taskAttachmentPath(owner, p_id)]);
+      return true;
+    },
     listCategories: async () =>
       unwrap(await db.rpc('mcp_list_categories', { p_token })),
     createCategory: async (c) =>

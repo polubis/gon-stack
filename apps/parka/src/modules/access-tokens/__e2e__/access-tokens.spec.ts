@@ -190,20 +190,23 @@ const commands = {
     await expect(page.locator('body')).not.toContainText(latest(page));
   },
 
-  'the client lists exactly the fourteen tools': async ({ page }) => {
+  'the client lists exactly the seventeen tools': async ({ page }) => {
     const { status, json } = await mcp(page, latest(page), 'tools/list');
     expect(status).toBe(200);
     expect(json.result!.tools!.map((t) => t.name).sort()).toEqual([
+      'add_task_attachment',
       'create_category',
       'create_priority',
       'create_task',
       'delete_category',
       'delete_task',
+      'delete_task_attachment',
       'get_expense',
       'get_task',
       'list_categories',
       'list_expenses',
       'list_priorities',
+      'list_task_attachments',
       'list_tasks',
       'set_task_status',
       'update_category',
@@ -422,7 +425,7 @@ test.describe('mcp access tokens', () => {
       ['i close the secret dialog'],
       ['the token is listed only in masked form'],
       ['i reload and the secret is gone for good'],
-      ['the client lists exactly the fourteen tools'],
+      ['the client lists exactly the seventeen tools'],
       ['the client reads the task and the expense'],
       ['the client marks the task done'],
       ['the app shows the task as done'],

@@ -79,6 +79,7 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
     updateCategory: facade.updateCategory,
     deleteCategory: facade.deleteCategory,
     dismissNotice: facade.dismissNotice,
+    notify: facade.notify,
     createCategory: (input: Omit<Category, 'id'>) => {
       const category = { ...input, id: newCategoryId() };
       facade.createCategory(category);

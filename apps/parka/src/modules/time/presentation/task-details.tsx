@@ -7,6 +7,7 @@ import { PriorityBadge } from './priority-badge';
 import { useContext } from './context';
 import { descriptionModal, editBacklogModal, editTaskModal } from './modal-ids';
 import { ModalShell } from './modal-shell';
+import { TaskAttachments } from './task-attachments';
 
 /** Roughly what fits the clamp when layout can't be measured. */
 const LONG_TEXT = 180;
@@ -96,6 +97,7 @@ export const TaskDetails = ({
           {isBoardTask(task) && task.inProgress ? <span>W trakcie</span> : null}
         </p>
         {task.description ? <ClampedDescription task={task} /> : null}
+        <TaskAttachments taskId={task.id} />
         <div className="mt-1 flex justify-end">
           <Button
             data-e2e="time:task-details-edit"

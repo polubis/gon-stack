@@ -22,6 +22,13 @@ const TASK = {
   recurring: false,
 };
 
+const ATTACHMENT = {
+  id: '0bc01207-5250-4718-a917-8041238c93d2',
+  name: 'umowa.pdf',
+  size: 2048,
+  mime: 'application/pdf',
+};
+
 type RpcJson = {
   error: { code: number };
   result: {
@@ -107,6 +114,25 @@ const fakeGateway = (calls: Calls, valid = true): McpGateway => {
     getExpense: async (id) => {
       await record('getExpense', id);
       return null;
+    },
+    listTaskAttachments: async (taskId) => {
+      await record('listTaskAttachments', taskId);
+      return taskId === TASK.id ? { items: [ATTACHMENT] } : null;
+    },
+    addTaskAttachment: async (taskId, file) => {
+      await record('addTaskAttachment', taskId, file.name, file.mime);
+      return taskId === TASK.id
+        ? {
+            ...ATTACHMENT,
+            name: file.name,
+            mime: file.mime,
+            originalSize: file.bytes.byteLength,
+          }
+        : null;
+    },
+    deleteTaskAttachment: async (id) => {
+      await record('deleteTaskAttachment', id);
+      return id === ATTACHMENT.id;
     },
   };
 };
@@ -205,16 +231,19 @@ describe('mcp tools list', () => {
     }[];
 
     expect(tools.map((t) => t.name).sort()).toEqual([
+      'add_task_attachment',
       'create_category',
       'create_priority',
       'create_task',
       'delete_category',
       'delete_task',
+      'delete_task_attachment',
       'get_expense',
       'get_task',
       'list_categories',
       'list_expenses',
       'list_priorities',
+      'list_task_attachments',
       'list_tasks',
       'set_task_status',
       'update_category',
@@ -238,7 +267,7 @@ describe('mcp tools list', () => {
         .filter((t) => t.annotations.destructiveHint)
         .map((t) => t.name)
         .sort(),
-    ).toEqual(['delete_category', 'delete_task']);
+    ).toEqual(['delete_category', 'delete_task', 'delete_task_attachment']);
   });
 });
 
@@ -490,6 +519,107 @@ describe('mcp task management', () => {
     expect(json.result.content[0].text).toMatch(/not found/);
   });
 
+  it('lists the attachments of a task', async () => {
+    const { rpc } = setup();
+
+    const { json } = await call(rpc, 'list_task_attachments', {
+      taskId: 't-1',
+    });
+
+    expect(json.result.structuredContent).toEqual({ items: [ATTACHMENT] });
+  });
+
+  it('attaches a file given as base64 and reports the sizes', async () => {
+    const { rpc, calls } = setup();
+
+    const { json } = await call(rpc, 'add_task_attachment', {
+      taskId: 't-1',
+      name: 'notatka.txt',
+      mimeType: 'text/plain',
+      contentBase64: btoa('hello'),
+    });
+
+    expect(json.result.structuredContent).toMatchObject({
+      name: 'notatka.txt',
+      originalSize: 5,
+    });
+    expect(calls).toEqual([
+      {
+        name: 'addTaskAttachment',
+        args: ['t-1', 'notatka.txt', 'text/plain'],
+      },
+    ]);
+  });
+
+  it('refuses an attachment of a type that is not allowed', async () => {
+    const { rpc, calls } = setup();
+
+    const { json } = await call(rpc, 'add_task_attachment', {
+      taskId: 't-1',
+      name: 'virus.exe',
+      mimeType: 'application/x-msdownload',
+      contentBase64: btoa('MZ'),
+    });
+
+    expect(json.result.isError).toBe(true);
+    expect(calls).toEqual([]);
+  });
+
+  it('refuses a document over 5 MB and broken base64', async () => {
+    const { rpc, calls } = setup();
+
+    const big = await call(rpc, 'add_task_attachment', {
+      taskId: 't-1',
+      name: 'duzy.pdf',
+      mimeType: 'application/pdf',
+      contentBase64: btoa('x'.repeat(5 * 1024 * 1024 + 1)),
+    });
+    const broken = await call(rpc, 'add_task_attachment', {
+      taskId: 't-1',
+      name: 'a.txt',
+      mimeType: 'text/plain',
+      contentBase64: '***',
+    });
+
+    expect(big.json.result.content[0].text).toMatch(/większy niż 5 MB/);
+    expect(broken.json.result.content[0].text).toMatch(/base64/);
+    expect(calls).toEqual([]);
+  });
+
+  it('says so when attaching to a task that does not exist', async () => {
+    const { rpc } = setup();
+
+    const { json } = await call(rpc, 'add_task_attachment', {
+      taskId: 'missing',
+      name: 'a.txt',
+      mimeType: 'text/plain',
+      contentBase64: btoa('a'),
+    });
+
+    expect(json.result.content[0].text).toMatch(/not found/);
+  });
+
+  it('deletes an attachment only when confirmed', async () => {
+    const { rpc, calls } = setup();
+
+    const refused = await call(rpc, 'delete_task_attachment', {
+      id: ATTACHMENT.id,
+    });
+    const done = await call(rpc, 'delete_task_attachment', {
+      id: ATTACHMENT.id,
+      confirm: true,
+    });
+
+    expect(refused.json.result.isError).toBe(true);
+    expect(done.json.result.structuredContent).toEqual({
+      id: ATTACHMENT.id,
+      deleted: true,
+    });
+    expect(calls).toEqual([
+      { name: 'deleteTaskAttachment', args: [ATTACHMENT.id] },
+    ]);
+  });
+
   it('reports a refused category deletion as a readable tool error', async () => {
     const { rpc } = setup();
 
@@ -661,14 +791,14 @@ describe('mcp access control', () => {
   it('rejects an oversized body', async () => {
     const { post } = setup();
 
-    const response = await post(null, {}, 'x'.repeat(70_000));
+    const response = await post(null, {}, 'x'.repeat(9 * 1024 * 1024));
 
     expect(response.status).toBe(413);
   });
 
   it('rejects an oversized body that declares no length', async () => {
     const { deps } = setup();
-    const chunk = new TextEncoder().encode('x'.repeat(40_000));
+    const chunk = new TextEncoder().encode('x'.repeat(5 * 1024 * 1024));
     const body = new ReadableStream({
       start(controller) {
         controller.enqueue(chunk);

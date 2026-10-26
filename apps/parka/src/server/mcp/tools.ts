@@ -1,4 +1,8 @@
 import z from 'zod';
+import {
+  ATTACHMENT_MIME_TYPES,
+  attachmentRejection,
+} from '@/shared/attachments/rules';
 import { isDay } from '@/shared/period/period';
 import { CATEGORY_ICON_IDS } from '@/shared/ui/category-icon-ids';
 import { McpInputError, type McpGateway } from './gateway';
@@ -154,6 +158,25 @@ const task = () =>
     priorityValue: z.number().nullable().describe('1 (least) to 10 (most)'),
     recurring: z.boolean(),
   });
+
+const attachment = () =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    size: z.number().int().describe('Stored bytes (after image reduction)'),
+    mime: z.string(),
+  });
+
+const decodeBase64 = (value: string): ArrayBuffer => {
+  try {
+    const binary = atob(value);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes.buffer;
+  } catch {
+    throw new ToolError('contentBase64 is not valid base64');
+  }
+};
 
 const category = () =>
   z.object({
@@ -377,6 +400,70 @@ export const MCP_TOOLS: readonly RegisteredTool[] = [
     run: async (args, gateway) => {
       if (!(await gateway.deleteTask(args.id)))
         throw new ToolError(`Task "${args.id}" not found`);
+      return { id: args.id, deleted: true as const };
+    },
+  }),
+  defineTool({
+    name: 'list_task_attachments',
+    title: 'List task attachments',
+    description:
+      'Lists the files attached to a task (name, stored size, type). A task has at most 5.',
+    input: z.strictObject({ taskId: id() }),
+    output: z.object({ items: z.array(attachment()) }),
+    annotations: READ_ONLY,
+    run: async (args, gateway) => {
+      const found = await gateway.listTaskAttachments(args.taskId);
+      if (!found) throw new ToolError(`Task "${args.taskId}" not found`);
+      return found as { items: z.input<ReturnType<typeof attachment>>[] };
+    },
+  }),
+  defineTool({
+    name: 'add_task_attachment',
+    title: 'Attach a file to a task',
+    description: `Attaches a file given as base64 (about 6 MB of file at most per call). Allowed: ${ATTACHMENT_MIME_TYPES.join(', ')}. A stored file is at most 5 MB and a task takes 5 files. Photos are re-encoded as lossy WebP (quality 75, same pixel size) first, so the limit applies after the reduction; an animated GIF is kept as it is.`,
+    input: z.strictObject({
+      taskId: id(),
+      name: z.string().trim().min(1).max(200),
+      mimeType: z.enum(ATTACHMENT_MIME_TYPES),
+      contentBase64: z.string().min(1),
+    }),
+    output: attachment().extend({
+      originalSize: z.number().int().describe('Bytes you sent'),
+    }),
+    annotations: WRITE,
+    run: async (args, gateway) => {
+      const bytes = decodeBase64(args.contentBase64);
+      const reason = attachmentRejection({
+        name: args.name,
+        type: args.mimeType,
+        size: bytes.byteLength,
+      });
+      if (reason) throw new ToolError(reason);
+      const added = await gateway.addTaskAttachment(args.taskId, {
+        name: args.name,
+        mime: args.mimeType,
+        bytes,
+      });
+      if (!added) throw new ToolError(`Task "${args.taskId}" not found`);
+      return added as z.input<ReturnType<typeof attachment>> & {
+        originalSize: number;
+      };
+    },
+  }),
+  defineTool({
+    name: 'delete_task_attachment',
+    title: 'Delete a task attachment permanently',
+    description:
+      'PERMANENTLY deletes one attached file (id from list_task_attachments). It cannot be undone. Use only when the user explicitly asked. Requires `confirm: true`.',
+    input: z.strictObject({
+      id: z.uuid(),
+      confirm: z.literal(true).describe('Must be true: confirms the deletion'),
+    }),
+    output: z.object({ id: z.string(), deleted: z.literal(true) }),
+    annotations: DESTRUCTIVE,
+    run: async (args, gateway) => {
+      if (!(await gateway.deleteTaskAttachment(args.id)))
+        throw new ToolError(`Attachment "${args.id}" not found`);
       return { id: args.id, deleted: true as const };
     },
   }),

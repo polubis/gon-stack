@@ -3,7 +3,8 @@ import type { McpGateway } from './gateway';
 import { handleMcpMessage, MCP_ERROR, MCP_PROTOCOL_VERSIONS } from './protocol';
 import { createRateLimiter, type RateLimiter } from './rate-limit';
 
-const MAX_BODY_BYTES = 64 * 1024;
+/** Room for a ~6 MB file sent as base64 (`add_task_attachment`). */
+const MAX_BODY_BYTES = 8 * 1024 * 1024;
 const WINDOW_MS = 60_000;
 const REQUESTS_PER_TOKEN = 120;
 const FAILURES_PER_CLIENT = 20;

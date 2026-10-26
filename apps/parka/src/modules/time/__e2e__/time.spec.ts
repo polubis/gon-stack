@@ -15,7 +15,9 @@ const EMAIL = `e2e-time-${Date.now()}@parka.test`;
 const RECURRING_EMAIL = `e2e-time-recurring-${Date.now()}@parka.test`;
 const BACKLOG_EMAIL = `e2e-time-backlog-${Date.now()}@parka.test`;
 const DESCRIPTION_EMAIL = `e2e-time-description-${Date.now()}@parka.test`;
+const ATTACHMENT_EMAIL = `e2e-time-attachment-${Date.now()}@parka.test`;
 const PASSWORD = 'secret123';
+const ATTACHMENT_TEXT = 'Treść załącznika E2E';
 const LONG_TITLE = `Długi tytuł ${'x'.repeat(147)}`;
 const LONG_DESCRIPTION = Array.from(
   { length: 12 },
@@ -45,6 +47,46 @@ const synced = (page: Page, method: string, status: number) =>
       r.request().method() === method &&
       r.status() === status,
   );
+
+/** A noisy test photo drawn on a canvas and saved as a near-lossless JPEG. */
+const makePhoto = async (
+  page: Page,
+  width: number,
+  height: number,
+): Promise<Buffer> => {
+  const bytes = await page.evaluate(
+    async ([w, h]) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = w!;
+      canvas.height = h!;
+      const g = canvas.getContext('2d')!;
+      const gradient = g.createLinearGradient(0, 0, w!, h!);
+      gradient.addColorStop(0, '#1d4ed8');
+      gradient.addColorStop(1, '#f59e0b');
+      g.fillStyle = gradient;
+      g.fillRect(0, 0, w!, h!);
+      for (let i = 0; i < 600; i++) {
+        g.fillStyle = `hsla(${(i * 37) % 360} 80% 50% / 0.5)`;
+        g.beginPath();
+        g.arc((i * 997) % w!, (i * 631) % h!, 20 + ((i * 13) % 160), 0, 7);
+        g.fill();
+      }
+      const pixels = g.getImageData(0, 0, w!, h!);
+      for (let i = 0; i < pixels.data.length; i += 4) {
+        const n = ((i * 2654435761) >>> 24) % 24;
+        pixels.data[i] = Math.min(255, pixels.data[i]! + n);
+        pixels.data[i + 1] = Math.min(255, pixels.data[i + 1]! + n);
+      }
+      g.putImageData(pixels, 0, 0);
+      const blob = await new Promise<Blob>((resolve) =>
+        canvas.toBlob((b) => resolve(b!), 'image/jpeg', 1),
+      );
+      return Array.from(new Uint8Array(await blob.arrayBuffer()));
+    },
+    [width, height],
+  );
+  return Buffer.from(bytes);
+};
 
 const commands = {
   'i register a new account': async (ctx) => {
@@ -429,6 +471,228 @@ const commands = {
     await getByE2e('time:description-more').click();
     await expect(getByE2e('time:description-full')).toContainText('Linia 12');
   },
+
+  'i register an account for attachments': async (ctx) => {
+    await registerAndConfirm(ctx, ATTACHMENT_EMAIL, PASSWORD);
+    await ctx.page.waitForLoadState('networkidle');
+  },
+
+  'i attach a file to a task and it survives a reload': async ({
+    page,
+    getByE2e,
+  }) => {
+    await open(page, APP_ROUTER.time({ date: DAY }));
+    await page
+      .getByRole('button', { name: 'Dodaj', exact: true })
+      .first()
+      .click();
+    await page.getByRole('menuitem', { name: 'Zadanie', exact: true }).click();
+    await getByE2e('time:task-dialog')
+      .getByRole('textbox', { name: 'Nazwa' })
+      .fill('Zadanie z plikiem E2E');
+    await Promise.all([
+      synced(page, 'POST', 201),
+      getByE2e('time:task-save').click(),
+    ]);
+    await page
+      .getByRole('button', { name: 'Szczegóły zadania: Zadanie z plikiem E2E' })
+      .click();
+    await expect(getByE2e('time:attachments')).toContainText(
+      'Brak załączników',
+    );
+    await Promise.all([
+      page.waitForResponse(
+        (r) => r.url().includes('/attachments/') && r.status() === 201,
+      ),
+      getByE2e('time:attachment-input').setInputFiles({
+        name: 'notatka.txt',
+        mimeType: 'text/plain',
+        buffer: Buffer.from(ATTACHMENT_TEXT),
+      }),
+    ]);
+    await expect(
+      getByE2e('time:attachments').getByRole('link', { name: 'notatka.txt' }),
+    ).toBeVisible();
+    await reload(page);
+    await expect(
+      getByE2e('time:attachments').getByRole('link', { name: 'notatka.txt' }),
+    ).toBeVisible();
+  },
+
+  'the attachment opens with its content and a wrong type is refused': async ({
+    page,
+    getByE2e,
+  }) => {
+    const link = getByE2e('time:attachments').getByRole('link', {
+      name: 'notatka.txt',
+    });
+    const href = await link.getAttribute('href');
+    const response = await page.request.get(href!);
+    expect(response.status()).toBe(200);
+    expect(await response.text()).toBe(ATTACHMENT_TEXT);
+
+    await getByE2e('time:attachment-input').setInputFiles({
+      name: 'virus.exe',
+      mimeType: 'application/x-msdownload',
+      buffer: Buffer.from('MZ'),
+    });
+    await expect(getByE2e('time:toast')).toContainText('virus.exe');
+    await expect(getByE2e('time:attachments')).toContainText('(1/5)');
+  },
+
+  'i delete the attachment after confirming and it stays gone': async ({
+    page,
+    getByE2e,
+  }) => {
+    await page.getByRole('button', { name: 'Usuń plik notatka.txt' }).click();
+    await expect(page).toHaveURL(/modal=attachment-delete/);
+    await Promise.all([
+      page.waitForResponse(
+        (r) =>
+          r.url().includes('/api/time/attachments/') &&
+          r.request().method() === 'DELETE' &&
+          r.status() === 200,
+      ),
+      getByE2e('time:delete-confirm').click(),
+    ]);
+    await expect(getByE2e('time:attachments')).toContainText(
+      'Brak załączników',
+    );
+    await reload(page);
+    await expect(getByE2e('time:attachments')).toContainText(
+      'Brak załączników',
+    );
+  },
+  'a big photo is reduced in quality, keeps its size and opens full screen':
+    async ({ page, getByE2e }) => {
+      const original = await makePhoto(page, 2000, 1400);
+      expect(original.length).toBeLessThanOrEqual(5 * 1024 * 1024);
+
+      const [response] = await Promise.all([
+        page.waitForResponse(
+          (r) =>
+            r.url().includes('/attachments/') &&
+            r.request().method() === 'POST',
+          { timeout: 90_000 },
+        ),
+        getByE2e('time:attachment-input').setInputFiles({
+          name: 'wakacje.jpg',
+          mimeType: 'image/jpeg',
+          buffer: original,
+        }),
+      ]);
+      const { data } = (await response.json()) as {
+        data: {
+          name: string;
+          size: number;
+          mime: string;
+          originalSize: number;
+        };
+      };
+      expect(data.mime).toBe('image/webp');
+      expect(data.name).toBe('wakacje.webp');
+      expect(data.originalSize).toBe(original.length);
+      expect(data.size).toBeLessThan(original.length / 2);
+      expect(data.size).toBeLessThanOrEqual(5 * 1024 * 1024);
+
+      const thumb = getByE2e('time:attachments').getByRole('button', {
+        name: 'Otwórz podgląd: wakacje.webp',
+      });
+      await expect(thumb).toBeVisible();
+      const href = await getByE2e('time:attachments')
+        .getByRole('link', { name: 'wakacje.webp' })
+        .getAttribute('href');
+      const dimensions = await page.evaluate(async (url) => {
+        const bitmap = await createImageBitmap(await (await fetch(url)).blob());
+        return [bitmap.width, bitmap.height];
+      }, href!);
+      expect(dimensions).toEqual([2000, 1400]);
+
+      await thumb.click();
+      await expect(page).toHaveURL(/modal=attachment-view/);
+      const viewer = getByE2e('time:attachment-viewer');
+      await expect(viewer).toBeVisible();
+      await expect(
+        viewer.getByRole('img', { name: 'wakacje.webp' }),
+      ).toBeVisible();
+      await page.keyboard.press('Escape');
+      await expect(viewer).toBeHidden();
+      await expect(page).not.toHaveURL(/attachment-view/);
+    },
+
+  'the mcp server lists, adds a reduced photo and deletes attachments': async ({
+    page,
+  }) => {
+    const created = await page.request.post(API_ROUTER.mcpTokens(), {
+      data: { name: 'E2E załączniki', ttlDays: 1 },
+    });
+    const { token } = ((await created.json()) as { data: { token: string } })
+      .data;
+    const call = async (name: string, args: Record<string, unknown>) => {
+      const response = await page.request.post(API_ROUTER.mcp(), {
+        headers: { Authorization: `Bearer ${token}` },
+        data: {
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'tools/call',
+          params: { name, arguments: args },
+        },
+      });
+      expect(response.status()).toBe(200);
+      return (
+        (await response.json()) as {
+          result: {
+            isError?: boolean;
+            structuredContent: {
+              items: { id: string }[];
+              id: string;
+              size: number;
+            };
+          };
+        }
+      ).result;
+    };
+
+    const tasks = await call('list_tasks', {});
+    const taskId = tasks.structuredContent.items[0]!.id;
+    const before = await call('list_task_attachments', { taskId });
+    const photo = await makePhoto(page, 2000, 1400);
+    const added = await call('add_task_attachment', {
+      taskId,
+      name: 'mcp.jpg',
+      mimeType: 'image/jpeg',
+      contentBase64: photo.toString('base64'),
+    });
+    expect(added.isError).toBeFalsy();
+    expect(added.structuredContent).toMatchObject({
+      name: 'mcp.webp',
+      mime: 'image/webp',
+      originalSize: photo.length,
+    });
+    expect(added.structuredContent.size).toBeLessThan(photo.length / 2);
+
+    const after = await call('list_task_attachments', { taskId });
+    expect(after.structuredContent.items).toHaveLength(
+      before.structuredContent.items.length + 1,
+    );
+    const href = API_ROUTER.timeAttachmentById(added.structuredContent.id);
+    expect((await page.request.get(href)).status()).toBe(200);
+
+    const refused = await call('add_task_attachment', {
+      taskId,
+      name: 'virus.exe',
+      mimeType: 'text/plain',
+      contentBase64: 'not base64!!',
+    });
+    expect(refused.isError).toBe(true);
+
+    const removed = await call('delete_task_attachment', {
+      id: added.structuredContent.id,
+      confirm: true,
+    });
+    expect(removed.structuredContent).toMatchObject({ deleted: true });
+    expect((await page.request.get(href)).status()).toBe(404);
+  },
 } satisfies CommandRegistry<Ctx>;
 
 test('time works against the real Supabase backend', async ({ e2e }) => {
@@ -476,5 +740,19 @@ test('recurring time tasks follow their series on the real backend', async ({
     ['i add a weekly recurring task and its first occurrence appears once'],
     ['the series reaches the following weeks and never revives a deleted task'],
     ['i end the series and its tasks stay as ordinary ones'],
+  );
+});
+
+test('task attachments upload, open and delete on the real backend', async ({
+  e2e,
+}) => {
+  test.setTimeout(150_000);
+  await interpreter(commands, e2e)(
+    ['i register an account for attachments'],
+    ['i attach a file to a task and it survives a reload'],
+    ['the attachment opens with its content and a wrong type is refused'],
+    ['i delete the attachment after confirming and it stays gone'],
+    ['a big photo is reduced in quality, keeps its size and opens full screen'],
+    ['the mcp server lists, adds a reduced photo and deletes attachments'],
   );
 });

@@ -39,6 +39,15 @@ export type Task = {
   recurringId: RecurringId | null;
 };
 
+/** File kept with a task (the bytes stay on the server). */
+export type Attachment = {
+  id: string;
+  name: string;
+  /** Bytes. */
+  size: number;
+  mime: string;
+};
+
 /** A task waiting for a day: same data as a task, nothing about time. */
 export type BacklogTask = Pick<
   Task,
