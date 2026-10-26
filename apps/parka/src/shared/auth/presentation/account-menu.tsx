@@ -347,6 +347,7 @@ export const AccountMenu = ({ placement }: Props) => {
             ref={menu}
             role="menu"
             aria-label="Konta"
+            data-keeps-nav
             data-e2e="account-menu:menu"
             side="top"
             align={side ? 'start' : 'end'}

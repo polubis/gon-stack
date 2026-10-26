@@ -137,6 +137,17 @@ describe('adding an expense on its own page', () => {
     expect(screen.getByLabelText('Sklep')).toBeVisible();
   });
 
+  it('keeps the save bar in the page flow instead of pinning it', async () => {
+    mockBackend();
+    await open();
+
+    const bar = screen.getByRole('button', { name: 'Dodaj wydatek' })
+      .parentElement as HTMLElement;
+
+    expect(bar).toHaveTextContent('Razem');
+    expect(bar.className).not.toMatch(/sticky|fixed/);
+  });
+
   it('links back to the dashboard', async () => {
     mockBackend();
     await open();

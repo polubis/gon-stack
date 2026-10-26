@@ -4,6 +4,8 @@ import { Main as FinanceTour } from '@/modules/finance-tour/presentation/main';
 import { AccountSwitchToast } from '@/shared/auth/presentation/account-switch-toast';
 import { ProtectedScreen } from '@/shared/auth/presentation/protected-screen';
 import { withAuth } from '@/shared/auth/presentation/with-auth';
+import { Provider as OverlayNavProvider } from '@/shared/navigation/overlay-nav/presentation/context';
+import { NavSlot } from '@/shared/navigation/overlay-nav/presentation/nav-slot';
 import { SyncedAppNav } from '@/shared/navigation/app-nav/presentation/synced-app-nav';
 import { navigateTo, registerNavigator } from '@/shared/router/navigation';
 import { normalizePath } from '@/shared/router/routes';
@@ -67,21 +69,23 @@ const Shell = () => {
   }, [pathname]);
 
   return (
-    <div className="flex h-dvh w-full flex-col overflow-hidden bg-surface lg:flex-row">
-      <div className="z-(--z-nav) hidden h-full w-64 shrink-0 lg:block xl:w-72">
-        <SyncedAppNav placement="side" />
-      </div>
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <div className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto">
-          <Outlet />
+    <OverlayNavProvider>
+      <div className="flex h-dvh w-full flex-col overflow-hidden bg-surface lg:flex-row">
+        <NavSlot placement="side">
+          <SyncedAppNav placement="side" />
+        </NavSlot>
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <div className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto">
+            <Outlet />
+          </div>
+          <NavSlot placement="bottom">
+            <SyncedAppNav placement="bottom" />
+          </NavSlot>
         </div>
-        <div className="z-(--z-nav) shrink-0 lg:hidden">
-          <SyncedAppNav placement="bottom" />
-        </div>
+        <AccountSwitchToast />
+        <FinanceTour />
       </div>
-      <AccountSwitchToast />
-      <FinanceTour />
-    </div>
+    </OverlayNavProvider>
   );
 };
 

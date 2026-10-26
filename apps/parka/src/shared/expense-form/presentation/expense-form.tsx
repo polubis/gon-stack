@@ -234,7 +234,7 @@ export const ExpenseForm = ({
             'mt-4 flex items-center gap-3 border-t border-line bg-card py-3',
             dialog
               ? 'flex-wrap'
-              : 'sticky bottom-0 -mx-4 px-4 md:-mx-8 md:px-8 lg:-mx-10 lg:px-10 xl:-mx-16 xl:px-16',
+              : '-mx-4 px-4 md:-mx-8 md:px-8 lg:-mx-10 lg:px-10 xl:-mx-16 xl:px-16',
           )}
         >
           <div className="flex-1">

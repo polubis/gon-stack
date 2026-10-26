@@ -150,20 +150,20 @@ export const Typeahead = ({
               aria-expanded={expanded}
               aria-controls={expanded ? listId : undefined}
               onClick={toggle}
-              className="grid h-6 w-6 place-items-center rounded-full text-ink-soft hover:bg-brand-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+              className="grid h-5 w-5 place-items-center rounded-full text-ink-soft hover:bg-brand-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             >
-              <Star className="h-4 w-4" aria-hidden="true" />
+              <Star className="h-3 w-3" aria-hidden="true" />
             </button>
           ) : null
         }
       />
       {expanded ? (
-        <div className="absolute inset-x-0 top-full z-(--z-tooltip) mt-1 overflow-hidden rounded-xl border border-line-strong bg-card text-ink shadow-popover">
+        <div className="absolute inset-x-0 top-full z-(--z-tooltip) mt-1 overflow-hidden rounded-lg border border-line-strong bg-card text-ink shadow-popover">
           <ul
             id={listId}
             role="listbox"
             aria-label={props['aria-label'] ?? 'Podpowiedzi'}
-            className="max-h-60 overflow-y-auto p-1"
+            className="max-h-48 overflow-y-auto p-0.5"
           >
             {ranked.map((item, index) => (
               <li
@@ -174,7 +174,7 @@ export const Typeahead = ({
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => choose(item.value)}
                 className={cn(
-                  'flex cursor-pointer items-center gap-2 rounded-lg py-2 pr-3 pl-3 text-sm',
+                  'flex cursor-pointer items-center gap-2 min-w-0 rounded-md px-2 py-1 text-xs',
                   index === active && 'bg-brand-softer',
                 )}
               >
@@ -188,7 +188,7 @@ export const Typeahead = ({
             ))}
           </ul>
           {onManage ? (
-            <div className="border-t border-line p-1">
+            <div className="border-t border-line p-0.5">
               <button
                 type="button"
                 data-e2e={`form-memory:manage:${field}`}
@@ -198,9 +198,9 @@ export const Typeahead = ({
                   setActive(-1);
                   onManage();
                 }}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-brand-dark transition-colors hover:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                className="flex w-full items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-brand-dark transition-colors hover:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
               >
-                <Settings2 className="h-4 w-4" aria-hidden="true" />
+                <Settings2 className="h-3 w-3" aria-hidden="true" />
                 Zarządzaj
               </button>
             </div>

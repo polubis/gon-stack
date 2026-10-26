@@ -47,13 +47,13 @@ export const ClearableInput = ({
         ref={ref}
         aria-label={ariaLabel}
         className={cn(
-          trailing ? 'pr-18' : 'pr-10',
+          trailing ? 'pr-16' : 'pr-10',
           '[&::-webkit-search-cancel-button]:hidden',
           className,
         )}
       />
       {trailing ? (
-        <div className="absolute right-9 top-1/2 -translate-y-1/2">
+        <div className="absolute right-8 top-1/2 -translate-y-1/2">
           {trailing}
         </div>
       ) : null}

@@ -51,6 +51,20 @@ const optionNames = () =>
     .queryAllByRole('option')
     .map((o) => o.textContent?.replace(/\d+×$/, ''));
 
+describe('typeahead compactness', () => {
+  it('shows a long value on one truncating line', async () => {
+    const long = 'Bardzo długa nazwa sklepu '.repeat(6).trim();
+    const { user } = setup([item(long, { useCount: 12 })]);
+
+    await user.click(star());
+
+    const option = screen.getByRole('option');
+    expect(option).toHaveTextContent(long);
+    expect(option.firstElementChild?.className).toMatch(/truncate/);
+    expect(option).toHaveTextContent('12×');
+  });
+});
+
 describe('typeahead', () => {
   it('offers the most used values first from the star button', async () => {
     const { user } = setup();
