@@ -267,7 +267,7 @@ export const Footer = () => (
             aria-label={copy.footer.poweredByAriaLabel}
             className="rounded text-secondary outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
-            <GreenOnLogo height={72} className="shrink-0" />
+            <GreenOnLogo className="shrink-0" />
           </a>
         </div>
       </div>

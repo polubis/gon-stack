@@ -5,23 +5,23 @@
   --font-display: 'Playfair Display', ui-serif, Georgia, serif;
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
-  --color-primary: #0e8080;
-  --color-primary-dark: #0d7c7c;
-  --color-secondary: #0b2545;
-  --color-ink: #1a2a3a;
-  --color-ink-light: #64748b;
-  --color-line: #e2e8f0;
-  --color-surface: #f8fafc;
-  --color-footer: #eef1f5;
+  --color-primary: light-dark(#0e8080, #2fb5b5);
+  --color-primary-dark: light-dark(#0d7c7c, #2fb5b5);
+  --color-secondary: light-dark(#0b2545, #e8f0fa);
+  --color-ink: light-dark(#1a2a3a, #e2e8f0);
+  --color-ink-light: light-dark(#64748b, #a3b3c7);
+  --color-line: light-dark(#e2e8f0, #26364b);
+  --color-surface: light-dark(#f8fafc, #0b1220);
+  --color-footer: light-dark(#eef1f5, #0e1626);
   --color-rating: #fbbf24;
-  --color-logo-mark: #9ca3af;
+  --color-logo-mark: light-dark(#9ca3af, #94a3b8);
   --color-logo-accent: #2e9bf5;
-  --color-dot-grid: #94a3b8;
-  --color-overlay: rgba(11, 37, 69, 0.6);
-  --color-card: #ffffff;
-  --color-on-primary: #ffffff;
-  --color-frame: #0b2545;
-  --color-icon: #94a3b8;
+  --color-dot-grid: light-dark(#94a3b8, #475569);
+  --color-overlay: light-dark(rgba(11, 37, 69, 0.6), rgba(0, 0, 0, 0.7));
+  --color-card: light-dark(#ffffff, #121c2d);
+  --color-on-primary: light-dark(#ffffff, #04201f);
+  --color-frame: light-dark(#0b2545, #1d2d47);
+  --color-icon: light-dark(#94a3b8, #8497ad);
 
   --text-3xs: 0.5rem;
   --text-2xs: 0.6875rem;
@@ -29,8 +29,10 @@
   --radius-md: 12px;
   --radius-lg: 16px;
 
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 2px 8px light-dark(rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.4));
+  --shadow-md: 0 8px 24px light-dark(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.5));
+  --shadow-nav: 0 8px 24px
+    light-dark(rgba(11, 37, 69, 0.14), rgba(0, 0, 0, 0.6));
 
   --z-index-sticky-header: 50;
   --z-index-cookies: 100;
@@ -45,46 +47,33 @@
   background-size: 12px 12px;
 }
 
+@custom-variant theme-dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+@custom-variant theme-light (&:where([data-theme='light'], [data-theme='light'] *));
+
+@utility logo-mask {
+  background-color: currentColor;
+  mask: url('/images/green-on-logo.svg') center / contain no-repeat;
+}
+
+/* Tokens use light-dark(); the active scheme comes from the user's explicit
+   choice (data-theme, set before first paint) or else the system. */
 :root {
   color-scheme: light dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-primary: #2fb5b5;
-    --color-primary-dark: #2fb5b5;
-    --color-secondary: #e8f0fa;
-    --color-ink: #e2e8f0;
-    --color-ink-light: #a3b3c7;
-    --color-line: #26364b;
-    --color-surface: #0b1220;
-    --color-footer: #0e1626;
-    --color-logo-mark: #94a3b8;
-    --color-dot-grid: #475569;
-    --color-overlay: rgba(0, 0, 0, 0.7);
-    --color-card: #121c2d;
-    --color-on-primary: #04201f;
-    --color-frame: #1d2d47;
-    --color-icon: #8497ad;
+:root[data-theme='light'] {
+  color-scheme: light;
+}
 
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
-  }
+:root[data-theme='dark'] {
+  color-scheme: dark;
 }
 
 @media (prefers-contrast: more) {
   :root {
-    --color-ink-light: #334155;
-    --color-line: #64748b;
-    --color-icon: #475569;
-  }
-}
-
-@media (prefers-color-scheme: dark) and (prefers-contrast: more) {
-  :root {
-    --color-ink-light: #d5dfeb;
-    --color-line: #8196ad;
-    --color-icon: #b4c3d6;
+    --color-ink-light: light-dark(#334155, #d5dfeb);
+    --color-line: light-dark(#64748b, #8196ad);
+    --color-icon: light-dark(#475569, #b4c3d6);
   }
 }
 

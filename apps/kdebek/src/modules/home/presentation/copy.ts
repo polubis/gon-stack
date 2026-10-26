@@ -78,6 +78,8 @@ export const copy = {
     cta: 'Umów wizytę online',
     ariaOpenMenu: 'Otwórz menu',
     ariaCloseMenu: 'Zamknij menu',
+    ariaThemeToLight: 'Włącz jasny motyw',
+    ariaThemeToDark: 'Włącz ciemny motyw',
     ariaMobileNav: 'Menu mobilne',
   },
 

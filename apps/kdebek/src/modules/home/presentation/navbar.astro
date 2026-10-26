@@ -3,6 +3,8 @@ import {
   CalendarPlus,
   Mail,
   Menu,
+  Moon,
+  Sun,
   Tag,
   Target,
   User,
@@ -29,14 +31,15 @@ const navItems = copy.navbar.navItems.map((item) => ({
 ---
 
 <header
-  class="sticky top-0 z-sticky-header px-3 pt-3 sm:px-4 sm:pt-4 @max-h-[800px]:pt-2 sm:@max-h-[800px]:pt-2.5"
+  id="navbar"
+  class="group/nav sticky top-0 z-sticky-header px-3 pt-3 sm:px-4 sm:pt-4 @max-h-[800px]:pt-2 sm:@max-h-[800px]:pt-2.5"
 >
   <div
-    class="relative mx-auto max-w-7xl rounded-3xl bg-card drop-shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+    class="relative mx-auto max-w-7xl rounded-3xl border border-transparent bg-card/90 backdrop-blur-xl transition-[box-shadow,border-color,background-color] duration-300 group-data-[scrolled]/nav:border-line group-data-[scrolled]/nav:bg-card/75 group-data-[scrolled]/nav:shadow-nav"
   >
     <div
       id="navbar-bar"
-      class="relative z-10 flex items-center justify-between gap-4 rounded-3xl bg-card px-4 py-3 sm:px-6 @max-h-[800px]:py-2"
+      class="relative z-10 flex items-center justify-between gap-4 rounded-3xl px-4 py-3 sm:px-6 @max-h-[800px]:py-2"
     >
       <a href="/" class="flex min-w-0 items-center gap-1 sm:gap-2">
         <LogoMark className="h-7 w-9 shrink-0" />
@@ -91,6 +94,19 @@ const navItems = copy.navbar.navItems.map((item) => ({
 
         <button
           type="button"
+          id="theme-toggle"
+          data-e2e="home:theme-toggle"
+          data-label-to-light={copy.navbar.ariaThemeToLight}
+          data-label-to-dark={copy.navbar.ariaThemeToDark}
+          aria-label={copy.navbar.ariaThemeToDark}
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line text-ink-light outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        >
+          <Moon className="h-5 w-5 shrink-0 theme-dark:hidden" aria-hidden="true" />
+          <Sun className="hidden h-5 w-5 shrink-0 theme-dark:block" aria-hidden="true" />
+        </button>
+
+        <button
+          type="button"
           id="navbar-toggle"
           data-e2e="home:nav-toggle"
           aria-expanded="false"
@@ -115,7 +131,7 @@ const navItems = copy.navbar.navItems.map((item) => ({
       aria-label={copy.navbar.ariaMobileNav}
       data-e2e="home:nav-menu-mobile"
       hidden
-      class="absolute left-0 right-0 top-full z-40 overflow-hidden rounded-b-3xl bg-card xl:hidden"
+      class="absolute left-0 right-0 top-full z-40 overflow-hidden rounded-b-3xl border border-t-0 border-line bg-card/95 shadow-nav backdrop-blur-xl xl:hidden"
     >
       <div
         id="navbar-mobile-grid"
@@ -151,6 +167,53 @@ const navItems = copy.navbar.navItems.map((item) => ({
 </header>
 
 <script>
+  const root = document.documentElement;
+  const themeToggle = document.getElementById('theme-toggle');
+  const navbar = document.getElementById('navbar');
+
+  if (themeToggle) {
+    const sync = () => {
+      const isDark = root.dataset.theme === 'dark';
+      themeToggle.setAttribute(
+        'aria-label',
+        (isDark
+          ? themeToggle.dataset.labelToLight
+          : themeToggle.dataset.labelToDark) ?? '',
+      );
+    };
+
+    themeToggle.addEventListener('click', () => {
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem('theme', next);
+      } catch {}
+      sync();
+    });
+
+    matchMedia('(prefers-color-scheme: dark)').addEventListener(
+      'change',
+      (e) => {
+        let stored: string | null = null;
+        try {
+          stored = localStorage.getItem('theme');
+        } catch {}
+        if (stored === 'light' || stored === 'dark') return;
+        root.dataset.theme = e.matches ? 'dark' : 'light';
+        sync();
+      },
+    );
+    sync();
+  }
+
+  if (navbar) {
+    const update = () => {
+      navbar.toggleAttribute('data-scrolled', window.scrollY > 8);
+    };
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  }
+
   const toggle = document.getElementById('navbar-toggle');
   const panel = document.getElementById('navbar-mobile-menu');
   const grid = document.getElementById('navbar-mobile-grid');

@@ -2,6 +2,7 @@ export type E2eId =
   | 'home:main'
   | 'home:nav-desktop'
   | 'home:nav-toggle'
+  | 'home:theme-toggle'
   | 'home:nav-menu-mobile'
   | 'home:hero-heading'
   | 'home:offer-video-placeholder'
