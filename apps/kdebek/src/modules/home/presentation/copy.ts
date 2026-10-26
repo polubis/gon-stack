@@ -237,6 +237,13 @@ export const copy = {
     ariaCollapsePrefix: 'Zwiń',
     ctaAllServices: 'Zobacz wszystkie usługi',
     ctaBook: 'Umów wizytę',
+    videoConsent: {
+      title: 'Film z YouTube',
+      description:
+        'Film pochodzi z YouTube (Google). Po załadowaniu Twój adres IP trafi do YouTube.',
+      cta: 'Załaduj film',
+      policy: 'Polityka prywatności',
+    },
     privateServices: [
       {
         id: 'therapeutic-massage',

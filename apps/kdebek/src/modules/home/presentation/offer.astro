@@ -4,7 +4,9 @@ import {
   Building2,
   Calendar,
   ChevronDown,
+  CirclePlay,
   HeartPulse,
+  Play,
   Sparkles,
   User,
   type LucideIcon,
@@ -273,15 +275,50 @@ const defaultOpenServiceId = privateServices[0]?.id ?? null;
 
                               {service.videoUrl && (
                                 <div class="-ml-[calc(2.5rem+0.75rem)] w-[calc(100%+3.25rem)] overflow-hidden rounded-xl ring-1 ring-line sm:-ml-[calc(2.5rem+1rem)] sm:w-[calc(100%+3.5rem)]">
-                                  <div class="relative aspect-video">
-                                    <iframe
-                                      class="absolute inset-0 h-full w-full"
-                                      src={service.videoUrl}
-                                      title={service.videoTitle ?? service.title}
-                                      loading="lazy"
-                                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                      allowfullscreen
-                                    />
+                                  <div
+                                    class="js-offer-video relative flex aspect-video w-full flex-col"
+                                    data-video-src={service.videoUrl}
+                                    data-video-title={
+                                      service.videoTitle ?? service.title
+                                    }
+                                  >
+                                    <div
+                                      class="js-offer-video-placeholder flex flex-1 flex-col items-center justify-center gap-3 bg-surface p-4 text-center sm:p-6"
+                                      data-e2e="home:offer-video-placeholder"
+                                    >
+                                      <CirclePlay
+                                        className="h-8 w-8 shrink-0 text-primary"
+                                        aria-hidden="true"
+                                      />
+                                      <p class="text-sm font-semibold text-secondary">
+                                        {copy.offerWidget.videoConsent.title}
+                                      </p>
+                                      <p class="max-w-prose text-xs leading-relaxed text-ink-light">
+                                        {
+                                          copy.offerWidget.videoConsent
+                                            .description
+                                        }
+                                      </p>
+                                      <button
+                                        type="button"
+                                        class="js-offer-video-load inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-bold tracking-wide text-white"
+                                        data-e2e="home:offer-video-load"
+                                      >
+                                        <Play
+                                          className="h-3.5 w-3.5 shrink-0"
+                                          aria-hidden="true"
+                                        />
+                                        {copy.offerWidget.videoConsent.cta}
+                                      </button>
+                                      <a
+                                        href="/polityka-prywatnosci/"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="text-xs font-medium text-primary underline"
+                                      >
+                                        {copy.offerWidget.videoConsent.policy}
+                                      </a>
+                                    </div>
                                   </div>
                                 </div>
                               )}
@@ -355,6 +392,38 @@ const defaultOpenServiceId = privateServices[0]?.id ?? null;
     );
     chevron?.classList.toggle('rotate-180', isOpen);
   };
+
+  document
+    .querySelectorAll<HTMLElement>('.js-offer-video')
+    .forEach((box) => {
+      box
+        .querySelector<HTMLButtonElement>('.js-offer-video-load')
+        ?.addEventListener('click', () => {
+          const placeholder = box.querySelector<HTMLElement>(
+            '.js-offer-video-placeholder',
+          );
+          const { videoSrc, videoTitle } = box.dataset;
+          if (!placeholder || !videoSrc) return;
+
+          // Keep the placeholder's height (it can exceed 16:9 on narrow
+          // widths) so swapping in the iframe does not shift the layout.
+          box.style.minHeight = `${box.offsetHeight}px`;
+
+          const frame = document.createElement('iframe');
+          frame.className = 'absolute inset-0 h-full w-full';
+          frame.src = videoSrc;
+          frame.title = videoTitle ?? '';
+          frame.loading = 'lazy';
+          frame.allow =
+            'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+          frame.allowFullscreen = true;
+          frame.dataset.e2e = 'home:offer-video-frame';
+
+          placeholder.remove();
+          box.appendChild(frame);
+          frame.focus();
+        });
+    });
 
   const openFirstService = (panel: HTMLElement) => {
     panel
