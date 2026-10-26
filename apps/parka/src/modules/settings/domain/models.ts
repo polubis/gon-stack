@@ -2,7 +2,6 @@ import type { Device } from '@/shared/device/domain/models';
 
 export type Profile = {
   name: string;
-  email: string;
 };
 
 /** Square WebP variants of the user's picture. */

@@ -15,7 +15,7 @@ import {
 import { Provider, useContext } from '../presentation/context';
 
 const SETTINGS = {
-  profile: { name: 'Ada', email: 'ada@example.com' },
+  profile: { name: 'Ada' },
   notifications: {
     push: false,
     email: false,

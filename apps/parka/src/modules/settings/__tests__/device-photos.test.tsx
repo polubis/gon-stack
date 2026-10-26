@@ -21,7 +21,7 @@ const variants = (version: number) =>
   }));
 
 const settings = () => ({
-  profile: { name: 'Ada', email: 'ada@example.com' },
+  profile: { name: 'Ada' },
   notifications: {
     push: false,
     email: true,
@@ -96,7 +96,7 @@ describe('device photo in settings', () => {
 
   it('shows the uploaded photo and sends it with the device id', async () => {
     render(<Main />);
-    await screen.findByRole('textbox', { name: 'Imię i nazwisko' });
+    await screen.findByText('Wygląd');
     await screen.findByLabelText('Wybierz zdjęcie urządzenia Telefon Ani');
 
     await userEvent.upload(chooser(), png());

@@ -1,7 +1,8 @@
 import { Plus, User } from 'lucide-react';
 import type { Avatar } from '@/shared/avatar/domain/models';
 import type { Period } from '@/shared/period/period';
-import { APP_ROUTER } from '@/shared/router/routes';
+import { ACCOUNT_MODAL } from '@/shared/auth/configuration/constraints';
+import { openModal } from '@/shared/router/modal-stack';
 import { cn } from '@repo/react-kit/cn';
 import { UnreadLink } from '@/modules/notifications/presentation/unread-link';
 import { PeriodControl } from '@/shared/period-control/presentation/period-control';
@@ -30,9 +31,11 @@ export const Header = ({
 
         <UnreadLink />
 
-        <a
-          href={APP_ROUTER.settings()}
-          aria-label="Profil i ustawienia"
+        <button
+          type="button"
+          aria-haspopup="dialog"
+          aria-label="Konto i profil"
+          onClick={() => openModal(ACCOUNT_MODAL)}
           className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-brand-soft text-brand max-md:hidden"
         >
           {avatar ? (
@@ -52,7 +55,7 @@ export const Header = ({
           ) : (
             <User className="h-5 w-5" aria-hidden="true" />
           )}
-        </a>
+        </button>
 
         <AddMenu
           side="bottom"

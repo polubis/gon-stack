@@ -1,6 +1,11 @@
 import { Outlet, useRouter, useRouterState } from '@tanstack/react-router';
 import { useEffect } from 'react';
+import {
+  AccountProfileSync,
+  ProfileEditModal,
+} from '@/modules/settings/presentation/profile-modal';
 import { Main as FinanceTour } from '@/modules/finance-tour/presentation/main';
+import { AccountDrawer } from '@/shared/auth/presentation/account-drawer';
 import { AccountSwitchToast } from '@/shared/auth/presentation/account-switch-toast';
 import { ProtectedScreen } from '@/shared/auth/presentation/protected-screen';
 import { withAuth } from '@/shared/auth/presentation/with-auth';
@@ -83,6 +88,9 @@ const Shell = () => {
           </NavSlot>
         </div>
         <AccountSwitchToast />
+        <AccountProfileSync />
+        <AccountDrawer />
+        <ProfileEditModal />
         <FinanceTour />
       </div>
     </OverlayNavProvider>

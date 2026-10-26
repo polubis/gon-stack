@@ -23,7 +23,7 @@ const NO_DETAILS = {
 };
 
 const settings = () => ({
-  profile: { name: 'Ada', email: 'ada@example.com' },
+  profile: { name: 'Ada' },
   notifications: {
     push: false,
     email: true,

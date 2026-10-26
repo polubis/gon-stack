@@ -101,7 +101,7 @@ const mockState = async (
       body: JSON.stringify({
         code: 200,
         data: {
-          profile: { name: '', email: '' },
+          profile: { name: '' },
           notifications: {
             push: true,
             email: false,
@@ -739,11 +739,14 @@ const commands = {
 
   'i update my profile name': async ({ page, getByE2e }) => {
     await mockState(page);
-    await open(page, APP_ROUTER.settings());
+    await open(page, APP_ROUTER.dashboard());
+    await getByE2e('account-menu:trigger').filter({ visible: true }).click();
+    await getByE2e('account-menu:edit').click();
     await getByE2e('settings:profile-name').fill('Anna Testowa');
-    await getByE2e('settings:profile-email').fill('anna@example.com');
+    await expect(page.getByLabel('E-mail')).toHaveCount(0);
     await getByE2e('settings:save-profile').click();
-    await expect(getByE2e('settings:profile-name')).toHaveValue('Anna Testowa');
+    await expect(getByE2e('settings:profile-modal')).toHaveCount(0);
+    await expect(getByE2e('account-menu:name')).toHaveText('Anna Testowa');
   },
 
   'financial data exports as csv': async ({ page, getByE2e }) => {

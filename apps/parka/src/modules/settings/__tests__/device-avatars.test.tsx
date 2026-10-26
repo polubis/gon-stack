@@ -14,7 +14,7 @@ import {
 import { Main } from '../presentation/main';
 
 const settings = (avatar: string | null) => ({
-  profile: { name: 'Ada', email: 'ada@example.com' },
+  profile: { name: 'Ada' },
   notifications: {
     push: false,
     email: true,

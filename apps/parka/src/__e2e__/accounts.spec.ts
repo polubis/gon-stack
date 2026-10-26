@@ -555,7 +555,6 @@ const isolation = {
   'account B sees no data of account A': async ({ page }) => {
     const settings = await getJson(page, API_ROUTER.settings());
     expect(settings.data.profile.name).not.toBe('Alicja');
-    expect(settings.data.profile.email).not.toBe(ISO_EMAIL_A);
     const suggestions = await getJson(page, API_ROUTER.suggestions());
     expect(JSON.stringify(suggestions.data)).not.toContain('Sklep Alicji');
     expect((await getJson(page, API_ROUTER.avatar())).data).toBeNull();

@@ -2,7 +2,6 @@ import {
   Download,
   FileText,
   KeyRound,
-  LayoutGrid,
   ShieldCheck,
   Sparkles,
   type LucideIcon,
@@ -20,7 +19,6 @@ export const ERROR_CODES = {
 export const LINKS: { label: string; href: string; icon: LucideIcon }[] = [
   { label: 'RODO — Twoje dane', href: APP_ROUTER.privacy(), icon: ShieldCheck },
   { label: 'AI — jak to działa', href: APP_ROUTER.aiInfo(), icon: Sparkles },
-  { label: 'Kategorie', href: APP_ROUTER.categories(), icon: LayoutGrid },
   { label: 'Raport miesięczny', href: APP_ROUTER.reports(), icon: FileText },
   { label: 'Eksport danych', href: APP_ROUTER.dataExport(), icon: Download },
   { label: 'Tokeny MCP', href: APP_ROUTER.accessTokens(), icon: KeyRound },

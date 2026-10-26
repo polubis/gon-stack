@@ -1,9 +1,8 @@
-import { ClearableInput } from '@/shared/ui/clearable';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import { APP_ROUTER } from '@/shared/router/routes';
-import { Button, Field, Toggle } from '@/shared/ui/controls';
+import { Toggle } from '@/shared/ui/controls';
 import { Card, ScreenHeader } from '@/shared/ui/layout';
 import { ErrorState } from '@/shared/ui/error-state';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
@@ -17,83 +16,13 @@ import {
   NOTIFICATION_OPTIONS,
   PUSH_HINTS,
 } from '../configuration/constraints';
-import type { Avatar, Settings } from '../domain/models';
+import type { Settings } from '../domain/models';
 import { DevicesCard } from './devices-card';
-import { ProfileAvatar } from './profile-avatar';
 import { Provider, useContext } from './context';
 import { SettingsSkeleton } from './settings-skeleton';
 
-const ProfileCard = ({
-  profile,
-  avatar,
-  uploading,
-  onPickAvatar,
-  onSave,
-}: {
-  profile: Settings['profile'];
-  avatar: Avatar | null;
-  uploading: boolean;
-  onPickAvatar: (file: File) => void;
-  onSave: (profile: Settings['profile']) => void;
-}) => {
-  const [name, setName] = useState(profile.name);
-  const [email, setEmail] = useState(profile.email);
-  const next = { name: name.trim(), email: email.trim() };
-  const canSave =
-    next.name !== '' &&
-    next.email !== '' &&
-    (next.name !== profile.name || next.email !== profile.email);
-
-  return (
-    <Card className="flex flex-col items-center gap-4 md:flex-row md:items-start md:gap-8 lg:col-span-2">
-      <ProfileAvatar
-        avatar={avatar}
-        uploading={uploading}
-        onPick={onPickAvatar}
-      />
-      <form
-        className="grid w-full min-w-0 flex-1 gap-3 md:grid-cols-2 md:gap-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (canSave) onSave(next);
-        }}
-      >
-        <Field label="Imię i nazwisko">
-          <ClearableInput
-            value={name}
-            autoComplete="name"
-            data-e2e="settings:profile-name"
-            onChange={(e) => setName(e.target.value)}
-          />
-        </Field>
-        <Field label="E-mail">
-          <ClearableInput
-            type="email"
-            value={email}
-            autoComplete="email"
-            data-e2e="settings:profile-email"
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </Field>
-        <div className="md:col-span-2 md:flex md:justify-end">
-          <Button
-            type="submit"
-            className="md:w-auto md:min-w-40"
-            data-e2e="settings:save-profile"
-            disabled={!canSave}
-          >
-            Zapisz
-          </Button>
-        </div>
-      </form>
-    </Card>
-  );
-};
-
 const SettingsContent = ({ settings }: { settings: Settings }) => {
   const ctx = useContext();
-  const avatar = ctx.useAvatar();
-  const isUploadingAvatar = ctx.useIsUploadingAvatar();
   const uploadingDeviceIds = ctx.useUploadingDeviceIds();
   const push = ctx.usePush();
   const isPushBusy = ctx.useIsPushBusy();
@@ -111,15 +40,6 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
 
   return (
     <div className="flex flex-col gap-4 md:gap-6 lg:grid lg:grid-cols-2">
-      <ProfileCard
-        key={`${settings.profile.name}\n${settings.profile.email}`}
-        profile={settings.profile}
-        avatar={avatar}
-        uploading={isUploadingAvatar}
-        onPickAvatar={ctx.uploadAvatar}
-        onSave={(profile) => ctx.update({ ...settings, profile })}
-      />
-
       <Card as="section" className="space-y-2" data-e2e="settings:appearance">
         <h2 className="text-sm font-semibold text-ink-soft">Wygląd</h2>
         <div className="flex items-center justify-between py-2 text-sm">

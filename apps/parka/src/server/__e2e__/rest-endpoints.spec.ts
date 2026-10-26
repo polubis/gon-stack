@@ -87,7 +87,6 @@ const daysUntil = (iso: string): number =>
   (Date.parse(iso) - Date.now()) / (24 * 60 * 60 * 1000);
 
 const categoryIdByPage = new WeakMap<Page, string>();
-const settingsEmailByPage = new WeakMap<Page, string>();
 
 const commands = {
   'i register and sign in': async (ctx) => {
@@ -717,11 +716,9 @@ const commands = {
 
   'settings are readable': async ({ page }) => {
     const body = await (await page.request.get(API_ROUTER.settings())).json();
-    expect(body.data.profile.email).toBeDefined();
-    settingsEmailByPage.set(page, body.data.profile.email);
     const putRes = await page.request.put(API_ROUTER.settings(), {
       data: {
-        profile: { name: 'Anna REST', email: body.data.profile.email },
+        profile: { name: 'Anna REST' },
         notifications: body.data.notifications,
       },
     });

@@ -8,3 +8,7 @@ export const ERROR_CODES = {
   switch: 'ACCOUNT_SWITCH_FAILED',
   logout: 'ACCOUNT_LOGOUT_FAILED',
 } as const;
+
+/** URL ids of the account modals (see `shared/router/modal-stack`). */
+export const ACCOUNT_MODAL = 'account';
+export const PROFILE_MODAL = 'profile';

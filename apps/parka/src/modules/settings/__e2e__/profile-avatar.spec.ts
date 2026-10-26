@@ -16,10 +16,12 @@ const PNG = Buffer.from(
 );
 
 const commands = {
-  'i open the settings': async ({ page }) => {
+  'i open the profile editor': async ({ page, getByE2e }) => {
     await signInAsTestUser(page);
     await installBackend(page, SEED);
-    await page.goto(APP_ROUTER.settings());
+    await page.goto(APP_ROUTER.dashboard());
+    await getByE2e('account-menu:trigger').filter({ visible: true }).click();
+    await getByE2e('account-menu:edit').click();
   },
   'i see no profile picture': async ({ getByE2e }) => {
     await expect(getByE2e('settings:profile-name')).toBeVisible();
@@ -49,7 +51,7 @@ const commands = {
   'my picture replaces the default icon': async ({ getByE2e }) => {
     await expect(getByE2e('settings:avatar-image')).toBeVisible();
   },
-  'i reload the settings': async ({ page }) => {
+  'i reload the page': async ({ page }) => {
     await page.reload();
   },
   'i see the crop editor': async ({ getByE2e }) => {
@@ -75,21 +77,21 @@ test.describe('profile avatar', () => {
     e2e,
   }) => {
     await interpreter(commands, e2e)(
-      ['i open the settings'],
+      ['i open the profile editor'],
       ['i see no profile picture'],
       ['i upload the image "me.png"'],
       ['i see the crop editor'],
       ['i zoom in and rotate the picture'],
       ['i confirm the crop'],
       ['my picture replaces the default icon'],
-      ['i reload the settings'],
+      ['i reload the page'],
       ['my picture replaces the default icon'],
     );
   });
 
   test('a file that is not an image is rejected', async ({ e2e }) => {
     await interpreter(commands, e2e)(
-      ['i open the settings'],
+      ['i open the profile editor'],
       ['i upload a text file named "notes.png"'],
       ['i see the error "File must be a JPEG, PNG, WebP or GIF image"'],
       ['i see no profile picture'],
@@ -98,7 +100,7 @@ test.describe('profile avatar', () => {
 
   test('a cancelled crop uploads nothing', async ({ e2e }) => {
     await interpreter(commands, e2e)(
-      ['i open the settings'],
+      ['i open the profile editor'],
       ['i upload the image "me.png"'],
       ['i cancel the crop'],
       ['i see no profile picture'],

@@ -26,7 +26,6 @@ export const updateSettings = privateProcedure({
     const { error: profileError } = await db.from('profiles').upsert({
       user_id: uid,
       name: input.profile.name,
-      email: input.profile.email,
     });
     if (profileError) throw new InternalServer(profileError);
 

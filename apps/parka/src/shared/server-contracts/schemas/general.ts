@@ -192,7 +192,7 @@ export const recurring = () =>
 
 export const settings = () =>
   z.object({
-    profile: z.object({ name: z.string(), email: z.string() }),
+    profile: z.object({ name: z.string() }),
     notifications: z.object({
       push: z.boolean(),
       email: z.boolean(),

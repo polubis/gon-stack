@@ -1,7 +1,7 @@
 export const SETTINGS_E2E_IDS = [
   'settings:main',
+  'settings:profile-modal',
   'settings:profile-name',
-  'settings:profile-email',
   'settings:save-profile',
   'settings:appearance',
   'settings:notifications',

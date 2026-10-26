@@ -310,7 +310,7 @@ export const installBackend = async (
       return json(route, {
         code: 200,
         data: {
-          profile: { name: 'Anna', email: 'anna@example.com' },
+          profile: { name: 'Anna' },
           notifications: {
             push: true,
             email: false,

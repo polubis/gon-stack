@@ -237,6 +237,19 @@
     }
   }
 
+  /* Side drawer entrance. Pair with `motion-reduce:animate-none`. */
+  --animate-drawer-in: drawer-in 0.25s ease-out;
+  @keyframes drawer-in {
+    from {
+      opacity: 0;
+      transform: translateX(1.5rem);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
   --animate-view-enter: view-enter 0.3s ease-out;
   @keyframes view-enter {
     from {

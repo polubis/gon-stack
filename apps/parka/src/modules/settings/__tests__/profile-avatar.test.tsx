@@ -12,10 +12,10 @@ import {
   it,
 } from 'vitest';
 import { stubImageCanvas } from '@/__tests__/stub-image-canvas';
-import { Main } from '../presentation/main';
+import { ProfileEditModal } from '../presentation/profile-modal';
 
 const SETTINGS = {
-  profile: { name: 'Ada', email: 'ada@example.com' },
+  profile: { name: 'Ada' },
   notifications: {
     push: false,
     email: true,
@@ -37,7 +37,10 @@ const PNG = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 const server = setupServer();
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
-afterEach(() => server.resetHandlers());
+afterEach(() => {
+  window.history.replaceState(null, '', '/app/');
+  server.resetHandlers();
+});
 afterAll(() => server.close());
 
 let uploads: Request[] = [];
@@ -49,8 +52,9 @@ const chooser = () =>
 const png = () =>
   new File([new Uint8Array(PNG)], 'me.png', { type: 'image/png' });
 
-describe('profile avatar in settings', () => {
+describe('profile avatar in the profile modal', () => {
   beforeEach(() => {
+    window.history.replaceState(null, '', '/app/?modal=profile');
     stubImageCanvas();
     uploads = [];
     uploadResponse = { code: 200, data: { variants: variants(2) } };
@@ -71,7 +75,7 @@ describe('profile avatar in settings', () => {
   });
 
   it('shows the default icon until a picture is uploaded', async () => {
-    render(<Main />);
+    render(<ProfileEditModal />);
 
     await screen.findByRole('textbox', { name: 'Imię i nazwisko' });
     expect(
@@ -80,7 +84,7 @@ describe('profile avatar in settings', () => {
   });
 
   it('shows the uploaded picture in place of the default icon', async () => {
-    render(<Main />);
+    render(<ProfileEditModal />);
     await screen.findByRole('textbox', { name: 'Imię i nazwisko' });
 
     await userEvent.upload(chooser(), png());
@@ -98,7 +102,7 @@ describe('profile avatar in settings', () => {
   });
 
   it('uploads only after the crop is confirmed', async () => {
-    render(<Main />);
+    render(<ProfileEditModal />);
     await screen.findByRole('textbox', { name: 'Imię i nazwisko' });
 
     await userEvent.upload(chooser(), png());
@@ -107,12 +111,14 @@ describe('profile avatar in settings', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Anuluj' }));
 
-    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(
+      screen.queryByRole('dialog', { name: 'Przytnij zdjęcie' }),
+    ).toBeNull();
     expect(uploads).toHaveLength(0);
   });
 
   it('rejects a file that is not an image without calling the server', async () => {
-    render(<Main />);
+    render(<ProfileEditModal />);
     await screen.findByRole('textbox', { name: 'Imię i nazwisko' });
 
     await userEvent.upload(
@@ -132,7 +138,7 @@ describe('profile avatar in settings', () => {
       type: 'bad-request',
       message: 'Broken image',
     };
-    render(<Main />);
+    render(<ProfileEditModal />);
     await screen.findByRole('textbox', { name: 'Imię i nazwisko' });
 
     await userEvent.upload(chooser(), png());

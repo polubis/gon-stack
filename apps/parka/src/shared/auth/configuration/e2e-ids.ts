@@ -1,6 +1,8 @@
 export const AUTH_E2E_IDS = [
   'account-menu:trigger',
   'account-menu:menu',
+  'account-menu:name',
+  'account-menu:edit',
   'account-menu:loading',
   'account-menu:load-error',
   'account-menu:add',
