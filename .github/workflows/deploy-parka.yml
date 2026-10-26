@@ -84,23 +84,9 @@ jobs:
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
-      # Skip only when the previous commit is known and migrations are untouched.
-      - name: Detect migration changes
-        id: migrations
-        env:
-          BEFORE: ${{ github.event.before }}
-        run: |
-          if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ] \
-            && git cat-file -e "$BEFORE^{commit}" 2>/dev/null \
-            && git diff --quiet "$BEFORE" "$GITHUB_SHA" -- apps/parka/supabase/migrations; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      # DB first: new code never runs against an old schema.
+      # DB first: new code never runs against an old schema. Always runs: a push
+      # diff misses migrations from an earlier failed deploy; push is a no-op when current.
       - name: Migrate DB
-        if: steps.migrations.outputs.changed == 'true'
         working-directory: apps/parka
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.PARKA_SUPABASE_ACCESS_TOKEN }}
