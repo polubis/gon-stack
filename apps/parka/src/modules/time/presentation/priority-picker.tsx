@@ -6,7 +6,7 @@ import type { PriorityId } from '../domain/models';
 import { useContext } from './context';
 import { NEW_PRIORITY_MODAL } from './modal-ids';
 import { PICKER_LINK } from './picker-link';
-import { PRIORITY_ICON, PRIORITY_TONE } from './priority-badge';
+import { PriorityMeter, PRIORITY_TONE } from './priority-badge';
 
 /** Radio segments of the priorities (highest value first), with a link to add one. */
 export const PriorityPicker = ({
@@ -33,13 +33,12 @@ export const PriorityPicker = ({
       <div className="flex flex-wrap gap-1 rounded-xl bg-brand-soft p-1">
         {priorities.map((item) => {
           const level = priorityLevel(item.value);
-          const Icon = PRIORITY_ICON[level];
           const selected = item.id === value;
           return (
             <label
               key={item.id}
               className={cn(
-                'flex h-9 min-w-24 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 text-sm font-medium transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand',
+                'flex min-h-9 min-w-24 flex-1 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg px-2 py-1 text-sm font-medium transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand',
                 selected
                   ? cn(
                       PRIORITY_TONE[level],
@@ -56,7 +55,7 @@ export const PriorityPicker = ({
                 onChange={() => onChange(item.id)}
                 className="sr-only"
               />
-              <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <PriorityMeter value={item.value} />
               <span className="truncate">{item.name}</span>
             </label>
           );
