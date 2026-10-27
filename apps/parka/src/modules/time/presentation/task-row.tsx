@@ -117,7 +117,7 @@ export const TaskRow = ({ task, now, step }: Props) => {
             </span>
           ) : null}
           {board?.recurringId != null ? <RecurringMark /> : null}
-          {priority ? <PriorityBadge priority={priority} /> : null}
+          {priority ? <PriorityBadge priority={priority} compact /> : null}
         </p>
       </div>
       <button

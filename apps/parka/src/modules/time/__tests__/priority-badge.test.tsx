@@ -20,6 +20,15 @@ describe('PriorityBadge', () => {
     expect(screen.getByText('Niski')).toBeVisible();
   });
 
+  it('compact hides the name visually but keeps it announced', () => {
+    const { container } = render(
+      <PriorityBadge priority={{ name: 'Wysoki', value: 9 }} compact />,
+    );
+
+    expect(container.textContent).toBe('Priorytet: Wysoki, 9 z 10');
+    expect(screen.getByText('Wysoki')).toHaveClass('sr-only');
+  });
+
   it('fills as many pips as the value', () => {
     const { container } = render(
       <PriorityBadge priority={{ name: 'Średni', value: 5 }} />,

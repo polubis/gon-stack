@@ -37,9 +37,12 @@ export const PriorityMeter = ({
 /** The one mark of a priority: tinted pill with the 1-10 pips and the name. */
 export const PriorityBadge = ({
   priority,
+  compact = false,
   className,
 }: {
   priority: Pick<Priority, 'name' | 'value'>;
+  /** List views: marker and color only, the name stays for assistive tech. */
+  compact?: boolean;
   className?: string;
 }) => (
   <span
@@ -51,7 +54,7 @@ export const PriorityBadge = ({
   >
     <PriorityMeter value={priority.value} />
     <span className="sr-only">Priorytet: </span>
-    <span className="truncate">{priority.name}</span>
+    <span className={compact ? 'sr-only' : 'truncate'}>{priority.name}</span>
     <span className="sr-only">, {priority.value} z 10</span>
   </span>
 );
