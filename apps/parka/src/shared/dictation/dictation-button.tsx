@@ -2,6 +2,7 @@ import { useState, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { Mic } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
+import { VoiceOverlay } from './voice-overlay';
 import { Toast } from '@/shared/ui/toast';
 import { setNativeValue } from '@/shared/ui/native-value';
 import { useDictation, type DictationError } from './use-dictation';
@@ -43,6 +44,7 @@ export const DictationButton = ({ target, label, className }: Props) => {
   if (!dictation.supported) return null;
 
   const begin = () => {
+    if (dictation.listening) return;
     setError(null);
     setBase(target.current?.value ?? '');
     dictation.start();
@@ -54,7 +56,8 @@ export const DictationButton = ({ target, label, className }: Props) => {
         type="button"
         aria-label={`${dictation.listening ? 'Zatrzymaj dyktowanie' : 'Dyktuj'}: ${label}`}
         aria-pressed={dictation.listening}
-        onClick={dictation.listening ? dictation.stop : begin}
+        disabled={dictation.listening}
+        onClick={begin}
         className={cn(
           'grid h-6 w-6 place-items-center rounded-full text-ink-soft hover:bg-brand-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
           dictation.listening &&
@@ -64,9 +67,15 @@ export const DictationButton = ({ target, label, className }: Props) => {
       >
         <Mic className="h-4 w-4" aria-hidden="true" />
       </button>
-      <span role="status" className="sr-only">
-        {dictation.listening ? 'Słucham…' : ''}
-      </span>
+      {dictation.listening ? (
+        <VoiceOverlay
+          label={label}
+          onStop={() => {
+            dictation.stop();
+            target.current?.focus();
+          }}
+        />
+      ) : null}
       {error
         ? createPortal(
             <Toast

@@ -55,7 +55,12 @@ export const ClearableInput = ({
           className,
         )}
       />
-      <div className="absolute right-8 top-1/2 flex -translate-y-1/2 items-center gap-1">
+      <div
+        className={cn(
+          'absolute top-1/2 flex -translate-y-1/2 items-center gap-1 transition-[right] duration-200 ease-out motion-reduce:transition-none',
+          filled ? 'right-8' : 'right-2',
+        )}
+      >
         {trailing}
         {dictatable ? <DictationButton target={ref} label={label} /> : null}
       </div>
@@ -64,7 +69,7 @@ export const ClearableInput = ({
           type="button"
           aria-label={`Wyczyść: ${label}`}
           onClick={() => ref.current && clear(ref.current)}
-          className="absolute right-2 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-full text-ink-soft hover:bg-brand-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          className="absolute right-2 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-full text-ink-soft hover:bg-brand-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand animate-clear-in motion-reduce:animate-none"
         >
           <X className="h-4 w-4" aria-hidden="true" />
         </button>

@@ -58,6 +58,7 @@
   --z-nav: 10;
   --z-modal: 20;
   --z-tooltip: 30;
+  --z-voice: 40;
 }
 
 :root[data-theme='dark'] {
@@ -271,5 +272,41 @@
   :focus-visible {
     outline: 2px solid var(--color-brand);
     outline-offset: 2px;
+  }
+
+  /* Dictation popup. Pair with `motion-reduce:animate-none`. */
+  --animate-overlay-in: overlay-in 0.2s ease-out both;
+  @keyframes overlay-in {
+    from {
+      opacity: 0;
+    }
+  }
+  --animate-voice-card-in: voice-card-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)
+    both;
+  @keyframes voice-card-in {
+    from {
+      opacity: 0;
+      transform: scale(0.9) translateY(0.5rem);
+    }
+  }
+  /* Idle voice bars when no live mic level is available. */
+  --animate-voice-bar: voice-bar 0.9s ease-in-out infinite;
+  @keyframes voice-bar {
+    0%,
+    100% {
+      transform: scaleY(0.2);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+
+  /* Clear button entrance. Pair with `motion-reduce:animate-none`. */
+  --animate-clear-in: clear-in 0.2s ease-out both;
+  @keyframes clear-in {
+    from {
+      opacity: 0;
+      transform: scale(0.5);
+    }
   }
 }

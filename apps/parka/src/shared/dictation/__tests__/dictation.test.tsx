@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { DictationButton } from '@/shared/dictation/dictation-button';
 import { ClearableInput } from '@/shared/ui/clearable';
 import { Field } from '@/shared/ui/controls';
 
@@ -12,6 +14,7 @@ type Fake = {
 };
 
 let current: Fake | null = null;
+let started = 0;
 
 const register = (fake: Fake) => {
   current = fake;
@@ -28,7 +31,9 @@ const installMic = () => {
     constructor() {
       register(this);
     }
-    start() {}
+    start() {
+      started += 1;
+    }
     stop() {
       this.onend?.();
     }
@@ -57,6 +62,8 @@ const Form = ({ initial = '' }: { initial?: string }) => {
 afterEach(() => {
   Reflect.deleteProperty(window, 'webkitSpeechRecognition');
   current = null;
+  started = 0;
+  vi.unstubAllGlobals();
 });
 
 describe('voice dictation into a text field', () => {
@@ -91,23 +98,38 @@ describe('voice dictation into a text field', () => {
     expect(screen.getByLabelText('Nazwa')).toHaveValue('Zakupy: chleb i masło');
   });
 
-  it('shows listening state and stops on second click', async () => {
+  it('blocks the page while listening and stops from the popup', async () => {
     installMic();
     render(<Form />);
 
     await userEvent.click(
       screen.getByRole('button', { name: 'Dyktuj: Nazwa' }),
     );
-    const stop = screen.getByRole('button', {
-      name: 'Zatrzymaj dyktowanie: Nazwa',
-    });
-    expect(stop).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Zatrzymaj dyktowanie: Nazwa' }),
+    ).toBeDisabled();
 
-    await userEvent.click(stop);
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Zakończ dyktowanie' }),
+    );
 
+    expect(screen.queryByRole('dialog')).toBeNull();
     expect(
       screen.getByRole('button', { name: 'Dyktuj: Nazwa' }),
     ).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('stops listening on Escape', async () => {
+    installMic();
+    render(<Form />);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Dyktuj: Nazwa' }),
+    );
+    await userEvent.keyboard('{Escape}');
+
+    expect(screen.queryByRole('dialog')).toBeNull();
   });
 
   it('explains a denied microphone and lets the user retry', async () => {
@@ -125,5 +147,71 @@ describe('voice dictation into a text field', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(
       'DICTATION_NOT_ALLOWED',
     );
+  });
+});
+
+const NoteDialog = () => {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  return (
+    <Dialog.Root defaultOpen>
+      <Dialog.Portal>
+        <Dialog.Content aria-describedby={undefined}>
+          <Dialog.Title>Notatka</Dialog.Title>
+          <textarea ref={ref} aria-label="Treść" />
+          <DictationButton target={ref} label="Treść" />
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+};
+
+describe('voice popup details', () => {
+  it('starts only one recording however often the mic is pressed', async () => {
+    installMic();
+    render(<Form />);
+    const mic = screen.getByRole('button', { name: 'Dyktuj: Nazwa' });
+
+    await userEvent.click(mic);
+    await userEvent.click(mic);
+
+    expect(started).toBe(1);
+    expect(
+      screen.getByRole('button', { name: 'Zatrzymaj dyktowanie: Nazwa' }),
+    ).toBeDisabled();
+  });
+
+  it('closes only the popup on Escape inside a dialog', async () => {
+    installMic();
+    render(<NoteDialog />);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Dyktuj: Treść' }),
+    );
+    await userEvent.keyboard('{Escape}');
+
+    expect(
+      screen.queryByRole('dialog', { name: 'Dyktowanie: Treść' }),
+    ).toBeNull();
+    expect(screen.getByRole('dialog', { name: 'Notatka' })).toBeVisible();
+    expect(screen.getByLabelText('Treść')).toHaveFocus();
+  });
+
+  it('still dictates when the microphone level is unavailable', async () => {
+    installMic();
+    vi.stubGlobal('navigator', {
+      ...navigator,
+      mediaDevices: {
+        getUserMedia: () => Promise.reject(new Error('denied')),
+      },
+    });
+    render(<Form />);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Dyktuj: Nazwa' }),
+    );
+    say('kup chleb');
+
+    expect(screen.getByRole('dialog')).toBeVisible();
+    expect(screen.getByLabelText('Nazwa')).toHaveValue('kup chleb');
   });
 });
