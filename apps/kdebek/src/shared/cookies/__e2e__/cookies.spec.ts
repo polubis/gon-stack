@@ -21,6 +21,8 @@ const readStoredPreferences = (page: Page) =>
 
 const commands = {
   'im on the home page': ({ page }) => page.goto('/'),
+  'im on the privacy policy page': ({ page }) =>
+    page.goto('/polityka-prywatnosci/'),
   'i have already accepted all cookies': ({ page }) =>
     seedAcceptedConsent(page),
 
@@ -216,6 +218,24 @@ describe('cookies consent navigation', () => {
       ['the cookie preferences view should be visible'],
       ['i click back'],
       ['the cookie dialog should be closed'],
+    );
+  });
+
+  test('lets a visitor manage cookies on the privacy policy page without a banner', async ({
+    page,
+    getByE2e,
+  }) => {
+    await interpreter(commands, { page, getByE2e })(
+      ['im on the privacy policy page'],
+      ['the cookie reopen trigger should be visible'],
+      ['the cookie dialog should be closed'],
+      ['i click the reopen trigger'],
+      ['the cookie preferences view should be visible'],
+      ['i toggle the performance category'],
+      ['i click save preferences'],
+      ['the cookie dialog should be closed'],
+      ['the cookie reopen trigger should be visible'],
+      ['only the performance category should be stored as accepted'],
     );
   });
 });

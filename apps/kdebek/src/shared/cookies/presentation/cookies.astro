@@ -5,12 +5,14 @@ import { copy } from './copy';
 
 type Props = {
   privacyPolicyUrl: string;
+  // Never opens the banner on its own; the settings button is always shown.
+  manual?: boolean;
 };
 
-const { privacyPolicyUrl }: Props = Astro.props;
+const { privacyPolicyUrl, manual = false }: Props = Astro.props;
 ---
 
-<div id="cookies-root" hidden>
+<div id="cookies-root" data-manual={manual ? 'true' : undefined} hidden>
   <div class="fixed inset-0 z-cookies bg-overlay"></div>
   <div
     id="cookies-dialog"
@@ -177,6 +179,7 @@ const { privacyPolicyUrl }: Props = Astro.props;
   const bannerView = document.getElementById('cookies-banner-view');
   const preferencesView = document.getElementById('cookies-preferences-view');
   const reopenTrigger = document.getElementById('cookies-reopen');
+  const isManual = root?.dataset.manual === 'true';
 
   if (root && dialog && bannerView && preferencesView && reopenTrigger) {
     const toggles = preferencesView.querySelectorAll<HTMLButtonElement>(
@@ -233,7 +236,7 @@ const { privacyPolicyUrl }: Props = Astro.props;
       root.hidden = !isOpen;
       bannerView.hidden = view !== 'banner';
       preferencesView.hidden = view !== 'preferences';
-      reopenTrigger.hidden = !(hasConsented && view === null);
+      reopenTrigger.hidden = !((hasConsented || isManual) && view === null);
       setBackgroundInert(isOpen);
 
       if (view === 'preferences') {
@@ -270,7 +273,7 @@ const { privacyPolicyUrl }: Props = Astro.props;
         hasConsented = true;
         analyticsLoaded = stored.preferences.performance;
         loadAnalyticsIfConsented(stored.preferences);
-      } else {
+      } else if (!isManual) {
         view = 'banner';
       }
 
@@ -326,7 +329,7 @@ const { privacyPolicyUrl }: Props = Astro.props;
     document
       .getElementById('cookies-back')
       ?.addEventListener('click', () =>
-        setView(hasConsented ? null : 'banner'),
+        setView(hasConsented || isManual ? null : 'banner'),
       );
 
     toggles.forEach((toggle) => {

@@ -234,8 +234,9 @@ const isPrivacyPolicyPage = url === PRIVACY_POLICY_URL;
   </head>
   <body>
     <slot />
-    {!isPrivacyPolicyPage && (
-      <Cookies privacyPolicyUrl={PRIVACY_POLICY_URL} />
-    )}
+    <Cookies
+      privacyPolicyUrl={PRIVACY_POLICY_URL}
+      manual={isPrivacyPolicyPage}
+    />
   </body>
 </html>

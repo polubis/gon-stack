@@ -14,7 +14,7 @@ const sections = [
     title: '1. Postanowienia ogólne',
     paragraphs: [
       'Niniejsza Polityka Prywatności opisuje zasady przetwarzania danych osobowych oraz wykorzystywania plików cookie w związku z korzystaniem ze strony internetowej masazysta-olsztyn.pl.',
-      'Administratorem danych osobowych jest Kacper Dębek, prowadzący gabinet masażu pod adresem ul. Profesorska 9A, 10-080 Olsztyn. W sprawach związanych z przetwarzaniem danych osobowych można kontaktować się pod adresem e-mail biuro.masazdebek@gmail.com lub telefonicznie pod numerem +48 666 735 220.',
+      'Administratorem danych osobowych jest Kacper Dębek, prowadzący działalność gospodarczą pod firmą KACPER DĘBEK BIURO MASAŻ (NIP: 7393979495, REGON: 524421871), gabinet masażu pod adresem ul. Profesorska 9A, 10-080 Olsztyn. W sprawach związanych z przetwarzaniem danych osobowych można kontaktować się pod adresem e-mail biuro.masazdebek@gmail.com lub telefonicznie pod numerem +48 666 735 220.',
     ],
   },
   {
@@ -32,6 +32,7 @@ const sections = [
     paragraphs: [
       'Dane osobowe przetwarzamy w celu: udzielenia odpowiedzi na przesłaną wiadomość (podstawa prawna: art. 6 ust. 1 lit. b i f RODO — działania podejmowane na Twoje żądanie oraz nasz prawnie uzasadniony interes w postaci obsługi korespondencji), zapewnienia prawidłowego i bezpiecznego działania strony oraz analizy ruchu (art. 6 ust. 1 lit. f RODO), a także — wyłącznie za Twoją zgodą — w celu analizy statystyk odwiedzin (Cloudflare Web Analytics) oraz wyświetlenia osadzonego filmu YouTube (art. 6 ust. 1 lit. a RODO). Nie przetwarzamy danych w celach marketingowych ani reklamowych.',
       'Podanie danych jest zawsze dobrowolne, jednak w niektórych przypadkach niezbędne do tego, abyśmy mogli odpowiedzieć na Twoje zapytanie.',
+      'Nie podejmujemy wobec Ciebie decyzji w sposób wyłącznie zautomatyzowany, w tym w drodze profilowania, które wywoływałoby skutki prawne lub w podobny sposób istotnie na Ciebie wpływało.',
     ],
   },
   {
@@ -39,7 +40,9 @@ const sections = [
     title: '4. Rezerwacja wizyt online',
     paragraphs: [
       'Rezerwacja wizyt odbywa się za pośrednictwem zewnętrznej platformy Booksy, prowadzonej przez odrębnego administratora danych (Booksy International sp. z o.o.). Dane podane podczas rezerwacji (np. imię i nazwisko, numer telefonu, adres e-mail) są przetwarzane przez Booksy na zasadach opisanych w jego własnej polityce prywatności, dostępnej na stronie booksy.com.',
-      'Strona masazysta-olsztyn.pl jedynie przekierowuje do platformy Booksy i nie przechowuje danych podanych w procesie rezerwacji.',
+      'Strona masazysta-olsztyn.pl jedynie przekierowuje do platformy Booksy i sama nie zapisuje ani nie przechowuje danych podanych w procesie rezerwacji.',
+      'Dane z rezerwacji trafiają jednak do nas poza stroną: po dokonaniu rezerwacji platforma Booksy przesyła na skrzynkę e-mail (Gmail) prowadzonego przez nas gabinetu powiadomienie o wizycie. Zawiera ono: imię i nazwisko (nazwę użytkownika), numer telefonu, adres e-mail, rodzaj zarezerwowanej usługi oraz datę i godzinę wizyty. Przetwarzamy te dane w celu obsługi rezerwacji i przeprowadzenia wizyty (podstawa prawna: art. 6 ust. 1 lit. b RODO — działania podejmowane na Twoje żądanie przed zawarciem umowy oraz jej wykonanie; w zakresie kontaktu w sprawie zmiany lub odwołania terminu także art. 6 ust. 1 lit. f RODO — nasz prawnie uzasadniony interes w sprawnej organizacji pracy gabinetu).',
+      'Odbiorcami tych danych są Booksy (platforma rezerwacyjna, odrębny administrator) oraz Google (dostawca poczty Gmail, podmiot przetwarzający na naszą rzecz). Google może przekazywać dane do USA — na podstawie decyzji Komisji Europejskiej w sprawie Programu Ochrony Danych UE–USA (EU-US Data Privacy Framework) lub standardowych klauzul umownych. Wiadomości z powiadomieniami przechowujemy przez 30 dni, a następnie usuwamy.',
     ],
   },
   {
@@ -62,7 +65,7 @@ const sections = [
         },
         '. Wybór nie jest zapamiętywany, a brak kliknięcia oznacza brak połączenia z YouTube.',
       ],
-      'Zgodę możesz udzielić lub odrzucić jednym kliknięciem w banerze, a następnie w każdej chwili zmienić za pomocą przycisku ustawień cookies dostępnego na stronie. Odmowa nie ogranicza działania strony.',
+      'Zgodę możesz udzielić lub odrzucić jednym kliknięciem w banerze, a następnie w każdej chwili zmienić za pomocą przycisku ustawień cookies (ikona ciasteczka w lewym dolnym rogu), dostępnego na każdej podstronie, także na tej. Odmowa nie ogranicza działania strony.',
     ],
   },
   {
@@ -70,7 +73,7 @@ const sections = [
     title: '7. Odbiorcy danych',
     paragraphs: [
       'Dostęp do danych mogą mieć podmioty świadczące na naszą rzecz usługi hostingowe, techniczne i analityczne, wyłącznie w zakresie niezbędnym do prawidłowego świadczenia tych usług i na podstawie zawartych z nimi umów powierzenia przetwarzania danych.',
-      'Dostawcą hostingu i sieci CDN jest Cloudflare, który przetwarza dane (w tym logi serwera) jako podmiot przetwarzający na podstawie umowy powierzenia przetwarzania danych; ten sam dostawca świadczy usługę Cloudflare Web Analytics (statystyki bez plików cookie), uruchamianą wyłącznie po Twojej zgodzie. Dane mogą być przekazywane do USA — na podstawie decyzji Komisji Europejskiej w sprawie Programu Ochrony Danych UE–USA (EU-US Data Privacy Framework) lub standardowych klauzul umownych.',
+      'Dostawcą poczty e-mail (Gmail) jest Google, który przetwarza dane jako podmiot przetwarzający (zob. sekcja 4). Dostawcą hostingu i sieci CDN jest Cloudflare, który przetwarza dane (w tym logi serwera) jako podmiot przetwarzający na podstawie umowy powierzenia przetwarzania danych; ten sam dostawca świadczy usługę Cloudflare Web Analytics (statystyki bez plików cookie), uruchamianą wyłącznie po Twojej zgodzie. Dane mogą być przekazywane do USA — na podstawie decyzji Komisji Europejskiej w sprawie Programu Ochrony Danych UE–USA (EU-US Data Privacy Framework) lub standardowych klauzul umownych.',
       'Po kliknięciu „Załaduj film” odbiorcą Twojego adresu IP i danych technicznych jest Google (YouTube) jako odrębny administrator, a po wejściu na Booksy — Booksy jako odrębny administrator (zob. sekcje 4 i 5).',
       'Dane mogą zostać ujawnione podmiotom uprawnionym na podstawie przepisów prawa, jeżeli wystąpią z takim żądaniem w oparciu o odpowiednią podstawę prawną.',
       'Nie sprzedajemy danych osobowych podmiotom trzecim.',
@@ -80,7 +83,7 @@ const sections = [
     id: 'okres-przechowywania',
     title: '8. Okres przechowywania danych',
     paragraphs: [
-      'Dane przekazane w korespondencji mailowej lub telefonicznej przechowujemy przez czas niezbędny do udzielenia odpowiedzi oraz przez okres wynikający z ewentualnych obowiązków archiwizacyjnych.',
+      'Korespondencję mailową, w tym powiadomienia o rezerwacjach z Booksy, przechowujemy przez 30 dni od jej zakończenia (powiadomień — od ich otrzymania), a następnie usuwamy. Dane przekazane telefonicznie wykorzystujemy wyłącznie do udzielenia odpowiedzi i nie zapisujemy ich w systemach strony.',
       'Logi serwera przechowywane są przez 7 dni, a następnie usuwane.',
       'Dane zbierane za pośrednictwem plików cookie przechowywane są przez okres wskazany w ustawieniach Twojej przeglądarki lub do momentu wycofania zgody, nie dłużej jednak niż przez 12 miesięcy od momentu jej udzielenia.',
     ],
@@ -134,7 +137,7 @@ export const copy = {
   header: {
     eyebrow: 'DOKUMENT PRAWNY',
     heading: 'Polityka prywatności',
-    lastUpdated: 'Ostatnia aktualizacja: 26 października 2026',
+    lastUpdated: 'Ostatnia aktualizacja: 27 października 2026',
   },
 
   sections,
