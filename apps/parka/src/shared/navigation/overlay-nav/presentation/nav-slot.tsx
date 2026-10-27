@@ -18,7 +18,7 @@ export const NavSlot = ({ placement, children }: Props) => {
 
   if (placement === 'side')
     return (
-      <div className="z-(--z-nav) hidden h-full w-64 shrink-0 lg:block xl:w-72">
+      <div className="z-(--z-raised) hidden h-full w-64 shrink-0 lg:block xl:w-72">
         {children}
       </div>
     );
@@ -29,7 +29,7 @@ export const NavSlot = ({ placement, children }: Props) => {
       aria-hidden={hidden || undefined}
       data-overlay-hidden={hidden}
       className={cn(
-        'z-(--z-nav) grid shrink-0 overflow-hidden transition-[grid-template-rows,opacity,translate] duration-200 ease-out motion-reduce:transition-none lg:hidden',
+        'z-(--z-raised) grid shrink-0 overflow-hidden transition-[grid-template-rows,opacity,translate] duration-200 ease-out motion-reduce:transition-none lg:hidden',
         hidden
           ? 'grid-rows-[0fr] translate-y-full opacity-0'
           : 'grid-rows-[1fr]',

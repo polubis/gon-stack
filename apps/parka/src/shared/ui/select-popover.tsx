@@ -55,7 +55,7 @@ export const SelectPopover = ({
             align="start"
             sideOffset={4}
             collisionPadding={16}
-            className="z-(--z-modal) w-(--radix-popover-trigger-width) rounded-xl border border-line-strong bg-card p-3 focus:outline-none"
+            className="z-(--z-popover) w-(--radix-popover-trigger-width) rounded-xl border border-line-strong bg-card p-3 focus:outline-none"
           >
             {children(() => setOpen(false))}
           </Popover.Content>

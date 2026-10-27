@@ -8,6 +8,13 @@
  * `text-danger`, `z-(--z-modal)` ...), never raw colors.
  */
 :root {
+  /* Layers, low to high. Use only via `z-(--z-*)`. */
+  --z-raised: 10;
+  --z-modal: 20;
+  --z-popover: 30;
+  --z-toast: 40;
+  --z-tooltip: 50;
+
   --surface: #f4f7f5;
   --card: #ffffff;
   --ink: #10241b;
@@ -55,10 +62,6 @@
   --shadow-card-value: 0 1px 2px rgb(16 36 27 / 0.04);
   --shadow-popover-value:
     0 8px 24px rgb(16 36 27 / 0.16), 0 2px 6px rgb(16 36 27 / 0.08);
-  --z-nav: 10;
-  --z-modal: 20;
-  --z-tooltip: 30;
-  --z-voice: 40;
 }
 
 :root[data-theme='dark'] {

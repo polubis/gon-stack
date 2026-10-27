@@ -25,7 +25,7 @@ export const NowLine = ({ offset }: { offset: string }) => (
   <span
     aria-hidden="true"
     style={{ top: offset }}
-    className="pointer-events-none absolute inset-x-0 z-10 flex items-center"
+    className="pointer-events-none absolute inset-x-0 z-(--z-raised) flex items-center"
   >
     <span className="h-2 w-2 shrink-0 -translate-x-1/2 animate-now-pulse rounded-full bg-danger-strong motion-reduce:animate-none" />
     <span className="h-0.5 flex-1 bg-danger-strong" />

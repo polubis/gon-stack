@@ -27,10 +27,10 @@ const STEP_BUTTON =
   'grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-line-strong bg-card text-ink transition-colors hover:bg-hover-soft disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
 
 const SEGMENT =
-  'relative flex h-full items-center justify-center transition-colors hover:bg-hover-soft focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
+  'relative flex h-full items-center justify-center transition-colors hover:bg-hover-soft focus-visible:z-(--z-raised) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
 
 const PANEL =
-  'z-(--z-modal) rounded-xl border border-line-strong bg-card p-2 shadow-lg focus:outline-none';
+  'z-(--z-popover) rounded-xl border border-line-strong bg-card p-2 shadow-lg focus:outline-none';
 
 const OPTION =
   'flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';

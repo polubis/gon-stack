@@ -88,7 +88,7 @@ export const VoiceOverlay = ({
       role="dialog"
       aria-modal="true"
       aria-label={`Dyktowanie: ${label}`}
-      className="pointer-events-auto fixed inset-0 z-(--z-voice) grid place-items-center bg-ink/40 p-4 backdrop-blur-sm animate-overlay-in motion-reduce:animate-none"
+      className="pointer-events-auto fixed inset-0 z-(--z-modal) grid place-items-center bg-ink/40 p-4 backdrop-blur-sm animate-overlay-in motion-reduce:animate-none"
     >
       <div className="flex w-full max-w-xs flex-col items-center gap-5 rounded-3xl bg-card p-8 shadow-popover animate-voice-card-in motion-reduce:animate-none">
         <span className="grid h-14 w-14 place-items-center rounded-full bg-danger-soft text-danger">

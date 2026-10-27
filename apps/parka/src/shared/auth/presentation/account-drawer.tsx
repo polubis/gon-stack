@@ -49,7 +49,7 @@ const SwitchingScreen = ({ email }: { email: string }) => (
     role="status"
     aria-live="polite"
     data-e2e="account-menu:switching"
-    className="fixed inset-0 z-(--z-tooltip) flex flex-col gap-4 bg-surface p-4 lg:p-8"
+    className="fixed inset-0 z-(--z-modal) flex flex-col gap-4 bg-surface p-4 lg:p-8"
   >
     <p className="text-sm font-medium text-ink-soft">
       Przełączanie na {email}…

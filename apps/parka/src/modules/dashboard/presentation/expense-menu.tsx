@@ -35,7 +35,7 @@ export const ExpenseMenu = ({ expense }: { expense: Expense }) => {
               .querySelector<HTMLElement>('[role="menuitem"]')
               ?.focus();
           }}
-          className="z-(--z-modal) w-56 animate-pop-in rounded-xl border border-line-strong bg-card p-2 shadow-popover focus:outline-none motion-reduce:animate-none"
+          className="z-(--z-popover) w-56 animate-pop-in rounded-xl border border-line-strong bg-card p-2 shadow-popover focus:outline-none motion-reduce:animate-none"
         >
           <div
             role="menu"

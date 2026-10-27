@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, request, type Page } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
 import { test, type Ctx } from './test';
 import { registerAndConfirm } from './mailbox';
@@ -282,11 +282,19 @@ const expectNoAccess = async (page: Page, seeds: Seed[]): Promise<void> => {
   for (const seed of seeds) {
     for (const method of ['PUT', 'DELETE'] as const) {
       const path = API_ROUTER.expenseById(seed.expenseId);
-      const res = await page.request.fetch(path, {
+      // A refused PUT leaves its body unread on the dev proxy's keep-alive
+      // connection; the next request on that connection is then dropped
+      // ("Network connection lost" -> 500). One connection per write.
+      const api = await request.newContext({
+        baseURL: test.info().project.use.baseURL,
+        storageState: await page.context().storageState(),
+      });
+      const res = await api.fetch(path, {
         method,
         headers: JSON_HEADERS,
         data: method === 'PUT' ? expenseBody(seed, 'any-category') : undefined,
       });
+      await api.dispose();
       expect(res.status(), `${method} ${path}`).toBe(401);
     }
   }

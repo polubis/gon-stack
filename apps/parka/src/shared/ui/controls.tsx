@@ -282,7 +282,7 @@ export const Select = ({
           position="popper"
           sideOffset={4}
           collisionPadding={16}
-          className="z-(--z-tooltip) min-w-(--radix-select-trigger-width) overflow-hidden rounded-xl border border-line-strong bg-card text-ink shadow-popover"
+          className="z-(--z-popover) min-w-(--radix-select-trigger-width) overflow-hidden rounded-xl border border-line-strong bg-card text-ink shadow-popover"
         >
           <SelectPrimitive.Viewport className="max-h-72 p-1">
             {options.map((option) => (

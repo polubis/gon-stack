@@ -150,7 +150,7 @@ const Screen = ({ kind, children }: Props) => {
       </main>
       {/* Zero-height sticky rail (as in finance): the button floats above the
           content, which scrolls clear of it thanks to <main> bottom padding. */}
-      <div className="pointer-events-none sticky bottom-4 z-(--z-nav) h-0 md:hidden">
+      <div className="pointer-events-none sticky bottom-4 z-(--z-raised) h-0 md:hidden">
         <AddMenu
           side="top"
           aria-label="Dodaj"

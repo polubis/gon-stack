@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
@@ -52,5 +54,38 @@ describe('Toast', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('Zapisano zmiany.');
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+});
+
+describe('Toast over an open modal', () => {
+  const Host = ({ onClose }: { onClose: () => void }) => {
+    const [open, setOpen] = useState(true);
+    const [notify, setNotify] = useState(false);
+    return (
+      <Dialog.Root open={open} onOpenChange={setOpen}>
+        <Dialog.Portal>
+          <Dialog.Content aria-describedby={undefined}>
+            <Dialog.Title>Edycja</Dialog.Title>
+            <button type="button" onClick={() => setNotify(true)}>
+              Zapisz
+            </button>
+          </Dialog.Content>
+          {notify ? <Toast notice={failure()} onClose={onClose} /> : null}
+        </Dialog.Portal>
+      </Dialog.Root>
+    );
+  };
+
+  it('can be dismissed without closing the modal', async () => {
+    // Tailwind's `pointer-events-auto` is not loaded in jsdom.
+    const ui = userEvent.setup({ pointerEventsCheck: 0 });
+    const onClose = vi.fn();
+    render(<Host onClose={onClose} />);
+    await ui.click(screen.getByRole('button', { name: 'Zapisz' }));
+
+    await ui.click(screen.getByRole('button', { name: 'Zamknij' }));
+
+    expect(onClose).toHaveBeenCalledOnce();
+    expect(screen.getByRole('dialog', { name: 'Edycja' })).toBeInTheDocument();
   });
 });

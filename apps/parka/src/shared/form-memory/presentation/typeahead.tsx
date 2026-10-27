@@ -158,7 +158,7 @@ export const Typeahead = ({
         }
       />
       {expanded ? (
-        <div className="absolute inset-x-0 top-full z-(--z-tooltip) mt-1 overflow-hidden rounded-lg border border-line-strong bg-card text-ink shadow-popover">
+        <div className="absolute inset-x-0 top-full z-(--z-popover) mt-1 overflow-hidden rounded-lg border border-line-strong bg-card text-ink shadow-popover">
           <ul
             id={listId}
             role="listbox"

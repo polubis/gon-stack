@@ -49,8 +49,11 @@ export const Toast = ({
     <div
       role={notice.tone === 'error' ? 'alert' : 'status'}
       data-e2e={dataE2e}
+      // Keep an open modal from treating the toast as an outside click/focus.
+      onPointerDown={(e) => e.stopPropagation()}
+      onFocus={(e) => e.stopPropagation()}
       className={cn(
-        'pointer-events-auto fixed inset-x-4 bottom-24 z-(--z-tooltip) mx-auto max-w-md rounded-xl px-4 py-3 text-sm shadow-lg',
+        'pointer-events-auto fixed inset-x-4 bottom-24 z-(--z-toast) mx-auto max-w-md rounded-xl px-4 py-3 text-sm shadow-lg',
         notice.tone === 'error'
           ? 'border border-danger-line bg-danger-soft text-danger'
           : 'bg-brand font-medium text-on-brand',

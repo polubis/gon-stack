@@ -49,7 +49,7 @@ const NAV_BUTTON =
   'grid h-10 w-10 place-items-center rounded-lg border border-line-strong bg-card text-ink transition-colors hover:bg-hover-soft disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
 
 const DAY_CELL =
-  'grid h-10 w-full place-items-center text-sm tabular-nums transition-colors focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:cursor-not-allowed disabled:opacity-30';
+  'grid h-10 w-full place-items-center text-sm tabular-nums transition-colors focus-visible:z-(--z-raised) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:cursor-not-allowed disabled:opacity-30';
 
 const ARROW_STEPS: Record<string, number> = {
   ArrowLeft: -1,

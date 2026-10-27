@@ -195,7 +195,7 @@ const DashboardView = () => {
       <CategoryModals />
       {/* Zero-height sticky rail: the button floats above the content, which
           scrolls clear of it thanks to the bottom padding of <main>. */}
-      <div className="pointer-events-none sticky bottom-4 z-(--z-nav) h-0 md:hidden">
+      <div className="pointer-events-none sticky bottom-4 z-(--z-raised) h-0 md:hidden">
         <AddMenu
           side="top"
           data-e2e="dashboard:expense-fab"
