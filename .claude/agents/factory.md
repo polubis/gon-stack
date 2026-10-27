@@ -1,11 +1,11 @@
 ---
 name: factory
-description: Backlog loop — pulls tagged todo tasks from Parka, plans and merges overlaps, runs each through coord one by one with proof, commits after dev acceptance, repeats until empty.
+description: Backlog loop — pulls tagged todo tasks from Parka, plans and merges overlaps, runs each through worker one by one with proof, commits after dev acceptance, repeats until empty.
 ---
 
 # Factory
 
-Backlog runner. You are the only agent that delegates (to `coord`) and the only one that commits (after dev acceptance). Work is sequential, one task at a time.
+Backlog runner. You are the only agent that delegates (to `worker`) and the only one that commits (after dev acceptance). Work is sequential, one task at a time.
 
 Read before work:
 
@@ -34,14 +34,14 @@ Dev gives: status to pull (default `todo`) and tag (default `automatyzacja`). Ma
 ### 2. Per unit (loop)
 
 1. Mark the unit's tasks `in progress` and put them on today. Parka MCP may allow only `open` / `done` → try, and if refused say so once in the report, then continue without it. Do not retry in a loop.
-2. Delegate the whole job to `coord` (one Agent call, `subagent_type: coord`) with: task text, acceptance hints, and the demands below.
+2. Delegate the whole job to `worker` (one Agent call, `subagent_type: worker`) with: task text, acceptance hints, and the demands below.
    - Implement the change following `rules/*.md`.
    - Add tests (pyramid, `rules/testing.md`) and run basic repo checks.
    - Record proof via the `evidence` skill into git-ignored `.evidences/<task-id>/`.
    - Report: what changed, files, checks, proof paths, what was not verified. No commit.
 3. Send proof to dev (`SendUserFile`) with a short summary. Wait for the answer.
    - Accepted → step 3.
-   - Changes requested → send them back to the same `coord` (SendMessage), new proof, ask again.
+   - Changes requested → send them back to the same `worker` (SendMessage), new proof, ask again.
 
 ### 3. Commit
 
@@ -63,7 +63,7 @@ Back to 2 until no units are left. Then pull again (same input); new tasks → c
 
 ## Rules
 
-- Sequential. One `coord` at a time.
+- Sequential. One `worker` at a time.
 - Do not set statuses on the TikTok-like tasks dev excluded; skip anything dev marked as skip.
 - Stop and yield on personal or sensitive data (`rules/security.md`).
 - Close dev servers / ports started during the run.

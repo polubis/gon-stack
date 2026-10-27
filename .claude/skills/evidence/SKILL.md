@@ -1,78 +1,77 @@
 ---
 name: evidence
-description: Record video proof that a change works. Before/after side-by-side or single-run video with injected highlight boxes and labels. Use when dev asks for proof, evidence, "video", "przed i po", "dowod", "pokaz ze dziala", or when coord must show proof of a UI change.
+description: Proof that a change works. Picks cheapest sufficient proof (test, screenshot, video, before/after). Use when dev asks for proof, evidence, "video", "przed i po", "dowod", "pokaz ze dziala", or when worker must show proof of a change.
 ---
 
 # Evidence
 
-Video proof of UI behavior. Playwright records one page. Highlights + labels injected into DOM. Output one `.webm`.
+Cheapest enough proof. Script does heavy lift: `evidence.mjs`. Agent writes only tiny scenario.
 
-## When
+## Pick level first
 
-- Change visible in UI, dev wants proof
-- Bug fix: BEFORE shows bug, AFTER shows fix
-- New feature only: single run (no BEFORE), same labels
+| Change | Proof |
+| --- | --- |
+| Logic bug / regression | Red test on old code, green on new. No video |
+| Static look (spacing, color, copy) | `--mode shot`, before/after, marked element |
+| New feature | `--mode single`, one video, no BEFORE |
+| Time/interaction bug (history, Back, animation) | `--mode before-after`: BEFORE then AFTER, sequential |
+| Responsive change | `--mode responsive`: one PNG board, shot per viewport, labeled by width |
+| Side-by-side iframe | Only if dev asks explicit. Iframes share session history, break Back |
 
-Not for non-UI change. Use tests.
+Non-UI change: tests only.
 
-## Workflow
+## Budget
 
-1. **Scenes.** List 1-3 scenes. Each = one user story + one highlight target. If BEFORE cannot show the bug, show the missing capability instead and caption honestly.
-2. **BEFORE code.** `git worktree add <scratch>/before HEAD`. Uncommitted work in main tree = AFTER. Never edit main tree.
-3. **Isolate deps.** Worktree must not share `node_modules` with main tree (symlink/junction). Install inside worktree, or run its server without relinking. Removing worktree through shared link deletes main files. After cleanup check main tree still builds/lints.
-4. **Two dev servers.** BEFORE on port A, AFTER on port B, plus tiny wrapper origin C. Start in background, wait ready.
-5. **Wrapper page.** Served via `context.route(C/**)`. Two `<iframe>` side by side: left red banner `BEFORE`, right green banner `AFTER`. Top bar = scene name. Hidden `#card` overlay for title cards.
-6. **Context.** `recordVideo` size = viewport. Fixed `timezoneId` + `locale`. Stub auth if needed. Mock whole backend with `context.route`, one state per origin. Mock answers what old/new server would return - say so in report.
-7. **Lockstep.** Helper `both(fn)` = `Promise.all` on both frames. Use stable locators.
-8. **Label.** Per highlight: `mark(frame, locator, caption, good)`, hold, `unmark`. Colors: bad `#dc2626`, good `#16a34a`.
-9. **Title cards** between scenes + closing summary card.
-10. **Save.** `page.video().path()` after `context.close()`, copy to root `.evidences/<name>.webm` (create dir if missing).
-11. **Verify.** Screenshot every ~2.5s, log real values (field values, request bodies). View screenshots before claiming. Caption must match logged value.
-12. **Cleanup.** Stop servers, `git worktree remove --force`, `git worktree prune`. `git status` must equal state before.
-13. **Deliver.** Absolute path + `SendUserFile` (`display: render`). Report scenes, limits.
+Max 1-3 scenes, ~10 s each. One repair try. Then report with limits.
 
-## Label helper
+## Run
 
-Box + caption inside frame, `position:fixed`, `pointer-events:none`, max z-index. Caption above element; below if element near top.
+Script generic. All repo facts via args or `rules/`/repo docs. Playwright resolved from `--playwright-from` (dir with `@playwright/test`, default cwd).
 
-```js
-const mark = async (frame, loc, caption, good) => {
-  const color = good ? '#16a34a' : '#dc2626';
-  const el = await loc.first().elementHandle();
-  await el.scrollIntoViewIfNeeded();
-  await frame.evaluate(([el, caption, color]) => {
-    const r = el.getBoundingClientRect();
-    const box = document.createElement('div');
-    box.className = '__hl';
-    box.style.cssText = `position:fixed;z-index:2147483647;pointer-events:none;left:${r.left - 6}px;top:${r.top - 6}px;width:${r.width + 12}px;height:${r.height + 12}px;border:4px solid ${color};border-radius:8px`;
-    const tag = document.createElement('div');
-    tag.className = '__hl';
-    tag.textContent = caption;
-    tag.style.cssText = `position:fixed;z-index:2147483647;pointer-events:none;left:${Math.max(4, r.left - 6)}px;top:${r.top < 70 ? r.bottom + 12 : r.top - 46}px;background:${color};color:#fff;font:700 20px system-ui;padding:6px 12px;border-radius:6px;white-space:nowrap`;
-    document.body.append(box, tag);
-  }, [el, caption, color]);
-};
-const unmark = (frame) =>
-  frame.evaluate(() => document.querySelectorAll('.__hl').forEach((n) => n.remove()));
+```
+node <skill>/evidence.mjs --scenario <file.mjs> --mode single|before-after|shot|responsive   --url <AFTER> [--before-url <BEFORE>] [--viewport 390x844] [--viewports 320,480,768x900]   --out <name> [--out-dir .evidences] [--timezone UTC] [--locale en-US]   [--backend <probeUrl>] [--serve "cmd|readyUrl|cwd"]... [--worktree <dir>] [--hold-ms 3000]
 ```
 
-## Single-run variant
+Scenario (scratch dir, never repo) = ES module:
 
-No wrapper, no second server. One page, same `mark`/`unmark`/title card helpers, `recordVideo` on context.
+```js
+export default async ({ page, mark, unmark, card, hold, log, frame, phase, baseUrl, vw }) => {
+  await page.getByRole('button', { name: 'Menu' }).click();
+  await mark(page.getByRole('dialog'), 'Modal open', true); // green; false = red
+  log('modals', await page.getByRole('dialog').count());   // log values, not screenshots
+  await frame('modal');                                    // max 3 key frames
+  await hold(2000); await unmark();
+};
+export const mock = async (ctx) => {}; // optional: ctx.route fallback
+```
+
+Script gives: marks, title cards, `recordVideo`, fixed tz/locale, reduced motion, `<out-dir>/<out>.log.txt`, cleanup in `finally` (servers, worktree, git status before/after).
+
+### Responsive
+
+`--viewports` list of `W` or `WxH` (default H 800). Same scenario runs per viewport (`vw` given, `mark` optional). Board `<out>.responsive.png` built with Playwright only (no ffmpeg/sharp). Viewport list: take from `rules/ui.md`, never from skill. Read board: labels + shots must match.
+
+## Backend
+
+Prefer real dev backend; start it per repo docs. Mock only if unreachable and scenario exports `mock`; log `backend=MOCK`, report says so. Else fail. `--backend <url>` probes.
+
+## BEFORE code
+
+`--worktree <dir>` = `git worktree add HEAD`, removed at end. Uncommitted work in main = AFTER. Never edit main tree. No `node_modules` link into worktree (removal deletes main files); install inside it. `{WT}` in `--serve` cmd/cwd = worktree dir. Check main still builds after.
+
+## Verify
+
+Read log + 2-3 key frames. Caption must match logged value. Never claim unseen.
 
 ## Rules
 
-- Hold each highlight 3-4.5s; title cards 3s. Readable.
-- Caption = fact (value, state), short.
-- Fixed timezone + locale, else video not reproducible.
-- Mock backend, never real data. Personal/sensitive data seen -> stop (`rules/security.md`).
-- Never modify source of main tree. Proof only.
-- No `ffmpeg` = `.webm` only; do not fake `.mp4`.
-- Final video + screenshots go ONLY to root `.evidences/` (gitignored). Check `.gitignore` has `/.evidences/`, add if missing. Scripts stay in scratch dir.
-- Report limits honestly: mocked parts, dev server not build, dropped scenes.
+- Highlight hold 3-4 s; title card 3 s.
+- Personal/sensitive data seen -> stop (`rules/security.md`).
+- No `ffmpeg` -> `.webm` only. No fake `.mp4`.
+- Pass `--out-dir` = gitignored dir per repo rules. Never commit artifacts.
 
 ## Report
 
-- Path of final video
-- Per scene: what BEFORE shows, what AFTER shows (logged values)
-- Limits + anything repaired
+- Path (absolute): video / shots / log
+- Per scene: BEFORE vs AFTER, logged values
+- Limits: mock, dev server vs build, dropped scenes, repair

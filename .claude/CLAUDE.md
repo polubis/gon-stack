@@ -6,7 +6,7 @@ This file + `rules/`, `skills/`, `references/`, `templates/` guide agents in **g
 
 Always check `references/aodi-framework.md` and `rules/*.md` before any task and force rules.
 
-Every task starts by delegating to the `coord` agent. `coord` never delegates and never commits: it does the work, shows proof, and waits for dev acceptance. Commit only after acceptance.
+Every task starts by delegating to the `worker` agent. `worker` never delegates and never commits: it does the work, shows proof, and waits for dev acceptance. Commit only after acceptance.
 
 ## Ecosystem
 
@@ -62,10 +62,9 @@ Read `references/aodi-framework.md` for tag legend (`A` / `O` / `D` / `I`). Appl
 
 | Path                                 | What                                                              |
 | ------------------------------------ | ----------------------------------------------------------------- |
-| [agents/coord.md](agents/coord.md)   | Simple solo / complex plan + workers + checks → hand off to doctor |
-| [agents/worker.md](agents/worker.md) | Task + context → precise implementation, report, done             |
+| [agents/worker.md](agents/worker.md) | Does the work solo: plan if complex, tests, checks, cheapest proof, wait for acceptance |
 | [agents/doctor.md](agents/doctor.md) | Rules audit (fix), proof, commit?, cleanup, close dev ports       |
-| [agents/factory.md](agents/factory.md) | Backlog loop: tagged tasks → plan → coord + proof → accept → commit → done |
+| [agents/factory.md](agents/factory.md) | Backlog loop: tagged tasks → plan → worker + proof → accept → commit → done |
 
 ### Worktrees
 
@@ -100,7 +99,7 @@ Read `references/aodi-framework.md` for tag legend (`A` / `O` / `D` / `I`). Appl
 | [e2e-via-commands](skills/e2e-via-commands/SKILL.md)                                 | E2E via step interpreter             | Extend e2e path         |
 | [check-html](skills/check-html/SKILL.md)                                             | a11y audit HTML/URL                  | Check accessibility     |
 | [witch-doctor](skills/witch-doctor/SKILL.md)                                         | Score module quality                 | Audit/review codebase   |
-| [evidence](skills/evidence/SKILL.md)                                                 | Before/after video + labels          | Proof of UI change      |
+| [evidence](skills/evidence/SKILL.md)                                                 | Cheapest proof: test/shot/video/responsive board + `evidence.mjs` | Proof of change |
 
 | [copyman](skills/copyman/SKILL.md) | Landing/pricing conversion copy | Marketing copy |
 | [posty](skills/posty/SKILL.md) | Batch polish posts (`---` split) | Post grammar/typo |
