@@ -21,6 +21,8 @@ export type Priority = { id: PriorityId; name: string; value: number };
 
 export type Task = {
   id: TaskId;
+  /** Unique readable key (`ABC-7`) set by the server; `null` until it answers. */
+  key: string | null;
   title: string;
   /** Longer notes; `null` when there are none. */
   description: string | null;
@@ -51,7 +53,13 @@ export type Attachment = {
 /** A task waiting for a day: same data as a task, nothing about time. */
 export type BacklogTask = Pick<
   Task,
-  'id' | 'title' | 'description' | 'categoryId' | 'priorityId' | 'device'
+  | 'id'
+  | 'key'
+  | 'title'
+  | 'description'
+  | 'categoryId'
+  | 'priorityId'
+  | 'device'
 >;
 
 /** Instruction that makes a task on each day of its series. */

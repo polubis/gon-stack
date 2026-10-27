@@ -22,6 +22,7 @@ export const toTimeBacklogTask = (
   profiles?: ProfilesByDevice,
 ) => ({
   id: row.id,
+  key: row.key,
   title: row.title,
   description: row.description,
   categoryId: row.category_id,
@@ -31,6 +32,7 @@ export const toTimeBacklogTask = (
 
 export const toTimeTask = (row: TaskRow, profiles?: ProfilesByDevice) => ({
   id: row.id,
+  key: row.key,
   title: row.title,
   description: row.description,
   categoryId: row.category_id,

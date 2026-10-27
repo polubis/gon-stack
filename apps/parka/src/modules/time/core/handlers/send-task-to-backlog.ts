@@ -21,6 +21,7 @@ export const sendTaskToBacklog = (store: Store, bus: Bus) => {
         ...store.$backlog.get(),
         {
           id,
+          key: previous.key,
           title: previous.title,
           description: previous.description,
           categoryId: previous.categoryId,

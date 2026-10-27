@@ -7,6 +7,7 @@ import { editBacklogModal, editTaskModal, viewTaskModal } from './modal-ids';
 import { PriorityBadge } from './priority-badge';
 import { RecurringMark } from './recurring-mark';
 import { stagger } from './stagger';
+import { TaskKey } from './task-key';
 import { TaskMenu } from './task-menu';
 
 type Props = {
@@ -40,11 +41,6 @@ export const TaskRow = ({ task, now, step }: Props) => {
   const board = 'day' in task ? task : null;
   const category = categories.find((item) => item.id === task.categoryId);
   const priority = priorities.find((item) => item.id === task.priorityId);
-  const hasMeta =
-    board?.at != null ||
-    board?.inProgress ||
-    board?.recurringId != null ||
-    Boolean(category);
   return (
     <li
       aria-current={now ? 'time' : undefined}
@@ -97,35 +93,32 @@ export const TaskRow = ({ task, now, step }: Props) => {
         >
           <span className="break-words">{task.title}</span>
         </button>
-        {hasMeta ? (
-          <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-ink-soft">
-            {board?.at != null ? (
-              <time className="tabular-nums">{board.at}</time>
-            ) : null}
-            {category ? (
-              <span className="inline-flex min-w-0 items-center gap-1">
-                <span
-                  className="h-2 w-2 shrink-0 rounded-full"
-                  style={{ backgroundColor: category.color }}
-                  aria-hidden="true"
-                />
-                <span className="truncate">{category.name}</span>
-              </span>
-            ) : null}
-            {board?.inProgress ? (
+        <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-ink-soft">
+          <TaskKey taskKey={task.key} data-e2e={`time:task-key:${task.id}`} />
+          {board?.at != null ? (
+            <time className="tabular-nums">{board.at}</time>
+          ) : null}
+          {category ? (
+            <span className="inline-flex min-w-0 items-center gap-1">
               <span
-                data-e2e={`time:task-progress-badge:${task.id}`}
-                className="font-medium text-brand"
-              >
-                W trakcie
-              </span>
-            ) : null}
-            {board?.recurringId != null ? <RecurringMark /> : null}
-            {priority ? <PriorityBadge priority={priority} /> : null}
-          </p>
-        ) : priority ? (
-          <PriorityBadge priority={priority} />
-        ) : null}
+                className="h-2 w-2 shrink-0 rounded-full"
+                style={{ backgroundColor: category.color }}
+                aria-hidden="true"
+              />
+              <span className="truncate">{category.name}</span>
+            </span>
+          ) : null}
+          {board?.inProgress ? (
+            <span
+              data-e2e={`time:task-progress-badge:${task.id}`}
+              className="font-medium text-brand"
+            >
+              W trakcie
+            </span>
+          ) : null}
+          {board?.recurringId != null ? <RecurringMark /> : null}
+          {priority ? <PriorityBadge priority={priority} /> : null}
+        </p>
       </div>
       <button
         type="button"

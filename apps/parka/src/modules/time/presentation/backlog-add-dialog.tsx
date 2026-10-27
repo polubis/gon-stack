@@ -85,6 +85,7 @@ export const BacklogAddDialog = ({
     if (priorityId === undefined) return;
     const next: BacklogTask = {
       id: task?.id ?? newTaskId(),
+      key: task?.key ?? null,
       title: title.trim(),
       description: description.trim() || null,
       categoryId,

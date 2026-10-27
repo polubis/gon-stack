@@ -21,7 +21,9 @@ export const createTask = (store: Store, bus: Bus) => {
             store.$tasks
               .get()
               .map((t) =>
-                t.id === task.id ? { ...t, device: saved.device } : t,
+                t.id === task.id
+                  ? { ...t, key: saved.key, device: saved.device }
+                  : t,
               ),
           );
           notify(store, { tone: 'success', message: 'Dodano zadanie.' });

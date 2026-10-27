@@ -46,6 +46,7 @@ export const toPriority = (dto: PriorityDto): Priority => ({
 
 export const toBacklogTask = (dto: BacklogDto): BacklogTask => ({
   id: dto.id as TaskId,
+  key: dto.key,
   title: dto.title,
   description: dto.description,
   categoryId: dto.categoryId as CategoryId,
@@ -55,6 +56,7 @@ export const toBacklogTask = (dto: BacklogDto): BacklogTask => ({
 
 export const toTask = (dto: TaskDto): Task => ({
   id: dto.id as TaskId,
+  key: dto.key,
   title: dto.title,
   description: dto.description,
   categoryId: dto.categoryId as CategoryId,

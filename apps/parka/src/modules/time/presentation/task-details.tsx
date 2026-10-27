@@ -8,6 +8,7 @@ import { useContext } from './context';
 import { descriptionModal, editBacklogModal, editTaskModal } from './modal-ids';
 import { ModalShell } from './modal-shell';
 import { TaskAttachments } from './task-attachments';
+import { TaskKey } from './task-key';
 
 /** Roughly what fits the clamp when layout can't be measured. */
 const LONG_TEXT = 180;
@@ -80,6 +81,7 @@ export const TaskDetails = ({
       }
     >
       <div className="flex flex-col gap-3">
+        <TaskKey taskKey={task.key} data-e2e="time:task-details-key" />
         <h3 className="break-words text-base font-semibold">{task.title}</h3>
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-soft">
           {category ? (

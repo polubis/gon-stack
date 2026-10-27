@@ -1,6 +1,6 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { addDays, periodContaining, todayDay } from '@/shared/period/period';
 import { Main } from '../presentation/main';
 import { http, HttpResponse } from 'msw';
@@ -53,6 +53,14 @@ const stubApi = (reads: Parameters<typeof readBody>[1]) => {
 };
 
 const deletes = () => calls.filter((c) => c.method === 'DELETE');
+
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'], now: new Date(2026, 9, 10, 12) });
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe('upcoming payment', () => {
   beforeEach(() => {

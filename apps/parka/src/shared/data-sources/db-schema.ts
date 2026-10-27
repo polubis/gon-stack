@@ -755,6 +755,7 @@ export type Database = {
           done: boolean;
           id: string;
           in_progress: boolean;
+          key: string;
           occurrence_date: string | null;
           priority_id: string;
           recurring_id: string | null;
@@ -778,6 +779,7 @@ export type Database = {
           done?: boolean;
           id: string;
           in_progress?: boolean;
+          key?: string;
           occurrence_date?: string | null;
           priority_id: string;
           recurring_id?: string | null;
@@ -800,6 +802,7 @@ export type Database = {
           done?: boolean;
           id?: string;
           in_progress?: boolean;
+          key?: string;
           occurrence_date?: string | null;
           priority_id?: string;
           recurring_id?: string | null;

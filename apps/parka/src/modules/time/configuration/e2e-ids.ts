@@ -41,6 +41,7 @@ export const TIME_E2E_IDS = [
   'time:description-editor',
   'time:task-details',
   'time:task-details-edit',
+  'time:task-details-key',
   'time:description-clamp',
   'time:description-more',
   'time:description-full',
@@ -57,6 +58,7 @@ export type TimeDynamicE2eId =
   | `time:form-color-option:${string}`
   | `time:add-day:${string}`
   | `time:task:${string | number}`
+  | `time:task-key:${string | number}`
   | `time:task-done:${string | number}`
   | `time:task-progress-badge:${string | number}`
   | `time:task-info:${string | number}`

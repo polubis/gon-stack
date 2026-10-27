@@ -138,6 +138,7 @@ export const TaskDialog = ({
     }
     const next: Task = {
       id: task?.id ?? newTaskId(),
+      key: task?.key ?? null,
       title: title.trim(),
       description: description.trim() || null,
       categoryId,

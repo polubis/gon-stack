@@ -22,6 +22,7 @@ export const PRIORITIES = [
 
 export const backlogTask = (overrides: Json = {}): Json => ({
   id: 'b-1',
+  key: null,
   title: 'Umówić dentystę',
   description: null,
   categoryId: 'health',
@@ -32,6 +33,7 @@ export const backlogTask = (overrides: Json = {}): Json => ({
 
 export const task = (overrides: Json = {}): Json => ({
   id: 't-1',
+  key: null,
   title: 'Raport miesięczny',
   description: null,
   categoryId: 'work',
@@ -58,6 +60,9 @@ const FAILURE = {
  */
 export const setupTimeBackend = () => {
   const calls: Call[] = [];
+  let created = 0;
+  /** Like the server: a prefix plus a running number, set once on create. */
+  const nextKey = () => `TST-${++created}`;
   const state = {
     tasks: [] as Json[],
     backlog: [] as Json[],
@@ -68,6 +73,8 @@ export const setupTimeBackend = () => {
     deviceProfile: null as Json | null,
     failReads: false,
     delayMs: 0,
+    /** Slows task creation, to see the app before the server answers. */
+    createDelayMs: 0,
     /** Files per task id; the real server keeps them in storage. */
     attachments: {} as Record<string, Json[]>,
     failAttachmentReads: false,
@@ -154,8 +161,9 @@ export const setupTimeBackend = () => {
     http.post('/api/time/backlog/', async ({ request }) => {
       const body = await record(request);
       if (state.failWrites) return HttpResponse.json(FAILURE);
-      state.backlog.push(body!);
-      return HttpResponse.json({ code: 201, data: withProfile(body!) });
+      const saved = { ...body!, key: nextKey() };
+      state.backlog.push(saved);
+      return HttpResponse.json({ code: 201, data: withProfile(saved) });
     }),
     http.put('/api/time/backlog/:id/', async ({ request }) => {
       const body = await record(request);
@@ -170,6 +178,7 @@ export const setupTimeBackend = () => {
       const full = state.tasks.find((t) => t.id === params.id)!;
       const rest = {
         id: full.id,
+        key: full.key,
         title: full.title,
         description: full.description,
         categoryId: full.categoryId,
@@ -182,9 +191,11 @@ export const setupTimeBackend = () => {
     }),
     http.post('/api/time/tasks/', async ({ request }) => {
       const body = await record(request);
+      if (state.createDelayMs) await delay(state.createDelayMs);
       if (state.failWrites) return HttpResponse.json(FAILURE);
-      state.tasks.push(body!);
-      return HttpResponse.json({ code: 201, data: withProfile(body!) });
+      const saved = { ...body!, key: nextKey() };
+      state.tasks.push(saved);
+      return HttpResponse.json({ code: 201, data: withProfile(saved) });
     }),
     http.put('/api/time/tasks/:id/', async ({ request }) => {
       const body = await record(request);
@@ -267,6 +278,8 @@ export const setupTimeBackend = () => {
 
   beforeEach(() => {
     calls.length = 0;
+    created = 0;
+    state.createDelayMs = 0;
     state.tasks = [];
     state.backlog = [];
     state.categories = [...CATEGORIES];

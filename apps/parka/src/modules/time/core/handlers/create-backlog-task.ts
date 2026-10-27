@@ -20,7 +20,9 @@ export const createBacklogTask = (store: Store, bus: Bus) => {
             store.$backlog
               .get()
               .map((t) =>
-                t.id === task.id ? { ...t, device: saved.device } : t,
+                t.id === task.id
+                  ? { ...t, key: saved.key, device: saved.device }
+                  : t,
               ),
           );
           notify(store, { tone: 'success', message: 'Dodano do backlogu.' });
