@@ -7,7 +7,7 @@ import {
 } from '@/shared/router/modal-stack';
 
 const NARROW = '(max-width: 39.99rem)';
-const PREFIX = 'select:';
+const PREFIX = 'popover:';
 
 const subscribe = (notify: () => void) => {
   const query = window.matchMedia?.(NARROW);
@@ -18,11 +18,11 @@ const subscribe = (notify: () => void) => {
 const isNarrow = () => window.matchMedia?.(NARROW).matches ?? false;
 
 /**
- * Open state of a select-like field. Wide screens keep it local; narrow
+ * Open state of every popover, menu and select. Wide screens keep it local; narrow
  * ones keep it in the URL modal stack (one history entry), so Back closes
- * just the select and a reload restores it. `key` must be stable.
+ * just the popover and a reload restores it. `key` must be stable.
  */
-export const useSelectOpen = (key: string) => {
+export const usePopoverOpen = (key: string) => {
   const id = `${PREFIX}${key}`;
   const narrow = useSyncExternalStore(subscribe, isNarrow, () => false);
   const stack = useModalStack();

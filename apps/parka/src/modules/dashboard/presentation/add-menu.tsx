@@ -1,6 +1,5 @@
 import {
   useRef,
-  useState,
   type ChangeEvent,
   type ComponentProps,
   type KeyboardEvent,
@@ -16,6 +15,7 @@ import {
 } from 'lucide-react';
 import { NEW_CATEGORY_MODAL } from '@/modules/categories/presentation/modal-ids';
 import { openModal } from '@/shared/router/modal-stack';
+import { usePopoverOpen } from '@/shared/ui/use-popover-open';
 import { navigateTo } from '@/shared/router/navigation';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { stashReceipt } from '@/shared/receipt-handoff/receipt-handoff';
@@ -69,7 +69,7 @@ export const AddMenu = ({
 }: Omit<ComponentProps<typeof Popover.Trigger>, 'type'> & {
   side: 'top' | 'bottom';
 }) => {
-  const [open, setOpen] = useState(false);
+  const { open, setOpen } = usePopoverOpen(`add-menu:${side}`);
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
 

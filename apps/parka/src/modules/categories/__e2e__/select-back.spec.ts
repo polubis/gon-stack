@@ -11,7 +11,7 @@ const NEW_CATEGORY = `${APP_ROUTER.categories()}new/`;
 const selects = (page: Page): string[] =>
   new URL(page.url()).searchParams
     .getAll('modal')
-    .filter((id) => id.startsWith('select:'));
+    .filter((id) => id.startsWith('popover:'));
 
 const openForm = async (page: Page, path: string): Promise<void> => {
   await signInAsTestUser(page);

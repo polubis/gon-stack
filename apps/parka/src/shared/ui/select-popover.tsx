@@ -4,7 +4,7 @@ import { ChevronDown } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import type { E2eId } from '@/__e2e__/selectors';
 import { inputClass } from './controls';
-import { useSelectOpen } from './use-select-open';
+import { usePopoverOpen } from './use-popover-open';
 
 type Props = {
   label: string;
@@ -22,7 +22,7 @@ export const SelectPopover = ({
   children,
   'data-e2e': e2e,
 }: Props) => {
-  const { open, setOpen } = useSelectOpen(label);
+  const { open, setOpen } = usePopoverOpen(label);
   const labelId = useId();
   const triggerId = useId();
 

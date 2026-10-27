@@ -1,15 +1,15 @@
-import { useState } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { Copy, Ellipsis } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { localMonth } from '@/shared/date/date';
 import { APP_ROUTER } from '@/shared/router/routes';
+import { usePopoverOpen } from '@/shared/ui/use-popover-open';
 import type { Expense } from '../domain/models';
 import { ITEM, moveFocus } from './add-menu';
 
 /** "More" popover of an expense row: quick actions that do not open the popup. */
 export const ExpenseMenu = ({ expense }: { expense: Expense }) => {
-  const [open, setOpen] = useState(false);
+  const { open, setOpen } = usePopoverOpen(`expense-menu:${expense.id}`);
   const label = `Więcej: ${expense.merchant}`;
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>

@@ -1,8 +1,9 @@
-import { useState, type KeyboardEvent, type ReactNode } from 'react';
+import { type KeyboardEvent, type ReactNode } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { CalendarRange, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { useModal } from '@/shared/router/modal-stack';
+import { usePopoverOpen } from '@/shared/ui/use-popover-open';
 import {
   canGoNext,
   clampPeriod,
@@ -184,8 +185,12 @@ export const PeriodControl = ({
   allowFuture = false,
   renderRange,
 }: Props) => {
-  const [valueOpen, setValueOpen] = useState(false);
-  const [kindOpen, setKindOpen] = useState(false);
+  const { open: valueOpen, setOpen: setValueOpen } = usePopoverOpen(
+    'period-control:value',
+  );
+  const { open: kindOpen, setOpen: setKindOpen } = usePopoverOpen(
+    'period-control:kind',
+  );
   const range = useModal(PERIOD_RANGE_MODAL);
   const own = period.kind === 'custom';
   const next = allowFuture || canGoNext(period, today);

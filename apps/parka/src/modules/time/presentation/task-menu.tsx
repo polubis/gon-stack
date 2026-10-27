@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import {
   CalendarArrowUp,
@@ -12,6 +11,7 @@ import {
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { openModal } from '@/shared/router/modal-stack';
+import { usePopoverOpen } from '@/shared/ui/use-popover-open';
 import { Input } from '@/shared/ui/controls';
 import { addDays, isDay } from '@/shared/period/period';
 import type { BacklogTask, Task } from '../domain/models';
@@ -32,7 +32,7 @@ type Target = { day: string; label: string; text: string; Icon: LucideIcon };
 /** "More" popover of a task row: quick moves, backlog, delete and where the task came from. */
 export const TaskMenu = ({ task }: { task: Task | BacklogTask }) => {
   const { now, updateTask, moveBacklogTask, sendTaskToBacklog } = useContext();
-  const [open, setOpen] = useState(false);
+  const { open, setOpen } = usePopoverOpen(`task-menu:${task.id}`);
   const board = 'day' in task ? task : null;
   const targets: Target[] = [
     { day: now.day, label: 'dziś', text: 'Przenieś na dziś', Icon: Sun },

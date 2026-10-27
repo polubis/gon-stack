@@ -9,7 +9,7 @@ import * as SelectPrimitive from '@radix-ui/react-select';
 import { Check, ChevronDown } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import type { E2eId } from '@/__e2e__/selectors';
-import { useSelectOpen } from './use-select-open';
+import { usePopoverOpen } from './use-popover-open';
 
 type SegmentedProps<T extends string> = {
   options: { value: T; label: string }[];
@@ -241,7 +241,7 @@ export const Select = ({
   placeholder?: string;
 }) => {
   const field = useField();
-  const { open, setOpen } = useSelectOpen(
+  const { open, setOpen } = usePopoverOpen(
     props['data-e2e'] ?? id ?? field?.id ?? 'field',
   );
   return (

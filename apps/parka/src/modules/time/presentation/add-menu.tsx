@@ -1,4 +1,4 @@
-import { useState, type ComponentProps, type KeyboardEvent } from 'react';
+import { type ComponentProps, type KeyboardEvent } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import {
   Flag,
@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { openModal } from '@/shared/router/modal-stack';
+import { usePopoverOpen } from '@/shared/ui/use-popover-open';
 import {
   NEW_BACKLOG_MODAL,
   NEW_CATEGORY_MODAL,
@@ -56,7 +57,7 @@ export const AddMenu = ({
 }: Omit<ComponentProps<typeof Popover.Trigger>, 'type'> & {
   side: 'top' | 'bottom';
 }) => {
-  const [open, setOpen] = useState(false);
+  const { open, setOpen } = usePopoverOpen(`add-menu:${side}`);
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger {...trigger} aria-haspopup="menu">
