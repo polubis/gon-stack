@@ -146,6 +146,7 @@ const page = (
 const task = () =>
   z.object({
     id: z.string(),
+    key: z.string().describe('Unique readable task key, e.g. QXT-7'),
     title: z.string(),
     description: z.string().nullable(),
     status: z.enum(['open', 'in_progress', 'done']),

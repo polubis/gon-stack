@@ -9,6 +9,7 @@ const TOKEN = 'parka_mcp_abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG';
 
 const TASK = {
   id: 't-1',
+  key: 'QXT-7',
   title: 'Pay rent',
   description: null,
   status: 'open',
@@ -286,6 +287,19 @@ describe('mcp reading', () => {
       expect.any(String),
     );
     expect(JSON.parse(json.result.content[0].text).items[0].id).toBe('t-1');
+  });
+
+  it('shows the task key in a listed task', async () => {
+    const { rpc } = setup();
+
+    const { json } = await rpc('tools/call', {
+      name: 'list_tasks',
+      arguments: {},
+    });
+
+    expect(json.result.structuredContent.items[0]).toMatchObject({
+      key: 'QXT-7',
+    });
   });
 
   it('continues from the cursor it handed out', async () => {
