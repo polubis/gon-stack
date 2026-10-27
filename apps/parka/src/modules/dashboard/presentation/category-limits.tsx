@@ -1,13 +1,12 @@
 import { categoryLabel } from '@/shared/i18n/category-label';
-import { Layers, Pencil } from 'lucide-react';
+import { Layers, Plus } from 'lucide-react';
 import { EmptyState } from '@/shared/ui/empty-state';
 import { Button, ProgressBar } from '@/shared/ui/controls';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { money } from '../domain/format';
 import type { Period } from '@/shared/period/period';
-import type { Category, CategoryProgress, LimitId } from '../domain/models';
+import type { Category, CategoryProgress } from '../domain/models';
 import { LIMIT_NOUN } from '../domain/period';
-import { AddLimitButton } from './add-limit-button';
 import { categoryOf, limitTone } from './selectors';
 
 export const CategoryLimits = ({
@@ -15,13 +14,11 @@ export const CategoryLimits = ({
   period,
   categories,
   onAdd,
-  onEdit,
 }: {
   progress: CategoryProgress[];
   period: Period;
   categories: Category[];
   onAdd: () => void;
-  onEdit: (id: LimitId) => void;
 }) =>
   progress.length === 0 ? (
     <EmptyState
@@ -30,7 +27,16 @@ export const CategoryLimits = ({
       icon={Layers}
       title="Brak limitów kategorii."
       description="Ogranicz wydatki w wybranej kategorii."
-      action={<AddLimitButton blocked={false} onClick={onAdd} />}
+      action={
+        <Button
+          variant="ghost"
+          className="w-auto px-3 py-1.5"
+          data-e2e="dashboard:limit-new"
+          onClick={onAdd}
+        >
+          <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj limit
+        </Button>
+      }
     />
   ) : (
     <ul
@@ -58,21 +64,10 @@ export const CategoryLimits = ({
               tone={limitTone(c.pct)}
               label={`${categoryLabel(category.name)}: ${Math.round(c.pct)}% limitu`}
             />
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-xs text-ink-soft">
-                {Math.round(c.pct)}% limitu na {LIMIT_NOUN[period.kind]}
-                {c.alertAt80 ? ' · alert przy 80%' : ''}
-              </p>
-              <Button
-                variant="ghost"
-                className="w-auto px-2 py-1"
-                aria-label={`Edytuj limit: ${categoryLabel(category.name)}`}
-                data-e2e={`dashboard:limit-edit:${c.id}`}
-                onClick={() => onEdit(c.id)}
-              >
-                <Pencil className="h-4 w-4" aria-hidden="true" />
-              </Button>
-            </div>
+            <p className="text-xs text-ink-soft">
+              {Math.round(c.pct)}% limitu na {LIMIT_NOUN[period.kind]}
+              {` · powiadomienie od ${c.alertAt}%`}
+            </p>
           </li>
         );
       })}

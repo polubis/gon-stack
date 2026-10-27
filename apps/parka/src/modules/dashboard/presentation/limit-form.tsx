@@ -1,137 +1,168 @@
 import { useState, type FormEvent } from 'react';
 import { categoryLabel } from '@/shared/i18n/category-label';
-import { Button, Field, Select, Toggle } from '@/shared/ui/controls';
+import { closeModal, openModal } from '@/shared/router/modal-stack';
+import { Button, Field, Select } from '@/shared/ui/controls';
 import { NumberInput } from '@/shared/ui/number-input';
-import { DEFAULT_CATEGORY_LIMIT } from '../configuration/constraints';
+import {
+  DEFAULT_ALERT_AT,
+  DEFAULT_CATEGORY_LIMIT,
+  DEFAULT_TOTAL_LIMIT,
+} from '../configuration/constraints';
 import { newLimitId } from '../domain/ids';
-import type { CategoryId, CategoryLimit, Delivery } from '../domain/models';
-import { categoryOf, withoutLimit } from './selectors';
+import type { CategoryId, Limit } from '../domain/models';
 import { useContext } from './context';
+import { DetailDialog, DialogActions } from './detail-dialog';
+import { limitDeleteModal } from './modal-ids';
+import { categoryOf, isCategoryLimit, withoutLimit } from './selectors';
 
-const DELIVERY_OPTIONS: { value: Delivery; label: string }[] = [
-  { value: 'push', label: 'Push' },
-  { value: 'email', label: 'Email' },
-];
+const TOTAL_SCOPE = 'total';
+const TOTAL_LABEL = 'Limit miesięczny (wszystkie wydatki)';
 
-/** Creates a category limit, or edits `limit` (category fixed, can be removed). */
+/** Creates a limit, or edits `limit` (its scope is fixed, it can be removed). */
 export const LimitForm = ({
+  modal,
   limit,
-  onDone,
 }: {
-  limit?: CategoryLimit;
-  onDone: () => void;
+  /** Its id in the URL modal stack. */
+  modal: string;
+  limit?: Limit;
 }) => {
   const ctx = useContext();
   const categories = ctx.useCategories();
   const limits = ctx.useLimits();
-  const [categoryId, setCategoryId] = useState<CategoryId | null>(null);
-  const [amount, setAmount] = useState(limit?.amount ?? DEFAULT_CATEGORY_LIMIT);
-  const [alertAt80, setAlertAt80] = useState(limit?.alertAt80 ?? true);
-  const [delivery, setDelivery] = useState<Delivery>(limit?.delivery ?? 'push');
+  const [scope, setScope] = useState<string | null>(null);
+  const [amount, setAmount] = useState<number | null>(limit?.amount ?? null);
+  const [alertAt, setAlertAt] = useState(limit?.alertAt ?? DEFAULT_ALERT_AT);
 
-  const available = limit
-    ? [categoryOf(categories, limit.categoryId)]
-    : withoutLimit(categories, limits);
-  const selected = available.some((c) => c.id === categoryId)
-    ? categoryId
-    : available[0]?.id;
+  const options = limit
+    ? [
+        {
+          value: isCategoryLimit(limit) ? limit.categoryId : TOTAL_SCOPE,
+          label: isCategoryLimit(limit)
+            ? categoryLabel(categoryOf(categories, limit.categoryId).name)
+            : TOTAL_LABEL,
+        },
+      ]
+    : [
+        ...(limits.some((l) => l.scope === 'total')
+          ? []
+          : [{ value: TOTAL_SCOPE, label: TOTAL_LABEL }]),
+        ...withoutLimit(categories, limits).map((c) => ({
+          value: c.id,
+          label: categoryLabel(c.name),
+        })),
+      ];
+  const selected = options.some((o) => o.value === scope)
+    ? scope
+    : options[0]?.value;
+  const shownAmount =
+    amount ??
+    (selected === TOTAL_SCOPE ? DEFAULT_TOTAL_LIMIT : DEFAULT_CATEGORY_LIMIT);
+  const valid =
+    Boolean(selected) &&
+    shownAmount > 0 &&
+    Number.isInteger(alertAt) &&
+    alertAt >= 1 &&
+    alertAt <= 100;
 
   const save = (event: FormEvent) => {
     event.preventDefault();
+    if (!valid || !selected) return;
     if (limit) {
-      ctx.updateLimit({ ...limit, amount, alertAt80, delivery });
-    } else if (selected) {
+      ctx.updateLimit({ ...limit, amount: shownAmount, alertAt });
+    } else if (selected === TOTAL_SCOPE) {
+      ctx.createLimit({
+        id: newLimitId(),
+        scope: 'total',
+        amount: shownAmount,
+        alertAt,
+      });
+    } else {
       ctx.createLimit({
         id: newLimitId(),
         scope: 'category',
-        categoryId: selected,
-        amount,
-        alertAt80,
-        delivery,
+        categoryId: selected as CategoryId,
+        amount: shownAmount,
+        alertAt,
       });
-    } else {
-      return;
     }
-    onDone();
-  };
-
-  const remove = () => {
-    if (!limit) return;
-    ctx.removeLimit(limit.id);
-    onDone();
+    closeModal(modal);
   };
 
   return (
-    <form onSubmit={save} className="space-y-3" data-e2e="dashboard:limit-form">
-      <Field label="Kategoria">
-        <Select
-          required
-          disabled={Boolean(limit)}
-          value={selected ?? ''}
-          data-e2e="dashboard:limit-form-category"
-          options={available.map((c) => ({
-            value: c.id,
-            label: categoryLabel(c.name),
-          }))}
-          onValueChange={(id) => setCategoryId(id as CategoryId)}
-        />
-      </Field>
-      <Field label="Limit miesięczny">
-        <NumberInput
-          required
-          value={amount}
-          data-e2e="dashboard:limit-form-amount"
-          onValueChange={setAmount}
-        />
-      </Field>
-      <div className="flex items-center justify-between">
-        <span className="text-sm">Ostrzeżenie przy 80%</span>
-        <Toggle
-          checked={alertAt80}
-          onChange={setAlertAt80}
-          label="Ostrzeżenie przy 80%"
-        />
-      </div>
-      <fieldset>
-        <legend className="mb-1 text-sm font-medium text-ink-soft">
-          Powiadomienia
-        </legend>
-        <div className="flex gap-4 text-sm">
-          {DELIVERY_OPTIONS.map((option) => (
-            <label key={option.value} className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="delivery"
-                className="accent-brand"
-                checked={delivery === option.value}
-                onChange={() => setDelivery(option.value)}
-              />
-              {option.label}
-            </label>
-          ))}
-        </div>
-      </fieldset>
-      <div className="flex gap-2">
-        <Button variant="ghost" onClick={onDone}>
-          Anuluj
-        </Button>
-        <Button
-          type="submit"
-          data-e2e="dashboard:limit-form-save"
-          disabled={!selected}
+    <DetailDialog
+      modal={modal}
+      data-e2e="dashboard:limit-dialog"
+      title={limit ? 'Edytuj limit' : 'Nowy limit'}
+      description="Kwota miesięczna i próg powiadomień."
+      onClose={() => closeModal(modal)}
+    >
+      <form
+        onSubmit={save}
+        className="space-y-3"
+        data-e2e="dashboard:limit-form"
+      >
+        <Field label="Kategoria">
+          <Select
+            required
+            disabled={Boolean(limit)}
+            value={selected ?? ''}
+            data-e2e="dashboard:limit-form-category"
+            options={options}
+            onValueChange={setScope}
+          />
+        </Field>
+        <Field label="Limit miesięczny">
+          <NumberInput
+            required
+            value={shownAmount}
+            data-e2e="dashboard:limit-form-amount"
+            onValueChange={setAmount}
+          />
+        </Field>
+        <Field
+          label="Powiadom od (% limitu)"
+          hint="Powiadomienie w aplikacji dostaniesz zawsze. Push, jeśli włączysz go w ustawieniach."
         >
-          Zapisz
-        </Button>
-      </div>
-      {limit ? (
-        <Button
-          variant="danger"
-          data-e2e="dashboard:limit-delete"
-          onClick={remove}
+          <NumberInput
+            integer
+            required
+            value={alertAt}
+            data-e2e="dashboard:limit-form-alert-at"
+            onValueChange={setAlertAt}
+          />
+        </Field>
+        <DialogActions
+          danger={
+            limit ? (
+              <Button
+                variant="danger"
+                className="w-auto"
+                data-e2e="dashboard:limit-delete"
+                onClick={() => openModal(limitDeleteModal(limit.id))}
+              >
+                Usuń limit
+              </Button>
+            ) : null
+          }
         >
-          Usuń limit
-        </Button>
-      ) : null}
-    </form>
+          <Button
+            variant="ghost"
+            className="w-auto"
+            onClick={() => closeModal(modal)}
+          >
+            Anuluj
+          </Button>
+          <Button
+            type="submit"
+            className="w-auto"
+            data-e2e="dashboard:limit-form-save"
+            disabled={!valid}
+          >
+            Zapisz
+          </Button>
+        </DialogActions>
+      </form>
+    </DetailDialog>
   );
 };

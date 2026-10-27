@@ -20,6 +20,7 @@ export const LIMITS_SECTION_ID = 'limits';
 
 export const DEFAULT_CATEGORY_LIMIT = 300;
 export const DEFAULT_TOTAL_LIMIT = 3000;
+export const DEFAULT_ALERT_AT = 80;
 
 /** Progress at which a limit turns from brand to warning. */
 export const WARN_PCT = 80;

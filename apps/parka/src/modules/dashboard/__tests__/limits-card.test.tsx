@@ -1,10 +1,19 @@
 import { useEffect } from 'react';
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from 'vitest';
 import { Provider, useContext } from '../presentation/context';
+import { LimitModals } from '../presentation/limit-modals';
 import { LimitsCard } from '../presentation/limits-card';
 import { periodContaining } from '@/shared/period/period';
 import { readHandlers } from './dashboard-backend';
@@ -17,29 +26,32 @@ const FOOD_LIMIT = {
   scope: 'category',
   categoryId: 'c-1',
   amount: 300,
-  alertAt80: true,
-  delivery: 'push',
+  alertAt: 80,
 };
 const TOTAL_LIMIT = {
   id: 'l-0',
   scope: 'total',
   amount: 1000,
-  alertAt80: true,
-  delivery: 'push',
+  alertAt: 80,
 };
 
 const server = setupServer();
+let sent: unknown[] = [];
 
 /** Backend holding `limits` and one category; writes are accepted. */
 const mockBackend = (limits: object[]) =>
   server.use(
     ...readHandlers({ limits, categories: [CATEGORY] }),
-    http.post('/api/limits/', async ({ request }) =>
-      HttpResponse.json({ code: 201, data: await request.json() }),
-    ),
-    http.put('/api/limits/:id/', async ({ request }) =>
-      HttpResponse.json({ code: 200, data: await request.json() }),
-    ),
+    http.post('/api/limits/', async ({ request }) => {
+      const body = await request.json();
+      sent.push(body);
+      return HttpResponse.json({ code: 201, data: body });
+    }),
+    http.put('/api/limits/:id/', async ({ request }) => {
+      const body = await request.json();
+      sent.push(body);
+      return HttpResponse.json({ code: 200, data: body });
+    }),
     http.delete('/api/limits/:id/', () =>
       HttpResponse.json({ code: 200, ok: true }),
     ),
@@ -50,7 +62,12 @@ const Harness = () => {
   useEffect(() => {
     ctx.load(PERIOD);
   }, [ctx]);
-  return <LimitsCard period={PERIOD} />;
+  return (
+    <>
+      <LimitsCard period={PERIOD} />
+      <LimitModals />
+    </>
+  );
 };
 
 const renderCard = async () => {
@@ -60,41 +77,73 @@ const renderCard = async () => {
       <Harness />
     </Provider>,
   );
-  await screen.findByRole('button', { name: /Dodaj limit/ });
+  await screen.findByRole('button', { name: /Zarządzaj limitami/ });
   await waitFor(() =>
     expect(screen.queryByText('Brak zdefiniowanego limitu.')).toBeNull(),
   );
   return user;
 };
 
+const openManager = async (user: ReturnType<typeof userEvent.setup>) => {
+  await user.click(screen.getByRole('button', { name: /Zarządzaj limitami/ }));
+  return screen.findByRole('dialog', { name: 'Limity' });
+};
+
 const openEditor = async (user: ReturnType<typeof userEvent.setup>) => {
+  const manager = await openManager(user);
   await user.click(
-    await screen.findByRole('button', { name: 'Edytuj limit: Spożywcze' }),
+    within(manager).getByRole('button', { name: 'Edytuj limit: Spożywcze' }),
   );
   return screen.findByRole('dialog', { name: 'Edytuj limit' });
 };
 
-describe('limits card', () => {
+const gone = (name: string) =>
+  waitFor(() => expect(screen.queryByRole('dialog', { name })).toBeNull());
+
+describe('limits managed in a modal', () => {
   beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
-  afterEach(() => server.resetHandlers());
+  beforeEach(() => {
+    sent = [];
+  });
+  afterEach(() => {
+    server.resetHandlers();
+    window.history.replaceState(null, '', '/');
+  });
   afterAll(() => server.close());
 
-  describe('limits card with a limit on every category', () => {
-    it('explains why a limit cannot be added', async () => {
+  describe('widget', () => {
+    it('shows progress only, without editing controls', async () => {
+      mockBackend([TOTAL_LIMIT, FOOD_LIMIT]);
+      await renderCard();
+
+      expect(screen.getByText(/powiadomienie od 80%/)).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /Edytuj limit/ })).toBeNull();
+      expect(screen.queryByRole('button', { name: /Dodaj limit/ })).toBeNull();
+    });
+  });
+
+  describe('limits list modal', () => {
+    it('lists the monthly and the category limits', async () => {
       mockBackend([TOTAL_LIMIT, FOOD_LIMIT]);
       const user = await renderCard();
-      const add = screen.getByRole('button', { name: /Dodaj limit/ });
 
-      await user.click(add);
+      const manager = await openManager(user);
 
-      expect(add).toHaveAttribute('aria-disabled', 'true');
-      expect(add).toHaveAccessibleDescription(
-        'Wszystkie kategorie mają już ustawiony limit.',
-      );
-      expect(screen.queryByRole('dialog')).toBeNull();
+      expect(
+        within(manager).getByRole('button', {
+          name: 'Edytuj limit: Limit miesięczny',
+        }),
+      ).toBeInTheDocument();
+      expect(
+        within(manager).getByRole('button', {
+          name: 'Edytuj limit: Spożywcze',
+        }),
+      ).toBeInTheDocument();
     });
+  });
 
-    it('edits the amount of a category limit', async () => {
+  describe('limit editing', () => {
+    it('edits the amount and the threshold of a category limit', async () => {
       mockBackend([TOTAL_LIMIT, FOOD_LIMIT]);
       const user = await renderCard();
       const dialog = await openEditor(user);
@@ -102,13 +151,45 @@ describe('limits card', () => {
       expect(within(dialog).getByLabelText('Kategoria')).toBeDisabled();
       const amount = within(dialog).getByLabelText('Limit miesięczny');
       expect(amount).toHaveValue('300');
+      const threshold = within(dialog).getByLabelText(/Powiadom od/);
+      expect(threshold).toHaveValue('80');
 
       await user.clear(amount);
       await user.type(amount, '450');
+      await user.clear(threshold);
+      await user.type(threshold, '60');
       await user.click(within(dialog).getByRole('button', { name: 'Zapisz' }));
 
-      expect(screen.queryByRole('dialog')).toBeNull();
-      expect(screen.getByText(/450,00/)).toBeInTheDocument();
+      await gone('Edytuj limit');
+      expect(sent).toEqual([
+        expect.objectContaining({ id: 'l-1', amount: 450, alertAt: 60 }),
+      ]);
+    });
+
+    it('offers no switch to turn limit notifications off', async () => {
+      mockBackend([TOTAL_LIMIT, FOOD_LIMIT]);
+      const user = await renderCard();
+      const dialog = await openEditor(user);
+
+      expect(within(dialog).queryByRole('switch')).toBeNull();
+      expect(within(dialog).queryByRole('radio')).toBeNull();
+      expect(
+        within(dialog).getByText(/Powiadomienie w aplikacji dostaniesz zawsze/),
+      ).toBeInTheDocument();
+    });
+
+    it('rejects a threshold above 100 percent', async () => {
+      mockBackend([TOTAL_LIMIT, FOOD_LIMIT]);
+      const user = await renderCard();
+      const dialog = await openEditor(user);
+      const threshold = within(dialog).getByLabelText(/Powiadom od/);
+
+      await user.clear(threshold);
+      await user.type(threshold, '150');
+
+      expect(
+        within(dialog).getByRole('button', { name: 'Zapisz' }),
+      ).toBeDisabled();
     });
 
     it('leaves the limit untouched when the editor is dismissed with Escape', async () => {
@@ -118,27 +199,13 @@ describe('limits card', () => {
 
       await user.keyboard('{Escape}');
 
-      expect(screen.queryByRole('dialog')).toBeNull();
-      expect(screen.getByText(/300,00/)).toBeInTheDocument();
+      await gone('Edytuj limit');
+      expect(sent).toEqual([]);
     });
+  });
 
-    it('keeps keyboard focus inside the editor', async () => {
-      mockBackend([TOTAL_LIMIT, FOOD_LIMIT]);
-      const user = await renderCard();
-      const dialog = await openEditor(user);
-
-      const close = within(dialog).getByRole('button', { name: 'Zamknij' });
-      const remove = within(dialog).getByRole('button', { name: 'Usuń limit' });
-
-      act(() => remove.focus());
-      await user.tab();
-      expect(close).toHaveFocus();
-
-      await user.tab({ shift: true });
-      expect(remove).toHaveFocus();
-    });
-
-    it('removes a category limit and frees its category for a new one', async () => {
+  describe('limit removal', () => {
+    it('asks for confirmation, then removes the limit', async () => {
       mockBackend([TOTAL_LIMIT, FOOD_LIMIT]);
       const user = await renderCard();
       const dialog = await openEditor(user);
@@ -146,36 +213,82 @@ describe('limits card', () => {
       await user.click(
         within(dialog).getByRole('button', { name: 'Usuń limit' }),
       );
+      const confirm = await screen.findByRole('dialog', {
+        name: 'Usunąć limit?',
+      });
+      await user.click(within(confirm).getByRole('button', { name: 'Usuń' }));
 
-      expect(screen.queryByRole('dialog')).toBeNull();
-      expect(screen.getByText('Brak limitów kategorii.')).toBeInTheDocument();
+      await gone('Usunąć limit?');
       expect(
-        screen.getByRole('button', { name: /Dodaj limit/ }),
-      ).not.toHaveAttribute('aria-disabled');
+        await screen.findByText('Brak limitów kategorii.'),
+      ).toBeInTheDocument();
     });
-  });
 
-  describe('limits card without a category limit', () => {
-    it('creates a limit for the free category', async () => {
-      mockBackend([TOTAL_LIMIT]);
+    it('keeps the limit when the confirmation is cancelled', async () => {
+      mockBackend([TOTAL_LIMIT, FOOD_LIMIT]);
       const user = await renderCard();
+      const dialog = await openEditor(user);
 
-      await user.click(screen.getByRole('button', { name: /Dodaj limit/ }));
-      const dialog = await screen.findByRole('dialog', { name: 'Nowy limit' });
-      expect(
-        within(dialog).queryByRole('button', { name: 'Usuń limit' }),
-      ).toBeNull();
-      await user.click(within(dialog).getByRole('button', { name: 'Zapisz' }));
+      await user.click(
+        within(dialog).getByRole('button', { name: 'Usuń limit' }),
+      );
+      const confirm = await screen.findByRole('dialog', {
+        name: 'Usunąć limit?',
+      });
+      await user.click(within(confirm).getByRole('button', { name: 'Anuluj' }));
 
-      expect(screen.queryByRole('dialog')).toBeNull();
+      await gone('Usunąć limit?');
       expect(
-        await screen.findByRole('button', { name: 'Edytuj limit: Spożywcze' }),
+        screen.getByRole('dialog', { name: 'Edytuj limit' }),
       ).toBeInTheDocument();
     });
   });
 
-  describe('limits card of a new user', () => {
-    it('offers one empty state that sets the monthly limit', async () => {
+  describe('limit creation', () => {
+    it('creates a limit for the free category with the chosen threshold', async () => {
+      mockBackend([TOTAL_LIMIT]);
+      const user = await renderCard();
+      const manager = await openManager(user);
+
+      await user.click(within(manager).getByRole('button', { name: /Dodaj/ }));
+      const dialog = await screen.findByRole('dialog', { name: 'Nowy limit' });
+      expect(
+        within(dialog).queryByRole('button', { name: 'Usuń limit' }),
+      ).toBeNull();
+      const threshold = within(dialog).getByLabelText(/Powiadom od/);
+      await user.clear(threshold);
+      await user.type(threshold, '50');
+      await user.click(within(dialog).getByRole('button', { name: 'Zapisz' }));
+
+      await gone('Nowy limit');
+      expect(sent).toEqual([
+        expect.objectContaining({
+          scope: 'category',
+          categoryId: 'c-1',
+          alertAt: 50,
+        }),
+      ]);
+      expect(
+        await within(manager).findByText(/powiadomienie od 50%/),
+      ).toBeInTheDocument();
+    });
+
+    it('cannot save a new limit when everything already has one', async () => {
+      mockBackend([TOTAL_LIMIT, FOOD_LIMIT]);
+      const user = await renderCard();
+      const manager = await openManager(user);
+
+      await user.click(within(manager).getByRole('button', { name: /Dodaj/ }));
+      const dialog = await screen.findByRole('dialog', { name: 'Nowy limit' });
+
+      expect(
+        within(dialog).getByRole('button', { name: 'Zapisz' }),
+      ).toBeDisabled();
+    });
+  });
+
+  describe('new user', () => {
+    it('sets the monthly limit from the empty state', async () => {
       mockBackend([]);
       const user = userEvent.setup();
       render(
@@ -192,9 +305,13 @@ describe('limits card', () => {
       await user.click(
         within(empty).getByRole('button', { name: /Ustaw limit miesięczny/ }),
       );
-      expect(
-        await screen.findByRole('dialog', { name: 'Ustaw limit miesięczny' }),
-      ).toBeInTheDocument();
+      const dialog = await screen.findByRole('dialog', { name: 'Nowy limit' });
+      await user.click(within(dialog).getByRole('button', { name: 'Zapisz' }));
+
+      await gone('Nowy limit');
+      expect(sent).toEqual([
+        expect.objectContaining({ scope: 'total', alertAt: 80 }),
+      ]);
     });
   });
 });

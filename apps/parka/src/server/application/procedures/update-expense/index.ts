@@ -13,6 +13,7 @@ import {
   loadCategoryNames,
   tryRecordNotifications,
 } from '../../shared/notifications';
+import { notifyReachedLimits } from '../../shared/limit-alerts';
 
 export const updateExpense = privateProcedure({
   schema: withZodSchema({ schema: updateExpenseSchema }),
@@ -80,6 +81,7 @@ export const updateExpense = privateProcedure({
         },
       },
     ]);
+    await notifyReachedLimits(db, uid, data.date);
 
     return {
       code: 200 as const,

@@ -65,6 +65,16 @@ export type Notification = Base &
         kind: 'time-day-unfinished';
         payload: { day: string; tasks: UnfinishedTaskSnapshot[] };
       }
+    | {
+        kind: 'limit-reached';
+        payload: {
+          category: string | null;
+          month: string;
+          amount: number;
+          spent: number;
+          alertAt: number;
+        };
+      }
     /** Rows from before typed payloads: text only, nothing to diff. */
     | { kind: 'other'; payload: null }
   );

@@ -169,8 +169,8 @@ export const limit = () =>
     scope: z.enum(['total', 'category']),
     categoryId: z.string().min(1).optional(),
     amount: z.coerce.number(),
-    alertAt80: z.boolean(),
-    delivery: z.enum(['push', 'email']),
+    /** Percent of the limit from which it notifies. */
+    alertAt: z.number().int().min(1).max(100),
   });
 
 export const recurringInterval = () => z.enum(['weekly', 'monthly', 'yearly']);

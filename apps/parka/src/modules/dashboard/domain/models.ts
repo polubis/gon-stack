@@ -134,23 +134,21 @@ export type NoticeBody =
 
 export type Notice = { id: number } & NoticeBody;
 
-export type Delivery = 'push' | 'email';
-
 export type Limit =
   | {
       id: LimitId;
       scope: 'total';
       amount: number;
-      alertAt80: boolean;
-      delivery: Delivery;
+      /** Percent of the limit from which it notifies. */
+      alertAt: number;
     }
   | {
       id: LimitId;
       scope: 'category';
       categoryId: CategoryId;
       amount: number;
-      alertAt80: boolean;
-      delivery: Delivery;
+      /** Percent of the limit from which it notifies. */
+      alertAt: number;
     };
 
 export type CategoryLimit = Extract<Limit, { scope: 'category' }>;
@@ -162,7 +160,7 @@ export type TotalProgress = { spent: number; amount: number; pct: number };
 export type CategoryProgress = TotalProgress & {
   id: LimitId;
   categoryId: CategoryId;
-  alertAt80: boolean;
+  alertAt: number;
 };
 
 /** Everything the dashboard shows, loaded together: all or nothing. */

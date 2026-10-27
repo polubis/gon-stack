@@ -13,15 +13,13 @@ const FOOD = {
   scope: 'category',
   categoryId: 'c-1',
   amount: 300,
-  alertAt80: true,
-  delivery: 'push',
+  alertAt: 80,
 };
 const TOTAL = {
   id: 'l-0',
   scope: 'total',
   amount: 1000,
-  alertAt80: true,
-  delivery: 'push',
+  alertAt: 80,
 };
 
 const server = setupServer();
@@ -61,8 +59,7 @@ const raised: CategoryLimit = {
   scope: 'category',
   categoryId: 'c-1' as CategoryLimit['categoryId'],
   amount: 450,
-  alertAt80: false,
-  delivery: 'email',
+  alertAt: 80,
 };
 
 const amountOf = (limits: { id: string; amount: number }[], id: string) =>

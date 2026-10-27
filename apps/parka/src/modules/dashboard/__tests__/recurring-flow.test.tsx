@@ -134,8 +134,7 @@ describe('upcoming recurring payments', () => {
     id: 'l-0',
     scope: 'total',
     amount: 100,
-    alertAt80: true,
-    delivery: 'push',
+    alertAt: 80,
   } as unknown as Limit;
 
   it('announces the next payment of each rule, latest first', () => {

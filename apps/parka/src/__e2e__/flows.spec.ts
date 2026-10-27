@@ -583,7 +583,8 @@ const commands = {
     await mockState(page);
     await open(page, APP_ROUTER.dashboard());
 
-    await getByE2e('dashboard:limit-new').click();
+    await getByE2e('dashboard:limits-manage').click();
+    await getByE2e('dashboard:limits-dialog-add').click();
     await getByE2e('dashboard:limit-form-amount').fill('450');
     await getByE2e('dashboard:limit-form-save').click();
     await expect(getByE2e('dashboard:limit-form')).toHaveCount(0);
@@ -597,25 +598,33 @@ const commands = {
           scope: 'category',
           categoryId: CATEGORY.id,
           amount: 300,
-          alertAt80: true,
-          delivery: 'push',
+          alertAt: 80,
         },
       ],
     });
     await open(page, APP_ROUTER.dashboard());
   },
   'i raise the category limit': async ({ getByE2e }) => {
+    await getByE2e('dashboard:limits-manage').click();
     await getByE2e('dashboard:limit-edit:limit-1').click();
     await getByE2e('dashboard:limit-form-amount').fill('900');
     await getByE2e('dashboard:limit-form-save').click();
     await expect(getByE2e('dashboard:limit-form')).toHaveCount(0);
-    await expect(getByE2e('dashboard:limit-list')).toContainText('900,00');
+    await expect(getByE2e('dashboard:limits-dialog-list')).toContainText(
+      '900,00',
+    );
+    await getByE2e('dashboard:limits-dialog')
+      .getByRole('button', { name: 'Zamknij' })
+      .click();
+    await expect(getByE2e('dashboard:limits-dialog')).toHaveCount(0);
   },
   'i remove the category limit': async ({ getByE2e }) => {
+    await getByE2e('dashboard:limits-manage').click();
     await getByE2e('dashboard:limit-edit:limit-1').click();
     await getByE2e('dashboard:limit-delete').click();
+    await getByE2e('dashboard:delete-confirm').click();
     await expect(getByE2e('dashboard:limit-form')).toHaveCount(0);
-    await expect(getByE2e('dashboard:limits-empty')).toBeVisible();
+    await expect(getByE2e('dashboard:limits-dialog-empty')).toBeVisible();
   },
   'a new category appears in the list': async ({ page, getByE2e }) => {
     await mockState(page);

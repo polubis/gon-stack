@@ -115,7 +115,7 @@ const commands = {
   'i open a dashboard with a monthly limit of 500': ({ page }) =>
     openDashboardWith(page, {
       ...BASE,
-      limits: [{ id: 'l-0', scope: 'total', amount: 500 }],
+      limits: [{ id: 'l-0', scope: 'total', amount: 500, alertAt: 80 }],
     }),
 
   'the month shows 100,00 over 2 expenses': async ({ getByE2e }) => {
@@ -313,10 +313,15 @@ const commands = {
     await expect(getByE2e('dashboard:limit-left')).toContainText('400,00');
   },
   'i lower the monthly limit to 300': async ({ getByE2e }) => {
-    await getByE2e('dashboard:limit-total-edit').click();
-    await getByE2e('dashboard:limit-total-amount').fill('300');
-    await getByE2e('dashboard:limit-total-save').click();
-    await expect(getByE2e('dashboard:limit-total-amount')).toHaveCount(0);
+    await getByE2e('dashboard:limits-manage').click();
+    await getByE2e('dashboard:limit-edit:l-0').click();
+    await getByE2e('dashboard:limit-form-amount').fill('300');
+    await getByE2e('dashboard:limit-form-save').click();
+    await expect(getByE2e('dashboard:limit-form')).toHaveCount(0);
+    await getByE2e('dashboard:limits-dialog')
+      .getByRole('button', { name: 'Zamknij' })
+      .click();
+    await expect(getByE2e('dashboard:limits-dialog')).toHaveCount(0);
   },
   'the limit has 200,00 left': async ({ getByE2e }) => {
     await expect(getByE2e('dashboard:limit-left')).toContainText('200,00');

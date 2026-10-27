@@ -95,8 +95,7 @@ export const toLimit = (dto: LimitDto): Limit => {
   const base = {
     id: dto.id as LimitId,
     amount: dto.amount,
-    alertAt80: dto.alertAt80,
-    delivery: dto.delivery,
+    alertAt: dto.alertAt,
   };
   return dto.scope === 'category' && dto.categoryId
     ? { ...base, scope: 'category', categoryId: dto.categoryId as CategoryId }

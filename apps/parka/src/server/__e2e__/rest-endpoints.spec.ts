@@ -189,8 +189,7 @@ const commands = {
         id: 'e2e-limit-1',
         scope: 'total',
         amount: 1000,
-        alertAt80: true,
-        delivery: 'push',
+        alertAt: 80,
       },
     });
     expect(res.status()).toBe(201);
@@ -201,8 +200,7 @@ const commands = {
         id: 'e2e-limit-1',
         scope: 'total',
         amount: 1500,
-        alertAt80: true,
-        delivery: 'email',
+        alertAt: 80,
       },
     });
     expect(res.ok()).toBe(true);

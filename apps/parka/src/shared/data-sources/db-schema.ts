@@ -215,6 +215,7 @@ export type Database = {
       };
       limits: {
         Row: {
+          alert_at: number;
           alert_at80: boolean;
           amount: number;
           category_id: string | null;
@@ -225,6 +226,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          alert_at?: number;
           alert_at80?: boolean;
           amount?: number;
           category_id?: string | null;
@@ -234,6 +236,7 @@ export type Database = {
           user_id: string;
         };
         Update: {
+          alert_at?: number;
           alert_at80?: boolean;
           amount?: number;
           category_id?: string | null;

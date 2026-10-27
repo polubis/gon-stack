@@ -40,6 +40,8 @@ export const DetailDialog = ({
     | 'dashboard:detail'
     | 'dashboard:recurring-dialog'
     | 'dashboard:categories-dialog'
+    | 'dashboard:limits-dialog'
+    | 'dashboard:limit-dialog'
     | 'dashboard:expenses-dialog'
     | 'dashboard:period-range-dialog';
 }) => {

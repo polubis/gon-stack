@@ -45,7 +45,7 @@ const SEED: Seed = {
     expense('e-today', 40, todayDay()),
     expense('e-old', 70, `${lastYear}-06-15`),
   ],
-  limits: [{ id: 'l-0', scope: 'total', amount: MONTHLY_LIMIT }],
+  limits: [{ id: 'l-0', scope: 'total', amount: MONTHLY_LIMIT, alertAt: 80 }],
   recurring: [],
 };
 

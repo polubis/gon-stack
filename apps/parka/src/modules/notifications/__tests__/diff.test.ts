@@ -90,6 +90,25 @@ describe('diff of a notification', () => {
     expect(days?.after).toBe('12.09.2026, 12.10.2026');
   });
 
+  it('shows spent, limit and threshold of a reached limit', () => {
+    const n: Notification = {
+      ...base,
+      kind: 'limit-reached',
+      payload: {
+        category: 'Jedzenie',
+        month: '2026-10',
+        amount: 100,
+        spent: 60,
+        alertAt: 50,
+      },
+    };
+
+    const rows = diffRows(n);
+
+    expect(rows.map((r) => r.label)).toEqual(['Wydane', 'Limit', 'Próg']);
+    expect(rows.find((r) => r.label === 'Próg')?.after).toBe('50%');
+  });
+
   it('has no change rows for the unfinished tasks summary', () => {
     const n: Notification = {
       ...base,

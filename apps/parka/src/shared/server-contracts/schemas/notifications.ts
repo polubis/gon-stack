@@ -70,6 +70,19 @@ export const notificationEvent = () =>
       }),
     ),
     typed(
+      'limit-reached',
+      z.object({
+        /** Category display name; `null` for the total limit. */
+        category: z.string().nullable(),
+        /** Month (`YYYY-MM`) the limit counts. */
+        month: z.string(),
+        amount: z.number(),
+        spent: z.number(),
+        /** Percent of the limit the user asked to be told at. */
+        alertAt: z.number(),
+      }),
+    ),
+    typed(
       'recurring-accrued',
       z.object({
         rule: recurringSnapshot(),

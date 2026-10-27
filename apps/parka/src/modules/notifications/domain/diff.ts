@@ -85,6 +85,24 @@ export const diffRows = (notification: Notification): DiffRow[] => {
       return added(
         recurringFields(notification.payload.rule, notification.payload.days),
       );
+    case 'limit-reached':
+      return [
+        {
+          label: 'Wydane',
+          before: null,
+          after: formatMoney(notification.payload.spent),
+        },
+        {
+          label: 'Limit',
+          before: null,
+          after: formatMoney(notification.payload.amount),
+        },
+        {
+          label: 'Próg',
+          before: null,
+          after: `${notification.payload.alertAt}%`,
+        },
+      ];
     /** A summary with a link, not a change: nothing to diff. */
     case 'time-day-unfinished':
       return [];

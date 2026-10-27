@@ -1,46 +1,26 @@
-import { useState, type FormEvent } from 'react';
-import { Pencil, Plus } from 'lucide-react';
-import { Button, Field, ProgressBar } from '@/shared/ui/controls';
-import { NumberInput } from '@/shared/ui/number-input';
-import { DEFAULT_TOTAL_LIMIT } from '../configuration/constraints';
-import { newLimitId } from '../domain/ids';
+import { ProgressBar } from '@/shared/ui/controls';
 import type { Period } from '@/shared/period/period';
 import { money } from '../domain/format';
-import type { Limit, TotalProgress } from '../domain/models';
+import type { TotalProgress } from '../domain/models';
 import { LIMIT_NOUN } from '../domain/period';
 import { limitTone } from './selectors';
-import { useContext } from './context';
 
 /** The always-visible headline of the limits card. */
 export const TotalLimit = ({
   progress,
   period,
   monthly,
-  onEdit,
 }: {
   progress: TotalProgress | null;
   period: Period;
   /** The limit as set, per month; `progress` holds it scaled to the period. */
   monthly: number | undefined;
-  onEdit: () => void;
 }) => {
   if (!progress)
     return (
-      <div
-        className="flex flex-wrap items-center justify-between gap-3"
-        data-e2e="dashboard:limit-total"
-      >
-        <p className="text-sm text-ink-soft">Brak zdefiniowanego limitu.</p>
-        <Button
-          variant="ghost"
-          className="w-auto px-3 py-1.5"
-          data-e2e="dashboard:limit-total-new"
-          onClick={onEdit}
-        >
-          <Plus className="h-4 w-4 shrink-0" aria-hidden="true" /> Ustaw limit
-          miesięczny
-        </Button>
-      </div>
+      <p className="text-sm text-ink-soft" data-e2e="dashboard:limit-total">
+        Brak zdefiniowanego limitu.
+      </p>
     );
 
   return (
@@ -59,14 +39,6 @@ export const TotalLimit = ({
               : null}
           </p>
         </div>
-        <Button
-          variant="ghost"
-          className="w-auto px-3 py-1.5"
-          data-e2e="dashboard:limit-total-edit"
-          onClick={onEdit}
-        >
-          <Pencil className="h-4 w-4" aria-hidden="true" /> Zmień
-        </Button>
       </div>
       <ProgressBar
         pct={progress.pct}
@@ -77,55 +49,5 @@ export const TotalLimit = ({
         {money(progress.spent)} · {Math.round(progress.pct)}%
       </p>
     </div>
-  );
-};
-
-export const TotalLimitForm = ({
-  limit,
-  onDone,
-}: {
-  limit?: Limit;
-  onDone: () => void;
-}) => {
-  const ctx = useContext();
-  const [amount, setAmount] = useState(limit?.amount ?? DEFAULT_TOTAL_LIMIT);
-
-  const save = (event: FormEvent) => {
-    event.preventDefault();
-    if (limit) {
-      ctx.updateLimit({ ...limit, amount: amount || limit.amount });
-    } else if (amount > 0) {
-      ctx.createLimit({
-        id: newLimitId(),
-        scope: 'total',
-        amount,
-        alertAt80: true,
-        delivery: 'push',
-      });
-    } else {
-      return;
-    }
-    onDone();
-  };
-
-  return (
-    <form onSubmit={save} className="space-y-3">
-      <Field label="Nowy limit miesięczny">
-        <NumberInput
-          required
-          value={amount}
-          data-e2e="dashboard:limit-total-amount"
-          onValueChange={setAmount}
-        />
-      </Field>
-      <div className="flex gap-2">
-        <Button variant="ghost" onClick={onDone}>
-          Anuluj
-        </Button>
-        <Button type="submit" data-e2e="dashboard:limit-total-save">
-          Zapisz
-        </Button>
-      </div>
-    </form>
   );
 };

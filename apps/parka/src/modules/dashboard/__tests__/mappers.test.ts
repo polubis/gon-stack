@@ -130,8 +130,7 @@ describe('dashboard limit mappers', () => {
       scope: 'category',
       categoryId: 'c-1',
       amount: 10,
-      alertAt80: true,
-      delivery: 'push',
+      alertAt: 80,
     });
 
     expect(limit).toMatchObject({ scope: 'category', categoryId: 'c-1' });
@@ -142,8 +141,7 @@ describe('dashboard limit mappers', () => {
       id: 'l-1',
       scope: 'total',
       amount: 10,
-      alertAt80: false,
-      delivery: 'email',
+      alertAt: 80,
     });
 
     expect(limit).not.toHaveProperty('categoryId');

@@ -17,8 +17,7 @@ export const listLimits = privateProcedure({
         scope: l.scope as 'total' | 'category',
         categoryId: l.category_id ?? undefined,
         amount: Number(l.amount),
-        alertAt80: l.alert_at80,
-        delivery: l.delivery as 'push' | 'email',
+        alertAt: l.alert_at,
       })),
     };
   },

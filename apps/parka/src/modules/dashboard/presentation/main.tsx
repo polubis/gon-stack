@@ -21,6 +21,7 @@ import { usePeriodSwipe } from '@/shared/period-control/presentation/use-period-
 import { CategoriesCard } from './categories-card';
 import { Provider, useContext } from './context';
 import { ExpenseDetail } from './expense-detail';
+import { LimitModals } from './limit-modals';
 import { LimitsCard } from './limits-card';
 import { expenseModal, expenseOfModal } from './modal-ids';
 import { MonthExpenses } from './month-expenses';
@@ -142,6 +143,7 @@ const DashboardView = () => {
           />
         ) : null,
       )}
+      <LimitModals />
       {notice ? (
         <Toast
           key={notice.id}

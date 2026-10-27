@@ -651,8 +651,7 @@ describe('dashboard period control', () => {
               id: 'l-0',
               scope: 'total',
               amount: 3100,
-              alertAt80: true,
-              delivery: 'push',
+              alertAt: 80,
             },
           ],
         });

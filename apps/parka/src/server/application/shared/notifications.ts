@@ -110,6 +110,15 @@ const text = (event: NotificationEvent): { title: string; body: string } => {
         body: `Niezrobione zadania: ${count}`,
       };
     }
+    case 'limit-reached': {
+      const { category, spent, amount, alertAt } = event.payload;
+      return {
+        title: category
+          ? `Limit „${category}” osiągnął ${alertAt}%`
+          : `Limit miesięczny osiągnął ${alertAt}%`,
+        body: `${money.format(spent)} z ${money.format(amount)}`,
+      };
+    }
     default: {
       const unreachable: never = event;
       return unreachable;

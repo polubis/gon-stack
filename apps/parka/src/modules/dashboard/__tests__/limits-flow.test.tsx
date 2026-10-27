@@ -12,8 +12,7 @@ const TOTAL = {
   id: 'l-1',
   scope: 'total',
   amount: 1000,
-  alertAt80: true,
-  delivery: 'push',
+  alertAt: 80,
 };
 
 const server = setupServer();
@@ -56,8 +55,7 @@ const raised: Limit = {
   id: 'l-1' as LimitId,
   scope: 'total',
   amount: 2000,
-  alertAt80: true,
-  delivery: 'push',
+  alertAt: 80,
 };
 
 describe('dashboard limits changes', () => {

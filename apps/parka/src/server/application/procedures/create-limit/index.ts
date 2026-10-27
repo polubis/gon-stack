@@ -15,8 +15,7 @@ export const createLimit = privateProcedure({
         scope: input.scope,
         category_id: input.categoryId ?? null,
         amount: input.amount,
-        alert_at80: input.alertAt80,
-        delivery: input.delivery,
+        alert_at: input.alertAt,
       })
       .select()
       .single();
@@ -29,8 +28,7 @@ export const createLimit = privateProcedure({
         scope: data.scope as 'total' | 'category',
         categoryId: data.category_id ?? undefined,
         amount: Number(data.amount),
-        alertAt80: data.alert_at80,
-        delivery: data.delivery as 'push' | 'email',
+        alertAt: data.alert_at,
       },
     };
   },

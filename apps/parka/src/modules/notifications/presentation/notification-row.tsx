@@ -4,6 +4,7 @@ import {
   CheckCheck,
   ArrowRight,
   FolderPen,
+  Gauge,
   Hourglass,
   Receipt,
   Repeat,
@@ -25,6 +26,7 @@ const ICON: Record<NotificationKind, LucideIcon> = {
   'category-updated': FolderPen,
   'category-deleted': FolderPen,
   'recurring-accrued': Repeat,
+  'limit-reached': Gauge,
   'time-day-unfinished': Hourglass,
   other: Bell,
 };

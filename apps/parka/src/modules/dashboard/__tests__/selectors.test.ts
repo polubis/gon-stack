@@ -114,16 +114,14 @@ describe('dashboard limit progress', () => {
     id: 'l-1' as LimitId,
     scope: 'total',
     amount: 1000,
-    alertAt80: true,
-    delivery: 'push',
+    alertAt: 80,
   };
   const FOOD_LIMIT: Limit = {
     id: 'l-2' as LimitId,
     scope: 'category',
     categoryId: FOOD,
     amount: 100,
-    alertAt80: false,
-    delivery: 'email',
+    alertAt: 80,
   };
 
   const EXPENSES = [

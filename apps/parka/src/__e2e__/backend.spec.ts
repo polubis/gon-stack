@@ -175,7 +175,8 @@ const commands = {
 
   'i create a category limit': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.dashboard());
-    await getByE2e('dashboard:limit-new').click();
+    await getByE2e('dashboard:limits-manage').click();
+    await getByE2e('dashboard:limits-dialog-add').click();
     await getByE2e('dashboard:limit-form-amount').fill('450');
     await Promise.all([
       synced(page, 'POST', API_ROUTER.limits(), 201),
@@ -184,7 +185,7 @@ const commands = {
     await expect(getByE2e('dashboard:limit-form')).toHaveCount(0);
     await reload(page);
     await expect(
-      getByE2e('dashboard:limit-list').getByText('Spożywcze'),
+      getByE2e('dashboard:limits-dialog-list').getByText('Spożywcze'),
     ).toBeVisible();
   },
 

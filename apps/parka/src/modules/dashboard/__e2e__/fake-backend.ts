@@ -46,7 +46,11 @@ type Item = {
   categoryId: string;
 };
 type Category = Row & { name: string; icon: string; color: string };
-type Limit = Row & { scope: 'total' | 'category'; amount: number };
+type Limit = Row & {
+  scope: 'total' | 'category';
+  amount: number;
+  alertAt: number;
+};
 type Recurring = RecurringRule & { paymentMethod: string; items?: Item[] };
 
 type Suggestion = {

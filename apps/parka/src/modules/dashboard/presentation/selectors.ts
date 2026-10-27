@@ -188,7 +188,7 @@ export const categoryProgress = (
       spent,
       amount,
       pct: pctOf(spent, amount),
-      alertAt80: l.alertAt80,
+      alertAt: l.alertAt,
     };
   });
 };
