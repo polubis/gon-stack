@@ -9,7 +9,6 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
-import { openModal } from '@/shared/router/modal-stack';
 import { usePopoverOpen } from '@/shared/ui/use-popover-open';
 import {
   NEW_BACKLOG_MODAL,
@@ -57,7 +56,7 @@ export const AddMenu = ({
 }: Omit<ComponentProps<typeof Popover.Trigger>, 'type'> & {
   side: 'top' | 'bottom';
 }) => {
-  const { open, setOpen } = usePopoverOpen(`add-menu:${side}`);
+  const { open, setOpen, openModal } = usePopoverOpen(`add-menu:${side}`);
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger {...trigger} aria-haspopup="menu">
@@ -89,10 +88,7 @@ export const AddMenu = ({
                 key={modal}
                 type="button"
                 role="menuitem"
-                onClick={() => {
-                  setOpen(false);
-                  openModal(modal);
-                }}
+                onClick={() => openModal(modal)}
                 className={cn(
                   'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-hover-soft focus-visible:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
                 )}

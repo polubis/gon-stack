@@ -52,6 +52,58 @@ describe('time menus on a phone', () => {
     await waitFor(() => expect(menuOf('Dodaj')).toBeNull());
   });
 
+  it('keeps the delete confirmation open after picking Usuń in the task menu', async () => {
+    backend.state.tasks = [task()];
+    renderTime();
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Więcej: Raport miesięczny' }),
+    );
+
+    await userEvent.click(
+      screen.getByRole('menuitem', { name: 'Usuń: Raport miesięczny' }),
+    );
+
+    expect(await screen.findByText('Usunąć zadanie?')).toBeVisible();
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(screen.getByText('Usunąć zadanie?')).toBeVisible();
+    expect(menuOf('Więcej: Raport miesięczny')).toBeNull();
+  });
+
+  it('closes the opened modal with one Back and lands on the page', async () => {
+    backend.state.tasks = [task()];
+    renderTime();
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Więcej: Raport miesięczny' }),
+    );
+    await userEvent.click(
+      screen.getByRole('menuitem', { name: 'Usuń: Raport miesięczny' }),
+    );
+    await screen.findByText('Usunąć zadanie?');
+
+    window.history.back();
+
+    await waitFor(() =>
+      expect(screen.queryByText('Usunąć zadanie?')).toBeNull(),
+    );
+    expect(new URL(window.location.href).searchParams.getAll('modal')).toEqual(
+      [],
+    );
+  });
+
+  it('keeps the form open after picking an option in the add menu', async () => {
+    renderTime();
+    await userEvent.click(
+      (await screen.findAllByRole('button', { name: 'Dodaj' }))[0]!,
+    );
+
+    await userEvent.click(screen.getByRole('menuitem', { name: 'Kategoria' }));
+
+    expect(await screen.findByRole('dialog')).toBeVisible();
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(screen.getByRole('dialog')).toBeVisible();
+    expect(menuOf('Dodaj')).toBeNull();
+  });
+
   it('opens only the pressed one of the two add buttons', async () => {
     renderTime();
     const [header, floating] = await screen.findAllByRole('button', {

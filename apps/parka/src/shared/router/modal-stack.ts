@@ -116,6 +116,22 @@ export const closeModal = (id: string): void => {
 };
 
 /**
+ * Swaps the open modal `from` for `to` in place: no history step, so an
+ * in-flight Back can never undo `to`. Falls back to a plain open when
+ * `from` is not on the stack.
+ */
+export const replaceModal = (from: string, to: string): void => {
+  if (typeof window === 'undefined') return;
+  const stack = read();
+  const index = stack.lastIndexOf(from);
+  if (index === -1) return openModal(to);
+  if (stack.includes(to)) return closeModal(from);
+  const next = stack.map((id, i) => (i === index ? to : id));
+  replaceUrl(hrefWith(next), window.history.state as Record<string, unknown>);
+  notify();
+};
+
+/**
  * Closes a modal, then runs `then` once the URL has settled. Stepping Back
  * is async, so URL writes made before it would be undone by it.
  */

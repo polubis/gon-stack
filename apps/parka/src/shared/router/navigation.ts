@@ -67,13 +67,16 @@ export const pushUrl = (
   window.history.pushState({ ...window.history.state, ...state }, '', path);
 };
 
-export const replaceUrl = (path: string): void => {
+export const replaceUrl = (
+  path: string,
+  state?: Record<string, unknown>,
+): void => {
   if (typeof window === 'undefined') return;
   if (navigator) {
-    navigator.replace(path);
+    navigator.replace(path, state);
     return;
   }
-  window.history.replaceState(window.history.state, '', path);
+  window.history.replaceState(state ?? window.history.state, '', path);
 };
 
 export const readQueryParam = (name: string): string | null => {

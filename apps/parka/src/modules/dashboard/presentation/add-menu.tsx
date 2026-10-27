@@ -14,7 +14,6 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { NEW_CATEGORY_MODAL } from '@/modules/categories/presentation/modal-ids';
-import { openModal } from '@/shared/router/modal-stack';
 import { usePopoverOpen } from '@/shared/ui/use-popover-open';
 import { navigateTo } from '@/shared/router/navigation';
 import { APP_ROUTER } from '@/shared/router/routes';
@@ -69,7 +68,11 @@ export const AddMenu = ({
 }: Omit<ComponentProps<typeof Popover.Trigger>, 'type'> & {
   side: 'top' | 'bottom';
 }) => {
-  const { open, setOpen } = usePopoverOpen(`add-menu:${side}`);
+  const {
+    open,
+    setOpen,
+    openModal: openFromMenu,
+  } = usePopoverOpen(`add-menu:${side}`);
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
 
@@ -133,13 +136,14 @@ export const AddMenu = ({
                     type="button"
                     role="menuitem"
                     onClick={() => {
-                      setOpen(false);
-                      if ('modal' in option) openModal(option.modal);
-                      else
+                      if ('modal' in option) openFromMenu(option.modal);
+                      else {
+                        setOpen(false);
                         (option.pick === 'photo'
                           ? cameraRef
                           : fileRef
                         ).current?.click();
+                      }
                     }}
                     className={ITEM}
                   >

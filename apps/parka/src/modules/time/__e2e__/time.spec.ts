@@ -15,6 +15,7 @@ const EMAIL = `e2e-time-${Date.now()}@parka.test`;
 const RECURRING_EMAIL = `e2e-time-recurring-${Date.now()}@parka.test`;
 const BACKLOG_EMAIL = `e2e-time-backlog-${Date.now()}@parka.test`;
 const DESCRIPTION_EMAIL = `e2e-time-description-${Date.now()}@parka.test`;
+const POPOVER_EMAIL = `e2e-time-popover-${Date.now()}@parka.test`;
 const ATTACHMENT_EMAIL = `e2e-time-attachment-${Date.now()}@parka.test`;
 const PASSWORD = 'secret123';
 const ATTACHMENT_TEXT = 'Treść załącznika E2E';
@@ -204,6 +205,49 @@ const commands = {
       page.getByRole('button', { name: 'Edytuj zadanie: Auto E2E' }),
     ).toBeVisible();
   },
+
+  'i register an account for popover actions': async (ctx) => {
+    await registerAndConfirm(ctx, POPOVER_EMAIL, PASSWORD);
+    await ctx.page.waitForLoadState('networkidle');
+    await ctx.page.setViewportSize({ width: 390, height: 844 });
+  },
+
+  'i add a task from the add menu and its form stays open': async ({
+    page,
+    getByE2e,
+  }) => {
+    await open(page, APP_ROUTER.time({ date: DAY }));
+    await page
+      .getByRole('button', { name: 'Dodaj', exact: true })
+      .first()
+      .click();
+    await page.getByRole('menuitem', { name: 'Zadanie', exact: true }).click();
+    await page.waitForTimeout(500);
+    const dialog = getByE2e('time:task-dialog');
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole('textbox', { name: 'Nazwa' }).fill('Menu E2E');
+    await Promise.all([
+      synced(page, 'POST', 201),
+      getByE2e('time:task-save').click(),
+    ]);
+    await expect(
+      page.getByRole('button', { name: 'Edytuj zadanie: Menu E2E' }),
+    ).toBeVisible();
+  },
+
+  'the delete confirmation from the task menu stays open until answered':
+    async ({ page, getByE2e }) => {
+      await page.getByRole('button', { name: 'Więcej: Menu E2E' }).click();
+      await page.getByRole('menuitem', { name: 'Usuń: Menu E2E' }).click();
+      await page.waitForTimeout(500);
+      await expect(getByE2e('time:delete-dialog')).toBeVisible();
+      await expect(page).toHaveURL(/modal=task-delete/);
+      await Promise.all([
+        synced(page, 'DELETE', 200),
+        getByE2e('time:delete-confirm').click(),
+      ]);
+      await expect(getByE2e('time:empty')).toBeVisible();
+    },
 
   'i register an account for recurring tasks': async (ctx) => {
     await registerAndConfirm(ctx, RECURRING_EMAIL, PASSWORD);
@@ -754,5 +798,15 @@ test('task attachments upload, open and delete on the real backend', async ({
     ['i delete the attachment after confirming and it stays gone'],
     ['a big photo is reduced in quality, keeps its size and opens full screen'],
     ['the mcp server lists, adds a reduced photo and deletes attachments'],
+  );
+});
+
+test('a modal opened from a popover action stays open on a phone', async ({
+  e2e,
+}) => {
+  await interpreter(commands, e2e)(
+    ['i register an account for popover actions'],
+    ['i add a task from the add menu and its form stays open'],
+    ['the delete confirmation from the task menu stays open until answered'],
   );
 });

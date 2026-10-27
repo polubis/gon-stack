@@ -2,6 +2,7 @@ import { useState, useSyncExternalStore } from 'react';
 import {
   closeModal,
   openModal,
+  replaceModal,
   useModalMounted,
   useModalStack,
 } from '@/shared/router/modal-stack';
@@ -36,6 +37,17 @@ export const usePopoverOpen = (key: string) => {
       if (!narrow) setLocal(next);
       else if (next) openModal(id);
       else closeModal(id);
+    },
+    /**
+     * Closes the popover and opens `modal` in its place. Never chain
+     * `setOpen(false)` with `openModal`: closing steps Back asynchronously
+     * and would undo the modal just pushed.
+     */
+    openModal: (modal: string) => {
+      if (!narrow) {
+        setLocal(false);
+        openModal(modal);
+      } else replaceModal(id, modal);
     },
   };
 };
