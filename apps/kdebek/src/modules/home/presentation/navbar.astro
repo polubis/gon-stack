@@ -131,19 +131,19 @@ const navItems = copy.navbar.navItems.map((item) => ({
       aria-label={copy.navbar.ariaMobileNav}
       data-e2e="home:nav-menu-mobile"
       hidden
-      class="absolute left-0 right-0 top-full z-40 overflow-hidden rounded-b-3xl border border-t-0 border-line bg-card/95 shadow-nav backdrop-blur-xl xl:hidden"
+      class="absolute inset-x-0 top-full z-40 mt-2 overflow-hidden rounded-2xl border border-line bg-card shadow-nav xl:hidden"
     >
       <div
         id="navbar-mobile-grid"
-        class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out"
+        class="grid grid-rows-[0fr] opacity-0 transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none"
       >
         <div class="min-h-0 overflow-hidden">
-          <div class="flex flex-col gap-1 px-4 pb-3 pt-3">
+          <div class="flex flex-col gap-0.5 p-2">
             {
               navItems.map(({ label, icon: Icon, href }) => (
                 <a
                   href={`#${href}`}
-                  class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-ink-light"
+                  class="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-ink-light"
                 >
                   <Icon className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
                   {label}
@@ -154,7 +154,7 @@ const navItems = copy.navbar.navItems.map((item) => ({
               href={BOOKING_URL}
               target="_blank"
               rel="noopener noreferrer"
-              class="mt-2 flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-on-primary shadow-sm sm:hidden"
+              class="mt-1 flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-sm sm:hidden"
             >
               <CalendarPlus className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
               {copy.navbar.cta}
@@ -222,10 +222,12 @@ const navItems = copy.navbar.navItems.map((item) => ({
   const iconClose = document.getElementById('navbar-icon-close');
 
   if (toggle && panel && grid && bar && iconMenu && iconClose) {
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    let hideTimer: ReturnType<typeof setTimeout> | undefined;
+
     const setOpen = (isOpen: boolean) => {
-      panel.hidden = !isOpen;
-      bar.classList.toggle('rounded-t-3xl', isOpen);
-      bar.classList.toggle('rounded-3xl', !isOpen);
+      clearTimeout(hideTimer);
+      if (isOpen) panel.hidden = false;
       iconMenu.classList.toggle('hidden', isOpen);
       iconClose.classList.toggle('hidden', !isOpen);
       toggle.setAttribute('aria-expanded', String(isOpen));
@@ -243,14 +245,25 @@ const navItems = copy.navbar.navItems.map((item) => ({
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             grid.classList.replace('grid-rows-[0fr]', 'grid-rows-[1fr]');
+            grid.classList.replace('opacity-0', 'opacity-100');
           });
         });
       } else {
         grid.classList.replace('grid-rows-[1fr]', 'grid-rows-[0fr]');
+        grid.classList.replace('opacity-100', 'opacity-0');
+        // Keep the panel rendered until the collapse finishes.
+        hideTimer = setTimeout(
+          () => {
+            panel.hidden = true;
+          },
+          reduceMotion.matches ? 0 : 300,
+        );
       }
     };
 
-    toggle.addEventListener('click', () => setOpen(!!panel.hidden));
+    toggle.addEventListener('click', () =>
+      setOpen(toggle.getAttribute('aria-expanded') !== 'true'),
+    );
     panel
       .querySelectorAll('a')
       .forEach((link) => link.addEventListener('click', () => setOpen(false)));
