@@ -4,6 +4,7 @@ import { dueOccurrences } from '@/shared/recurring/occurrences';
 import type { SupabaseServer } from '@/shared/data-sources/supabase-server';
 import { InternalServer } from '../core/error-handling';
 import { logger } from '../core/logger';
+import { readAllPages } from './paged';
 import { toDevice, type ProfilesByDevice } from './device';
 import { recordNotificationOnce } from './notifications';
 
@@ -72,11 +73,10 @@ export const materializeTimeRecurring = async (
   userId: string,
   until: string,
 ): Promise<void> => {
-  const { data: rows, error } = await db
-    .from('time_recurring')
-    .select('*')
-    .eq('active', true);
-  if (error) throw new InternalServer(error);
+  const rows = await readAllPages((from, to, total) => {
+    const query = db.from('time_recurring').select('*').eq('active', true);
+    return (total ? query.order('id') : query).range(from, to);
+  });
 
   for (const row of rows) {
     const due = dueOccurrences(toTimeRecurring(row), until);

@@ -1,23 +1,13 @@
 import { listCategoriesSchema } from '@schemas/categories';
-import { InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
+import { readCategories } from '../../shared/finance-reads';
 
 export const listCategories = privateProcedure({
   schema: withZodSchema({ schema: listCategoriesSchema }),
 })({
-  handler: async (_input, { db }) => {
-    const { data, error } = await db.from('categories').select('*');
-    if (error) throw new InternalServer(error);
-
-    return {
-      code: 200 as const,
-      data: data.map((c) => ({
-        id: c.id,
-        name: c.name,
-        icon: c.icon,
-        color: c.color,
-      })),
-    };
-  },
+  handler: async (_input, { db }) => ({
+    code: 200 as const,
+    data: await readCategories(db),
+  }),
 });

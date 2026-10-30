@@ -1,5 +1,6 @@
 import type { z } from 'zod';
 import type { Schema } from '@schemas/dashboard';
+import type { Schema as BootstrapSchema } from '@schemas/bootstrap';
 import {
   deleteExpenseSchema,
   listExpensesSchema,
@@ -100,6 +101,30 @@ export const fetchSummary = async (
   }
 
   return toSummary(json.data);
+};
+
+/** Everything a cold dashboard needs, read in one request. */
+const fetchBootstrap = async (period: Period): Promise<DashboardData> => {
+  const response = await fetch(
+    API_ROUTER.bootstrap({
+      kind: period.kind,
+      from: period.from,
+      to: period.kind === 'custom' ? period.to : undefined,
+      tz: browserTimeZone(),
+    }),
+    { headers: { Accept: 'application/json' }, signal: SHARED },
+  );
+  const json = (await response.json()) as BootstrapSchema['out'];
+  if (json.code !== 200) throw new Error(json.message);
+
+  const { dashboard, expenses, categories, limits, recurring } = json.data;
+  return {
+    summary: toSummary(dashboard),
+    expenses: expenses.map(toExpense),
+    categories: categories.map(toCategory),
+    limits: limits.map(toLimit),
+    recurring: recurring.map(toRecurring),
+  };
 };
 
 export const fetchExpenses = async (
@@ -227,20 +252,32 @@ export const prefetchSummary = (period: Period) =>
   cache.prefetch(summaryKey(period), () => fetchSummary(period, SHARED));
 
 /**
- * Single entry point for reading: every read of the dashboard in parallel.
- * Each read first turns due recurring charges into expenses on the server;
- * that is idempotent, so parallel reads never double a charge. Only the
- * summary depends on the period; the rest is shared between periods.
+ * Single entry point for reading the dashboard. The summary depends on the
+ * period; expenses, categories, limits and recurring are shared between
+ * periods and kept in the cache. When those are missing, they come together
+ * with the summary in one request (signed in once, charges made once);
+ * moving to another period then asks for the summary alone. Due recurring
+ * charges become expenses on the server, idempotently, so parallel reads
+ * never double a charge.
  */
 export const fetchDashboard = async (
   period: Period,
 ): Promise<DashboardData> => {
-  const [summary, expenses, categories, limits, recurring] = await Promise.all([
-    cache.read(summaryKey(period), () => fetchSummary(period, SHARED)),
-    cache.read('expenses', () => fetchExpenses(SHARED)),
-    cache.read('categories', () => fetchCategories(SHARED)),
-    cache.read('limits', () => fetchLimits(SHARED)),
-    cache.read('recurring', () => fetchRecurring(SHARED)),
+  let together: Promise<DashboardData> | undefined;
+  const bootstrap = () => (together ??= fetchBootstrap(period));
+
+  // Reads start in this order: the shared ones first tell the summary whether
+  // a request is already on its way.
+  const [expenses, categories, limits, recurring, summary] = await Promise.all([
+    cache.read('expenses', () => bootstrap().then((data) => data.expenses)),
+    cache.read('categories', () => bootstrap().then((data) => data.categories)),
+    cache.read('limits', () => bootstrap().then((data) => data.limits)),
+    cache.read('recurring', () => bootstrap().then((data) => data.recurring)),
+    cache.read(summaryKey(period), () =>
+      together
+        ? together.then((data) => data.summary)
+        : fetchSummary(period, SHARED),
+    ),
   ]);
 
   return { summary, expenses, categories, limits, recurring };

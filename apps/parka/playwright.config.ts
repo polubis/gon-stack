@@ -15,6 +15,7 @@ const REAL_BACKEND_SPECS = [
   '**/modules/time/__e2e__/time.spec.ts',
   '**/modules/access-tokens/__e2e__/access-tokens.spec.ts',
   '**/server/__e2e__/rest-endpoints.spec.ts',
+  '**/server/__e2e__/finance-*.spec.ts',
 ];
 
 export default defineConfig({

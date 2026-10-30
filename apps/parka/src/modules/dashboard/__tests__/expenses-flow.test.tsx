@@ -32,7 +32,8 @@ const stubApi = (deleteResponse: object) =>
 const summaryReads = (calls: ReturnType<typeof stubApi>) =>
   calls.filter(
     ({ url }) =>
-      url.includes('/api/dashboard') && url.includes('from=2025-04-01'),
+      (url.includes('/api/dashboard') || url.includes('/api/bootstrap')) &&
+      url.includes('from=2025-04-01'),
   ).length;
 
 const setup = async () => {

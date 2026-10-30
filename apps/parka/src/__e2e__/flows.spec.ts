@@ -31,6 +31,20 @@ const CATEGORY = {
   color: '#0f7a4f',
 };
 
+/** Dashboard summary of an account with nothing in it. */
+const EMPTY_SUMMARY = {
+  total: 0,
+  change: 0,
+  previousTotal: 0,
+  userName: 'Anna',
+  transactions: 0,
+  dailyAverage: 0,
+  series: [],
+  previousSeries: [],
+  monthlyLimit: null,
+  categories: [],
+};
+
 /**
  * Stubs every entity endpoint (empty unless overridden) so each module loads
  * deterministic rows through its own repository, without a real backend.
@@ -76,19 +90,25 @@ const mockState = async (
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
+        body: JSON.stringify({ code: 200, data: EMPTY_SUMMARY }),
+      });
+    },
+  );
+  // A cold dashboard asks for the summary and every list in one request.
+  await page.route(
+    `**${API_ROUTER.bootstrap({ kind: '', from: '' })}**`,
+    async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
         body: JSON.stringify({
           code: 200,
           data: {
-            total: 0,
-            change: 0,
-            previousTotal: 0,
-            userName: 'Anna',
-            transactions: 0,
-            dailyAverage: 0,
-            series: [],
-            previousSeries: [],
-            monthlyLimit: null,
-            categories: [],
+            dashboard: EMPTY_SUMMARY,
+            expenses: [],
+            categories: rows.categories ?? [CATEGORY],
+            limits: rows.limits ?? [],
+            recurring: rows.recurring ?? [],
           },
         }),
       });
@@ -477,6 +497,26 @@ const commands = {
         body: JSON.stringify({ code: 200, data: [category, funCategory] }),
       });
     });
+    // A cold dashboard reads the lists in one request: the same rows.
+    await page.route(
+      `**${API_ROUTER.bootstrap({ kind: '', from: '' })}**`,
+      async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            code: 200,
+            data: {
+              dashboard: EMPTY_SUMMARY,
+              expenses,
+              categories: [category, funCategory],
+              limits: [],
+              recurring: [],
+            },
+          }),
+        });
+      },
+    );
     await page.route(`**${API_ROUTER.expenses()}**`, async (route) => {
       const method = route.request().method();
       if (method === 'GET') {

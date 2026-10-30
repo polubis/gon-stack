@@ -74,22 +74,26 @@ const bucketIndex = (
     ? periodMonths(period).indexOf(localMonth(date, timeZone)) + 1
     : daysBetween(period.from, localDay(date, timeZone)) + 1;
 
+/** Buckets (days or months) the chart of `period` shows. */
+export const seriesLength = (period: Period): number =>
+  bucketOf(period) === 'month'
+    ? periodMonths(period).length
+    : periodDays(period);
+
 const seriesOf = (
   expenses: DashboardExpense[],
   period: Period,
   timeZone?: string,
 ): DashboardPoint[] => {
   const scoped = inPeriod(expenses, period, timeZone);
-  const length =
-    bucketOf(period) === 'month'
-      ? periodMonths(period).length
-      : periodDays(period);
-  return Array.from({ length }, (_, i) => ({
-    index: i + 1,
-    total: sum(
-      scoped.filter((e) => bucketIndex(period, e.date, timeZone) === i + 1),
-    ),
-  }));
+  const length = seriesLength(period);
+  // One pass: each expense lands in its bucket once, not once per bucket.
+  const totals = Array.from({ length }, () => 0);
+  for (const e of scoped) {
+    const i = bucketIndex(period, e.date, timeZone) - 1;
+    if (i >= 0 && i < length) totals[i] = (totals[i] ?? 0) + e.amount;
+  }
+  return totals.map((total, i) => ({ index: i + 1, total }));
 };
 
 /** Days of `period` that have passed as of `today` (`YYYY-MM-DD`). */
@@ -97,6 +101,82 @@ const elapsedDays = (period: Period, today: string): number => {
   if (today < period.from) return 0;
   const last = today < period.to ? today : period.to;
   return daysBetween(period.from, last) + 1;
+};
+
+/** Sums of the selected period and the one before it, however they were found. */
+export type DashboardTotals = {
+  total: number;
+  previousTotal: number;
+  transactions: number;
+  /** Buckets with something in them; the others are zero. */
+  series: DashboardPoint[];
+  previousSeries: DashboardPoint[];
+  /** What each category got of the selected period (no order, no zeros needed). */
+  categoryAmounts: { categoryId: string; amount: number }[];
+};
+
+const fill = (length: number, points: DashboardPoint[]): DashboardPoint[] => {
+  const totals = new Map(points.map((p) => [p.index, p.total]));
+  return Array.from({ length }, (_, i) => ({
+    index: i + 1,
+    total: totals.get(i + 1) ?? 0,
+  }));
+};
+
+/** The dashboard rules on top of sums: change, average, shares, order. */
+export const dashboardFromTotals = ({
+  totals,
+  categories,
+  period,
+  previous,
+  today,
+  monthlyLimit,
+}: {
+  totals: DashboardTotals;
+  categories: DashboardCategory[];
+  period: Period;
+  previous: Period;
+  /** `YYYY-MM-DD`; injected so the summary stays pure. */
+  today: string;
+  monthlyLimit: number | null;
+}): DashboardSummary => {
+  const { total, previousTotal } = totals;
+  const change =
+    previousTotal === 0 ? 0 : ((total - previousTotal) / previousTotal) * 100;
+
+  const elapsed = elapsedDays(period, today);
+  const dailyAverage = elapsed === 0 ? 0 : total / elapsed;
+
+  const categorySlices = categories
+    .map((category) => {
+      const amount = Number(
+        totals.categoryAmounts
+          .filter((s) => s.categoryId === category.id)
+          .reduce((sum, s) => sum + s.amount, 0)
+          .toFixed(2),
+      );
+      return {
+        categoryId: category.id,
+        name: category.name,
+        color: category.color,
+        amount,
+        pct: total === 0 ? 0 : (amount / total) * 100,
+      };
+    })
+    .filter((s) => s.amount > 0)
+    .sort((a, b) => b.amount - a.amount);
+
+  return {
+    total,
+    change,
+    previousTotal,
+    transactions: totals.transactions,
+    dailyAverage,
+    series: fill(seriesLength(period), totals.series),
+    previousSeries: fill(seriesLength(previous), totals.previousSeries),
+    monthlyLimit,
+    categories: categorySlices,
+  };
 };
 
 export const summarizeDashboard = ({
@@ -120,45 +200,22 @@ export const summarizeDashboard = ({
   timeZone?: string;
 }): DashboardSummary => {
   const scoped = inPeriod(expenses, period, timeZone);
-  const total = sum(scoped);
-  const previousTotal = sum(inPeriod(expenses, previous, timeZone));
-  const change =
-    previousTotal === 0 ? 0 : ((total - previousTotal) / previousTotal) * 100;
 
-  const elapsed = elapsedDays(period, today);
-  const dailyAverage = elapsed === 0 ? 0 : total / elapsed;
-
-  const shares = scoped.flatMap((e) =>
-    categoryShares({ ...e, items: e.items ?? [] }),
-  );
-  const categorySlices = categories
-    .map((category) => {
-      const amount = Number(
-        shares
-          .filter((s) => s.categoryId === category.id)
-          .reduce((total, s) => total + s.amount, 0)
-          .toFixed(2),
-      );
-      return {
-        categoryId: category.id,
-        name: category.name,
-        color: category.color,
-        amount,
-        pct: total === 0 ? 0 : (amount / total) * 100,
-      };
-    })
-    .filter((s) => s.amount > 0)
-    .sort((a, b) => b.amount - a.amount);
-
-  return {
-    total,
-    change,
-    previousTotal,
-    transactions: scoped.length,
-    dailyAverage,
-    series: seriesOf(expenses, period, timeZone),
-    previousSeries: seriesOf(expenses, previous, timeZone),
+  return dashboardFromTotals({
+    totals: {
+      total: sum(scoped),
+      previousTotal: sum(inPeriod(expenses, previous, timeZone)),
+      transactions: scoped.length,
+      series: seriesOf(expenses, period, timeZone),
+      previousSeries: seriesOf(expenses, previous, timeZone),
+      categoryAmounts: scoped.flatMap((e) =>
+        categoryShares({ ...e, items: e.items ?? [] }),
+      ),
+    },
+    categories,
+    period,
+    previous,
+    today,
     monthlyLimit,
-    categories: categorySlices,
-  };
+  });
 };

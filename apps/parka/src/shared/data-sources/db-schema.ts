@@ -845,6 +845,18 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
       };
+      dashboard_summary: {
+        Args: {
+          p_bucket: string;
+          p_from: string;
+          p_previous_bucket: string;
+          p_previous_from: string;
+          p_previous_to: string;
+          p_to: string;
+          p_tz: string;
+        };
+        Returns: Json;
+      };
       mcp_add_task_attachment: {
         Args: {
           p_id: string;
@@ -952,6 +964,7 @@ export type Database = {
         Returns: Json;
       };
       mcp_user: { Args: { p_token: string }; Returns: string };
+      own_devices: { Args: Record<PropertyKey, never>; Returns: Json };
       record_field_use: {
         Args: { p_field: string; p_value: string };
         Returns: undefined;

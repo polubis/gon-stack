@@ -7,6 +7,7 @@ import {
 } from '@/shared/expense-category/category';
 import { dueOccurrences } from '@/shared/recurring/occurrences';
 import { BadRequest, InternalServer } from '../core/error-handling';
+import { readAllPages } from './paged';
 import type { SupabaseServer } from '@/shared/data-sources/supabase-server';
 import {
   loadCategoryNames,
@@ -46,11 +47,11 @@ export const toRule = (row: RuleRow, items: ItemRow[] = []): Rule => ({
 });
 
 /** Products of the given rules (RLS scopes the read to the caller). */
-export const loadRuleItems = async (db: SupabaseServer): Promise<ItemRow[]> => {
-  const { data, error } = await db.from('recurring_items').select('*');
-  if (error) throw new InternalServer(error);
-  return data;
-};
+export const loadRuleItems = (db: SupabaseServer): Promise<ItemRow[]> =>
+  readAllPages((from, to, total) => {
+    const query = db.from('recurring_items').select('*');
+    return (total ? query.order('id') : query).range(from, to);
+  });
 
 /**
  * What a rule stores: with products the cost is their total and the category
@@ -117,18 +118,19 @@ export const materializeRecurring = async (
   userId: string,
   today: string,
 ): Promise<void> => {
-  const { data: rows, error } = await db
-    .from('recurring_expenses')
-    .select('*')
-    .eq('active', true);
-  if (error) throw new InternalServer(error);
+  const rows = await readAllPages((from, to, total) => {
+    const query = db.from('recurring_expenses').select('*').eq('active', true);
+    return (total ? query.order('id') : query).range(from, to);
+  });
 
-  const ruleItems = await loadRuleItems(db);
   const accrued: NotificationEvent[] = [];
+  // Usually nothing is due: the products are read only once a charge is.
+  let ruleItems: ItemRow[] | undefined;
   for (const row of rows) {
     const due = dueOccurrences(toRule(row), today);
     const newest = due.at(-1);
     if (newest === undefined) continue;
+    ruleItems ??= await loadRuleItems(db);
 
     const { data: inserted, error: insertError } = await db
       .from('expenses')

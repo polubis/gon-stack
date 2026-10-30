@@ -1,15 +1,10 @@
-import { categoryShares } from '@/shared/expense-category/category';
 import type { SupabaseServer } from '@/shared/data-sources/supabase-server';
 import { InternalServer } from '../core/error-handling';
 import { logger } from '../core/logger';
+import { readMonthSpending } from './finance-reads';
 import { loadCategoryNames, recordNotificationOnce } from './notifications';
 
-type Db = Pick<SupabaseServer, 'from'>;
-
-const nextMonth = (month: string): string => {
-  const [year, number] = month.split('-').map(Number);
-  return new Date(Date.UTC(year!, number!, 1)).toISOString().slice(0, 10);
-};
+type Db = Pick<SupabaseServer, 'from' | 'rpc'>;
 
 /**
  * Tells the user about every limit whose spending in the month of `day`
@@ -30,45 +25,18 @@ export const notifyReachedLimits = async (
     if (limits.error) throw new InternalServer(limits.error);
     if (limits.data.length === 0) return;
 
-    const expenses = await db
-      .from('expenses')
-      .select('id, amount, category_id')
-      .gte('date', `${month}-01`)
-      .lt('date', nextMonth(month));
-    if (expenses.error) throw new InternalServer(expenses.error);
-    const ids = expenses.data.map((e) => e.id);
-    const items = ids.length
-      ? await db
-          .from('receipt_items')
-          .select('expense_id, unit_price, quantity, discount, category_id')
-          .in('expense_id', ids)
-      : { data: [], error: null };
-    if (items.error) throw new InternalServer(items.error);
-
-    const shares = expenses.data.flatMap((e) =>
-      categoryShares({
-        amount: Number(e.amount),
-        categoryId: e.category_id,
-        items: items.data
-          .filter((it) => it.expense_id === e.id)
-          .map((it) => ({
-            categoryId: it.category_id,
-            unitPrice: Number(it.unit_price),
-            quantity: Number(it.quantity),
-            discount: Number(it.discount),
-          })),
-      }),
-    );
+    // Added up in the database: a month can hold more rows than one read returns.
+    const spending = await readMonthSpending(db, month);
     const names = await loadCategoryNames(db);
 
     for (const limit of limits.data) {
       const amount = Number(limit.amount);
       const spent =
         limit.scope === 'category'
-          ? shares
-              .filter((s) => s.categoryId === limit.category_id)
-              .reduce((total, s) => total + s.amount, 0)
-          : expenses.data.reduce((total, e) => total + Number(e.amount), 0);
+          ? spending.categories
+              .filter((c) => c.categoryId === limit.category_id)
+              .reduce((total, c) => total + c.amount, 0)
+          : spending.total;
       if (amount <= 0 || (spent / amount) * 100 < limit.alert_at) continue;
       await recordNotificationOnce(
         db,

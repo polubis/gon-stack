@@ -5,6 +5,7 @@ import type { SupabaseServer } from '@/shared/data-sources/supabase-server';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { InternalServer } from '../core/error-handling';
 import { logger } from '../core/logger';
+import { readAllPages } from './paged';
 import { deliverPush } from './push-delivery';
 
 export type NotificationEvent = z.infer<ReturnType<typeof notificationEvent>>;
@@ -70,8 +71,10 @@ export const recurringSnapshot = (
 export const loadCategoryNames = async (
   db: Db,
 ): Promise<ReadonlyMap<string, string>> => {
-  const { data, error } = await db.from('categories').select('id, name');
-  if (error) throw new InternalServer(error);
+  const data = await readAllPages((from, to, total) => {
+    const query = db.from('categories').select('id, name');
+    return (total ? query.order('id') : query).range(from, to);
+  });
   return new Map(data.map((c) => [c.id, categoryLabel(c.name)]));
 };
 

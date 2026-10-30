@@ -1,7 +1,7 @@
 import { listTimeSchema } from '@schemas/time';
-import { InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
+import { readAllPages } from '../../shared/paged';
 import { loadProfiles } from '../../shared/device';
 import {
   materializeTimeRecurring,
@@ -18,43 +18,51 @@ export const listTime = privateProcedure({
     if (input.tz) await notifyUnfinishedTasks(db, user.id, input.tz);
     const profiles = await loadProfiles(db);
     const [categories, priorities, tasks, backlog] = await Promise.all([
-      db.from('time_categories').select('*').order('name'),
-      db.from('time_priorities').select('*').order('value'),
-      db
-        .from('time_tasks')
-        .select('*')
-        .gte('day', input.from)
-        .lte('day', input.to)
-        .order('day')
-        .order('at', { nullsFirst: false }),
-      db
-        .from('time_tasks')
-        .select('*')
-        .is('day', null)
-        .order('created_at')
-        .order('id'),
+      readAllPages((from, to, total) => {
+        const query = db.from('time_categories').select('*').order('name');
+        return (total ? query.order('id') : query).range(from, to);
+      }),
+      readAllPages((from, to, total) => {
+        const query = db.from('time_priorities').select('*').order('value');
+        return (total ? query.order('id') : query).range(from, to);
+      }),
+      readAllPages((from, to, total) => {
+        const query = db
+          .from('time_tasks')
+          .select('*')
+          .gte('day', input.from)
+          .lte('day', input.to)
+          .order('day')
+          .order('at', { nullsFirst: false });
+        return (total ? query.order('id') : query).range(from, to);
+      }),
+      readAllPages((from, to) =>
+        db
+          .from('time_tasks')
+          .select('*')
+          .is('day', null)
+          .order('created_at')
+          .order('id')
+          .range(from, to),
+      ),
     ]);
-    if (categories.error) throw new InternalServer(categories.error);
-    if (priorities.error) throw new InternalServer(priorities.error);
-    if (tasks.error) throw new InternalServer(tasks.error);
-    if (backlog.error) throw new InternalServer(backlog.error);
 
     return {
       code: 200 as const,
       data: {
-        categories: categories.data.map((c) => ({
+        categories: categories.map((c) => ({
           id: c.id,
           name: c.name,
           icon: c.icon,
           color: c.color,
         })),
-        priorities: priorities.data.map((p) => ({
+        priorities: priorities.map((p) => ({
           id: p.id,
           name: p.name,
           value: p.value,
         })),
-        tasks: tasks.data.map((row) => toTimeTask(row, profiles)),
-        backlog: backlog.data.map((row) => toTimeBacklogTask(row, profiles)),
+        tasks: tasks.map((row) => toTimeTask(row, profiles)),
+        backlog: backlog.map((row) => toTimeBacklogTask(row, profiles)),
       },
     };
   },

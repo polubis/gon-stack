@@ -208,10 +208,31 @@ describe('dashboard screen', () => {
 
     await screen.findByText('Limity');
     const dashboardCalls = calls.filter(
-      ({ url }) => !url.includes('/api/notifications'),
+      ({ url }) =>
+        url.includes('/api/bootstrap') || url.includes('/api/dashboard'),
     );
-    // Five reads for the month plus the summary of the month before it.
-    expect(dashboardCalls).toHaveLength(7);
+    // One read for the month plus the summary of the month before it.
+    expect(dashboardCalls.map(({ url }) => url.split('?')[0])).toEqual([
+      '/api/bootstrap/',
+      '/api/dashboard/',
+    ]);
+  });
+
+  it('reads only the summary when it moves to another period', async () => {
+    const calls = stubApi();
+    render(<Main />);
+    await screen.findByText('Limity');
+    const loaded = calls.length;
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Poprzedni okres' }),
+    );
+
+    await waitFor(() => expect(calls.length).toBeGreaterThan(loaded));
+    const shared = /\/api\/(bootstrap|expenses|categories|limits|recurring)\//;
+    expect(calls.slice(loaded).filter(({ url }) => shared.test(url))).toEqual(
+      [],
+    );
   });
 
   it('shows only the failure screen when any part fails to load', async () => {

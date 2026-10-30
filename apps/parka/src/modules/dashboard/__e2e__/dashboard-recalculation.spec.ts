@@ -103,6 +103,14 @@ const openDashboardWith = async (page: Page, seed: Seed): Promise<void> => {
   await open(page, APP_ROUTER.dashboard());
 };
 
+/** Reads a cold load makes in one request instead. */
+const SEPARATE_READS = [
+  '/api/expenses/',
+  '/api/categories/',
+  '/api/limits/',
+  '/api/recurring/',
+];
+
 const commands = {
   'i open a dashboard with expenses of two months': ({ page }) =>
     openDashboardWith(page, BASE),
@@ -336,39 +344,32 @@ const commands = {
   },
 
   'the dashboard loaded everything once': async ({ page }) => {
-    // The summary of the neighbouring month is fetched ahead, so it may be
-    // read twice in all: the shown month and the one before it.
-    const shared = [
-      '/api/expenses/',
-      '/api/categories/',
-      '/api/limits/',
-      '/api/recurring/',
-    ];
-    for (const path of shared)
-      await expect
-        .poll(() => backendOf(page).count('GET', path), { message: path })
-        .toBe(1);
+    // One request brings the month and everything shared; the summary of the
+    // neighbouring month is fetched ahead on its own.
     await expect
-      .poll(() => backendOf(page).count('GET', '/api/dashboard/'))
-      .toBeGreaterThanOrEqual(1);
+      .poll(() => backendOf(page).count('GET', '/api/bootstrap/'))
+      .toBe(1);
     // Nothing else follows: a repeated read would show up after a settle.
     await page.waitForTimeout(500);
-    for (const path of shared)
-      expect(backendOf(page).count('GET', path), path).toBe(1);
+    expect(backendOf(page).count('GET', '/api/bootstrap/')).toBe(1);
+    for (const path of SEPARATE_READS)
+      expect(backendOf(page).count('GET', path), path).toBe(0);
     expect(backendOf(page).count('GET', '/api/dashboard/')).toBeLessThanOrEqual(
-      2,
+      1,
     );
   },
   'the dashboard loaded everything twice': async ({ page }) => {
     await expect
-      .poll(() => backendOf(page).count('GET', '/api/recurring/'))
+      .poll(() => backendOf(page).count('GET', '/api/bootstrap/'))
       .toBe(2);
     await page.waitForTimeout(500);
-    expect(backendOf(page).count('GET', '/api/recurring/')).toBe(2);
-    // Each load may also fetch the previous month ahead: two loads, at most four.
-    const summaries = backendOf(page).count('GET', '/api/dashboard/');
-    expect(summaries).toBeGreaterThanOrEqual(2);
-    expect(summaries).toBeLessThanOrEqual(4);
+    expect(backendOf(page).count('GET', '/api/bootstrap/')).toBe(2);
+    for (const path of SEPARATE_READS)
+      expect(backendOf(page).count('GET', path), path).toBe(0);
+    // Each load may also fetch the previous month ahead: two loads, at most two.
+    expect(backendOf(page).count('GET', '/api/dashboard/')).toBeLessThanOrEqual(
+      2,
+    );
   },
 } satisfies CommandRegistry<Ctx>;
 

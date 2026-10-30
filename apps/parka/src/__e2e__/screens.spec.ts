@@ -75,8 +75,31 @@ const commands = {
       );
     // Dashboard is backend-only (see modules/dashboard/AGENTS.md) — stub the
     // response so the a11y check doesn't depend on an authenticated session.
+    const summary = {
+      total: 0,
+      change: 0,
+      previousTotal: 0,
+      userName: 'Anna',
+      transactions: 0,
+      dailyAverage: 0,
+      series: [],
+      previousSeries: [],
+      monthlyLimit: null,
+      categories: [],
+    };
     await page.route(
       `**${API_ROUTER.dashboard({ kind: '', from: '' })}**`,
+      async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ code: 200, data: summary }),
+        });
+      },
+    );
+    // A cold dashboard asks for the summary and every list in one request.
+    await page.route(
+      `**${API_ROUTER.bootstrap({ kind: '', from: '' })}**`,
       async (route) => {
         await route.fulfill({
           status: 200,
@@ -84,16 +107,11 @@ const commands = {
           body: JSON.stringify({
             code: 200,
             data: {
-              total: 0,
-              change: 0,
-              previousTotal: 0,
-              userName: 'Anna',
-              transactions: 0,
-              dailyAverage: 0,
-              series: [],
-              previousSeries: [],
-              monthlyLimit: null,
+              dashboard: summary,
+              expenses: [],
               categories: [],
+              limits: [],
+              recurring: [],
             },
           }),
         });

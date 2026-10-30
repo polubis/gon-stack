@@ -197,6 +197,22 @@ export const installBackend = async (
     };
   };
 
+  /** Expenses as the server lists them: devices carry what the user set. */
+  const listedExpenses = () =>
+    state.expenses.map((e) =>
+      e.device
+        ? {
+            ...e,
+            device: {
+              ...e.device,
+              avatar: profiles.get(e.device.id)?.avatar ?? null,
+              customName: profiles.get(e.device.id)?.customName ?? null,
+              photo: devicePhotos.get(e.device.id) ?? null,
+            },
+          }
+        : e,
+    );
+
   await page.route('**/api/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -214,6 +230,26 @@ export const installBackend = async (
           url.searchParams.get('to') ?? undefined,
           url.searchParams.get('tz') ?? undefined,
         ),
+      });
+    }
+
+    if (collection === 'bootstrap') {
+      const timeZone = url.searchParams.get('tz') ?? undefined;
+      materialize(timeZone);
+      return json(route, {
+        code: 200,
+        data: {
+          dashboard: summary(
+            (url.searchParams.get('kind') ?? 'month') as PeriodKind,
+            url.searchParams.get('from') ?? todayOf(),
+            url.searchParams.get('to') ?? undefined,
+            timeZone,
+          ),
+          expenses: listedExpenses(),
+          categories: state.categories,
+          limits: state.limits,
+          recurring: state.recurring,
+        },
       });
     }
 
@@ -344,19 +380,7 @@ export const installBackend = async (
       if (collection === 'expenses')
         return json(route, {
           code: 200,
-          data: state.expenses.map((e) =>
-            e.device
-              ? {
-                  ...e,
-                  device: {
-                    ...e.device,
-                    avatar: profiles.get(e.device.id)?.avatar ?? null,
-                    customName: profiles.get(e.device.id)?.customName ?? null,
-                    photo: devicePhotos.get(e.device.id) ?? null,
-                  },
-                }
-              : e,
-          ),
+          data: listedExpenses(),
         });
       return json(route, { code: 200, data: lists[collection] });
     }

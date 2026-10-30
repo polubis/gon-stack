@@ -15,20 +15,48 @@ const read = (data: unknown[]) => {
   const query: Record<string, unknown> = {
     then: (resolve: (value: unknown) => void) => resolve({ data, error: null }),
   };
-  for (const name of ['select', 'gte', 'lt', 'in', 'eq'])
+  for (const name of ['select', 'order', 'range', 'eq'])
     query[name] = () => query;
   return query;
 };
 
 const fakeDb = (limits: LimitRow[], expenses: object[]) => {
   const stored = new Map<string, Record<string, unknown>>();
+  // What `dashboard_summary` answers for the month: the total and each category's share.
+  const month = {
+    total: expenses.reduce(
+      (sum, e) => sum + Number((e as { amount: number }).amount),
+      0,
+    ),
+    categories: [
+      ...new Set(
+        expenses.map((e) => (e as { category_id: string }).category_id),
+      ),
+    ].map((categoryId) => ({
+      categoryId,
+      amount: expenses
+        .filter(
+          (e) => (e as { category_id: string }).category_id === categoryId,
+        )
+        .reduce((sum, e) => sum + Number((e as { amount: number }).amount), 0),
+    })),
+  };
   const db = {
+    rpc: () =>
+      Promise.resolve({
+        data: {
+          ...month,
+          previousTotal: 0,
+          transactions: 0,
+          series: [],
+          previousSeries: [],
+        },
+        error: null,
+      }),
     from: (table: string) => {
       if (table === 'limits') return read(limits);
-      if (table === 'expenses') return read(expenses);
       if (table === 'categories')
         return read([{ id: 'c-1', name: 'Jedzenie' }]);
-      if (table === 'receipt_items') return read([]);
       return {
         upsert: (row: { id: string }) => ({
           select: () => {

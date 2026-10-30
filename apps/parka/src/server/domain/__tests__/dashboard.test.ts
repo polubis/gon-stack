@@ -5,6 +5,7 @@ import {
   type PeriodKind,
 } from '@/shared/period/period';
 import {
+  dashboardFromTotals,
   summarizeDashboard,
   type DashboardCategory,
   type DashboardExpense,
@@ -104,6 +105,17 @@ describe('dashboard summary', () => {
     expect(summary.series[0]).toEqual({ index: 1, total: 30 });
     expect(summary.series[9]).toEqual({ index: 10, total: 60 });
     expect(summary.previousSeries[30]).toEqual({ index: 31, total: 40 });
+  });
+
+  it('adds up several expenses of one day, in any input order', () => {
+    const summary = summarize('month', '2026-09-01', '2026-10-15', [
+      expense('2026-09-10T08:00:00.000Z', 5),
+      expense('2026-09-02T08:00:00.000Z', 7),
+      expense('2026-09-10T20:00:00.000Z', 6),
+    ]);
+
+    expect(summary.series[9]).toEqual({ index: 10, total: 11 });
+    expect(summary.series[1]).toEqual({ index: 2, total: 7 });
   });
 
   it('breaks the selected month down by category, biggest first', () => {
@@ -237,5 +249,57 @@ describe('days in the viewer time zone', () => {
 
     // 13:00 +13h = 01:00 on 15 Oct.
     expect(summary.series[14]?.total).toBe(7);
+  });
+});
+
+describe('dashboard from sums', () => {
+  const period = periodContaining('month', '2026-09-01');
+  const compose = (
+    totals: Partial<Parameters<typeof dashboardFromTotals>[0]['totals']>,
+  ) =>
+    dashboardFromTotals({
+      totals: {
+        total: 31,
+        previousTotal: 0,
+        transactions: 2,
+        series: [{ index: 10, total: 31 }],
+        previousSeries: [],
+        categoryAmounts: [],
+        ...totals,
+      },
+      categories,
+      period,
+      previous: shiftPeriod(period, -1),
+      today: '2026-10-15',
+      monthlyLimit: null,
+    });
+
+  it('shows the buckets with nothing in them as zero', () => {
+    const summary = compose({});
+
+    expect(summary.series).toHaveLength(30);
+    expect(summary.series[9]).toEqual({ index: 10, total: 31 });
+    expect(summary.series[0]).toEqual({ index: 1, total: 0 });
+    expect(summary.previousSeries).toHaveLength(31);
+  });
+
+  it('lists categories biggest first, to the cent, without empty ones', () => {
+    const summary = compose({
+      categoryAmounts: [
+        { categoryId: 'food', amount: 10.004 },
+        { categoryId: 'fun', amount: 20 },
+        { categoryId: 'food', amount: 0.003 },
+      ],
+    });
+
+    expect(summary.categories.map((c) => [c.categoryId, c.amount])).toEqual([
+      ['fun', 20],
+      ['food', 10.01],
+    ]);
+  });
+
+  it('has no change against a month without spending', () => {
+    expect(compose({ previousTotal: 0 }).change).toBe(0);
+    expect(compose({ previousTotal: 20 }).change).toBeCloseTo(55);
   });
 });

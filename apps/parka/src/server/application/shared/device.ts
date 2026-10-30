@@ -2,6 +2,7 @@ import type { z } from 'zod';
 import type { device } from '@schemas/general';
 import type { SupabaseServer } from '@/shared/data-sources/supabase-server';
 import { DEVICE_AVATAR_IDS } from '@/shared/device/domain/avatars';
+import { readAllPages } from './paged';
 import { toDevicePhoto, type DevicePhoto } from './device-photo';
 
 type Device = z.infer<ReturnType<typeof device>>;
@@ -57,9 +58,12 @@ export const toDevice = (
 export const loadProfiles = async (
   db: SupabaseServer,
 ): Promise<ProfilesByDevice> => {
-  const { data } = await db
-    .from('device_profiles')
-    .select('user_id, device_id, avatar, custom_name, photo_updated_at');
+  const data = await readAllPages((from, to, total) => {
+    const query = db
+      .from('device_profiles')
+      .select('user_id, device_id, avatar, custom_name, photo_updated_at');
+    return (total ? query.order('device_id') : query).range(from, to);
+  }).catch(() => undefined);
   return new Map(
     (data ?? []).map((r) => [
       r.device_id,

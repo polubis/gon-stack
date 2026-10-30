@@ -143,6 +143,10 @@ export const API_ROUTER = {
     '/api/dashboard/',
     { kind: string; from: string; to?: string; tz?: string }
   >('/api/dashboard/'),
+  bootstrap: routeWithRequiredQuery<
+    '/api/bootstrap/',
+    { kind: string; from: string; to?: string; tz?: string }
+  >('/api/bootstrap/'),
   expenses: routeWithQuery<'/api/expenses/', { tz?: string }>('/api/expenses/'),
   expenseById: routeById('/api/expenses/'),
   scanReceipt: route('/api/receipts/scan/'),

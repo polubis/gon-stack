@@ -32,6 +32,9 @@ describe('api routes', () => {
     expect(API_ROUTER.dashboard({ kind: 'week', from: '2025-04-07' })).toBe(
       '/api/dashboard/?kind=week&from=2025-04-07',
     );
+    expect(
+      API_ROUTER.bootstrap({ kind: 'month', from: '2025-04-01', tz: 'UTC' }),
+    ).toBe('/api/bootstrap/?kind=month&from=2025-04-01&tz=UTC');
   });
 
   it('covers auth endpoints used by sign-in/up and logout', () => {

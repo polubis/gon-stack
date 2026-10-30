@@ -1,22 +1,8 @@
 import { updateSettingsSchema } from '@schemas/settings';
-import type { SupabaseServer } from '@/shared/data-sources/supabase-server';
 import { InternalServer } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
-
-const getOwnDeviceIds = async (db: SupabaseServer): Promise<string[]> => {
-  const [expenses, tasks] = await Promise.all([
-    db.from('expenses').select('device_id').not('device_id', 'is', null),
-    db.from('time_tasks').select('device_id').not('device_id', 'is', null),
-  ]);
-  if (expenses.error) throw new InternalServer(expenses.error);
-  if (tasks.error) throw new InternalServer(tasks.error);
-  return [
-    ...new Set(
-      [...expenses.data, ...tasks.data].map((r) => r.device_id as string),
-    ),
-  ];
-};
+import { readOwnDevices } from '../../shared/finance-reads';
 
 export const updateSettings = privateProcedure({
   schema: withZodSchema({ schema: updateSettingsSchema }),
@@ -52,7 +38,7 @@ export const updateSettings = privateProcedure({
 
     // Only avatar and custom name are writable; a device the user owns no
     // expense of is ignored.
-    const owned = new Set(await getOwnDeviceIds(db));
+    const owned = new Set((await readOwnDevices(db)).map((d) => d.device_id));
     const own = input.devices
       .filter((d) => owned.has(d.id))
       .map((d) => ({
