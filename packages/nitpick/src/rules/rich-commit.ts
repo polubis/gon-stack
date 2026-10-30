@@ -17,7 +17,9 @@ const COMMIT_TYPES = [
 const BULLET = /^\s*- \S/;
 const FOOTER =
   /^(\s*- )?\s*(co-authored-by|signed-off-by|reviewed-by|acked-by|refs?|fixes|closes|resolves|breaking[ -]change|generated (with|by))\b|🤖/i;
-const FIX = `Rewrite the commit message as "type(scope): title", a blank line, then a "- " change list (nested "  - " items allowed). Nothing may follow the list: no footer, trailer, reference or credit. Example:
+const SESSION_TRAILER =
+  /^Claude-Session: https:\/\/claude\.ai\/code\/session_[\w-]+$/;
+const FIX = `Rewrite the commit message as "type(scope): title", a blank line, then a "- " change list (nested "  - " items allowed). Nothing may follow the list except an optional final "Claude-Session: https://claude.ai/code/session_<id>" line (after a blank line); no other footer, trailer, reference or credit. Example:
 fix(repo): prevent racing of requests
 
 - Introduce a request id and a reference to latest request
@@ -30,10 +32,12 @@ const validateRichCommit = (
   const subjectPattern = new RegExp(
     String.raw`^(${types.join('|')})\([^()\s]+\)!?: \S.*$`,
   );
-  const [subject = '', blank, ...body] = message
-    .replaceAll('\r\n', '\n')
-    .trimEnd()
-    .split('\n');
+  const lines = message.replaceAll('\r\n', '\n').trimEnd().split('\n');
+  if (SESSION_TRAILER.test(lines.at(-1) ?? '')) {
+    lines.pop();
+    if (lines.at(-1) === '') lines.pop();
+  }
+  const [subject = '', blank, ...body] = lines;
   const problems: string[] = [];
 
   if (!subjectPattern.test(subject)) {

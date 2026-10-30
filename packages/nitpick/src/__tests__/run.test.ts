@@ -255,7 +255,9 @@ describe('Violation guidance works when', () => {
       'Violated rule: rich-commit. Read .ai/rules/rich-commit.md',
     );
     expect(guidance[1]).toMatch(/^Fix: Rewrite the commit message as /);
-    expect(guidance[1]).toContain('no footer, trailer, reference or credit');
+    expect(guidance[1]).toContain(
+      'no other footer, trailer, reference or credit',
+    );
   });
 
   it('points to the root file for a rule with an inline doc', async () => {

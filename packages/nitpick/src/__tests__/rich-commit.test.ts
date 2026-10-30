@@ -87,6 +87,62 @@ describe('Commit validation works when', () => {
     ]);
   });
 
+  describe('Claude session trailer', () => {
+    const trailer = 'Claude-Session: https://claude.ai/code/session_01AbC-x_9';
+
+    it('accepts it after a blank line', async () => {
+      expect(await commitProblems(`${valid}\n\n${trailer}\n`)).toEqual([]);
+    });
+
+    it('accepts it without a blank line', async () => {
+      expect(await commitProblems(`${valid}\n${trailer}`)).toEqual([]);
+    });
+
+    it.each([
+      'Claude-Session: https://example.com/session_1',
+      'Claude-Session: https://claude.ai/code/session_',
+      'Claude-Session: https://claude.ai/code/session_1 extra',
+      'Claude-Session: https://claude.ai/code/other_1',
+      'Session: https://claude.ai/code/session_1',
+    ])('rejects lookalike %s', async (line) => {
+      expect(await commitProblems(`${valid}\n\n${line}`)).not.toEqual([]);
+    });
+
+    it('rejects it followed by another trailer', async () => {
+      expect(
+        await commitProblems(`${valid}\n\n${trailer}\nCo-authored-by: A`),
+      ).not.toEqual([]);
+    });
+
+    it('rejects Co-authored-by before it', async () => {
+      expect(
+        await commitProblems(`${valid}\n\nCo-authored-by: A\n${trailer}`),
+      ).not.toEqual([]);
+    });
+
+    it('rejects it in the middle of the list', async () => {
+      expect(
+        await commitProblems(
+          `${valid.replace('- Other', `${trailer}\n- Other`)}`,
+        ),
+      ).not.toEqual([]);
+    });
+
+    it('rejects a blank line inside the list before it', async () => {
+      expect(
+        await commitProblems(
+          `${valid.replace('\n- Other', '\n\n- Other')}\n\n${trailer}`,
+        ),
+      ).toEqual(['Blank line not allowed inside the change list']);
+    });
+
+    it('rejects it as the only body', async () => {
+      expect(await commitProblems(`fix(repo): title\n\n${trailer}`)).toEqual([
+        'Body with a "- " change list is required',
+      ]);
+    });
+  });
+
   it('rejects prose in body', async () => {
     expect(await commitProblems(`${valid}\nsome prose`)).toHaveLength(1);
   });

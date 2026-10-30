@@ -15,5 +15,5 @@ fix(repo)!: prevent racing of requests
   - Nested list...
 - Other points
 ```
-2. (A) No AI credits, refs, footer in commit message. Only title + description as nested list
+2. (A) No AI credits, refs, footer in commit message. Only title + description as nested list. Sole exception: one final `Claude-Session: https://claude.ai/code/session_<id>` line
 3. (A) Never commit artifacts: videos, screenshots, recordings, logs, build/test output, scratch files
