@@ -22,7 +22,7 @@ const Rows = ({ count, className }: { count: number; className: string }) => (
 export const DashboardSkeleton = () => (
   <>
     <div
-      className="xl:col-span-6 xl:col-start-1 xl:row-start-2"
+      className="xl:col-span-6 xl:col-start-1 xl:row-start-1"
       aria-hidden="true"
     >
       <Card className="flex flex-col items-center gap-1 py-6 xl:h-full xl:justify-center">
@@ -49,7 +49,7 @@ export const DashboardSkeleton = () => (
     </div>
 
     <Card
-      className="space-y-4 xl:col-span-6 xl:col-start-1 xl:row-start-3"
+      className="space-y-4 xl:col-span-6 xl:col-start-1 xl:row-start-2"
       aria-hidden="true"
     >
       <div className="flex items-baseline justify-between gap-3">
@@ -81,7 +81,7 @@ export const DashboardSkeleton = () => (
     </Card>
 
     <Card
-      className="space-y-4 xl:col-span-6 xl:col-start-7 xl:row-start-2"
+      className="space-y-4 xl:col-span-6 xl:col-start-7 xl:row-start-1"
       aria-hidden="true"
     >
       <div className="flex items-center justify-between gap-2">
@@ -97,7 +97,7 @@ export const DashboardSkeleton = () => (
     </Card>
 
     <Card
-      className="flex h-112 flex-col gap-4 md:h-96 xl:col-span-6 xl:col-start-7 xl:row-start-3 xl:h-0 xl:min-h-full"
+      className="flex h-112 flex-col gap-4 md:h-96 xl:col-span-6 xl:col-start-7 xl:row-start-2 xl:h-0 xl:min-h-full"
       aria-hidden="true"
     >
       <Skeleton className="h-6 w-24" />
@@ -110,7 +110,7 @@ export const DashboardSkeleton = () => (
     </Card>
 
     <Card
-      className="space-y-4 xl:col-span-12 xl:row-start-4"
+      className="space-y-4 xl:col-span-12 xl:row-start-3"
       aria-hidden="true"
     >
       <div className="flex flex-col items-start gap-2 md:flex-row md:items-center md:justify-between">

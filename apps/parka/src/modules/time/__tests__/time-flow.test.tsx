@@ -209,12 +209,14 @@ describe('time swipe and prefetch', () => {
 
     fireEvent.touchStart(main, { touches: [{ clientX: 300, clientY: 200 }] });
     fireEvent.touchMove(main, { touches: [{ clientX: 250, clientY: 202 }] });
-    expect(main.style.transform).toBe('translateX(-30px)');
+    const [filters, data] = Array.from(main.children) as HTMLElement[];
+    expect(data!.style.transform).toBe('translateX(-30px)');
+    expect(filters!.style.transform).toBe('');
 
     fireEvent.touchEnd(main, {
       changedTouches: [{ clientX: 250, clientY: 202 }],
     });
-    expect(main.style.transform).toBe('');
+    expect(data!.style.transform).toBe('');
     expect(window.location.search).toContain('date=2026-10-20');
   });
 

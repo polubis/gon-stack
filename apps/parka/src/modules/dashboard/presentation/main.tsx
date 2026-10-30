@@ -73,7 +73,7 @@ const DashboardView = () => {
     setPeriod(target);
   };
 
-  const { gesture, go } = usePeriodSwipe({
+  const { gesture, contentRef, go } = usePeriodSwipe({
     period,
     today,
     onChange: goToPeriod,
@@ -163,34 +163,37 @@ const DashboardView = () => {
       <LoadingBanner active={loading && ready} />
       <main
         {...gesture}
-        className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-3 px-4 pb-24 pt-4 md:gap-4 md:px-8 md:pb-6 lg:px-10 lg:pt-8 xl:grid xl:grid-cols-12 xl:content-start xl:px-16"
+        className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-3 px-4 pb-24 pt-4 md:gap-4 md:px-8 md:pb-6 lg:px-10 lg:pt-8 xl:px-16"
       >
-        <div className="xl:col-span-12">
-          <Header
-            period={period}
-            today={today}
-            avatar={avatar}
-            onPeriodChange={go}
-          />
-        </div>
+        <Header
+          period={period}
+          today={today}
+          avatar={avatar}
+          onPeriodChange={go}
+        />
 
-        {ready ? (
-          <>
-            <div className="xl:col-span-6 xl:col-start-1 xl:row-start-2">
-              <TotalHero period={period} summary={summary} />
-            </div>
-            <MonthExpenses
-              period={period}
-              onSelect={(id) => openModal(expenseModal(id))}
-            />
-            <CategoriesCard period={period} summary={summary} />
-            <LimitsCard period={period} />
-            <SpendingChart period={period} summary={summary} />
-            {overlays}
-          </>
-        ) : (
-          <DashboardSkeleton />
-        )}
+        <div
+          ref={contentRef}
+          className="flex flex-col gap-3 md:gap-4 xl:grid xl:grid-cols-12 xl:content-start"
+        >
+          {ready ? (
+            <>
+              <div className="xl:col-span-6 xl:col-start-1 xl:row-start-1">
+                <TotalHero period={period} summary={summary} />
+              </div>
+              <MonthExpenses
+                period={period}
+                onSelect={(id) => openModal(expenseModal(id))}
+              />
+              <CategoriesCard period={period} summary={summary} />
+              <LimitsCard period={period} />
+              <SpendingChart period={period} summary={summary} />
+            </>
+          ) : (
+            <DashboardSkeleton />
+          )}
+        </div>
+        {ready ? overlays : null}
       </main>
       <CategoryModals />
       {/* Zero-height sticky rail: the button floats above the content, which

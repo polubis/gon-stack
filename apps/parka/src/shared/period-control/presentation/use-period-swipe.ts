@@ -47,8 +47,9 @@ const ownsGesture = (target: EventTarget, root: HTMLElement): boolean => {
  * Touch handlers that step the period: swipe left for the next one, right for
  * the previous one. The content follows the finger (with resistance where
  * there is nothing further), snaps back on a short swipe and, on a long one,
- * the new period slides in from the side of the gesture. `go` is the same
- * step for the buttons and pickers. The step buttons stay the keyboard
+ * the new period slides in from the side of the gesture. Only the element
+ * under `contentRef` (the data) moves; the handlers go on the wider area.
+ * `go` is the same step for the buttons and pickers. The step buttons stay the keyboard
  * alternative; the gesture works only on touch devices (coarse pointer);
  * motion is off with `prefers-reduced-motion`.
  */
@@ -114,8 +115,9 @@ export const usePeriodSwipe = ({
 
   return {
     go,
+    /** Goes on the data area only: the filters stay put while it moves. */
+    contentRef: content as RefObject<HTMLDivElement | null>,
     gesture: {
-      ref: content as RefObject<HTMLElement | null>,
       onTouchStart: (e: TouchEvent<HTMLElement>) => {
         const touch = e.touches[0];
         const inside = e.currentTarget.contains(e.target as Node);

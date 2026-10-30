@@ -44,7 +44,7 @@ export const CategoriesCard = ({
   const caption = `Rozkład wydatków wg kategorii w okresie: ${periodTitle(period)}`;
 
   return (
-    <Card className="space-y-4 xl:col-span-6 xl:col-start-7 xl:row-start-2">
+    <Card className="space-y-4 xl:col-span-6 xl:col-start-7 xl:row-start-1">
       <div className="flex min-h-9 items-center justify-between gap-2">
         <h2 className="text-base font-semibold">Kategorie</h2>
         <div className="flex items-center gap-1">

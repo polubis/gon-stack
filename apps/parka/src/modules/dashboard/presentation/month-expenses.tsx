@@ -237,7 +237,7 @@ export const MonthExpenses = ({
     <Card
       as="section"
       aria-labelledby="month-expenses"
-      className="space-y-4 xl:col-span-6 xl:col-start-1 xl:row-start-3"
+      className="space-y-4 xl:col-span-6 xl:col-start-1 xl:row-start-2"
       data-e2e="dashboard:expenses"
     >
       <div className="flex items-baseline justify-between gap-3">

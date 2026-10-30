@@ -30,7 +30,7 @@ export const LimitsCard = ({ period }: { period: Period }) => {
       id={LIMITS_SECTION_ID}
       aria-labelledby="limits-title"
       tabIndex={-1}
-      className="relative flex h-112 scroll-mt-4 flex-col outline-none md:h-auto md:max-h-128 md:min-h-96 xl:col-span-6 xl:col-start-7 xl:row-start-3 xl:h-0 xl:max-h-none xl:min-h-full"
+      className="relative flex h-112 scroll-mt-4 flex-col outline-none md:h-auto md:max-h-128 md:min-h-96 xl:col-span-6 xl:col-start-7 xl:row-start-2 xl:h-0 xl:max-h-none xl:min-h-full"
       data-e2e="dashboard:limits"
     >
       <div className="flex min-h-0 flex-1 flex-col gap-4">

@@ -83,7 +83,7 @@ const Screen = ({ kind, children }: Props) => {
   } = useContext();
   const modalOpen = useModalStack().length > 0;
   const period = periodContaining(kind, anchor);
-  const { gesture, go } = usePeriodSwipe({
+  const { gesture, contentRef, go } = usePeriodSwipe({
     period,
     today: now.day,
     onChange: usePeriodChange(kind),
@@ -128,25 +128,27 @@ const Screen = ({ kind, children }: Props) => {
         className="flex flex-1 flex-col gap-4 px-4 pb-24 pt-2 md:gap-6 md:px-8 md:pb-6 lg:px-10 xl:px-16"
       >
         <RangeControl period={period} onChange={go} />
-        {error ? (
-          <ErrorState
-            data-e2e="time:load-error"
-            title="Nie udało się wczytać zadań"
-            code={ERROR_CODES.load}
-            description={error}
-            onRetry={() => load(kind, from, to)}
-            backHref={APP_ROUTER.dashboard()}
-          />
-        ) : initializing || (isLoading && !loaded) ? (
-          <ViewSkeleton kind={kind} />
-        ) : (
-          <div
-            key={kind}
-            className="flex animate-view-enter flex-col gap-4 motion-reduce:animate-none md:gap-6"
-          >
-            {children}
-          </div>
-        )}
+        <div ref={contentRef} className="flex flex-col gap-4 md:gap-6">
+          {error ? (
+            <ErrorState
+              data-e2e="time:load-error"
+              title="Nie udało się wczytać zadań"
+              code={ERROR_CODES.load}
+              description={error}
+              onRetry={() => load(kind, from, to)}
+              backHref={APP_ROUTER.dashboard()}
+            />
+          ) : initializing || (isLoading && !loaded) ? (
+            <ViewSkeleton kind={kind} />
+          ) : (
+            <div
+              key={kind}
+              className="flex animate-view-enter flex-col gap-4 motion-reduce:animate-none md:gap-6"
+            >
+              {children}
+            </div>
+          )}
+        </div>
       </main>
       {/* Zero-height sticky rail (as in finance): the button floats above the
           content, which scrolls clear of it thanks to <main> bottom padding. */}

@@ -155,7 +155,7 @@ export const SpendingChart = ({
     (d) => d.total === 0,
   );
   return (
-    <Card className="space-y-4 xl:col-span-12 xl:row-start-4">
+    <Card className="space-y-4 xl:col-span-12 xl:row-start-3">
       <div className="flex flex-col items-start gap-2 md:flex-row md:items-center md:justify-between">
         <h2 className="text-base font-semibold">Wydatki w czasie</h2>
         <Legend period={period} />

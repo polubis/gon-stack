@@ -135,12 +135,14 @@ describe('dashboard period control', () => {
 
     fireEvent.touchStart(main, { touches: [{ clientX: 300, clientY: 200 }] });
     fireEvent.touchMove(main, { touches: [{ clientX: 200, clientY: 200 }] });
-    expect(main.style.transform).toBe('translateX(-20px)');
+    const [filters, data] = Array.from(main.children) as HTMLElement[];
+    expect(data!.style.transform).toBe('translateX(-20px)');
+    expect(filters!.style.transform).toBe('');
 
     fireEvent.touchEnd(main, {
       changedTouches: [{ clientX: 200, clientY: 200 }],
     });
-    expect(main.style.transform).toBe('');
+    expect(data!.style.transform).toBe('');
     expect(label().textContent).toBe('10.2026');
   });
 
