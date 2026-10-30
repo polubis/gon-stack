@@ -4,82 +4,129 @@ import { decisionLog } from '@repo/nitpick/rules/decision-log';
 import { mswBackendMocks } from '@repo/nitpick/rules/msw-backend-mocks';
 import { richCommit } from '@repo/nitpick/rules/rich-commit';
 
+const SKILLS = [
+  ['caveman', 'Cut fluff ~75%; keep tech exact', 'Markdown / `/caveman`'],
+  ['clarify', 'Vague ask → airtight spec', 'Req unclear'],
+  ['sloth', 'One tiny change + confirm', '`/sloth`, risky blast'],
+  ['plan-requirements', 'Raw → standard feature.md', 'Plan requirements'],
+  ['ux-ui-designer', 'MVP → `ux-ui.md`', 'Design tokens/views'],
+  ['plan-ui', 'Graphic → element list (no code)', 'Analyse mockup'],
+  ['plan-db', 'Schema + indexes/security/migrations', 'Design DB'],
+  ['plan-be', 'REST/RPC + Zod in/out', 'Plan APIs'],
+  ['plan-domain', 'Pure TS domain types + events', 'Domain layer'],
+  ['plan-fe', 'Views/core/integration plan', 'FE architecture'],
+  ['supabase-mate', 'Supabase design + approval gates', 'Schema/RLS/RPC'],
+  ['feature-workflow', 'Orchestrate plan → impl skills', 'Full epic'],
+  ['clone', 'Impl in ideal-example style', '"clone X, build Y"'],
+  ['do-ui', 'Graphic → pixel-perfect Tailwind', 'Pixel-perfect UI'],
+  ['document-module', 'Module → `AGENTS.md`', 'Ideal-example docs'],
+  [
+    'async-implement',
+    'TODO.md → parallel worktree agents',
+    'Multi-task parallel',
+  ],
+  ['ui-component-craft', 'Req gate → pure UI components', 'Craft components'],
+  [
+    'react-best-practices',
+    'React/Tailwind/Radix rules',
+    'Write/review React UI',
+  ],
+  [
+    'supabase-postgres-best-practices',
+    'Postgres perf rules',
+    'SQL/schema tune',
+  ],
+  [
+    'black-box-tester',
+    'Plan → black-box tests only',
+    'Tests from requirements',
+  ],
+  ['e2e-via-commands', 'E2E via step interpreter', 'Extend e2e path'],
+  ['check-html', 'a11y audit HTML/URL', 'Check accessibility'],
+  ['witch-doctor', 'Score module quality', 'Audit/review codebase'],
+  [
+    'evidence',
+    'Cheapest proof: test/shot/video/responsive board + `evidence.mjs`',
+    'Proof of change',
+  ],
+  ['copyman', 'Landing/pricing conversion copy', 'Marketing copy'],
+  ['posty', 'Batch polish posts (`---` split)', 'Post grammar/typo'],
+  ['polaczek', 'Polish lang + typography', 'Polish text fix'],
+  ['loop-article-web', 'One lang template per run', 'Article loop'],
+  ['do-memo', 'Concept → use case → example', 'Flashcard / memo'],
+  ['mti', 'Interview notes → scored report', 'Tech interview write-up'],
+  [
+    'mp4-powerpoint',
+    'Animated LinkedIn explainer video (MP4)',
+    'LinkedIn video/slides',
+  ],
+] as const;
+
 export default config({
-  entry: { doc: '# Project rules for AI agents' },
+  output: [{ path: '.claude', root: 'CLAUDE.md' }],
+  entry: {
+    doc: ({ file, ref }) => `# gon-stack \`.claude\`
+
+This file + \`rules/\`, \`skills/\`, \`references/\` guide agents in **gon-stack**.
+
+## Prerequisites
+
+Always check ${file('aodi-framework')} and \`rules/*.md\` before any task and force rules.
+
+Every task starts by delegating to the ${ref('worker')} agent. \`worker\` never delegates and never commits: it does the work, shows proof, and waits for dev acceptance. Commit only after acceptance.
+
+Use ${ref('caveman')} for any markdown (\`rules/general.md\`), ${ref('clarify')} when the ask is vague, ${ref('sloth')} for risky changes.
+
+## Ecosystem
+
+\`\`\`md
+\`rules/\` -> rules to apply during work
+\`skills/\` -> skills
+\`references/\` -> knowledge
+\`agents/\` -> agent personas
+\`\`\`
+
+### Agents
+
+| Agent | What |
+| ----- | ---- |
+| ${ref('worker')} | Does the work solo: plan if complex, tests, checks, cheapest proof, wait for acceptance |
+| ${ref('doctor')} | Rules audit (fix), proof, commit?, cleanup, close dev ports |
+
+### Skills
+
+| Skill | Does | When |
+| ----- | ---- | ---- |
+${SKILLS.map(([id, does, when]) => `| ${ref(id)} | ${does} | ${when} |`).join('\n')}`,
+  },
   settings: {
     mcp: {
       playwright: { command: 'npx', args: ['@playwright/mcp@latest'] },
       a11y: { command: 'npx', args: ['-y', 'a11y-mcp'] },
     },
-    permissions: { allow: ['mcp__playwright__*', 'mcp__a11y__*'] },
+    permissions: {
+      allow: [
+        'mcp__playwright__*',
+        'mcp__a11y__*',
+        'Bash(git checkout -b *)',
+        'Bash(git switch -c *)',
+        'Bash(git branch *)',
+        'Bash(git add *)',
+        'Bash(git commit *)',
+        'Bash(git push -u origin changes-batch-*)',
+        'Bash(git push origin changes-batch-*)',
+      ],
+    },
     attribution: { commit: '', pr: '' },
   },
   agents: {
-    coord: {
-      frontmatter: {
-        name: 'coord',
-        description:
-          'Routes work — simple tasks solo, complex ones via plan + parallel workers + test pyramid; basic repo checks at the end.',
-      },
-      doc: ({ ref, insert }) => `# Coord
-
-Entry point from dev. You know the catalog under \`rules/\`, \`skills/\`, \`references/\`, \`agents/\` — **do not load contents upfront**; read only when routing requires it.
-
-Read before work:
-
-- \`@../CLAUDE.md\`
-
-Rule tags:
-
-${insert('aodi-framework')}
-
-## Flow
-
-1. Complex work (e.g. CRUD, many layers, DB + API + UI): write a short plan first.
-2. Execute yourself. Tests follow the **pyramid** (${ref('testing-pyramid')}).
-3. Run **basic repo checks** (typecheck/lint/test for touched packages).
-4. Show dev proof it works. Wait for acceptance.
-
-## Rules
-
-- **Never delegate** (no ${ref('worker')}s, no subagents, no ${ref('doctor')}).
-- **Never commit** (or push). Commit only after dev accepts, and not by coord.
-- Ping dev on ambiguity, missing rules/skills in the catalog, or blockers.
-
-## Output
-
-- What changed, files touched, checks run, proof.
-- Awaiting dev acceptance.`,
-    },
     worker: {
       frontmatter: {
         name: 'worker',
         description:
-          'Execution unit — receives a task and upstream context, executes precisely, then stops.',
+          'Does the work solo — short plan for complex tasks, test pyramid, basic repo checks, cheapest sufficient proof, then waits for dev acceptance.',
       },
-      doc: `# Worker
-
-You execute; you do not own the full plan or delegate further.
-
-## Input
-
-- A concrete task (scope, files, layer, done criteria).
-- Context from coord (plan, rules/skills to read **only if listed in the task**).
-
-## Responsibilities
-
-- Complete the task exactly within the given scope.
-- Read only what the task requires (rules, skills, files).
-- Do not expand scope without pinging coord.
-
-## Rules
-
-- Never speculate about code you have not opened.
-- When done: short report (what changed, files, tests/checks you ran, blockers).
-
-## Output
-
-Report and stop — hand results back to coord.`,
+      doc: { file: './agents/worker.md' },
     },
     doctor: {
       frontmatter: {
@@ -87,49 +134,43 @@ Report and stop — hand results back to coord.`,
         description:
           'After work — rules audit (with fixes), checks, proof it works, optional commit/push, cleanup.',
       },
-      doc: `# Doctor
-
-Takes coord’s output. You finish quality, proof, and session closure.
-
-## 1. Rules audit
-
-- Match applicable \`rules/*.md\` to the changes (\`references/aodi-framework.md\`).
-- **Fix violations immediately** — do not report-only.
-- Re-run **basic repo checks** after fixes.
-
-## 2. Proof
-
-Show dev adequate evidence the problem is solved, e.g.:
-
-- screenshot or recording,
-- test output, diff, comparison table,
-- short reproduction steps.
-
-## 3. Commit?
-
-**Ask:** commit (+ push)? yes/no
-
-### No
-
-- Fix per feedback.
-- New proof → ask again about commit.
-
-### Yes
-
-1. **Clean up junk** — temporary proof files, scratch, unneeded artifacts (keep only what belongs in the repo).
-2. **Rules audit** on the final diff — fix again if needed.
-3. **Decision log** — add a new \`decisions/NNNN-slug.md\` for this session (next free global number; template \`templates/decision-entry.md\`, rule \`rules/general.md\` #3). Stage it with the code change.
-4. Commit (\`rules/git.md\`) and push **only when dev asked for it**.
-5. **Shut down** dev servers/ports you started this session (e.g. \`pnpm dev\`).
-
-## Output
-
-- Check status,
-- proof (link or description),
-- decision log path (if committing),
-- commit/push outcome or fix list,
-- confirmation that dev ports were closed.`,
+      doc: { file: './agents/doctor.md' },
     },
+  },
+  skills: {
+    'async-implement': { source: './skills/async-implement' },
+    'black-box-tester': { source: './skills/black-box-tester' },
+    caveman: { source: './skills/caveman' },
+    'check-html': { source: './skills/check-html' },
+    clarify: { source: './skills/clarify' },
+    clone: { source: './skills/clone' },
+    copyman: { source: './skills/copyman' },
+    'do-memo': { source: './skills/do-memo' },
+    'do-ui': { source: './skills/do-ui' },
+    'document-module': { source: './skills/document-module' },
+    'e2e-via-commands': { source: './skills/e2e-via-commands' },
+    evidence: { source: './skills/evidence' },
+    'feature-workflow': { source: './skills/feature-workflow' },
+    'loop-article-web': { source: './skills/loop-article-web' },
+    'mp4-powerpoint': { source: './skills/mp4-powerpoint' },
+    mti: { source: './skills/mti' },
+    'plan-be': { source: './skills/plan-be' },
+    'plan-db': { source: './skills/plan-db' },
+    'plan-domain': { source: './skills/plan-domain' },
+    'plan-fe': { source: './skills/plan-fe' },
+    'plan-requirements': { source: './skills/plan-requirements' },
+    'plan-ui': { source: './skills/plan-ui' },
+    polaczek: { source: './skills/polaczek' },
+    posty: { source: './skills/posty' },
+    'react-best-practices': { source: './skills/react-best-practices' },
+    sloth: { source: './skills/sloth' },
+    'supabase-mate': { source: './skills/supabase-mate' },
+    'supabase-postgres-best-practices': {
+      source: './skills/supabase-postgres-best-practices',
+    },
+    'ui-component-craft': { source: './skills/ui-component-craft' },
+    'ux-ui-designer': { source: './skills/ux-ui-designer' },
+    'witch-doctor': { source: './skills/witch-doctor' },
   },
   refs: {
     'aodi-framework': aodiFramework,
@@ -270,6 +311,18 @@ Show dev adequate evidence the problem is solved, e.g.:
         doc: 'Theming in single app/lib file',
       },
       'styling-cn': { importance: 'A', doc: '`cn` from `react-kit`' },
+      'styling-z-index-scale': {
+        importance: 'A',
+        doc: 'Z-index scale only in top of app `index.css` as tokens, low to high: raised, modal/dialog, popover/menu, toast, tooltip',
+      },
+      'styling-z-index-tokens': {
+        importance: 'A',
+        doc: 'Use scale tokens everywhere (`z-(--z-toast)`), never raw `z-*` values',
+      },
+      'styling-toast-above-modals': {
+        importance: 'A',
+        doc: 'Toast stays above modals, reachable, dismiss never closes modal',
+      },
     },
     'unit-testing': {
       'unit-accessible-selectors': {

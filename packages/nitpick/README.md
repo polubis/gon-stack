@@ -2,6 +2,10 @@
 
 Keeps AI rules documentation (AODI format) in sync with the code, and runs project checks from the same rule definitions. Config lives in `.nitpick/config.ts`.
 
+## Pruning
+
+Nitpick owns only `rules/`, `agents/`, `references/` and `skills/` (recursively) under the first `output` path. `--sync` deletes every file there that is not generated and then removes empty directories; `--check` reports each as `[sync] <path> is stale, run nitpick --sync` (exit 1). Everything else in the output dir (root file, `settings.json`, `settings.local.json`, any other file or dir) is never touched. No pruning when the output path is the project root or outside it. Extra `output` entries are unaffected.
+
 ## Status
 
 Implemented:
@@ -14,6 +18,7 @@ Implemented:
 - Per-rule `include` / `exclude`
 - Typed `doc` forms: string, `{ file }`, or callback with `ref` / `file` / `insert`
 - Ready-made rules: `richCommit`, `decisionLog`
+- `skills`: directory trees authored in `.nitpick/`, synced byte for byte (binary safe) to `<path>/skills/<id>/`
 - Claude Code settings: `settings` option generates `settings.json` / `settings.local.json` and `.mcp.json`
 
 Covered by tests: 100% statements, branches, functions and lines (enforced by `test:coverage`; `cli.ts` is excluded).
@@ -32,7 +37,7 @@ Rules live under `rules.<group>.<id>`. Group = key, id = key, nothing else to au
 - `fix`: text after the problems of the rule (`Fix: ...`). Required with `run`.
 - `include` / `exclude`: globs (`path.matchesGlob`) filtering `files` passed to `run`.
 - Group files: rules of one group go to `<path>/rules/<group>.md`, groups in order of first key. Group name: letters, digits, `_`, `-`; must not equal a rule id with file doc.
-- Ids unique across all groups and agents. Duplicate = `config()` throws `Duplicate unit id "x"`; raw configs get `Duplicate id "x"` from verification (exit 3).
+- Ids unique across all groups, agents and skills. Duplicate = `config()` throws `Duplicate unit id "x"`; raw configs get `Duplicate id "x"` from verification (exit 3).
 - Rules run in config order.
 
 ## Configuration
@@ -65,16 +70,18 @@ export default config({
       doc: ({ ref }) => `Use ${ref('repo')} and ${ref('react-hooks')}`,
     },
   },
+  skills: { evidence: { source: './skills/evidence' } },
   refs: { 'react-state': './knowledge/react/state.md' },
 });
 ```
 
-- Ids come from keys. `ref(id)` takes the union of all rule and agent ids (typo = compile error). `file(key)` takes the union of `refs` keys. Inferred, no manual generics.
+- Ids come from keys. `ref(id)` takes the union of all rule, agent and skill ids (typo = compile error). `file(key)` takes the union of `refs` keys. Inferred, no manual generics.
 - `ref(id)` links to the file that documents the unit (group file, rule file or `agents/<id>.md`). It never inlines, so cycles are harmless and cannot hang.
 - Unknown or extra fields, missing `importance`/`doc`, `run` on an agent, `run` without `fix`: compile errors.
 - `entry.doc` replaces header and intro of the root file (`header` = `# Information for AI`).
 - Override a ready-made rule by spreading it: `{ ...richCommit, importance: 'D' }`.
 - `agents`: each writes `<path>/agents/<id>.md` and is listed under `## Agent files` in the root. Optional `frontmatter: Record<string, string>` renders as a `---` block before the doc. No `run`. Agent ids are typed even when every agent `doc` is a callback.
+- `skills`: id -> `{ source }`, a directory relative to `.nitpick/`. The whole tree is written to `<path>/skills/<id>/` (same relative paths, listed under `## Skill files` in the root). `ref(id)` links to `skills/<id>/SKILL.md`. Config error (exit 3): missing directory, no `SKILL.md`, `SKILL.md` frontmatter without `name` or `description`, `name` different from the id, id shared with a rule or agent. Files ending in `.md` are CRLF normalized to LF (also for `--check`); every other file is copied as raw bytes and `--check` compares bytes.
 - `refs`: id -> markdown file (relative to `.nitpick/`), written to `<path>/references/<key>.md`; `{{ref:key}}` links inside files; missing file, self ref, unknown ref, cycle = config error.
 
 ### Docs

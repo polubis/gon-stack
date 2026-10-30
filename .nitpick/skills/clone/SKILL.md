@@ -16,7 +16,7 @@ continue after the user replies. Never ask one at a time.
 
 | #   | Input             | Required | Rule                                                                  |
 | --- | ----------------- | -------- | --------------------------------------------------------------------- |
-| 1   | **Requirements**  | Yes      | A `feature.md`-style doc or explicit prompt text. Missing → ask.      |
+| 1   | **Requirements**  | Yes      | A feature requirements doc or explicit prompt text. Missing → ask.      |
 | 2   | **Ideal example** | Yes      | A directory (ideal module) or a single file to mirror. Missing → ask. |
 | 3   | **Target path**   | Yes      | Where the new implementation lands. Missing → ask.                    |
 

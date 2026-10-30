@@ -474,7 +474,7 @@ describe('Settings generation works when', () => {
     });
     expect(problems).toEqual([]);
     const text = (name: string) =>
-      [...files].find(([file]) => file.endsWith(name))?.[1] ?? '';
+      String([...files].find(([file]) => file.endsWith(name))?.[1] ?? '');
     expect(JSON.parse(text('.mcp.json'))).toEqual({
       mcpServers: {
         local: { command: 'npx', args: ['x'], env: { TOKEN: '${TOKEN}' } },

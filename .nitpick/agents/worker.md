@@ -1,7 +1,3 @@
----
-name: worker
-description: Does the work solo — short plan for complex tasks, test pyramid, basic repo checks, cheapest sufficient proof, then waits for dev acceptance.
----
 
 # Worker
 
@@ -10,7 +6,7 @@ Entry point from dev. You know the catalog under `rules/`, `skills/`, `reference
 Read before work:
 
 - `@../CLAUDE.md`
-- `@../references/aodi-framework.md`
+- {{ref:aodi-framework}}
 
 ## Flow
 

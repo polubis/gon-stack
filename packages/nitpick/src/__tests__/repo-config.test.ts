@@ -26,19 +26,18 @@ describe('Repo config works when', () => {
     expect((await built()).problems).toEqual([]);
   });
 
-  it('renders coord with the injected AODI legend and links to its peers', async () => {
-    const coord = (await built()).read('.ai', 'agents', 'coord.md');
-    expect(coord).toContain('name: coord');
-    expect(coord).toContain('| `A` | always');
-    expect(coord).toContain('| `I` | infer during task');
-    expect(coord).toContain('[worker](worker.md)');
-    expect(coord).toContain('[doctor](doctor.md)');
-    expect(coord).toContain('[testing-pyramid](../rules/testing.md)');
-    expect(coord).not.toContain('@../references/aodi-framework.md');
+  it('renders worker with frontmatter', async () => {
+    const worker = (await built()).read('.claude', 'agents', 'worker.md');
+    expect(worker).toContain('name: worker');
+    expect(worker).not.toContain('coord');
   });
 
   it('writes the built-in AODI reference from the package', async () => {
-    const aodi = (await built()).read('.ai', 'references', 'aodi-framework.md');
+    const aodi = (await built()).read(
+      '.claude',
+      'references',
+      'aodi-framework.md',
+    );
     expect(aodi).toContain('| `A` | always');
   });
 
@@ -47,7 +46,7 @@ describe('Repo config works when', () => {
       rules: { g: { r: { importance: 'A', doc: 'r' } } },
       agents: {
         worker: { doc: 'w' },
-        coord: {
+        doctor: {
           // @ts-expect-error unknown agent id
           doc: ({ ref }) => ref('wroker'),
         },

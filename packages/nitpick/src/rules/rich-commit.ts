@@ -33,7 +33,7 @@ const validateRichCommit = (
     String.raw`^(${types.join('|')})\([^()\s]+\)!?: \S.*$`,
   );
   const lines = message.replaceAll('\r\n', '\n').trimEnd().split('\n');
-  if (SESSION_TRAILER.test(lines.at(-1) ?? '')) {
+  if (SESSION_TRAILER.test(lines.at(-1) as string)) {
     lines.pop();
     if (lines.at(-1) === '') lines.pop();
   }

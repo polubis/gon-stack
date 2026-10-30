@@ -25,10 +25,10 @@ src/
 `__evals__/` — optional eval fixtures
 └── `*.json`
 `decisions/` — repo root; per-task decisions, one file each
-└── `{NNNN}-{scope-prefix}-{verb}-{object}.md` — template `templates/decision-entry.md`
+└── `{NNNN}-{scope-prefix}-{verb}-{object}.md`
 `__tests__/` — unit/integration tests
 └── `*.test.*`
-`AGENTS.md` — module conventions + references via `templates/AGENTS.md`
+`AGENTS.md` — module conventions + references
 `configuration/` — static config; no business logic, no state
 ├── `constraints.ts` — `FEATURE_NAME`, constants
 └── `validation.ts` — form/error config (when needed)

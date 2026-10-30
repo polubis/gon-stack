@@ -24,7 +24,7 @@ Check before starting. Missing required → list all gaps once, then continue.
 
 | #   | Input             | Required | Rule                                                                    |
 | --- | ----------------- | -------- | ----------------------------------------------------------------------- |
-| 1   | **Requirements**  | Yes      | `feature.md`-style doc or epic text. Missing → run `plan-requirements`. |
+| 1   | **Requirements**  | Yes      | Feature requirements doc or epic text. Missing → run `plan-requirements`. |
 | 2   | **Ideal example** | Yes      | Module/file whose style implementation mirrors. Missing → ask.          |
 | 3   | **API style**     | Cond.    | `REST` or `RPC`, needed before `plan-be`. Missing → ask at that stage.  |
 | 4   | **DB engine**     | Cond.    | Needed before `plan-db`. Missing → ask at that stage.                   |

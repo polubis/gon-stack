@@ -6,5 +6,4 @@ pnpm-lock.yaml
 .claude
 
 *.md
-.ai
 .mcp.json

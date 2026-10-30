@@ -72,11 +72,14 @@ type AgentUnit<I extends string, K extends string> = {
   frontmatter?: Record<string, string>;
 };
 
+type SkillUnit = { source: string };
+
 export type Config = {
   settings?: Settings;
   entry?: { doc: EntryDoc<string, string> };
   rules: Record<string, Record<string, RuleUnit<string, string>>>;
   agents?: Record<string, AgentUnit<string, string>>;
+  skills?: Record<string, SkillUnit>;
   refs?: Record<string, string>;
   output?: Output[];
 };
@@ -94,16 +97,18 @@ export const listRules = (value: Config): ListedRule[] =>
 export const config = <
   const R extends Record<string, Record<string, unknown>>,
   const A extends string = never,
+  const S extends string = never,
   const F extends Record<string, string> = Record<never, never>,
 >(value: {
   settings?: Settings;
-  entry?: { doc: EntryDoc<UnitIds<R, A>, keyof F & string> };
+  entry?: { doc: EntryDoc<UnitIds<R, A | S>, keyof F & string> };
   rules: {
     [G in keyof R]: {
-      [I in keyof R[G]]: RuleUnit<UnitIds<R, A>, keyof F & string>;
+      [I in keyof R[G]]: RuleUnit<UnitIds<R, A | S>, keyof F & string>;
     };
   };
-  agents?: { [I in A]: AgentUnit<UnitIds<R, A>, keyof F & string> };
+  agents?: { [I in A]: AgentUnit<UnitIds<R, A | S>, keyof F & string> };
+  skills?: { [I in S]: SkillUnit };
   refs?: F;
   output?: Output[];
 }): Config => {
@@ -112,6 +117,7 @@ export const config = <
   for (const id of [
     ...listRules(result).map((rule) => rule.id),
     ...Object.keys(result.agents ?? {}),
+    ...Object.keys(result.skills ?? {}),
   ]) {
     if (seen.has(id)) throw new Error(`Duplicate unit id "${id}"`);
     seen.add(id);

@@ -21,7 +21,7 @@
     "ci:verify": "turbo run //#format:check lint check-types test build --ui=stream && turbo run test:e2e --concurrency=1 --ui=stream",
     "ci:verify:dry": "turbo run //#format:check lint check-types test build --cache=local:,remote: --ui=stream && turbo run test:e2e --cache=local:,remote: --concurrency=1 --ui=stream",
     "ci:e2e": "turbo run test:e2e --concurrency=1",
-    "prepare": "husky",
+    "prepare": "node scripts/prepare.mjs",
     "check-deps": "ncu --workspaces",
     "update-deps": "ncu -u --workspaces",
     "update-deps-safe": "ncu -u --workspaces --target minor",

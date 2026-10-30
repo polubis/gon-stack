@@ -1,4 +1,4 @@
-Each session ends with one decision entry in root `decisions/`. Template `templates/decision-entry.md`.
+Each session ends with one decision entry in root `decisions/`.
 
 Commit adds (stages) exactly one new file in `decisions/`, never more. Pure renames git detects do not count. Commit touching only `decisions/` files (move, edit) needs no new entry. `__log__/` dirs are gone: new file there = error.
 

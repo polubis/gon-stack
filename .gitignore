@@ -48,4 +48,4 @@ test-results/
 /.evidences/
 
 # nitpick generated docs
-.ai/
+.claude

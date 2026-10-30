@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { basename, dirname, join, posix, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { listRules } from './config.js';
@@ -6,7 +6,8 @@ import type { Config, EntryDoc } from './config.js';
 import { buildSettings } from './settings.js';
 
 type Docs = {
-  files: Map<string, string>;
+  files: Map<string, string | Uint8Array>;
+  outputDir: string;
   problems: string[];
   rulePaths: Map<string, string>;
 };
@@ -109,9 +110,74 @@ type Doc = EntryDoc<string, string>;
 
 const GROUP_NAME = /^[\w-]+$/;
 
+const skillPath = (id: string): string => posix.join('skills', id, 'SKILL.md');
+
 const agentPath = (id: string): string => posix.join('agents', `${id}.md`);
 
 const groupPath = (group: string): string => posix.join('rules', `${group}.md`);
+
+const walk = (dir: string, prefix = ''): string[] =>
+  readdirSync(dir)
+    .sort()
+    .flatMap((name) =>
+      statSync(join(dir, name)).isDirectory()
+        ? walk(join(dir, name), `${prefix}${name}/`)
+        : [`${prefix}${name}`],
+    );
+
+const FRONTMATTER = /^---\n([\s\S]*?)\n---(\n|$)/;
+
+const frontmatterOf = (text: string): Map<string, string> =>
+  new Map(
+    (FRONTMATTER.exec(text)?.[1] ?? '').split('\n').flatMap((line) => {
+      const at = line.indexOf(':');
+      if (at < 1) return [];
+      const value = line
+        .slice(at + 1)
+        .trim()
+        .replace(/^(["'])(.*)\1$/, '$2');
+      return [[line.slice(0, at).trim(), value] as [string, string]];
+    }),
+  );
+
+const readSkill = (
+  id: string,
+  dir: string,
+  problems: string[],
+): Map<string, string | Uint8Array> => {
+  const files = new Map<string, string | Uint8Array>();
+  let names: string[];
+  try {
+    names = walk(dir);
+  } catch {
+    problems.push(`Skill "${id}": missing directory ${dir}`);
+    return files;
+  }
+  for (const name of names) {
+    const bytes = readFileSync(join(dir, name));
+    files.set(
+      name,
+      name.endsWith('.md')
+        ? bytes.toString('utf8').replaceAll('\r\n', '\n')
+        : bytes,
+    );
+  }
+  const main = files.get('SKILL.md');
+  if (typeof main !== 'string') {
+    problems.push(`Skill "${id}": missing SKILL.md`);
+    return files;
+  }
+  const head = frontmatterOf(main);
+  for (const key of ['name', 'description']) {
+    if (!head.get(key)) {
+      problems.push(`Skill "${id}": frontmatter needs ${key}`);
+    }
+  }
+  if (head.get('name') && head.get('name') !== id) {
+    problems.push(`Skill "${id}": frontmatter name differs from id`);
+  }
+  return files;
+};
 
 export const buildDocs = (
   config: Config,
@@ -119,7 +185,7 @@ export const buildDocs = (
   projectRoot: string,
 ): Docs => {
   const problems: string[] = [];
-  const files = new Map<string, string>();
+  const files = new Map<string, string | Uint8Array>();
   const refs = config.refs ?? {};
   const target = (key: string): string => posix.join('references', `${key}.md`);
 
@@ -133,12 +199,17 @@ export const buildDocs = (
     ...unit,
     id,
   }));
+  const skills = Object.entries(config.skills ?? {}).map(([id, unit]) => ({
+    ...unit,
+    id,
+  }));
   const unitTargets = new Map<string, string>([
     ...rules.map(({ id, group, doc }): [string, string] => [
       id,
       typeof doc === 'object' ? instructionPath(id) : groupPath(group),
     ]),
     ...agents.map(({ id }): [string, string] => [id, agentPath(id)]),
+    ...skills.map(({ id }): [string, string] => [id, skillPath(id)]),
   ]);
 
   const resolveDoc = (
@@ -180,7 +251,7 @@ export const buildDocs = (
   };
 
   const ids = new Set<string>();
-  for (const { id } of [...rules, ...agents]) {
+  for (const { id } of [...rules, ...agents, ...skills]) {
     if (ids.has(id)) problems.push(`Duplicate id "${id}"`);
     ids.add(id);
   }
@@ -257,6 +328,20 @@ export const buildDocs = (
       groupFiles.set(file, `${head}${body}\n`);
     }
   }
+  if (skills.length > 0) {
+    sections.push(
+      '## Skill files',
+      skills
+        .map(({ id }) => `- ${link('root.md', skillPath(id), skillPath(id))}`)
+        .join('\n'),
+    );
+    for (const { id, source } of skills) {
+      const tree = readSkill(id, resolve(configDir, source), problems);
+      for (const [name, content] of tree) {
+        files.set(join(projectRoot, primary.path, 'skills', id, name), content);
+      }
+    }
+  }
   if (sources.size > 0) {
     sections.push(
       '## Reference files',
@@ -306,5 +391,10 @@ export const buildDocs = (
       ]),
   );
 
-  return { files, problems, rulePaths };
+  return {
+    files,
+    outputDir: join(projectRoot, primary.path),
+    problems,
+    rulePaths,
+  };
 };
