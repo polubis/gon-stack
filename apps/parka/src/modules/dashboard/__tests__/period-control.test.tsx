@@ -104,6 +104,31 @@ describe('dashboard period control', () => {
     await waitFor(() => expect(label().textContent).toBe('10.2026'));
   });
 
+  it('ignores swipes on a device with a mouse', async () => {
+    vi.stubGlobal(
+      'matchMedia',
+      (query: string) =>
+        ({
+          matches: false,
+          media: query,
+          addEventListener: () => {},
+          removeEventListener: () => {},
+        }) as unknown as MediaQueryList,
+    );
+    await open();
+    const main = screen.getByRole('main');
+
+    fireEvent.touchStart(main, { touches: [{ clientX: 100, clientY: 200 }] });
+    fireEvent.touchMove(main, { touches: [{ clientX: 300, clientY: 200 }] });
+    fireEvent.touchEnd(main, {
+      changedTouches: [{ clientX: 300, clientY: 205 }],
+    });
+
+    expect(main.style.transform).toBe('');
+    expect(label().textContent).toBe('10.2026');
+    vi.unstubAllGlobals();
+  });
+
   it('resists a drag towards the future and snaps back', async () => {
     await open();
     const main = screen.getByRole('main');

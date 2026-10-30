@@ -26,6 +26,10 @@ const CONTROLS = 'input, textarea, select, [role="slider"]';
 const reduced = (): boolean =>
   window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
+/** Swipe is a touch gesture: off where the main pointer is a mouse. */
+const touchPrimary = (): boolean =>
+  window.matchMedia?.('(pointer: coarse)').matches ?? true;
+
 /** A swipe that starts in a sideways scroller or a control belongs to it. */
 const ownsGesture = (target: EventTarget, root: HTMLElement): boolean => {
   for (let el = target as HTMLElement | null; el; el = el.parentElement) {
@@ -45,7 +49,8 @@ const ownsGesture = (target: EventTarget, root: HTMLElement): boolean => {
  * there is nothing further), snaps back on a short swipe and, on a long one,
  * the new period slides in from the side of the gesture. `go` is the same
  * step for the buttons and pickers. The step buttons stay the keyboard
- * alternative; motion is off with `prefers-reduced-motion`.
+ * alternative; the gesture works only on touch devices (coarse pointer);
+ * motion is off with `prefers-reduced-motion`.
  */
 export const usePeriodSwipe = ({
   period,
@@ -118,6 +123,7 @@ export const usePeriodSwipe = ({
           e.touches.length === 1 &&
           touch &&
           inside &&
+          touchPrimary() &&
           period.kind !== 'custom' &&
           !ownsGesture(e.target, e.currentTarget)
             ? { x: touch.clientX, y: touch.clientY }
