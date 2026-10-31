@@ -26,11 +26,13 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "env": ["GITHUB_SHA"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "deploy": {
       "cache": false,
       "dependsOn": ["^build"],
+      "env": ["GITHUB_SHA"],
       "passThroughEnv": ["CLOUDFLARE_API_TOKEN", "CLOUDFLARE_ACCOUNT_ID"]
     },
     "lint": {
