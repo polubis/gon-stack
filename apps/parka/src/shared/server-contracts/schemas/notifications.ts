@@ -67,6 +67,8 @@ export const notificationEvent = () =>
         /** The day (`YYYY-MM-DD`) that is about to end. */
         day: z.string(),
         tasks: z.array(unfinishedTask()).min(1),
+        /** All not-done board tasks up to that day (overdue + today); absent on older rows. */
+        totalOpen: z.number().int().optional(),
       }),
     ),
     typed(
