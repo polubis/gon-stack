@@ -62,6 +62,7 @@ const unfinished = (id = 'n-3') => ({
       { title: 'Zakupy', at: null },
       { title: 'Bank', at: '16:30' },
     ],
+    totalOpen: 5,
   },
 });
 
@@ -179,7 +180,11 @@ describe('notifications screen', () => {
 
     render(<Main />);
 
-    expect(await screen.findByText('Do zrobienia: 3 zadania')).toBeTruthy();
+    expect(
+      await screen.findByText(
+        'Dziś: Siłownia, Zakupy, Bank · Niezrobione łącznie: 5',
+      ),
+    ).toBeTruthy();
     expect(screen.queryByRole('group', { name: /Zmiany:/ })).toBeNull();
     expect(
       screen

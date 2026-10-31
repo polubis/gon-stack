@@ -13,7 +13,7 @@ import {
 import { cn } from '@repo/react-kit/cn';
 import { Card } from '@/shared/ui/layout';
 import { APP_ROUTER } from '@/shared/router/routes';
-import { ageLabel, taskCount } from '../domain/format';
+import { ageLabel, unfinishedSummary } from '../domain/format';
 import type { Notification, NotificationKind } from '../domain/models';
 import { useContext } from './context';
 import { DiffView } from './diff-view';
@@ -74,7 +74,7 @@ export const NotificationRow = ({
           </p>
           <p className="wrap-anywhere text-xs text-ink-soft">
             {notification.kind === 'time-day-unfinished'
-              ? `Do zrobienia: ${taskCount(notification.payload.tasks.length)}`
+              ? unfinishedSummary(notification.payload)
               : notification.body}
           </p>
         </div>

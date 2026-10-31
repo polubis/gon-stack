@@ -5,13 +5,18 @@ import { notifyUnfinishedTasks } from '../time';
 type Row = { title: string; at: string | null };
 
 /** Stand-in for the two tables the check touches; records what was stored. */
-const fakeDb = (tasks: Row[]) => {
+const fakeDb = (tasks: Row[], totalOpen = tasks.length) => {
   const stored = new Map<string, Record<string, unknown>>();
   const db = {
     from: (table: string) => {
       if (table === 'time_tasks') {
+        const countQuery = {
+          eq: () => countQuery,
+          lte: () => Promise.resolve({ count: totalOpen, error: null }),
+        };
         const query = {
-          select: () => query,
+          select: (_cols: string, opts?: { head?: boolean }) =>
+            opts?.head ? countQuery : query,
           eq: () => query,
           order: () => Promise.resolve({ data: tasks, error: null }),
         };
@@ -55,6 +60,30 @@ describe('unfinished tasks near the end of the day', () => {
           day: '2026-10-20',
           tasks: [{ title: 'Raport', at: '09:00' }],
         },
+      },
+    ]);
+  });
+
+  it('adds the overall not-done count and lists today in the text', async () => {
+    const { db, stored } = fakeDb(
+      [
+        { title: 'Raport', at: '09:00:00' },
+        { title: 'Bank', at: null },
+      ],
+      7,
+    );
+
+    await notifyUnfinishedTasks(
+      db,
+      'u1',
+      'Europe/Warsaw',
+      at('2026-10-20T18:30:00Z'),
+    );
+
+    expect([...stored.values()]).toMatchObject([
+      {
+        payload: { totalOpen: 7 },
+        body: 'Dziś: Raport, Bank · Niezrobione łącznie: 7',
       },
     ]);
   });
