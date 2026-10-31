@@ -139,10 +139,17 @@ export const notifyUnfinishedTasks = async (
       .order('at', { nullsFirst: true });
     if (error) throw new InternalServer(error);
     if (data.length === 0) return;
+    const { count, error: countError } = await db
+      .from('time_tasks')
+      .select('id', { count: 'exact', head: true })
+      .eq('done', false)
+      .lte('day', day);
+    if (countError) throw new InternalServer(countError);
     await recordNotificationOnce(db, userId, `time-day-unfinished:${day}`, {
       kind: 'time-day-unfinished',
       payload: {
         day,
+        totalOpen: Math.max(count ?? 0, data.length),
         tasks: data.map((row) => ({
           title: row.title,
           at: toHourMinute(row.at),

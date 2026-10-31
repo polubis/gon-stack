@@ -22,6 +22,15 @@ export const taskCount = (count: number): string => {
   return `${count} ${form}`;
 };
 
+/** `Dziś: Raport, Bank · Niezrobione łącznie: 5`; total omitted on old rows. */
+export const unfinishedSummary = (payload: {
+  tasks: readonly { title: string }[];
+  totalOpen?: number;
+}): string =>
+  payload.totalOpen === undefined
+    ? `Do zrobienia: ${taskCount(payload.tasks.length)}`
+    : `Dziś: ${payload.tasks.map((t) => t.title).join(', ')} · Niezrobione łącznie: ${payload.totalOpen}`;
+
 const money = new Intl.NumberFormat('pl-PL', {
   style: 'currency',
   currency: 'PLN',
