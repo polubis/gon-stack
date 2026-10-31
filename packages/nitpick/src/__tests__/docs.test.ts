@@ -309,6 +309,50 @@ describe('Agents work when', () => {
   });
 });
 
+describe('Table of contents works when', () => {
+  const agents = { a: { doc: 'Body' } };
+  const skills = { demo: { source: './skills/demo' } };
+  const sources = {
+    'skills/demo/SKILL.md':
+      '---\nname: demo\ndescription: "Does demo"\n---\n\n# Demo\n',
+  };
+
+  it('lists agents and skills by default', async () => {
+    const { read, problems } = await build(
+      { rules: {}, agents, skills },
+      sources,
+    );
+    expect(problems).toEqual([]);
+    expect(read('.ai', 'AGENTS.md')).toContain('## Agent files');
+    expect(read('.ai', 'AGENTS.md')).toContain('## Skill files');
+  });
+
+  it('hides the agent list but still writes agent files', async () => {
+    const { read, problems } = await build({
+      rules: {},
+      agents,
+      output: [{ path: '.ai', root: 'AGENTS.md', toc: { agents: false } }],
+    });
+    expect(problems).toEqual([]);
+    expect(read('.ai', 'AGENTS.md')).not.toContain('## Agent files');
+    expect(read('.ai', 'agents', 'a.md')).toBe('Body\n');
+  });
+
+  it('hides the skill list but still copies skill files', async () => {
+    const { read, problems } = await build(
+      {
+        rules: {},
+        skills,
+        output: [{ path: '.ai', root: 'AGENTS.md', toc: { skills: false } }],
+      },
+      sources,
+    );
+    expect(problems).toEqual([]);
+    expect(read('.ai', 'AGENTS.md')).not.toContain('## Skill files');
+    expect(read('.ai', 'skills', 'demo', 'SKILL.md')).toContain('# Demo');
+  });
+});
+
 describe('Refs work when', () => {
   it('link nested keys relative to their own folders and keep lookalikes', async () => {
     const { read, problems } = await build(
