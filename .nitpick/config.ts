@@ -4,100 +4,18 @@ import { decisionLog } from '@repo/nitpick/rules/decision-log';
 import { mswBackendMocks } from '@repo/nitpick/rules/msw-backend-mocks';
 import { richCommit } from '@repo/nitpick/rules/rich-commit';
 
-const SKILLS = [
-  ['caveman', 'Cut fluff ~75%; keep tech exact', 'Markdown / `/caveman`'],
-  ['clarify', 'Vague ask → airtight spec', 'Req unclear'],
-  ['sloth', 'One tiny change + confirm', '`/sloth`, risky blast'],
-  ['plan-requirements', 'Raw → standard feature.md', 'Plan requirements'],
-  ['ux-ui-designer', 'MVP → `ux-ui.md`', 'Design tokens/views'],
-  ['plan-ui', 'Graphic → element list (no code)', 'Analyse mockup'],
-  ['plan-db', 'Schema + indexes/security/migrations', 'Design DB'],
-  ['plan-be', 'REST/RPC + Zod in/out', 'Plan APIs'],
-  ['plan-domain', 'Pure TS domain types + events', 'Domain layer'],
-  ['plan-fe', 'Views/core/integration plan', 'FE architecture'],
-  ['supabase-mate', 'Supabase design + approval gates', 'Schema/RLS/RPC'],
-  ['feature-workflow', 'Orchestrate plan → impl skills', 'Full epic'],
-  ['clone', 'Impl in ideal-example style', '"clone X, build Y"'],
-  ['do-ui', 'Graphic → pixel-perfect Tailwind', 'Pixel-perfect UI'],
-  ['document-module', 'Module → `AGENTS.md`', 'Ideal-example docs'],
-  [
-    'async-implement',
-    'TODO.md → parallel worktree agents',
-    'Multi-task parallel',
-  ],
-  ['ui-component-craft', 'Req gate → pure UI components', 'Craft components'],
-  [
-    'react-best-practices',
-    'React/Tailwind/Radix rules',
-    'Write/review React UI',
-  ],
-  [
-    'supabase-postgres-best-practices',
-    'Postgres perf rules',
-    'SQL/schema tune',
-  ],
-  [
-    'black-box-tester',
-    'Plan → black-box tests only',
-    'Tests from requirements',
-  ],
-  ['e2e-via-commands', 'E2E via step interpreter', 'Extend e2e path'],
-  ['check-html', 'a11y audit HTML/URL', 'Check accessibility'],
-  ['witch-doctor', 'Score module quality', 'Audit/review codebase'],
-  [
-    'evidence',
-    'Cheapest proof: test/shot/video/responsive board + `evidence.mjs`',
-    'Proof of change',
-  ],
-  ['copyman', 'Landing/pricing conversion copy', 'Marketing copy'],
-  ['posty', 'Batch polish posts (`---` split)', 'Post grammar/typo'],
-  ['polaczek', 'Polish lang + typography', 'Polish text fix'],
-  ['loop-article-web', 'One lang template per run', 'Article loop'],
-  ['do-memo', 'Concept → use case → example', 'Flashcard / memo'],
-  ['mti', 'Interview notes → scored report', 'Tech interview write-up'],
-  [
-    'mp4-powerpoint',
-    'Animated LinkedIn explainer video (MP4)',
-    'LinkedIn video/slides',
-  ],
-] as const;
-
 export default config({
-  output: [{ path: '.claude', root: 'CLAUDE.md' }],
+  output: [
+    {
+      path: '.claude',
+      root: 'CLAUDE.md',
+      toc: { agents: false, skills: false },
+    },
+  ],
   entry: {
-    doc: ({ file, ref }) => `# gon-stack \`.claude\`
+    doc: ({ ref }) => `# gon-stack \`.claude\`
 
-This file + \`rules/\`, \`skills/\`, \`references/\` guide agents in **gon-stack**.
-
-## Prerequisites
-
-Always check ${file('aodi-framework')} and \`rules/*.md\` before any task and force rules.
-
-Every task starts by delegating to the ${ref('worker')} agent. \`worker\` never delegates and never commits: it does the work, shows proof, and waits for dev acceptance. Commit only after acceptance.
-
-Use ${ref('caveman')} for any markdown (\`rules/general.md\`), ${ref('clarify')} when the ask is vague, ${ref('sloth')} for risky changes.
-
-## Ecosystem
-
-\`\`\`md
-\`rules/\` -> rules to apply during work
-\`skills/\` -> skills
-\`references/\` -> knowledge
-\`agents/\` -> agent personas
-\`\`\`
-
-### Agents
-
-| Agent | What |
-| ----- | ---- |
-| ${ref('worker')} | Does the work solo: plan if complex, tests, checks, cheapest proof, wait for acceptance |
-| ${ref('doctor')} | Rules audit (fix), proof, commit?, cleanup, close dev ports |
-
-### Skills
-
-| Skill | Does | When |
-| ----- | ---- | ---- |
-${SKILLS.map(([id, does, when]) => `| ${ref(id)} | ${does} | ${when} |`).join('\n')}`,
+For "document" creation and code comments use ${ref('caveman')}; same for communication.`,
   },
   settings: {
     mcp: {
@@ -120,13 +38,77 @@ ${SKILLS.map(([id, does, when]) => `| ${ref(id)} | ${does} | ${when} |`).join('\
     attribution: { commit: '', pr: '' },
   },
   agents: {
+    boss: {
+      frontmatter: {
+        name: 'boss',
+        description:
+          'Entry point for every task — checks aodi-framework and rules, scopes the task, delegates to worker, relays acceptance.',
+      },
+      doc: ({ file, ref }) => `# Boss
+
+Entry point for every task from dev. You never do the work yourself: you scope it and delegate to ${ref('worker')}.
+
+Read before routing:
+
+- ${file('aodi-framework')}
+- \`rules/*.md\` (force applicable rules into the task)
+
+## Flow
+
+1. Vague ask: run ${ref('clarify')} first, until the spec is airtight.
+2. Risky change (wide blast, data, auth, migrations): run ${ref('sloth')} — one tiny change, dev confirms each.
+3. Markdown work: apply ${ref('caveman')} (\`rules/general.md\`).
+4. Pick the skills and rules that fit the scope; pass them to the worker by path.
+5. Delegate the scoped task to ${ref('worker')}. Include: goal, acceptance criteria, rules, skills, proof level.
+6. Relay worker output to dev. Wait for acceptance. ${ref('doctor')} closes the session only after dev accepts.
+
+## Rules
+
+- **Always delegate** to ${ref('worker')}. Boss does not edit code, run checks, or commit.
+- Re-scope and re-delegate when the worker reports a blocker or missing catalog entry.
+- Ping dev on ambiguity before delegating.
+
+## Output
+
+- Scope handed to worker (goal, rules, skills, proof level).
+- Worker result, relayed as is.
+- Awaiting dev acceptance.
+`,
+    },
     worker: {
       frontmatter: {
         name: 'worker',
         description:
           'Does the work solo — short plan for complex tasks, test pyramid, basic repo checks, cheapest sufficient proof, then waits for dev acceptance.',
       },
-      doc: { file: './agents/worker.md' },
+      doc: ({ file, ref }) => `# Worker
+
+Entry point from dev. You know the catalog under \`rules/\`, \`skills/\`, \`references/\`, \`agents/\` — **do not load contents upfront**; read only when routing requires it.
+
+Read before work:
+
+- \`@../CLAUDE.md\`
+- ${file('aodi-framework')}
+
+## Flow
+
+1. Complex work (e.g. CRUD, many layers, DB + API + UI): write a short plan first.
+2. Pick proof level now (${ref('evidence')} table), before first edit. If it needs BEFORE (time/interaction bug), capture it on untouched code first.
+3. Execute yourself. Tests follow the **pyramid** (\`rules/testing.md\`).
+4. Run **basic repo checks** (typecheck/lint/test for touched packages).
+5. Show dev proof at the chosen level, cheapest sufficient. Wait for acceptance.
+
+## Rules
+
+- **Never delegate** (no workers, no subagents, no ${ref('doctor')}).
+- **Never commit** (or push). Commit only after dev accepts, and not by worker.
+- Ping dev on ambiguity, missing rules/skills in the catalog, or blockers.
+
+## Output
+
+- What changed, files touched, checks run, proof.
+- Awaiting dev acceptance.
+`,
     },
     doctor: {
       frontmatter: {
@@ -134,7 +116,49 @@ ${SKILLS.map(([id, does, when]) => `| ${ref(id)} | ${does} | ${when} |`).join('\
         description:
           'After work — rules audit (with fixes), checks, proof it works, optional commit/push, cleanup.',
       },
-      doc: { file: './agents/doctor.md' },
+      doc: ({ file }) => `# Doctor
+
+Takes the worker’s output. You finish quality, proof, and session closure.
+
+## 1. Rules audit
+
+- Match applicable \`rules/*.md\` to the changes (${file('aodi-framework')}).
+- **Fix violations immediately** — do not report-only.
+- Re-run **basic repo checks** after fixes.
+
+## 2. Proof
+
+Show dev adequate evidence the problem is solved, e.g.:
+
+- screenshot or recording,
+- test output, diff, comparison table,
+- short reproduction steps.
+
+## 3. Commit?
+
+**Ask:** commit (+ push)? yes/no
+
+### No
+
+- Fix per feedback.
+- New proof → ask again about commit.
+
+### Yes
+
+1. **Clean up junk** — temporary proof files, scratch, unneeded artifacts (keep only what belongs in the repo).
+2. **Rules audit** on the final diff — fix again if needed.
+3. **Decision log** — add a new \`decisions/NNNN-slug.md\` for this session (next free global number; format in \`rules/decision-log.md\`). Stage it with the code change.
+4. Commit (\`rules/git.md\`) and push **only when dev asked for it**.
+5. **Shut down** dev servers/ports you started this session (e.g. \`pnpm dev\`).
+
+## Output
+
+- Check status,
+- proof (link or description),
+- decision log path (if committing),
+- commit/push outcome or fix list,
+- confirmation that dev ports were closed.
+`,
     },
   },
   skills: {

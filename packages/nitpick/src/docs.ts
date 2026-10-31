@@ -12,7 +12,11 @@ type Docs = {
   rulePaths: Map<string, string>;
 };
 
-type Output = { path: string; root: string };
+type Output = {
+  path: string;
+  root: string;
+  toc?: { agents?: boolean; skills?: boolean };
+};
 
 const DEFAULT_OUTPUT: Output[] = [{ path: '.ai', root: 'AGENTS.md' }];
 const REF = /\{\{ref:([^}\s]+)\}\}/g;
@@ -313,10 +317,12 @@ export const buildDocs = (
   }
   if (agents.length > 0) {
     const agentFiles = agents.map(({ id }) => agentPath(id));
-    sections.push(
-      '## Agent files',
-      agentFiles.map((file) => `- ${link('root.md', file, file)}`).join('\n'),
-    );
+    if (primary.toc?.agents ?? true) {
+      sections.push(
+        '## Agent files',
+        agentFiles.map((file) => `- ${link('root.md', file, file)}`).join('\n'),
+      );
+    }
     for (const [index, { id, doc, frontmatter }] of agents.entries()) {
       const file = agentFiles[index] as string;
       const head = frontmatter
@@ -329,12 +335,14 @@ export const buildDocs = (
     }
   }
   if (skills.length > 0) {
-    sections.push(
-      '## Skill files',
-      skills
-        .map(({ id }) => `- ${link('root.md', skillPath(id), skillPath(id))}`)
-        .join('\n'),
-    );
+    if (primary.toc?.skills ?? true) {
+      sections.push(
+        '## Skill files',
+        skills
+          .map(({ id }) => `- ${link('root.md', skillPath(id), skillPath(id))}`)
+          .join('\n'),
+      );
+    }
     for (const { id, source } of skills) {
       const tree = readSkill(id, resolve(configDir, source), problems);
       for (const [name, content] of tree) {

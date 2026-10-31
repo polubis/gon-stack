@@ -55,7 +55,11 @@ type Check =
   | { run: (context: CheckContext) => void | Promise<void>; fix: string }
   | { run?: undefined; fix?: string };
 
-type Output = { path: string; root: string };
+type Output = {
+  path: string;
+  root: string;
+  toc?: { agents?: boolean; skills?: boolean };
+};
 
 export type RuleUnit<I extends string = never, K extends string = never> = {
   importance: Importance;
