@@ -6,6 +6,8 @@ import { Button } from '@/shared/ui/controls';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { EmptyState } from '@/shared/ui/empty-state';
 import { ErrorState } from '@/shared/ui/error-state';
+import { changeProps, useListChanges } from '@/shared/ui/list-changes';
+import { cn } from '@repo/react-kit/cn';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { ERROR_CODES } from '../configuration/constraints';
 import { useContext } from './context';
@@ -19,6 +21,7 @@ export const CategoriesDialog = ({ modal }: { modal: string }) => {
   const categories = ctx.useCategories();
   const initializing = ctx.useInitializing();
   const error = ctx.useError();
+  const rows = useListChanges(categories, (c) => c.id, String(initializing));
   const add = (
     <Button
       onClick={() => openModal(NEW_CATEGORY_MODAL)}
@@ -51,7 +54,7 @@ export const CategoriesDialog = ({ modal }: { modal: string }) => {
           <Skeleton className="h-12 w-full rounded-xl" />
           <Skeleton className="h-12 w-full rounded-xl" />
         </div>
-      ) : categories.length === 0 ? (
+      ) : categories.length === 0 && rows.length === 0 ? (
         <EmptyState
           data-e2e="categories:empty"
           icon={Tags}
@@ -66,11 +69,18 @@ export const CategoriesDialog = ({ modal }: { modal: string }) => {
             data-e2e="categories:list"
             className="max-h-80 overflow-y-auto overflow-x-hidden rounded-2xl border border-line bg-card"
           >
-            {categories.map((c, index) => (
+            {rows.map(({ key, item: c, phase, at }) => (
               <li
-                key={c.id}
-                style={stagger(index)}
-                className="animate-item-in border-b border-line last:border-0 motion-reduce:animate-none"
+                key={key}
+                style={phase === 'idle' ? stagger(at) : undefined}
+                aria-hidden={changeProps(phase)['aria-hidden']}
+                inert={changeProps(phase).inert}
+                className={cn(
+                  'border-b border-line last:border-0',
+                  phase === 'idle' &&
+                    'animate-item-in motion-reduce:animate-none',
+                  changeProps(phase).className,
+                )}
               >
                 <a
                   href={APP_ROUTER.categoryEdit({ id: c.id })}

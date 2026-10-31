@@ -1,5 +1,6 @@
 import { Fragment } from 'react';
 import { cn } from '@repo/react-kit/cn';
+import { useListChanges } from '@/shared/ui/list-changes';
 import { ALL_DAY_LABEL } from '../configuration/constraints';
 import { weekdayLong, weekdayShort } from '../domain/period-title';
 import {
@@ -27,56 +28,70 @@ const DayName = ({ day }: { day: string }) => (
   </>
 );
 
-/** Phone to desktop: one light card per day, tasks in time order (all-day first). */
-const DayCards = ({ days }: { days: string[] }) => {
-  const { tasks, priorities, now } = useContext();
+const taskKey = (task: { id: string }) => task.id;
+
+/** One day card: tasks in time order (all-day first); changes animate in place. */
+const DayCard = ({ day, index }: { day: string; index: number }) => {
+  const { tasks, priorities, now, initializing } = useContext();
+  const scope = `${day}:${initializing}`;
+  const today = day === now.day;
+  const ofDay = tasksOn(tasks, day, priorities);
+  const timed = ofDay.filter(isTimed);
+  const nowIndex = today ? nowIndexOf(timed, now.time) : -1;
+  const allDayRows = useListChanges(
+    ofDay.filter((task) => task.at === null),
+    taskKey,
+    scope,
+  );
+  const timedRows = useListChanges(timed, taskKey, scope);
   return (
-    <ol className="grid gap-3 md:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:hidden">
-      {days.map((day, dayIndex) => {
-        const today = day === now.day;
-        const ofDay = tasksOn(tasks, day, priorities);
-        const allDay = ofDay.filter((task) => task.at === null);
-        const timed = ofDay.filter(isTimed);
-        const nowIndex = today ? nowIndexOf(timed, now.time) : -1;
-        return (
-          <li
-            key={day}
-            style={stagger(dayIndex)}
-            aria-current={today ? 'date' : undefined}
-            className={cn(
-              'flex animate-item-in flex-col gap-1 rounded-2xl border bg-card p-2 motion-reduce:animate-none',
-              today ? 'border-brand' : 'border-line',
-            )}
-          >
-            <div className="flex items-center justify-between gap-2 pl-2">
-              <h2
-                className={cn('text-sm font-semibold', today && 'text-brand')}
-              >
-                <DayName day={day} />
-              </h2>
-              <AddDayButton day={day} />
-            </div>
-            {ofDay.length ? (
-              <ul className="flex flex-col">
-                {allDay.map((task) => (
-                  <TaskRow key={task.id} task={task} />
-                ))}
-                {timed.map((task, index) => (
-                  <Fragment key={task.id}>
-                    <TaskRow task={task} now={index === nowIndex} />
-                    {index === nowIndex ? <NowMarker time={now.time} /> : null}
-                  </Fragment>
-                ))}
-              </ul>
-            ) : (
-              <p className="pb-2 pl-2 text-xs text-ink-soft">Brak zadań.</p>
-            )}
-          </li>
-        );
-      })}
-    </ol>
+    <li
+      style={stagger(index)}
+      aria-current={today ? 'date' : undefined}
+      className={cn(
+        'flex animate-item-in flex-col gap-1 rounded-2xl border bg-card p-2 motion-reduce:animate-none',
+        today ? 'border-brand' : 'border-line',
+      )}
+    >
+      <div className="flex items-center justify-between gap-2 pl-2">
+        <h2 className={cn('text-sm font-semibold', today && 'text-brand')}>
+          <DayName day={day} />
+        </h2>
+        <AddDayButton day={day} />
+      </div>
+      {allDayRows.length + timedRows.length ? (
+        <ul className="flex flex-col">
+          {allDayRows.map(({ key, item, phase }) => (
+            <TaskRow key={key} task={item} phase={phase} />
+          ))}
+          {timedRows.map(({ key, item, phase, at }) => (
+            <Fragment key={key}>
+              <TaskRow
+                task={item}
+                now={at >= 0 && at === nowIndex}
+                phase={phase}
+              />
+              {at >= 0 && at === nowIndex ? (
+                <NowMarker time={now.time} />
+              ) : null}
+            </Fragment>
+          ))}
+        </ul>
+      ) : (
+        <p className="pb-2 pl-2 text-xs text-ink-soft">Brak zadań.</p>
+      )}
+    </li>
   );
 };
+
+/** Phone to desktop: one light card per day. */
+const DayCards = ({ days }: { days: string[] }) => (
+  <ol className="grid gap-3 md:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:hidden">
+    {days.map((day, index) => (
+      <DayCard key={day} day={day} index={index} />
+    ))}
+  </ol>
+);
 
 /** Extra wide screens (2xl+): all-day row on top, then an hour axis with tasks at their hour. */
 const HourGrid = ({ days }: { days: string[] }) => {

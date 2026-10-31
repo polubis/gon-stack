@@ -474,6 +474,10 @@ Show dev adequate evidence the problem is solved, e.g.:
         importance: 'A',
         doc: 'Proper empty states display with pattern: `icon:title:description:primary-action`',
       },
+      'ux-change-transitions': {
+        importance: 'A',
+        doc: 'Every create/update/delete shows a transition on the changed item: create fades + slides in, update flashes a brief highlight, delete fades + slides out and neighbours glide into the gap. All disabled with `motion-reduce`, no jumping UI',
+      },
     },
   },
 });
