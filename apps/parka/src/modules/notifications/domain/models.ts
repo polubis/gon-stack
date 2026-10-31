@@ -63,7 +63,11 @@ export type Notification = Base &
       }
     | {
         kind: 'time-day-unfinished';
-        payload: { day: string; tasks: UnfinishedTaskSnapshot[] };
+        payload: {
+          day: string;
+          tasks: UnfinishedTaskSnapshot[];
+          totalOpen?: number;
+        };
       }
     | {
         kind: 'limit-reached';

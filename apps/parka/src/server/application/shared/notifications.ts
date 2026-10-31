@@ -104,10 +104,12 @@ const text = (event: NotificationEvent): { title: string; body: string } => {
         body: `${event.payload.rule.name} · ${money.format(event.payload.rule.cost)}`,
       };
     case 'time-day-unfinished': {
-      const count = event.payload.tasks.length;
+      const { tasks, totalOpen = tasks.length } = event.payload;
+      const shown = tasks.slice(0, 3).map((t) => t.title);
+      const more = tasks.length - shown.length;
       return {
         title: 'Dzień się kończy, a zadania czekają',
-        body: `Niezrobione zadania: ${count}`,
+        body: `Dziś: ${shown.join(', ')}${more > 0 ? ` +${more}` : ''} · Niezrobione łącznie: ${totalOpen}`,
       };
     }
     case 'limit-reached': {
