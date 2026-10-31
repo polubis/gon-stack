@@ -1,8 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Mic, Square } from 'lucide-react';
+import { currentDevice } from '@/shared/device/integration/current-device';
 
 const BARS = [0.55, 0.8, 1, 0.8, 0.55];
+
+/**
+ * Phones give the mic to one consumer: a getUserMedia stream starves
+ * SpeechRecognition (no audio, no result), so the meter is desktop only.
+ */
+const canMeter = () => currentDevice().type === 'desktop';
 
 /**
  * Drives `--voice-level` (0..1) on `el` from the microphone volume.
@@ -12,6 +19,7 @@ const useVoiceLevel = (el: { current: HTMLElement | null }) => {
   const [live, setLive] = useState(false);
 
   useEffect(() => {
+    if (!canMeter()) return;
     let frame = 0;
     let cancelled = false;
     let stream: MediaStream | null = null;

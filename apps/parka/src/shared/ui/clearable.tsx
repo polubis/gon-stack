@@ -1,19 +1,18 @@
-import { useRef, type ComponentProps, type ReactNode } from 'react';
+import {
+  useRef,
+  type ComponentProps,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { DictationButton } from '@/shared/dictation/dictation-button';
-import { Input, useField } from './controls';
+import { Input, inputClass, useField } from './controls';
 import { setNativeValue } from './native-value';
 
 const TEXT_TYPES = ['text', 'email', 'password', 'search', 'tel', 'url'];
 
 const DICTATION_TYPES = ['text', 'search'];
-
-/** Empties the input through the native setter so React `onChange` runs, then focuses it. */
-const clear = (el: HTMLInputElement) => {
-  setNativeValue(el, '');
-  el.focus();
-};
 
 /**
  * Text-like `<input>` with an "x" button that empties it and refocuses it,
@@ -55,24 +54,100 @@ export const ClearableInput = ({
           className,
         )}
       />
-      <div
+      <Adornments
+        target={ref}
+        label={label}
+        filled={filled}
+        top="top-1/2 -translate-y-1/2"
+        before={trailing}
+        mic={dictatable}
+      />
+    </div>
+  );
+};
+
+const BUTTON_CLASS =
+  'grid h-6 w-6 place-items-center rounded-full text-ink-soft hover:bg-brand-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
+
+/**
+ * Mic + "x" adornments shared by every text field: mic sits far right when the
+ * field is empty and slides left once the "x" appears. `top` aligns it.
+ */
+const Adornments = ({
+  target,
+  label,
+  filled,
+  top,
+  before,
+  mic = true,
+}: {
+  target: RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
+  label: string;
+  filled: boolean;
+  top: string;
+  before?: ReactNode;
+  mic?: boolean;
+}) => (
+  <>
+    <div
+      className={cn(
+        'absolute flex items-center gap-1 transition-[right] duration-200 ease-out motion-reduce:transition-none',
+        top,
+        filled ? 'right-8' : 'right-2',
+      )}
+    >
+      {before}
+      {mic ? <DictationButton target={target} label={label} /> : null}
+    </div>
+    {filled ? (
+      <button
+        type="button"
+        aria-label={`Wyczyść: ${label}`}
+        onClick={() => {
+          const el = target.current;
+          if (!el) return;
+          setNativeValue(el, '');
+          el.focus();
+        }}
         className={cn(
-          'absolute top-1/2 flex -translate-y-1/2 items-center gap-1 transition-[right] duration-200 ease-out motion-reduce:transition-none',
-          filled ? 'right-8' : 'right-2',
+          'absolute right-2 animate-clear-in motion-reduce:animate-none',
+          BUTTON_CLASS,
+          top,
         )}
       >
-        {trailing}
-        {dictatable ? <DictationButton target={ref} label={label} /> : null}
-      </div>
-      {filled ? (
-        <button
-          type="button"
-          aria-label={`Wyczyść: ${label}`}
-          onClick={() => ref.current && clear(ref.current)}
-          className="absolute right-2 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-full text-ink-soft hover:bg-brand-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand animate-clear-in motion-reduce:animate-none"
-        >
-          <X className="h-4 w-4" aria-hidden="true" />
-        </button>
+        <X className="h-4 w-4" aria-hidden="true" />
+      </button>
+    ) : null}
+  </>
+);
+
+/** `<textarea>` with the same mic + "x" behaviour as `ClearableInput`, anchored top right. */
+export const ClearableTextarea = ({
+  className,
+  label: shortLabel,
+  'aria-label': ariaLabel,
+  ...props
+}: ComponentProps<'textarea'> & {
+  /** Short name used by the mic and "x" buttons when the field's own label is long. */
+  label?: string;
+}) => {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const field = useField();
+  const editable = !props.disabled && !props.readOnly;
+  const filled = editable && String(props.value ?? '') !== '';
+  const label =
+    shortLabel ?? ariaLabel ?? field?.label ?? props.placeholder ?? 'pole';
+
+  return (
+    <div className="relative">
+      <textarea
+        {...props}
+        ref={ref}
+        aria-label={ariaLabel}
+        className={cn(inputClass, 'pr-16', className)}
+      />
+      {editable ? (
+        <Adornments target={ref} label={label} filled={filled} top="top-2" />
       ) : null}
     </div>
   );
