@@ -214,4 +214,25 @@ describe('voice popup details', () => {
     expect(screen.getByRole('dialog')).toBeVisible();
     expect(screen.getByLabelText('Nazwa')).toHaveValue('kup chleb');
   });
+
+  it('leaves the microphone to speech recognition on a phone', async () => {
+    installMic();
+    const getUserMedia = vi.fn(() => Promise.reject(new Error('busy')));
+    vi.stubGlobal('navigator', {
+      userAgent:
+        'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/126.0 Mobile Safari/537.36',
+      maxTouchPoints: 5,
+      mediaDevices: { getUserMedia },
+    });
+    render(<Form />);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Dyktuj: Nazwa' }),
+    );
+    say('kup chleb');
+
+    expect(getUserMedia).not.toHaveBeenCalled();
+    expect(started).toBe(1);
+    expect(screen.getByLabelText('Nazwa')).toHaveValue('kup chleb');
+  });
 });

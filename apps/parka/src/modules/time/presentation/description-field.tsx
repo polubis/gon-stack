@@ -9,6 +9,7 @@ import {
   useModalStack,
 } from '@/shared/router/modal-stack';
 import { DictationButton } from '@/shared/dictation/dictation-button';
+import { ClearableTextarea } from '@/shared/ui/clearable';
 import { Button, inputClass } from '@/shared/ui/controls';
 import { TASK_DESCRIPTION_MAX_LENGTH } from '../configuration/constraints';
 import { DESCRIPTION_EDITOR_MODAL } from './modal-ids';
@@ -90,7 +91,6 @@ const FullscreenEditor = ({ value, onChange }: Props) => {
 
 /** Optional task notes: textarea with counter, clear button and a fullscreen editor. */
 export const DescriptionField = ({ value, onChange }: Props) => {
-  const ref = useRef<HTMLTextAreaElement>(null);
   const id = useId();
   const counterId = useId();
   const editing = useModalStack().includes(DESCRIPTION_EDITOR_MODAL);
@@ -102,37 +102,17 @@ export const DescriptionField = ({ value, onChange }: Props) => {
       >
         Opis (opcjonalnie)
       </label>
-      <div className="relative">
-        <textarea
-          id={id}
-          ref={ref}
-          rows={3}
-          value={value}
-          maxLength={TASK_DESCRIPTION_MAX_LENGTH}
-          aria-describedby={counterId}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="Dodatkowe informacje o zadaniu"
-          className={cn(inputClass, 'max-h-48 resize-y pr-16')}
-        />
-        <DictationButton
-          target={ref}
-          label="Opis"
-          className="absolute right-8 top-2"
-        />
-        {value !== '' ? (
-          <button
-            type="button"
-            aria-label="Wyczyść: Opis"
-            onClick={() => {
-              onChange('');
-              ref.current?.focus();
-            }}
-            className="absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-full text-ink-soft hover:bg-brand-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-          >
-            <X className="h-4 w-4" aria-hidden="true" />
-          </button>
-        ) : null}
-      </div>
+      <ClearableTextarea
+        id={id}
+        rows={3}
+        value={value}
+        maxLength={TASK_DESCRIPTION_MAX_LENGTH}
+        aria-describedby={counterId}
+        label="Opis"
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Dodatkowe informacje o zadaniu"
+        className="max-h-48 resize-y"
+      />
       <div className="mt-1 flex items-center justify-between gap-3">
         <Counter id={counterId} value={value} />
         <button
