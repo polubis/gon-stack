@@ -11,6 +11,8 @@ interface ImportMetaEnv {
   readonly PARKA_VAPID_PRIVATE_KEY: string;
   /** `mailto:` contact for push services. */
   readonly PARKA_VAPID_SUBJECT: string;
+  /** `package.json` version + commit; injected at build, see `astro.config.mjs`. */
+  readonly PUBLIC_PARKA_APP_VERSION: string;
 }
 
 interface ImportMeta {
