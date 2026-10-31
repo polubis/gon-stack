@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
-import { ClearableInput } from '../clearable';
+import { afterEach, describe, expect, it } from 'vitest';
+import { ClearableInput, ClearableTextarea } from '../clearable';
 import { Field, Input, Select } from '../controls';
 import { NumberInput } from '../number-input';
 
@@ -108,5 +108,67 @@ describe('controls without a clear button', () => {
     expect(screen.getByLabelText('Data')).toBeVisible();
     expect(screen.getByLabelText('Kategoria')).toHaveTextContent('Alfa');
     expect(screen.queryByRole('button', { name: /Wyczyść/ })).toBeNull();
+  });
+});
+
+const Fields = () => {
+  const [a, setA] = useState('');
+  const [b, setB] = useState('');
+  return (
+    <>
+      <ClearableInput
+        aria-label="Linia"
+        value={a}
+        onChange={(e) => setA(e.target.value)}
+      />
+      <ClearableTextarea
+        aria-label="Opis"
+        value={b}
+        onChange={(e) => setB(e.target.value)}
+      />
+    </>
+  );
+};
+
+const slot = (name: string) =>
+  screen.getByRole('button', { name }).parentElement?.className ?? '';
+
+describe('textarea mic and clear button', () => {
+  afterEach(() => {
+    Reflect.deleteProperty(window, 'webkitSpeechRecognition');
+  });
+
+  it('behaves like a text input: mic far right when empty, slides left beside the x', async () => {
+    Object.assign(window, {
+      webkitSpeechRecognition: class {
+        start() {}
+        stop() {}
+        abort() {}
+      },
+    });
+    render(<Fields />);
+
+    expect(screen.queryByRole('button', { name: /Wyczyść/ })).toBeNull();
+    expect(slot('Dyktuj: Opis')).toContain('right-2');
+    expect(slot('Dyktuj: Opis')).toBe(
+      slot('Dyktuj: Linia').replace('top-1/2 -translate-y-1/2', 'top-2'),
+    );
+
+    await userEvent.type(screen.getByLabelText('Opis'), 'tekst');
+
+    expect(screen.getByRole('button', { name: 'Wyczyść: Opis' })).toBeVisible();
+    expect(slot('Dyktuj: Opis')).toContain('right-8');
+  });
+
+  it('empties the textarea and focuses it', async () => {
+    render(<Fields />);
+    await userEvent.type(screen.getByLabelText('Opis'), 'tekst');
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Wyczyść: Opis' }),
+    );
+
+    expect(screen.getByLabelText('Opis')).toHaveValue('');
+    expect(screen.getByLabelText('Opis')).toHaveFocus();
   });
 });
