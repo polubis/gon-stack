@@ -1,6 +1,11 @@
 import { CheckCircle2, Circle, LoaderCircle, Pencil } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { openModal } from '@/shared/router/modal-stack';
+import {
+  changeProps,
+  useEntrance,
+  type ChangePhase,
+} from '@/shared/ui/list-changes';
 import type { BacklogTask, Task } from '../domain/models';
 import { useContext } from './context';
 import { editBacklogModal, editTaskModal, viewTaskModal } from './modal-ids';
@@ -16,6 +21,8 @@ type Props = {
   now?: boolean;
   /** Entrance step; omit when a parent already animates the row. */
   step?: number;
+  /** What just happened to the row: created, updated or leaving. */
+  phase?: ChangePhase;
 };
 
 /** Todo, then in progress, then done, then todo again. */
@@ -36,19 +43,27 @@ const nextStatus = (task: Task): { task: Task; message: string } =>
         };
 
 /** Task line: status cycle, title (opens details), a muted meta line, edit and a "more" menu. Backlog tasks have no status. */
-export const TaskRow = ({ task, now, step }: Props) => {
+export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
   const { categories, priorities, updateTask } = useContext();
   const board = 'day' in task ? task : null;
   const category = categories.find((item) => item.id === task.categoryId);
   const priority = priorities.find((item) => item.id === task.priorityId);
+  const change = changeProps(phase);
+  const entrance = useEntrance(phase, step !== undefined);
   return (
     <li
       aria-current={now ? 'time' : undefined}
       data-e2e={`time:task:${task.id}`}
-      style={step === undefined ? undefined : stagger(step)}
+      aria-hidden={change['aria-hidden']}
+      inert={change.inert}
+      onAnimationEnd={entrance.onAnimationEnd}
+      style={
+        entrance.entering && step !== undefined ? stagger(step) : undefined
+      }
       className={cn(
         'flex items-start gap-0.5 rounded-xl py-1 pl-1 pr-0.5 transition-colors hover:bg-hover-soft',
-        step !== undefined && 'animate-item-in motion-reduce:animate-none',
+        entrance.entering && 'animate-item-in motion-reduce:animate-none',
+        change.className,
         now && 'bg-brand-softer',
       )}
     >

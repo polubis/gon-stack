@@ -2,6 +2,7 @@ import { Inbox, Plus } from 'lucide-react';
 import { openModal } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
 import { EmptyState } from '@/shared/ui/empty-state';
+import { useListChanges } from '@/shared/ui/list-changes';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { SKELETON_ROWS } from '../configuration/constraints';
 import { sortByPriority } from '../domain/priority';
@@ -15,6 +16,11 @@ const rows = Array.from({ length: SKELETON_ROWS }, (_, i) => i);
 /** Tasks without a day; the row menu puts a task on a day. */
 export const BacklogDialog = ({ modal }: { modal: string }) => {
   const { backlog, priorities, initializing } = useContext();
+  const rowsOf = useListChanges(
+    sortByPriority(backlog, priorities),
+    (task) => task.id,
+    String(initializing),
+  );
   return (
     <ModalShell
       modal={modal}
@@ -40,7 +46,7 @@ export const BacklogDialog = ({ modal }: { modal: string }) => {
               </li>
             ))}
           </ul>
-        ) : backlog.length === 0 ? (
+        ) : backlog.length === 0 && rowsOf.length === 0 ? (
           <EmptyState
             data-e2e="time:backlog-empty"
             icon={Inbox}
@@ -59,8 +65,8 @@ export const BacklogDialog = ({ modal }: { modal: string }) => {
         ) : (
           <>
             <ul className="flex flex-col">
-              {sortByPriority(backlog, priorities).map((task) => (
-                <TaskRow key={task.id} task={task} />
+              {rowsOf.map(({ key, item, phase }) => (
+                <TaskRow key={key} task={item} phase={phase} />
               ))}
             </ul>
             <Button
