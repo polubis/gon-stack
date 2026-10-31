@@ -378,7 +378,9 @@ describe('image attachments', () => {
 
     const details = await openDetails(user);
 
-    const empty = await details.findByRole('status');
+    const empty = within(
+      await details.findByRole('region', { name: 'Załączniki' }),
+    ).getByRole('status');
     expect(within(empty).getByText('Brak załączników')).toBeVisible();
     expect(
       within(empty).getByText(/Dodaj zdjęcie, PDF lub plik tekstowy/),

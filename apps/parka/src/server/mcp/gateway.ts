@@ -79,6 +79,8 @@ export type McpGateway = {
   listTaskAttachments: (taskId: string) => Promise<unknown>;
   addTaskAttachment: (taskId: string, file: NewAttachment) => Promise<unknown>;
   deleteTaskAttachment: (id: string) => Promise<unknown>;
+  listTaskComments: (taskId: string) => Promise<unknown>;
+  addTaskComment: (taskId: string, body: string) => Promise<unknown>;
   listCategories: () => Promise<unknown>;
   createCategory: (input: {
     name: string;
@@ -250,6 +252,12 @@ export const createSupabaseGateway = (
       await files().remove([taskAttachmentPath(owner, p_id)]);
       return true;
     },
+    listTaskComments: async (p_task_id) =>
+      unwrap(await db.rpc('mcp_list_task_comments', { p_token, p_task_id })),
+    addTaskComment: async (p_task_id, p_body) =>
+      unwrap(
+        await db.rpc('mcp_add_task_comment', { p_token, p_task_id, p_body }),
+      ),
     listCategories: async () =>
       unwrap(await db.rpc('mcp_list_categories', { p_token })),
     createCategory: async (c) =>

@@ -24,6 +24,7 @@
     "db:gen-types": "pnpx supabase gen types typescript --local > src/shared/data-sources/db-schema.ts",
     "db:reset": "pnpx supabase db reset",
     "db:stop": "pnpx supabase stop",
+    "db:test": "pnpx supabase test db",
     "db:migration:new": "pnpx supabase migration new",
     "db:migration:up": "pnpx supabase migration up"
   },

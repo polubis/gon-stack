@@ -24,6 +24,7 @@ import type { AccessToken, TokenId } from '../domain/models';
 import { ConfirmDialog } from './confirm-dialog';
 import { Provider, useContext } from './context';
 import { CreateDialog } from './create-dialog';
+import { RenameDialog } from './rename-dialog';
 import { SecretDialog } from './secret-dialog';
 import { ListSkeleton } from './skeleton';
 import { TokenRow } from './token-row';
@@ -72,6 +73,8 @@ const Modals = ({ tokens }: { tokens: AccessToken[] }) => {
         const [kind, id] = entry.split(':');
         const confirm = CONFIRMS.find((c) => c.modal === kind);
         const token = tokens.find((t) => t.id === id);
+        if (kind === MODAL.rename && token)
+          return <RenameDialog key={entry} modal={entry} token={token} />;
         if (!confirm || !token) return null;
 
         return (

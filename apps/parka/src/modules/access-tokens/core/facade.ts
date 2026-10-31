@@ -7,6 +7,8 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
     load: () => trigger('[TRIGGER]_LOAD'),
     create: (name: string, ttlDays: number | null) =>
       trigger('[TRIGGER]_CREATE', { name, ttlDays }),
+    rename: (id: TokenId, name: string) =>
+      trigger('[TRIGGER]_RENAME', { id, name }),
     rotate: (id: TokenId) => trigger('[TRIGGER]_ROTATE', { id }),
     revoke: (id: TokenId) => trigger('[TRIGGER]_REVOKE', { id }),
     remove: (id: TokenId) => trigger('[TRIGGER]_REMOVE', { id }),

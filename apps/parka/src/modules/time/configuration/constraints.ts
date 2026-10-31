@@ -94,3 +94,5 @@ export const ERROR_CODES = {
   load: 'TIME_LOAD',
   render: 'TIME_RENDER',
 } as const;
+
+export const COMMENT_MAX_LENGTH = 2000;

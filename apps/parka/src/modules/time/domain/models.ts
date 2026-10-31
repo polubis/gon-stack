@@ -50,6 +50,20 @@ export type Attachment = {
   mime: string;
 };
 
+/** Note under a task. `bot` names the MCP token that wrote it (never the secret). */
+export type TaskComment = {
+  id: string;
+  body: string;
+  /** ISO time it was written. */
+  createdAt: string;
+  /** ISO time the text last changed; `null` when it never did. */
+  editedAt: string | null;
+  bot: { name: string; ref: string } | null;
+};
+
+/** The account owner: the human side of every comment. */
+export type CommentOwner = { name: string; avatarUrl: string | null };
+
 /** A task waiting for a day: same data as a task, nothing about time. */
 export type BacklogTask = Pick<
   Task,

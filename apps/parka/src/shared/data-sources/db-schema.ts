@@ -7,31 +7,6 @@ export type Json =
   | Json[];
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never;
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json;
-          operationName?: string;
-          query?: string;
-          variables?: Json;
-        };
-        Returns: Json;
-      };
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
   public: {
     Tables: {
       categories: {
@@ -741,6 +716,77 @@ export type Database = {
           },
         ];
       };
+      time_task_comments: {
+        Row: {
+          body: string;
+          bot_name: string | null;
+          bot_ref: string | null;
+          created_at: string;
+          edited_at: string | null;
+          id: string;
+          mcp_token_id: string | null;
+          task_id: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          body: string;
+          bot_name?: string | null;
+          bot_ref?: string | null;
+          created_at?: string;
+          edited_at?: string | null;
+          id?: string;
+          mcp_token_id?: string | null;
+          task_id: string;
+          user_id: string;
+        };
+        Update: {
+          body?: string;
+          bot_name?: string | null;
+          bot_ref?: string | null;
+          created_at?: string;
+          edited_at?: string | null;
+          id?: string;
+          mcp_token_id?: string | null;
+          task_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'time_task_comments_mcp_token_id_fkey';
+            columns: ['mcp_token_id'];
+            isOneToOne: false;
+            referencedRelation: 'mcp_tokens';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'time_task_comments_task_fk';
+            columns: ['user_id', 'task_id'];
+            isOneToOne: false;
+            referencedRelation: 'time_tasks';
+            referencedColumns: ['user_id', 'id'];
+          },
+        ];
+      };
+      time_task_keys: {
+        Row: {
+          last_number: number;
+          prefix: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          last_number?: number;
+          prefix: string;
+          user_id: string;
+        };
+        Update: {
+          last_number?: number;
+          prefix?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       time_tasks: {
         Row: {
           at: string | null;
@@ -856,6 +902,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      mcp_add_task_comment: {
+        Args: { p_body: string; p_task_id: string; p_token: string };
+        Returns: Json;
+      };
       mcp_authenticate: { Args: { p_token: string }; Returns: boolean };
       mcp_create_category: {
         Args: {
@@ -899,6 +949,7 @@ export type Database = {
         Returns: Json;
       };
       mcp_get_task: { Args: { p_id: string; p_token: string }; Returns: Json };
+      mcp_header_user: { Args: Record<PropertyKey, never>; Returns: string };
       mcp_list_categories: { Args: { p_token: string }; Returns: Json };
       mcp_list_expenses: {
         Args: {
@@ -913,6 +964,10 @@ export type Database = {
       };
       mcp_list_priorities: { Args: { p_token: string }; Returns: Json };
       mcp_list_task_attachments: {
+        Args: { p_task_id: string; p_token: string };
+        Returns: Json;
+      };
+      mcp_list_task_comments: {
         Args: { p_task_id: string; p_token: string };
         Returns: Json;
       };
@@ -952,6 +1007,7 @@ export type Database = {
         Returns: Json;
       };
       mcp_user: { Args: { p_token: string }; Returns: string };
+      next_task_key: { Args: { p_user: string }; Returns: string };
       record_field_use: {
         Args: { p_field: string; p_value: string };
         Returns: undefined;
@@ -1085,9 +1141,6 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },

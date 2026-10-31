@@ -23,16 +23,19 @@ export const DEFAULT_TTL = '30';
 
 /** What a client connected with a token can do; mirrors the server tools. */
 export const CAPABILITIES = [
-  'Czytać zadania i wydatki',
-  'Zmieniać status zadania (zrobione / do zrobienia)',
+  'Czytać zadania, kategorie, priorytety i wydatki',
+  'Tworzyć, zmieniać i usuwać zadania oraz ich załączniki',
+  'Zarządzać kategoriami zadań i dodawać priorytety',
+  'Dodawać komentarze do zadań, podpisane nazwą tokenu',
 ] as const;
 
 export const NOT_ALLOWED =
-  'Nic poza tym: bez edycji, tworzenia i usuwania zadań oraz bez zapisu wydatków.';
+  'Nic poza tym: bez zapisu wydatków, edycji i usuwania komentarzy oraz bez dostępu do ustawień konta.';
 
 /** URL ids of the confirmation modals (see `shared/router/modal-stack`). */
 export const MODAL = {
   create: 'token-new',
+  rename: 'token-rename',
   rotate: 'token-rotate',
   revoke: 'token-revoke',
   remove: 'token-delete',

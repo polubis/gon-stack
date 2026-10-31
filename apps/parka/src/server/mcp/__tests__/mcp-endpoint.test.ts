@@ -30,6 +30,16 @@ const ATTACHMENT = {
   mime: 'application/pdf',
 };
 
+const COMMENT = {
+  id: '5d1f7f0e-3b6a-4a3e-9d52-2f6a7c1b9e11',
+  body: 'Done by the bot',
+  createdAt: '2026-10-31T10:00:00.000Z',
+  editedAt: null,
+  author: 'bot',
+  botName: 'Claude Desktop',
+  botRef: '0b9a4a52',
+};
+
 type RpcJson = {
   error: { code: number };
   result: {
@@ -130,6 +140,14 @@ const fakeGateway = (calls: Calls, valid = true): McpGateway => {
             originalSize: file.bytes.byteLength,
           }
         : null;
+    },
+    listTaskComments: async (taskId) => {
+      await record('listTaskComments', taskId);
+      return taskId === 't-1' ? { items: [COMMENT] } : null;
+    },
+    addTaskComment: async (taskId, body) => {
+      await record('addTaskComment', taskId, body);
+      return taskId === 't-1' ? { ...COMMENT, body } : null;
     },
     deleteTaskAttachment: async (id) => {
       await record('deleteTaskAttachment', id);
@@ -233,6 +251,7 @@ describe('mcp tools list', () => {
 
     expect(tools.map((t) => t.name).sort()).toEqual([
       'add_task_attachment',
+      'add_task_comment',
       'create_category',
       'create_priority',
       'create_task',
@@ -245,6 +264,7 @@ describe('mcp tools list', () => {
       'list_expenses',
       'list_priorities',
       'list_task_attachments',
+      'list_task_comments',
       'list_tasks',
       'set_task_status',
       'update_category',
@@ -611,6 +631,123 @@ describe('mcp task management', () => {
     });
 
     expect(json.result.content[0].text).toMatch(/not found/);
+  });
+
+  it('lists the comments of a task with the bot name and ref, never a token', async () => {
+    const { rpc } = setup();
+
+    const { json } = await call(rpc, 'list_task_comments', { taskId: 't-1' });
+
+    expect(json.result.structuredContent).toEqual({ items: [COMMENT] });
+    expect(JSON.stringify(json)).not.toContain(TOKEN);
+  });
+
+  it('adds a comment to a task', async () => {
+    const { rpc, calls } = setup();
+
+    const { json } = await call(rpc, 'add_task_comment', {
+      taskId: 't-1',
+      body: '  Checked  ',
+    });
+
+    expect(json.result.structuredContent).toMatchObject({
+      author: 'bot',
+      botName: 'Claude Desktop',
+      botRef: '0b9a4a52',
+    });
+    expect(calls).toEqual([
+      { name: 'addTaskComment', args: ['t-1', 'Checked'] },
+    ]);
+  });
+
+  it('refuses an empty or oversized comment and a missing task', async () => {
+    const { rpc, calls } = setup();
+
+    const empty = await call(rpc, 'add_task_comment', {
+      taskId: 't-1',
+      body: '   ',
+    });
+    const long = await call(rpc, 'add_task_comment', {
+      taskId: 't-1',
+      body: 'x'.repeat(2001),
+    });
+    const missing = await call(rpc, 'add_task_comment', {
+      taskId: 'missing',
+      body: 'hi',
+    });
+
+    expect(empty.json.result.isError).toBe(true);
+    expect(long.json.result.isError).toBe(true);
+    expect(missing.json.result.content[0].text).toMatch(/not found/);
+    expect(calls).toEqual([
+      { name: 'addTaskComment', args: ['missing', 'hi'] },
+    ]);
+  });
+
+  it('accepts a comment of exactly 2000 characters', async () => {
+    const { rpc, calls } = setup();
+
+    const { json } = await call(rpc, 'add_task_comment', {
+      taskId: 't-1',
+      body: 'x'.repeat(2000),
+    });
+
+    expect(json.result.isError).toBeUndefined();
+    expect(calls).toEqual([
+      { name: 'addTaskComment', args: ['t-1', 'x'.repeat(2000)] },
+    ]);
+  });
+
+  it('refuses a comment without a task or with fields it does not know', async () => {
+    const { rpc, calls } = setup();
+
+    const noTask = await call(rpc, 'add_task_comment', { body: 'hi' });
+    const noBody = await call(rpc, 'add_task_comment', { taskId: 't-1' });
+    const forged = await call(rpc, 'add_task_comment', {
+      taskId: 't-1',
+      body: 'hi',
+      botName: 'Forged',
+    });
+
+    expect(noTask.json.result.isError).toBe(true);
+    expect(noBody.json.result.isError).toBe(true);
+    expect(forged.json.result.isError).toBe(true);
+    expect(calls).toEqual([]);
+  });
+
+  it('says so when listing comments of a task that does not exist', async () => {
+    const { rpc } = setup();
+
+    const { json } = await call(rpc, 'list_task_comments', {
+      taskId: 'missing',
+    });
+
+    expect(json.result.isError).toBe(true);
+    expect(json.result.content[0].text).toMatch(/not found/);
+  });
+
+  it.each([
+    ['list_task_comments', { taskId: 't-1' }],
+    ['add_task_comment', { taskId: 't-1', body: 'hi' }],
+  ])('refuses %s for a token the database rejects', async (name, args) => {
+    const { rpc, calls } = setup({ valid: false });
+
+    const { response } = await rpc('tools/call', { name, arguments: args });
+
+    expect(response.status).toBe(401);
+    expect(calls).toEqual([]);
+  });
+
+  it('keeps the comment author readable without exposing a token', async () => {
+    const { rpc } = setup();
+
+    const { json } = await call(rpc, 'add_task_comment', {
+      taskId: 't-1',
+      body: 'hi',
+    });
+
+    expect(json.result.content[0].text).toContain('Claude Desktop');
+    expect(JSON.stringify(json)).not.toContain(TOKEN);
   });
 
   it('deletes an attachment only when confirmed', async () => {

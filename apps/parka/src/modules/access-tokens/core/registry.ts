@@ -1,6 +1,7 @@
 import type { Store } from './store';
 import { load } from './handlers/load';
 import { create } from './handlers/create';
+import { rename } from './handlers/rename';
 import { rotate } from './handlers/rotate';
 import { revoke } from './handlers/revoke';
 import { remove } from './handlers/remove';
@@ -14,6 +15,7 @@ export const createRegistry = (store: Store) => {
   const register = bus.createRegistry(
     load(store, bus),
     create(store, bus),
+    rename(store, bus),
     rotate(store, bus),
     revoke(store, bus),
     remove(store, bus),
