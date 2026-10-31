@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type AnimationEvent } from 'react';
 
 export type ChangePhase = 'idle' | 'in' | 'flash' | 'out';
 
@@ -21,6 +21,7 @@ type State<T> = {
 
 const FLASH_MS = 1200;
 const EXIT_MS = 300;
+const IN_MS = 400;
 
 /** No matchMedia (tests) counts as reduced: lists then change instantly. */
 const reduced = () =>
@@ -87,6 +88,22 @@ export const useListChanges = <T>(
   const { phases, ghosts } = state;
   const hasPhases = Object.keys(phases).length > 0;
   const hasGhosts = ghosts.length > 0;
+  const hasIn = Object.values(phases).includes('in');
+  // `in` clips overflow only while it grows; flash may outlast it.
+  useEffect(() => {
+    if (!hasIn) return;
+    const timer = setTimeout(
+      () =>
+        setState((s) => ({
+          ...s,
+          phases: Object.fromEntries(
+            Object.entries(s.phases).filter(([, phase]) => phase !== 'in'),
+          ),
+        })),
+      IN_MS,
+    );
+    return () => clearTimeout(timer);
+  }, [phases, hasIn]);
   useEffect(() => {
     if (!hasPhases) return;
     const timer = setTimeout(
@@ -126,6 +143,25 @@ const CLASSES: Record<ChangePhase, string> = {
   in: 'animate-row-in overflow-hidden motion-reduce:animate-none',
   flash: 'animate-row-flash motion-reduce:animate-none',
   out: 'pointer-events-none animate-row-out overflow-hidden motion-reduce:animate-none',
+};
+
+/**
+ * Staggered entrance for rows present at mount. Ends after its first run, so
+ * a later phase change (flash) never replays it. Rows created later skip it.
+ */
+export const useEntrance = (phase: ChangePhase, enabled = true) => {
+  const [mountPhase] = useState(phase);
+  const [done, setDone] = useState(false);
+  return {
+    entering: enabled && mountPhase === 'idle' && !done,
+    onAnimationEnd: (event: AnimationEvent<HTMLElement>) => {
+      if (
+        event.target === event.currentTarget &&
+        event.animationName === 'item-in'
+      )
+        setDone(true);
+    },
+  };
 };
 
 /** Classes and a11y props for a row in the given phase; leaving rows are inert. */

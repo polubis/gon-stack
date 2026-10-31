@@ -6,7 +6,13 @@ import { Button } from '@/shared/ui/controls';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { EmptyState } from '@/shared/ui/empty-state';
 import { ErrorState } from '@/shared/ui/error-state';
-import { changeProps, useListChanges } from '@/shared/ui/list-changes';
+import {
+  changeProps,
+  useEntrance,
+  useListChanges,
+  type ChangePhase,
+} from '@/shared/ui/list-changes';
+import type { Category } from '../domain/models';
 import { cn } from '@repo/react-kit/cn';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { ERROR_CODES } from '../configuration/constraints';
@@ -14,6 +20,45 @@ import { useContext } from './context';
 import { NEW_CATEGORY_MODAL } from './modal-ids';
 import { ModalShell } from './modal-shell';
 import { stagger } from './stagger';
+
+const CategoryRow = ({
+  category: c,
+  phase,
+  at,
+}: {
+  category: Category;
+  phase: ChangePhase;
+  at: number;
+}) => {
+  const change = changeProps(phase);
+  const entrance = useEntrance(phase);
+  return (
+    <li
+      aria-hidden={change['aria-hidden']}
+      inert={change.inert}
+      onAnimationEnd={entrance.onAnimationEnd}
+      style={entrance.entering ? stagger(at) : undefined}
+      className={cn(
+        'border-b border-line last:border-0',
+        entrance.entering && 'animate-item-in motion-reduce:animate-none',
+        change.className,
+      )}
+    >
+      <a
+        href={APP_ROUTER.categoryEdit({ id: c.id })}
+        data-e2e={`categories:row:${c.id}`}
+        aria-label={`Edytuj kategorię ${categoryLabel(c.name)}`}
+        className="flex w-full items-center gap-3 px-3 py-3 transition-colors hover:bg-hover-soft focus-visible:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand"
+      >
+        <CategoryAvatar category={c} />
+        <span className="min-w-0 flex-1 truncate text-sm font-medium">
+          {categoryLabel(c.name)}
+        </span>
+        <ChevronRight className="h-5 w-5 text-ink-soft" aria-hidden="true" />
+      </a>
+    </li>
+  );
+};
 
 /** Browse list of the categories; a row opens its editor, "Dodaj" stacks the form. */
 export const CategoriesDialog = ({ modal }: { modal: string }) => {
@@ -69,35 +114,8 @@ export const CategoriesDialog = ({ modal }: { modal: string }) => {
             data-e2e="categories:list"
             className="max-h-80 overflow-y-auto overflow-x-hidden rounded-2xl border border-line bg-card"
           >
-            {rows.map(({ key, item: c, phase, at }) => (
-              <li
-                key={key}
-                style={phase === 'idle' ? stagger(at) : undefined}
-                aria-hidden={changeProps(phase)['aria-hidden']}
-                inert={changeProps(phase).inert}
-                className={cn(
-                  'border-b border-line last:border-0',
-                  phase === 'idle' &&
-                    'animate-item-in motion-reduce:animate-none',
-                  changeProps(phase).className,
-                )}
-              >
-                <a
-                  href={APP_ROUTER.categoryEdit({ id: c.id })}
-                  data-e2e={`categories:row:${c.id}`}
-                  aria-label={`Edytuj kategorię ${categoryLabel(c.name)}`}
-                  className="flex w-full items-center gap-3 px-3 py-3 transition-colors hover:bg-hover-soft focus-visible:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand"
-                >
-                  <CategoryAvatar category={c} />
-                  <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                    {categoryLabel(c.name)}
-                  </span>
-                  <ChevronRight
-                    className="h-5 w-5 text-ink-soft"
-                    aria-hidden="true"
-                  />
-                </a>
-              </li>
+            {rows.map(({ key, item, phase, at }) => (
+              <CategoryRow key={key} category={item} phase={phase} at={at} />
             ))}
           </ul>
         </>

@@ -1,6 +1,11 @@
 import { act, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { changeProps, useListChanges } from '../list-changes';
+import {
+  changeProps,
+  useEntrance,
+  useListChanges,
+  type ChangePhase,
+} from '../list-changes';
 
 type Row = { id: string; name: string };
 
@@ -23,6 +28,34 @@ const List = ({ rows, scope }: { rows: Row[]; scope?: string }) => {
         );
       })}
     </ul>
+  );
+};
+
+const Staggered = ({ rows }: { rows: Row[] }) => {
+  const entries = useListChanges(rows, (r) => r.id);
+  return (
+    <ul>
+      {entries.map(({ key, item, phase }) => (
+        <Entering key={key} name={item.name} phase={phase} id={key} />
+      ))}
+    </ul>
+  );
+};
+
+const Entering = ({
+  id,
+  name,
+  phase,
+}: {
+  id: string;
+  name: string;
+  phase: ChangePhase;
+}) => {
+  const entrance = useEntrance(phase);
+  return (
+    <li data-testid={id} className={entrance.entering ? 'enter' : ''}>
+      {name}
+    </li>
   );
 };
 
@@ -82,6 +115,39 @@ describe('list change transitions', () => {
 
     act(() => void vi.advanceTimersByTime(400));
     expect(screen.queryByTestId('a')).not.toBeInTheDocument();
+  });
+
+  it('stops clipping a created row once it has grown in', () => {
+    const { rerender } = render(<List rows={[a]} />);
+
+    rerender(<List rows={[a, b]} />);
+    act(() => void vi.advanceTimersByTime(500));
+
+    expect(screen.getByTestId('b').className).toBe('');
+  });
+
+  it('keeps a flash running past the growth of a created row', () => {
+    const { rerender } = render(<List rows={[a, b]} />);
+
+    const c = { id: 'c', name: 'Gamma' };
+    rerender(<List rows={[a, b, c]} />);
+    rerender(<List rows={[{ ...a, name: 'Alpha 2' }, b, c]} />);
+    act(() => void vi.advanceTimersByTime(500));
+
+    expect(screen.getByTestId('a')).toHaveClass('animate-row-flash');
+  });
+
+  it('never replays the entrance on a row that changed later', () => {
+    const { rerender } = render(<Staggered rows={[a]} />);
+    expect(screen.getByTestId('a')).toHaveClass('enter');
+
+    rerender(<Staggered rows={[a, b]} />);
+    expect(screen.getByTestId('b')).not.toHaveClass('enter');
+    act(() => void vi.advanceTimersByTime(1500));
+    rerender(<Staggered rows={[a, { ...b, name: 'Beta 2' }]} />);
+    act(() => void vi.advanceTimersByTime(1500));
+
+    expect(screen.getByTestId('b')).not.toHaveClass('enter');
   });
 
   it('swaps rows silently when the scope changes', () => {

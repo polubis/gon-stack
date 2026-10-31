@@ -1,7 +1,11 @@
 import { CheckCircle2, Circle, LoaderCircle, Pencil } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { openModal } from '@/shared/router/modal-stack';
-import { changeProps, type ChangePhase } from '@/shared/ui/list-changes';
+import {
+  changeProps,
+  useEntrance,
+  type ChangePhase,
+} from '@/shared/ui/list-changes';
 import type { BacklogTask, Task } from '../domain/models';
 import { useContext } from './context';
 import { editBacklogModal, editTaskModal, viewTaskModal } from './modal-ids';
@@ -45,17 +49,20 @@ export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
   const category = categories.find((item) => item.id === task.categoryId);
   const priority = priorities.find((item) => item.id === task.priorityId);
   const change = changeProps(phase);
-  const stepped = phase === 'idle' ? step : undefined;
+  const entrance = useEntrance(phase, step !== undefined);
   return (
     <li
       aria-current={now ? 'time' : undefined}
       data-e2e={`time:task:${task.id}`}
       aria-hidden={change['aria-hidden']}
       inert={change.inert}
-      style={stepped === undefined ? undefined : stagger(stepped)}
+      onAnimationEnd={entrance.onAnimationEnd}
+      style={
+        entrance.entering && step !== undefined ? stagger(step) : undefined
+      }
       className={cn(
         'flex items-start gap-0.5 rounded-xl py-1 pl-1 pr-0.5 transition-colors hover:bg-hover-soft',
-        stepped !== undefined && 'animate-item-in motion-reduce:animate-none',
+        entrance.entering && 'animate-item-in motion-reduce:animate-none',
         change.className,
         now && 'bg-brand-softer',
       )}

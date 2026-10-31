@@ -24,7 +24,9 @@ export const Main = () => {
   const unscheduled = day.filter((task) => task.at === null);
   const scheduledRows = useListChanges(scheduled, taskKey, scope);
   const unscheduledRows = useListChanges(unscheduled, taskKey, scope);
-  if (day.length === 0) return <EmptyPeriod kind="day" />;
+  // Rows include the one still leaving: the empty state waits for its exit.
+  if (scheduledRows.length + unscheduledRows.length === 0)
+    return <EmptyPeriod kind="day" />;
 
   const nowIndex = anchor === now.day ? nowIndexOf(scheduled, now.time) : -1;
 

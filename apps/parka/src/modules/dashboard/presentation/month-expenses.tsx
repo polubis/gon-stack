@@ -106,14 +106,18 @@ const ExpenseList = ({
   categories,
   onSelect,
   scope,
+  empty,
 }: {
   expenses: Expense[];
   categories: Category[];
   onSelect: (id: ExpenseId) => void;
   /** Changes of the list scope (period, filter) swap rows without animation. */
   scope: string;
+  /** Shown once no row is left, after the last one finished leaving. */
+  empty?: ReactNode;
 }) => {
   const rows = useListChanges(expenses, expenseKey, scope);
+  if (rows.length === 0 && empty) return empty;
   return (
     <ul className="divide-y divide-line pr-2">
       {rows.map(({ key, item: e, phase }) => {
@@ -325,33 +329,32 @@ export const MonthExpenses = ({
         ) : null}
 
         <div className={cn('relative overflow-hidden', EXPENSES_LIST_HEIGHT)}>
-          {visible.length === 0 ? (
-            <EmptyState
-              variant="card"
-              data-e2e="dashboard:expenses-empty"
-              className="h-full"
-              icon={Receipt}
-              title="Brak wydatków w tym okresie."
-              description={`Nie dodano jeszcze wydatków: ${periodTitle(period)}.`}
-              action={
-                <Button
-                  href={APP_ROUTER.newExpense()}
-                  data-e2e="dashboard:expense-empty-new"
-                  className="w-auto px-3 py-1.5"
-                >
-                  <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  Dodaj wydatek
-                </Button>
-              }
-            />
-          ) : (
-            <ExpenseList
-              expenses={visible.slice(0, MAX_VISIBLE_EXPENSES)}
-              categories={categories}
-              onSelect={onSelect}
-              scope={scope}
-            />
-          )}
+          <ExpenseList
+            expenses={visible.slice(0, MAX_VISIBLE_EXPENSES)}
+            categories={categories}
+            onSelect={onSelect}
+            scope={scope}
+            empty={
+              <EmptyState
+                variant="card"
+                data-e2e="dashboard:expenses-empty"
+                className="h-full"
+                icon={Receipt}
+                title="Brak wydatków w tym okresie."
+                description={`Nie dodano jeszcze wydatków: ${periodTitle(period)}.`}
+                action={
+                  <Button
+                    href={APP_ROUTER.newExpense()}
+                    data-e2e="dashboard:expense-empty-new"
+                    className="w-auto px-3 py-1.5"
+                  >
+                    <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    Dodaj wydatek
+                  </Button>
+                }
+              />
+            }
+          />
           {visible.length > MAX_VISIBLE_EXPENSES && (
             <ShowAllFade
               onClick={all.open}
