@@ -168,6 +168,23 @@ const attachment = () =>
     mime: z.string(),
   });
 
+const comment = () =>
+  z.object({
+    id: z.string(),
+    body: z.string(),
+    createdAt: z.string(),
+    editedAt: z.string().nullable(),
+    author: z.enum(['owner', 'bot']),
+    botName: z
+      .string()
+      .nullable()
+      .describe('Name of the token that wrote it (bot comments)'),
+    botRef: z
+      .string()
+      .nullable()
+      .describe('Short id of that token, safe to show (never the secret)'),
+  });
+
 const decodeBase64 = (value: string): ArrayBuffer => {
   try {
     const binary = atob(value);
@@ -466,6 +483,37 @@ export const MCP_TOOLS: readonly RegisteredTool[] = [
       if (!(await gateway.deleteTaskAttachment(args.id)))
         throw new ToolError(`Attachment "${args.id}" not found`);
       return { id: args.id, deleted: true as const };
+    },
+  }),
+  defineTool({
+    name: 'list_task_comments',
+    title: 'List task comments',
+    description:
+      'Lists the comments under a task, oldest first. Each says who wrote it: the account owner or a bot (the name and short id of its token).',
+    input: z.strictObject({ taskId: id() }),
+    output: z.object({ items: z.array(comment()) }),
+    annotations: READ_ONLY,
+    run: async (args, gateway) => {
+      const found = await gateway.listTaskComments(args.taskId);
+      if (!found) throw new ToolError(`Task "${args.taskId}" not found`);
+      return found as { items: z.input<ReturnType<typeof comment>>[] };
+    },
+  }),
+  defineTool({
+    name: 'add_task_comment',
+    title: 'Comment on a task',
+    description:
+      'Adds a comment under a task. It is shown to the owner as written by this bot, signed with the name of the token you are connected with. A task takes at most 200 comments.',
+    input: z.strictObject({
+      taskId: id(),
+      body: z.string().trim().min(1).max(2000),
+    }),
+    output: comment(),
+    annotations: WRITE,
+    run: async (args, gateway) => {
+      const added = await gateway.addTaskComment(args.taskId, args.body);
+      if (!added) throw new ToolError(`Task "${args.taskId}" not found`);
+      return added as z.input<ReturnType<typeof comment>>;
     },
   }),
   defineTool({

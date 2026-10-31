@@ -82,3 +82,13 @@ export const deleteMcpTokenSchema = () =>
       writeErrors,
     ]),
   });
+
+/** The name is how a comment written by this token signs itself. */
+export const renameMcpTokenSchema = () =>
+  z.object({
+    in: z.object({ id: z.uuid(), name: z.string().trim().min(1).max(60) }),
+    out: z.union([
+      z.object({ code: z.literal(200), data: mcpToken() }),
+      writeErrors,
+    ]),
+  });

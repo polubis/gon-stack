@@ -214,3 +214,67 @@ export const deleteTaskAttachmentSchema = () =>
       writeErrors,
     ]),
   });
+
+export const COMMENT_MAX_LENGTH = 2000;
+
+const commentBody = () => z.string().trim().min(1).max(COMMENT_MAX_LENGTH);
+
+/** `bot` names the MCP token that wrote it (never the secret); `null` is the owner. */
+const taskComment = () =>
+  z.object({
+    id: z.string().min(1),
+    body: z.string().min(1),
+    createdAt: z.string(),
+    /** Set when the text was changed after it was written. */
+    editedAt: z.string().nullable(),
+    bot: z
+      .object({ name: z.string().min(1), ref: z.string().min(1) })
+      .nullable(),
+  });
+
+export const listTaskCommentsSchema = () =>
+  z.object({
+    in: z.object({ id: z.string().min(1) }),
+    out: z.union([
+      z.object({
+        code: z.literal(200),
+        data: z.object({
+          /** Account owner: who the human side of every comment is. */
+          owner: z.object({
+            name: z.string().min(1),
+            avatarUrl: z.string().nullable(),
+          }),
+          items: z.array(taskComment()),
+        }),
+      }),
+      writeErrors,
+    ]),
+  });
+
+export const createTaskCommentSchema = () =>
+  z.object({
+    in: z.object({ id: z.string().min(1), body: commentBody() }),
+    out: z.union([
+      z.object({ code: z.literal(201), data: taskComment() }),
+      conflictOut(),
+      writeErrors,
+    ]),
+  });
+
+export const updateTaskCommentSchema = () =>
+  z.object({
+    in: z.object({ id: z.uuid(), body: commentBody() }),
+    out: z.union([
+      z.object({ code: z.literal(200), data: taskComment() }),
+      writeErrors,
+    ]),
+  });
+
+export const deleteTaskCommentSchema = () =>
+  z.object({
+    in: z.object({ id: z.uuid() }),
+    out: z.union([
+      z.object({ code: z.literal(200), ok: z.literal(true) }),
+      writeErrors,
+    ]),
+  });

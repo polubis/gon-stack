@@ -116,3 +116,13 @@ export const viewedAttachmentIdOf = (modal: string): string | null =>
   modal.startsWith(VIEW_ATTACHMENT_PREFIX)
     ? modal.slice(VIEW_ATTACHMENT_PREFIX.length)
     : null;
+
+const DELETE_COMMENT_PREFIX = 'comment-delete:';
+
+export const deleteCommentModal = (id: string): string =>
+  `${DELETE_COMMENT_PREFIX}${id}`;
+
+export const deletedCommentIdOf = (modal: string): string | null =>
+  modal.startsWith(DELETE_COMMENT_PREFIX)
+    ? modal.slice(DELETE_COMMENT_PREFIX.length)
+    : null;

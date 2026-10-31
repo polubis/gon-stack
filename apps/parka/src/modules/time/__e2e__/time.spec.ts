@@ -17,6 +17,7 @@ const BACKLOG_EMAIL = `e2e-time-backlog-${Date.now()}@parka.test`;
 const DESCRIPTION_EMAIL = `e2e-time-description-${Date.now()}@parka.test`;
 const POPOVER_EMAIL = `e2e-time-popover-${Date.now()}@parka.test`;
 const ATTACHMENT_EMAIL = `e2e-time-attachment-${Date.now()}@parka.test`;
+const COMMENT_EMAIL = `e2e-time-comment-${Date.now()}@parka.test`;
 const PASSWORD = 'secret123';
 const ATTACHMENT_TEXT = 'Treść załącznika E2E';
 const LONG_TITLE = `Długi tytuł ${'x'.repeat(147)}`;
@@ -737,6 +738,172 @@ const commands = {
     expect(removed.structuredContent).toMatchObject({ deleted: true });
     expect((await page.request.get(href)).status()).toBe(404);
   },
+  'i register an account for comments': async (ctx) => {
+    await registerAndConfirm(ctx, COMMENT_EMAIL, PASSWORD);
+    await ctx.page.waitForLoadState('networkidle');
+  },
+
+  'i comment on a task and the comment survives a reload': async ({
+    page,
+    getByE2e,
+  }) => {
+    await open(page, APP_ROUTER.time({ date: DAY }));
+    await page
+      .getByRole('button', { name: 'Dodaj', exact: true })
+      .first()
+      .click();
+    await page.getByRole('menuitem', { name: 'Zadanie', exact: true }).click();
+    await getByE2e('time:task-dialog')
+      .getByRole('textbox', { name: 'Nazwa' })
+      .fill('Zadanie z komentarzem E2E');
+    await Promise.all([
+      synced(page, 'POST', 201),
+      getByE2e('time:task-save').click(),
+    ]);
+    await page
+      .getByRole('button', {
+        name: 'Szczegóły zadania: Zadanie z komentarzem E2E',
+      })
+      .click();
+    await expect(getByE2e('time:comments')).toContainText('Brak komentarzy');
+    await getByE2e('time:comment-add').click();
+    await getByE2e('time:comment-input').fill('Pierwszy komentarz E2E');
+    await Promise.all([
+      page.waitForResponse(
+        (r) => r.url().includes('/comments/') && r.status() === 201,
+      ),
+      getByE2e('time:comment-save').click(),
+    ]);
+    await reload(page);
+    await expect(getByE2e('time:comments')).toContainText(
+      'Pierwszy komentarz E2E',
+    );
+  },
+
+  'the mcp bot comments under its token name and a rename follows': async ({
+    page,
+    getByE2e,
+  }) => {
+    const created = await page.request.post(API_ROUTER.mcpTokens(), {
+      data: { name: 'Bot E2E', ttlDays: 1 },
+    });
+    const { token, item } = (
+      (await created.json()) as {
+        data: { token: string; item: { id: string } };
+      }
+    ).data;
+    const call = async (name: string, args: Record<string, unknown>) => {
+      const response = await page.request.post(API_ROUTER.mcp(), {
+        headers: { Authorization: `Bearer ${token}` },
+        data: {
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'tools/call',
+          params: { name, arguments: args },
+        },
+      });
+      expect(response.status()).toBe(200);
+      return (
+        (await response.json()) as {
+          result: {
+            isError?: boolean;
+            structuredContent: {
+              items: { id: string }[];
+              botName: string;
+              botRef: string;
+            };
+          };
+        }
+      ).result;
+    };
+    const tasks = await call('list_tasks', {});
+    const taskId = tasks.structuredContent.items[0]!.id;
+    const added = await call('add_task_comment', {
+      taskId,
+      body: 'Komentarz bota E2E',
+    });
+    expect(added.structuredContent).toMatchObject({
+      botName: 'Bot E2E',
+      botRef: item.id.replace(/-/g, '').slice(0, 8),
+    });
+    expect(JSON.stringify(added)).not.toContain(token);
+
+    await open(page, APP_ROUTER.accessTokens());
+    await page
+      .getByRole('button', { name: 'Zmień nazwę tokenu Bot E2E' })
+      .click();
+    const dialog = page.getByRole('dialog', { name: 'Nazwa tokenu' });
+    await dialog.getByRole('textbox', { name: 'Nazwa' }).fill('Bot po zmianie');
+    await Promise.all([
+      page.waitForResponse(
+        (r) =>
+          r.url().includes('/api/mcp-tokens/') &&
+          r.request().method() === 'PATCH' &&
+          r.status() === 200,
+      ),
+      dialog.getByRole('button', { name: 'Zapisz nazwę' }).click(),
+    ]);
+    await expect(
+      page.getByRole('heading', { name: 'Bot po zmianie' }),
+    ).toBeVisible();
+
+    await open(page, APP_ROUTER.time({ date: DAY }));
+    await page
+      .getByRole('button', {
+        name: 'Szczegóły zadania: Zadanie z komentarzem E2E',
+      })
+      .click();
+    const comments = getByE2e('time:comments');
+    await expect(comments).toContainText('Komentarz bota E2E');
+    await expect(comments).toContainText('Bot po zmianie');
+    await expect(comments).toContainText('Bot MCP');
+    await expect(comments).not.toContainText(token);
+  },
+
+  'the owner edits the bot comment and its avatar splits': async ({
+    page,
+    getByE2e,
+  }) => {
+    await getByE2e('time:comments')
+      .getByRole('button', { name: /^Edytuj komentarz: Bot po zmianie/ })
+      .click();
+    await getByE2e('time:comment-input').fill('Komentarz bota po edycji');
+    await Promise.all([
+      page.waitForResponse(
+        (r) =>
+          r.url().includes('/api/time/comments/') &&
+          r.request().method() === 'PUT' &&
+          r.status() === 200,
+      ),
+      getByE2e('time:comment-save').click(),
+    ]);
+    await expect(
+      getByE2e('time:comments').getByRole('img', { name: /^Autorzy:/ }),
+    ).toBeVisible();
+    await expect(getByE2e('time:comments')).toContainText('(edytowano)');
+  },
+
+  'i delete a comment after confirming and it stays gone': async ({
+    page,
+    getByE2e,
+  }) => {
+    await getByE2e('time:comments')
+      .getByRole('button', { name: /^Usuń komentarz/ })
+      .first()
+      .click();
+    await expect(page).toHaveURL(/modal=comment-delete/);
+    await Promise.all([
+      page.waitForResponse(
+        (r) =>
+          r.url().includes('/api/time/comments/') &&
+          r.request().method() === 'DELETE' &&
+          r.status() === 200,
+      ),
+      getByE2e('time:delete-confirm').click(),
+    ]);
+    await reload(page);
+    await expect(getByE2e('time:comments')).toContainText('Komentarze (1)');
+  },
 } satisfies CommandRegistry<Ctx>;
 
 test('time works against the real Supabase backend', async ({ e2e }) => {
@@ -798,6 +965,19 @@ test('task attachments upload, open and delete on the real backend', async ({
     ['i delete the attachment after confirming and it stays gone'],
     ['a big photo is reduced in quality, keeps its size and opens full screen'],
     ['the mcp server lists, adds a reduced photo and deletes attachments'],
+  );
+});
+
+test('task comments, bot comments and renamed tokens on the real backend', async ({
+  e2e,
+}) => {
+  test.setTimeout(150_000);
+  await interpreter(commands, e2e)(
+    ['i register an account for comments'],
+    ['i comment on a task and the comment survives a reload'],
+    ['the mcp bot comments under its token name and a rename follows'],
+    ['the owner edits the bot comment and its avatar splits'],
+    ['i delete a comment after confirming and it stays gone'],
   );
 });
 

@@ -31,6 +31,14 @@ export const ModalShell = ({
         <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-overlay" />
         <Dialog.Content
           data-e2e={dataE2e}
+          onEscapeKeyDown={(e) => {
+            // A field inside owns Escape (e.g. cancels its own editor).
+            if (
+              e.target instanceof Element &&
+              e.target.closest('[data-owns-escape]')
+            )
+              e.preventDefault();
+          }}
           onOpenAutoFocus={(e) => {
             // Focus the dialog itself: no input grabs focus, so no mobile keyboard pops up.
             e.preventDefault();

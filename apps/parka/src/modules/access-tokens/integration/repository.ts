@@ -3,6 +3,7 @@ import {
   createMcpTokenSchema,
   deleteMcpTokenSchema,
   listMcpTokensSchema,
+  renameMcpTokenSchema,
   revokeMcpTokenSchema,
   rotateMcpTokenSchema,
 } from '@schemas/mcp-tokens';
@@ -14,6 +15,7 @@ type ListOut = z.infer<ReturnType<typeof listMcpTokensSchema>>['out'];
 type CreateOut = z.infer<ReturnType<typeof createMcpTokenSchema>>['out'];
 type RotateOut = z.infer<ReturnType<typeof rotateMcpTokenSchema>>['out'];
 type RevokeOut = z.infer<ReturnType<typeof revokeMcpTokenSchema>>['out'];
+type RenameOut = z.infer<ReturnType<typeof renameMcpTokenSchema>>['out'];
 type DeleteOut = z.infer<ReturnType<typeof deleteMcpTokenSchema>>['out'];
 
 /** Astro treats a body-less write as a form post: always send JSON. */
@@ -67,6 +69,21 @@ export const postRevocation = async (id: TokenId): Promise<AccessToken> => {
     body: '{}',
   });
   const json = (await response.json()) as RevokeOut;
+  if (json.code !== 200) throw new Error(json.message);
+  return toAccessToken(json.data);
+};
+
+/** Only the label changes: comments written by this token sign with it. */
+export const patchTokenName = async (
+  id: TokenId,
+  name: string,
+): Promise<AccessToken> => {
+  const response = await fetch(API_ROUTER.mcpTokenById(id), {
+    method: 'PATCH',
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ name }),
+  });
+  const json = (await response.json()) as RenameOut;
   if (json.code !== 200) throw new Error(json.message);
   return toAccessToken(json.data);
 };

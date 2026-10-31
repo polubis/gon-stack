@@ -51,6 +51,15 @@ export const TIME_E2E_IDS = [
   'time:attachment-add',
   'time:attachment-input',
   'time:attachment-viewer',
+  'time:comments',
+  'time:comments-skeleton',
+  'time:comments-error',
+  'time:comments-empty',
+  'time:comment-add',
+  'time:comment-form',
+  'time:comment-input',
+  'time:comment-save',
+  'time:comment-cancel',
 ] as const;
 
 export type TimeDynamicE2eId =
@@ -70,6 +79,12 @@ export type TimeDynamicE2eId =
   | `time:task-date:${string | number}`
   | `time:attachment:${string}`
   | `time:attachment-thumb:${string}`
-  | `time:attachment-delete:${string}`;
+  | `time:attachment-delete:${string}`
+  | `time:comment:${string}`
+  | `time:comment-avatar:${string}`
+  | `time:comment-author:${string}`
+  | `time:comment-time:${string}`
+  | `time:comment-edit:${string}`
+  | `time:comment-delete:${string}`;
 
 export type TimeE2eId = (typeof TIME_E2E_IDS)[number] | TimeDynamicE2eId;

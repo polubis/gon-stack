@@ -4,6 +4,7 @@ import {
   CircleSlash,
   Clock,
   Loader2,
+  Pencil,
   RefreshCw,
   Trash2,
   type LucideIcon,
@@ -114,6 +115,17 @@ export const TokenRow = ({
       </dl>
 
       <div className="flex flex-wrap gap-2">
+        <Button
+          variant="ghost"
+          className="w-auto px-3 py-2"
+          data-e2e={`access-tokens:rename:${token.id}`}
+          aria-label={`Zmień nazwę tokenu ${token.name}`}
+          disabled={busy}
+          onClick={ask('rename')}
+        >
+          <Pencil className="h-4 w-4" aria-hidden="true" />
+          Nazwa
+        </Button>
         {revoked ? null : (
           <>
             <Button

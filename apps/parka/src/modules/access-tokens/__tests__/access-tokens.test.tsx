@@ -44,10 +44,11 @@ afterAll(() => server.close());
 /** In-memory stand-in for the token endpoints. */
 const stubApi = (
   initial: Item[],
-  overrides: { createStatus?: number } = {},
+  overrides: { createStatus?: number; renameStatus?: number } = {},
 ) => {
   let tokens = [...initial];
   const created: unknown[] = [];
+  const renamed: unknown[] = [];
 
   server.use(
     http.get('/api/mcp-tokens/', () =>
@@ -90,13 +91,30 @@ const stubApi = (
         data: tokens.find((t) => t.id === params.id),
       });
     }),
+    http.patch('/api/mcp-tokens/:id/', async ({ params, request }) => {
+      const body = (await request.json()) as { name: string };
+      renamed.push(body);
+      if (overrides.renameStatus && overrides.renameStatus !== 200)
+        return HttpResponse.json({
+          code: overrides.renameStatus,
+          type: 'internal-server',
+          message: 'boom',
+        });
+      tokens = tokens.map((t) =>
+        t.id === params.id ? { ...t, name: body.name } : t,
+      );
+      return HttpResponse.json({
+        code: 200,
+        data: tokens.find((t) => t.id === params.id),
+      });
+    }),
     http.delete('/api/mcp-tokens/:id/', ({ params }) => {
       tokens = tokens.filter((t) => t.id !== params.id);
       return HttpResponse.json({ code: 200, ok: true });
     }),
   );
 
-  return { created };
+  return { created, renamed };
 };
 
 const setup = async (initial: Item[], overrides = {}) => {
@@ -276,6 +294,65 @@ describe('access token creation', () => {
 });
 
 describe('access token management', () => {
+  it('renames a token so its comments sign with the new name', async () => {
+    const { user, renamed } = await setup([item()]);
+
+    await user.click(
+      screen.getByRole('button', { name: 'Zmień nazwę tokenu Claude Desktop' }),
+    );
+    const dialog = await screen.findByRole('dialog', { name: 'Nazwa tokenu' });
+    const input = within(dialog).getByRole('textbox', { name: 'Nazwa' });
+    await user.clear(input);
+    await user.type(input, 'Asystent domowy');
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Zapisz nazwę' }),
+    );
+
+    expect(
+      await screen.findByText('Zmieniono nazwę tokenu.'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Asystent domowy' }),
+    ).toBeInTheDocument();
+    expect(renamed).toEqual([{ name: 'Asystent domowy' }]);
+  });
+
+  it('does not submit an unchanged or blank name', async () => {
+    const { user } = await setup([item()]);
+
+    await user.click(
+      screen.getByRole('button', { name: 'Zmień nazwę tokenu Claude Desktop' }),
+    );
+    const dialog = await screen.findByRole('dialog', { name: 'Nazwa tokenu' });
+    const save = within(dialog).getByRole('button', { name: 'Zapisz nazwę' });
+    expect(save).toBeDisabled();
+
+    await user.clear(within(dialog).getByRole('textbox', { name: 'Nazwa' }));
+    expect(save).toBeDisabled();
+  });
+
+  it('restores the name and explains when renaming fails', async () => {
+    const { user } = await setup([item()], { renameStatus: 500 });
+
+    await user.click(
+      screen.getByRole('button', { name: 'Zmień nazwę tokenu Claude Desktop' }),
+    );
+    const dialog = await screen.findByRole('dialog', { name: 'Nazwa tokenu' });
+    const input = within(dialog).getByRole('textbox', { name: 'Nazwa' });
+    await user.clear(input);
+    await user.type(input, 'Nowa');
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Zapisz nazwę' }),
+    );
+
+    expect(
+      await screen.findByText('ACCESS_TOKEN_RENAME_FAILED'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Claude Desktop' }),
+    ).toBeInTheDocument();
+  });
+
   it('disables a token only after confirmation', async () => {
     const { user } = await setup([item()]);
 

@@ -16,6 +16,9 @@ export const ACCESS_TOKENS_E2E_IDS = [
   'access-tokens:secret-done',
   'access-tokens:confirm-dialog',
   'access-tokens:confirm',
+  'access-tokens:rename-form',
+  'access-tokens:rename-name',
+  'access-tokens:rename-submit',
 ] as const;
 
 export type AccessTokensE2eDynamicId =
@@ -23,6 +26,7 @@ export type AccessTokensE2eDynamicId =
   | `access-tokens:status:${string}`
   | `access-tokens:mask:${string}`
   | `access-tokens:last-used:${string}`
+  | `access-tokens:rename:${string}`
   | `access-tokens:rotate:${string}`
   | `access-tokens:revoke:${string}`
   | `access-tokens:delete:${string}`;

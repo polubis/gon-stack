@@ -79,6 +79,15 @@ export const setupTimeBackend = () => {
     attachments: {} as Record<string, Json[]>,
     failAttachmentReads: false,
     failAttachmentWrites: false,
+    /** Comments per task id and who owns the account. */
+    comments: {} as Record<string, Json[]>,
+    owner: { name: 'Anna Kowalska', avatarUrl: null } as Json,
+    failCommentReads: false,
+    failCommentWrites: false,
+    /** What a failing comment write answers; defaults to a server error. */
+    commentFailure: null as Json | null,
+    /** Slows comment writes, to see the app before the server answers. */
+    commentDelayMs: 0,
     uploadResult: {
       id: 'a-new',
       name: 'file',
@@ -155,6 +164,62 @@ export const setupTimeBackend = () => {
       for (const key of Object.keys(state.attachments))
         state.attachments[key] = state.attachments[key]!.filter(
           (item) => item.id !== params.id,
+        );
+      return HttpResponse.json({ code: 200, ok: true });
+    }),
+    http.get('/api/time/tasks/:id/comments/', async ({ request, params }) => {
+      calls.push({ method: 'GET', url: request.url });
+      if (state.failCommentReads) return HttpResponse.json(FAILURE);
+      return HttpResponse.json({
+        code: 200,
+        data: {
+          owner: state.owner,
+          items: state.comments[params.id as string] ?? [],
+        },
+      });
+    }),
+    http.post('/api/time/tasks/:id/comments/', async ({ request, params }) => {
+      const body = await record(request);
+      if (state.commentDelayMs) await delay(state.commentDelayMs);
+      if (state.failCommentWrites)
+        return HttpResponse.json(state.commentFailure ?? FAILURE);
+      const id = params.id as string;
+      const saved = {
+        id: `c-${(state.comments[id]?.length ?? 0) + 1}`,
+        body: body!.body,
+        createdAt: '2026-10-31T10:00:00.000Z',
+        editedAt: null,
+        bot: null,
+      };
+      state.comments[id] = [...(state.comments[id] ?? []), saved];
+      return HttpResponse.json({ code: 201, data: saved });
+    }),
+    http.put('/api/time/comments/:id/', async ({ request, params }) => {
+      const body = await record(request);
+      if (state.commentDelayMs) await delay(state.commentDelayMs);
+      if (state.failCommentWrites)
+        return HttpResponse.json(state.commentFailure ?? FAILURE);
+      let saved: Json | undefined;
+      for (const key of Object.keys(state.comments))
+        state.comments[key] = state.comments[key]!.map((c) => {
+          if (c.id !== params.id) return c;
+          saved = {
+            ...c,
+            body: body!.body,
+            editedAt: '2026-10-31T11:00:00.000Z',
+          };
+          return saved;
+        });
+      return HttpResponse.json({ code: 200, data: saved });
+    }),
+    http.delete('/api/time/comments/:id/', async ({ request, params }) => {
+      await record(request);
+      if (state.commentDelayMs) await delay(state.commentDelayMs);
+      if (state.failCommentWrites)
+        return HttpResponse.json(state.commentFailure ?? FAILURE);
+      for (const key of Object.keys(state.comments))
+        state.comments[key] = state.comments[key]!.filter(
+          (c) => c.id !== params.id,
         );
       return HttpResponse.json({ code: 200, ok: true });
     }),
@@ -291,6 +356,12 @@ export const setupTimeBackend = () => {
     state.attachments = {};
     state.failAttachmentReads = false;
     state.failAttachmentWrites = false;
+    state.comments = {};
+    state.failCommentReads = false;
+    state.failCommentWrites = false;
+    state.commentFailure = null;
+    state.commentDelayMs = 0;
+    state.owner = { name: 'Anna Kowalska', avatarUrl: null };
   });
   beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
   afterEach(() => server.resetHandlers());
