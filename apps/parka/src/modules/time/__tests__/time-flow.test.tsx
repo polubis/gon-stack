@@ -469,6 +469,37 @@ describe('time task maintenance', () => {
     expect(backend.writes()[0]!.url).toContain('/api/time/tasks/t-1/');
   });
 
+  it('lets the last deleted task leave before the empty state shows', async () => {
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn(() => ({
+        matches: false,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      })),
+    );
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    renderTime();
+    await user.click(await row('Raport miesięczny'));
+    await user.click(
+      within(await screen.findByRole('dialog')).getByRole('button', {
+        name: 'Usuń',
+      }),
+    );
+    await user.click(
+      within(screen.getAllByRole('dialog').at(-1)!).getByRole('button', {
+        name: 'Usuń',
+      }),
+    );
+
+    expect(screen.queryByRole('heading', { name: 'Brak zadań' })).toBeNull();
+    expect(
+      await screen.findByRole('heading', { name: 'Brak zadań' }),
+    ).toBeVisible();
+    vi.unstubAllGlobals();
+  });
+
   it('opens details, not the editor, when the row is clicked', async () => {
     const user = userEvent.setup();
     backend.seed([task()]);
