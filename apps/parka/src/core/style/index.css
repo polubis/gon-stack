@@ -254,6 +254,45 @@
     }
   }
 
+  /*
+   * CUD transitions (see `shared/ui/list-changes`): created rows grow in, updated
+   * rows flash, deleted rows fade out and collapse so neighbours glide up.
+   * Pair with `motion-reduce:animate-none`.
+   */
+  --animate-row-in: row-in 0.3s ease-out;
+  @keyframes row-in {
+    from {
+      opacity: 0;
+      max-height: 0;
+      transform: translateY(-0.25rem);
+    }
+    to {
+      opacity: 1;
+      max-height: 12rem;
+      transform: none;
+    }
+  }
+  --animate-row-flash: row-flash 1.2s ease-out;
+  @keyframes row-flash {
+    from {
+      background-color: var(--brand-soft);
+    }
+  }
+  --animate-row-out: row-out 0.3s ease-in both;
+  @keyframes row-out {
+    from {
+      opacity: 1;
+      max-height: 12rem;
+    }
+    to {
+      opacity: 0;
+      max-height: 0;
+      padding-block: 0;
+      border-width: 0;
+      transform: translateX(1rem);
+    }
+  }
+
   --animate-view-enter: view-enter 0.3s ease-out;
   @keyframes view-enter {
     from {

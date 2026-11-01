@@ -6,6 +6,7 @@ import { APP_ROUTER } from '@/shared/router/routes';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { Button } from '@/shared/ui/controls';
 import { EmptyState } from '@/shared/ui/empty-state';
+import { changeProps, useListChanges } from '@/shared/ui/list-changes';
 import { Card } from '@/shared/ui/layout';
 import { cn } from '@repo/react-kit/cn';
 import {
@@ -97,54 +98,72 @@ const Row = ({
   </button>
 );
 
+const expenseKey = (e: Expense) => e.id;
+
 /** Rows of the expenses list; every row opens its edit popup. */
 const ExpenseList = ({
   expenses,
   categories,
   onSelect,
+  scope,
+  empty,
 }: {
   expenses: Expense[];
   categories: Category[];
   onSelect: (id: ExpenseId) => void;
-}) => (
-  <ul className="divide-y divide-line pr-2">
-    {expenses.map((e) => {
-      const category = categoryOf(categories, e.categoryId);
-      return (
-        <li key={e.id} className="group flex items-center gap-1">
-          <Row id={e.id} onSelect={onSelect}>
-            <span className="relative shrink-0">
-              <CategoryAvatar category={category} className="h-10 w-10" />
-              {e.recurringId !== null ? <RecurringMark /> : null}
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-semibold">
-                {e.merchant}
+  /** Changes of the list scope (period, filter) swap rows without animation. */
+  scope: string;
+  /** Shown once no row is left, after the last one finished leaving. */
+  empty?: ReactNode;
+}) => {
+  const rows = useListChanges(expenses, expenseKey, scope);
+  if (rows.length === 0 && empty) return empty;
+  return (
+    <ul className="divide-y divide-line pr-2">
+      {rows.map(({ key, item: e, phase }) => {
+        const category = categoryOf(categories, e.categoryId);
+        const change = changeProps(phase);
+        return (
+          <li
+            key={key}
+            aria-hidden={change['aria-hidden']}
+            inert={change.inert}
+            className={cn('group flex items-center gap-1', change.className)}
+          >
+            <Row id={e.id} onSelect={onSelect}>
+              <span className="relative shrink-0">
+                <CategoryAvatar category={category} className="h-10 w-10" />
+                {e.recurringId !== null ? <RecurringMark /> : null}
               </span>
-              <span className="flex items-center gap-2 text-xs text-ink-soft">
-                <span className="shrink-0">
-                  {shortDateTimeLabel(e.date)}
-                  <span className="sr-only">{`, ${categoryLabel(category.name)}`}</span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-semibold">
+                  {e.merchant}
                 </span>
-                {e.device ? <DeviceBadge device={e.device} /> : null}
+                <span className="flex items-center gap-2 text-xs text-ink-soft">
+                  <span className="shrink-0">
+                    {shortDateTimeLabel(e.date)}
+                    <span className="sr-only">{`, ${categoryLabel(category.name)}`}</span>
+                  </span>
+                  {e.device ? <DeviceBadge device={e.device} /> : null}
+                </span>
               </span>
-            </span>
-            <span className="relative text-sm font-semibold tabular-nums">
-              {money(e.amount)}
-              <span
-                role="tooltip"
-                className="pointer-events-none absolute top-1/2 right-full z-(--z-tooltip) mr-3 hidden -translate-y-1/2 rounded-lg bg-card px-3 py-1.5 text-xs font-medium whitespace-nowrap text-ink shadow-popover md:group-hover:block md:group-focus-within:block"
-              >
-                {categoryLabel(category.name)}
+              <span className="relative text-sm font-semibold tabular-nums">
+                {money(e.amount)}
+                <span
+                  role="tooltip"
+                  className="pointer-events-none absolute top-1/2 right-full z-(--z-tooltip) mr-3 hidden -translate-y-1/2 rounded-lg bg-card px-3 py-1.5 text-xs font-medium whitespace-nowrap text-ink shadow-popover md:group-hover:block md:group-focus-within:block"
+                >
+                  {categoryLabel(category.name)}
+                </span>
               </span>
-            </span>
-          </Row>
-          <ExpenseMenu expense={e} />
-        </li>
-      );
-    })}
-  </ul>
-);
+            </Row>
+            <ExpenseMenu expense={e} />
+          </li>
+        );
+      })}
+    </ul>
+  );
+};
 
 /**
  * Payments the recurring rules will charge next: a projection, not expenses,
@@ -205,6 +224,25 @@ const UpcomingList = ({
   </section>
 );
 
+/**
+ * Scope of the list rows: a period or filter switch (and the load it starts)
+ * swaps rows silently; only edits within one scope animate.
+ */
+const useListScope = (period: string, filter: string, loading: boolean) => {
+  const [seen, setSeen] = useState(period);
+  const [switching, setSwitching] = useState(false);
+  const [wasLoading, setWasLoading] = useState(loading);
+  if (seen !== period) {
+    setSeen(period);
+    setSwitching(true);
+  }
+  if (wasLoading !== loading) {
+    setWasLoading(loading);
+    if (wasLoading && switching) setSwitching(false);
+  }
+  return `${filter}|${period}|${switching}`;
+};
+
 /** All expenses of the selected period, filterable by category; upcoming payments announced apart. */
 export const MonthExpenses = ({
   period,
@@ -219,6 +257,7 @@ export const MonthExpenses = ({
   const categories = ctx.useCategories();
   const [filter, setFilter] = useState<CategoryId | null>(null);
   const all = useModal(EXPENSES_MODAL);
+  const loading = ctx.useLoading();
 
   const today = todayDay();
   // Only the present period looks ahead; a past one is just history.
@@ -232,6 +271,8 @@ export const MonthExpenses = ({
   const visible = active
     ? inPeriod.filter((e) => touchesCategory(e, categories, active))
     : inPeriod;
+
+  const scope = useListScope(periodTitle(period), String(active), loading);
 
   return (
     <Card
@@ -288,32 +329,32 @@ export const MonthExpenses = ({
         ) : null}
 
         <div className={cn('relative overflow-hidden', EXPENSES_LIST_HEIGHT)}>
-          {visible.length === 0 ? (
-            <EmptyState
-              variant="card"
-              data-e2e="dashboard:expenses-empty"
-              className="h-full"
-              icon={Receipt}
-              title="Brak wydatków w tym okresie."
-              description={`Nie dodano jeszcze wydatków: ${periodTitle(period)}.`}
-              action={
-                <Button
-                  href={APP_ROUTER.newExpense()}
-                  data-e2e="dashboard:expense-empty-new"
-                  className="w-auto px-3 py-1.5"
-                >
-                  <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  Dodaj wydatek
-                </Button>
-              }
-            />
-          ) : (
-            <ExpenseList
-              expenses={visible.slice(0, MAX_VISIBLE_EXPENSES)}
-              categories={categories}
-              onSelect={onSelect}
-            />
-          )}
+          <ExpenseList
+            expenses={visible.slice(0, MAX_VISIBLE_EXPENSES)}
+            categories={categories}
+            onSelect={onSelect}
+            scope={scope}
+            empty={
+              <EmptyState
+                variant="card"
+                data-e2e="dashboard:expenses-empty"
+                className="h-full"
+                icon={Receipt}
+                title="Brak wydatków w tym okresie."
+                description={`Nie dodano jeszcze wydatków: ${periodTitle(period)}.`}
+                action={
+                  <Button
+                    href={APP_ROUTER.newExpense()}
+                    data-e2e="dashboard:expense-empty-new"
+                    className="w-auto px-3 py-1.5"
+                  >
+                    <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    Dodaj wydatek
+                  </Button>
+                }
+              />
+            }
+          />
           {visible.length > MAX_VISIBLE_EXPENSES && (
             <ShowAllFade
               onClick={all.open}
@@ -334,6 +375,7 @@ export const MonthExpenses = ({
             expenses={visible}
             categories={categories}
             onSelect={onSelect}
+            scope={scope}
           />
         </DetailDialog>
       )}
