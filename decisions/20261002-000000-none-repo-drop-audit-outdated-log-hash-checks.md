@@ -4,7 +4,7 @@ scope: repo
 summary: Drop audit, outdated, log-existence and hash checks and hashy
 why: Audit, outdated, log-existence and hash gates added friction without protecting anything. Supersedes 0032, 0068 and 0070 (CI-gate parts)
 date: 2026-10-02
-supersedes: 0032
+supersedes: 20260927-000000-none-repo-require-log-check-in-ci-verify
 ---
 
 - Removed every non-functional gate: `deps:audit`, `deps:outdated`, `ci:security`, `ci:check-updates` (pre-push outdated check), `log:check` + `scripts/log-check.mjs` (PR CI step, `ci:verify`, `ci:verify:dry`) and `hash:*` scripts.

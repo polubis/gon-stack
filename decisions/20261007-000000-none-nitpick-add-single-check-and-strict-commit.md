@@ -4,7 +4,7 @@ scope: nitpick
 summary: Nitpick single check, strict commit rule, LLM-friendly errors
 why: Nitpick should be simple (`sync` writes, `check` verifies all), gate commits where the message exists, and name the broken rule
 date: 2026-10-07
-supersedes: 0112
+supersedes: 20261006-000000-none-nitpick-add-docs-and-checks-engine
 ---
 
 - Simplified the nitpick CLI to two modes, moved nitpick from turbo/CI to the `commit-msg` hook, made `rich-commit` strict and made violations readable for an LLM.

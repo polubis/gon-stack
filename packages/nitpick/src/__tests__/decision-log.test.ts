@@ -26,7 +26,9 @@ export default config({
   },
 });`;
 
-const NAME = 'decisions/0001-parka-add-thing.md';
+const NAME = 'decisions/20261011-120000-none-parka-add-thing.md';
+const OTHER = 'decisions/20261010-090000-none-parka-order-tiles.md';
+const SAME_SLUG = 'decisions/20261010-090000-none-parka-add-thing.md';
 
 const doc = (
   fields: Record<string, string | undefined> = {},
@@ -100,14 +102,14 @@ const OPTIONS = {
   scopes: [/^(repo|claude|nitpick)$/, /^(parka|uih)(\/[a-z0-9-]+)*$/],
 };
 
-const problemsOf = (content: string, name = NAME, existing: number[] = []) =>
+const problemsOf = (content: string, name = NAME, existing: string[] = []) =>
   validateDecisionLog(name, content, existing, OPTIONS).join('\n');
 
 const failsWith = (
   content: string,
   expected: string,
   name = NAME,
-  existing: number[] = [],
+  existing: string[] = [],
 ) => expect(problemsOf(content, name, existing)).toContain(expected);
 
 describe('Decision entry rule accepts', () => {
@@ -120,7 +122,7 @@ describe('Decision entry rule accepts', () => {
       {
         ticket: 'ABC-123',
         date: '2026-10-11',
-        supersedes: '0001',
+        supersedes: '20261010-090000-none-parka-order-tiles',
         tags: '[ux, "dash-board"]',
         models: '\n  - claude-opus\n  - claude-sonnet',
         inputTokens: '1200',
@@ -133,9 +135,9 @@ describe('Decision entry rule accepts', () => {
     );
     expect(
       validateDecisionLog(
-        'decisions/0002-parka-order-tiles.md',
+        'decisions/20261011-120000-ABC-123-parka-order-tiles.md',
         full,
-        [1],
+        [OTHER],
         OPTIONS,
       ),
     ).toEqual([]);
@@ -149,7 +151,7 @@ describe('Decision entry rule accepts', () => {
     expect(
       await commitCheck(
         { 'old/note.md': doc() },
-        { 'decisions/0002-parka-add-other.md': doc() },
+        { 'decisions/20261011-120100-none-parka-add-other.md': doc() },
         [['old/note.md', NAME]],
       ),
     ).toBe(0);
@@ -193,11 +195,28 @@ describe('Decision entry rule rejects', () => {
         {},
         {
           [NAME]: doc(),
-          'decisions/0002-parka-add-other.md': doc(),
+          [OTHER]: doc({ scope: 'parka/dashboard' }, '- Other\n'),
         },
       ),
     ).toBe(1);
     expect(output()).toContain('Exactly one new "decisions/');
+  });
+
+  it('an entry whose ticket and slug are already used', async () => {
+    expect(await commitCheck({ [SAME_SLUG]: doc() }, { [NAME]: doc() })).toBe(
+      1,
+    );
+    expect(output()).toContain('already used by decisions/');
+  });
+
+  it('a repo that still has a legacy NNNN decision', async () => {
+    expect(
+      await commitCheck(
+        { 'decisions/0001-parka-add-thing.md': doc() },
+        { 'a.ts': 'x' },
+      ),
+    ).toBe(1);
+    expect(output()).toContain('name must be "decisions/YYYYMMDD-HHmmss-');
   });
 
   it('an entry that is created but not staged', async () => {
@@ -218,7 +237,10 @@ describe('Decision entry rule rejects', () => {
     expect(
       await commitCheck(
         {},
-        { 'apps/a/__log__/0001-add-thing.md': doc(), 'a.ts': 'x' },
+        {
+          'apps/a/__log__/20261011-120000-none-parka-add-thing.md': doc(),
+          'a.ts': 'x',
+        },
       ),
     ).toBe(1);
     expect(output()).toContain('decisions live in "decisions/"');
@@ -226,28 +248,57 @@ describe('Decision entry rule rejects', () => {
   });
 
   it('a misnamed file', () => {
-    failsWith(doc(), 'name must be "decisions/NNNN-', 'decisions/notes.md');
-  });
-
-  it('a number that is not the next free one', () => {
     failsWith(
       doc(),
-      'next free one: 0001, found 0003',
-      'decisions/0003-parka-add-thing.md',
+      'name must be "decisions/YYYYMMDD-HHmmss-',
+      'decisions/notes.md',
     );
-    failsWith(doc(), 'next free one: 0002, found 0001', NAME, [1]);
+    failsWith(
+      doc(),
+      'name must be "decisions/YYYYMMDD-HHmmss-',
+      'decisions/0001-parka-add-thing.md',
+    );
+  });
+
+  it('a datetime that is not real', () => {
+    failsWith(
+      doc(),
+      'datetime must be a real YYYYMMDD-HHmmss, found "20261340-120000"',
+      'decisions/20261340-120000-none-parka-add-thing.md',
+    );
+    failsWith(
+      doc(),
+      'datetime must be a real YYYYMMDD-HHmmss, found "20261011-250000"',
+      'decisions/20261011-250000-none-parka-add-thing.md',
+    );
+  });
+
+  it('a ticket and slug already used by another decision', () => {
+    failsWith(
+      doc(),
+      `ticket "none" and slug "parka-add-thing" already used by ${SAME_SLUG}`,
+      NAME,
+      [SAME_SLUG],
+    );
+  });
+
+  it('a file ticket that differs from the frontmatter', () => {
+    failsWith(
+      doc({ ticket: 'VYB-1' }),
+      'must match frontmatter ticket "VYB-1"',
+    );
   });
 
   it('a slug that is too short or too long', () => {
     failsWith(
       doc({ scope: 'uih' }),
       'slug "uih-add" must have 8-60',
-      'decisions/0001-uih-add.md',
+      'decisions/20261011-120000-none-uih-add.md',
     );
     failsWith(
       doc(),
       'must have 8-60 characters',
-      `decisions/0001-parka-add-${'long-'.repeat(12)}name.md`,
+      `decisions/20261011-120000-none-parka-add-${'long-'.repeat(12)}name.md`,
     );
   });
 
@@ -255,17 +306,17 @@ describe('Decision entry rule rejects', () => {
     failsWith(
       doc(),
       'must start with the scope prefix "parka-"',
-      'decisions/0001-dashboard-add-thing.md',
+      'decisions/20261011-120000-none-dashboard-add-thing.md',
     );
     failsWith(
       doc(),
       'put an imperative verb',
-      'decisions/0001-parka-thing-added.md',
+      'decisions/20261011-120000-none-parka-thing-added.md',
     );
     failsWith(
       doc(),
       'add an object after the verb "add"',
-      'decisions/0001-parka-add.md',
+      'decisions/20261011-120000-none-parka-add.md',
     );
   });
 
@@ -334,9 +385,12 @@ describe('Decision entry rule rejects', () => {
     failsWith(doc({ date: '2026-02-30' }), '"date" must be a real date');
   });
 
-  it('a supersedes that is malformed or missing', () => {
-    failsWith(doc({ supersedes: '22' }), '4 digit number');
-    failsWith(doc({ supersedes: '0009' }), '0009 does not exist');
+  it('a supersedes that is not a decision name or does not exist', () => {
+    failsWith(doc({ supersedes: '22' }), 'must be a decision name like');
+    failsWith(
+      doc({ supersedes: '20261010-090000-none-parka-order-tiles' }),
+      '20261010-090000-none-parka-order-tiles does not exist in decisions/',
+    );
   });
 
   it('tags and metrics with wrong shape', () => {
