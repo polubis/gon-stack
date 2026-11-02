@@ -1,3 +1,4 @@
+import { dayLabel, monthLabel, rangeLabel } from '@/shared/date/date';
 import {
   currentPeriod,
   shiftPeriod,
@@ -14,25 +15,20 @@ export const PERIOD_KIND_LABELS: Record<PeriodKind, string> = {
   custom: 'Własny',
 };
 
-/** `2026-10-05` -> `05.10.2026`. */
-const numeric = (day: string): string =>
-  `${day.slice(8, 10)}.${day.slice(5, 7)}.${day.slice(0, 4)}`;
-
 /**
- * Numeric heading of a period: `20.10.2026`, `19.10.2026 – 25.10.2026`,
- * `10.2026`, `2026`. Same shape in every module that uses the control.
+ * Heading of a period with weekday and month names: `wt. 20 paź 2026`,
+ * `pon. 19 – niedz. 25 paź 2026`, `październik 2026`, `2026`. Same shape in
+ * every module that uses the control.
  */
 export const periodLabel = (period: Period): string => {
   switch (period.kind) {
     case 'day':
-      return numeric(period.from);
+      return dayLabel(period.from);
     case 'week':
     case 'custom':
-      return period.from === period.to
-        ? numeric(period.from)
-        : `${numeric(period.from)} – ${numeric(period.to)}`;
+      return rangeLabel(period.from, period.to);
     case 'month':
-      return `${period.from.slice(5, 7)}.${period.from.slice(0, 4)}`;
+      return monthLabel(period.from.slice(0, 7));
     case 'year':
       return period.from.slice(0, 4);
   }

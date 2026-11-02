@@ -87,7 +87,7 @@ describe('diff of a notification', () => {
 
     const days = diffRows(n).find((r) => r.label === 'Naliczone dni');
 
-    expect(days?.after).toBe('12.09.2026, 12.10.2026');
+    expect(days?.after).toBe('sob. 12 wrz 2026, pon. 12 paź 2026');
   });
 
   it('shows spent, limit and threshold of a reached limit', () => {

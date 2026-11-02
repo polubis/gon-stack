@@ -337,7 +337,7 @@ describe('backlog custom date', () => {
     );
 
     expect(
-      await screen.findByText('Przeniesiono „Umówić dentystę” na 30.10.'),
+      await screen.findByText('Przeniesiono „Umówić dentystę” na pt. 30 paź.'),
     ).toBeVisible();
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     expect(backend.writes()[0]!.body).toMatchObject({

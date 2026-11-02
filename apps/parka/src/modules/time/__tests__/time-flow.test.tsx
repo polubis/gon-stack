@@ -92,7 +92,7 @@ describe('time navigation', () => {
     expect(await row('Jutro')).toBeVisible();
     expect(
       screen.getByRole('group', { name: 'Zakres czasu' }),
-    ).toHaveTextContent('21.10.2026');
+    ).toHaveTextContent('śr. 21 paź 2026');
     expect(window.location.search).toContain('date=2026-10-21');
     expect(readsOf('2026-10-21', '2026-10-21')).toHaveLength(1);
   });
@@ -123,7 +123,7 @@ describe('time navigation', () => {
 
     expect(
       await screen.findByRole('group', { name: 'Zakres czasu' }),
-    ).toHaveTextContent('19.10.2026 – 25.10.2026');
+    ).toHaveTextContent('pon. 19 – niedz. 25 paź 2026');
     expect(window.location.search).toContain('date=2026-10-20');
     await waitFor(() =>
       expect(readsOf('2026-10-19', '2026-10-25')).toHaveLength(1),
@@ -170,7 +170,7 @@ describe('time navigation', () => {
     expect(queryParams(first.url).get('to')).toBe('2026-10-25');
     expect(
       screen.getByRole('group', { name: 'Zakres czasu' }),
-    ).toHaveTextContent('19.10.2026 – 25.10.2026');
+    ).toHaveTextContent('pon. 19 – niedz. 25 paź 2026');
   });
 });
 

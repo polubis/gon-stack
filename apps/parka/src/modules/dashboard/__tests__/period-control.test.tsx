@@ -95,13 +95,13 @@ describe('dashboard period control', () => {
     };
 
     swipe(300, 100);
-    expect(label().textContent).toBe('10.2026');
+    expect(label().textContent).toBe('październik 2026');
 
     swipe(100, 300);
-    await waitFor(() => expect(label().textContent).toBe('09.2026'));
+    await waitFor(() => expect(label().textContent).toBe('wrzesień 2026'));
 
     swipe(300, 100);
-    await waitFor(() => expect(label().textContent).toBe('10.2026'));
+    await waitFor(() => expect(label().textContent).toBe('październik 2026'));
   });
 
   it('ignores swipes on a device with a mouse', async () => {
@@ -125,7 +125,7 @@ describe('dashboard period control', () => {
     });
 
     expect(main.style.transform).toBe('');
-    expect(label().textContent).toBe('10.2026');
+    expect(label().textContent).toBe('październik 2026');
     vi.unstubAllGlobals();
   });
 
@@ -143,7 +143,7 @@ describe('dashboard period control', () => {
       changedTouches: [{ clientX: 200, clientY: 200 }],
     });
     expect(data!.style.transform).toBe('');
-    expect(label().textContent).toBe('10.2026');
+    expect(label().textContent).toBe('październik 2026');
   });
 
   it('opens the previous month without asking for it again', async () => {
@@ -154,7 +154,7 @@ describe('dashboard period control', () => {
 
     await userEvent.click(prev());
 
-    await waitFor(() => expect(label().textContent).toBe('09.2026'));
+    await waitFor(() => expect(label().textContent).toBe('wrzesień 2026'));
     expect(
       asked(calls).filter((url) => url.includes('from=2026-09-01')),
     ).toHaveLength(1);
@@ -163,7 +163,7 @@ describe('dashboard period control', () => {
   it('opens on the current month and cannot go forward', async () => {
     await open();
 
-    expect(label().textContent).toBe('10.2026');
+    expect(label().textContent).toBe('październik 2026');
     expect(kindButton().getAttribute('aria-label')).toBe('Zakres: Miesiąc');
     expect(next().disabled).toBe(true);
   });
@@ -173,7 +173,7 @@ describe('dashboard period control', () => {
 
     await userEvent.click(prev());
 
-    expect(label().textContent).toBe('09.2026');
+    expect(label().textContent).toBe('wrzesień 2026');
     expect(next().disabled).toBe(false);
     await waitFor(() =>
       expect(asked(calls).join(' ')).toContain('kind=month&from=2026-09-01'),
@@ -181,7 +181,7 @@ describe('dashboard period control', () => {
 
     await userEvent.click(next());
 
-    expect(label().textContent).toBe('10.2026');
+    expect(label().textContent).toBe('październik 2026');
     expect(next().disabled).toBe(true);
   });
 
@@ -192,7 +192,7 @@ describe('dashboard period control', () => {
     await userEvent.click(next());
 
     expect(asked(calls)).toHaveLength(before);
-    expect(label().textContent).toBe('10.2026');
+    expect(label().textContent).toBe('październik 2026');
   });
 
   it('shows the current week, Monday to Sunday, and steps by week', async () => {
@@ -200,7 +200,7 @@ describe('dashboard period control', () => {
 
     await kind('Tydzień');
 
-    expect(label().textContent).toBe('05.10.2026 – 11.10.2026');
+    expect(label().textContent).toBe('pon. 5 – niedz. 11 paź 2026');
     expect(screen.getByText('Wydatki w tym tygodniu')).toBeTruthy();
     await waitFor(() =>
       expect(asked(calls).join(' ')).toContain('kind=week&from=2026-10-05'),
@@ -208,7 +208,7 @@ describe('dashboard period control', () => {
 
     await userEvent.click(prev());
 
-    expect(label().textContent).toMatch(/^28.09.2026 – 04.10.2026$/);
+    expect(label().textContent).toMatch(/^pon. 28 wrz – niedz. 4 paź 2026$/);
     expect(next().disabled).toBe(false);
   });
 
@@ -217,23 +217,23 @@ describe('dashboard period control', () => {
 
     await kind('Dzień');
 
-    expect(label().textContent).toBe('10.10.2026');
+    expect(label().textContent).toBe('sob. 10 paź 2026');
     expect(next().disabled).toBe(true);
 
     await userEvent.click(prev());
 
-    expect(label().textContent).toBe('09.10.2026');
+    expect(label().textContent).toBe('pt. 9 paź 2026');
   });
 
   it('returns to the present with Dziś', async () => {
     await open();
     await userEvent.click(prev());
-    expect(label().textContent).toBe('09.2026');
+    expect(label().textContent).toBe('wrzesień 2026');
 
     await userEvent.click(kindButton());
     await userEvent.click(screen.getByRole('button', { name: 'Dziś' }));
 
-    expect(label().textContent).toBe('10.2026');
+    expect(label().textContent).toBe('październik 2026');
     expect(next().disabled).toBe(true);
   });
 
@@ -290,7 +290,7 @@ describe('dashboard period control', () => {
 
     await userEvent.keyboard('{Enter}');
 
-    expect(label().textContent).toBe('09.2026');
+    expect(label().textContent).toBe('wrzesień 2026');
     expect(document.activeElement).toBe(prev());
   });
 
@@ -313,7 +313,7 @@ describe('dashboard period control', () => {
   it('snaps a future period from the address back to the present', async () => {
     const calls = await open('?month=2030-01');
 
-    expect(label().textContent).toBe('10.2026');
+    expect(label().textContent).toBe('październik 2026');
     expect(asked(calls).every((url) => !url.includes('2030'))).toBe(true);
   });
 
@@ -348,14 +348,14 @@ describe('dashboard period control', () => {
       const calls = await open();
       const list = await openPicker('Wybierz miesiąc');
       const names = optionNames(list);
-      expect(names[0]).toBe('10.2026');
+      expect(names[0]).toBe('październik 2026');
       expect(names).not.toContain('Listopad 2026');
 
       await userEvent.click(
-        within(list).getByRole('button', { name: '03.2026' }),
+        within(list).getByRole('button', { name: 'marzec 2026' }),
       );
 
-      expect(label().textContent).toBe('03.2026');
+      expect(label().textContent).toBe('marzec 2026');
       expect(screen.queryByLabelText('Wybierz miesiąc')).toBeNull();
       await waitFor(() =>
         expect(asked(calls).join(' ')).toContain('kind=month&from=2026-03-01'),
@@ -368,7 +368,7 @@ describe('dashboard period control', () => {
 
       const list = await openPicker('Wybierz tydzień');
 
-      expect(optionNames(list)[0]).toBe('05.10.2026 – 11.10.2026');
+      expect(optionNames(list)[0]).toBe('pon. 5 – niedz. 11 paź 2026');
     });
 
     it('jumps to a chosen day', async () => {
@@ -380,7 +380,7 @@ describe('dashboard period control', () => {
 
       fireEvent.change(input, { target: { value: '2026-02-14' } });
 
-      expect(label().textContent).toBe('14.02.2026');
+      expect(label().textContent).toBe('sob. 14 lut 2026');
     });
 
     it('jumps to a chosen week', async () => {
@@ -389,10 +389,12 @@ describe('dashboard period control', () => {
       const list = await openPicker('Wybierz tydzień');
 
       await userEvent.click(
-        within(list).getByRole('button', { name: '02.03.2026 – 08.03.2026' }),
+        within(list).getByRole('button', {
+          name: 'pon. 2 – niedz. 8 mar 2026',
+        }),
       );
 
-      expect(label().textContent).toBe('02.03.2026 – 08.03.2026');
+      expect(label().textContent).toBe('pon. 2 – niedz. 8 mar 2026');
     });
 
     it('lists only years up to the present and jumps to one', async () => {
@@ -453,19 +455,19 @@ describe('dashboard period control', () => {
       expect(dialog()).toBeTruthy();
       expect(screen.queryByLabelText('Od')).toBeNull();
       expect(window.location.search).toContain('modal=period-range');
-      expect(day('10 października 2026').getAttribute('aria-pressed')).toBe(
-        'true',
-      );
+      expect(
+        day('sobota, 10 października 2026').getAttribute('aria-pressed'),
+      ).toBe('true');
     });
 
     it('shows the chosen from-to range and asks for it', async () => {
       const calls = await open();
       await kind('Własny');
 
-      await apply(1, '1 września 2026', '30 września 2026');
+      await apply(1, 'wtorek, 1 września 2026', 'środa, 30 września 2026');
 
       await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-      expect(label().textContent).toBe('01.09.2026 – 30.09.2026');
+      expect(label().textContent).toBe('wt. 1 – śr. 30 wrz 2026');
       await waitFor(() =>
         expect(asked(calls).join(' ')).toContain(
           'kind=custom&from=2026-09-01&to=2026-09-30',
@@ -479,60 +481,76 @@ describe('dashboard period control', () => {
     it('reopens the modal from the period label', async () => {
       await open();
       await kind('Własny');
-      await apply(1, '1 września 2026', '30 września 2026');
+      await apply(1, 'wtorek, 1 września 2026', 'środa, 30 września 2026');
       await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 
       await userEvent.click(valueButton());
 
       expect(dialog()).toBeTruthy();
-      expect(day('1 września 2026').getAttribute('aria-pressed')).toBe('true');
+      expect(day('wtorek, 1 września 2026').getAttribute('aria-pressed')).toBe(
+        'true',
+      );
     });
 
     it('steps by its own length', async () => {
       await open();
       await kind('Własny');
-      await apply(1, '1 września 2026', '30 września 2026');
+      await apply(1, 'wtorek, 1 września 2026', 'środa, 30 września 2026');
       await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 
       await userEvent.click(prev());
 
-      expect(label().textContent).toBe('02.08.2026 – 31.08.2026');
+      expect(label().textContent).toBe('niedz. 2 – pon. 31 sie 2026');
       await userEvent.click(next());
-      expect(label().textContent).toBe('01.09.2026 – 30.09.2026');
+      expect(label().textContent).toBe('wt. 1 – śr. 30 wrz 2026');
     });
 
     it('waits for both days before it can be applied', async () => {
       await open();
       await kind('Własny');
 
-      await userEvent.click(day('5 października 2026'));
+      await userEvent.click(day('poniedziałek, 5 października 2026'));
 
       expect(applyButton().disabled).toBe(true);
-      await userEvent.click(day('8 października 2026'));
+      await userEvent.click(day('czwartek, 8 października 2026'));
       expect(applyButton().disabled).toBe(false);
+    });
+
+    it('names weekdays and months of the chosen range', async () => {
+      await open();
+      await kind('Własny');
+
+      await userEvent.click(day('poniedziałek, 5 października 2026'));
+      await userEvent.click(day('czwartek, 8 października 2026'));
+
+      expect(
+        screen.getByText('poniedziałek, 5 – czwartek, 8 października 2026'),
+      ).toBeTruthy();
     });
 
     it('starts again from an earlier second click', async () => {
       await open();
       await kind('Własny');
 
-      await userEvent.click(day('5 października 2026'));
-      await userEvent.click(day('1 października 2026'));
+      await userEvent.click(day('poniedziałek, 5 października 2026'));
+      await userEvent.click(day('czwartek, 1 października 2026'));
 
       expect(applyButton().disabled).toBe(true);
-      expect(day('1 października 2026').getAttribute('aria-pressed')).toBe(
-        'true',
-      );
-      expect(day('5 października 2026').getAttribute('aria-pressed')).toBe(
-        'false',
-      );
+      expect(
+        day('czwartek, 1 października 2026').getAttribute('aria-pressed'),
+      ).toBe('true');
+      expect(
+        day('poniedziałek, 5 października 2026').getAttribute('aria-pressed'),
+      ).toBe('false');
     });
 
     it('does not offer days after today', async () => {
       await open();
       await kind('Własny');
 
-      expect(day('11 października 2026').hasAttribute('disabled')).toBe(true);
+      expect(
+        day('niedziela, 11 października 2026').hasAttribute('disabled'),
+      ).toBe(true);
       expect(
         within(dialog())
           .getByRole('button', { name: 'Następny miesiąc' })
@@ -561,7 +579,7 @@ describe('dashboard period control', () => {
       await jumpTo('2023', 'marzec');
 
       expect(monthTitle().textContent).toBe('marzec 2023');
-      expect(day('1 marca 2023')).toBeTruthy();
+      expect(day('środa, 1 marca 2023')).toBeTruthy();
       expect(document.activeElement).toBe(monthTitle());
     });
 
@@ -570,12 +588,12 @@ describe('dashboard period control', () => {
       await kind('Własny');
 
       await jumpTo('2025', 'czerwiec');
-      await userEvent.click(day('3 czerwca 2025'));
-      await userEvent.click(day('9 czerwca 2025'));
+      await userEvent.click(day('wtorek, 3 czerwca 2025'));
+      await userEvent.click(day('poniedziałek, 9 czerwca 2025'));
       await userEvent.click(applyButton());
 
       await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-      expect(label().textContent).toBe('03.06.2025 – 09.06.2025');
+      expect(label().textContent).toBe('wt. 3 – pon. 9 cze 2025');
     });
 
     it('steps the year with arrows and never past the present', async () => {
@@ -633,14 +651,14 @@ describe('dashboard period control', () => {
     it('keeps the selected days while jumping around', async () => {
       await open();
       await kind('Własny');
-      await userEvent.click(day('5 października 2026'));
+      await userEvent.click(day('poniedziałek, 5 października 2026'));
 
       await jumpTo('2025', 'styczeń');
       await jumpTo('2026', 'październik');
 
-      expect(day('5 października 2026').getAttribute('aria-pressed')).toBe(
-        'true',
-      );
+      expect(
+        day('poniedziałek, 5 października 2026').getAttribute('aria-pressed'),
+      ).toBe('true');
     });
 
     it('closes without changing the range', async () => {
@@ -652,19 +670,19 @@ describe('dashboard period control', () => {
       );
 
       await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-      expect(label().textContent).toBe('04.10.2026 – 10.10.2026');
+      expect(label().textContent).toBe('niedz. 4 – sob. 10 paź 2026');
     });
 
     it('restores the range from the address', async () => {
       await open('?range=custom&from=2026-08-10&to=2026-08-20');
 
-      expect(label().textContent).toBe('10.08.2026 – 20.08.2026');
+      expect(label().textContent).toBe('pon. 10 – czw. 20 sie 2026');
     });
 
     it('cuts the end of a range at the present', async () => {
       await open('?range=custom&from=2026-10-01&to=2027-01-01');
 
-      expect(label().textContent).toBe('01.10.2026 – 10.10.2026');
+      expect(label().textContent).toBe('czw. 1 – sob. 10 paź 2026');
     });
   });
 

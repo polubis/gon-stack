@@ -18,9 +18,21 @@ const task = (title: string, day: string, at: string | null): Task =>
 describe('period titles', () => {
   it.each([
     ['day', '2026-10-20', 'wtorek, 20 października 2026'],
-    ['week', '2026-10-20', '19 – 25 października 2026'],
-    ['week', '2026-10-01', '28 września – 4 października 2026'],
-    ['week', '2026-12-31', '28 grudnia 2026 – 3 stycznia 2027'],
+    [
+      'week',
+      '2026-10-20',
+      'poniedziałek, 19 – niedziela, 25 października 2026',
+    ],
+    [
+      'week',
+      '2026-10-01',
+      'poniedziałek, 28 września – niedziela, 4 października 2026',
+    ],
+    [
+      'week',
+      '2026-12-31',
+      'poniedziałek, 28 grudnia 2026 – niedziela, 3 stycznia 2027',
+    ],
     ['month', '2026-10-20', 'październik 2026'],
     ['year', '2026-10-20', '2026'],
   ] as const)('titles a %s around %s', (kind, anchor, expected) => {

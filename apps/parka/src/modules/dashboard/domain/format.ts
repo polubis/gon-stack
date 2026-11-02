@@ -1,4 +1,4 @@
-import { localMonth } from '@/shared/date/date';
+import { dayLabel, instantDateTimeLabel, localMonth } from '@/shared/date/date';
 import type { Month } from './models';
 
 const MONTH_PATTERN = /^\d{4}-\d{2}$/;
@@ -9,35 +9,6 @@ const plMoney = new Intl.NumberFormat('pl-PL', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
-
-const plMonth = new Intl.DateTimeFormat('pl-PL', {
-  month: 'long',
-  year: 'numeric',
-});
-
-const plDateTime = new Intl.DateTimeFormat('pl-PL', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-const plDate = new Intl.DateTimeFormat('pl-PL', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-});
-
-const plTime = new Intl.DateTimeFormat('pl-PL', {
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-const plShortMonth = new Intl.DateTimeFormat('pl-PL', { month: 'short' });
-
-const capitalize = (value: string): string =>
-  value.charAt(0).toUpperCase() + value.slice(1);
 
 const toYearMonth = (month: Month): [number, number] =>
   month.split('-').map(Number) as [number, number];
@@ -55,32 +26,6 @@ export const toMonth = (value: string): Month => {
   return value as Month;
 };
 
-/** `2025-04` → `kwiecień 2025`. */
-export const monthLabel = (month: Month): string => {
-  const [y, m] = toYearMonth(month);
-  return plMonth.format(new Date(y, m - 1, 1));
-};
-
-/** `2025-04` → `Kwiecień 2025`. */
-export const monthTitle = (month: Month): string =>
-  capitalize(monthLabel(month));
-
-/** `2025-04`, 14 → `14 Kwi`. */
-export const dayLabel = (month: Month, day: number): string => {
-  const [y, m] = toYearMonth(month);
-  return `${day} ${capitalize(plShortMonth.format(new Date(y, m - 1, day)))}`;
-};
-
-/** ISO date-time → `14 Kwi 2025`. */
-export const shortDateLabel = (iso: string): string => {
-  const date = new Date(iso);
-  return `${date.getDate()} ${capitalize(plShortMonth.format(date))} ${date.getFullYear()}`;
-};
-
-/** ISO date-time → `14 Kwi 2025, 14:30` in the user's time zone. */
-export const shortDateTimeLabel = (iso: string): string =>
-  `${shortDateLabel(iso)}, ${plTime.format(new Date(iso))}`;
-
 /** `2025-04` → `2025-03`. */
 export const prevMonth = (month: Month): Month => {
   const [y, m] = toYearMonth(month);
@@ -93,17 +38,11 @@ export const prevMonth = (month: Month): Month => {
 /** Today's month, e.g. `2026-09`. */
 export const currentMonth = (): Month => toMonth(localMonth(new Date()));
 
-/** ISO date(-time) → `14.04.2025`. */
-export const dateLabel = (iso: string): string => plDate.format(new Date(iso));
+/** ISO date-time → `pon. 14 kwi 2025, 14:30` in the user's time zone. */
+export const dateTimeLabel = (iso: string): string => instantDateTimeLabel(iso);
 
-/** Plain day `YYYY-MM-DD` → `14.04.2025`; never shifted by the time zone. */
-export const plainDateLabel = (day: string): string => {
-  const [y = 0, m = 1, d = 1] = day.split('-').map(Number);
-  return plDate.format(new Date(y, m - 1, d));
-};
-
-export const dateTimeLabel = (iso: string): string =>
-  plDateTime.format(new Date(iso));
+/** Plain day `YYYY-MM-DD` → `pon. 14 kwi 2025`; never shifted by the time zone. */
+export const plainDateLabel = (day: string): string => dayLabel(day);
 
 /** ISO date-time → `YYYY-MM`. */
 export const monthOf = (iso: string): Month => toMonth(localMonth(iso));
