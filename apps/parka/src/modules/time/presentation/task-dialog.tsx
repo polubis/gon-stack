@@ -4,6 +4,8 @@ import {
   currentDevice,
   loadDeviceHints,
 } from '@/shared/device/integration/current-device';
+import { dayLabel } from '@/shared/date/date';
+import { isDay } from '@/shared/period/period';
 import type { RecurringInterval } from '@/shared/recurring/occurrences';
 import { Button, Field, Input, Select, Toggle } from '@/shared/ui/controls';
 import { ClearableInput } from '@/shared/ui/clearable';
@@ -211,6 +213,9 @@ export const TaskDialog = ({
             />
           </Field>
         </div>
+        {isDay(day) ? (
+          <p className="-mt-2 text-xs text-ink-soft">{dayLabel(day, 'long')}</p>
+        ) : null}
         {touched && pickError ? (
           <span role="alert" className="-mt-2 block text-xs text-danger">
             {pickError}

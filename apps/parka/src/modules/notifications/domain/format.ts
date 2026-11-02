@@ -1,3 +1,5 @@
+import { instantDayLabel } from '@/shared/date/date';
+
 const MINUTE_MS = 60_000;
 const HOUR_MS = 60 * MINUTE_MS;
 const DAY_MS = 24 * HOUR_MS;
@@ -36,18 +38,7 @@ const money = new Intl.NumberFormat('pl-PL', {
   currency: 'PLN',
 });
 
-const day = new Intl.DateTimeFormat('pl-PL', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-});
-
 export const formatMoney = (amount: number): string => money.format(amount);
 
-/** Accepts an ISO instant or a plain `YYYY-MM-DD` day. */
-export const formatDay = (value: string): string => {
-  const date = /^\d{4}-\d{2}-\d{2}$/.test(value)
-    ? new Date(`${value}T12:00:00`)
-    : new Date(value);
-  return day.format(date);
-};
+/** Accepts an ISO instant or a plain `YYYY-MM-DD` day: `pon. 14 kwi 2025`. */
+export const formatDay = (value: string): string => instantDayLabel(value);

@@ -9,78 +9,70 @@ import {
   type Period,
   type PeriodKind,
 } from '@/shared/period/period';
-
-const plLong = new Intl.DateTimeFormat('pl-PL', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-  timeZone: 'UTC',
-});
-const plShort = new Intl.DateTimeFormat('pl-PL', {
-  day: 'numeric',
-  month: 'short',
-  timeZone: 'UTC',
-});
-const plShortYear = new Intl.DateTimeFormat('pl-PL', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-  timeZone: 'UTC',
-});
-const plShortMonth = new Intl.DateTimeFormat('pl-PL', {
-  month: 'short',
-  timeZone: 'UTC',
-});
-const plMonthYear = new Intl.DateTimeFormat('pl-PL', {
-  month: 'long',
-  year: 'numeric',
-  timeZone: 'UTC',
-});
+import {
+  dayLabel,
+  monthLabel,
+  monthNameLabel,
+  rangeLabel,
+  weekdayLabel,
+} from '@/shared/date/date';
 
 const asDate = (day: string): Date => new Date(`${day}T00:00:00.000Z`);
 
 const capitalize = (value: string): string =>
   value.charAt(0).toUpperCase() + value.slice(1);
 
-/** `2026-10-05..11` week → `5–11 października 2026`. */
+/**
+ * Heading of a period, weekday and month named: `wtorek, 14 października 2026`,
+ * `Tydzień pon. 5 – niedz. 11 paź 2026`, `Październik 2026`, `2026`.
+ */
 export const periodTitle = (period: Period): string => {
   switch (period.kind) {
     case 'day':
-      return plLong.format(asDate(period.from));
-    case 'week': {
-      const sameMonth = period.from.slice(0, 7) === period.to.slice(0, 7);
-      const start = sameMonth
-        ? String(Number(period.from.slice(8, 10)))
-        : plShort.format(asDate(period.from));
-      const end = plShort.format(asDate(period.to));
-      const year = asDate(period.to).getUTCFullYear();
-      return `Tydzień ${start}–${end} ${year}`;
-    }
+      return dayLabel(period.from, 'long');
+    case 'week':
+      return `Tydzień ${rangeLabel(period.from, period.to)}`;
     case 'month':
-      return capitalize(plMonthYear.format(asDate(period.from)));
+      return capitalize(monthLabel(period.from.slice(0, 7)));
     case 'year':
-      return String(asDate(period.from).getUTCFullYear());
-    case 'custom': {
-      const from = asDate(period.from);
-      const to = asDate(period.to);
-      if (period.from === period.to) return plShortYear.format(from);
-      const sameYear = from.getUTCFullYear() === to.getUTCFullYear();
-      const start = sameYear ? plShort.format(from) : plShortYear.format(from);
-      return `${start} – ${plShortYear.format(to)}`;
-    }
+      return period.from.slice(0, 4);
+    case 'custom':
+      return rangeLabel(period.from, period.to);
   }
 };
 
-/** Label of one chart bucket: `14 Paź` for a day, `Paź` for a month. */
-export const pointLabel = (period: Period, index: number): string => {
-  if (bucketOf(period) === 'month') {
-    const date = asDate(period.from);
-    date.setUTCMonth(date.getUTCMonth() + index - 1);
-    return capitalize(plShortMonth.format(date));
-  }
+/** Day of a chart bucket (`index` is 1-based), or a day of the month it covers. */
+const pointDay = (period: Period, index: number): string => {
   const date = asDate(period.from);
-  date.setUTCDate(date.getUTCDate() + index - 1);
-  return capitalize(plShort.format(date));
+  if (bucketOf(period) === 'month') {
+    date.setUTCMonth(date.getUTCMonth() + index - 1);
+  } else {
+    date.setUTCDate(date.getUTCDate() + index - 1);
+  }
+  return date.toISOString().slice(0, 10);
+};
+
+/** Full label of a bucket: `pon. 14 paź 2026` for a day, `Paź 2026` for a month. */
+export const pointTitle = (period: Period, index: number): string => {
+  const day = pointDay(period, index);
+  return bucketOf(period) === 'month'
+    ? capitalize(monthLabel(day.slice(0, 7), 'short'))
+    : dayLabel(day);
+};
+
+/**
+ * Compact axis label: `Paź` for a month, `pon. 14` in a week, `14 paź` for
+ * other days.
+ */
+export const pointLabel = (period: Period, index: number): string => {
+  const day = pointDay(period, index);
+  const month = Number(day.slice(5, 7)) - 1;
+  if (bucketOf(period) === 'month')
+    return capitalize(monthNameLabel(month, 'short'));
+  const date = Number(day.slice(8));
+  return period.kind === 'week'
+    ? `${weekdayLabel(day)} ${date}`
+    : `${date} ${monthNameLabel(month, 'short')}`;
 };
 
 /** Buckets that get an axis label; the rest stay readable via the table. */

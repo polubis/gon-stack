@@ -119,3 +119,117 @@ export const dayStart = (day: string): string => {
   const [y = 0, m = 0, d = 0] = day.split('-').map(Number);
   return new Date(y, m - 1, d).toISOString();
 };
+
+/**
+ * Labels for people (pl-PL), the one wording used across the app. They read a
+ * plain day (`YYYY-MM-DD`), so a time zone never shifts them.
+ *
+ * - short: `pon. 19 paź 2026`, `pon. 19 – ndz. 25 paź 2026`, `paź 2026`
+ * - long: `poniedziałek, 19 października 2026`, `październik 2026`
+ */
+export type LabelStyle = 'short' | 'long';
+
+const labelFormatters = new Map<string, Intl.DateTimeFormat>();
+
+const labelFormat = (
+  options: Intl.DateTimeFormatOptions,
+  day: string,
+): string => {
+  const key = JSON.stringify(options);
+  let formatter = labelFormatters.get(key);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat('pl-PL', {
+      timeZone: 'UTC',
+      ...options,
+    });
+    labelFormatters.set(key, formatter);
+  }
+  // Intl writes `pon., 19`; the dot already separates, so drop the comma.
+  return formatter.format(new Date(`${day}T00:00:00Z`)).replaceAll('.,', '.');
+};
+
+/** `2026-10-19` → `pon. 19 paź 2026` / `poniedziałek, 19 października 2026`. */
+export const dayLabel = (
+  day: string,
+  style: LabelStyle = 'short',
+  withYear = true,
+): string =>
+  labelFormat(
+    {
+      weekday: style,
+      day: 'numeric',
+      month: style,
+      ...(withYear ? { year: 'numeric' } : {}),
+    },
+    day,
+  );
+
+/**
+ * Instant (or plain day) → day label in the local zone: `pon. 19 paź 2026`.
+ * The one wording for a date shown next to data (expenses, comments...).
+ */
+export const instantDayLabel = (
+  value: string | Date,
+  style: LabelStyle = 'short',
+): string => dayLabel(localDay(value), style);
+
+/** Instant → `pon. 19 paź 2026, 14:30` in the local zone. */
+export const instantDateTimeLabel = (
+  value: string | Date,
+  style: LabelStyle = 'short',
+): string => {
+  const { hour, minute } = partsOf(new Date(value), undefined);
+  return `${instantDayLabel(value, style)}, ${hour}:${minute}`;
+};
+
+/** Weekday only: `pon.` / `poniedziałek`. */
+export const weekdayLabel = (
+  day: string,
+  style: LabelStyle = 'short',
+): string => labelFormat({ weekday: style }, day);
+
+/** Monday to Sunday: `pon.`, `wt.`... / `poniedziałek`, `wtorek`... */
+export const weekdayNames = (style: LabelStyle = 'short'): string[] =>
+  Array.from({ length: 7 }, (_, i) =>
+    // 2026-10-19 is a Monday.
+    weekdayLabel(`2026-10-${String(19 + i)}`, style),
+  );
+
+/** `2026-10` → `paź 2026` / `październik 2026`. */
+export const monthLabel = (month: string, style: LabelStyle = 'long'): string =>
+  labelFormat({ month: style, year: 'numeric' }, `${month}-01`);
+
+/** Month name alone, `monthIndex` 0-11: `paź` / `październik`. */
+export const monthNameLabel = (
+  monthIndex: number,
+  style: LabelStyle = 'long',
+): string =>
+  labelFormat(
+    { month: style },
+    `2026-${String(monthIndex + 1).padStart(2, '0')}-01`,
+  );
+
+/**
+ * Range of days, shared parts written once:
+ * `pon. 19 – ndz. 25 paź 2026`, `pon. 28 wrz – ndz. 4 paź 2026`,
+ * `pon. 29 gru 2025 – ndz. 4 sty 2026`. One day collapses to a day label.
+ */
+export const rangeLabel = (
+  from: string,
+  to: string,
+  style: LabelStyle = 'short',
+): string => {
+  if (from === to) return dayLabel(from, style);
+  const sameYear = from.slice(0, 4) === to.slice(0, 4);
+  const sameMonth = sameYear && from.slice(5, 7) === to.slice(5, 7);
+  const start = labelFormat(
+    {
+      weekday: style,
+      day: 'numeric',
+      ...(sameMonth ? {} : { month: style }),
+      ...(sameYear ? {} : { year: 'numeric' }),
+    },
+    from,
+  );
+  return `${start} – ${dayLabel(to, style)}`;
+};

@@ -12,6 +12,7 @@ import type { LucideIcon } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { usePopoverOpen } from '@/shared/ui/use-popover-open';
 import { Input } from '@/shared/ui/controls';
+import { dayLabel } from '@/shared/date/date';
 import { addDays, isDay } from '@/shared/period/period';
 import type { BacklogTask, Task } from '../domain/models';
 import { weekDays } from '../domain/schedule';
@@ -23,8 +24,8 @@ import { TaskDeviceBadge } from './task-device';
 const ITEM =
   'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-hover-soft focus-visible:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
 
-/** `YYYY-MM-DD` as `DD.MM`. */
-const shortDay = (day: string): string => `${day.slice(8)}.${day.slice(5, 7)}`;
+/** `2026-10-30` as `pt. 30 paź`. */
+const shortDay = (day: string): string => dayLabel(day, 'short', false);
 
 type Target = { day: string; label: string; text: string; Icon: LucideIcon };
 
@@ -101,6 +102,9 @@ export const TaskMenu = ({ task }: { task: Task | BacklogTask }) => {
               >
                 <Icon className="h-4 w-4 text-ink-soft" aria-hidden="true" />
                 {text}
+                <span className="ml-auto pl-2 text-xs text-ink-soft">
+                  {shortDay(day)}
+                </span>
               </button>
             ))}
             {board && board.recurringId === null ? (

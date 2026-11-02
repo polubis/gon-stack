@@ -14,7 +14,7 @@ import {
   MAX_VISIBLE_EXPENSES,
 } from '../configuration/constraints';
 import { containsDate, todayDay, type Period } from '@/shared/period/period';
-import { money, plainDateLabel, shortDateTimeLabel } from '../domain/format';
+import { money, plainDateLabel, dateTimeLabel } from '../domain/format';
 import { periodTitle } from '../domain/period';
 import type {
   Category,
@@ -141,7 +141,7 @@ const ExpenseList = ({
                 </span>
                 <span className="flex items-center gap-2 text-xs text-ink-soft">
                   <span className="shrink-0">
-                    {shortDateTimeLabel(e.date)}
+                    {dateTimeLabel(e.date)}
                     <span className="sr-only">{`, ${categoryLabel(category.name)}`}</span>
                   </span>
                   {e.device ? <DeviceBadge device={e.device} /> : null}

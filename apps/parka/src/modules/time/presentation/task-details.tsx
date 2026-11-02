@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react';
+import { dayLabel } from '@/shared/date/date';
 import { closeModalThen, openModal } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
 import { DESCRIPTION_CLAMP_LINES } from '../configuration/constraints';
@@ -77,7 +78,7 @@ export const TaskDetails = ({
       title="Szczegóły zadania"
       description={
         isBoardTask(task)
-          ? `${task.day}${task.at === null ? '' : `, ${task.at}`}`
+          ? `${dayLabel(task.day, 'long')}${task.at === null ? '' : `, ${task.at}`}`
           : 'Zadanie z backlogu'
       }
     >

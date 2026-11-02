@@ -1,6 +1,13 @@
 import { useRef, useState, type KeyboardEvent } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
+import {
+  dayLabel,
+  monthLabel,
+  monthNameLabel,
+  rangeLabel,
+  weekdayNames,
+} from '@/shared/date/date';
 import { closeModal, closeModalThen } from '@/shared/router/modal-stack';
 import {
   addDays,
@@ -13,25 +20,7 @@ import { Select } from '@/shared/ui/controls';
 import { DetailDialog } from './detail-dialog';
 import { PERIOD_RANGE_MODAL } from '@/shared/period-control/configuration/constraints';
 
-const WEEKDAYS = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'] as const;
-
-const MONTH_TITLE = new Intl.DateTimeFormat('pl-PL', {
-  month: 'long',
-  year: 'numeric',
-  timeZone: 'UTC',
-});
-
-const DAY_NAME = new Intl.DateTimeFormat('pl-PL', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-  timeZone: 'UTC',
-});
-
-const MONTH_NAME = new Intl.DateTimeFormat('pl-PL', {
-  month: 'long',
-  timeZone: 'UTC',
-});
+const WEEKDAYS = weekdayNames();
 
 /** How many years back the year select reaches. */
 const YEARS_BACK = 20;
@@ -148,9 +137,9 @@ export const PeriodRangeDialog = ({
   };
 
   const summary = complete
-    ? `${DAY_NAME.format(new Date(draft.from))} – ${DAY_NAME.format(new Date(draft.to))}`
+    ? rangeLabel(draft.from, draft.to, 'long')
     : draft.from
-      ? `Od ${DAY_NAME.format(new Date(draft.from))} – wybierz dzień końcowy`
+      ? `Od ${dayLabel(draft.from, 'long')} – wybierz dzień końcowy`
       : 'Wybierz dzień początkowy';
 
   return (
@@ -178,13 +167,11 @@ export const PeriodRangeDialog = ({
           data-e2e="dashboard:period-range-month"
           aria-expanded={jumping}
           aria-controls="period-range-jump"
-          aria-label={`${MONTH_TITLE.format(new Date(firstOf(month)))}, wybierz miesiąc i rok`}
+          aria-label={`${monthLabel(month)}, wybierz miesiąc i rok`}
           onClick={toggleJump}
           className={TITLE_BUTTON}
         >
-          <span className="truncate">
-            {MONTH_TITLE.format(new Date(firstOf(month)))}
-          </span>
+          <span className="truncate">{monthLabel(month)}</span>
           <ChevronDown
             className={cn(
               'h-4 w-4 shrink-0 transition-transform motion-reduce:transition-none',
@@ -264,7 +251,7 @@ export const PeriodRangeDialog = ({
                       : 'hover:bg-hover-soft',
                   )}
                 >
-                  {MONTH_NAME.format(new Date(firstOf(value)))}
+                  {monthNameLabel(i)}
                 </button>
               );
             })}
@@ -301,7 +288,7 @@ export const PeriodRangeDialog = ({
                   type="button"
                   data-day={day}
                   data-e2e={`dashboard:period-range-day:${day}`}
-                  aria-label={DAY_NAME.format(new Date(day))}
+                  aria-label={dayLabel(day, 'long')}
                   aria-pressed={edge}
                   disabled={day > today}
                   onClick={() => setDraft(nextDraft(draft, day))}

@@ -2,6 +2,7 @@ import { expect, type Page } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
 import { test, type Ctx } from '@/__e2e__/test';
 import { signInAsTestUser } from '@/__e2e__/session';
+import { monthLabel, rangeLabel } from '@/shared/date/date';
 import { APP_ROUTER } from '@/shared/router/routes';
 import {
   currentPeriod,
@@ -176,7 +177,7 @@ const commands = {
   },
   'the label shows the June range': async ({ getByE2e }) => {
     await expect(getByE2e('period-control:label')).toContainText(
-      `01.06.${lastYear} – 30.06.${lastYear}`,
+      rangeLabel(`${lastYear}-06-01`, `${lastYear}-06-30`),
     );
   },
   'i go back one period': ({ getByE2e }) =>
@@ -227,7 +228,9 @@ const commands = {
   'i jump to the first month of last year': ({ getByE2e }) =>
     getByE2e(`period-control:option:${lastYear}-03`).click(),
   'the label shows March of last year': async ({ getByE2e }) => {
-    await expect(getByE2e('period-control:label')).toHaveText(`03.${lastYear}`);
+    await expect(getByE2e('period-control:label')).toHaveText(
+      monthLabel(`${lastYear}-03`),
+    );
   },
   'the picker cannot reach the future': async ({ page }) => {
     const values = await page

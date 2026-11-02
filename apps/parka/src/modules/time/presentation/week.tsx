@@ -2,7 +2,8 @@ import { Fragment } from 'react';
 import { cn } from '@repo/react-kit/cn';
 import { useListChanges } from '@/shared/ui/list-changes';
 import { ALL_DAY_LABEL } from '../configuration/constraints';
-import { weekdayLong, weekdayShort } from '../domain/period-title';
+import { monthNameLabel, weekdayLabel } from '@/shared/date/date';
+import { fullDate } from '../domain/period-title';
 import {
   gridHours,
   isTimed,
@@ -19,12 +20,15 @@ import { stagger } from './stagger';
 
 const hourLabel = (hour: number) => `${String(hour).padStart(2, '0')}:00`;
 
-/** Short day name for sighted users, full name for screen readers. */
+/** Weekday, day and month for sighted users, the full date for screen readers. */
 const DayName = ({ day }: { day: string }) => (
   <>
-    <span aria-hidden="true">{weekdayShort(day)}</span>
-    <span className="sr-only">{weekdayLong(day)}</span>{' '}
-    <span className="font-normal text-ink-soft">{Number(day.slice(8))}</span>
+    <span aria-hidden="true">{weekdayLabel(day)}</span>
+    <span className="sr-only">{fullDate(day)}</span>{' '}
+    <span aria-hidden="true" className="font-normal text-ink-soft">
+      {Number(day.slice(8))}{' '}
+      {monthNameLabel(Number(day.slice(5, 7)) - 1, 'short')}
+    </span>
   </>
 );
 

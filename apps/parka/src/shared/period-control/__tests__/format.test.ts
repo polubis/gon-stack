@@ -6,11 +6,11 @@ const TODAY = '2026-10-20';
 
 describe('period label', () => {
   it.each([
-    ['day', '20.10.2026'],
-    ['week', '19.10.2026 – 25.10.2026'],
-    ['month', '10.2026'],
+    ['day', 'wt. 20 paź 2026'],
+    ['week', 'pon. 19 – niedz. 25 paź 2026'],
+    ['month', 'październik 2026'],
     ['year', '2026'],
-  ] as const)('writes a %s with numbers only', (kind, expected) => {
+  ] as const)('writes a %s with weekday and month names', (kind, expected) => {
     expect(periodLabel(periodContaining(kind, TODAY))).toBe(expected);
   });
 });
@@ -23,7 +23,7 @@ describe('picker options', () => {
       false,
     );
 
-    expect(first?.label).toBe('10.2026');
+    expect(first?.label).toBe('październik 2026');
   });
 
   it('reach into the future when it is allowed', () => {
@@ -33,6 +33,6 @@ describe('picker options', () => {
       true,
     );
 
-    expect(first?.label).toBe('10.2028');
+    expect(first?.label).toBe('październik 2028');
   });
 });

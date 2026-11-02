@@ -8,7 +8,12 @@ import { shiftPeriod, type Period } from '@/shared/period/period';
 import { CHART_TICKS } from '../configuration/constraints';
 import { money } from '../domain/format';
 import type { Summary } from '../domain/models';
-import { labelledPoints, periodTitle, pointLabel } from '../domain/period';
+import {
+  labelledPoints,
+  periodTitle,
+  pointLabel,
+  pointTitle,
+} from '../domain/period';
 import { niceStep } from './selectors';
 
 const percentOf = (value: number, top: number): number => (value / top) * 100;
@@ -81,7 +86,7 @@ const Chart = ({ period, summary }: { period: Period; summary: Summary }) => {
                   />
                   <span className="pointer-events-none absolute bottom-full left-1/2 z-(--z-tooltip) mb-1 hidden -translate-x-1/2 whitespace-nowrap rounded-lg bg-card px-2 py-1 text-xs shadow-popover group-hover:block">
                     <span className="block text-ink-soft">
-                      {pointLabel(period, d.index)}
+                      {pointTitle(period, d.index)}
                     </span>
                     <span className="font-semibold">{money(d.total)}</span>
                   </span>
@@ -133,7 +138,7 @@ const Chart = ({ period, summary }: { period: Period; summary: Summary }) => {
           <tbody>
             {series.map((d) => (
               <tr key={d.index}>
-                <th scope="row">{pointLabel(period, d.index)}</th>
+                <th scope="row">{pointTitle(period, d.index)}</th>
                 <td>{money(d.total)}</td>
               </tr>
             ))}

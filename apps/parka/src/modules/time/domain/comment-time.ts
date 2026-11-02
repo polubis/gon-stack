@@ -1,8 +1,5 @@
-const WHEN = new Intl.DateTimeFormat('pl-PL', {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-});
+import { instantDateTimeLabel } from '@/shared/date/date';
 
-/** `24 paź 2026, 10:00`: when a comment was written. */
+/** `sob. 24 paź 2026, 10:00`: when a comment was written. */
 export const formatCommentTime = (iso: string): string =>
-  WHEN.format(new Date(iso));
+  instantDateTimeLabel(iso);

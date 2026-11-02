@@ -1,3 +1,4 @@
+import { weekdayNames } from '@/shared/date/date';
 import { APP_ROUTER } from '@/shared/router/routes';
 import type { RecurringInterval } from '@/shared/recurring/occurrences';
 import type { TimeKind } from '../domain/models';
@@ -77,15 +78,8 @@ export const DEFAULT_TIME = '12:00';
 
 export const ALL_DAY_LABEL = 'Cały dzień';
 
-export const WEEKDAY_SHORT = [
-  'Pn',
-  'Wt',
-  'Śr',
-  'Cz',
-  'Pt',
-  'So',
-  'Nd',
-] as const;
+/** Monday to Sunday, written like every other weekday: `pon.`, `wt.`... */
+export const WEEKDAY_SHORT: readonly string[] = weekdayNames();
 
 /** Skeleton rows shown while the first load runs. */
 export const SKELETON_ROWS = 5;
