@@ -26,6 +26,20 @@ export type DictationError = { code: string; denied: boolean };
 const IGNORED_ERRORS = ['no-speech', 'aborted'];
 const DENIED_ERRORS = ['not-allowed', 'service-not-allowed'];
 
+/**
+ * Folds recognition segments into one text without repeats: a segment that
+ * extends everything so far replaces it (cumulative results), one already
+ * present at the end is dropped (re-delivered results).
+ */
+const mergeSegments = (segments: string[]) =>
+  segments.reduce((acc, raw) => {
+    const seg = raw.replace(/\s+/g, ' ').trim();
+    if (seg === '' || acc === seg) return acc;
+    if (acc !== '' && seg.startsWith(acc)) return seg;
+    if (acc.endsWith(` ${seg}`) && seg.includes(' ')) return acc;
+    return acc === '' ? seg : `${acc} ${seg}`;
+  }, '');
+
 const subscribeNothing = () => () => {};
 
 const getRecognition = (): RecognitionCtor | null => {
@@ -37,17 +51,15 @@ const getRecognition = (): RecognitionCtor | null => {
 };
 
 /**
- * Browser speech-to-text. `onText` receives the whole transcript of the
- * current session (final + interim) each time it changes.
- * `supported` is false on the server and in browsers without the API.
+ * Browser speech-to-text. `transcript` is the de-duplicated text so far
+ * (final + interim, kept across restarts until `reset`); nothing is written
+ * anywhere. `supported` is false on the server and in browsers without the API.
  */
 export const useDictation = ({
   lang,
-  onText,
   onError,
 }: {
   lang: string;
-  onText: (transcript: string) => void;
   onError: (error: DictationError) => void;
 }) => {
   const supported = useSyncExternalStore(
@@ -57,7 +69,8 @@ export const useDictation = ({
   );
   const [listening, setListening] = useState(false);
   const recognition = useRef<Recognition | null>(null);
-  const emitText = useEffectEvent(onText);
+  const [transcript, setTranscript] = useState('');
+  const carry = useRef('');
   const emitError = useEffectEvent(onError);
 
   useEffect(() => {
@@ -68,11 +81,11 @@ export const useDictation = ({
     rec.continuous = true;
     rec.interimResults = true;
     rec.onresult = (e) => {
-      emitText(
-        Array.from(e.results, (r) => r[0]?.transcript ?? '')
-          .join(' ')
-          .replace(/\s+/g, ' ')
-          .trim(),
+      setTranscript(
+        mergeSegments([
+          carry.current,
+          mergeSegments(Array.from(e.results, (r) => r[0]?.transcript ?? '')),
+        ]),
       );
     };
     rec.onerror = (e) => {
@@ -95,7 +108,17 @@ export const useDictation = ({
   return {
     supported,
     listening,
-    start: () => setListening(true),
+    transcript,
+    /** `resume` keeps the text so far; otherwise a fresh take starts. */
+    start: (resume = false) => {
+      carry.current = resume ? transcript : '';
+      if (!resume) setTranscript('');
+      setListening(true);
+    },
+    reset: () => {
+      carry.current = '';
+      setTranscript('');
+    },
     stop: () => {
       recognition.current?.stop();
       setListening(false);

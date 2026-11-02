@@ -66,6 +66,27 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+const mic = () => screen.getByRole('button', { name: 'Dyktuj: Nazwa' });
+const preview = () => screen.getByRole('log', { name: 'Podgląd dyktowania' });
+const field = () => screen.getByLabelText('Nazwa');
+
+const Note = ({ initial = '', max }: { initial?: string; max?: number }) => {
+  const [value, setValue] = useState(initial);
+  const ref = useRef<HTMLTextAreaElement>(null);
+  return (
+    <>
+      <textarea
+        ref={ref}
+        aria-label="Treść"
+        maxLength={max}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+      />
+      <DictationButton target={ref} label="Treść" />
+    </>
+  );
+};
+
 describe('voice dictation into a text field', () => {
   it('has no mic button when the browser cannot recognise speech', () => {
     render(<Form />);
@@ -73,72 +94,157 @@ describe('voice dictation into a text field', () => {
     expect(screen.queryByRole('button', { name: /Dyktuj/ })).toBeNull();
   });
 
-  it('types what was said into the field', async () => {
-    installMic();
-    render(<Form />);
-
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Dyktuj: Nazwa' }),
-    );
-    say('kup mleko');
-
-    expect(screen.getByLabelText('Nazwa')).toHaveValue('kup mleko');
-  });
-
-  it('appends to existing text and follows interim corrections', async () => {
+  it('previews live speech without touching the field', async () => {
     installMic();
     render(<Form initial="Zakupy:" />);
 
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Dyktuj: Nazwa' }),
-    );
-    say('chleb');
-    say('chleb', 'i masło');
+    await userEvent.click(mic());
+    say('kup');
+    say('kup mleko');
 
-    expect(screen.getByLabelText('Nazwa')).toHaveValue('Zakupy: chleb i masło');
+    expect(preview()).toHaveTextContent('kup mleko');
+    expect(field()).toHaveValue('Zakupy:');
   });
 
-  it('blocks the page while listening and stops from the popup', async () => {
+  it('inserts the previewed text once on accept', async () => {
+    installMic();
+    render(<Form initial="Zakupy:" />);
+
+    await userEvent.click(mic());
+    say('chleb');
+    say('chleb', 'i masło');
+    await userEvent.click(screen.getByRole('button', { name: 'Wstaw' }));
+
+    expect(field()).toHaveValue('Zakupy: chleb i masło');
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('inserts into a textarea too', async () => {
+    installMic();
+    render(<Note initial="Notatka" />);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Dyktuj: Treść' }),
+    );
+    say('jutro rano');
+    await userEvent.click(screen.getByRole('button', { name: 'Wstaw' }));
+
+    expect(screen.getByLabelText('Treść')).toHaveValue('Notatka jutro rano');
+  });
+
+  it('shows repeated or re-delivered results only once', async () => {
     installMic();
     render(<Form />);
 
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Dyktuj: Nazwa' }),
-    );
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'Zatrzymaj dyktowanie: Nazwa' }),
-    ).toBeDisabled();
+    await userEvent.click(mic());
+    say('kup mleko');
+    say('kup mleko', 'kup mleko');
+    say('kup mleko', 'kup mleko jutro');
+    say('kup mleko', 'kup mleko jutro');
+    say('kup mleko', 'kup mleko jutro', 'kup mleko jutro');
 
+    expect(preview()).toHaveTextContent(/^kup mleko jutro$/);
+    await userEvent.click(screen.getByRole('button', { name: 'Wstaw' }));
+    expect(field()).toHaveValue('kup mleko jutro');
+  });
+
+  it('writes nothing on cancel', async () => {
+    installMic();
+    render(<Form initial="Zakupy:" />);
+
+    await userEvent.click(mic());
+    say('kup mleko');
+    await userEvent.click(screen.getByRole('button', { name: 'Anuluj' }));
+
+    expect(field()).toHaveValue('Zakupy:');
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('starts a fresh take after a cancelled one', async () => {
+    installMic();
+    render(<Form />);
+
+    await userEvent.click(mic());
+    say('stary tekst');
+    await userEvent.click(screen.getByRole('button', { name: 'Anuluj' }));
+    await userEvent.click(mic());
+    say('nowy');
+    await userEvent.click(screen.getByRole('button', { name: 'Wstaw' }));
+
+    expect(field()).toHaveValue('nowy');
+  });
+
+  it('writes nothing on Escape', async () => {
+    installMic();
+    render(<Form />);
+
+    await userEvent.click(mic());
+    say('kup mleko');
+    await userEvent.keyboard('{Escape}');
+
+    expect(field()).toHaveValue('');
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('cannot accept before anything was said', async () => {
+    installMic();
+    render(<Form />);
+
+    await userEvent.click(mic());
+
+    expect(screen.getByRole('button', { name: 'Wstaw' })).toBeDisabled();
+  });
+
+  it('keeps the preview after listening stops and can continue', async () => {
+    installMic();
+    render(<Form />);
+
+    await userEvent.click(mic());
+    say('kup mleko');
     await userEvent.click(
       screen.getByRole('button', { name: 'Zakończ dyktowanie' }),
     );
 
-    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(preview()).toHaveTextContent('kup mleko');
+    expect(field()).toHaveValue('');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Dyktuj dalej' }));
+    say('i chleb');
+    await userEvent.click(screen.getByRole('button', { name: 'Wstaw' }));
+
+    expect(field()).toHaveValue('kup mleko i chleb');
+  });
+
+  it('respects the field max length', async () => {
+    installMic();
+    render(<Note initial="abc" max={8} />);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Dyktuj: Treść' }),
+    );
+    say('defghijkl');
+    await userEvent.click(screen.getByRole('button', { name: 'Wstaw' }));
+
+    expect(screen.getByLabelText('Treść')).toHaveValue('abc defg');
+  });
+
+  it('blocks the page while dictating', async () => {
+    installMic();
+    render(<Form />);
+
+    await userEvent.click(mic());
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Dyktuj: Nazwa' }),
-    ).toHaveAttribute('aria-pressed', 'false');
+      screen.getByRole('button', { name: 'Zatrzymaj dyktowanie: Nazwa' }),
+    ).toBeDisabled();
   });
 
-  it('stops listening on Escape', async () => {
+  it('explains a denied microphone', async () => {
     installMic();
     render(<Form />);
 
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Dyktuj: Nazwa' }),
-    );
-    await userEvent.keyboard('{Escape}');
-
-    expect(screen.queryByRole('dialog')).toBeNull();
-  });
-
-  it('explains a denied microphone and lets the user retry', async () => {
-    installMic();
-    render(<Form />);
-
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Dyktuj: Nazwa' }),
-    );
+    await userEvent.click(mic());
     act(() => current?.onerror?.({ error: 'not-allowed' }));
 
     expect(screen.getByRole('alert')).toHaveTextContent(
@@ -212,7 +318,7 @@ describe('voice popup details', () => {
     say('kup chleb');
 
     expect(screen.getByRole('dialog')).toBeVisible();
-    expect(screen.getByLabelText('Nazwa')).toHaveValue('kup chleb');
+    expect(preview()).toHaveTextContent('kup chleb');
   });
 
   it('leaves the microphone to speech recognition on a phone', async () => {
@@ -233,6 +339,6 @@ describe('voice popup details', () => {
 
     expect(getUserMedia).not.toHaveBeenCalled();
     expect(started).toBe(1);
-    expect(screen.getByLabelText('Nazwa')).toHaveValue('kup chleb');
+    expect(preview()).toHaveTextContent('kup chleb');
   });
 });
