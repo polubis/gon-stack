@@ -6,13 +6,15 @@ type Fields = Record<string, string | string[]>;
 type Bounds = { min: number; max: number };
 
 const DIR = 'decisions/';
-const FILE = /^decisions\/(\d{4})-([a-z0-9]+(?:-[a-z0-9]+)*)\.md$/;
+const STEM =
+  /(\d{8}-\d{6})-((?:[A-Za-z][A-Za-z0-9]*-\d+)|none)-([a-z0-9]+(?:-[a-z0-9]+)*)/;
+const FILE = new RegExp(`^${DIR}${STEM.source}\\.md$`);
+const SUPERSEDES = new RegExp(`^${STEM.source}$`);
 const WRONG_LOCATION = /(^|\/)__log__\//;
 const SCOPE = /^[a-z][a-z0-9-]*(\/[a-z][a-z0-9-]*)*$/;
 const KEBAB = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 const TICKET = /^([A-Za-z][A-Za-z0-9]*-\d+|none)$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
-const NUMBER = /^\d{4}$/;
 const UINT = /^\d+$/;
 const DECIMAL = /^\d+(\.\d+)?$/;
 const KEY = /^([A-Za-z][A-Za-z0-9]*):(?: (.*))?$/;
@@ -118,14 +120,14 @@ const VERBS = [
   'wait',
   'wire',
 ];
-const TEMPLATE = `decisions/NNNN-<scope-prefix>-<verb>-<object>.md
+const TEMPLATE = `decisions/20261011-120000-none-parka-add-dashboard-tiles.md
 ---
 ticket: none
 scope: parka/dashboard
 summary: Tiles ordered by priority
 why: Total + budget answer "am I OK?" first
 date: 2026-10-11
-supersedes: 0022
+supersedes: 20261009-093000-none-parka-order-tiles
 ---
 
 - Order: hero, limits, expenses, categories, chart
@@ -135,6 +137,15 @@ supersedes: 0022
 const isDate = (value: string): boolean =>
   DATE.test(value) &&
   new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
+
+const isDateTime = (value: string): boolean => {
+  const [date = '', time = ''] = value.split('-');
+  const iso = `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6)}T${time.slice(0, 2)}:${time.slice(2, 4)}:${time.slice(4)}`;
+  const parsed = new Date(`${iso}Z`);
+  return (
+    !Number.isNaN(parsed.getTime()) && parsed.toISOString().startsWith(iso)
+  );
+};
 
 const scalar = (raw: string): string | undefined => {
   const value = raw.trim();
@@ -214,7 +225,7 @@ const checkLength = (
 
 const validateFields = (
   fields: Fields,
-  existing: number[],
+  existing: string[],
   { scopes }: Options,
   problems: string[],
 ): void => {
@@ -255,13 +266,13 @@ const validateFields = (
   checkLength(fields, 'why', WHY, problems);
   if (typeof date === 'string' && !isDate(date))
     problems.push(`"date" must be a real date YYYY-MM-DD, found "${date}"`);
-  if (typeof supersedes === 'string' && !NUMBER.test(supersedes))
+  if (typeof supersedes === 'string' && !SUPERSEDES.test(supersedes))
     problems.push(
-      `"supersedes" must be a 4 digit number, found "${supersedes}"`,
+      `"supersedes" must be a decision name like 20261011-120000-none-parka-add-thing, found "${supersedes}"`,
     );
   else if (
     typeof supersedes === 'string' &&
-    !existing.includes(Number(supersedes))
+    !existing.includes(`${DIR}${supersedes}.md`)
   )
     problems.push(`"supersedes" ${supersedes} does not exist in ${DIR}`);
   if (Array.isArray(tags))
@@ -303,21 +314,43 @@ const validateBody = (lines: string[], problems: string[]): void => {
   });
 };
 
-const validateName = (
-  number: string,
-  slug: string,
-  existing: number[],
-  scope: string | string[] | undefined,
-  problems: string[],
-): void => {
-  const expected = Math.max(0, ...existing) + 1;
-  if (Number(number) !== expected)
+const nameProblems = (file: string, others: string[]): string[] => {
+  const match = FILE.exec(file);
+  if (!match)
+    return [
+      `name must be "${DIR}YYYYMMDD-HHmmss-<ticket>-<scope-prefix>-<verb>-<object>.md" (kebab-case, [a-z0-9-])`,
+    ];
+  const [, datetime = '', ticket = '', slug = ''] = match;
+  const problems: string[] = [];
+  if (!isDateTime(datetime))
     problems.push(
-      `file number must be the next free one: ${String(expected).padStart(4, '0')}, found ${number}`,
+      `datetime must be a real YYYYMMDD-HHmmss, found "${datetime}"`,
     );
   if (slug.length < SLUG.min || slug.length > SLUG.max)
     problems.push(
       `slug "${slug}" must have ${SLUG.min}-${SLUG.max} characters, found ${slug.length}`,
+    );
+  const twin = others.find((other) => {
+    const found = FILE.exec(other);
+    return found?.[2] === ticket && found[3] === slug;
+  });
+  if (twin)
+    problems.push(
+      `ticket "${ticket}" and slug "${slug}" already used by ${twin}`,
+    );
+  return problems;
+};
+
+const validateSlug = (
+  ticket: string,
+  slug: string,
+  fields: Fields,
+  problems: string[],
+): void => {
+  const { ticket: declared, scope } = fields;
+  if (typeof declared === 'string' && declared !== ticket)
+    problems.push(
+      `file ticket "${ticket}" must match frontmatter ticket "${declared}"`,
     );
   if (typeof scope !== 'string') return;
   const prefix = `${scope.split('/')[0]}-`;
@@ -336,14 +369,14 @@ const validateName = (
     problems.push(`slug "${slug}": add an object after the verb "${verb}"`);
 };
 
-const validateEntry = (
+export const validateDecisionLog = (
   file: string,
-  [number, slug]: [string, string],
   content: string,
-  existing: number[],
+  existing: string[],
   options: Options,
 ): string[] => {
-  const problems: string[] = [];
+  const problems = nameProblems(file, existing);
+  const [, , ticket = '', slug = ''] = FILE.exec(file) ?? [];
   const lines = content.replaceAll('\r\n', '\n').split('\n');
   const end = lines[0] === '---' ? lines.indexOf('---', 1) : -1;
 
@@ -354,7 +387,7 @@ const validateEntry = (
   } else {
     const fields = parseFields(lines.slice(1, end), problems);
     validateFields(fields, existing, options, problems);
-    validateName(number, slug, existing, fields['scope'], problems);
+    if (FILE.test(file)) validateSlug(ticket, slug, fields, problems);
     if (lines[end + 1] !== '')
       problems.push('one blank line must follow the closing "---"');
     const body = lines.slice(end + 2);
@@ -364,26 +397,6 @@ const validateEntry = (
   }
 
   return problems.map((problem) => `${file}: ${problem}`);
-};
-
-export const validateDecisionLog = (
-  file: string,
-  content: string,
-  existing: number[],
-  options: Options,
-): string[] => {
-  const match = FILE.exec(file);
-  return match
-    ? validateEntry(
-        file,
-        match.slice(1) as [string, string],
-        content,
-        existing,
-        options,
-      )
-    : [
-        `${file}: name must be "${DIR}NNNN-<scope-prefix>-<verb>-<object>.md" (kebab-case, [a-z0-9-])`,
-      ];
 };
 
 export const decisionLog = (options: Options): RuleUnit => ({
@@ -399,6 +412,7 @@ export const decisionLog = (options: Options): RuleUnit => ({
       report(
         `${file}: decisions live in "${DIR}" at repo root, not in "__log__/"`,
       );
+    const decisions = files.filter((file) => file.startsWith(DIR));
     const entries = git.stagedAddedFiles.filter((file) => file.startsWith(DIR));
     const decisionsOnly =
       git.stagedFiles.length > 0 &&
@@ -406,16 +420,14 @@ export const decisionLog = (options: Options): RuleUnit => ({
         (file) => file.startsWith(DIR) || WRONG_LOCATION.test(file),
       );
     if (entries.length === 0 && !decisionsOnly)
-      report(`No new "${DIR}NNNN-slug.md" entry staged in this commit`);
+      report(
+        `No new "${DIR}YYYYMMDD-HHmmss-<ticket>-<slug>.md" entry staged in this commit`,
+      );
     if (entries.length > 1)
       report(
-        `Exactly one new "${DIR}NNNN-slug.md" entry per commit, found ${entries.length}: ${entries.join(', ')}`,
+        `Exactly one new "${DIR}YYYYMMDD-HHmmss-<ticket>-<slug>.md" entry per commit, found ${entries.length}: ${entries.join(', ')}`,
       );
-    const existing = files
-      .filter((file) => !entries.includes(file))
-      .map((file) => FILE.exec(file)?.[1])
-      .filter((number) => number !== undefined)
-      .map(Number);
+    const existing = decisions.filter((file) => !entries.includes(file));
     for (const file of entries)
       for (const problem of validateDecisionLog(
         file,
@@ -424,5 +436,11 @@ export const decisionLog = (options: Options): RuleUnit => ({
         options,
       ))
         report(problem);
+    for (const file of existing)
+      for (const problem of nameProblems(
+        file,
+        existing.filter((other) => other !== file),
+      ))
+        report(`${file}: ${problem}`);
   },
 });

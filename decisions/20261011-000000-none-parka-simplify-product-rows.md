@@ -4,7 +4,7 @@ scope: parka
 summary: "Expense popup: product rows simplified"
 why: Icon, name and total are enough; the subtitle and category name were repeats
 date: 2026-10-11
-supersedes: 0151
+supersedes: 20261011-000000-none-parka-show-product-category-icons
 ---
 
 - Decision: product row = category icon + name + total. Nothing else.

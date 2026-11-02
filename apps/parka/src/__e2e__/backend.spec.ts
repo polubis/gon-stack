@@ -238,7 +238,7 @@ const commands = {
   },
 } satisfies CommandRegistry<Ctx>;
 
-// Skipped: see decisions/0082-parka-skip-backend-e2e.md
+// Skipped: see decisions/20261002-000000-none-parka-skip-backend-e2e.md
 test.skip('every feature works against the real Supabase backend', async ({
   e2e,
 }) => {

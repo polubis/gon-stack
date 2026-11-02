@@ -4,7 +4,7 @@ scope: repo
 summary: Slim CI gates, parallel root format check, turbo agent guidance off
 why: Audit/outdated/hash gates were noisy and unrelated to current work; format in parallel cuts wall time. Supersedes the CI-gate part of 0068
 date: 2026-10-01
-supersedes: 0068
+supersedes: 20260930-000000-none-repo-add-security-audit-ci-gates
 ---
 
 - Removed `deps:audit`, `deps:outdated` and `hash:check` from `ci:verify`, `ci:verify:dry`, PR CI and Parka deploy `verify` (scripts remain for manual use).

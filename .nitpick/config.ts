@@ -147,7 +147,7 @@ Show dev adequate evidence the problem is solved, e.g.:
 
 1. **Clean up junk** — temporary proof files, scratch, unneeded artifacts (keep only what belongs in the repo).
 2. **Rules audit** on the final diff — fix again if needed.
-3. **Decision log** — add a new \`decisions/NNNN-slug.md\` for this session (next free global number; format in \`rules/decision-log.md\`). Stage it with the code change.
+3. **Decision log** — add a new \`decisions/YYYYMMDD-HHmmss-<ticket>-slug.md\` for this session (datetime now, no number; format in \`rules/decision-log.md\`). Stage it with the code change.
 4. Commit (\`rules/git.md\`) and push **only when dev asked for it**.
 5. **Shut down** dev servers/ports you started this session (e.g. \`pnpm dev\`).
 
