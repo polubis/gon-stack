@@ -245,6 +245,26 @@ export const Footer = () => (
       <div className="my-10 h-px bg-line" />
 
       <div className="flex flex-col gap-6">
+        <section
+          aria-labelledby="footer-legal-notice"
+          className="text-sm text-ink-light"
+        >
+          <h2 id="footer-legal-notice" className="font-semibold text-secondary">
+            {copy.footer.legalNotice.title}
+          </h2>
+          <ul className="mt-2 space-y-1">
+            {copy.footer.legalNotice.lines.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+          <a
+            href={copy.footer.legalNotice.privacyPolicyHref}
+            className="mt-2 inline-block font-medium text-primary underline"
+          >
+            {copy.footer.legalNotice.privacyPolicyLabel}
+          </a>
+        </section>
+
         <div className="flex flex-col items-start gap-4 text-left text-sm text-ink-light lg:flex-row lg:items-center lg:justify-between">
           <p>
             {copy.footer.copyrightPrefix} {new Date().getFullYear()}{' '}
