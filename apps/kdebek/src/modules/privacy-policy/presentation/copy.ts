@@ -21,6 +21,7 @@ const sections = [
     id: 'jakie-dane-zbieramy',
     title: '2. Jakie dane zbieramy',
     paragraphs: [
+      'Źródłem danych jesteś Ty (dane przekazane bezpośrednio) albo platforma Booksy (dane z rezerwacji, zob. sekcja 4) i Twoja przeglądarka (dane techniczne). Nie otrzymujemy Twoich danych z innych źródeł.',
       'Zbieramy dane, które przekazujesz nam samodzielnie, np. kontaktując się z nami mailowo lub telefonicznie — mogą to być imię i nazwisko, adres e-mail, numer telefonu oraz treść wiadomości.',
       'Zbieramy również dane gromadzone automatycznie podczas korzystania ze strony, takie jak adres IP, rodzaj przeglądarki i urządzenia, przybliżona lokalizacja oraz informacje o sposobie korzystania ze strony — za pośrednictwem plików cookie, opisanych w dalszej części niniejszej Polityki. Dostawca hostingu rejestruje ponadto logi serwera (adres IP, user agent, czas żądania i adres URL), które przetwarzamy w celu zapewnienia bezpieczeństwa i diagnostyki strony (art. 6 ust. 1 lit. f RODO) i przechowujemy przez 7 dni.',
       'Nie przetwarzamy szczególnych kategorii danych (danych wrażliwych, w tym danych o stanie zdrowia) inaczej niż w zakresie, w jakim samodzielnie przekażesz je nam w wiadomości lub w trakcie wizyty w gabinecie — takie dane wykorzystywane są wyłącznie w celu prawidłowego przeprowadzenia zabiegu i nie są przechowywane w systemach strony internetowej.',
@@ -92,9 +93,10 @@ const sections = [
     id: 'twoje-prawa',
     title: '9. Twoje prawa',
     paragraphs: [
-      'Zgodnie z RODO przysługuje Ci prawo dostępu do swoich danych, ich sprostowania, usunięcia, ograniczenia przetwarzania, przenoszenia danych oraz wniesienia sprzeciwu wobec ich przetwarzania.',
-      'Jeżeli przetwarzanie odbywa się na podstawie zgody, masz prawo w każdej chwili ją wycofać, co nie wpływa na zgodność z prawem przetwarzania dokonanego przed jej wycofaniem.',
-      'Przysługuje Ci również prawo do wniesienia skargi do Prezesa Urzędu Ochrony Danych Osobowych, jeżeli uznasz, że przetwarzanie Twoich danych narusza obowiązujące przepisy.',
+      'Zgodnie z RODO przysługuje Ci: prawo dostępu do danych (art. 15), sprostowania (art. 16), usunięcia (art. 17), ograniczenia przetwarzania (art. 18), przenoszenia danych (art. 20) oraz sprzeciwu wobec przetwarzania opartego na prawnie uzasadnionym interesie (art. 21). Prawo sprzeciwu przysługuje Ci z przyczyn związanych z Twoją szczególną sytuacją; po jego wniesieniu przestaniemy przetwarzać dane, chyba że wykażemy ważne prawnie uzasadnione podstawy.',
+      'Aby skorzystać z tych praw, napisz na adres e-mail biuro.masazdebek@gmail.com lub zadzwoń pod numer +48 666 735 220. Odpowiemy bez zbędnej zwłoki, w ciągu miesiąca od otrzymania żądania (art. 12 ust. 3 RODO). Możemy poprosić o dane niezbędne do potwierdzenia Twojej tożsamości.',
+      'Jeżeli przetwarzanie odbywa się na podstawie zgody (analityka, film YouTube), masz prawo w każdej chwili ją wycofać — równie łatwo, jak ją wyrazić: przyciskiem ustawień cookies (ikona ciasteczka w lewym dolnym rogu każdej podstrony) lub wiadomością do nas. Wycofanie zgody nie wpływa na zgodność z prawem przetwarzania dokonanego przed jej wycofaniem (art. 7 ust. 3 RODO).',
+      'Przysługuje Ci również prawo do wniesienia skargi do organu nadzorczego — Prezesa Urzędu Ochrony Danych Osobowych (ul. Stawki 2, 00-193 Warszawa, uodo.gov.pl), jeżeli uznasz, że przetwarzanie Twoich danych narusza obowiązujące przepisy.',
     ],
   },
   {
@@ -137,7 +139,7 @@ export const copy = {
   header: {
     eyebrow: 'DOKUMENT PRAWNY',
     heading: 'Polityka prywatności',
-    lastUpdated: 'Ostatnia aktualizacja: 27 października 2026',
+    lastUpdated: 'Ostatnia aktualizacja: 2 listopada 2026',
   },
 
   sections,

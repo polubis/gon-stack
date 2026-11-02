@@ -513,7 +513,6 @@ export const copy = {
           { label: 'Czas trwania zabiegu' },
           { label: 'Przygotowanie do wizyty' },
           { label: 'FAQ – najczęstsze pytania', href: '#faq' },
-          { label: 'Regulamin' },
           { label: 'Polityka prywatności', href: '/polityka-prywatnosci/' },
         ],
       },
@@ -565,6 +564,16 @@ export const copy = {
       title: 'Umów wizytę online',
       description: 'Zarezerwuj dogodny termin bez wychodzenia z domu.',
       cta: 'UMÓW WIZYTĘ ONLINE',
+    },
+    legalNotice: {
+      title: 'Dane przedsiębiorcy',
+      lines: [
+        'KACPER DĘBEK BIURO MASAŻ',
+        'NIP: 7393979495, REGON: 524421871',
+        'ul. Profesorska 9A, 10-080 Olsztyn',
+      ],
+      privacyPolicyLabel: 'Polityka prywatności i cookies',
+      privacyPolicyHref: '/polityka-prywatnosci/',
     },
     copyrightPrefix: '©',
     copyrightSuffix:
