@@ -22,58 +22,75 @@ const joinText = (base: string, text: string) =>
     : `${base} ${text}`;
 
 /**
- * Mic toggle that dictates into `target`: the transcript is appended to the
- * text present when dictation started and flows through the normal change
- * event. Renders nothing where speech recognition is unavailable.
+ * Mic that opens a dictation preview: speech is shown live in the overlay and
+ * written into `target` (appended to its text, once, via the normal change
+ * event) only when the user accepts. Renders nothing where speech recognition
+ * is unavailable.
  */
 export const DictationButton = ({ target, label, className }: Props) => {
-  const [base, setBase] = useState('');
+  const [open, setOpen] = useState(false);
   const [error, setError] = useState<DictationError | null>(null);
   const [attempt, setAttempt] = useState(0);
   const dictation = useDictation({
     lang: DICTATION_LANG,
-    onText: (text) => {
-      const el = target.current;
-      if (!el) return;
-      const next = joinText(base, text);
-      setNativeValue(el, el.maxLength > 0 ? next.slice(0, el.maxLength) : next);
+    onError: (e) => {
+      setError(e);
+      if (dictation.transcript === '') setOpen(false);
     },
-    onError: setError,
   });
 
   if (!dictation.supported) return null;
 
   const begin = () => {
-    if (dictation.listening) return;
+    if (open) return;
     setError(null);
-    setBase(target.current?.value ?? '');
+    setOpen(true);
     dictation.start();
+  };
+
+  const close = () => {
+    dictation.stop();
+    dictation.reset();
+    setOpen(false);
+    target.current?.focus();
+  };
+
+  const accept = () => {
+    const el = target.current;
+    if (el) {
+      const next = joinText(el.value, dictation.transcript);
+      setNativeValue(el, el.maxLength > 0 ? next.slice(0, el.maxLength) : next);
+    }
+    close();
   };
 
   return (
     <>
       <button
         type="button"
-        aria-label={`${dictation.listening ? 'Zatrzymaj dyktowanie' : 'Dyktuj'}: ${label}`}
-        aria-pressed={dictation.listening}
-        disabled={dictation.listening}
+        aria-label={`${open ? 'Zatrzymaj dyktowanie' : 'Dyktuj'}: ${label}`}
+        aria-pressed={open}
+        disabled={open}
         onClick={begin}
         className={cn(
           'grid h-6 w-6 place-items-center rounded-full text-ink-soft hover:bg-brand-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
-          dictation.listening &&
+          open &&
             'animate-pulse bg-danger-soft text-danger motion-reduce:animate-none',
           className,
         )}
       >
         <Mic className="h-4 w-4" aria-hidden="true" />
       </button>
-      {dictation.listening ? (
+      {open ? (
         <VoiceOverlay
           label={label}
-          onStop={() => {
-            dictation.stop();
-            target.current?.focus();
-          }}
+          transcript={dictation.transcript}
+          listening={dictation.listening}
+          onToggle={() =>
+            dictation.listening ? dictation.stop() : dictation.start(true)
+          }
+          onAccept={accept}
+          onCancel={close}
         />
       ) : null}
       {error

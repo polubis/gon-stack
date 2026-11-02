@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Mic, Square } from 'lucide-react';
+import { Check, Mic, Square } from 'lucide-react';
 import { currentDevice } from '@/shared/device/integration/current-device';
 
 const BARS = [0.55, 0.8, 1, 0.8, 0.55];
@@ -15,11 +15,14 @@ const canMeter = () => currentDevice().type === 'desktop';
  * Drives `--voice-level` (0..1) on `el` from the microphone volume.
  * Returns false while no live level is available (animation falls back to a loop).
  */
-const useVoiceLevel = (el: { current: HTMLElement | null }) => {
+const useVoiceLevel = (
+  el: { current: HTMLElement | null },
+  listening: boolean,
+) => {
   const [live, setLive] = useState(false);
 
   useEffect(() => {
-    if (!canMeter()) return;
+    if (!listening || !canMeter()) return;
     let frame = 0;
     let cancelled = false;
     let stream: MediaStream | null = null;
@@ -58,38 +61,49 @@ const useVoiceLevel = (el: { current: HTMLElement | null }) => {
       stream?.getTracks().forEach((t) => t.stop());
       void ctx?.close();
     };
-  }, [el]);
+  }, [el, listening]);
 
   return live;
 };
 
 /**
- * Blocking "listening" popup with a voice-level animation. Covers the page so
- * nothing else (including a second mic press) can be triggered until stopped.
+ * Blocking dictation popup: voice-level animation plus a live preview of the
+ * transcript. Nothing is written anywhere until `onAccept`; Esc cancels.
  */
 export const VoiceOverlay = ({
   label,
-  onStop,
+  transcript,
+  listening,
+  onToggle,
+  onAccept,
+  onCancel,
 }: {
   label: string;
-  onStop: () => void;
+  transcript: string;
+  listening: boolean;
+  onToggle: () => void;
+  onAccept: () => void;
+  onCancel: () => void;
 }) => {
   const bars = useRef<HTMLDivElement>(null);
-  const stop = useRef<HTMLButtonElement>(null);
-  const live = useVoiceLevel(bars);
+  const toggle = useRef<HTMLButtonElement>(null);
+  const live = useVoiceLevel(bars, listening);
 
   useEffect(() => {
-    stop.current?.focus();
+    toggle.current?.focus();
+  }, []);
+
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopImmediatePropagation();
-        onStop();
+        onCancel();
       }
     };
     // window capture runs before any document-level handler (e.g. a Radix dialog's Escape).
     window.addEventListener('keydown', onKey, true);
     return () => window.removeEventListener('keydown', onKey, true);
-  }, [onStop]);
+  }, [onCancel]);
 
   return createPortal(
     <div
@@ -98,7 +112,7 @@ export const VoiceOverlay = ({
       aria-label={`Dyktowanie: ${label}`}
       className="pointer-events-auto fixed inset-0 z-(--z-modal) grid place-items-center bg-ink/40 p-4 backdrop-blur-sm animate-overlay-in motion-reduce:animate-none"
     >
-      <div className="flex w-full max-w-xs flex-col items-center gap-5 rounded-3xl bg-card p-8 shadow-popover animate-voice-card-in motion-reduce:animate-none">
+      <div className="flex w-full max-w-xs flex-col items-center gap-4 rounded-3xl bg-card p-6 shadow-popover animate-voice-card-in motion-reduce:animate-none">
         <span className="grid h-14 w-14 place-items-center rounded-full bg-danger-soft text-danger">
           <Mic className="h-6 w-6" aria-hidden="true" />
         </span>
@@ -106,7 +120,8 @@ export const VoiceOverlay = ({
           ref={bars}
           aria-hidden="true"
           data-live={live}
-          className="flex h-12 items-center gap-1.5"
+          data-active={listening}
+          className="flex h-10 items-center gap-1.5 data-[active=false]:opacity-30"
         >
           {BARS.map((k, i) => (
             <span
@@ -123,17 +138,50 @@ export const VoiceOverlay = ({
           ))}
         </div>
         <p role="status" className="text-sm font-medium text-ink">
-          Słucham…
+          {listening ? 'Słucham…' : 'Dyktowanie zatrzymane'}
         </p>
-        <button
-          ref={stop}
-          type="button"
-          onClick={onStop}
-          className="flex items-center gap-2 rounded-full bg-ink px-5 py-2 text-sm font-medium text-card hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+        <div
+          role="log"
+          aria-label="Podgląd dyktowania"
+          className="max-h-40 min-h-16 w-full overflow-y-auto rounded-2xl bg-hover p-3 text-sm text-ink"
         >
-          <Square className="h-3.5 w-3.5" aria-hidden="true" />
-          Zakończ dyktowanie
+          {transcript === '' ? (
+            <span className="text-ink-soft">Zacznij mówić…</span>
+          ) : (
+            transcript
+          )}
+        </div>
+        <button
+          ref={toggle}
+          type="button"
+          onClick={onToggle}
+          className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-ink hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+        >
+          {listening ? (
+            <Square className="h-3.5 w-3.5" aria-hidden="true" />
+          ) : (
+            <Mic className="h-3.5 w-3.5" aria-hidden="true" />
+          )}
+          {listening ? 'Zakończ dyktowanie' : 'Dyktuj dalej'}
         </button>
+        <div className="flex w-full gap-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 rounded-full bg-hover px-5 py-2 text-sm font-medium text-ink hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          >
+            Anuluj
+          </button>
+          <button
+            type="button"
+            disabled={transcript === ''}
+            onClick={onAccept}
+            className="flex flex-1 items-center justify-center gap-2 rounded-full bg-ink px-5 py-2 text-sm font-medium text-card hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:opacity-40"
+          >
+            <Check className="h-3.5 w-3.5" aria-hidden="true" />
+            Wstaw
+          </button>
+        </div>
       </div>
     </div>,
     document.body,
