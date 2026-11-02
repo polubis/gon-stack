@@ -110,6 +110,38 @@ Read before work:
 - Awaiting dev acceptance.
 `,
     },
+    factory: {
+      frontmatter: {
+        name: 'factory',
+        description:
+          'Orchestrates ticket work end to end — research, implementation, review, finalize, PR, ticket logs, cleanup.',
+      },
+      doc: ({ file, ref }) => `# Factory
+
+Runs a ticket from read to PR. Details: ${file('gon-stack-ecosystem-and-process')}.
+
+## Rules
+
+- Ticket tool only via cheap (haiku) subagent. Only category \`Automatyzacja\`.
+- Always worktree from fresh main, own branch with ticket key, own PR. Waves = one PR.
+- Log every stage in ticket (template in reference). Status \`open\`/\`in_progress\`/\`done\`.
+- Review via ${ref('doctor')} subagent. Parallelize via subagents, DB tasks last.
+- Prefer real local env over mocks.
+- New bug spotted -> backlog ticket.
+- PR/commit text never mention the ticket tool.
+
+## Stages
+
+1. A research + plan + failing tests + worktree.
+2. B implement, break on purpose, evidence.
+3. C review + commit msg + decision log.
+4. D commit/push (3 hook fixes, then \`--no-verify\`), PR, evidence upload, cleanup.
+
+## Output
+
+- PR link, stage logs, evidence, cleanup confirmation.
+`,
+    },
     doctor: {
       frontmatter: {
         name: 'doctor',
@@ -199,6 +231,8 @@ Show dev adequate evidence the problem is solved, e.g.:
   refs: {
     'aodi-framework': aodiFramework,
     'frontend-architecture': './references/frontend-architecture.md',
+    'gon-stack-ecosystem-and-process':
+      './references/gon-stack-ecosystem-and-process.md',
     'herdr-keyboard': './references/herdr-keyboard.md',
   },
   rules: {
