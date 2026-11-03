@@ -14,7 +14,11 @@ export default defineConfig({
     include: ['src/**/*.test.ts'],
     coverage: {
       include: ['src/**/*.ts'],
-      exclude: ['src/**/*.test.ts', 'src/cli.ts'],
+      exclude: [
+        'src/**/*.test.ts',
+        'src/cli.ts',
+        'src/plugins/statusline-bin.ts',
+      ],
       thresholds: {
         statements: 100,
         branches: 100,

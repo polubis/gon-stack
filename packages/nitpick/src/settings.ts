@@ -1,6 +1,8 @@
 import { join } from 'node:path';
 import type { McpServer, Settings } from './config.js';
 
+export type SettingsSource = { from: string; settings: Settings };
+
 type Built = { files: Map<string, string>; problems: string[] };
 
 const NAMES = ['settings.json', 'settings.local.json'];
@@ -30,12 +32,34 @@ const serverProblems = (name: string, server: McpServer): string[] =>
     ? secretProblems(`mcp "${name}" headers`, server.headers)
     : secretProblems(`mcp "${name}" env`, server.env);
 
-export const buildSettings = (
+// Groups every source by target file. Same key from two sources = config error.
+const merge = (
+  sources: SettingsSource[],
+): { byName: Map<string, Settings>; problems: string[] } => {
+  const byName = new Map<string, Settings>();
+  const problems: string[] = [];
+  for (const { from, settings } of sources) {
+    const { name = 'settings.json', ...rest } = settings;
+    const target = byName.get(name) ?? {};
+    for (const [key, value] of Object.entries(rest)) {
+      if (key in target) {
+        problems.push(`Settings "${key}" set twice (${from})`);
+      } else {
+        target[key] = value;
+      }
+    }
+    byName.set(name, target);
+  }
+  return { byName, problems };
+};
+
+const buildFile = (
+  name: string,
   settings: Settings,
   outputDir: string,
   projectRoot: string,
-): Built => {
-  const { name = 'settings.json', mcp = {}, ...rest } = settings;
+): Built & { mcp: boolean } => {
+  const { mcp = {}, ...rest } = settings;
   const servers = Object.entries(mcp);
   const problems = [
     ...(NAMES.includes(name)
@@ -58,6 +82,27 @@ export const buildSettings = (
   );
   if (servers.length > 0) {
     files.set(join(projectRoot, '.mcp.json'), json({ mcpServers: mcp }));
+  }
+  return { files, problems, mcp: servers.length > 0 };
+};
+
+export const buildSettings = (
+  sources: SettingsSource[],
+  outputDir: string,
+  projectRoot: string,
+): Built => {
+  const { byName, problems: mergeProblems } = merge(sources);
+  const files = new Map<string, string>();
+  const problems = [...mergeProblems];
+  let mcpFiles = 0;
+  for (const [name, settings] of byName) {
+    const built = buildFile(name, settings, outputDir, projectRoot);
+    problems.push(...built.problems);
+    for (const [file, text] of built.files) files.set(file, text);
+    if (built.mcp) mcpFiles += 1;
+  }
+  if (mcpFiles > 1) {
+    problems.push('Settings mcp: set in more than one settings file');
   }
   return { files, problems };
 };

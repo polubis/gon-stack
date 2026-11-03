@@ -3,8 +3,10 @@ import { aodiFramework } from '@repo/nitpick/rules/aodi-framework';
 import { decisionLog } from '@repo/nitpick/rules/decision-log';
 import { mswBackendMocks } from '@repo/nitpick/rules/msw-backend-mocks';
 import { richCommit } from '@repo/nitpick/rules/rich-commit';
+import { statusLine } from '@repo/nitpick/plugins/statusline';
 
 export default config({
+  plugins: [statusLine({ limits: { daily: 20, weekly: 100 } })],
   output: [
     {
       path: '.claude',
