@@ -7,6 +7,7 @@ import { ScreenHeader } from '@/shared/ui/layout';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
 import { Toast } from '@/shared/ui/toast';
 import { APP_ROUTER } from '@/shared/router/routes';
+import { Segmented, segmentedIds } from '@/shared/ui/controls';
 import { PeriodControl } from '@/shared/period-control/presentation/period-control';
 import { usePeriodSwipe } from '@/shared/period-control/presentation/use-period-swipe';
 import {
@@ -16,7 +17,12 @@ import {
 } from '@/shared/period/period';
 import { navigateTo } from '@/shared/router/navigation';
 import { useModalStack } from '@/shared/router/modal-stack';
-import { ERROR_CODES, TIME_KINDS } from '../configuration/constraints';
+import {
+  ERROR_CODES,
+  TIME_KINDS,
+  TIME_VIEWS,
+  VIEW_PARAM,
+} from '../configuration/constraints';
 import type { TimeE2eId } from '../configuration/e2e-ids';
 import type { TimeKind } from '../domain/models';
 import { UnreadLink } from '@/modules/notifications/presentation/unread-link';
@@ -24,13 +30,16 @@ import { rangeOf } from '../domain/schedule';
 import { AddMenu } from './add-menu';
 import { BacklogButton } from './backlog-button';
 import { Provider, useContext } from './context';
-import { ViewSkeleton } from './skeleton';
+import { StatsSkeleton, ViewSkeleton } from './skeleton';
+import { Stats } from './stats';
 import { TaskModals } from './task-modals';
 
 type Props = {
   kind: TimeKind;
   children: ReactNode;
 };
+
+const VIEWS_PANEL = 'time-views';
 
 const ADD_BUTTON =
   'inline-flex items-center justify-center gap-2 rounded-xl bg-brand text-sm font-semibold text-on-brand transition-colors hover:bg-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2';
@@ -41,7 +50,7 @@ const anchorOf = (period: Period, today: string): string =>
 
 /** Moves to a period: same kind keeps the route, another kind switches it. */
 const usePeriodChange = (kind: TimeKind) => {
-  const { setAnchor, now } = useContext();
+  const { setAnchor, now, view } = useContext();
   return (period: Period) => {
     const day = anchorOf(period, now.day);
     if (period.kind === kind) {
@@ -49,7 +58,11 @@ const usePeriodChange = (kind: TimeKind) => {
       return;
     }
     const target = TIME_KINDS.find((item) => item.kind === period.kind);
-    if (target) navigateTo(target.href(day));
+    // Another kind is another route: the tab travels in the URL.
+    if (!target) return;
+    const url = new URL(target.href(day), window.location.origin);
+    if (view === 'stats') url.searchParams.set(VIEW_PARAM, 'stats');
+    navigateTo(url.pathname + url.search);
   };
 };
 
@@ -78,6 +91,8 @@ const Screen = ({ kind, children }: Props) => {
     loaded,
     error,
     notice,
+    view,
+    setView,
     load,
     dismissNotice,
   } = useContext();
@@ -127,7 +142,18 @@ const Screen = ({ kind, children }: Props) => {
         {...gesture}
         className="flex flex-1 flex-col gap-4 px-4 pb-24 pt-2 md:gap-6 md:px-8 md:pb-6 lg:px-10 xl:px-16"
       >
-        <RangeControl period={period} onChange={go} />
+        <div className="flex flex-col gap-4 md:gap-6">
+          <div className="mx-auto w-full max-w-sm" data-e2e="time:view-tabs">
+            <Segmented
+              label="Widok"
+              options={TIME_VIEWS}
+              panel={VIEWS_PANEL}
+              value={view}
+              onChange={setView}
+            />
+          </div>
+          <RangeControl period={period} onChange={go} />
+        </div>
         <div ref={contentRef} className="flex flex-col gap-4 md:gap-6">
           {error ? (
             <ErrorState
@@ -139,13 +165,24 @@ const Screen = ({ kind, children }: Props) => {
               backHref={APP_ROUTER.dashboard()}
             />
           ) : initializing || (isLoading && !loaded) ? (
-            <ViewSkeleton kind={kind} />
+            view === 'stats' ? (
+              <StatsSkeleton />
+            ) : (
+              <ViewSkeleton kind={kind} />
+            )
           ) : (
             <div
-              key={kind}
+              key={`${kind}:${view}`}
               className="flex animate-view-enter flex-col gap-4 motion-reduce:animate-none md:gap-6"
             >
-              {children}
+              <div
+                role="tabpanel"
+                id={segmentedIds(VIEWS_PANEL, view).panel}
+                aria-labelledby={segmentedIds(VIEWS_PANEL, view).tab}
+                className="flex flex-col gap-4 md:gap-6"
+              >
+                {view === 'stats' ? <Stats kind={kind} /> : children}
+              </div>
             </div>
           )}
         </div>

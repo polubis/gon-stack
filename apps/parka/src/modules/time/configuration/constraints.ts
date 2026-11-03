@@ -27,6 +27,16 @@ export const TIME_KINDS: readonly {
 /** Query param holding the viewed day. */
 export const DATE_PARAM = 'date';
 
+/** Query param holding the tab; absent means the task lists. */
+export const VIEW_PARAM = 'view';
+
+export type TimeView = 'tasks' | 'stats';
+
+export const TIME_VIEWS: { value: TimeView; label: string }[] = [
+  { value: 'tasks', label: 'Zadania' },
+  { value: 'stats', label: 'Statystyki' },
+];
+
 export const NAME_MAX_LENGTH = 40;
 
 /** Longer than a name: a task title may be a whole sentence. */

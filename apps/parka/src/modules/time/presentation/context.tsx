@@ -1,9 +1,18 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { context } from '@repo/react-kit/context';
-import { readQueryParam, writeQueryParam } from '@/shared/router/navigation';
+import {
+  readQueryParam,
+  writeQueryParam,
+  writeQueryParams,
+} from '@/shared/router/navigation';
 import { isDay, todayDay } from '@/shared/period/period';
 import { createMediator } from '../core/mediator';
-import { DATE_PARAM, FEATURE_NAME } from '../configuration/constraints';
+import {
+  DATE_PARAM,
+  FEATURE_NAME,
+  VIEW_PARAM,
+  type TimeView,
+} from '../configuration/constraints';
 import { sortByUsage } from '../domain/category-usage';
 import { newCategoryId, newPriorityId } from '../domain/ids';
 import type { Category, Priority } from '../domain/models';
@@ -14,6 +23,9 @@ const dateFromUrl = (): string => {
   return value !== null && isDay(value) ? value : todayDay();
 };
 
+const viewFromUrl = (): TimeView =>
+  readQueryParam(VIEW_PARAM) === 'stats' ? 'stats' : 'tasks';
+
 /**
  * The module store plus the viewed day (`anchor`, mirrored in the `date`
  * query param) and the clock. `newCategory` / `newPriority` hold the last
@@ -22,6 +34,7 @@ const dateFromUrl = (): string => {
 export const [Provider, useContext] = context(FEATURE_NAME, () => {
   const [{ facade, register }] = useState(createMediator);
   const [anchor, setAnchorState] = useState(dateFromUrl);
+  const [view, setViewState] = useState(viewFromUrl);
   const [newCategory, setNewCategory] = useState<Category>();
   const [newPriority, setNewPriority] = useState<Priority>();
   const now = useClock();
@@ -37,7 +50,10 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
 
   // Back / Forward may land on another `date`.
   useEffect(() => {
-    const onPop = () => setAnchorState(dateFromUrl());
+    const onPop = () => {
+      setAnchorState(dateFromUrl());
+      setViewState(viewFromUrl());
+    };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
@@ -52,6 +68,12 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
     setAnchor: (day: string) => {
       setAnchorState(day);
       writeQueryParam(DATE_PARAM, day);
+    },
+    /** Tab of the screen: the task lists or their statistics (`view` param). */
+    view,
+    setView: (next: TimeView) => {
+      setViewState(next);
+      writeQueryParams({ [VIEW_PARAM]: next === 'stats' ? 'stats' : null });
     },
     now,
     newCategory,

@@ -55,3 +55,25 @@ export const ViewSkeleton = ({ kind }: { kind: TimeKind }) => (
     )}
   </div>
 );
+
+const StatsCard = ({ className }: { className?: string }) => (
+  <Card className={className}>
+    <Skeleton className="mb-4 h-4 w-28" />
+    <Skeleton className="h-40 w-full" />
+  </Card>
+);
+
+/** Mimics the statistics dashboard: hero, status, categories, priorities, chart. */
+export const StatsSkeleton = () => (
+  <div
+    data-e2e="time:stats-skeleton"
+    aria-hidden="true"
+    className="flex flex-col gap-3 md:gap-4 xl:grid xl:grid-cols-12"
+  >
+    <StatsCard className="xl:col-span-6" />
+    <StatsCard className="xl:col-span-6" />
+    <StatsCard className="xl:col-span-6" />
+    <StatsCard className="xl:col-span-6" />
+    <StatsCard className="xl:col-span-12" />
+  </div>
+);

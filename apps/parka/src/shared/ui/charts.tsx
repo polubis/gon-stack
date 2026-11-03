@@ -50,12 +50,15 @@ export const BarChart = ({
 
 type Slice = { label: string; value: number; color: string };
 
+/** Donut with a legend; `format` adds each slice's own value beside its share. */
 export const Donut = ({
   slices,
   caption,
+  format,
 }: {
   slices: Slice[];
   caption: string;
+  format?: (value: number) => string;
 }) => {
   const total = Math.max(
     1,
@@ -75,7 +78,7 @@ export const Donut = ({
   );
 
   return (
-    <figure className="m-0 flex items-center gap-5">
+    <figure className="m-0 flex flex-col items-center gap-4 sm:flex-row sm:gap-5">
       <svg
         viewBox="0 0 160 160"
         className="h-36 w-36 shrink-0"
@@ -98,16 +101,31 @@ export const Donut = ({
           ))}
         </g>
       </svg>
-      <ul className="flex-1 space-y-1.5 text-sm">
+      <ul className="w-full min-w-0 space-y-1.5 text-sm sm:flex-1">
         {slices.map((s) => (
           <li key={s.label} className="flex items-center gap-2">
             <span
-              className="h-2.5 w-2.5 rounded-full"
+              className="h-2.5 w-2.5 shrink-0 rounded-full"
               style={{ backgroundColor: s.color }}
               aria-hidden="true"
             />
-            <span className="flex-1 text-ink-soft">{s.label}</span>
-            <span className="font-medium tabular-nums">
+            <span
+              className="min-w-0 flex-1 truncate text-ink-soft"
+              title={s.label}
+            >
+              {s.label}
+            </span>
+            {format ? (
+              <span className="font-medium tabular-nums">
+                {format(s.value)}
+              </span>
+            ) : null}
+            <span
+              className={cn(
+                'tabular-nums',
+                format ? 'w-10 text-right text-ink-soft' : 'font-medium',
+              )}
+            >
               {Math.round((s.value / total) * 100)}%
             </span>
           </li>

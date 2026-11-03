@@ -3,6 +3,7 @@ import {
   useContext,
   useId,
   type ComponentProps,
+  type KeyboardEvent,
   type ReactNode,
 } from 'react';
 import * as SelectPrimitive from '@radix-ui/react-select';
@@ -16,41 +17,79 @@ type SegmentedProps<T extends string> = {
   value: T;
   onChange: (value: T) => void;
   label: string;
+  /**
+   * Base id of the panel the tabs switch. Gives every tab `aria-controls`;
+   * the panel carries `segmentedIds(panel, value)` (`role="tabpanel"`).
+   */
+  panel?: string;
 };
+
+/** Ids tying a tab to its panel (`aria-controls` / `aria-labelledby`). */
+export const segmentedIds = (panel: string, value: string) => ({
+  tab: `${panel}-tab-${value}`,
+  panel: `${panel}-panel`,
+});
 
 export const Segmented = <T extends string>({
   options,
   value,
   onChange,
   label,
-}: SegmentedProps<T>) => (
-  <div
-    role="tablist"
-    aria-label={label}
-    className="flex gap-1 rounded-xl bg-brand-soft p-1"
-  >
-    {options.map((opt) => {
-      const selected = opt.value === value;
-      return (
-        <button
-          key={opt.value}
-          type="button"
-          role="tab"
-          aria-selected={selected}
-          onClick={() => onChange(opt.value)}
-          className={cn(
-            'flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
-            selected
-              ? 'bg-card text-brand-dark shadow-sm'
-              : 'text-ink-soft hover:text-ink',
-          )}
-        >
-          {opt.label}
-        </button>
-      );
-    })}
-  </div>
-);
+  panel,
+}: SegmentedProps<T>) => {
+  const move = (event: KeyboardEvent<HTMLDivElement>) => {
+    const keys = ['ArrowRight', 'ArrowLeft', 'Home', 'End'];
+    if (!keys.includes(event.key)) return;
+    const at = options.findIndex((opt) => opt.value === value);
+    const target =
+      event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+          ? options.length - 1
+          : (at + (event.key === 'ArrowRight' ? 1 : -1) + options.length) %
+            options.length;
+    event.preventDefault();
+    onChange(options[target]!.value);
+    event.currentTarget
+      .querySelectorAll<HTMLButtonElement>('[role="tab"]')
+      [target]?.focus();
+  };
+
+  return (
+    <div
+      role="tablist"
+      aria-label={label}
+      onKeyDown={move}
+      className="flex gap-1 rounded-xl bg-brand-soft p-1"
+    >
+      {options.map((opt) => {
+        const selected = opt.value === value;
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            role="tab"
+            id={panel ? segmentedIds(panel, opt.value).tab : undefined}
+            aria-selected={selected}
+            aria-controls={
+              panel ? segmentedIds(panel, opt.value).panel : undefined
+            }
+            tabIndex={selected ? 0 : -1}
+            onClick={() => onChange(opt.value)}
+            className={cn(
+              'flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+              selected
+                ? 'bg-card text-brand-dark shadow-sm'
+                : 'text-ink-soft hover:text-ink',
+            )}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
 
 type ToggleProps = {
   checked: boolean;
