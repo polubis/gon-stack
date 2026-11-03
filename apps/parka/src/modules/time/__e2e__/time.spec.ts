@@ -18,6 +18,7 @@ const DESCRIPTION_EMAIL = `e2e-time-description-${Date.now()}@parka.test`;
 const POPOVER_EMAIL = `e2e-time-popover-${Date.now()}@parka.test`;
 const ATTACHMENT_EMAIL = `e2e-time-attachment-${Date.now()}@parka.test`;
 const COMMENT_EMAIL = `e2e-time-comment-${Date.now()}@parka.test`;
+const OPEN_ONLY_EMAIL = `e2e-time-open-only-${Date.now()}@parka.test`;
 const PASSWORD = 'secret123';
 const ATTACHMENT_TEXT = 'Treść załącznika E2E';
 const LONG_TITLE = `Długi tytuł ${'x'.repeat(147)}`;
@@ -904,6 +905,68 @@ const commands = {
     await reload(page);
     await expect(getByE2e('time:comments')).toContainText('Komentarze (1)');
   },
+
+  'i register an account for the open-only filter': async (ctx) => {
+    await registerAndConfirm(ctx, OPEN_ONLY_EMAIL, PASSWORD);
+    await ctx.page.waitForLoadState('networkidle');
+  },
+
+  'i add a done task and an open task to the day': async ({
+    page,
+    getByE2e,
+  }) => {
+    await open(page, APP_ROUTER.time({ date: DAY }));
+    await getByE2e('time:empty').getByRole('button').click();
+    const dialog = getByE2e('time:task-dialog');
+    await dialog.getByRole('textbox', { name: 'Nazwa' }).fill('Zrobione E2E');
+    await Promise.all([
+      synced(page, 'POST', 201),
+      getByE2e('time:task-save').click(),
+    ]);
+    await page
+      .getByRole('button', { name: 'Dodaj', exact: true })
+      .first()
+      .click();
+    await page.getByRole('menuitem', { name: 'Zadanie', exact: true }).click();
+    await getByE2e('time:task-dialog')
+      .getByRole('textbox', { name: 'Nazwa' })
+      .fill('Otwarte E2E');
+    await Promise.all([
+      synced(page, 'POST', 201),
+      getByE2e('time:task-save').click(),
+    ]);
+    const box = page.getByRole('checkbox', { name: 'Zrobione: Zrobione E2E' });
+    await Promise.all([synced(page, 'PUT', 200), box.click()]);
+    await expect(box).toHaveAttribute('aria-checked', 'mixed');
+    await Promise.all([synced(page, 'PUT', 200), box.click()]);
+    await expect(box).toBeChecked();
+  },
+
+  'the open-only switch hides done tasks and keeps the choice after a reload':
+    async ({ page, getByE2e }) => {
+      const toggle = getByE2e('time:open-only').getByRole('switch', {
+        name: 'Tylko niezrobione',
+      });
+      await expect(
+        page.getByRole('button', { name: 'Szczegóły zadania: Zrobione E2E' }),
+      ).toBeVisible();
+      await toggle.click();
+      await expect(toggle).toHaveAttribute('aria-checked', 'true');
+      await expect(
+        page.getByRole('button', { name: 'Szczegóły zadania: Zrobione E2E' }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole('button', { name: 'Szczegóły zadania: Otwarte E2E' }),
+      ).toBeVisible();
+      await reload(page);
+      await expect(toggle).toHaveAttribute('aria-checked', 'true');
+      await expect(
+        page.getByRole('button', { name: 'Szczegóły zadania: Zrobione E2E' }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole('button', { name: 'Szczegóły zadania: Otwarte E2E' }),
+      ).toBeVisible();
+    },
 } satisfies CommandRegistry<Ctx>;
 
 test('time works against the real Supabase backend', async ({ e2e }) => {
@@ -988,5 +1051,17 @@ test('a modal opened from a popover action stays open on a phone', async ({
     ['i register an account for popover actions'],
     ['i add a task from the add menu and its form stays open'],
     ['the delete confirmation from the task menu stays open until answered'],
+  );
+});
+
+test('the open-only filter hides done tasks on the real backend', async ({
+  e2e,
+}) => {
+  await interpreter(commands, e2e)(
+    ['i register an account for the open-only filter'],
+    ['i add a done task and an open task to the day'],
+    [
+      'the open-only switch hides done tasks and keeps the choice after a reload',
+    ],
   );
 });

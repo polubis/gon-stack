@@ -36,7 +36,7 @@ const taskKey = (task: { id: string }) => task.id;
 
 /** One day card: tasks in time order (all-day first); changes animate in place. */
 const DayCard = ({ day, index }: { day: string; index: number }) => {
-  const { tasks, priorities, now, initializing } = useContext();
+  const { visibleTasks: tasks, priorities, now, initializing } = useContext();
   const scope = `${day}:${initializing}`;
   const today = day === now.day;
   const ofDay = tasksOn(tasks, day, priorities);
@@ -99,7 +99,7 @@ const DayCards = ({ days }: { days: string[] }) => (
 
 /** Extra wide screens (2xl+): all-day row on top, then an hour axis with tasks at their hour. */
 const HourGrid = ({ days }: { days: string[] }) => {
-  const { tasks, priorities, now } = useContext();
+  const { visibleTasks: tasks, priorities, now } = useContext();
   const timedOf = (day: string) =>
     tasksOn(tasks, day, priorities).filter(isTimed);
   const nowHour = hourLabel(Number(now.time.slice(0, 2)));
@@ -210,7 +210,7 @@ const HourGrid = ({ days }: { days: string[] }) => {
 
 /** Week view: all-day tasks apart from tasks pinned to an hour. */
 export const Main = () => {
-  const { tasks, viewAnchor: anchor } = useContext();
+  const { visibleTasks: tasks, viewAnchor: anchor } = useContext();
   const days = weekDays(anchor);
   if (!tasks.some((task) => days.includes(task.day)))
     return <EmptyPeriod kind="week" />;

@@ -26,6 +26,25 @@ const dateFromUrl = (): string => {
 const viewFromUrl = (): TimeView =>
   readQueryParam(VIEW_PARAM) === 'stats' ? 'stats' : 'tasks';
 
+/** Per-viewer preference: remembered across visits, safe to lose. */
+const OPEN_ONLY_KEY = 'parka:time-open-only';
+
+const openOnlyFromStorage = (): boolean => {
+  try {
+    return window.localStorage.getItem(OPEN_ONLY_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+
+const saveOpenOnly = (value: boolean) => {
+  try {
+    window.localStorage.setItem(OPEN_ONLY_KEY, value ? '1' : '0');
+  } catch {
+    // Storage blocked: the filter still works for this visit.
+  }
+};
+
 /**
  * The module store plus the viewed day (`anchor`, mirrored in the `date`
  * query param) and the clock. `newCategory` / `newPriority` hold the last
@@ -35,6 +54,7 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
   const [{ facade, register }] = useState(createMediator);
   const [anchor, setAnchorState] = useState(dateFromUrl);
   const [view, setViewState] = useState(viewFromUrl);
+  const [openOnly, setOpenOnlyState] = useState(openOnlyFromStorage);
   const [newCategory, setNewCategory] = useState<Category>();
   const [newPriority, setNewPriority] = useState<Priority>();
   const now = useClock();
@@ -79,6 +99,13 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
     newCategory,
     newPriority,
     tasks,
+    /** Tasks the lists show: `tasks` minus done ones while `openOnly` is on. */
+    visibleTasks: openOnly ? tasks.filter((task) => !task.done) : tasks,
+    openOnly,
+    setOpenOnly: (next: boolean) => {
+      setOpenOnlyState(next);
+      saveOpenOnly(next);
+    },
     backlog,
     /** Most used first (loaded tasks and backlog), ties keep stored order. */
     categories: sortByUsage(categories, [...tasks, ...backlog]),

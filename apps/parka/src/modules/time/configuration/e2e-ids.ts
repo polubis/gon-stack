@@ -19,6 +19,7 @@ export const TIME_E2E_IDS = [
   'time:stats-active-empty',
   'time:stats-backlog',
   'time:view-tabs',
+  'time:open-only',
   'time:task-dialog',
   'time:task-save',
   'time:task-delete',
