@@ -20,6 +20,8 @@ Implemented:
 - Ready-made rules: `richCommit`, `decisionLog`
 - `skills`: directory trees authored in `.nitpick/`, synced byte for byte (binary safe) to `<path>/skills/<id>/`
 - Claude Code settings: `settings` option generates `settings.json` / `settings.local.json` and `.mcp.json`
+- Plugins: `plugins` option merges built-in or custom settings contributions into the generated settings files
+- Built-in `statusLine` plugin: Claude Code status line with model and context gauge, daily cost and limit shares
 
 Covered by tests: 100% statements, branches, functions and lines (enforced by `test:coverage`; `cli.ts` is excluded).
 
@@ -207,6 +209,34 @@ flowchart TD
 ```
 
 The engine gives repeatable input and stable result order. A `check` must avoid depending on time and network if its result is to stay deterministic.
+
+### Plugins
+
+`plugins` is a list of `{ id, settings }`. Each plugin's `settings` is merged with the `settings` option. A plugin sets its own `name` (default `settings.json`), so it can write into `settings.local.json`. A key set twice (config and plugin, or two plugins) is a config error. Plugin ids are unique (`Duplicate plugin "x"`).
+
+```ts
+import { statusLine } from '@repo/nitpick/plugins/statusline';
+
+export default config({
+  plugins: [statusLine({ limits: { daily: 20, weekly: 100 } })],
+  // ...
+});
+```
+
+#### `statusLine` plugin
+
+Built-in. Writes `statusLine` into `settings.local.json`. The command holds an absolute path to the compiled `dist/plugins/statusline-bin.js`, so the file stays per machine. Run `nitpick --sync` after each build of the package. Output, one line:
+
+```text
+Haiku 5.5 ◔ 43% | $3.96/1.2M | td 20%/1.2M | wk 66%/3.1M
+```
+
+- Model name and context gauge: `○ ◔ ◑ ◕ ●` by quarter of the window, with percent of the window taken. Green up to 50%, yellow up to 60%, red above. `n/a` when the window size is unknown. Read from Claude Code stdin (`context_window`).
+- Daily cost in dollars and daily tokens in millions. Cost from `~/.claude/projects/**/*.jsonl` (`cost-state` counters, attributed to the last message timestamp before each). Tokens are input + output, each message id counted once.
+- `td`: share of the daily limit used (cost / limit), and daily tokens in millions. `wk`: the same for the rolling last 7 local days.
+- Limits are USD and optional. Without a limit the share shows `-`. Limits are not read from the plan; set them yourself.
+- Scan is incremental: `~/.claude/cache/nitpick-statusline.json` keeps a byte offset per transcript. First run on a large history can take a few seconds.
+- Never fails the bar: unreadable usage shows `usage n/a`; a crash prints `statusline unavailable`. Exit 0.
 
 ## Package
 

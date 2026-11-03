@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { listRules } from './config.js';
 import type { Config, EntryDoc } from './config.js';
 import { buildSettings } from './settings.js';
+import type { SettingsSource } from './settings.js';
 
 type Docs = {
   files: Map<string, string | Uint8Array>;
@@ -384,8 +385,15 @@ export const buildDocs = (
     );
   }
 
-  if (config.settings) {
-    const built = buildSettings(config.settings, primary.path, projectRoot);
+  const settingsSources: SettingsSource[] = [
+    ...(config.settings ? [{ from: 'config', settings: config.settings }] : []),
+    ...(config.plugins ?? []).map(({ id, settings }) => ({
+      from: `plugin "${id}"`,
+      settings,
+    })),
+  ];
+  if (settingsSources.length > 0) {
+    const built = buildSettings(settingsSources, primary.path, projectRoot);
     problems.push(...built.problems);
     for (const [file, text] of built.files) files.set(file, text);
   }

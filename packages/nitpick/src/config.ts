@@ -78,8 +78,11 @@ type AgentUnit<I extends string, K extends string> = {
 
 type SkillUnit = { source: string };
 
+export type Plugin = { id: string; settings: Settings };
+
 export type Config = {
   settings?: Settings;
+  plugins?: Plugin[];
   entry?: { doc: EntryDoc<string, string> };
   rules: Record<string, Record<string, RuleUnit<string, string>>>;
   agents?: Record<string, AgentUnit<string, string>>;
@@ -105,6 +108,7 @@ export const config = <
   const F extends Record<string, string> = Record<never, never>,
 >(value: {
   settings?: Settings;
+  plugins?: Plugin[];
   entry?: { doc: EntryDoc<UnitIds<R, A | S>, keyof F & string> };
   rules: {
     [G in keyof R]: {
@@ -117,6 +121,11 @@ export const config = <
   output?: Output[];
 }): Config => {
   const result = value as unknown as Config;
+  const plugins = new Set<string>();
+  for (const { id } of result.plugins ?? []) {
+    if (plugins.has(id)) throw new Error(`Duplicate plugin "${id}"`);
+    plugins.add(id);
+  }
   const seen = new Set<string>();
   for (const id of [
     ...listRules(result).map((rule) => rule.id),
