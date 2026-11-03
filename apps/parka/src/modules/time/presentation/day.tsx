@@ -12,7 +12,7 @@ const taskKey = (task: { id: string }) => task.id;
 /** Day view: tasks with a time, then tasks without one. */
 export const Main = () => {
   const {
-    tasks,
+    visibleTasks: tasks,
     priorities,
     viewAnchor: anchor,
     now,

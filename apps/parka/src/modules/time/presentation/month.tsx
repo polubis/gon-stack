@@ -14,7 +14,7 @@ const MAX_DOTS = 4;
 /** Month view: calendar grid, a dot in the category colour per task. */
 export const Main = () => {
   const {
-    tasks,
+    visibleTasks: tasks,
     categories,
     priorities,
     viewAnchor: anchor,

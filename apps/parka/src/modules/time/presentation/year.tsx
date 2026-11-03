@@ -9,7 +9,7 @@ import { stagger } from './stagger';
 
 /** Year view: twelve months, task count and density each. */
 export const Main = () => {
-  const { tasks, viewAnchor: anchor, now } = useContext();
+  const { visibleTasks: tasks, viewAnchor: anchor, now } = useContext();
   const counts = countsByMonth(tasks, anchor);
   const peak = Math.max(...counts);
   if (peak === 0) return <EmptyPeriod kind="year" />;

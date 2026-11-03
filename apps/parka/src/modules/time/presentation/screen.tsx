@@ -7,7 +7,7 @@ import { ScreenHeader } from '@/shared/ui/layout';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
 import { Toast } from '@/shared/ui/toast';
 import { APP_ROUTER } from '@/shared/router/routes';
-import { Segmented, segmentedIds } from '@/shared/ui/controls';
+import { Segmented, segmentedIds, Toggle } from '@/shared/ui/controls';
 import { PeriodControl } from '@/shared/period-control/presentation/period-control';
 import { usePeriodSwipe } from '@/shared/period-control/presentation/use-period-swipe';
 import {
@@ -93,6 +93,8 @@ const Screen = ({ kind, children }: Props) => {
     notice,
     view,
     setView,
+    openOnly,
+    setOpenOnly,
     load,
     dismissNotice,
   } = useContext();
@@ -181,7 +183,26 @@ const Screen = ({ kind, children }: Props) => {
                 aria-labelledby={segmentedIds(VIEWS_PANEL, view).tab}
                 className="flex flex-col gap-4 md:gap-6"
               >
-                {view === 'stats' ? <Stats kind={kind} /> : children}
+                {view === 'stats' ? (
+                  <Stats kind={kind} />
+                ) : (
+                  <>
+                    <div
+                      data-e2e="time:open-only"
+                      className="flex items-center justify-between gap-3 px-1"
+                    >
+                      <span className="text-sm font-medium">
+                        Tylko niezrobione
+                      </span>
+                      <Toggle
+                        label="Tylko niezrobione"
+                        checked={openOnly}
+                        onChange={setOpenOnly}
+                      />
+                    </div>
+                    {children}
+                  </>
+                )}
               </div>
             </div>
           )}
