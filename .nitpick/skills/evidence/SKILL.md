@@ -29,7 +29,7 @@ Max 1-3 scenes, ~10 s each. One repair try. Then report with limits.
 Script generic. All repo facts via args or `rules/`/repo docs. Playwright resolved from `--playwright-from` (dir with `@playwright/test`, default cwd).
 
 ```
-node <skill>/evidence.mjs --scenario <file.mjs> --mode single|before-after|shot|responsive   --url <AFTER> [--before-url <BEFORE>] [--viewport 390x844] [--viewports 320,480,768x900]   --out <name> [--out-dir .evidences] [--timezone UTC] [--locale en-US]   [--backend <probeUrl>] [--serve "cmd|readyUrl|cwd"]... [--worktree <dir>] [--hold-ms 3000]
+node <skill>/evidence.mjs --scenario <file.mjs> --mode single|before-after|shot|responsive   --url <AFTER> [--before-url <BEFORE>] [--viewport 390x844] [--viewports 320,480,768x900]   --out <name> --out-dir .evidences/<KEY> [--timezone UTC] [--locale en-US]   [--backend <probeUrl>] [--serve "cmd|readyUrl|cwd"]... [--worktree <dir>] [--hold-ms 3000]
 ```
 
 Scenario (scratch dir, never repo) = ES module:
@@ -68,10 +68,12 @@ Read log + 2-3 key frames. Caption must match logged value. Never claim unseen.
 - Highlight hold 3-4 s; title card 3 s.
 - Personal/sensitive data seen -> stop (`rules/security.md`).
 - No `ffmpeg` -> `.webm` only. No fake `.mp4`.
-- Pass `--out-dir` = gitignored dir per repo rules. Never commit artifacts.
+- Evidence dir always `.evidences/<KEY>/` (repo root, gitignored): `<KEY>` = tracker key (`VYB-238`), or `none` without a task, or PR id (`pr-31`). Never scratchpad, never repo tree outside `.evidences/`. Never commit artifacts.
+- Key is required input. No key given -> ask before running.
+- Scratch dir only for scenario file and temp files, never for outputs.
 
 ## Report
 
-- Path (absolute): video / shots / log
+- Path (absolute, under `.evidences/<KEY>/`): video / shots / log
 - Per scene: BEFORE vs AFTER, logged values
 - Limits: mock, dev server vs build, dropped scenes, repair
