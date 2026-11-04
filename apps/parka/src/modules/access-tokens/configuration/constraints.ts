@@ -35,8 +35,6 @@ export const NOT_ALLOWED =
 /** URL ids of the confirmation modals (see `shared/router/modal-stack`). */
 export const MODAL = {
   create: 'token-new',
-  rename: 'token-rename',
-  rotate: 'token-rotate',
   revoke: 'token-revoke',
   remove: 'token-delete',
 } as const;

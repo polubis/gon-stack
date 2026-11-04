@@ -24,25 +24,17 @@ import type { AccessToken, TokenId } from '../domain/models';
 import { ConfirmDialog } from './confirm-dialog';
 import { Provider, useContext } from './context';
 import { CreateDialog } from './create-dialog';
-import { RenameDialog } from './rename-dialog';
 import { SecretDialog } from './secret-dialog';
 import { ListSkeleton } from './skeleton';
 import { TokenRow } from './token-row';
 
 const CONFIRMS = [
   {
-    modal: MODAL.rotate,
-    title: (t: AccessToken) => `Zmienić token „${t.name}”?`,
-    description:
-      'Dostaniesz nowy token, a obecny przestanie działać od razu. Podłączeni klienci będą wymagali nowego tokenu.',
-    confirmLabel: 'Zmień',
-  },
-  {
     modal: MODAL.revoke,
-    title: (t: AccessToken) => `Wyłączyć token „${t.name}”?`,
+    title: (t: AccessToken) => `Wstrzymać token „${t.name}”?`,
     description:
-      'Token przestanie działać od razu i nie da się go włączyć ponownie. Możesz wygenerować nowy.',
-    confirmLabel: 'Wyłącz',
+      'Token przestanie działać od razu. Podłączeni klienci przestaną mieć dostęp, dopóki nie wznowisz tokenu.',
+    confirmLabel: 'Wstrzymaj',
   },
   {
     modal: MODAL.remove,
@@ -54,7 +46,6 @@ const CONFIRMS = [
 ] as const;
 
 const ACTION = {
-  [MODAL.rotate]: 'rotate',
   [MODAL.revoke]: 'revoke',
   [MODAL.remove]: 'remove',
 } as const;
@@ -73,8 +64,6 @@ const Modals = ({ tokens }: { tokens: AccessToken[] }) => {
         const [kind, id] = entry.split(':');
         const confirm = CONFIRMS.find((c) => c.modal === kind);
         const token = tokens.find((t) => t.id === id);
-        if (kind === MODAL.rename && token)
-          return <RenameDialog key={entry} modal={entry} token={token} />;
         if (!confirm || !token) return null;
 
         return (
@@ -196,6 +185,7 @@ const AccessTokensView = () => {
                     key={token.id}
                     token={token}
                     busy={busyIds.includes(token.id)}
+                    onResume={ctx.resume}
                   />
                 ))}
               </ul>

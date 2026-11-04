@@ -829,21 +829,13 @@ const commands = {
     });
     expect(JSON.stringify(added)).not.toContain(token);
 
+    // Renaming left the UI with VYB-198; the endpoint still serves the rename.
+    const renamed = await page.request.patch(`/api/mcp-tokens/${item.id}/`, {
+      data: { name: 'Bot po zmianie' },
+    });
+    expect(renamed.status()).toBe(200);
+
     await open(page, APP_ROUTER.accessTokens());
-    await page
-      .getByRole('button', { name: 'Zmień nazwę tokenu Bot E2E' })
-      .click();
-    const dialog = page.getByRole('dialog', { name: 'Nazwa tokenu' });
-    await dialog.getByRole('textbox', { name: 'Nazwa' }).fill('Bot po zmianie');
-    await Promise.all([
-      page.waitForResponse(
-        (r) =>
-          r.url().includes('/api/mcp-tokens/') &&
-          r.request().method() === 'PATCH' &&
-          r.status() === 200,
-      ),
-      dialog.getByRole('button', { name: 'Zapisz nazwę' }).click(),
-    ]);
     await expect(
       page.getByRole('heading', { name: 'Bot po zmianie' }),
     ).toBeVisible();

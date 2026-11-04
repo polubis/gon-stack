@@ -19,14 +19,14 @@ export const revoke = (store: Store, { ofType, emit }: Bus) =>
           store.$tokens.set(
             store.$tokens.get().map((t) => (t.id === id ? item : t)),
           );
-          notify(store, { tone: 'success', message: 'Wyłączono token.' });
+          notify(store, { tone: 'success', message: 'Wstrzymano token.' });
         }),
         catchError((error: unknown) => {
           store.$tokens.set(previous);
           notify(store, {
             tone: 'error',
-            title: 'Nie udało się wyłączyć tokenu',
-            code: 'ACCESS_TOKEN_REVOKE_FAILED',
+            title: 'Nie udało się wstrzymać tokenu',
+            code: 'ACCESS_TOKEN_PAUSE_FAILED',
             description: errorMessage(error),
             retry: () => emit('[TRIGGER]_REVOKE', { id }),
           });

@@ -27,18 +27,20 @@ const IGNORED_ERRORS = ['no-speech', 'aborted'];
 const DENIED_ERRORS = ['not-allowed', 'service-not-allowed'];
 
 /**
- * Folds recognition segments into one text without repeats: a segment that
- * extends everything so far replaces it (cumulative results), one already
- * present at the end is dropped (re-delivered results).
+ * Appends one recognition segment to `text` without repeats: a segment that
+ * extends the text so far replaces it (cumulative results), one already
+ * present at the end is dropped (re-delivered results). `text` itself is kept
+ * verbatim, so edits (spaces, line breaks) survive.
  */
-const mergeSegments = (segments: string[]) =>
-  segments.reduce((acc, raw) => {
-    const seg = raw.replace(/\s+/g, ' ').trim();
-    if (seg === '' || acc === seg) return acc;
-    if (acc !== '' && seg.startsWith(acc)) return seg;
-    if (acc.endsWith(` ${seg}`) && seg.includes(' ')) return acc;
-    return acc === '' ? seg : `${acc} ${seg}`;
-  }, '');
+const extend = (text: string, raw: string) => {
+  const seg = raw.replace(/\s+/g, ' ').trim();
+  const head = text.trimEnd();
+  if (seg === '' || head === seg) return text;
+  if (seg.includes(' ') && head.endsWith(` ${seg}`)) return text;
+  if (head !== '' && seg.startsWith(head)) return seg;
+  if (head === '') return seg;
+  return /\s$/.test(text) ? `${text}${seg}` : `${text} ${seg}`;
+};
 
 const subscribeNothing = () => () => {};
 
@@ -70,7 +72,12 @@ export const useDictation = ({
   const [listening, setListening] = useState(false);
   const recognition = useRef<Recognition | null>(null);
   const [transcript, setTranscript] = useState('');
-  const carry = useRef('');
+  /** Text the live session continues from (previous takes or user edits). */
+  const base = useRef('');
+  /** Results of the live session already folded into `base` by an edit. */
+  const consumed = useRef(0);
+  /** Results the live session has delivered so far. */
+  const delivered = useRef(0);
   const emitError = useEffectEvent(onError);
 
   useEffect(() => {
@@ -80,12 +87,18 @@ export const useDictation = ({
     rec.lang = lang;
     rec.continuous = true;
     rec.interimResults = true;
+    consumed.current = 0;
+    delivered.current = 0;
     rec.onresult = (e) => {
+      const results = Array.from(e.results);
+      delivered.current = results.length;
       setTranscript(
-        mergeSegments([
-          carry.current,
-          mergeSegments(Array.from(e.results, (r) => r[0]?.transcript ?? '')),
-        ]),
+        results
+          .slice(consumed.current)
+          .reduce(
+            (text, r) => extend(text, r[0]?.transcript ?? ''),
+            base.current,
+          ),
       );
     };
     rec.onerror = (e) => {
@@ -111,12 +124,18 @@ export const useDictation = ({
     transcript,
     /** `resume` keeps the text so far; otherwise a fresh take starts. */
     start: (resume = false) => {
-      carry.current = resume ? transcript : '';
+      base.current = resume ? transcript : '';
       if (!resume) setTranscript('');
       setListening(true);
     },
+    /** Replaces the previewed text (user edit). Speech after it continues from it. */
+    edit: (text: string) => {
+      base.current = text;
+      consumed.current = delivered.current;
+      setTranscript(text);
+    },
     reset: () => {
-      carry.current = '';
+      base.current = '';
       setTranscript('');
     },
     stop: () => {

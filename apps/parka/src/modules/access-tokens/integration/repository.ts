@@ -3,9 +3,8 @@ import {
   createMcpTokenSchema,
   deleteMcpTokenSchema,
   listMcpTokensSchema,
-  renameMcpTokenSchema,
+  resumeMcpTokenSchema,
   revokeMcpTokenSchema,
-  rotateMcpTokenSchema,
 } from '@schemas/mcp-tokens';
 import { API_ROUTER } from '@/shared/router/routes';
 import type { AccessToken, TokenId } from '../domain/models';
@@ -13,9 +12,8 @@ import { toAccessToken } from './mappers';
 
 type ListOut = z.infer<ReturnType<typeof listMcpTokensSchema>>['out'];
 type CreateOut = z.infer<ReturnType<typeof createMcpTokenSchema>>['out'];
-type RotateOut = z.infer<ReturnType<typeof rotateMcpTokenSchema>>['out'];
 type RevokeOut = z.infer<ReturnType<typeof revokeMcpTokenSchema>>['out'];
-type RenameOut = z.infer<ReturnType<typeof renameMcpTokenSchema>>['out'];
+type ResumeOut = z.infer<ReturnType<typeof resumeMcpTokenSchema>>['out'];
 type DeleteOut = z.infer<ReturnType<typeof deleteMcpTokenSchema>>['out'];
 
 /** Astro treats a body-less write as a form post: always send JSON. */
@@ -49,19 +47,7 @@ export const postToken = async (
   return { token: json.data.token, item: toAccessToken(json.data.item) };
 };
 
-export const postRotation = async (
-  id: TokenId,
-): Promise<{ token: string; item: AccessToken }> => {
-  const response = await fetch(API_ROUTER.mcpTokenRotate(id), {
-    method: 'POST',
-    headers: JSON_HEADERS,
-    body: '{}',
-  });
-  const json = (await response.json()) as RotateOut;
-  if (json.code !== 200) throw new Error(json.message);
-  return { token: json.data.token, item: toAccessToken(json.data.item) };
-};
-
+/** Pause: the token stops working at once and can be resumed later. */
 export const postRevocation = async (id: TokenId): Promise<AccessToken> => {
   const response = await fetch(API_ROUTER.mcpTokenRevoke(id), {
     method: 'POST',
@@ -73,17 +59,13 @@ export const postRevocation = async (id: TokenId): Promise<AccessToken> => {
   return toAccessToken(json.data);
 };
 
-/** Only the label changes: comments written by this token sign with it. */
-export const patchTokenName = async (
-  id: TokenId,
-  name: string,
-): Promise<AccessToken> => {
-  const response = await fetch(API_ROUTER.mcpTokenById(id), {
-    method: 'PATCH',
+export const postResume = async (id: TokenId): Promise<AccessToken> => {
+  const response = await fetch(API_ROUTER.mcpTokenResume(id), {
+    method: 'POST',
     headers: JSON_HEADERS,
-    body: JSON.stringify({ name }),
+    body: '{}',
   });
-  const json = (await response.json()) as RenameOut;
+  const json = (await response.json()) as ResumeOut;
   if (json.code !== 200) throw new Error(json.message);
   return toAccessToken(json.data);
 };

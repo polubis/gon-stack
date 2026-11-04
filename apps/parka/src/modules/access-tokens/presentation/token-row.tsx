@@ -1,11 +1,10 @@
 import {
-  Ban,
   CircleCheck,
-  CircleSlash,
   Clock,
   Loader2,
-  Pencil,
-  RefreshCw,
+  Pause,
+  PauseCircle,
+  Play,
   Trash2,
   type LucideIcon,
 } from 'lucide-react';
@@ -15,7 +14,7 @@ import { Button } from '@/shared/ui/controls';
 import { Card } from '@/shared/ui/layout';
 import { MODAL } from '../configuration/constraints';
 import { formatWhen, maskToken } from '../domain/format';
-import type { AccessToken, TokenStatus } from '../domain/models';
+import type { AccessToken, TokenId, TokenStatus } from '../domain/models';
 
 const STATUS: Record<
   TokenStatus,
@@ -32,9 +31,9 @@ const STATUS: Record<
     className: 'border border-line-strong bg-track text-ink-soft',
   },
   revoked: {
-    label: 'Wyłączony',
-    icon: CircleSlash,
-    className: 'bg-danger-soft text-danger',
+    label: 'Wstrzymany',
+    icon: PauseCircle,
+    className: 'border border-line-strong bg-track text-ink-soft',
   },
 };
 
@@ -64,13 +63,15 @@ const Meta = ({
 export const TokenRow = ({
   token,
   busy,
+  onResume,
 }: {
   token: AccessToken;
   busy: boolean;
+  onResume: (id: TokenId) => void;
 }) => {
   const status = STATUS[token.status];
   const StatusIcon = status.icon;
-  const revoked = token.status === 'revoked';
+  const paused = token.status === 'revoked';
   const ask = (kind: keyof typeof MODAL) => () =>
     openModal(`${MODAL[kind]}:${token.id}`);
 
@@ -115,46 +116,38 @@ export const TokenRow = ({
       </dl>
 
       <div className="flex flex-wrap gap-2">
-        <Button
-          variant="ghost"
-          className="w-auto px-3 py-2"
-          data-e2e={`access-tokens:rename:${token.id}`}
-          aria-label={`Zmień nazwę tokenu ${token.name}`}
-          disabled={busy}
-          onClick={ask('rename')}
-        >
-          <Pencil className="h-4 w-4" aria-hidden="true" />
-          Nazwa
-        </Button>
-        {revoked ? null : (
-          <>
-            <Button
-              variant="ghost"
-              className="w-auto px-3 py-2"
-              data-e2e={`access-tokens:rotate:${token.id}`}
-              aria-label={`Zmień token ${token.name}`}
-              disabled={busy}
-              onClick={ask('rotate')}
-            >
-              {busy ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              ) : (
-                <RefreshCw className="h-4 w-4" aria-hidden="true" />
-              )}
-              Zmień
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-auto px-3 py-2"
-              data-e2e={`access-tokens:revoke:${token.id}`}
-              aria-label={`Wyłącz token ${token.name}`}
-              disabled={busy}
-              onClick={ask('revoke')}
-            >
-              <Ban className="h-4 w-4" aria-hidden="true" />
-              Wyłącz
-            </Button>
-          </>
+        {paused ? (
+          <Button
+            variant="ghost"
+            className="w-auto px-3 py-2"
+            data-e2e={`access-tokens:resume:${token.id}`}
+            aria-label={`Wznów token ${token.name}`}
+            disabled={busy}
+            onClick={() => onResume(token.id as TokenId)}
+          >
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Play className="h-4 w-4" aria-hidden="true" />
+            )}
+            Wznów
+          </Button>
+        ) : (
+          <Button
+            variant="ghost"
+            className="w-auto px-3 py-2"
+            data-e2e={`access-tokens:revoke:${token.id}`}
+            aria-label={`Wstrzymaj token ${token.name}`}
+            disabled={busy}
+            onClick={ask('revoke')}
+          >
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Pause className="h-4 w-4" aria-hidden="true" />
+            )}
+            Wstrzymaj
+          </Button>
         )}
         <Button
           variant="danger"

@@ -286,28 +286,7 @@ const commands = {
     );
   },
 
-  'i rotate the token after confirming': async ({
-    page,
-    getByE2e,
-    getByE2ePrefix,
-  }) => {
-    await getByE2ePrefix('access-tokens:rotate:').click();
-    await expect(page).toHaveURL(/modal=token-rotate/);
-    await getByE2e('access-tokens:confirm').click();
-    await expect(getByE2e('access-tokens:secret-dialog')).toBeVisible();
-    const secret = (await getByE2e('access-tokens:secret').textContent()) ?? '';
-    expect(secret).not.toBe(latest(page));
-    secrets.set(page, [...secrets.get(page)!, secret]);
-    await getByE2e('access-tokens:secret-done').click();
-  },
-
-  'the old secret is refused and the new one works': async ({ page }) => {
-    const [old, fresh] = secrets.get(page)!.slice(-2) as [string, string];
-    expect((await mcp(page, old, 'ping')).status).toBe(401);
-    expect((await mcp(page, fresh, 'ping')).status).toBe(200);
-  },
-
-  'i disable the token after confirming': async ({
+  'i pause the token after confirming': async ({
     page,
     getByE2e,
     getByE2ePrefix,
@@ -321,13 +300,27 @@ const commands = {
       getByE2e('access-tokens:confirm').click(),
     ]);
     await expect(getByE2ePrefix('access-tokens:status:')).toHaveText(
-      'Wyłączony',
+      'Wstrzymany',
     );
   },
 
-  'the disabled token is refused': async ({ page }) => {
+  'the paused token is refused': async ({ page }) => {
     expect((await mcp(page, latest(page), 'tools/list')).status).toBe(401);
     expect((await call(page, latest(page), 'list_tasks', {})).status).toBe(401);
+  },
+
+  'i resume the token without confirming': async ({ page, getByE2ePrefix }) => {
+    await Promise.all([
+      page.waitForResponse(
+        (r) => r.url().includes('/resume/') && r.status() === 200,
+      ),
+      getByE2ePrefix('access-tokens:resume:').click(),
+    ]);
+    await expect(getByE2ePrefix('access-tokens:status:')).toHaveText('Aktywny');
+  },
+
+  'the resumed token works again': async ({ page }) => {
+    expect((await mcp(page, latest(page), 'tools/list')).status).toBe(200);
   },
 
   'i delete the token after confirming': async ({
@@ -433,10 +426,10 @@ test.describe('mcp access tokens', () => {
       ['the app shows the task as done'],
       ['the status tool changes nothing but the status'],
       ['the token shows when it was last used'],
-      ['i rotate the token after confirming'],
-      ['the old secret is refused and the new one works'],
-      ['i disable the token after confirming'],
-      ['the disabled token is refused'],
+      ['i pause the token after confirming'],
+      ['the paused token is refused'],
+      ['i resume the token without confirming'],
+      ['the resumed token works again'],
       ['i delete the token after confirming'],
     );
   });

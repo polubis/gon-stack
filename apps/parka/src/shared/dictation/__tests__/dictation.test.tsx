@@ -67,7 +67,8 @@ afterEach(() => {
 });
 
 const mic = () => screen.getByRole('button', { name: 'Dyktuj: Nazwa' });
-const preview = () => screen.getByRole('log', { name: 'Podgląd dyktowania' });
+const preview = () =>
+  screen.getByRole('textbox', { name: 'Podgląd dyktowania' });
 const field = () => screen.getByLabelText('Nazwa');
 
 const Note = ({ initial = '', max }: { initial?: string; max?: number }) => {
@@ -102,7 +103,7 @@ describe('voice dictation into a text field', () => {
     say('kup');
     say('kup mleko');
 
-    expect(preview()).toHaveTextContent('kup mleko');
+    expect(preview()).toHaveValue('kup mleko');
     expect(field()).toHaveValue('Zakupy:');
   });
 
@@ -143,7 +144,7 @@ describe('voice dictation into a text field', () => {
     say('kup mleko', 'kup mleko jutro');
     say('kup mleko', 'kup mleko jutro', 'kup mleko jutro');
 
-    expect(preview()).toHaveTextContent(/^kup mleko jutro$/);
+    expect(preview()).toHaveValue('kup mleko jutro');
     await userEvent.click(screen.getByRole('button', { name: 'Wstaw' }));
     expect(field()).toHaveValue('kup mleko jutro');
   });
@@ -205,7 +206,7 @@ describe('voice dictation into a text field', () => {
       screen.getByRole('button', { name: 'Zakończ dyktowanie' }),
     );
 
-    expect(preview()).toHaveTextContent('kup mleko');
+    expect(preview()).toHaveValue('kup mleko');
     expect(field()).toHaveValue('');
 
     await userEvent.click(screen.getByRole('button', { name: 'Dyktuj dalej' }));
@@ -318,7 +319,7 @@ describe('voice popup details', () => {
     say('kup chleb');
 
     expect(screen.getByRole('dialog')).toBeVisible();
-    expect(preview()).toHaveTextContent('kup chleb');
+    expect(preview()).toHaveValue('kup chleb');
   });
 
   it('leaves the microphone to speech recognition on a phone', async () => {
@@ -339,6 +340,120 @@ describe('voice popup details', () => {
 
     expect(getUserMedia).not.toHaveBeenCalled();
     expect(started).toBe(1);
-    expect(preview()).toHaveTextContent('kup chleb');
+    expect(preview()).toHaveValue('kup chleb');
+  });
+});
+
+describe('editing while dictating', () => {
+  it('lets the preview be edited while speech keeps coming', async () => {
+    installMic();
+    render(<Form />);
+
+    await userEvent.click(mic());
+    say('kup');
+    await userEvent.type(preview(), ' mleko');
+    say('kup', 'i chleb');
+    await userEvent.click(screen.getByRole('button', { name: 'Wstaw' }));
+
+    expect(field()).toHaveValue('kup mleko i chleb');
+  });
+
+  it('keeps typed text when a new take starts after stopping', async () => {
+    installMic();
+    render(<Form />);
+
+    await userEvent.click(mic());
+    say('kup');
+    await userEvent.clear(preview());
+    await userEvent.type(preview(), 'mleko');
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Zakończ dyktowanie' }),
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Dyktuj dalej' }));
+    say('chleb');
+
+    expect(preview()).toHaveValue('mleko chleb');
+  });
+});
+
+describe('screen while dictating', () => {
+  it('keeps the screen awake until the dictation is accepted', async () => {
+    installMic();
+    const release = vi.fn(() => Promise.resolve());
+    const request = vi.fn(() =>
+      Promise.resolve({ release, addEventListener: vi.fn() }),
+    );
+    vi.stubGlobal('navigator', { ...navigator, wakeLock: { request } });
+    render(<Form />);
+
+    await userEvent.click(mic());
+    say('kup chleb');
+
+    expect(request).toHaveBeenCalledWith('screen');
+    expect(release).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Wstaw' }));
+
+    expect(release).toHaveBeenCalledTimes(1);
+  });
+
+  it('takes the screen again when the page comes back to the foreground', async () => {
+    installMic();
+    const releaseListeners: (() => void)[] = [];
+    const request = vi.fn(() =>
+      Promise.resolve({
+        release: vi.fn(() => Promise.resolve()),
+        addEventListener: (_: 'release', listener: () => void) => {
+          releaseListeners.push(listener);
+        },
+      }),
+    );
+    vi.stubGlobal('navigator', { ...navigator, wakeLock: { request } });
+    const setVisibility = (state: 'visible' | 'hidden') => {
+      Object.defineProperty(document, 'visibilityState', {
+        configurable: true,
+        get: () => state,
+      });
+      document.dispatchEvent(new Event('visibilitychange'));
+    };
+    render(<Form />);
+
+    await userEvent.click(mic());
+    expect(request).toHaveBeenCalledTimes(1);
+
+    setVisibility('hidden');
+    releaseListeners.at(-1)?.();
+    setVisibility('visible');
+
+    expect(request).toHaveBeenCalledTimes(2);
+    Reflect.deleteProperty(document, 'visibilityState');
+  });
+
+  it('releases the screen when the dictation is cancelled', async () => {
+    installMic();
+    const release = vi.fn(() => Promise.resolve());
+    const request = vi.fn(() =>
+      Promise.resolve({ release, addEventListener: vi.fn() }),
+    );
+    vi.stubGlobal('navigator', { ...navigator, wakeLock: { request } });
+    render(<Form />);
+
+    await userEvent.click(mic());
+    await userEvent.click(screen.getByRole('button', { name: 'Anuluj' }));
+
+    expect(release).toHaveBeenCalledTimes(1);
+  });
+
+  it('still dictates when the screen cannot be kept awake', async () => {
+    installMic();
+    const request = vi.fn(() => Promise.reject(new Error('NotAllowedError')));
+    vi.stubGlobal('navigator', { ...navigator, wakeLock: { request } });
+    render(<Form />);
+
+    await userEvent.click(mic());
+    say('kup chleb');
+
+    expect(request).toHaveBeenCalled();
+    expect(preview()).toHaveValue('kup chleb');
   });
 });
