@@ -87,6 +87,7 @@ const { updateTaskComment } = await import('../update-task-comment');
 const { deleteTaskComment } = await import('../delete-task-comment');
 const { listTaskComments } = await import('../list-task-comments');
 const { renameMcpToken } = await import('../rename-mcp-token');
+const { resumeMcpToken } = await import('../resume-mcp-token');
 
 const context = {
   request: new Request('http://localhost/api/'),
@@ -388,5 +389,65 @@ describe('rename mcp token', () => {
     expect(
       await run(renameMcpToken, { id: TOKEN, name: 'x'.repeat(60) }),
     ).toMatchObject({ code: 200 });
+  });
+});
+
+describe('resume mcp token', () => {
+  const TOKEN_ROW = {
+    id: TOKEN,
+    name: 'Asystent',
+    token_hint: 'abcd',
+    token_tail: 'wxyz',
+    ttl_days: 30,
+    expires_at: null,
+    revoked_at: null,
+    rotated_at: null,
+    last_used_at: null,
+    created_at: '2026-10-31T10:00:00.000Z',
+  };
+
+  it('lifts a pause of an own token', async () => {
+    results['mcp_tokens.select'] = ok({
+      ...TOKEN_ROW,
+      revoked_at: '2026-10-31T11:00:00.000Z',
+    });
+    results['mcp_tokens.update'] = ok(TOKEN_ROW);
+
+    const response = await run(resumeMcpToken, { id: TOKEN });
+
+    expect(response).toMatchObject({
+      code: 200,
+      data: { id: TOKEN, status: 'active' },
+    });
+    expect(updated).toEqual([{ revoked_at: null }]);
+    expect(eqs['mcp_tokens.update']).toContainEqual(['user_id', ME]);
+  });
+
+  it('leaves an active token untouched', async () => {
+    results['mcp_tokens.select'] = ok(TOKEN_ROW);
+
+    const response = await run(resumeMcpToken, { id: TOKEN });
+
+    expect(response).toMatchObject({
+      code: 200,
+      data: { status: 'active' },
+    });
+    expect(updated).toEqual([]);
+  });
+
+  it('says not found for a token of someone else', async () => {
+    results['mcp_tokens.select'] = ok(null);
+
+    expect(await run(resumeMcpToken, { id: TOKEN })).toMatchObject({
+      code: 404,
+    });
+    expect(updated).toEqual([]);
+  });
+
+  it('refuses a malformed id', async () => {
+    expect(await run(resumeMcpToken, { id: 'nope' })).toMatchObject({
+      code: 400,
+    });
+    expect(updated).toEqual([]);
   });
 });

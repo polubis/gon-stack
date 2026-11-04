@@ -92,3 +92,13 @@ export const renameMcpTokenSchema = () =>
       writeErrors,
     ]),
   });
+
+/** Lifts a pause set by revoke; the token keeps its secret and settings. */
+export const resumeMcpTokenSchema = () =>
+  z.object({
+    in: z.object({ id: z.uuid() }),
+    out: z.union([
+      z.object({ code: z.literal(200), data: mcpToken() }),
+      writeErrors,
+    ]),
+  });

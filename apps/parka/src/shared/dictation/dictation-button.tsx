@@ -89,6 +89,7 @@ export const DictationButton = ({ target, label, className }: Props) => {
           onToggle={() =>
             dictation.listening ? dictation.stop() : dictation.start(true)
           }
+          onEdit={dictation.edit}
           onAccept={accept}
           onCancel={close}
         />

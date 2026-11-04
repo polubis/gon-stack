@@ -44,11 +44,10 @@ afterAll(() => server.close());
 /** In-memory stand-in for the token endpoints. */
 const stubApi = (
   initial: Item[],
-  overrides: { createStatus?: number; renameStatus?: number } = {},
+  overrides: { createStatus?: number } = {},
 ) => {
   let tokens = [...initial];
   const created: unknown[] = [];
-  const renamed: unknown[] = [];
 
   server.use(
     http.get('/api/mcp-tokens/', () =>
@@ -74,14 +73,6 @@ const stubApi = (
         data: { token: SECRET, item: next },
       });
     }),
-    http.post('/api/mcp-tokens/:id/rotate/', ({ params }) => {
-      const rotated = item({ id: String(params.id), tail: 'Rt8n' });
-      tokens = tokens.map((t) => (t.id === params.id ? rotated : t));
-      return HttpResponse.json({
-        code: 200,
-        data: { token: SECRET, item: rotated },
-      });
-    }),
     http.post('/api/mcp-tokens/:id/revoke/', ({ params }) => {
       tokens = tokens.map((t) =>
         t.id === params.id ? { ...t, status: 'revoked' as const } : t,
@@ -91,17 +82,9 @@ const stubApi = (
         data: tokens.find((t) => t.id === params.id),
       });
     }),
-    http.patch('/api/mcp-tokens/:id/', async ({ params, request }) => {
-      const body = (await request.json()) as { name: string };
-      renamed.push(body);
-      if (overrides.renameStatus && overrides.renameStatus !== 200)
-        return HttpResponse.json({
-          code: overrides.renameStatus,
-          type: 'internal-server',
-          message: 'boom',
-        });
+    http.post('/api/mcp-tokens/:id/resume/', ({ params }) => {
       tokens = tokens.map((t) =>
-        t.id === params.id ? { ...t, name: body.name } : t,
+        t.id === params.id ? { ...t, status: 'active' as const } : t,
       );
       return HttpResponse.json({
         code: 200,
@@ -114,7 +97,7 @@ const stubApi = (
     }),
   );
 
-  return { created, renamed };
+  return { created };
 };
 
 const setup = async (initial: Item[], overrides = {}) => {
@@ -156,16 +139,16 @@ describe('access tokens list', () => {
     expect(screen.queryByText(SECRET)).not.toBeInTheDocument();
   });
 
-  it('offers no rotate or disable for a disabled token', async () => {
+  it('offers resume but no pause for a paused token', async () => {
     await setup([item({ status: 'revoked' })]);
 
-    expect(screen.getByText('Wyłączony')).toBeInTheDocument();
+    expect(screen.getByText('Wstrzymany')).toBeInTheDocument();
     expect(
-      screen.queryByRole('button', { name: /Zmień token/ }),
+      screen.queryByRole('button', { name: /Wstrzymaj token/ }),
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole('button', { name: /Wyłącz token/ }),
-    ).not.toBeInTheDocument();
+      screen.getByRole('button', { name: /Wznów token/ }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /Usuń token/ }),
     ).toBeInTheDocument();
@@ -294,77 +277,75 @@ describe('access token creation', () => {
 });
 
 describe('access token management', () => {
-  it('renames a token so its comments sign with the new name', async () => {
-    const { user, renamed } = await setup([item()]);
-
-    await user.click(
-      screen.getByRole('button', { name: 'Zmień nazwę tokenu Claude Desktop' }),
-    );
-    const dialog = await screen.findByRole('dialog', { name: 'Nazwa tokenu' });
-    const input = within(dialog).getByRole('textbox', { name: 'Nazwa' });
-    await user.clear(input);
-    await user.type(input, 'Asystent domowy');
-    await user.click(
-      within(dialog).getByRole('button', { name: 'Zapisz nazwę' }),
-    );
-
-    expect(
-      await screen.findByText('Zmieniono nazwę tokenu.'),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { name: 'Asystent domowy' }),
-    ).toBeInTheDocument();
-    expect(renamed).toEqual([{ name: 'Asystent domowy' }]);
-  });
-
-  it('does not submit an unchanged or blank name', async () => {
+  it('pauses a token only after confirmation', async () => {
     const { user } = await setup([item()]);
 
     await user.click(
-      screen.getByRole('button', { name: 'Zmień nazwę tokenu Claude Desktop' }),
-    );
-    const dialog = await screen.findByRole('dialog', { name: 'Nazwa tokenu' });
-    const save = within(dialog).getByRole('button', { name: 'Zapisz nazwę' });
-    expect(save).toBeDisabled();
-
-    await user.clear(within(dialog).getByRole('textbox', { name: 'Nazwa' }));
-    expect(save).toBeDisabled();
-  });
-
-  it('restores the name and explains when renaming fails', async () => {
-    const { user } = await setup([item()], { renameStatus: 500 });
-
-    await user.click(
-      screen.getByRole('button', { name: 'Zmień nazwę tokenu Claude Desktop' }),
-    );
-    const dialog = await screen.findByRole('dialog', { name: 'Nazwa tokenu' });
-    const input = within(dialog).getByRole('textbox', { name: 'Nazwa' });
-    await user.clear(input);
-    await user.type(input, 'Nowa');
-    await user.click(
-      within(dialog).getByRole('button', { name: 'Zapisz nazwę' }),
-    );
-
-    expect(
-      await screen.findByText('ACCESS_TOKEN_RENAME_FAILED'),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { name: 'Claude Desktop' }),
-    ).toBeInTheDocument();
-  });
-
-  it('disables a token only after confirmation', async () => {
-    const { user } = await setup([item()]);
-
-    await user.click(
-      screen.getByRole('button', { name: 'Wyłącz token Claude Desktop' }),
+      screen.getByRole('button', { name: 'Wstrzymaj token Claude Desktop' }),
     );
     const dialog = await screen.findByRole('dialog');
     expect(screen.getByText('Aktywny')).toBeInTheDocument();
-    await user.click(within(dialog).getByRole('button', { name: 'Wyłącz' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Wstrzymaj' }));
 
-    expect(await screen.findByText('Wyłączono token.')).toBeInTheDocument();
-    expect(screen.getByText('Wyłączony')).toBeInTheDocument();
+    expect(await screen.findByText('Wstrzymano token.')).toBeInTheDocument();
+    expect(screen.getByText('Wstrzymany')).toBeInTheDocument();
+  });
+
+  it('resumes a paused token without confirmation', async () => {
+    const { user } = await setup([item({ status: 'revoked' })]);
+
+    await user.click(
+      screen.getByRole('button', { name: 'Wznów token Claude Desktop' }),
+    );
+
+    expect(await screen.findByText('Wznowiono token.')).toBeInTheDocument();
+    expect(screen.getByText('Aktywny')).toBeInTheDocument();
+  });
+
+  it('keeps the token active and explains when pausing fails', async () => {
+    const { user } = await setup([item()]);
+    server.use(
+      http.post('/api/mcp-tokens/:id/revoke/', () =>
+        HttpResponse.json({
+          code: 500,
+          type: 'internal-server',
+          message: 'no',
+        }),
+      ),
+    );
+
+    await user.click(
+      screen.getByRole('button', { name: 'Wstrzymaj token Claude Desktop' }),
+    );
+    const dialog = await screen.findByRole('dialog');
+    await user.click(within(dialog).getByRole('button', { name: 'Wstrzymaj' }));
+
+    expect(
+      await screen.findByText('ACCESS_TOKEN_PAUSE_FAILED'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Aktywny')).toBeInTheDocument();
+  });
+
+  it('keeps the token paused and explains when resuming fails', async () => {
+    const { user } = await setup([item({ status: 'revoked' })]);
+    server.use(
+      http.post('/api/mcp-tokens/:id/resume/', () =>
+        HttpResponse.json({
+          code: 500,
+          type: 'internal-server',
+          message: 'no',
+        }),
+      ),
+    );
+
+    await user.click(
+      screen.getByRole('button', { name: 'Wznów token Claude Desktop' }),
+    );
+
+    expect(
+      await screen.findByText('ACCESS_TOKEN_RESUME_FAILED'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Wstrzymany')).toBeInTheDocument();
   });
 
   it('keeps the token when the confirmation is cancelled', async () => {
@@ -394,26 +375,6 @@ describe('access token management', () => {
     expect(await screen.findByText('Usunięto token.')).toBeInTheDocument();
     expect(screen.queryByText('Claude Desktop')).not.toBeInTheDocument();
     expect(screen.getByText('Nie masz jeszcze tokenów')).toBeInTheDocument();
-  });
-
-  it('rotates a token and reveals its new secret once', async () => {
-    const { user } = await setup([item()]);
-
-    await user.click(
-      screen.getByRole('button', { name: 'Zmień token Claude Desktop' }),
-    );
-    const confirm = await screen.findByRole('dialog');
-    await user.click(within(confirm).getByRole('button', { name: 'Zmień' }));
-
-    const reveal = await screen.findByRole('dialog', {
-      name: 'Token zmieniony',
-    });
-    expect(within(reveal).getByText(SECRET)).toBeInTheDocument();
-    await user.click(within(reveal).getByRole('button', { name: 'Gotowe' }));
-    await waitFor(() =>
-      expect(screen.queryByText(SECRET)).not.toBeInTheDocument(),
-    );
-    expect(screen.getByText('parka_mcp_Zq8x…Rt8n')).toBeInTheDocument();
   });
 
   it('restores the token and explains when deleting fails', async () => {

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, Mic, Square } from 'lucide-react';
 import { currentDevice } from '@/shared/device/integration/current-device';
+import { useWakeLock } from './use-wake-lock';
 
 const BARS = [0.55, 0.8, 1, 0.8, 0.55];
 
@@ -67,14 +68,16 @@ const useVoiceLevel = (
 };
 
 /**
- * Blocking dictation popup: voice-level animation plus a live preview of the
- * transcript. Nothing is written anywhere until `onAccept`; Esc cancels.
+ * Blocking dictation popup: voice-level animation plus an editable preview of
+ * the transcript (dictation and typing both go there). Nothing is written
+ * anywhere until `onAccept`; Esc cancels. The screen stays awake while listening.
  */
 export const VoiceOverlay = ({
   label,
   transcript,
   listening,
   onToggle,
+  onEdit,
   onAccept,
   onCancel,
 }: {
@@ -82,12 +85,14 @@ export const VoiceOverlay = ({
   transcript: string;
   listening: boolean;
   onToggle: () => void;
+  onEdit: (text: string) => void;
   onAccept: () => void;
   onCancel: () => void;
 }) => {
   const bars = useRef<HTMLDivElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
   const live = useVoiceLevel(bars, listening);
+  useWakeLock(listening);
 
   useEffect(() => {
     toggle.current?.focus();
@@ -140,17 +145,14 @@ export const VoiceOverlay = ({
         <p role="status" className="text-sm font-medium text-ink">
           {listening ? 'Słucham…' : 'Dyktowanie zatrzymane'}
         </p>
-        <div
-          role="log"
+        <textarea
           aria-label="Podgląd dyktowania"
-          className="max-h-40 min-h-16 w-full overflow-y-auto rounded-2xl bg-hover p-3 text-sm text-ink"
-        >
-          {transcript === '' ? (
-            <span className="text-ink-soft">Zacznij mówić…</span>
-          ) : (
-            transcript
-          )}
-        </div>
+          placeholder="Zacznij mówić…"
+          value={transcript}
+          onChange={(e) => onEdit(e.target.value)}
+          rows={3}
+          className="max-h-40 min-h-16 w-full resize-none overflow-y-auto rounded-2xl bg-hover p-3 text-sm text-ink placeholder:text-ink-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+        />
         <button
           ref={toggle}
           type="button"
