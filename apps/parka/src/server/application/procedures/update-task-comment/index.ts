@@ -1,5 +1,5 @@
 import { updateTaskCommentSchema } from '@schemas/time';
-import { InternalServer, NotFound } from '../../core/error-handling';
+import { NotFound } from '../../core/error-handling';
 import { fromSupabaseError } from '../../adapter/supabase';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
@@ -30,7 +30,7 @@ export const updateTaskComment = privateProcedure({
           .select('id, name')
           .eq('id', data.mcp_token_id)
       : { data: [], error: null };
-    if (tokens.error) throw new InternalServer(tokens.error);
+    if (tokens.error) throw fromSupabaseError(tokens.error);
 
     return {
       code: 200 as const,

@@ -1,7 +1,8 @@
 import { listSuggestionsSchema } from '@schemas/suggestions';
-import { InternalServer } from '../../core/error-handling';
+
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 const MAX_SUGGESTIONS = 500;
 
@@ -16,7 +17,7 @@ export const listSuggestions = privateProcedure({
       .order('last_used', { ascending: false, nullsFirst: false })
       .order('value')
       .limit(MAX_SUGGESTIONS);
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
 
     return {
       code: 200 as const,

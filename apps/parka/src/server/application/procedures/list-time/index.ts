@@ -1,5 +1,5 @@
 import { listTimeSchema } from '@schemas/time';
-import { InternalServer } from '../../core/error-handling';
+
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { loadProfiles } from '../../shared/device';
@@ -9,6 +9,7 @@ import {
   toTimeBacklogTask,
   toTimeTask,
 } from '../../shared/time';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const listTime = privateProcedure({
   schema: withZodSchema({ schema: listTimeSchema }),
@@ -34,10 +35,10 @@ export const listTime = privateProcedure({
         .order('created_at')
         .order('id'),
     ]);
-    if (categories.error) throw new InternalServer(categories.error);
-    if (priorities.error) throw new InternalServer(priorities.error);
-    if (tasks.error) throw new InternalServer(tasks.error);
-    if (backlog.error) throw new InternalServer(backlog.error);
+    if (categories.error) throw fromSupabaseError(categories.error);
+    if (priorities.error) throw fromSupabaseError(priorities.error);
+    if (tasks.error) throw fromSupabaseError(tasks.error);
+    if (backlog.error) throw fromSupabaseError(backlog.error);
 
     return {
       code: 200 as const,

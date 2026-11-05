@@ -1,6 +1,6 @@
 import { env } from 'cloudflare:workers';
 import { uploadAvatarSchema } from '@schemas/avatar';
-import { InternalServer } from '../../core/error-handling';
+
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { AVATAR_BUCKET, avatarPath, toAvatar } from '../../shared/avatar';
@@ -8,6 +8,7 @@ import {
   buildAvatarVariants,
   type ImagesBinding,
 } from '../../shared/avatar-image';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const uploadAvatar = privateProcedure({
   schema: withZodSchema({ schema: uploadAvatarSchema }),
@@ -24,7 +25,7 @@ export const uploadAvatar = privateProcedure({
         contentType: 'image/webp',
         upsert: true,
       });
-      if (error) throw new InternalServer(error);
+      if (error) throw fromSupabaseError(error);
     }
 
     const { data, error } = await db
@@ -32,7 +33,7 @@ export const uploadAvatar = privateProcedure({
       .upsert({ user_id: user.id, updated_at: new Date().toISOString() })
       .select('updated_at')
       .single();
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
 
     return {
       code: 200 as const,

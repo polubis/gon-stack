@@ -2,11 +2,12 @@ import type { z } from 'zod';
 import { listExpensesSchema } from '@schemas/expenses';
 import { receiptItem } from '@schemas/general';
 import { todayDay } from '@/shared/period/period';
-import { InternalServer } from '../../core/error-handling';
+
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { loadProfiles, toDevice } from '../../shared/device';
 import { materializeRecurring } from '../../shared/recurring';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const listExpenses = privateProcedure({
   schema: withZodSchema({ schema: listExpensesSchema }),
@@ -21,8 +22,8 @@ export const listExpenses = privateProcedure({
       db.from('receipt_items').select('*'),
       loadProfiles(db),
     ]);
-    if (expenses.error) throw new InternalServer(expenses.error);
-    if (items.error) throw new InternalServer(items.error);
+    if (expenses.error) throw fromSupabaseError(expenses.error);
+    if (items.error) throw fromSupabaseError(items.error);
 
     const itemsByExpense = new Map<
       string,

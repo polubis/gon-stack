@@ -1,9 +1,10 @@
 import { createMcpTokenSchema } from '@schemas/mcp-tokens';
-import { Conflict, InternalServer } from '../../core/error-handling';
+import { Conflict } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { issueMcpToken, MCP_TOKEN_LIMIT } from '../../../domain/mcp-token';
 import { MCP_TOKEN_COLUMNS, toMcpToken } from '../../shared/mcp-token';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 /** The one place a secret is born: it goes to the response once, only its hash is stored. */
 export const createMcpToken = privateProcedure({
@@ -14,7 +15,7 @@ export const createMcpToken = privateProcedure({
       .from('mcp_tokens')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id);
-    if (countError) throw new InternalServer(countError);
+    if (countError) throw fromSupabaseError(countError);
     if ((count ?? 0) >= MCP_TOKEN_LIMIT)
       throw new Conflict(
         undefined,
@@ -36,7 +37,7 @@ export const createMcpToken = privateProcedure({
       })
       .select(MCP_TOKEN_COLUMNS)
       .single();
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
 
     return {
       code: 201 as const,

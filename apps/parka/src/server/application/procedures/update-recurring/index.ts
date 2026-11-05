@@ -1,8 +1,9 @@
 import { updateRecurringSchema } from '@schemas/recurring';
-import { InternalServer, NotFound } from '../../core/error-handling';
+import { NotFound } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { replaceRuleItems, ruleTotals, toRule } from '../../shared/recurring';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 /**
  * Edits the rule only: expenses it already created stay as they are, so a
@@ -29,7 +30,7 @@ export const updateRecurring = privateProcedure({
       .eq('id', input.id)
       .select()
       .maybeSingle();
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
     if (!data) throw new NotFound(undefined, 'Recurring expense not found');
 
     const items = await replaceRuleItems(db, user.id, input.id, input.items);

@@ -1,8 +1,9 @@
 import { resumeMcpTokenSchema } from '@schemas/mcp-tokens';
-import { InternalServer, NotFound } from '../../core/error-handling';
+import { NotFound } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { MCP_TOKEN_COLUMNS, toMcpToken } from '../../shared/mcp-token';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 /** Lifts a pause: the token works again, unless it has expired meanwhile. */
 export const resumeMcpToken = privateProcedure({
@@ -15,7 +16,7 @@ export const resumeMcpToken = privateProcedure({
       .eq('id', input.id)
       .eq('user_id', user.id)
       .maybeSingle();
-    if (found.error) throw new InternalServer(found.error);
+    if (found.error) throw fromSupabaseError(found.error);
     if (!found.data) throw new NotFound(undefined, 'Token not found');
     if (!found.data.revoked_at)
       return { code: 200 as const, data: toMcpToken(found.data) };
@@ -27,7 +28,7 @@ export const resumeMcpToken = privateProcedure({
       .eq('user_id', user.id)
       .select(MCP_TOKEN_COLUMNS)
       .single();
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
 
     return { code: 200 as const, data: toMcpToken(data) };
   },

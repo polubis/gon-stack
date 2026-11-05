@@ -1,7 +1,8 @@
 import { updateLimitSchema } from '@schemas/limits';
-import { InternalServer, NotFound } from '../../core/error-handling';
+import { NotFound } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const updateLimit = privateProcedure({
   schema: withZodSchema({ schema: updateLimitSchema }),
@@ -18,7 +19,7 @@ export const updateLimit = privateProcedure({
       .eq('id', input.id)
       .select()
       .maybeSingle();
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
     if (!data) throw new NotFound(undefined, 'Limit not found');
 
     return {

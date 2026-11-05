@@ -1,5 +1,5 @@
 import { deleteTimeTaskSchema } from '@schemas/time';
-import { InternalServer, NotFound } from '../../core/error-handling';
+import { NotFound } from '../../core/error-handling';
 import {
   TASK_ATTACHMENT_BUCKET,
   taskAttachmentPath,
@@ -18,14 +18,14 @@ export const deleteTimeTask = privateProcedure({
       .select('id')
       .eq('user_id', user.id)
       .eq('task_id', input.id);
-    if (attachments.error) throw new InternalServer(attachments.error);
+    if (attachments.error) throw fromSupabaseError(attachments.error);
     if (attachments.data.length > 0) {
       const removed = await db.storage
         .from(TASK_ATTACHMENT_BUCKET)
         .remove(
           attachments.data.map((row) => taskAttachmentPath(user.id, row.id)),
         );
-      if (removed.error) throw new InternalServer(removed.error);
+      if (removed.error) throw fromSupabaseError(removed.error);
     }
 
     const { data, error } = await db

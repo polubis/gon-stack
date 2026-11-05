@@ -1,7 +1,8 @@
 import { markAllNotificationsReadSchema } from '@schemas/notifications';
-import { InternalServer } from '../../core/error-handling';
+
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const markAllNotificationsRead = privateProcedure({
   schema: withZodSchema({ schema: markAllNotificationsReadSchema }),
@@ -11,7 +12,7 @@ export const markAllNotificationsRead = privateProcedure({
       .from('notifications')
       .update({ read_at: new Date().toISOString() })
       .is('read_at', null);
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
 
     return { code: 200 as const, ok: true as const };
   },

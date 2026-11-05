@@ -1,6 +1,6 @@
 import { createExpenseSchema } from '@schemas/expenses';
 import { deriveExpenseCategory } from '@/shared/expense-category/category';
-import { BadRequest, InternalServer } from '../../core/error-handling';
+import { BadRequest } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { deviceColumns, loadProfiles, toDevice } from '../../shared/device';
@@ -10,6 +10,7 @@ import {
   tryRecordNotifications,
 } from '../../shared/notifications';
 import { notifyReachedLimits } from '../../shared/limit-alerts';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const createExpense = privateProcedure({
   schema: withZodSchema({ schema: createExpenseSchema }),
@@ -36,7 +37,7 @@ export const createExpense = privateProcedure({
       })
       .select()
       .single();
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
 
     if (input.items.length > 0) {
       const { error: itemsError } = await db.from('receipt_items').insert(
@@ -51,7 +52,7 @@ export const createExpense = privateProcedure({
           category_id: it.categoryId,
         })),
       );
-      if (itemsError) throw new InternalServer(itemsError);
+      if (itemsError) throw fromSupabaseError(itemsError);
     }
 
     await tryRecordNotifications(db, uid, [

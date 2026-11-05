@@ -1,7 +1,7 @@
 import { env } from 'cloudflare:workers';
 import { uploadTaskAttachmentSchema } from '@schemas/time';
 import { ATTACHMENT_MAX_COUNT } from '@/shared/attachments/rules';
-import { Conflict, InternalServer, NotFound } from '../../core/error-handling';
+import { Conflict, NotFound } from '../../core/error-handling';
 import { fromSupabaseError } from '../../adapter/supabase';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
@@ -33,7 +33,7 @@ export const uploadTaskAttachment = privateProcedure({
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id)
       .eq('task_id', taskId);
-    if (count.error) throw new InternalServer(count.error);
+    if (count.error) throw fromSupabaseError(count.error);
     if ((count.count ?? 0) >= ATTACHMENT_MAX_COUNT)
       throw new Conflict(
         undefined,
@@ -52,7 +52,7 @@ export const uploadTaskAttachment = privateProcedure({
     const upload = await db.storage
       .from(TASK_ATTACHMENT_BUCKET)
       .upload(path, prepared.bytes, { contentType: prepared.mime });
-    if (upload.error) throw new InternalServer(upload.error);
+    if (upload.error) throw fromSupabaseError(upload.error);
 
     const { data, error } = await db
       .from('time_task_attachments')

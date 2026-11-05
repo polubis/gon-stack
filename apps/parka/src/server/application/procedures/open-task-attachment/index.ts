@@ -1,5 +1,5 @@
 import { openTaskAttachmentSchema } from '@schemas/time';
-import { InternalServer, NotFound } from '../../core/error-handling';
+import { NotFound } from '../../core/error-handling';
 import { fromSupabaseError } from '../../adapter/supabase';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
@@ -26,7 +26,7 @@ export const openTaskAttachment = privateProcedure({
     const { data, error } = await db.storage
       .from(TASK_ATTACHMENT_BUCKET)
       .createSignedUrl(taskAttachmentPath(user.id, row.data.id), LINK_SECONDS);
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
 
     return { code: 302 as const, location: data.signedUrl };
   },

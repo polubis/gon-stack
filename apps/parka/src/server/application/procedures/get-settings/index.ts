@@ -1,8 +1,9 @@
 import { getSettingsSchema } from '@schemas/settings';
-import { InternalServer } from '../../core/error-handling';
+
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { loadProfiles, toDevice } from '../../shared/device';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const getSettings = privateProcedure({
   schema: withZodSchema({ schema: getSettingsSchema }),
@@ -27,10 +28,10 @@ export const getSettings = privateProcedure({
         .order('day', { ascending: false }),
       loadProfiles(db),
     ]);
-    if (profile.error) throw new InternalServer(profile.error);
-    if (prefs.error) throw new InternalServer(prefs.error);
-    if (rows.error) throw new InternalServer(rows.error);
-    if (taskRows.error) throw new InternalServer(taskRows.error);
+    if (profile.error) throw fromSupabaseError(profile.error);
+    if (prefs.error) throw fromSupabaseError(prefs.error);
+    if (rows.error) throw fromSupabaseError(rows.error);
+    if (taskRows.error) throw fromSupabaseError(taskRows.error);
 
     // One entry per device, named by its most recent expense, else task.
     const devices = new Map<string, NonNullable<ReturnType<typeof toDevice>>>();

@@ -1,8 +1,9 @@
 import { finishFinanceTourSchema } from '@schemas/finance-tour';
-import { InternalServer } from '../../core/error-handling';
+
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { tourExpiry } from '@/server/domain/finance-tour';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const finishFinanceTour = privateProcedure({
   schema: withZodSchema({ schema: finishFinanceTourSchema }),
@@ -19,7 +20,7 @@ export const finishFinanceTour = privateProcedure({
       },
       { onConflict: 'user_id' },
     );
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
 
     return { code: 200 as const, ok: true as const };
   },
