@@ -22,7 +22,10 @@ const commands = {
     await page.waitForTimeout(200);
   },
   'i open the add menu': async ({ page }) => {
-    await page.getByRole('button', { name: 'Dodaj' }).first().click();
+    await page
+      .getByRole('button', { name: 'Dodaj', exact: true })
+      .first()
+      .click();
   },
   'i pick the category option': async ({ page }) => {
     await page.getByRole('menuitem', { name: 'Kategoria' }).click();
