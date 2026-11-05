@@ -45,7 +45,9 @@ const showCookieConsent = COOKIE_CONSENT_PAGES.includes(url);
     <slot name="head-extra" />
     <script is:inline>
       try {
-        if (localStorage.getItem('parka:theme') === 'dark')
+        // Mirrors resolveDark in shared/theme/theme.ts (night: 19:00-07:00).
+        var mode = localStorage.getItem('parka:theme'), h = new Date().getHours();
+        if (mode === 'dark' || (mode === 'auto' && (h >= 19 || h < 7)))
           document.documentElement.dataset.theme = 'dark';
       } catch {}
     </script>
