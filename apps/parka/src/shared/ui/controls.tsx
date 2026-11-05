@@ -13,7 +13,7 @@ import type { E2eId } from '@/__e2e__/selectors';
 import { usePopoverOpen } from './use-popover-open';
 
 type SegmentedProps<T extends string> = {
-  options: { value: T; label: string }[];
+  options: { value: T; label: ReactNode }[];
   value: T;
   onChange: (value: T) => void;
   label: string;

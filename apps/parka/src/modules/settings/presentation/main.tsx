@@ -1,15 +1,22 @@
-import { useEffect } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { useEffect, type ReactNode } from 'react';
+import {
+  ChevronRight,
+  Moon,
+  Sun,
+  SunMoon,
+  type LucideIcon,
+} from 'lucide-react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import { APP_ROUTER } from '@/shared/router/routes';
-import { Toggle } from '@/shared/ui/controls';
+import { Segmented, Toggle } from '@/shared/ui/controls';
 import { Card, ScreenHeader } from '@/shared/ui/layout';
 import { ErrorState } from '@/shared/ui/error-state';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
 import { Toast } from '@/shared/ui/toast';
 import { UnreadLink } from '@/modules/notifications/presentation/unread-link';
 import type { Device } from '@/shared/device/domain/models';
-import { useDarkTheme } from '@/shared/theme/use-dark-theme';
+import type { ThemeMode } from '@/shared/theme/theme';
+import { useThemeMode } from '@/shared/theme/use-theme-mode';
 import {
   ERROR_CODES,
   LINKS,
@@ -21,12 +28,31 @@ import { DevicesCard } from './devices-card';
 import { Provider, useContext } from './context';
 import { SettingsSkeleton } from './settings-skeleton';
 
+const ThemeLabel = ({
+  icon: Icon,
+  text,
+}: {
+  icon: LucideIcon;
+  text: string;
+}) => (
+  <span className="inline-flex items-center gap-1.5">
+    <Icon className="h-4 w-4" aria-hidden="true" />
+    {text}
+  </span>
+);
+
+const THEME_OPTIONS: { value: ThemeMode; label: ReactNode }[] = [
+  { value: 'auto', label: <ThemeLabel icon={SunMoon} text="Auto" /> },
+  { value: 'dark', label: <ThemeLabel icon={Moon} text="Ciemny" /> },
+  { value: 'light', label: <ThemeLabel icon={Sun} text="Jasny" /> },
+];
+
 const SettingsContent = ({ settings }: { settings: Settings }) => {
   const ctx = useContext();
   const uploadingDeviceIds = ctx.useUploadingDeviceIds();
   const push = ctx.usePush();
   const isPushBusy = ctx.useIsPushBusy();
-  const [dark, setDark] = useDarkTheme();
+  const [mode, setMode] = useThemeMode();
   const setDevice = (
     id: string,
     patch: Partial<Pick<Device, 'avatar' | 'customName'>>,
@@ -42,9 +68,13 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
     <div className="flex flex-col gap-4 md:gap-6 lg:grid lg:grid-cols-2">
       <Card as="section" className="space-y-2" data-e2e="settings:appearance">
         <h2 className="text-sm font-semibold text-ink-soft">Wygląd</h2>
-        <div className="flex items-center justify-between py-2 text-sm">
-          <span>Ciemny motyw</span>
-          <Toggle checked={dark} onChange={setDark} label="Ciemny motyw" />
+        <div className="py-2">
+          <Segmented<ThemeMode>
+            label="Motyw"
+            options={THEME_OPTIONS}
+            value={mode}
+            onChange={setMode}
+          />
         </div>
       </Card>
 
