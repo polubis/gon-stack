@@ -1,5 +1,5 @@
 import { getDashboardSchema } from '@schemas/dashboard';
-import { InternalServer } from '../../core/error-handling';
+
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import {
@@ -11,6 +11,7 @@ import {
 } from '@/shared/period/period';
 import { summarizeDashboard } from '@/server/domain/dashboard';
 import { materializeRecurring } from '../../shared/recurring';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const getDashboard = privateProcedure({
   schema: withZodSchema({ schema: getDashboardSchema }),
@@ -44,11 +45,11 @@ export const getDashboard = privateProcedure({
       db.from('limits').select('amount').eq('scope', 'total'),
       db.from('profiles').select('name').maybeSingle(),
     ]);
-    if (expenses.error) throw new InternalServer(expenses.error);
-    if (items.error) throw new InternalServer(items.error);
-    if (categories.error) throw new InternalServer(categories.error);
-    if (limits.error) throw new InternalServer(limits.error);
-    if (profile.error) throw new InternalServer(profile.error);
+    if (expenses.error) throw fromSupabaseError(expenses.error);
+    if (items.error) throw fromSupabaseError(items.error);
+    if (categories.error) throw fromSupabaseError(categories.error);
+    if (limits.error) throw fromSupabaseError(limits.error);
+    if (profile.error) throw fromSupabaseError(profile.error);
 
     // Only real expenses count: a recurring rule is an instruction, and its
     // upcoming occurrences are a projection that never reaches a total.

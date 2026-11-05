@@ -1,8 +1,9 @@
 import { renameMcpTokenSchema } from '@schemas/mcp-tokens';
-import { InternalServer, NotFound } from '../../core/error-handling';
+import { NotFound } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { MCP_TOKEN_COLUMNS, toMcpToken } from '../../shared/mcp-token';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 /** Only the label changes; the secret and its lifetime stay as they were. */
 export const renameMcpToken = privateProcedure({
@@ -16,7 +17,7 @@ export const renameMcpToken = privateProcedure({
       .eq('user_id', user.id)
       .select(MCP_TOKEN_COLUMNS)
       .maybeSingle();
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
     if (!data) throw new NotFound(undefined, 'Token not found');
 
     return { code: 200 as const, data: toMcpToken(data) };

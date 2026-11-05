@@ -8,9 +8,15 @@ import {
   type AllErrors,
 } from '../core/error-handling';
 
+/** Storage errors are not exported by supabase-js; only the message is certain. */
+type StorageFailure = { message: string; status?: number; code?: string };
+
 const TOO_MANY_ATTEMPTS = 'Too many attempts. Try again in a few minutes';
 
 const FOREIGN_KEY_VIOLATION = '23503';
+
+/** PostgREST: token invalid / expired, or issued ahead of its clock. */
+const TOKEN_REJECTED = new Set(['PGRST301', 'PGRST303']);
 
 const RATE_LIMITED = new Set([
   'over_request_rate_limit',
@@ -23,12 +29,16 @@ const RATE_LIMITED = new Set([
  * travels as `cause`; the client only gets the fixed message of the result.
  */
 export const fromSupabaseError = (
-  error: AuthError | PostgrestError,
+  error: AuthError | PostgrestError | StorageFailure,
 ): AllErrors => {
   const code = error.code ?? '';
 
   if (('status' in error && error.status === 429) || RATE_LIMITED.has(code)) {
     return new TooManyRequests(error, TOO_MANY_ATTEMPTS);
+  }
+
+  if (TOKEN_REJECTED.has(code)) {
+    return new Unauthorized(error, 'Session expired. Sign in again');
   }
 
   switch (code) {

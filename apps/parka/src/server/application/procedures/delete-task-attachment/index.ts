@@ -1,5 +1,5 @@
 import { deleteTaskAttachmentSchema } from '@schemas/time';
-import { InternalServer, NotFound } from '../../core/error-handling';
+import { NotFound } from '../../core/error-handling';
 import { fromSupabaseError } from '../../adapter/supabase';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
@@ -25,7 +25,7 @@ export const deleteTaskAttachment = privateProcedure({
     const removed = await db.storage
       .from(TASK_ATTACHMENT_BUCKET)
       .remove([taskAttachmentPath(user.id, input.id)]);
-    if (removed.error) throw new InternalServer(removed.error);
+    if (removed.error) throw fromSupabaseError(removed.error);
 
     return { code: 200 as const, ok: true as const };
   },

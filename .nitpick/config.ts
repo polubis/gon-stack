@@ -2,6 +2,7 @@ import { config } from '@repo/nitpick/config';
 import { aodiFramework } from '@repo/nitpick/rules/aodi-framework';
 import { decisionLog } from '@repo/nitpick/rules/decision-log';
 import { mswBackendMocks } from '@repo/nitpick/rules/msw-backend-mocks';
+import { supabaseErrorMapping } from '@repo/nitpick/rules/supabase-error-mapping';
 import { richCommit } from '@repo/nitpick/rules/rich-commit';
 import { statusLine } from '@repo/nitpick/plugins/statusline';
 
@@ -280,6 +281,9 @@ Show dev adequate evidence the problem is solved, e.g.:
         importance: 'A',
         doc: 'Backend endpoints via builded-in adapaters and type-safe input/output validation',
       },
+    },
+    supabase: {
+      'supabase-error-mapping': supabaseErrorMapping,
     },
     coding: {
       'coding-minimal-code': {

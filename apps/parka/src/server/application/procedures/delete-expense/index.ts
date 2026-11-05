@@ -1,5 +1,5 @@
 import { deleteExpenseSchema } from '@schemas/expenses';
-import { InternalServer, NotFound } from '../../core/error-handling';
+import { NotFound } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import {
@@ -7,6 +7,7 @@ import {
   loadCategoryNames,
   tryRecordNotifications,
 } from '../../shared/notifications';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const deleteExpense = privateProcedure({
   schema: withZodSchema({ schema: deleteExpenseSchema }),
@@ -17,20 +18,20 @@ export const deleteExpense = privateProcedure({
       .select('*')
       .eq('id', input.id)
       .maybeSingle();
-    if (previousError) throw new InternalServer(previousError);
+    if (previousError) throw fromSupabaseError(previousError);
 
     const { error: itemsError } = await db
       .from('receipt_items')
       .delete()
       .eq('expense_id', input.id);
-    if (itemsError) throw new InternalServer(itemsError);
+    if (itemsError) throw fromSupabaseError(itemsError);
 
     const { data, error } = await db
       .from('expenses')
       .delete()
       .eq('id', input.id)
       .select();
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
     if (!data || data.length === 0)
       throw new NotFound(undefined, 'Expense not found');
 

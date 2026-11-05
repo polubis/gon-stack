@@ -3,9 +3,10 @@ import type { notificationEvent } from '@schemas/notifications';
 import type { Database } from '@/shared/data-sources/db-schema';
 import type { SupabaseServer } from '@/shared/data-sources/supabase-server';
 import { categoryLabel } from '@/shared/i18n/category-label';
-import { InternalServer } from '../core/error-handling';
+
 import { logger } from '../core/logger';
 import { deliverPush } from './push-delivery';
+import { fromSupabaseError } from '../adapter/supabase';
 
 export type NotificationEvent = z.infer<ReturnType<typeof notificationEvent>>;
 
@@ -71,7 +72,7 @@ export const loadCategoryNames = async (
   db: Db,
 ): Promise<ReadonlyMap<string, string>> => {
   const { data, error } = await db.from('categories').select('id, name');
-  if (error) throw new InternalServer(error);
+  if (error) throw fromSupabaseError(error);
   return new Map(data.map((c) => [c.id, categoryLabel(c.name)]));
 };
 
@@ -149,7 +150,7 @@ export const recordNotifications = async (
       ...messages[i]!,
     })),
   );
-  if (error) throw new InternalServer(error);
+  if (error) throw fromSupabaseError(error);
   await deliverPush(db, userId, messages);
   return events.length;
 };
@@ -179,7 +180,7 @@ export const recordNotificationOnce = async (
       { onConflict: 'user_id,id', ignoreDuplicates: true },
     )
     .select('id');
-  if (error) throw new InternalServer(error);
+  if (error) throw fromSupabaseError(error);
   if (data.length === 0) return false;
   await deliverPush(db, userId, [message]);
   return true;

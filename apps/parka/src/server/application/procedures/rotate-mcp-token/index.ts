@@ -1,9 +1,10 @@
 import { rotateMcpTokenSchema } from '@schemas/mcp-tokens';
-import { Conflict, InternalServer, NotFound } from '../../core/error-handling';
+import { Conflict, NotFound } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { issueMcpToken } from '../../../domain/mcp-token';
 import { MCP_TOKEN_COLUMNS, toMcpToken } from '../../shared/mcp-token';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 /** New secret for the same token: the old one stops working at once, the lifetime restarts. */
 export const rotateMcpToken = privateProcedure({
@@ -16,7 +17,7 @@ export const rotateMcpToken = privateProcedure({
       .eq('id', input.id)
       .eq('user_id', user.id)
       .maybeSingle();
-    if (current.error) throw new InternalServer(current.error);
+    if (current.error) throw fromSupabaseError(current.error);
     if (!current.data) throw new NotFound(undefined, 'Token not found');
     if (current.data.revoked_at)
       throw new Conflict(undefined, 'A disabled token cannot be rotated');
@@ -38,7 +39,7 @@ export const rotateMcpToken = privateProcedure({
       .is('revoked_at', null)
       .select(MCP_TOKEN_COLUMNS)
       .maybeSingle();
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
     if (!data)
       throw new Conflict(undefined, 'The token changed. Reload and retry');
 

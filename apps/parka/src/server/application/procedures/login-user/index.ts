@@ -32,7 +32,9 @@ export const loginUser = publicProcedure({
       });
 
       if (oauthResult.error || !oauthResult.data.url) {
-        throw new InternalServer(oauthResult.error);
+        throw oauthResult.error
+          ? fromSupabaseError(oauthResult.error)
+          : new InternalServer(new Error('OAuth url missing'));
       }
 
       return {

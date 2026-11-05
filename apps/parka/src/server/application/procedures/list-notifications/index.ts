@@ -2,9 +2,10 @@ import {
   listNotificationsSchema,
   notificationEvent,
 } from '@schemas/notifications';
-import { BadRequest, InternalServer } from '../../core/error-handling';
+import { BadRequest } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 const SEPARATOR = '|';
 
@@ -43,8 +44,8 @@ export const listNotifications = privateProcedure({
         .select('id', { count: 'exact', head: true })
         .is('read_at', null),
     ]);
-    if (page.error) throw new InternalServer(page.error);
-    if (unread.error) throw new InternalServer(unread.error);
+    if (page.error) throw fromSupabaseError(page.error);
+    if (unread.error) throw fromSupabaseError(unread.error);
 
     const rows = page.data.slice(0, input.limit);
     const last = rows.at(-1);

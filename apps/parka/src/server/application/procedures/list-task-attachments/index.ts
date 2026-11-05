@@ -1,8 +1,9 @@
 import { listTaskAttachmentsSchema } from '@schemas/time';
-import { InternalServer } from '../../core/error-handling';
+
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { toTaskAttachment } from '../../shared/task-attachment';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const listTaskAttachments = privateProcedure({
   schema: withZodSchema({ schema: listTaskAttachmentsSchema }),
@@ -15,7 +16,7 @@ export const listTaskAttachments = privateProcedure({
       .eq('task_id', input.id)
       .order('created_at')
       .order('id');
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
 
     return { code: 200 as const, data: data.map(toTaskAttachment) };
   },

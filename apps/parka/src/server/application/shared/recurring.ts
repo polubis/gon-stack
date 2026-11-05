@@ -6,7 +6,7 @@ import {
   itemsTotal,
 } from '@/shared/expense-category/category';
 import { dueOccurrences } from '@/shared/recurring/occurrences';
-import { BadRequest, InternalServer } from '../core/error-handling';
+import { BadRequest } from '../core/error-handling';
 import type { SupabaseServer } from '@/shared/data-sources/supabase-server';
 import {
   loadCategoryNames,
@@ -14,6 +14,7 @@ import {
   tryRecordNotifications,
   type NotificationEvent,
 } from './notifications';
+import { fromSupabaseError } from '../adapter/supabase';
 
 type Rule = z.infer<ReturnType<typeof recurring>>;
 type RuleRow = Database['public']['Tables']['recurring_expenses']['Row'];
@@ -48,7 +49,7 @@ export const toRule = (row: RuleRow, items: ItemRow[] = []): Rule => ({
 /** Products of the given rules (RLS scopes the read to the caller). */
 export const loadRuleItems = async (db: SupabaseServer): Promise<ItemRow[]> => {
   const { data, error } = await db.from('recurring_items').select('*');
-  if (error) throw new InternalServer(error);
+  if (error) throw fromSupabaseError(error);
   return data;
 };
 
@@ -80,7 +81,7 @@ export const replaceRuleItems = async (
     .from('recurring_items')
     .delete()
     .eq('recurring_id', recurringId);
-  if (wipeError) throw new InternalServer(wipeError);
+  if (wipeError) throw fromSupabaseError(wipeError);
   if (items.length === 0) return [];
 
   const { data, error } = await db
@@ -98,7 +99,7 @@ export const replaceRuleItems = async (
       })),
     )
     .select();
-  if (error) throw new InternalServer(error);
+  if (error) throw fromSupabaseError(error);
   return data;
 };
 
@@ -121,7 +122,7 @@ export const materializeRecurring = async (
     .from('recurring_expenses')
     .select('*')
     .eq('active', true);
-  if (error) throw new InternalServer(error);
+  if (error) throw fromSupabaseError(error);
 
   const ruleItems = await loadRuleItems(db);
   const accrued: NotificationEvent[] = [];
@@ -152,7 +153,7 @@ export const materializeRecurring = async (
         },
       )
       .select('occurrence_date');
-    if (insertError) throw new InternalServer(insertError);
+    if (insertError) throw fromSupabaseError(insertError);
 
     // Only rows this call really created: a parallel request that lost the race adds none.
     const days = inserted
@@ -178,7 +179,7 @@ export const materializeRecurring = async (
         ),
         { onConflict: 'user_id,id', ignoreDuplicates: true },
       );
-      if (itemsError) throw new InternalServer(itemsError);
+      if (itemsError) throw fromSupabaseError(itemsError);
     }
     if (days.length > 0) {
       accrued.push({
@@ -196,7 +197,7 @@ export const materializeRecurring = async (
       .update({ last_materialized_date: newest })
       .eq('id', row.id)
       .or(`last_materialized_date.is.null,last_materialized_date.lt.${newest}`);
-    if (markError) throw new InternalServer(markError);
+    if (markError) throw fromSupabaseError(markError);
   }
 
   await tryRecordNotifications(db, userId, accrued);

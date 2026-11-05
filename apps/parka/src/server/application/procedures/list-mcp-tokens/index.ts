@@ -1,8 +1,9 @@
 import { listMcpTokensSchema } from '@schemas/mcp-tokens';
-import { InternalServer } from '../../core/error-handling';
+
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { MCP_TOKEN_COLUMNS, toMcpToken } from '../../shared/mcp-token';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const listMcpTokens = privateProcedure({
   schema: withZodSchema({ schema: listMcpTokensSchema }),
@@ -13,7 +14,7 @@ export const listMcpTokens = privateProcedure({
       .select(MCP_TOKEN_COLUMNS)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
 
     const now = new Date();
     return {

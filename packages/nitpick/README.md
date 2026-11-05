@@ -17,7 +17,7 @@ Implemented:
 - Check snapshot: `files`, `readText`, `git`, `meta`
 - Per-rule `include` / `exclude`
 - Typed `doc` forms: string, `{ file }`, or callback with `ref` / `file` / `insert`
-- Ready-made rules: `richCommit`, `decisionLog`
+- Ready-made rules: `richCommit`, `decisionLog`, `mswBackendMocks`, `supabaseErrorMapping`
 - `skills`: directory trees authored in `.nitpick/`, synced byte for byte (binary safe) to `<path>/skills/<id>/`
 - Claude Code settings: `settings` option generates `settings.json` / `settings.local.json` and `.mcp.json`
 - Plugins: `plugins` option merges built-in or custom settings contributions into the generated settings files

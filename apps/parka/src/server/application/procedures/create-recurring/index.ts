@@ -1,8 +1,9 @@
 import { createRecurringSchema } from '@schemas/recurring';
-import { InternalServer } from '../../core/error-handling';
+
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { replaceRuleItems, ruleTotals, toRule } from '../../shared/recurring';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const createRecurring = privateProcedure({
   schema: withZodSchema({ schema: createRecurringSchema }),
@@ -25,7 +26,7 @@ export const createRecurring = privateProcedure({
       })
       .select()
       .single();
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
 
     const items = await replaceRuleItems(db, user.id, input.id, input.items);
 

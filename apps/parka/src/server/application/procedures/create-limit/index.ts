@@ -1,7 +1,8 @@
 import { createLimitSchema } from '@schemas/limits';
-import { InternalServer } from '../../core/error-handling';
+
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const createLimit = privateProcedure({
   schema: withZodSchema({ schema: createLimitSchema }),
@@ -19,7 +20,7 @@ export const createLimit = privateProcedure({
       })
       .select()
       .single();
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
 
     return {
       code: 201 as const,

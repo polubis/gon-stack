@@ -1,10 +1,6 @@
 import { updateExpenseSchema } from '@schemas/expenses';
 import { deriveExpenseCategory } from '@/shared/expense-category/category';
-import {
-  BadRequest,
-  InternalServer,
-  NotFound,
-} from '../../core/error-handling';
+import { BadRequest, NotFound } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { loadProfiles, toDevice } from '../../shared/device';
@@ -14,6 +10,7 @@ import {
   tryRecordNotifications,
 } from '../../shared/notifications';
 import { notifyReachedLimits } from '../../shared/limit-alerts';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const updateExpense = privateProcedure({
   schema: withZodSchema({ schema: updateExpenseSchema }),
@@ -29,7 +26,7 @@ export const updateExpense = privateProcedure({
       .select('*')
       .eq('id', input.id)
       .maybeSingle();
-    if (previousError) throw new InternalServer(previousError);
+    if (previousError) throw fromSupabaseError(previousError);
     if (!previous) throw new NotFound(undefined, 'Expense not found');
 
     const { data, error } = await db
@@ -46,14 +43,14 @@ export const updateExpense = privateProcedure({
       .eq('id', input.id)
       .select()
       .maybeSingle();
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
     if (!data) throw new NotFound(undefined, 'Expense not found');
 
     const { error: wipeError } = await db
       .from('receipt_items')
       .delete()
       .eq('expense_id', input.id);
-    if (wipeError) throw new InternalServer(wipeError);
+    if (wipeError) throw fromSupabaseError(wipeError);
 
     if (input.items.length > 0) {
       const { error: itemsError } = await db.from('receipt_items').insert(
@@ -68,7 +65,7 @@ export const updateExpense = privateProcedure({
           category_id: it.categoryId,
         })),
       );
-      if (itemsError) throw new InternalServer(itemsError);
+      if (itemsError) throw fromSupabaseError(itemsError);
     }
 
     const names = await loadCategoryNames(db);

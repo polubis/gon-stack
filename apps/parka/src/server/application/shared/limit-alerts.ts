@@ -1,8 +1,9 @@
 import { categoryShares } from '@/shared/expense-category/category';
 import type { SupabaseServer } from '@/shared/data-sources/supabase-server';
-import { InternalServer } from '../core/error-handling';
+
 import { logger } from '../core/logger';
 import { loadCategoryNames, recordNotificationOnce } from './notifications';
+import { fromSupabaseError } from '../adapter/supabase';
 
 type Db = Pick<SupabaseServer, 'from'>;
 
@@ -27,7 +28,7 @@ export const notifyReachedLimits = async (
     const limits = await db
       .from('limits')
       .select('id, scope, category_id, amount, alert_at');
-    if (limits.error) throw new InternalServer(limits.error);
+    if (limits.error) throw fromSupabaseError(limits.error);
     if (limits.data.length === 0) return;
 
     const expenses = await db
@@ -35,7 +36,7 @@ export const notifyReachedLimits = async (
       .select('id, amount, category_id')
       .gte('date', `${month}-01`)
       .lt('date', nextMonth(month));
-    if (expenses.error) throw new InternalServer(expenses.error);
+    if (expenses.error) throw fromSupabaseError(expenses.error);
     const ids = expenses.data.map((e) => e.id);
     const items = ids.length
       ? await db
@@ -43,7 +44,7 @@ export const notifyReachedLimits = async (
           .select('expense_id, unit_price, quantity, discount, category_id')
           .in('expense_id', ids)
       : { data: [], error: null };
-    if (items.error) throw new InternalServer(items.error);
+    if (items.error) throw fromSupabaseError(items.error);
 
     const shares = expenses.data.flatMap((e) =>
       categoryShares({

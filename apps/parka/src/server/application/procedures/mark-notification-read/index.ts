@@ -1,7 +1,8 @@
 import { markNotificationReadSchema } from '@schemas/notifications';
-import { InternalServer, NotFound } from '../../core/error-handling';
+import { NotFound } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const markNotificationRead = privateProcedure({
   schema: withZodSchema({ schema: markNotificationReadSchema }),
@@ -13,7 +14,7 @@ export const markNotificationRead = privateProcedure({
       .eq('id', input.id)
       .is('read_at', null)
       .select('id');
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
 
     if (data.length === 0) {
       // Already read is fine; a missing row is not.
@@ -21,7 +22,7 @@ export const markNotificationRead = privateProcedure({
         .from('notifications')
         .select('id')
         .eq('id', input.id);
-      if (lookupError) throw new InternalServer(lookupError);
+      if (lookupError) throw fromSupabaseError(lookupError);
       if (existing.length === 0)
         throw new NotFound(undefined, 'Notification not found');
     }

@@ -1,11 +1,12 @@
 import { updateCategorySchema } from '@schemas/categories';
-import { InternalServer, NotFound } from '../../core/error-handling';
+import { NotFound } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import {
   categorySnapshot,
   tryRecordNotifications,
 } from '../../shared/notifications';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const updateCategory = privateProcedure({
   schema: withZodSchema({ schema: updateCategorySchema }),
@@ -16,7 +17,7 @@ export const updateCategory = privateProcedure({
       .select('*')
       .eq('id', input.id)
       .maybeSingle();
-    if (previousError) throw new InternalServer(previousError);
+    if (previousError) throw fromSupabaseError(previousError);
     if (!previous) throw new NotFound(undefined, 'Category not found');
 
     const { data, error } = await db
@@ -25,7 +26,7 @@ export const updateCategory = privateProcedure({
       .eq('id', input.id)
       .select()
       .maybeSingle();
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
     if (!data) throw new NotFound(undefined, 'Category not found');
 
     await tryRecordNotifications(db, user.id, [

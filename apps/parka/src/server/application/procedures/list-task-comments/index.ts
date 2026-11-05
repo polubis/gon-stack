@@ -1,5 +1,5 @@
 import { listTaskCommentsSchema } from '@schemas/time';
-import { InternalServer, NotFound } from '../../core/error-handling';
+import { NotFound } from '../../core/error-handling';
 import { fromSupabaseError } from '../../adapter/supabase';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
@@ -33,7 +33,7 @@ export const listTaskComments = privateProcedure({
       .eq('task_id', input.id)
       .order('created_at')
       .order('id');
-    if (comments.error) throw new InternalServer(comments.error);
+    if (comments.error) throw fromSupabaseError(comments.error);
 
     const tokenIds = [
       ...new Set(comments.data.flatMap((c) => c.mcp_token_id ?? [])),
@@ -42,7 +42,7 @@ export const listTaskComments = privateProcedure({
       tokenIds.length === 0
         ? { data: [], error: null }
         : await db.from('mcp_tokens').select('id, name').in('id', tokenIds);
-    if (tokens.error) throw new InternalServer(tokens.error);
+    if (tokens.error) throw fromSupabaseError(tokens.error);
     const names = tokenNames(tokens.data);
 
     const [me, avatar] = await Promise.all([

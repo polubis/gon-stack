@@ -2,10 +2,11 @@ import type { Database } from '@/shared/data-sources/db-schema';
 import { localDay, localHour } from '@/shared/date/date';
 import { dueOccurrences } from '@/shared/recurring/occurrences';
 import type { SupabaseServer } from '@/shared/data-sources/supabase-server';
-import { InternalServer } from '../core/error-handling';
+
 import { logger } from '../core/logger';
 import { toDevice, type ProfilesByDevice } from './device';
 import { recordNotificationOnce } from './notifications';
+import { fromSupabaseError } from '../adapter/supabase';
 
 type TaskRow = Database['public']['Tables']['time_tasks']['Row'];
 type RuleRow = Database['public']['Tables']['time_recurring']['Row'];
@@ -76,7 +77,7 @@ export const materializeTimeRecurring = async (
     .from('time_recurring')
     .select('*')
     .eq('active', true);
-  if (error) throw new InternalServer(error);
+  if (error) throw fromSupabaseError(error);
 
   for (const row of rows) {
     const due = dueOccurrences(toTimeRecurring(row), until);
@@ -102,7 +103,7 @@ export const materializeTimeRecurring = async (
         ignoreDuplicates: true,
       },
     );
-    if (insertError) throw new InternalServer(insertError);
+    if (insertError) throw fromSupabaseError(insertError);
 
     // Only forward: a slower parallel request must not roll the mark back.
     const { error: markError } = await db
@@ -110,7 +111,7 @@ export const materializeTimeRecurring = async (
       .update({ last_materialized_date: newest })
       .eq('id', row.id)
       .or(`last_materialized_date.is.null,last_materialized_date.lt.${newest}`);
-    if (markError) throw new InternalServer(markError);
+    if (markError) throw fromSupabaseError(markError);
   }
 };
 
@@ -137,14 +138,14 @@ export const notifyUnfinishedTasks = async (
       .eq('day', day)
       .eq('done', false)
       .order('at', { nullsFirst: true });
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
     if (data.length === 0) return;
     const { count, error: countError } = await db
       .from('time_tasks')
       .select('id', { count: 'exact', head: true })
       .eq('done', false)
       .lte('day', day);
-    if (countError) throw new InternalServer(countError);
+    if (countError) throw fromSupabaseError(countError);
     await recordNotificationOnce(db, userId, `time-day-unfinished:${day}`, {
       kind: 'time-day-unfinished',
       payload: {

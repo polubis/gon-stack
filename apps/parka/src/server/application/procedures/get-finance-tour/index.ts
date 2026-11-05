@@ -1,8 +1,9 @@
 import { getFinanceTourSchema } from '@schemas/finance-tour';
-import { InternalServer } from '../../core/error-handling';
+
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { validOutcome } from '@/server/domain/finance-tour';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const getFinanceTour = privateProcedure({
   schema: withZodSchema({ schema: getFinanceTourSchema }),
@@ -12,7 +13,7 @@ export const getFinanceTour = privateProcedure({
       .from('finance_tours')
       .select('outcome, expires_at')
       .maybeSingle();
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
 
     const outcome = validOutcome(data, new Date());
 

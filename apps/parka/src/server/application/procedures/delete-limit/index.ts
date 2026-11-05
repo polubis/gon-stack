@@ -1,7 +1,8 @@
 import { deleteLimitSchema } from '@schemas/limits';
-import { InternalServer, NotFound } from '../../core/error-handling';
+import { NotFound } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const deleteLimit = privateProcedure({
   schema: withZodSchema({ schema: deleteLimitSchema }),
@@ -12,7 +13,7 @@ export const deleteLimit = privateProcedure({
       .delete()
       .eq('id', input.id)
       .select();
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
     if (!data || data.length === 0)
       throw new NotFound(undefined, 'Limit not found');
 

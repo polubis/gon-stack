@@ -1,7 +1,8 @@
 import { subscribePushSchema } from '@schemas/push';
-import { InternalServer } from '../../core/error-handling';
+
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const subscribePush = privateProcedure({
   schema: withZodSchema({ schema: subscribePushSchema }),
@@ -13,7 +14,7 @@ export const subscribePush = privateProcedure({
       p256dh: keys.p256dh,
       auth: keys.auth,
     });
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
 
     return { code: 200 as const, ok: true as const };
   },

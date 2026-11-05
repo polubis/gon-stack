@@ -1,11 +1,12 @@
 import { createCategorySchema } from '@schemas/categories';
-import { InternalServer } from '../../core/error-handling';
+
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import {
   categorySnapshot,
   tryRecordNotifications,
 } from '../../shared/notifications';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const createCategory = privateProcedure({
   schema: withZodSchema({ schema: createCategorySchema }),
@@ -22,7 +23,7 @@ export const createCategory = privateProcedure({
       })
       .select()
       .single();
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
 
     await tryRecordNotifications(db, user.id, [
       {

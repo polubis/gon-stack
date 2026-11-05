@@ -1,6 +1,6 @@
 import { env } from 'cloudflare:workers';
 import { uploadDevicePhotoSchema } from '@schemas/avatar';
-import { BadRequest, InternalServer } from '../../core/error-handling';
+import { BadRequest } from '../../core/error-handling';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import {
@@ -12,6 +12,7 @@ import {
   devicePhotoPath,
   toDevicePhoto,
 } from '../../shared/device-photo';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const uploadDevicePhoto = privateProcedure({
   schema: withZodSchema({ schema: uploadDevicePhotoSchema }),
@@ -30,8 +31,8 @@ export const uploadDevicePhoto = privateProcedure({
         .eq('device_id', deviceId)
         .limit(1),
     ]);
-    if (expenses.error) throw new InternalServer(expenses.error);
-    if (tasks.error) throw new InternalServer(tasks.error);
+    if (expenses.error) throw fromSupabaseError(expenses.error);
+    if (tasks.error) throw fromSupabaseError(tasks.error);
     if (expenses.data.length + tasks.data.length === 0)
       throw new BadRequest(null, 'Unknown device');
 
@@ -47,7 +48,7 @@ export const uploadDevicePhoto = privateProcedure({
         bytes,
         { contentType: 'image/webp', upsert: true },
       );
-      if (error) throw new InternalServer(error);
+      if (error) throw fromSupabaseError(error);
     }
 
     const { data, error } = await db
@@ -59,7 +60,7 @@ export const uploadDevicePhoto = privateProcedure({
       })
       .select('photo_updated_at')
       .single();
-    if (error) throw new InternalServer(error);
+    if (error) throw fromSupabaseError(error);
 
     return {
       code: 200 as const,

@@ -1,8 +1,9 @@
 import { schema } from '@schemas/confirm-registration';
 import { APP_ROUTER } from '@/shared/router/routes';
-import { InternalServer } from '../../core/error-handling';
+
 import { withZodSchema } from '../../adapter/zod';
 import { publicProcedure } from '../../core/procedure';
+import { fromSupabaseError } from '../../adapter/supabase';
 
 export const confirmRegistration = publicProcedure({
   schema: withZodSchema({ schema }),
@@ -11,7 +12,7 @@ export const confirmRegistration = publicProcedure({
     const { error } = await db.auth.exchangeCodeForSession(code);
 
     if (error) {
-      throw new InternalServer(error);
+      throw fromSupabaseError(error);
     }
 
     return {
