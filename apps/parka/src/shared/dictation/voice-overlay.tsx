@@ -91,8 +91,21 @@ export const VoiceOverlay = ({
 }) => {
   const bars = useRef<HTMLDivElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
+  const preview = useRef<HTMLTextAreaElement>(null);
   const live = useVoiceLevel(bars, listening);
   useWakeLock(listening);
+
+  // Keep the newest words in view while speech keeps arriving; a user edit
+  // leaves the scroll position alone.
+  const edited = useRef(false);
+  useEffect(() => {
+    if (edited.current) {
+      edited.current = false;
+      return;
+    }
+    const el = preview.current;
+    if (listening && el) el.scrollTop = el.scrollHeight;
+  }, [transcript, listening]);
 
   useEffect(() => {
     toggle.current?.focus();
@@ -146,12 +159,16 @@ export const VoiceOverlay = ({
           {listening ? 'Słucham…' : 'Dyktowanie zatrzymane'}
         </p>
         <textarea
+          ref={preview}
           aria-label="Podgląd dyktowania"
           placeholder="Zacznij mówić…"
           value={transcript}
-          onChange={(e) => onEdit(e.target.value)}
-          rows={3}
-          className="max-h-40 min-h-16 w-full resize-none overflow-y-auto rounded-2xl bg-hover p-3 text-sm text-ink placeholder:text-ink-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          onChange={(e) => {
+            edited.current = true;
+            onEdit(e.target.value);
+          }}
+          rows={6}
+          className="max-h-80 min-h-32 w-full resize-none overflow-y-auto rounded-2xl bg-hover p-3 text-sm text-ink placeholder:text-ink-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         />
         <button
           ref={toggle}
