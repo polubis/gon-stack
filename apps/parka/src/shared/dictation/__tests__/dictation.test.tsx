@@ -187,6 +187,55 @@ describe('voice dictation into a text field', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
+  it('keeps the newest speech in view as it arrives', async () => {
+    installMic();
+    render(<Form />);
+
+    await userEvent.click(mic());
+    const area = preview();
+    let scrollTop = 0;
+    Object.defineProperties(area, {
+      scrollHeight: { configurable: true, value: 480 },
+      scrollTop: {
+        configurable: true,
+        get: () => scrollTop,
+        set: (v: number) => {
+          scrollTop = v;
+        },
+      },
+    });
+    say('kup mleko');
+    say('kup mleko', 'i chleb');
+
+    expect(scrollTop).toBe(480);
+  });
+
+  it('does not pull the view back to the end while the user edits', async () => {
+    installMic();
+    render(<Form />);
+
+    await userEvent.click(mic());
+    const area = preview();
+    let scrollTop = 0;
+    Object.defineProperties(area, {
+      scrollHeight: { configurable: true, value: 480 },
+      scrollTop: {
+        configurable: true,
+        get: () => scrollTop,
+        set: (v: number) => {
+          scrollTop = v;
+        },
+      },
+    });
+    say('kup mleko');
+    expect(scrollTop).toBe(480);
+
+    scrollTop = 0;
+    await userEvent.type(area, 'x');
+
+    expect(scrollTop).toBe(0);
+  });
+
   it('cannot accept before anything was said', async () => {
     installMic();
     render(<Form />);
