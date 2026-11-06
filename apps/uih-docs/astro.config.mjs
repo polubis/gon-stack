@@ -25,6 +25,14 @@ export default defineConfig({
           find: '@repo/uih/button',
           replacement: `${uihSrc}/button/button.tsx`,
         },
+        {
+          find: '@repo/uih/select-stream',
+          replacement: `${uihSrc}/select/select-stream.ts`,
+        },
+        {
+          find: '@repo/uih/select',
+          replacement: `${uihSrc}/select/select.tsx`,
+        },
         { find: '@repo/uih/theme', replacement: `${uihSrc}/theme` },
       ],
     },

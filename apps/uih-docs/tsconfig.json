@@ -8,7 +8,11 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@repo/uih/button": ["../../packages/uih/src/button/button.tsx"]
+      "@repo/uih/button": ["../../packages/uih/src/button/button.tsx"],
+      "@repo/uih/select": ["../../packages/uih/src/select/select.tsx"],
+      "@repo/uih/select-stream": [
+        "../../packages/uih/src/select/select-stream.ts"
+      ]
     }
   }
 }
