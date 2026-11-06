@@ -340,6 +340,10 @@ Show dev adequate evidence the problem is solved, e.g.:
       },
     },
     security: {
+      'security-no-vulnerabilities': {
+        importance: 'A',
+        doc: 'Zero known dependency vulnerabilities (`pnpm audit:check`, any severity, enforced in pre-commit + PR CI). Fix via update/version up, else `overrides`',
+      },
       'security-sensitive-data': {
         importance: 'A',
         doc: 'Yield and stop everything when any personal or sensitive data detected',
