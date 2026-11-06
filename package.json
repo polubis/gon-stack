@@ -1,6 +1,8 @@
 {
   "name": "with-tailwind",
   "private": true,
+  "author": "Adrian Połubiński",
+  "license": "MIT",
   "scripts": {
     "build": "turbo run build",
     "deploy": "turbo run deploy",
