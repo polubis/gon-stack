@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { basename, dirname, join, posix, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { listRules } from './config.js';
-import type { Config, EntryDoc } from './config.js';
+import type { Config, EntryDoc, RefSource } from './config.js';
 import { buildSettings } from './settings.js';
 import type { SettingsSource } from './settings.js';
 
@@ -192,14 +192,26 @@ export const buildDocs = (
   const problems: string[] = [];
   const files = new Map<string, string | Uint8Array>();
   const rules = listRules(config);
-  const refs: Record<string, string> = { ...config.refs };
+  const refs: Record<string, string> = {};
+  const listedRefs = new Set<string>();
+  const refInfo = (value: RefSource): { file: string; listed: boolean } =>
+    typeof value === 'string'
+      ? { file: value, listed: false }
+      : { file: value.file, listed: value.listed ?? false };
+  for (const [key, value] of Object.entries(config.refs ?? {})) {
+    const { file, listed } = refInfo(value);
+    refs[key] = file;
+    if (listed) listedRefs.add(key);
+  }
   for (const rule of rules)
-    for (const [key, source] of Object.entries(rule.refs ?? {})) {
-      if (key in refs && refs[key] !== source)
+    for (const [key, value] of Object.entries(rule.refs ?? {})) {
+      const { file, listed } = refInfo(value);
+      if (key in refs && refs[key] !== file)
         problems.push(
           `Knowledge "${key}": rule "${rule.id}" and config point to different files`,
         );
-      else refs[key] = source;
+      else refs[key] = file;
+      if (listed) listedRefs.add(key);
     }
   const target = (key: string): string => posix.join('references', `${key}.md`);
 
@@ -315,12 +327,19 @@ export const buildDocs = (
       .join(' ');
     groupFiles.set(file, `## ${title}\n\n${list(group, file)}\n`);
   }
-  if (groupFiles.size > 0 && (primary.toc?.rules ?? true)) {
+  const showRules = primary.toc?.rules ?? true;
+  const ruleGroups = Object.keys(config.rules).filter(
+    (group) =>
+      showRules || rules.some((rule) => rule.group === group && rule.listed),
+  );
+  if (ruleGroups.length > 0) {
     sections.push(
       '## Rule files',
       AODI_LEGEND,
-      [...groupFiles.keys()]
-        .map((file) => `- ${link('root.md', file, file)}`)
+      ruleGroups
+        .map(
+          (group) => `- ${link('root.md', groupPath(group), groupPath(group))}`,
+        )
         .join('\n'),
     );
   }
@@ -359,10 +378,14 @@ export const buildDocs = (
       }
     }
   }
-  if (sources.size > 0 && (primary.toc?.refs ?? true)) {
+  const showRefs = primary.toc?.refs ?? true;
+  const refKeys = [...sources.keys()].filter(
+    (key) => showRefs || listedRefs.has(key),
+  );
+  if (refKeys.length > 0) {
     sections.push(
       '## Reference files',
-      [...sources.keys()]
+      refKeys
         .map((key) => `- ${link('root.md', target(key), target(key))}`)
         .join('\n'),
     );
