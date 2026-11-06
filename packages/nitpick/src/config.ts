@@ -61,12 +61,15 @@ type Output = {
   toc?: { agents?: boolean; skills?: boolean; rules?: boolean; refs?: boolean };
 };
 
+export type RefSource = string | { file: string; listed?: boolean };
+
 export type RuleUnit<I extends string = never, K extends string = never> = {
   importance: Importance;
   doc: Doc<I, K>;
   include?: string[];
   exclude?: string[];
-  refs?: Record<string, string>;
+  refs?: Record<string, RefSource>;
+  listed?: boolean;
   unlisted?: boolean;
 } & Check;
 
@@ -89,7 +92,7 @@ export type Config = {
   rules: Record<string, Record<string, RuleUnit<string, string>>>;
   agents?: Record<string, AgentUnit<string, string>>;
   skills?: Record<string, SkillUnit>;
-  refs?: Record<string, string>;
+  refs?: Record<string, RefSource>;
   output?: Output[];
 };
 
@@ -107,7 +110,7 @@ export const config = <
   const R extends Record<string, Record<string, unknown>>,
   const A extends string = never,
   const S extends string = never,
-  const F extends Record<string, string> = Record<never, never>,
+  const F extends Record<string, RefSource> = Record<never, never>,
 >(value: {
   settings?: Settings;
   plugins?: Plugin[];

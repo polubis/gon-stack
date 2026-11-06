@@ -378,6 +378,41 @@ describe('Table of contents works when', () => {
     expect(read('.ai', 'references', 'k.md')).toBe('ref\n');
   });
 
+  it('lists a listed reference even when the reference list is hidden', async () => {
+    const { read, problems } = await build(
+      {
+        rules: {},
+        refs: { k: './k.md', j: { file: './j.md', listed: true } },
+        output: [
+          {
+            path: '.ai',
+            root: 'AGENTS.md',
+            toc: { refs: false },
+          },
+        ],
+      },
+      { 'k.md': 'ref\n', 'j.md': 'ref\n' },
+    );
+    expect(problems).toEqual([]);
+    expect(read('.ai', 'AGENTS.md')).toContain('## Reference files');
+    expect(read('.ai', 'AGENTS.md')).toContain('references/j.md');
+    expect(read('.ai', 'AGENTS.md')).not.toContain('references/k.md');
+    expect(read('.ai', 'references', 'k.md')).toBe('ref\n');
+  });
+
+  it('lists the group of a listed rule even when the rule list is hidden', async () => {
+    const { read, problems } = await build({
+      rules: {
+        g: { r: { importance: A, doc: 'Body', listed: true } },
+        h: { s: { importance: A, doc: 'Other' } },
+      },
+      output: [{ path: '.ai', root: 'AGENTS.md', toc: { rules: false } }],
+    });
+    expect(problems).toEqual([]);
+    expect(read('.ai', 'AGENTS.md')).toContain('- [rules/g.md](rules/g.md)');
+    expect(read('.ai', 'AGENTS.md')).not.toContain('rules/h.md');
+  });
+
   it('hides the skill list but still copies skill files', async () => {
     const { read, problems } = await build(
       {
