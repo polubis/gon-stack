@@ -1,6 +1,9 @@
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
-import { richCommit } from '../rules/rich-commit.js';
+import {
+  richCommit,
+  richCommitTemplateReference,
+} from '../rules/rich-commit.js';
 
 const run = async (rule: typeof richCommit, message: string) => {
   const reports: string[] = [];
@@ -153,6 +156,9 @@ describe('Rule metadata works when', () => {
     const { doc } = richCommit;
     if (typeof doc !== 'object') throw new Error('expected file');
     expect(await readFile(doc.file, 'utf8')).toContain(
+      '{{ref:rich-commit-template}}',
+    );
+    expect(await readFile(richCommitTemplateReference, 'utf8')).toContain(
       'fix(repo)!: prevent racing of requests',
     );
   });

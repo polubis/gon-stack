@@ -561,3 +561,53 @@ describe('Config helper works when', () => {
     expect(Object.keys(value.rules)).toEqual(['g']);
   });
 });
+
+describe('Rule refs work when', () => {
+  it('are merged into refs and linked from the rule file', async () => {
+    const { read, problems } = await build(
+      {
+        rules: {
+          g: {
+            r: {
+              importance: A,
+              doc: { file: './r.md' },
+              refs: { k: './k.md' },
+            },
+          },
+        },
+      },
+      { 'r.md': 'See {{ref:k}}.', 'k.md': 'K\n' },
+    );
+    expect(problems).toEqual([]);
+    expect(read('.ai', 'rules', 'r.md')).toBe('See [k](../references/k.md).');
+    expect(read('.ai', 'references', 'k.md')).toBe('K\n');
+  });
+
+  it('report a config ref key that points to another file', async () => {
+    const { problems } = await build(
+      {
+        rules: {
+          g: { r: { importance: A, doc: 'x', refs: { k: './a.md' } } },
+        },
+        refs: { k: './b.md' },
+      },
+      { 'a.md': 'a', 'b.md': 'b' },
+    );
+    expect(problems).toEqual([
+      'Knowledge "k": rule "r" and config point to different files',
+    ]);
+  });
+
+  it('accept the same key pointing to the same file', async () => {
+    const { problems } = await build(
+      {
+        rules: {
+          g: { r: { importance: A, doc: 'x', refs: { k: './k.md' } } },
+        },
+        refs: { k: './k.md' },
+      },
+      { 'k.md': 'K' },
+    );
+    expect(problems).toEqual([]);
+  });
+});

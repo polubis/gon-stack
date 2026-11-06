@@ -680,13 +680,21 @@ describe('Rich commit through the CLI works when', () => {
     expect(await readFile(join(root, '.ai', 'AGENTS.md'), 'utf8')).toBe(
       '# Information for AI\n\n## Rule files\n\n' +
         AODI_LEGEND +
-        '\n\n- [rules/git.md](rules/git.md)\n',
+        '\n\n- [rules/git.md](rules/git.md)\n\n## Reference files\n\n- [references/rich-commit-template.md](references/rich-commit-template.md)\n',
     );
     expect(await readFile(join(root, '.ai', 'rules', 'git.md'), 'utf8')).toBe(
       '## Git\n\n1. (A) [rich-commit](rich-commit.md)\n',
     );
     expect(
       await readFile(join(root, '.ai', 'rules', 'rich-commit.md'), 'utf8'),
+    ).toContain(
+      '1. (A) Commit message follows [rich-commit-template](../references/rich-commit-template.md).',
+    );
+    expect(
+      await readFile(
+        join(root, '.ai', 'references', 'rich-commit-template.md'),
+        'utf8',
+      ),
     ).toContain('Follow this conventional commit convention');
   });
 });

@@ -191,7 +191,16 @@ export const buildDocs = (
 ): Docs => {
   const problems: string[] = [];
   const files = new Map<string, string | Uint8Array>();
-  const refs = config.refs ?? {};
+  const rules = listRules(config);
+  const refs: Record<string, string> = { ...config.refs };
+  for (const rule of rules)
+    for (const [key, source] of Object.entries(rule.refs ?? {})) {
+      if (key in refs && refs[key] !== source)
+        problems.push(
+          `Knowledge "${key}": rule "${rule.id}" and config point to different files`,
+        );
+      else refs[key] = source;
+    }
   const target = (key: string): string => posix.join('references', `${key}.md`);
 
   const sources = readSources(refs, configDir, problems);
@@ -199,7 +208,6 @@ export const buildDocs = (
 
   const [primary = DEFAULT_OUTPUT[0] as Output, ...others] =
     config.output ?? [];
-  const rules = listRules(config);
   const agents = Object.entries(config.agents ?? {}).map(([id, unit]) => ({
     ...unit,
     id,
