@@ -58,7 +58,7 @@ type Check =
 type Output = {
   path: string;
   root: string;
-  toc?: { agents?: boolean; skills?: boolean };
+  toc?: { agents?: boolean; skills?: boolean; rules?: boolean; refs?: boolean };
 };
 
 export type RuleUnit<I extends string = never, K extends string = never> = {

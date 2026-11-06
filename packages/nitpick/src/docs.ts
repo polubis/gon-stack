@@ -16,7 +16,7 @@ type Docs = {
 type Output = {
   path: string;
   root: string;
-  toc?: { agents?: boolean; skills?: boolean };
+  toc?: { agents?: boolean; skills?: boolean; rules?: boolean; refs?: boolean };
 };
 
 const DEFAULT_OUTPUT: Output[] = [{ path: '.ai', root: 'AGENTS.md' }];
@@ -315,7 +315,7 @@ export const buildDocs = (
       .join(' ');
     groupFiles.set(file, `## ${title}\n\n${list(group, file)}\n`);
   }
-  if (groupFiles.size > 0) {
+  if (groupFiles.size > 0 && (primary.toc?.rules ?? true)) {
     sections.push(
       '## Rule files',
       AODI_LEGEND,
@@ -359,7 +359,7 @@ export const buildDocs = (
       }
     }
   }
-  if (sources.size > 0) {
+  if (sources.size > 0 && (primary.toc?.refs ?? true)) {
     sections.push(
       '## Reference files',
       [...sources.keys()]

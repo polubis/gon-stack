@@ -12,7 +12,7 @@ export default config({
     {
       path: '.claude',
       root: 'CLAUDE.md',
-      toc: { agents: false, skills: false },
+      toc: { agents: false, skills: false, rules: false, refs: false },
     },
   ],
   entry: {
