@@ -46,6 +46,9 @@ jobs:
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
+      - name: Audit (any vulnerability fails)
+        run: pnpm audit:check
+
       # e2e stays local-only (pnpm test:e2e): CI webServer lacks Supabase fixtures.
       - name: Verify (format, lint, types, tests) - parka and its deps
         run: pnpm exec turbo run //#format:check lint check-types test --filter=parka... --filter=// --ui=stream

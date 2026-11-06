@@ -58,6 +58,12 @@ onlyBuiltDependencies:
 # Transitive fixes until @astrojs/cloudflare bumps its own range
 overrides:
   '@cloudflare/vite-plugin': 1.62.2
+  # Security: parents pin vulnerable ranges (miniflare, typography, ajv, ts-estree)
+  sharp: 0.35.5
+  undici@<7.30.1: 7.30.1
+  fast-uri@<3.1.9: 3.1.9
+  postcss-selector-parser@<6.1.5: 6.1.5
+  minimatch@>=10.0.0 <11.0.1: 11.0.1
 
 # Single version source for shared deps (use "catalog:" in package.json)
 catalog:
@@ -135,4 +141,4 @@ catalog:
   vite-tsconfig-paths: 6.1.1
   vitest: 4.1.12
   wrangler: 4.149.0
-  zod: 4.6.5
+  zod: 4.6.6

@@ -1,2 +1,3 @@
 pnpm ci:format
+pnpm audit:check
 pnpm ci:verify
