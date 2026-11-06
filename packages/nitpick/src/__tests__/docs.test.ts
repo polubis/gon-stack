@@ -356,6 +356,28 @@ describe('Table of contents works when', () => {
     expect(read('.ai', 'agents', 'a.md')).toBe('Body\n');
   });
 
+  it('hides the rule and reference lists but still writes their files', async () => {
+    const { read, problems } = await build(
+      {
+        rules: { g: { r: { importance: A, doc: 'Body' } } },
+        refs: { k: './k.md' },
+        output: [
+          {
+            path: '.ai',
+            root: 'AGENTS.md',
+            toc: { rules: false, refs: false },
+          },
+        ],
+      },
+      { 'k.md': 'ref\n' },
+    );
+    expect(problems).toEqual([]);
+    expect(read('.ai', 'AGENTS.md')).not.toContain('## Rule files');
+    expect(read('.ai', 'AGENTS.md')).not.toContain('## Reference files');
+    expect(read('.ai', 'rules', 'g.md')).toContain('1. (A) Body');
+    expect(read('.ai', 'references', 'k.md')).toBe('ref\n');
+  });
+
   it('hides the skill list but still copies skill files', async () => {
     const { read, problems } = await build(
       {
