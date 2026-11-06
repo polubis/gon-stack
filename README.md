@@ -2,14 +2,14 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg">
-  <img alt="gon-stack: Astro + React apps on Cloudflare Workers, built with AI agents under machine-checked rules" src="assets/banner.svg" width="100%">
+  <img alt="gon-stack: generic ecosystem for full stack AI development, incubator and sandbox" src="assets/banner.svg" width="100%">
 </picture>
 
 <a href="https://github.com/polubis"><img src="assets/avatar.png" alt="Adrian Połubiński" width="96" height="96"></a>
 
 <sub>Built by <a href="https://github.com/polubis"><b>Adrian Połubiński</b></a> · <a href="https://polubinski.dev">polubinski.dev</a></sub>
 
-**Turborepo monorepo for shipping Astro + React apps on Cloudflare Workers, built with AI agents under strict, machine-checked rules.**
+**Generic ecosystem for full stack AI development: an incubator for new products and a sandbox for testing how AI agents build them, under strict, machine-checked rules.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-0bad67?style=flat-square)](LICENSE)
 [![Node 24](https://img.shields.io/badge/node-24.22.1-0bad67?style=flat-square&logo=nodedotjs&logoColor=white)](.nvmrc)
@@ -19,9 +19,9 @@
 [![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F38020?style=flat-square&logo=cloudflareworkers&logoColor=white)](https://workers.cloudflare.com)
 [![PR CI](https://github.com/polubis/gon-stack/actions/workflows/pr-ci.yml/badge.svg)](https://github.com/polubis/gon-stack/actions/workflows/pr-ci.yml)
 
-[Template + sandbox](#-template-and-sandbox) •
+[Incubator + sandbox](#-incubator-and-sandbox) •
 [Quick Start](#-quick-start) •
-[Apps](#-apps) •
+[Fork it](#-fork-it-and-make-it-yours) •
 [Packages](#-packages) •
 [How we work](#-how-we-work) •
 [Agent skills](#-agent-skills-and-rules) •
@@ -32,13 +32,13 @@
 
 ---
 
-## 🧩 Template and sandbox
+## 🧩 Incubator and sandbox
 
-gon-stack is **both a template and a sandbox**.
+gon-stack is a **generic ecosystem for full stack AI development**, working as an **incubator + sandbox**.
 
-- **Template.** Clone it and get ready-made Astro + React apps, shared packages, CI and Cloudflare Workers deploys wired up.
-- **Sandbox.** Real products are built here, so every rule, skill and tool is tested on live code, not on toy examples.
-- **Real production apps.** `parka`, `kdebek` and `polubinski-dev` deploy to Cloudflare Workers from `main` via GitHub Actions. `polubinski-dev` serves [polubinski.dev](https://polubinski.dev).
+- **Incubator.** Start a new product here: monorepo, shared packages, CI and agent workflow are wired up. Ideas grow into real apps, then ship from `main`.
+- **Sandbox.** Rules, skills, agents and tooling are tried on live code, not on toy examples. What works stays, what does not gets cut.
+- **Stack-agnostic by design.** Rules, skills, agents and gates are generic building blocks. They apply to any app you put under `apps/`, in any web stack.
 - **AI ecosystem and tooling.** Agents work with the same gates as humans:
 
 | Piece     | Where                     | What it gives                                                    |
@@ -62,7 +62,7 @@ flowchart LR
   B --> V["Verify<br/>pnpm ci:verify"]
   V --> E["Evidence<br/>.evidences/KEY"]
   E --> D["Decision<br/>decisions/"]
-  D --> S["Ship<br/>GH Actions to Cloudflare Workers"]
+  D --> S["Ship<br/>CI/CD of your choice"]
 ```
 
 ---
@@ -74,7 +74,7 @@ Requires Node `24.22.1` (see `.nvmrc`) and pnpm `11.28.5`.
 ```bash
 pnpm install
 pnpm dev                          # all apps via turbo
-pnpm --filter parka dev           # one app, http://localhost:4321
+pnpm --filter <app> dev           # one app
 ```
 
 | What you're doing | Command                            | Key principle                 |
@@ -88,11 +88,11 @@ pnpm --filter parka dev           # one app, http://localhost:4321
 | Format            | `pnpm format`                      | Prettier + Tailwind plugin    |
 
 <details>
-<summary><b>Supabase apps (Docker needed)</b></summary>
+<summary><b>Apps with Supabase (Docker needed)</b></summary>
 
 <br>
 
-Apps with Supabase (`parka`, `romantic-app`, `talent-orbit`) need Docker:
+Apps that use the bundled Supabase setup need Docker:
 
 ```bash
 pnpm db:start        # Postgres + Auth + Studio
@@ -100,26 +100,20 @@ pnpm db:reset        # apply migrations
 pnpm db:gen-types    # regenerate DB types
 ```
 
-Copy `.env.example` and `.dev.vars.example` where an app ships them (see `apps/parka/README.md`).
+Copy `.env.example` and `.dev.vars.example` where an app ships them.
 
 </details>
 
 ---
 
-## 📦 Apps
+## 🍴 Fork it and make it yours
 
-| App                                     | What it is                                                                            | Stack                           | Deployed |
-| --------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------- | :------: |
-| [`parka`](apps/parka)                   | Personal finance and tasks: expenses, categories, reports, access tokens, data export | Astro, React, Supabase, Workers |    ✅    |
-| [`polubinski-dev`](apps/polubinski-dev) | IT mentoring website, [polubinski.dev](https://polubinski.dev)                        | Astro, React, Workers           |    ✅    |
-| [`kdebek`](apps/kdebek)                 | Home + privacy policy site                                                            | Astro, React, Workers           |    ✅    |
-| [`talent-orbit`](apps/talent-orbit)     | Tests, exams, questions library, roles, organizations                                 | Astro, React, Supabase, Workers |          |
-| [`romantic-app`](apps/romantic-app)     | Amoria: landing, auth, profile setup, chat, design system                             | Astro, React, Supabase, Workers |          |
-| [`content-maker`](apps/content-maker)   | Content creation tool                                                                 | Astro, React, Workers           |          |
-| [`uih-docs`](apps/uih-docs)             | Docs for `@repo/uih`                                                                  | Astro, MDX                      |          |
-| [`docs`](apps/docs), [`web`](apps/web)  | Turborepo starter apps                                                                | Next.js                         |          |
+1. **Fork** the repo (or use it as a template).
+2. **Remove the sample apps** from `apps/` (and their `deploy-*.yml` workflows).
+3. **Add your own app** under `apps/` in any web stack: Astro, Next.js, Vite, SvelteKit, plain TypeScript, anything pnpm and Turborepo can run.
+4. **Everything applies to it:** rules, skills, agents, nitpick checks, `ci:verify`, evidence and decision log work per app, no matter the framework. Trim rules you do not need in `.claude/rules/`.
 
-✅ = deployed to Cloudflare Workers by `.github/workflows/deploy-*.yml`.
+Shared packages stay available: use them, swap them or delete them.
 
 ---
 
@@ -184,7 +178,7 @@ Copy `.env.example` and `.dev.vars.example` where an app ships them (see `apps/p
 ## 🗂️ Project structure
 
 ```
-apps/        deployable apps (Astro + Workers, two Next.js starters)
+apps/        your apps, any web stack (sample apps included)
 packages/    shared libraries and configs
 decisions/   one decision entry per session
 scripts/     repo tooling
@@ -200,7 +194,7 @@ Typical app layout: `src/core`, `src/modules/<feature>`, `src/pages`, `src/__e2e
 
 ## ⚙️ Tech stack
 
-Turborepo, pnpm workspaces, Astro, React, TypeScript, Tailwind CSS, Supabase (Postgres, Auth, RLS), Cloudflare Workers, Zod, RxJS, Vitest, Playwright, MSW, ESLint, Prettier, Husky.
+Defaults, all replaceable: Turborepo, pnpm workspaces, TypeScript, Astro, React, Tailwind CSS, Supabase, Cloudflare Workers, Zod, Vitest, Playwright, MSW, ESLint, Prettier, Husky.
 
 ---
 
@@ -214,13 +208,6 @@ Create a branch from `main`, keep changes minimal, follow nearby conventions, ru
 
 Created and maintained by **Adrian Połubiński** ([@polubis](https://github.com/polubis), [polubinski.dev](https://polubinski.dev)).
 
-<a href="https://greenonsoftware.com">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/greenon-logo-dark.svg">
-    <img alt="GreenOn Software" src="assets/greenon-logo.svg" width="220">
-  </picture>
-</a>
-
 ---
 
 ## 📄 License
@@ -229,8 +216,10 @@ Created and maintained by **Adrian Połubiński** ([@polubis](https://github.com
 
 <div align="center">
 <br>
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
-  <img alt="gon-stack" src="assets/logo.svg" width="180">
-</picture>
+<a href="https://greenonsoftware.com">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/greenon-logo-dark.svg">
+    <img alt="GreenOn Software" src="assets/greenon-logo.svg" width="220">
+  </picture>
+</a>
 </div>
