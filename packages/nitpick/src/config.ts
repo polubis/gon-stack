@@ -66,6 +66,7 @@ export type RuleUnit<I extends string = never, K extends string = never> = {
   doc: Doc<I, K>;
   include?: string[];
   exclude?: string[];
+  refs?: Record<string, string>;
 } & Check;
 
 export type EntryDoc<I extends string, K extends string> =

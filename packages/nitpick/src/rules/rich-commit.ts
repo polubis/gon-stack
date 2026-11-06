@@ -68,11 +68,18 @@ const validateRichCommit = (
   return problems;
 };
 
+export const richCommitTemplateReference = fileURLToPath(
+  new URL('rich-commit-template.md', import.meta.url),
+);
+
 export const richCommit: RuleUnit = {
   importance: 'A',
   fix: FIX,
   doc: {
     file: fileURLToPath(new URL('rich-commit.md', import.meta.url)),
+  },
+  refs: {
+    'rich-commit-template': richCommitTemplateReference,
   },
   run: ({ git, report }) => {
     for (const message of git.commitMessages)

@@ -405,6 +405,9 @@ export const decisionLog = (options: Options): RuleUnit => ({
   doc: {
     file: fileURLToPath(new URL('decision-log.md', import.meta.url)),
   },
+  refs: {
+    'decision-log-template': decisionLogTemplateReference,
+  },
   run: async ({ files, git, readText, report }) => {
     for (const file of git.stagedAddedFiles.filter((item) =>
       WRONG_LOCATION.test(item),
@@ -444,3 +447,7 @@ export const decisionLog = (options: Options): RuleUnit => ({
         report(`${file}: ${problem}`);
   },
 });
+
+export const decisionLogTemplateReference = fileURLToPath(
+  new URL('decision-log-template.md', import.meta.url),
+);

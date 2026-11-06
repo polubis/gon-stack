@@ -85,6 +85,7 @@ export default config({
 - `agents`: each writes `<path>/agents/<id>.md` and is listed under `## Agent files` in the root. Optional `frontmatter: Record<string, string>` renders as a `---` block before the doc. No `run`. Agent ids are typed even when every agent `doc` is a callback.
 - `skills`: id -> `{ source }`, a directory relative to `.nitpick/`. The whole tree is written to `<path>/skills/<id>/` (same relative paths, listed under `## Skill files` in the root). `ref(id)` links to `skills/<id>/SKILL.md`. Config error (exit 3): missing directory, no `SKILL.md`, `SKILL.md` frontmatter without `name` or `description`, `name` different from the id, id shared with a rule or agent. Files ending in `.md` are CRLF normalized to LF (also for `--check`); every other file is copied as raw bytes and `--check` compares bytes.
 - `refs`: id -> markdown file (relative to `.nitpick/`), written to `<path>/references/<key>.md`; `{{ref:key}}` links inside files; missing file, self ref, unknown ref, cycle = config error.
+- Rule `refs`: a rule may carry its own `refs` (same shape). They are merged into the config `refs` automatically; same key with a different file = config error.
 
 ### Docs
 
@@ -185,7 +186,7 @@ Id `rich-commit`, importance `A`. Its instruction lives in the library (`src/rul
 
 ## `decisionLog` rule
 
-Factory `decisionLog({ scopes })`, id `decision-log`, group `general`, importance `A`. Instruction `src/rules/decision-log.md`. `scopes`: regexes a `scope` must match (see `.nitpick/config.ts`). Validates `git.stagedAddedFiles` / `git.stagedFiles` (works with `--commit-msg`, i.e. in the `commit-msg` hook):
+Factory `decisionLog({ scopes })`, id `decision-log`, group `general`, importance `A`. Rule file `rules/decision-log.md` (`src/rules/decision-log.md`) follows `{{ref:decision-log-template}}`. The rule registers that ref itself through its `refs` field (`src/rules/decision-log-template.md`, written to `references/decision-log-template.md`), so config needs no manual `refs` entry. `scopes`: regexes a `scope` must match (see `.nitpick/config.ts`). Validates `git.stagedAddedFiles` / `git.stagedFiles` (works with `--commit-msg`, i.e. in the `commit-msg` hook):
 
 - Exactly one newly staged file `decisions/NNNN-<scope-prefix>-<verb>-<object>.md`. New files under any `__log__/` are reported as wrong location. A commit that only touches `decisions/` files (moves, edits) needs no new entry.
 - Name: `NNNN` = max existing + 1, slug `[a-z0-9-]` 8-60 chars, starts with the first `scope` segment, then a verb from the allow-list (`VERBS` in the rule), then an object.
