@@ -1,0 +1,157 @@
+---
+title: Select
+description: Generic headless select. Popover on wide screens, full screen modal on phones.
+order: 2
+---
+
+import {
+  BasicDemo,
+  DarkDemo,
+  DisabledDemo,
+  LiveDemo,
+  ModalDemo,
+  ObjectDemo,
+  SearchDemo,
+  SoundDemo,
+  StreamPanel,
+} from '@/demos/select/select-demos';
+
+# Select
+
+Compound, generic, headless. Width follows container. `mode="auto"` (default): popover from `40rem` up, full screen modal below. Popover closes on outside click, modal on native Back. Keyboard: arrows, Home/End, PageUp/PageDown, Enter/Space, Escape, typeahead. Looks bare until theme imported: see [headless page](/select-headless/).
+
+<StreamPanel client:load />
+
+## Usage
+
+```tsx
+import { Select } from '@repo/uih/select';
+import '@repo/uih/theme/select.css'; // optional theme
+
+<Select.Root id="fruit" defaultValue="Cherry">
+  <Select.Label>Fruit</Select.Label>
+  <Select.Control>
+    <Select.Trigger>
+      <Select.Value placeholder="Choose fruit" />
+    </Select.Trigger>
+    <Select.Clear aria-label="Clear fruit" />
+    <Select.Icon />
+  </Select.Control>
+  <Select.Content title="Fruit">
+    <Select.List items={fruits}>
+      {(fruit) => (
+        <Select.Item value={fruit}>
+          {fruit}
+          <Select.ItemIndicator />
+        </Select.Item>
+      )}
+    </Select.List>
+  </Select.Content>
+</Select.Root>;
+```
+
+## Basic + clear
+
+`x` pops in left of chevron once value set.
+
+<div class="not-prose max-w-sm">
+  <BasicDemo client:load />
+</div>
+
+## Search
+
+`Select.Search` holds focus, arrows still drive list. Filtering is yours (`onQueryChange`). `Select.Empty` gets the phrase.
+
+<div class="not-prose max-w-sm">
+  <SearchDemo client:load />
+</div>
+
+## Generic items
+
+`createSelect<T>()` returns typed parts. `itemKey` gives identity (equality, list keys, `name` form value).
+
+```tsx
+const PersonSelect = createSelect<Person>();
+
+<PersonSelect.Root itemKey={(person) => person.id} name="owner">
+  ...
+  <PersonSelect.Value>{(person) => person.name}</PersonSelect.Value>
+</PersonSelect.Root>;
+```
+
+<div class="not-prose max-w-sm">
+  <ObjectDemo client:load />
+</div>
+
+## Add / remove animation
+
+`Select.List` keeps removed rows until exit animation ends; new rows animate in.
+
+<div class="not-prose max-w-sm">
+  <LiveDemo client:load />
+</div>
+
+## Sound
+
+`sound` flag: soft synthesized tone on open and close (Web Audio, no asset).
+
+<div class="not-prose max-w-sm">
+  <SoundDemo client:load />
+</div>
+
+## Modal
+
+`mode="modal"` forces full screen dialog (what phones get in `auto`). Options stack from the bottom, search under them: thumb reach. Pushes one history entry, Back closes it (`closeOnBack`).
+
+<div class="not-prose max-w-sm">
+  <ModalDemo client:load />
+</div>
+
+## Dark
+
+`data-theme="dark"` on any ancestor.
+
+<div class="not-prose max-w-sm">
+  <DarkDemo client:load />
+</div>
+
+## Disabled
+
+<div class="not-prose max-w-sm">
+  <DisabledDemo client:load />
+</div>
+
+## Global stream
+
+```ts
+import { selectStream } from '@repo/uih/select-stream';
+
+selectStream.subscribe(({ type, id, open }) => {}); // open: ids open now
+selectStream.getOpen();
+selectStream.open('fruit'); // queued until mounted
+selectStream.close('fruit');
+```
+
+App layer here mirrors `open` into `?select=` (`src/integration/select-url.ts`): reload or deep link reopens.
+
+## Parts
+
+| Part            | Element                    | Notes                                      |
+| --------------- | -------------------------- | ------------------------------------------ |
+| `Root`          | `div[data-ds-select]`      | state, mode, stream, `name` hidden input   |
+| `Label`         | `label`                    | names trigger + list                       |
+| `Control`       | `div`                      | positions trigger, clear, icon             |
+| `Trigger`       | `button[role=combobox]`    | ArrowUp/Down open                          |
+| `Value`         | `span`                     | `placeholder`, render fn `(value) => node` |
+| `Clear`         | `button`                   | only with value                            |
+| `Icon`          | `span[aria-hidden]`        | chevron default                            |
+| `Content`       | `div` / `div[role=dialog]` | `title`, `closeLabel`                      |
+| `Search`        | `input[role=combobox]`     | own clear `x`                              |
+| `List`          | `div[role=listbox]`        | `items`, render fn, enter/exit presence    |
+| `Item`          | `div[role=option]`         | `value`, `disabled`                        |
+| `ItemIndicator` | `span[aria-hidden]`        | check when selected                        |
+| `Empty`         | `div[role=status]`         | node or `(query) => node`                  |
+
+Root props: `id`, `value`/`defaultValue`/`onValueChange`, `open`/`defaultOpen`/`onOpenChange`, `query`/`onQueryChange`, `itemKey`, `mode`, `modalQuery`, `sound`, `closeOnBack`, `disabled`, `required`, `name`.
+
+Theme tokens: `--ds-select-*` (see `theme/select.css`), defaults from `tokens.css`.

@@ -1,0 +1,24 @@
+---
+import '@/headless.css';
+import { HeadlessDemo } from '@/demos/select/select-demos';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Select headless | uih docs</title>
+  </head>
+  <body class="bg-page text-ink">
+    <main class="mx-auto flex max-w-sm flex-col gap-4 p-4">
+      <h1 class="text-xl font-semibold">Select, headless</h1>
+      <p class="text-ink-soft text-sm">
+        No <code>@repo/uih/theme</code> import here. Same parts and behaviour,
+        browser defaults only.
+      </p>
+      <HeadlessDemo client:load />
+      <a class="underline" href="/select/">Back to themed docs</a>
+    </main>
+  </body>
+</html>

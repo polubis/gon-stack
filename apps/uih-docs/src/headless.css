@@ -1,0 +1,8 @@
+@import 'tailwindcss';
+
+/* Headless page: no uih theme imported on purpose. */
+@theme {
+  --color-page: #ffffff;
+  --color-ink: #111827;
+  --color-ink-soft: #4b5563;
+}

@@ -3,11 +3,16 @@
 @plugin '@tailwindcss/typography';
 @import '@repo/uih/theme/all.css';
 
-@theme {
-  --color-page: #f9fafb;
-  --color-ink: #111827;
-  --color-ink-soft: #4b5563;
-  --color-line: #d1d5db;
-  --color-code: #111827;
-  --color-on-code: #f3f4f6;
+/* Docs palette follows the uih (Parka) tokens, so `data-theme='dark'` flips both. */
+@theme inline {
+  --color-page: var(--ds-color-surface-sunken);
+  --color-card: var(--ds-color-surface);
+  --color-ink: var(--ds-color-on-surface);
+  --color-ink-soft: var(--ds-color-on-surface-soft);
+  --color-line: var(--ds-color-border);
+  --color-brand: var(--ds-color-accent);
+  --color-brand-soft: var(--ds-color-accent-soft);
+  --color-brand-ink: var(--ds-color-primary);
+  --color-code: #10241b;
+  --color-on-code: #e6f0ea;
 }

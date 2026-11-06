@@ -1,0 +1,571 @@
+/*
+ * Select, Parka theme. Every value is a `--ds-select-*` token with a
+ * fallback, so any ancestor or `style` can override it.
+ */
+@layer ds.select {
+  :where([data-ds-select]) {
+    position: relative;
+    display: block;
+    inline-size: 100%;
+    color: var(--ds-select-fg, var(--ds-color-on-surface, #10241b));
+    font-size: var(--ds-select-font-size, var(--ds-font-size, 1rem));
+  }
+
+  :where([data-ds-select-label]) {
+    display: block;
+    margin-block-end: var(--ds-select-label-gap, 0.375rem);
+    color: var(--ds-select-label-fg, var(--ds-color-on-surface-soft, #46564d));
+    font-size: var(--ds-select-label-size, var(--ds-font-size-sm, 0.875rem));
+    font-weight: 500;
+    cursor: default;
+  }
+
+  :where([data-ds-select-control]) {
+    position: relative;
+  }
+
+  /* trigger */
+  :where([data-ds-select-trigger]) {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    inline-size: 100%;
+    min-block-size: var(--ds-select-height, var(--ds-target-size, 2.75rem));
+    margin: 0;
+    padding-block: var(--ds-select-py, 0.5rem);
+    padding-inline: var(--ds-select-px, 0.875rem) 2.75rem;
+    border: var(--ds-select-border-width, 0.0625rem) solid
+      var(--ds-select-border, var(--ds-color-border-strong, #77867e));
+    border-radius: var(--ds-select-radius, var(--ds-radius, 0.75rem));
+    background: var(--ds-select-bg, var(--ds-color-surface, #ffffff));
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+    transition:
+      border-color var(--ds-duration, 200ms) ease,
+      background-color var(--ds-duration, 200ms) ease,
+      box-shadow var(--ds-duration, 200ms) ease,
+      padding var(--ds-duration, 200ms) var(--ds-ease-out, ease-out);
+  }
+
+  :where([data-filled='true'] > [data-ds-select-trigger]) {
+    padding-inline-end: 5rem;
+  }
+
+  :where([data-ds-select-trigger]:hover:not(:disabled)) {
+    border-color: var(--ds-select-accent, var(--ds-color-accent, #0b6e46));
+    background: var(
+      --ds-select-bg-hover,
+      var(--ds-color-accent-softer, #f1f8f4)
+    );
+  }
+
+  :where([data-ds-select-trigger][data-state='open']) {
+    border-color: var(--ds-select-accent, var(--ds-color-accent, #0b6e46));
+    box-shadow: 0 0 0 0.25rem
+      var(--ds-select-ring, var(--ds-color-accent-soft, #e3f2ea));
+  }
+
+  :where(
+    [data-ds-select-trigger],
+    [data-ds-select-clear],
+    [data-ds-select-close],
+    [data-ds-select-search-clear],
+    [data-ds-select-search] input
+  ):focus-visible {
+    outline: var(--ds-select-focus-width, 0.125rem) solid
+      var(--ds-select-focus, var(--ds-color-focus, #0b6e46));
+    outline-offset: 0.125rem;
+  }
+
+  :where([data-ds-select-trigger]:disabled) {
+    opacity: var(--ds-select-disabled-opacity, 0.55);
+    cursor: not-allowed;
+  }
+
+  :where([data-ds-select-value]) {
+    display: block;
+    min-inline-size: 0;
+    overflow: hidden;
+  }
+
+  :where([data-ds-select-text]) {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    animation: ds-select-value-in 260ms var(--ds-ease-out, ease-out);
+  }
+
+  :where([data-ds-select-value][data-placeholder]) {
+    color: var(
+      --ds-select-placeholder,
+      var(--ds-color-on-surface-soft, #46564d)
+    );
+  }
+
+  /* chevron */
+  :where([data-ds-select-icon]) {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-end: 0.875rem;
+    display: grid;
+    place-items: center;
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+    margin-block-start: -0.5625rem;
+    color: var(--ds-select-icon, var(--ds-color-on-surface-soft, #46564d));
+    pointer-events: none;
+    transition: transform 320ms var(--ds-ease-spring, ease-out);
+  }
+
+  :where([data-ds-select-icon] svg) {
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  :where([data-ds-select-icon][data-state='open']) {
+    transform: rotate(180deg);
+    color: var(--ds-select-accent, var(--ds-color-accent, #0b6e46));
+  }
+
+  /* clear "x": pops in left of the chevron (Parka mic + x behaviour) */
+  :where([data-ds-select-clear], [data-ds-select-search-clear]) {
+    position: absolute;
+    inset-block-start: 50%;
+    display: grid;
+    place-items: center;
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
+    margin: -0.875rem 0 0;
+    padding: 0;
+    border: 0;
+    border-radius: 999rem;
+    background: transparent;
+    color: var(--ds-select-icon, var(--ds-color-on-surface-soft, #46564d));
+    cursor: pointer;
+    animation: ds-select-clear-in 240ms var(--ds-ease-spring, ease-out) both;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
+  }
+
+  /* 2.75rem hit area (WCAG 2.5.5 AAA) around the small visual. */
+  :where([data-ds-select-clear], [data-ds-select-search-clear])::after {
+    content: '';
+    position: absolute;
+    inset: -0.5rem;
+  }
+
+  :where([data-ds-select-clear]) {
+    inset-inline-end: 2.375rem;
+  }
+
+  :where([data-ds-select-clear], [data-ds-select-search-clear]):hover {
+    background: var(--ds-select-hover, var(--ds-color-accent-soft, #e3f2ea));
+    color: var(--ds-select-fg, var(--ds-color-on-surface, #10241b));
+  }
+
+  :where(
+      [data-ds-select-clear],
+      [data-ds-select-search-clear],
+      [data-ds-select-close]
+    )
+    svg {
+    inline-size: 1rem;
+    block-size: 1rem;
+  }
+
+  /* popup */
+  :where([data-ds-select-content]) {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    background: var(--ds-select-popup-bg, var(--ds-color-surface, #ffffff));
+    color: var(--ds-select-fg, var(--ds-color-on-surface, #10241b));
+  }
+
+  :where([data-ds-select-content][data-state='closed']) {
+    pointer-events: none;
+  }
+
+  :where([data-ds-select-content][data-mode='popover']) {
+    position: absolute;
+    inset-block-start: calc(100% + var(--ds-select-offset, 0.375rem));
+    inset-inline: 0;
+    z-index: var(--ds-select-z, var(--ds-z-popover, 30));
+    padding: var(--ds-select-popup-padding, 0.375rem);
+    border: 0.0625rem solid
+      var(
+        --ds-select-popup-border,
+        var(--ds-color-border, rgb(16 36 27 / 0.16))
+      );
+    border-radius: var(--ds-select-popup-radius, 1rem);
+    box-shadow: var(--ds-select-shadow, var(--ds-shadow-popover));
+    transform-origin: top center;
+    animation: ds-select-pop-in 220ms var(--ds-ease-out, ease-out);
+  }
+
+  :where([data-ds-select-content][data-mode='popover'][data-state='closed']) {
+    animation: ds-select-pop-out 150ms ease-in both;
+  }
+
+  :where([data-ds-select-content][data-mode='modal']) {
+    position: fixed;
+    inset: 0;
+    z-index: var(--ds-select-modal-z, var(--ds-z-modal, 20));
+    padding: max(0.75rem, env(safe-area-inset-top))
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.75rem, env(safe-area-inset-bottom))
+      max(0.75rem, env(safe-area-inset-left));
+    animation: ds-select-sheet-in 320ms var(--ds-ease-out, ease-out);
+  }
+
+  :where([data-ds-select-content][data-mode='modal'][data-state='closed']) {
+    animation: ds-select-sheet-out 200ms ease-in both;
+  }
+
+  :where([data-ds-select-header]) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-inline: -0.75rem;
+    padding: 0 0.75rem 0.5rem;
+    border-block-end: 0.0625rem solid
+      var(
+        --ds-select-popup-border,
+        var(--ds-color-border, rgb(16 36 27 / 0.16))
+      );
+  }
+
+  :where([data-mode='modal'] [data-ds-select-title]) {
+    font-size: 1.25rem;
+  }
+
+  :where([data-mode='modal'] [data-ds-select-item]) {
+    min-block-size: 3rem;
+    font-size: 1.0625rem;
+  }
+
+  :where([data-ds-select-title]) {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+
+  :where([data-ds-select-close]) {
+    display: grid;
+    place-items: center;
+    inline-size: var(--ds-target-size, 2.75rem);
+    block-size: var(--ds-target-size, 2.75rem);
+    margin-inline-start: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 999rem;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    transition: background-color 150ms ease;
+  }
+
+  :where([data-ds-select-close]:hover) {
+    background: var(--ds-select-hover, var(--ds-color-accent-soft, #e3f2ea));
+  }
+
+  /* search */
+  :where([data-ds-select-search]) {
+    position: relative;
+    flex: none;
+  }
+
+  :where([data-ds-select-search-icon]) {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 0.75rem;
+    inline-size: 1rem;
+    block-size: 1rem;
+    margin-block-start: -0.5rem;
+    color: var(--ds-select-icon, var(--ds-color-on-surface-soft, #46564d));
+    pointer-events: none;
+  }
+
+  :where([data-ds-select-search] input) {
+    box-sizing: border-box;
+    inline-size: 100%;
+    min-block-size: var(--ds-target-size, 2.75rem);
+    margin: 0;
+    padding-block: 0.5rem;
+    padding-inline: 2.375rem 2.75rem;
+    border: 0.0625rem solid transparent;
+    border-radius: var(--ds-radius-sm, 0.625rem);
+    background: var(
+      --ds-select-search-bg,
+      var(--ds-color-surface-sunken, #f4f7f5)
+    );
+    color: inherit;
+    font: inherit;
+    font-size: var(--ds-font-size-sm, 0.875rem);
+    transition:
+      border-color 150ms ease,
+      background-color 150ms ease;
+    appearance: none;
+  }
+
+  :where([data-ds-select-search] input)::-webkit-search-cancel-button {
+    appearance: none;
+  }
+
+  :where([data-ds-select-search] input)::placeholder {
+    color: var(
+      --ds-select-placeholder,
+      var(--ds-color-on-surface-soft, #46564d)
+    );
+    opacity: 1;
+  }
+
+  :where([data-ds-select-search] input:focus) {
+    border-color: var(--ds-select-accent, var(--ds-color-accent, #0b6e46));
+    background: var(--ds-select-popup-bg, var(--ds-color-surface, #ffffff));
+  }
+
+  :where([data-ds-select-search-clear]) {
+    inset-inline-end: 0.5rem;
+  }
+
+  /* list: gap between items and scrollbar */
+  :where([data-ds-select-list]) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    max-block-size: var(--ds-select-list-height, 17.5rem);
+    padding: 0.125rem;
+    padding-inline-end: 0.375rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    scroll-padding-block: 0.25rem;
+    outline: none;
+  }
+
+  /*
+   * Phone = thumb zone: options stack from the bottom (auto top margin keeps
+   * long lists scrollable), search sits below them, closest to the thumb.
+   */
+  :where([data-mode='modal'] [data-ds-select-list]) {
+    flex: 1;
+    max-block-size: none;
+  }
+
+  :where([data-mode='modal'] [data-ds-select-list] > :first-child) {
+    margin-block-start: auto;
+  }
+
+  :where([data-mode='modal'] [data-ds-select-search]) {
+    order: 1;
+  }
+
+  /* item */
+  :where([data-ds-select-item]) {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    flex: none;
+    box-sizing: border-box;
+    min-block-size: var(
+      --ds-select-item-height,
+      var(--ds-target-size, 2.75rem)
+    );
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--ds-select-item-radius, var(--ds-radius-sm, 0.625rem));
+    overflow: hidden;
+    cursor: pointer;
+    user-select: none;
+    transition:
+      background-color 120ms ease,
+      color 120ms ease;
+  }
+
+  :where([data-ds-select-item][data-active]) {
+    background: var(
+      --ds-select-item-active-bg,
+      var(--ds-color-accent-softer, #f1f8f4)
+    );
+  }
+
+  :where([data-ds-select-item][aria-selected='true']) {
+    background: var(
+      --ds-select-item-selected-bg,
+      var(--ds-color-accent-soft, #e3f2ea)
+    );
+    color: var(--ds-select-item-selected-fg, var(--ds-color-primary, #08512f));
+    font-weight: 600;
+  }
+
+  /* Visible focus when the listbox itself holds focus. */
+  :where(
+    [data-ds-select-list]:focus-visible [data-ds-select-item][data-active]
+  ),
+  :where(
+    [data-ds-select-search]:has(input:focus-visible)
+      ~ [data-ds-select-list]
+      [data-ds-select-item][data-active]
+  ) {
+    box-shadow: inset 0 0 0 0.125rem
+      var(--ds-select-focus, var(--ds-color-focus, #0b6e46));
+  }
+
+  :where([data-ds-select-item][aria-disabled='true']) {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  :where([data-ds-select-indicator]) {
+    display: grid;
+    place-items: center;
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+    margin-inline-start: auto;
+    flex: none;
+    animation: ds-select-check-in 360ms var(--ds-ease-spring, ease-out);
+  }
+
+  :where([data-ds-select-indicator] svg) {
+    inline-size: 100%;
+    block-size: 100%;
+    stroke-width: 2.5;
+  }
+
+  /* open: first rows cascade in */
+  :where([data-state='open'] [data-ds-select-item]:not([data-presence])) {
+    animation: ds-select-item-in 260ms var(--ds-ease-out, ease-out) both;
+  }
+
+  :where([data-ds-select-item]:nth-child(2)) {
+    animation-delay: 20ms;
+  }
+  :where([data-ds-select-item]:nth-child(3)) {
+    animation-delay: 40ms;
+  }
+  :where([data-ds-select-item]:nth-child(4)) {
+    animation-delay: 60ms;
+  }
+  :where([data-ds-select-item]:nth-child(5)) {
+    animation-delay: 80ms;
+  }
+  :where([data-ds-select-item]:nth-child(n + 6)) {
+    animation-delay: 100ms;
+  }
+
+  /* add / remove */
+  :where([data-ds-select-item][data-presence='enter']) {
+    animation: ds-select-row-in 320ms var(--ds-ease-out, ease-out);
+    animation-delay: 0ms;
+  }
+
+  :where([data-ds-select-item][data-presence='exit']) {
+    pointer-events: none;
+    animation: ds-select-row-out 260ms ease-in both;
+    animation-delay: 0ms;
+  }
+
+  :where([data-ds-select-empty]) {
+    padding: 1.25rem 1rem;
+    color: var(--ds-select-empty-fg, var(--ds-color-on-surface-soft, #46564d));
+    font-size: var(--ds-font-size-sm, 0.875rem);
+    text-align: center;
+    animation: ds-select-item-in 260ms var(--ds-ease-out, ease-out);
+  }
+
+  @media (forced-colors: active) {
+    :where([data-ds-select-item][data-active]) {
+      outline: 0.125rem solid Highlight;
+    }
+    :where([data-ds-select-item][aria-selected='true']) {
+      outline: 0.125rem solid SelectedItem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :where([data-ds-select], [data-ds-select] *, [data-ds-select] *::after) {
+      animation: none;
+      transition: none;
+    }
+  }
+
+  @keyframes ds-select-pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(-0.375rem) scale(0.97);
+    }
+  }
+  @keyframes ds-select-pop-out {
+    to {
+      opacity: 0;
+      transform: translateY(-0.25rem) scale(0.98);
+    }
+  }
+  @keyframes ds-select-sheet-in {
+    from {
+      opacity: 0;
+      transform: translateY(1.5rem);
+    }
+  }
+  @keyframes ds-select-sheet-out {
+    to {
+      opacity: 0;
+      transform: translateY(1.5rem);
+    }
+  }
+  @keyframes ds-select-item-in {
+    from {
+      opacity: 0;
+      transform: translateY(-0.25rem);
+    }
+  }
+  @keyframes ds-select-row-in {
+    from {
+      opacity: 0;
+      max-block-size: 0;
+      min-block-size: 0;
+      padding-block: 0;
+      transform: translateX(-0.75rem);
+    }
+    to {
+      max-block-size: 3.5rem;
+    }
+  }
+  @keyframes ds-select-row-out {
+    from {
+      max-block-size: 3.5rem;
+    }
+    to {
+      opacity: 0;
+      max-block-size: 0;
+      min-block-size: 0;
+      padding-block: 0;
+      transform: translateX(0.75rem);
+    }
+  }
+  @keyframes ds-select-value-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.25rem);
+    }
+  }
+  @keyframes ds-select-clear-in {
+    from {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+  }
+  @keyframes ds-select-check-in {
+    from {
+      opacity: 0;
+      transform: scale(0.4) rotate(-20deg);
+    }
+  }
+}

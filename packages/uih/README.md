@@ -1,6 +1,6 @@
 # @repo/uih
 
-Headless React UI. Skeleton + `Button`.
+Headless React UI: `Button`, `Select`. Default theme = Parka (WCAG AAA text contrast, dark via `[data-theme='dark']`).
 
 ## Conventions
 
@@ -16,8 +16,11 @@ Headless React UI. Skeleton + `Button`.
 
 ```ts
 import { Button } from '@repo/uih/button';
+import { Select, createSelect } from '@repo/uih/select';
+import { selectStream } from '@repo/uih/select-stream';
 import '@repo/uih/theme/tokens.css'; // optional
 import '@repo/uih/theme/button.css'; // optional
+import '@repo/uih/theme/select.css'; // optional
 import '@repo/uih/theme/all.css'; // bundle
 ```
 
@@ -31,7 +34,7 @@ import '@repo/uih/theme/all.css'; // bundle
 
 ## Not yet
 
-Theme schema/runtime/editor, browser tests, other components.
+Theme schema/runtime/editor, other components. Select popover does not flip up near viewport bottom and is clipped by `overflow: hidden` ancestors (no portal).
 
 ## Tailwind app setup
 

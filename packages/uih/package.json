@@ -13,8 +13,17 @@
       "types": "./dist/button/button.d.ts",
       "import": "./dist/button/button.js"
     },
+    "./select": {
+      "types": "./dist/select/select.d.ts",
+      "import": "./dist/select/select.js"
+    },
+    "./select-stream": {
+      "types": "./dist/select/select-stream.d.ts",
+      "import": "./dist/select/select-stream.js"
+    },
     "./theme/tokens.css": "./dist/theme/tokens.css",
     "./theme/button.css": "./dist/theme/button.css",
+    "./theme/select.css": "./dist/theme/select.css",
     "./theme/all.css": "./dist/theme/all.css"
   },
   "license": "MIT",
@@ -26,6 +35,10 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text"
   },
+  "dependencies": {
+    "@repo/react-kit": "workspace:*",
+    "lucide-react": "catalog:"
+  },
   "peerDependencies": {
     "react": "catalog:"
   },
@@ -36,6 +49,7 @@
     "@testing-library/react": "catalog:",
     "@testing-library/user-event": "catalog:",
     "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "eslint": "catalog:",
