@@ -155,6 +155,24 @@ describe('Rule docs work when', () => {
     expect(read('.ai', 'AGENTS.md')).not.toContain('r.md');
   });
 
+  it('keep an unlisted file doc out of the group file but still write it', async () => {
+    const { read, problems } = await build(
+      {
+        rules: {
+          g: {
+            r: { importance: A, doc: { file: './r.md' }, unlisted: true },
+            s: { importance: A, doc: 'shown' },
+          },
+        },
+      },
+      { 'r.md': 'hidden\n' },
+    );
+    expect(problems).toEqual([]);
+    expect(read('.ai', 'rules', 'g.md')).not.toContain('r.md');
+    expect(read('.ai', 'rules', 'g.md')).toContain('1. (A) shown');
+    expect(read('.ai', 'rules', 'r.md')).toBe('hidden\n');
+  });
+
   it('report a missing doc file and unknown refs per occurrence', async () => {
     const { problems } = await build(
       {

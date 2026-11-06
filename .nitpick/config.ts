@@ -18,6 +18,8 @@ export default config({
   entry: {
     doc: ({ ref }) => `# gon-stack \`.claude\`
 
+During modification follow conventions/style around.
+
 For "document" creation and code comments use ${ref('caveman')}; same for communication.`,
   },
   settings: {
@@ -60,10 +62,9 @@ Read before routing:
 
 1. Vague ask: run ${ref('clarify')} first, until the spec is airtight.
 2. Risky change (wide blast, data, auth, migrations): run ${ref('sloth')} — one tiny change, dev confirms each.
-3. Markdown work: apply ${ref('caveman')} (\`rules/general.md\`).
-4. Pick the skills and rules that fit the scope; pass them to the worker by path.
-5. Delegate the scoped task to ${ref('worker')}. Include: goal, acceptance criteria, rules, skills, proof level.
-6. Relay worker output to dev. Wait for acceptance. ${ref('doctor')} closes the session only after dev accepts.
+3. Pick the skills and rules that fit the scope; pass them to the worker by path.
+4. Delegate the scoped task to ${ref('worker')}. Include: goal, acceptance criteria, rules, skills, proof level.
+5. Relay worker output to dev. Wait for acceptance. ${ref('doctor')} closes the session only after dev accepts.
 
 ## Rules
 
@@ -206,7 +207,16 @@ Show dev adequate evidence the problem is solved, e.g.:
   },
   rules: {
     git: {
-      'rich-commit': richCommit,
+      'decision-log': {
+        ...decisionLog({
+          scopes: [
+            /^(repo|claude|nitpick)$/,
+            /^(parka|uih)(\/[a-z][a-z0-9-]*)?$/,
+          ],
+        }),
+        unlisted: true,
+      },
+      'rich-commit': { ...richCommit, unlisted: true },
       'git-no-artifacts': {
         importance: 'A',
         doc: 'Never commit artifacts: videos, screenshots, recordings, logs, build/test output, scratch files',
@@ -240,27 +250,6 @@ Show dev adequate evidence the problem is solved, e.g.:
         doc: 'No internals testing, public behaviors only',
       },
       'testing-pyramid': { importance: 'A', doc: 'Test pyramid' },
-    },
-    general: {
-      'decision-log': decisionLog({
-        scopes: [
-          /^(repo|claude|nitpick)$/,
-          /^(parka|uih)(\/[a-z][a-z0-9-]*)?$/,
-        ],
-      }),
-      'general-minimal-text': {
-        importance: 'A',
-        doc: 'Turbo minimal text',
-      },
-      'general-prefer-ascii': { importance: 'I', doc: 'Prefer ASCI' },
-      'general-caveman-markdown': {
-        importance: 'A',
-        doc: 'Use `/caveman full` skill to reduce text inside any `markdown`',
-      },
-      'general-follow-conventions': {
-        importance: 'A',
-        doc: 'During modification follow conventions/style around',
-      },
     },
     accessibility: {
       'a11y-wcag': { importance: 'A', doc: 'WCAG 2.2' },

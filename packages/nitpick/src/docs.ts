@@ -289,7 +289,7 @@ export const buildDocs = (
 
   const list = (group: string, from: string): string =>
     rules
-      .filter((rule) => rule.group === group)
+      .filter((rule) => rule.group === group && !rule.unlisted)
       .map(
         (rule, index) =>
           `${index + 1}. (${rule.importance}) ${
