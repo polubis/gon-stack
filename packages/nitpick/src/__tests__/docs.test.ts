@@ -125,6 +125,15 @@ describe('Rule groups work when', () => {
 });
 
 describe('Rule docs work when', () => {
+  it('link a group by its name from a rule doc', async () => {
+    const { read } = await build({
+      rules: {
+        g: { a: { importance: A, doc: ({ ref }) => `see ${ref('g')}` } },
+      },
+    });
+    expect(read('.ai', 'rules', 'g.md')).toBe('## G\n\n1. (A) see [g](g.md)\n');
+  });
+
   it('inline strings and callbacks in the group file', async () => {
     const { read } = await build({
       rules: {
