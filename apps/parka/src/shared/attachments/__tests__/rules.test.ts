@@ -15,18 +15,35 @@ describe('attachment rules', () => {
     expect(attachmentRejection(file({ type: 'text/plain' }))).toBeNull();
   });
 
-  it('rejects other types', () => {
+  it('accepts mp4 video and other document formats', () => {
     expect(
-      attachmentRejection(file({ type: 'application/zip' })),
+      attachmentRejection(file({ name: 'a.mp4', type: 'video/mp4' })),
+    ).toBeNull();
+    expect(
+      attachmentRejection(file({ name: 'a.zip', type: 'application/zip' })),
+    ).toBeNull();
+  });
+
+  it('rejects unknown types', () => {
+    expect(
+      attachmentRejection(file({ type: 'application/x-msdownload' })),
     ).not.toBeNull();
   });
 
-  it('rejects empty files and files over 5 MB, accepts exactly 5 MB', () => {
+  it('rejects empty files and files over 20 MB, accepts exactly 20 MB', () => {
     expect(attachmentRejection(file({ size: 0 }))).not.toBeNull();
+    expect(attachmentRejection(file({ size: 20 * 1024 * 1024 + 1 }))).toBe(
+      'Plik jest większy niż 20 MB',
+    );
+    expect(attachmentRejection(file({ size: 20 * 1024 * 1024 }))).toBeNull();
+  });
+
+  it('keeps photos at 5 MB', () => {
     expect(
-      attachmentRejection(file({ size: 5 * 1024 * 1024 + 1 })),
-    ).not.toBeNull();
-    expect(attachmentRejection(file({ size: 5 * 1024 * 1024 }))).toBeNull();
+      attachmentRejection(
+        file({ type: 'image/png', size: 5 * 1024 * 1024 + 1 }),
+      ),
+    ).toBe('Zdjęcie jest większe niż 5 MB');
   });
 
   it('rejects names over 200 characters', () => {

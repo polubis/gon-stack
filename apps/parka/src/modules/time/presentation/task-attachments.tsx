@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import {
   FileText,
   Loader2,
@@ -12,6 +12,7 @@ import {
   attachmentRejection,
   formatFileSize,
   isImageMime,
+  isVideoMime,
 } from '@/shared/attachments/rules';
 import { API_ROUTER } from '@/shared/router/routes';
 import {
@@ -22,6 +23,11 @@ import {
 import { Button } from '@/shared/ui/controls';
 import { EmptyState } from '@/shared/ui/empty-state';
 import { Skeleton } from '@/shared/ui/skeleton';
+import {
+  readUploads,
+  startUpload,
+  subscribeUploads,
+} from '../core/attachment-uploads';
 import type { Attachment, TaskId } from '../domain/models';
 import {
   fetchAttachments,
@@ -30,16 +36,18 @@ import {
 } from '../integration/attachments';
 import { AttachmentViewer } from './attachment-viewer';
 import { useContext } from './context';
+import { VideoTrimDialog } from './video-trim-dialog';
 import { DeleteDialog } from './delete-dialog';
 import {
   deleteAttachmentModal,
   deletedAttachmentIdOf,
+  viewTaskModal,
   viewAttachmentModal,
   viewedAttachmentIdOf,
 } from './modal-ids';
 
 const Thumb = ({ item }: { item: Attachment }) =>
-  isImageMime(item.mime) ? (
+  isImageMime(item.mime) || isVideoMime(item.mime) ? (
     <button
       type="button"
       data-e2e={`time:attachment-thumb:${item.id}`}
@@ -47,13 +55,26 @@ const Thumb = ({ item }: { item: Attachment }) =>
       onClick={() => openModal(viewAttachmentModal(item.id))}
       className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-track focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
     >
-      <img
-        src={API_ROUTER.timeAttachmentById(item.id)}
-        alt=""
-        loading="lazy"
-        decoding="async"
-        className="h-full w-full object-cover"
-      />
+      {isVideoMime(item.mime) ? (
+        // First frame only: no controls, no autoplay.
+        <video
+          src={`${API_ROUTER.timeAttachmentById(item.id)}#t=0.001`}
+          preload="metadata"
+          muted
+          playsInline
+          tabIndex={-1}
+          aria-hidden="true"
+          className="pointer-events-none h-full w-full object-cover"
+        />
+      ) : (
+        <img
+          src={API_ROUTER.timeAttachmentById(item.id)}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover"
+        />
+      )}
     </button>
   ) : (
     <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand-soft text-brand">
@@ -74,7 +95,7 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
   const input = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<Attachment[]>();
   const [failed, setFailed] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [trimQueue, setTrimQueue] = useState<File[]>([]);
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
@@ -98,9 +119,44 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
     }
   }, [items, stack]);
 
-  const upload = async (files: File[]) => {
-    setUploading(true);
-    let count = items?.length ?? 0;
+  const all = useSyncExternalStore(subscribeUploads, readUploads, readUploads);
+  const sending = all.filter((u) => u.taskId === taskId);
+  const sendingCount = sending.length;
+
+  // A finished upload (even one started before the popup was reopened) shows up.
+  const wasSending = useRef(sendingCount);
+  useEffect(() => {
+    if (sendingCount < wasSending.current) setAttempt((n) => n + 1);
+    wasSending.current = sendingCount;
+  }, [sendingCount]);
+
+  const send = (file: File) =>
+    startUpload(postAttachment, taskId, file, {
+      onDone: (added) =>
+        notify({
+          tone: 'success',
+          message:
+            added.size < added.originalSize
+              ? `Dodano „${added.name}”, zmniejszono z ${formatFileSize(added.originalSize)} do ${formatFileSize(added.size)}`
+              : `Wysłano plik „${added.name}”`,
+          action: {
+            label: 'Przejdź do pliku',
+            run: () => openModal(viewTaskModal(taskId)),
+          },
+        }),
+      onFail: (error, retry) =>
+        notify({
+          tone: 'error',
+          title: `Nie dodano pliku „${file.name}”`,
+          code: 'ATTACHMENT_UPLOAD',
+          description: `Nie udało się wysłać pliku${error instanceof Error ? ` (${error.message})` : ''}. Spróbuj ponownie.`,
+          retry,
+        }),
+    });
+
+  const upload = (files: File[]) => {
+    let count = (items?.length ?? 0) + sendingCount;
+    const videos: File[] = [];
     for (const file of files) {
       const reason =
         count >= ATTACHMENT_MAX_COUNT
@@ -115,28 +171,11 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
         });
         continue;
       }
-      try {
-        const { originalSize, ...added } = await postAttachment(taskId, file);
-        count += 1;
-        setItems((current) => [...(current ?? []), added]);
-        notify({
-          tone: 'success',
-          message:
-            added.size < originalSize
-              ? `Dodano „${added.name}”, zmniejszono z ${formatFileSize(originalSize)} do ${formatFileSize(added.size)}`
-              : `Dodano plik „${added.name}”`,
-        });
-      } catch (error) {
-        notify({
-          tone: 'error',
-          title: `Nie dodano pliku „${file.name}”`,
-          code: 'ATTACHMENT_UPLOAD',
-          description: `Nie udało się wysłać pliku${error instanceof Error ? ` (${error.message})` : ''}. Spróbuj ponownie.`,
-          retry: () => void upload([file]),
-        });
-      }
+      count += 1;
+      if (isVideoMime(file.type)) videos.push(file);
+      else send(file);
     }
-    setUploading(false);
+    if (videos.length > 0) setTrimQueue((queue) => [...queue, ...videos]);
   };
 
   const remove = async (item: Attachment) => {
@@ -161,22 +200,16 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
   const viewingId = selectedId(stack, viewedAttachmentIdOf);
   const deleting = items?.find((item) => item.id === deletingId);
   const viewing = items?.find((item) => item.id === viewingId);
-  const full = (items?.length ?? 0) >= ATTACHMENT_MAX_COUNT;
+  const full = (items?.length ?? 0) + sendingCount >= ATTACHMENT_MAX_COUNT;
   const addButton = (
     <Button
       variant="ghost"
       className="w-auto px-3 py-1.5 text-xs"
       data-e2e="time:attachment-add"
-      disabled={uploading || full || !items}
+      disabled={full || !items}
       onClick={() => input.current?.click()}
     >
-      {uploading ? (
-        <Loader2
-          className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none"
-          aria-hidden="true"
-        />
-      ) : null}
-      {uploading ? 'Wysyłanie…' : 'Dodaj plik'}
+      Dodaj plik
     </Button>
   );
 
@@ -190,9 +223,11 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
         <h4 className="flex items-center gap-1.5 text-xs font-semibold text-ink-soft">
           <Paperclip className="h-3.5 w-3.5" aria-hidden="true" />
           Załączniki
-          {items ? ` (${items.length}/${ATTACHMENT_MAX_COUNT})` : null}
+          {items
+            ? ` (${items.length + sendingCount}/${ATTACHMENT_MAX_COUNT})`
+            : null}
         </h4>
-        {items?.length === 0 && !uploading ? null : addButton}
+        {items?.length === 0 && sendingCount === 0 ? null : addButton}
         <input
           ref={input}
           type="file"
@@ -205,7 +240,7 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
           onChange={(event) => {
             const files = Array.from(event.target.files ?? []);
             event.target.value = '';
-            if (files.length > 0) void upload(files);
+            if (files.length > 0) upload(files);
           }}
         />
       </div>
@@ -242,7 +277,7 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
         >
           <Skeleton className="h-14 w-full" />
         </div>
-      ) : items.length === 0 ? (
+      ) : items.length === 0 && sendingCount === 0 ? (
         <EmptyState
           variant="card"
           icon={Paperclip}
@@ -252,6 +287,39 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
         />
       ) : (
         <ul className="flex flex-col gap-1.5">
+          {sending.map((item) => (
+            <li
+              key={`upload-${item.key}`}
+              data-e2e={`time:attachment-upload:${item.key}`}
+              className="flex flex-col gap-1 rounded-xl border border-line-strong bg-card px-3 py-2 text-sm"
+            >
+              <div className="flex items-center gap-2">
+                <Loader2
+                  className="h-4 w-4 shrink-0 animate-spin text-brand motion-reduce:animate-none"
+                  aria-hidden="true"
+                />
+                <span className="min-w-0 flex-1 truncate font-semibold">
+                  {item.name}
+                </span>
+                <span className="shrink-0 text-xs text-ink-soft">
+                  {Math.round(item.progress * 100)}%
+                </span>
+              </div>
+              <div
+                role="progressbar"
+                aria-label={`Wysyłanie: ${item.name}`}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.round(item.progress * 100)}
+                className="h-1.5 overflow-hidden rounded-full bg-track"
+              >
+                <div
+                  className="h-full bg-brand transition-[width] motion-reduce:transition-none"
+                  style={{ width: `${item.progress * 100}%` }}
+                />
+              </div>
+            </li>
+          ))}
           {items.map((item) => (
             <li
               key={item.id}
@@ -284,6 +352,25 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
         </ul>
       )}
 
+      {trimQueue[0] ? (
+        <VideoTrimDialog
+          key={`${trimQueue[0].name}-${trimQueue[0].size}-${trimQueue.length}`}
+          file={trimQueue[0]}
+          onCancel={() => setTrimQueue((queue) => queue.slice(1))}
+          onSubmit={(file) => {
+            setTrimQueue((queue) => queue.slice(1));
+            const reason = attachmentRejection(file);
+            if (reason === null) send(file);
+            else
+              notify({
+                tone: 'error',
+                title: `Nie dodano pliku „${file.name}”`,
+                code: 'ATTACHMENT_REJECTED',
+                description: reason,
+              });
+          }}
+        />
+      ) : null}
       {viewing ? (
         <AttachmentViewer
           modal={viewAttachmentModal(viewing.id)}

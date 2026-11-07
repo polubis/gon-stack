@@ -20,22 +20,32 @@ export const fetchAttachments = async (id: TaskId): Promise<Attachment[]> => {
   return json.data;
 };
 
-export const postAttachment = async (
+/** Sends one file; `onProgress` gets 0..1 while the bytes go out. */
+export const postAttachment = (
   id: TaskId,
   file: File,
-): Promise<Attachment & { originalSize: number }> => {
-  const body = new FormData();
-  body.set('file', file, file.name);
-  const response = await fetch(API_ROUTER.timeTaskAttachments(id), {
-    method: 'POST',
-    body,
+  onProgress: (progress: number) => void = () => undefined,
+): Promise<Attachment & { originalSize: number }> =>
+  new Promise((resolve, reject) => {
+    const body = new FormData();
+    body.set('file', file, file.name);
+    const request = new XMLHttpRequest();
+    request.open('POST', API_ROUTER.timeTaskAttachments(id));
+    request.setRequestHeader('Accept', 'application/json');
+    request.responseType = 'json';
+    request.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress(event.loaded / event.total);
+    };
+    request.onerror = () => reject(new Error('Network error'));
+    request.onload = () => {
+      const json = request.response as Out<
+        typeof uploadTaskAttachmentSchema
+      > | null;
+      if (json?.code === 201) return resolve(json.data);
+      reject(new Error(json?.message ?? `HTTP ${request.status}`));
+    };
+    request.send(body);
   });
-  const json = (await response.json()) as Out<
-    typeof uploadTaskAttachmentSchema
-  >;
-  if (json.code !== 201) throw new Error(json.message);
-  return json.data;
-};
 
 export const removeAttachment = async (id: string): Promise<void> => {
   const response = await fetch(API_ROUTER.timeAttachmentById(id), {

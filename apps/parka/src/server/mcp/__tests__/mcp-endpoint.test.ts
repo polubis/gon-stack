@@ -599,14 +599,14 @@ describe('mcp task management', () => {
     expect(calls).toEqual([]);
   });
 
-  it('refuses a document over 5 MB and broken base64', async () => {
+  it('refuses a document over 20 MB and broken base64', async () => {
     const { rpc, calls } = setup();
 
     const big = await call(rpc, 'add_task_attachment', {
       taskId: 't-1',
       name: 'duzy.pdf',
       mimeType: 'application/pdf',
-      contentBase64: btoa('x'.repeat(5 * 1024 * 1024 + 1)),
+      contentBase64: btoa('x'.repeat(20 * 1024 * 1024 + 1)),
     });
     const broken = await call(rpc, 'add_task_attachment', {
       taskId: 't-1',
@@ -615,7 +615,7 @@ describe('mcp task management', () => {
       contentBase64: '***',
     });
 
-    expect(big.json.result.content[0].text).toMatch(/większy niż 5 MB/);
+    expect(big.json.result.content[0].text).toMatch(/większy niż 20 MB/);
     expect(broken.json.result.content[0].text).toMatch(/base64/);
     expect(calls).toEqual([]);
   });
@@ -942,14 +942,14 @@ describe('mcp access control', () => {
   it('rejects an oversized body', async () => {
     const { post } = setup();
 
-    const response = await post(null, {}, 'x'.repeat(9 * 1024 * 1024));
+    const response = await post(null, {}, 'x'.repeat(29 * 1024 * 1024));
 
     expect(response.status).toBe(413);
   });
 
   it('rejects an oversized body that declares no length', async () => {
     const { deps } = setup();
-    const chunk = new TextEncoder().encode('x'.repeat(5 * 1024 * 1024));
+    const chunk = new TextEncoder().encode('x'.repeat(15 * 1024 * 1024));
     const body = new ReadableStream({
       start(controller) {
         controller.enqueue(chunk);
