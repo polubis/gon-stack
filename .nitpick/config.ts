@@ -16,11 +16,14 @@ export default config({
     },
   ],
   entry: {
-    doc: ({ ref }) => `# gon-stack \`.claude\`
+    doc: ({ insert, ref }) => `# gon-stack \`.claude\`
 
-During modification follow conventions/style around.
+Follow these rules:
 
-For "document" creation and code comments use ${ref('caveman')}; same for communication.`,
+${insert('aodi-framework')}
+
+- ${ref('git')}
+- ${ref('way-of-work')}`,
   },
   settings: {
     mcp: {
@@ -206,6 +209,17 @@ Show dev adequate evidence the problem is solved, e.g.:
     'herdr-keyboard': './references/herdr-keyboard.md',
   },
   rules: {
+    'way-of-work': {
+      'way-of-work-caveman': {
+        importance: 'A',
+        doc: ({ ref }) =>
+          `For "document" creation and code comments use ${ref('caveman')}; same for communication.`,
+      },
+      'way-of-work-conventions': {
+        importance: 'A',
+        doc: 'During modification follow conventions/style around',
+      },
+    },
     git: {
       'decision-log': {
         ...decisionLog({
@@ -214,12 +228,16 @@ Show dev adequate evidence the problem is solved, e.g.:
             /^(parka|uih)(\/[a-z][a-z0-9-]*)?$/,
           ],
         }),
-        unlisted: true,
+        unlisted: false,
       },
-      'rich-commit': { ...richCommit, unlisted: true },
+      'rich-commit': { ...richCommit, unlisted: false },
       'git-no-artifacts': {
         importance: 'A',
         doc: 'Never commit artifacts: videos, screenshots, recordings, logs, build/test output, scratch files',
+      },
+      'git-new-branch-from-main': {
+        importance: 'A',
+        doc: 'Always do the work on a new branch created from fresh main: checkout main, pull --rebase with origin, then branch',
       },
     },
     testing: {

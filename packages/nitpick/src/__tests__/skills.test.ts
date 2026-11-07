@@ -128,7 +128,9 @@ describe('Skills contract works when', () => {
           r: {
             importance: 'A',
             doc: ({ ref }) => {
-              expectTypeOf(ref).parameter(0).toEqualTypeOf<'r' | 'demo'>();
+              expectTypeOf(ref)
+                .parameter(0)
+                .toEqualTypeOf<'r' | 'demo' | 'g'>();
               return ref('demo');
             },
           },

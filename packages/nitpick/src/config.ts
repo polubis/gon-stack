@@ -46,7 +46,7 @@ type Ctx<I extends string, K extends string> = {
 type UnitIds<
   R extends Record<string, Record<string, unknown>>,
   A extends string,
-> = { [G in keyof R]: keyof R[G] & string }[keyof R] | A;
+> = { [G in keyof R]: keyof R[G] & string }[keyof R] | (keyof R & string) | A;
 
 type Doc<I extends string, K extends string> =
   string | { file: string } | ((ctx: Ctx<I, K>) => string);

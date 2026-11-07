@@ -229,6 +229,10 @@ export const buildDocs = (
     id,
   }));
   const unitTargets = new Map<string, string>([
+    ...Object.keys(config.rules).map((group): [string, string] => [
+      group,
+      groupPath(group),
+    ]),
     ...rules.map(({ id, group, doc }): [string, string] => [
       id,
       typeof doc === 'object' ? instructionPath(id) : groupPath(group),

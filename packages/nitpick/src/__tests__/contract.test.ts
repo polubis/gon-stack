@@ -25,7 +25,9 @@ describe('Config contract types work when', () => {
             doc: ({ ref, file }) => {
               expectTypeOf(ref)
                 .parameter(0)
-                .toEqualTypeOf<'kb' | 'wcag' | 'style' | 'repo' | 'claude'>();
+                .toEqualTypeOf<
+                  'kb' | 'wcag' | 'style' | 'repo' | 'claude' | 'a11y' | 'ui'
+                >();
               expectTypeOf(file).parameter(0).toEqualTypeOf<'guide'>();
               return `${ref('kb')} ${ref('repo')} ${file('guide')}`;
             },
@@ -48,7 +50,9 @@ describe('Config contract types work when', () => {
           r: {
             importance: 'A',
             doc: ({ ref }) => {
-              expectTypeOf(ref).parameter(0).toEqualTypeOf<'r' | 'a' | 'b'>();
+              expectTypeOf(ref)
+                .parameter(0)
+                .toEqualTypeOf<'r' | 'a' | 'b' | 'g'>();
               return ref('a');
             },
           },
