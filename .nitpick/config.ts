@@ -219,6 +219,15 @@ Show dev adequate evidence the problem is solved, e.g.:
         importance: 'A',
         doc: 'During modification follow conventions/style around',
       },
+      'way-of-work-evidence': {
+        importance: 'A',
+        doc: ({ ref }) =>
+          `After each work make evidence via ${ref('evidence')} skill`,
+      },
+      'way-of-work-tests': {
+        importance: 'A',
+        doc: 'After each work add tests: e2e, unit, integration, whatever fits',
+      },
     },
     git: {
       'decision-log': {
