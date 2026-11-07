@@ -46,6 +46,7 @@
     "@types/react-dom": "catalog:",
     "astro": "catalog:",
     "lucide-react": "catalog:",
+    "mediabunny": "1.65.2",
     "openai": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",

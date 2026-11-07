@@ -132,7 +132,7 @@ describe('prepareAttachment', () => {
     ).rejects.toBeInstanceOf(BadRequest);
   });
 
-  it('leaves a document untouched and holds it to 5 MB', async () => {
+  it('leaves a document untouched and holds it to 20 MB', async () => {
     const { images, outputs } = fakeImages(10);
 
     const small = await prepareAttachment(images, {
@@ -142,7 +142,7 @@ describe('prepareAttachment', () => {
     });
     await expect(
       prepareAttachment(images, {
-        bytes: bytes(5 * MB + 1),
+        bytes: bytes(20 * MB + 1),
         name: 'b.pdf',
         mime: 'application/pdf',
       }),

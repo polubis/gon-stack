@@ -1,10 +1,18 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderTime } from './render-time';
 import { setupTimeBackend, task } from './time-backend';
 
+const trim = vi.hoisted(() => vi.fn());
+vi.mock('../integration/trim-video', () => ({ trimVideo: trim }));
+
 const backend = setupTimeBackend();
+
+beforeEach(() => {
+  URL.createObjectURL = vi.fn(() => 'blob:video');
+  URL.revokeObjectURL = vi.fn();
+});
 
 afterEach(() => vi.useRealTimers());
 
@@ -74,7 +82,7 @@ describe('task attachments', () => {
     expect(
       await details.findByRole('link', { name: 'notatka.txt' }),
     ).toBeVisible();
-    expect(await screen.findByText('Dodano plik „notatka.txt”')).toBeVisible();
+    expect(await screen.findByText('Wysłano plik „notatka.txt”')).toBeVisible();
     expect(backend.state.attachments['t-1']).toHaveLength(1);
   });
 
@@ -96,7 +104,7 @@ describe('task attachments', () => {
     expect(backend.writes()).toHaveLength(0);
   });
 
-  it('refuses a file over 5 MB', async () => {
+  it('refuses a file over 20 MB', async () => {
     const user = userEvent.setup();
     backend.seed([task()]);
     const details = await openDetails(user);
@@ -104,12 +112,14 @@ describe('task attachments', () => {
 
     await pick(
       details,
-      new File([new Uint8Array(5 * 1024 * 1024 + 1)], 'duzy.pdf', {
+      new File([new Uint8Array(20 * 1024 * 1024 + 1)], 'duzy.pdf', {
         type: 'application/pdf',
       }),
     );
 
-    expect(await screen.findByText('Plik jest większy niż 5 MB')).toBeVisible();
+    expect(
+      await screen.findByText('Plik jest większy niż 20 MB'),
+    ).toBeVisible();
     expect(backend.writes()).toHaveLength(0);
   });
 
@@ -407,5 +417,99 @@ describe('image attachments', () => {
       );
 
     expect(await screen.findByRole('alert')).toHaveClass('top-4');
+  });
+
+  it('offers a way to the task from the finished upload toast', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    const details = await openDetails(user);
+    await details.findByText('Brak załączników');
+    backend.state.uploadResult = {
+      id: 'a-9',
+      name: 'notatka.txt',
+      size: 5,
+      mime: 'text/plain',
+    };
+
+    await pick(
+      details,
+      new File(['hello'], 'notatka.txt', { type: 'text/plain' }),
+    );
+
+    expect(
+      await screen.findByRole('button', { name: 'Przejdź do pliku' }),
+    ).toBeVisible();
+  });
+
+  const MOVIE = {
+    id: 'v-1',
+    name: 'demo.mp4',
+    size: 3 * 1024 * 1024,
+    mime: 'video/mp4',
+  };
+
+  const openTrim = async (details: ReturnType<typeof within>) => {
+    await pick(details, new File(['video'], 'demo.mp4', { type: 'video/mp4' }));
+    const dialog = within(await screen.findByLabelText('Przytnij nagranie'));
+    const player = dialog.getByLabelText('Podgląd: demo.mp4');
+    Object.defineProperty(player, 'duration', { value: 10 });
+    fireEvent.loadedMetadata(player);
+    return dialog;
+  };
+
+  it('sends a picked video whole when trimming is skipped', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    const details = await openDetails(user);
+    await details.findByText('Brak załączników');
+    backend.state.uploadResult = MOVIE;
+
+    const dialog = await openTrim(details);
+    await user.click(dialog.getByRole('button', { name: 'Wyślij całość' }));
+
+    expect(await screen.findByText('Wysłano plik „demo.mp4”')).toBeVisible();
+    expect(trim).not.toHaveBeenCalled();
+  });
+
+  it('sends the trimmed video after cutting it', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    const details = await openDetails(user);
+    await details.findByText('Brak załączników');
+    backend.state.uploadResult = MOVIE;
+    trim.mockResolvedValue(
+      new File(['cut'], 'demo.mp4', { type: 'video/mp4' }),
+    );
+
+    const dialog = await openTrim(details);
+    expect(
+      dialog.getByRole('button', { name: 'Przytnij i wyślij' }),
+    ).toBeDisabled();
+    fireEvent.change(dialog.getByLabelText(/Początek/), {
+      target: { value: '2' },
+    });
+    await user.click(dialog.getByRole('button', { name: 'Przytnij i wyślij' }));
+
+    expect(await screen.findByText('Wysłano plik „demo.mp4”')).toBeVisible();
+    expect(trim).toHaveBeenCalledWith(
+      expect.objectContaining({ start: 2, end: 10 }),
+      expect.any(Function),
+    );
+  });
+
+  it('shows a video as a still first frame without autoplay', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    backend.state.attachments['t-1'] = [MOVIE];
+
+    const details = await openDetails(user);
+
+    const thumb = await details.findByRole('button', {
+      name: 'Otwórz podgląd: demo.mp4',
+    });
+    const video = thumb.querySelector('video');
+    expect(video).not.toBeNull();
+    expect(video).not.toHaveAttribute('autoplay');
+    expect(video).not.toHaveAttribute('controls');
   });
 });

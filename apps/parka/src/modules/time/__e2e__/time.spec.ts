@@ -52,6 +52,37 @@ const synced = (page: Page, method: string, status: number) =>
   );
 
 /** A noisy test photo drawn on a canvas and saved as a near-lossless JPEG. */
+const makeVideo = async (page: Page, seconds: number): Promise<Buffer> => {
+  const bytes = await page.evaluate(async (length) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 320;
+    canvas.height = 180;
+    const g = canvas.getContext('2d')!;
+    const recorder = new MediaRecorder(canvas.captureStream(25), {
+      mimeType: 'video/webm',
+    });
+    const chunks: Blob[] = [];
+    recorder.ondataavailable = (event) => chunks.push(event.data);
+    const stopped = new Promise((resolve) => (recorder.onstop = resolve));
+    recorder.start();
+    const started = performance.now();
+    await new Promise<void>((resolve) => {
+      const draw = () => {
+        const t = performance.now() - started;
+        g.fillStyle = `hsl(${(t / 10) % 360} 80% 50%)`;
+        g.fillRect(0, 0, 320, 180);
+        if (t < length * 1000) requestAnimationFrame(draw);
+        else resolve();
+      };
+      draw();
+    });
+    recorder.stop();
+    await stopped;
+    return Array.from(new Uint8Array(await new Blob(chunks).arrayBuffer()));
+  }, seconds);
+  return Buffer.from(bytes);
+};
+
 const makePhoto = async (
   page: Page,
   width: number,
@@ -666,6 +697,45 @@ const commands = {
       await expect(page).not.toHaveURL(/attachment-view/);
     },
 
+  'a video is trimmed in a worker, uploaded with progress and shown as a still':
+    async ({ page, getByE2e }) => {
+      const video = await makeVideo(page, 4);
+      await getByE2e('time:attachment-input').setInputFiles({
+        name: 'demo.webm',
+        mimeType: 'video/webm',
+        buffer: video,
+      });
+      const trim = getByE2e('time:attachment-trim');
+      await expect(trim).toBeVisible();
+      const player = trim.getByLabel('Podgląd: demo.webm');
+      await expect
+        .poll(() => player.evaluate((el) => (el as HTMLVideoElement).duration))
+        .toBeGreaterThan(0);
+      await getByE2e('time:attachment-trim-start').fill('1');
+      const [response] = await Promise.all([
+        page.waitForResponse(
+          (r) =>
+            r.url().includes('/attachments/') &&
+            r.request().method() === 'POST',
+          { timeout: 90_000 },
+        ),
+        getByE2e('time:attachment-trim-confirm').click(),
+      ]);
+      expect(response.status()).toBe(201);
+      const { data } = (await response.json()) as {
+        data: { mime: string; originalSize: number };
+      };
+      expect(data.mime).toBe('video/webm');
+      expect(data.originalSize).toBeLessThan(video.length);
+
+      await expect(getByE2e('time:toast')).toContainText('demo.webm');
+      const thumb = getByE2e('time:attachments').getByRole('button', {
+        name: 'Otwórz podgląd: demo.webm',
+      });
+      await expect(thumb.locator('video')).toHaveJSProperty('autoplay', false);
+      await expect(thumb.locator('video')).toHaveJSProperty('paused', true);
+    },
+
   'the mcp server lists, adds a reduced photo and deletes attachments': async ({
     page,
   }) => {
@@ -716,6 +786,22 @@ const commands = {
       originalSize: photo.length,
     });
     expect(added.structuredContent.size).toBeLessThan(photo.length / 2);
+
+    const movie = await call('add_task_attachment', {
+      taskId,
+      name: 'ekran.mp4',
+      mimeType: 'video/mp4',
+      contentBase64: Buffer.alloc(15 * 1024 * 1024, 1).toString('base64'),
+    });
+    expect(movie.isError).toBeFalsy();
+    expect(movie.structuredContent).toMatchObject({
+      name: 'ekran.mp4',
+      size: 15 * 1024 * 1024,
+    });
+    await call('delete_task_attachment', {
+      id: movie.structuredContent.id,
+      confirm: true,
+    });
 
     const after = await call('list_task_attachments', { taskId });
     expect(after.structuredContent.items).toHaveLength(

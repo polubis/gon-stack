@@ -95,7 +95,12 @@ export type Recurring = {
 export type TimeKind = 'day' | 'week' | 'month' | 'year';
 
 export type NoticeBody =
-  | { tone: 'success'; message: string }
+  | {
+      tone: 'success';
+      message: string;
+      /** Follow-up shown on the toast, e.g. "go to the file". */
+      action?: { label: string; run: () => void };
+    }
   | {
       tone: 'error';
       title: string;

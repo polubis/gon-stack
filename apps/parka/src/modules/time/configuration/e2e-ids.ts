@@ -63,6 +63,11 @@ export const TIME_E2E_IDS = [
   'time:attachment-add',
   'time:attachment-input',
   'time:attachment-viewer',
+  'time:attachment-trim',
+  'time:attachment-trim-start',
+  'time:attachment-trim-end',
+  'time:attachment-trim-confirm',
+  'time:attachment-trim-skip',
   'time:comments',
   'time:comments-skeleton',
   'time:comments-error',
@@ -92,6 +97,7 @@ export type TimeDynamicE2eId =
   | `time:attachment:${string}`
   | `time:attachment-thumb:${string}`
   | `time:attachment-delete:${string}`
+  | `time:attachment-upload:${string}`
   | `time:comment:${string}`
   | `time:comment-avatar:${string}`
   | `time:comment-author:${string}`

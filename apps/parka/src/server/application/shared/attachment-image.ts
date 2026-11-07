@@ -1,6 +1,7 @@
 import {
   ATTACHMENT_IMAGE_QUALITY,
   ATTACHMENT_MAX_BYTES,
+  ATTACHMENT_MAX_IMAGE_SOURCE_BYTES,
   isImageMime,
 } from '@/shared/attachments/rules';
 import { BadRequest } from '../core/error-handling';
@@ -82,10 +83,14 @@ export const prepareAttachment = async (
     }
   }
 
-  if (result.bytes.byteLength > ATTACHMENT_MAX_BYTES)
+  const image = isImageMime(file.mime);
+  const limit = image
+    ? ATTACHMENT_MAX_IMAGE_SOURCE_BYTES
+    : ATTACHMENT_MAX_BYTES;
+  if (result.bytes.byteLength > limit)
     throw new BadRequest(
       undefined,
-      `File is larger than ${ATTACHMENT_MAX_BYTES / 1024 / 1024} MB${isImageMime(file.mime) ? ' even after the size reduction' : ''}`,
+      `File is larger than ${limit / 1024 / 1024} MB${image ? ' even after the size reduction' : ''}`,
     );
   return result;
 };
