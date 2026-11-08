@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
-bash clean-modules.sh
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+bash "$DIR/clean-modules.sh"
 
 echo "Removing pnpm-lock.yaml..."
 rm -f pnpm-lock.yaml
