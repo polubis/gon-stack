@@ -71,6 +71,8 @@ export const DASHBOARD_E2E_IDS = [
   'dashboard:delete-confirm',
   'dashboard:scope-note',
   'dashboard:upcoming',
+  'dashboard:upcoming-toggle',
+  'dashboard:upcoming-dialog',
   'dashboard:upcoming-badge',
 ] as const;
 

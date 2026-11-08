@@ -266,3 +266,63 @@ describe('charged recurring expense', () => {
     expect(deletes()).toHaveLength(0);
   });
 });
+
+describe('many upcoming payments', () => {
+  const rules = () =>
+    Array.from({ length: 5 }, (_, i) => ({
+      ...rule(),
+      id: `r-${i}`,
+      name: `Abonament ${i}`,
+      startDate: addDays(todayDay(), 1 + i),
+    }));
+
+  beforeEach(() => {
+    window.history.replaceState(null, '', '/app/');
+    stubApi({ recurring: rules(), categories: [CATEGORY] });
+  });
+
+  it('announces the three nearest and lists all in a popup', async () => {
+    const user = userEvent.setup();
+    render(<Main />);
+    const panel = within(
+      await screen.findByRole('region', { name: /Nadchodzące/ }),
+    );
+
+    expect(panel.getAllByRole('listitem')).toHaveLength(3);
+    expect(panel.queryByText('Abonament 4')).toBeNull();
+
+    await user.click(panel.getByRole('button', { name: 'Pokaż wszystkie' }));
+    const dialog = within(await screen.findByRole('dialog'));
+
+    expect(dialog.getAllByRole('listitem')).toHaveLength(5);
+    expect(dialog.getByText('Abonament 4')).toBeVisible();
+  });
+
+  it('opens a payment from the full list over it', async () => {
+    const user = userEvent.setup();
+    render(<Main />);
+    await user.click(
+      await screen.findByRole('button', { name: 'Pokaż wszystkie' }),
+    );
+    await user.click(
+      within(await screen.findByRole('dialog')).getByRole('button', {
+        name: /Abonament 4/,
+      }),
+    );
+
+    expect(
+      await screen.findByRole('dialog', { name: /Abonament 4/ }),
+    ).toBeVisible();
+    expect(screen.queryAllByRole('dialog', { hidden: true })).toHaveLength(2);
+  });
+
+  it('offers no button when the panel already shows everything', async () => {
+    stubApi({ recurring: rules().slice(0, 3), categories: [CATEGORY] });
+    render(<Main />);
+    await screen.findByRole('region', { name: /Nadchodzące/ });
+
+    expect(
+      screen.queryByRole('button', { name: 'Pokaż wszystkie' }),
+    ).toBeNull();
+  });
+});

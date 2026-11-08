@@ -27,7 +27,7 @@ import { DetailDialog } from './detail-dialog';
 import { DeviceBadge } from './device-badge';
 import { useContext } from './context';
 import { ExpenseMenu } from './expense-menu';
-import { EXPENSES_MODAL } from './modal-ids';
+import { EXPENSES_MODAL, UPCOMING_MODAL } from './modal-ids';
 import { RecurringMark, UpcomingBadge } from './recurring-badge';
 import { ShowAllFade } from './show-all-fade';
 import {
@@ -36,6 +36,7 @@ import {
   expensesInPeriod,
   sumAmount,
   touchesCategory,
+  UPCOMING_LIMIT,
   upcomingCharges,
 } from './selectors';
 
@@ -165,11 +166,8 @@ const ExpenseList = ({
   );
 };
 
-/**
- * Payments the recurring rules will charge next: a projection, not expenses,
- * so they sit apart from the list and never reach a sum.
- */
-const UpcomingList = ({
+/** Rows of upcoming payments; every row opens the popup of its rule. */
+const UpcomingRows = ({
   upcoming,
   categories,
   onSelect,
@@ -177,6 +175,57 @@ const UpcomingList = ({
   upcoming: Upcoming[];
   categories: Category[];
   onSelect: (id: ExpenseId) => void;
+}) => (
+  <ul className="divide-y divide-line">
+    {upcoming.map(({ id, recurring, date }) => {
+      const category = categoryOf(categories, recurring.categoryId);
+      return (
+        <li key={id}>
+          <button
+            type="button"
+            onClick={() => onSelect(id)}
+            data-e2e={`dashboard:upcoming:${id}`}
+            className={cn(ROW_CLASS, 'hover:bg-hover-soft')}
+          >
+            <span className="relative shrink-0">
+              <CategoryAvatar category={category} className="h-10 w-10" />
+              <RecurringMark />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-semibold">
+                {recurring.name}
+              </span>
+              <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-soft">
+                <span className="shrink-0">{plainDateLabel(date)}</span>
+                <UpcomingBadge />
+              </span>
+            </span>
+            <span className="text-sm font-semibold tabular-nums text-ink-soft">
+              {money(recurring.cost)}
+            </span>
+          </button>
+        </li>
+      );
+    })}
+  </ul>
+);
+
+/**
+ * Payments the recurring rules will charge next: a projection, not expenses,
+ * so they sit apart from the list and never reach a sum. Shows the nearest
+ * few; `onShowAll` opens the rest.
+ */
+const UpcomingList = ({
+  upcoming,
+  categories,
+  onSelect,
+  onShowAll,
+}: {
+  upcoming: Upcoming[];
+  categories: Category[];
+  onSelect: (id: ExpenseId) => void;
+  /** Present when more payments exist than the panel shows. */
+  onShowAll?: () => void;
 }) => (
   <section
     aria-labelledby="upcoming-expenses"
@@ -189,38 +238,23 @@ const UpcomingList = ({
     >
       Nadchodzące · nie wliczone do podsumowania
     </h3>
-    <ul className="divide-y divide-line">
-      {upcoming.map(({ id, recurring, date }) => {
-        const category = categoryOf(categories, recurring.categoryId);
-        return (
-          <li key={id}>
-            <button
-              type="button"
-              onClick={() => onSelect(id)}
-              data-e2e={`dashboard:upcoming:${id}`}
-              className={cn(ROW_CLASS, 'hover:bg-hover-soft')}
-            >
-              <span className="relative shrink-0">
-                <CategoryAvatar category={category} className="h-10 w-10" />
-                <RecurringMark />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold">
-                  {recurring.name}
-                </span>
-                <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-soft">
-                  <span className="shrink-0">{plainDateLabel(date)}</span>
-                  <UpcomingBadge />
-                </span>
-              </span>
-              <span className="text-sm font-semibold tabular-nums text-ink-soft">
-                {money(recurring.cost)}
-              </span>
-            </button>
-          </li>
-        );
-      })}
-    </ul>
+    <UpcomingRows
+      upcoming={upcoming}
+      categories={categories}
+      onSelect={onSelect}
+    />
+    {onShowAll ? (
+      <div className="flex justify-center pt-1">
+        <Button
+          variant="ghost"
+          className="w-auto px-3 py-1.5"
+          onClick={onShowAll}
+          data-e2e="dashboard:upcoming-toggle"
+        >
+          Pokaż wszystkie
+        </Button>
+      </div>
+    ) : null}
   </section>
 );
 
@@ -257,13 +291,16 @@ export const MonthExpenses = ({
   const categories = ctx.useCategories();
   const [filter, setFilter] = useState<CategoryId | null>(null);
   const all = useModal(EXPENSES_MODAL);
+  const allUpcoming = useModal(UPCOMING_MODAL);
   const loading = ctx.useLoading();
 
   const today = todayDay();
   // Only the present period looks ahead; a past one is just history.
   const upcoming = containsDate(period, today)
-    ? upcomingCharges(recurring, today, period)
+    ? upcomingCharges(recurring, today, period, UPCOMING_LIMIT)
     : [];
+  // The modal lists every rule, however far its next payment is.
+  const everyUpcoming = upcomingCharges(recurring, today);
   const inPeriod = expensesInPeriod(expenses, period);
   const tabs = categoryTabs(inPeriod, categories);
   // The chosen category may have no expenses in another period: show all then.
@@ -325,6 +362,11 @@ export const MonthExpenses = ({
             upcoming={upcoming}
             categories={categories}
             onSelect={onSelect}
+            onShowAll={
+              everyUpcoming.length > upcoming.length
+                ? allUpcoming.open
+                : undefined
+            }
           />
         ) : null}
 
@@ -363,6 +405,21 @@ export const MonthExpenses = ({
           )}
         </div>
       </div>
+      {allUpcoming.isOpen && (
+        <DetailDialog
+          modal={UPCOMING_MODAL}
+          data-e2e="dashboard:upcoming-dialog"
+          title="Nadchodzące"
+          description="Następna płatność każdej reguły · nie wliczone do podsumowania"
+          onClose={allUpcoming.close}
+        >
+          <UpcomingRows
+            upcoming={everyUpcoming}
+            categories={categories}
+            onSelect={onSelect}
+          />
+        </DetailDialog>
+      )}
       {all.isOpen && (
         <DetailDialog
           modal={EXPENSES_MODAL}

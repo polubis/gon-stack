@@ -3,6 +3,7 @@ import type { ExpenseId, LimitId } from '../domain/models';
 /** URL ids of the dashboard modals (see `shared/router/modal-stack`). */
 export const CATEGORIES_MODAL = 'categories';
 export const EXPENSES_MODAL = 'expenses';
+export const UPCOMING_MODAL = 'upcoming';
 
 const EXPENSE_PREFIX = 'expense:';
 
