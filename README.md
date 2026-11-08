@@ -83,7 +83,8 @@ pnpm --filter <app> dev           # one app
 | Unit tests        | `pnpm test`                        | Behavior, not internals       |
 | E2E tests         | `pnpm pw:install && pnpm test:e2e` | Runs against the built worker |
 | Lint + types      | `pnpm lint && pnpm check-types`    | Strict TypeScript             |
-| Full CI locally   | `pnpm ci:verify`                   | Same gate as the PR           |
+| Full CI locally   | `pnpm ci:verify`                   | Format, lint, types, test, build (pre-commit) |
+| E2E before ship   | `pnpm ci:e2e`                      | PR gate coming; not on commit yet |
 | Rules in sync     | `pnpm nitpick:check`               | Docs match code               |
 | Format            | `pnpm format`                      | Prettier + Tailwind plugin    |
 
@@ -142,7 +143,7 @@ Shared packages stay available: use them, swap them or delete them.
 3. **Rich commits.** `type(scope): title`, blank line, `- ` change list. Scope is required, `!` marks a breaking change.
 4. **One decision per session.** A new file in `decisions/YYYYMMDD-HHmmss-<ticket>-<slug>.md` records what changed and why.
 5. **Proof, not claims.** Cheapest sufficient evidence (test, screenshot, video) saved under `.evidences/<KEY>/`, never committed.
-6. **CI gate.** `ci:verify` runs format, lint, types, unit tests, build, then e2e. Husky runs it before commit.
+6. **CI gate.** Husky runs `ci:verify` (format, lint, types, unit tests, build) and `audit:check` before commit. Run `pnpm ci:e2e` locally; PR quality checks will add e2e soon.
 
 ---
 
