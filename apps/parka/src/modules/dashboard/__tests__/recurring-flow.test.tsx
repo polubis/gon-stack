@@ -166,6 +166,21 @@ describe('upcoming recurring payments', () => {
     ).toEqual(['2025-06-28', '2025-06-22']);
   });
 
+  it('keeps only the nearest payments when given a limit', () => {
+    const list = [
+      asRecurring({ id: 'r-1', name: 'Trzeci', startDate: '2025-06-24' }),
+      asRecurring({ id: 'r-2', name: 'Pierwszy', startDate: '2025-06-22' }),
+      asRecurring({ id: 'r-3', name: 'Drugi', startDate: '2025-06-23' }),
+    ];
+
+    expect(
+      upcomingCharges(list, '2025-06-20', undefined, 2).map(
+        (u) => u.recurring.name,
+      ),
+    ).toEqual(['Drugi', 'Pierwszy']);
+    expect(upcomingCharges(list, '2025-06-20')).toHaveLength(3);
+  });
+
   it('announces nothing for a paused or finished rule', () => {
     const list = [
       asRecurring({ active: false }),

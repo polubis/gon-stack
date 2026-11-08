@@ -30,12 +30,12 @@ import type {
 
 const UPCOMING_PREFIX = 'upcoming:';
 
-/** How many rules the list announces at most, each by its next payment. */
+/** Payments the panel announces before "Pokaż wszystkie". */
 export const UPCOMING_LIMIT = 3;
 
 /**
- * The next payment of each rule after `today` (`YYYY-MM-DD`): the nearest
- * `UPCOMING_LIMIT` of them, shown latest first.
+ * The next payment of each rule after `today` (`YYYY-MM-DD`), shown latest
+ * first; with a `limit` only the nearest ones are kept.
  * One per rule: the same rule repeated would only duplicate what is on
  * screen. With a `period` only payments inside it are kept. A projection:
  * never stored, never part of a sum or a limit.
@@ -44,6 +44,7 @@ export const upcomingCharges = (
   recurring: Recurring[],
   today: string,
   period?: Period,
+  limit?: number,
 ): Upcoming[] =>
   recurring
     .flatMap((r) =>
@@ -55,7 +56,7 @@ export const upcomingCharges = (
     )
     .filter((u) => period === undefined || containsDay(period, u.date))
     .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
-    .slice(0, UPCOMING_LIMIT)
+    .slice(0, limit)
     .reverse();
 
 /** Weekly / monthly / yearly in the app's language. */

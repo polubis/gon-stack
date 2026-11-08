@@ -43,6 +43,7 @@ export const DetailDialog = ({
     | 'dashboard:limits-dialog'
     | 'dashboard:limit-dialog'
     | 'dashboard:expenses-dialog'
+    | 'dashboard:upcoming-dialog'
     | 'dashboard:period-range-dialog';
 }) => {
   useModalMounted(modal);
