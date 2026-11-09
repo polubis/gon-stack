@@ -3,7 +3,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { Loader2, Scissors, X } from 'lucide-react';
 import { closeModal, useModalMounted } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
-import { readDuration, trimVideo } from '../integration/trim-video';
+import { previewUrl, readDuration, trimVideo } from '../integration/trim-video';
 
 const STEP = 0.1;
 
@@ -23,17 +23,22 @@ export const VideoTrimDialog = ({
   onDone: (result: File | null) => void;
 }) => {
   useModalMounted(modal);
-  const [url] = useState(() => URL.createObjectURL(file));
+  const [url] = useState(() => previewUrl(file));
   const [duration, setDuration] = useState<number>();
   const [start, setStart] = useState(0);
   const [end, setEnd] = useState(0);
   const [progress, setProgress] = useState<number>();
   const [failed, setFailed] = useState(false);
 
-  useEffect(() => () => URL.revokeObjectURL(url), [url]);
+  useEffect(
+    () => () => {
+      if (url) URL.revokeObjectURL(url);
+    },
+    [url],
+  );
   useEffect(() => {
     let current = true;
-    readDuration(url).then(
+    readDuration(file).then(
       (length) => {
         if (!current) return;
         setDuration(length);
@@ -44,7 +49,7 @@ export const VideoTrimDialog = ({
     return () => {
       current = false;
     };
-  }, [url]);
+  }, [file]);
 
   const finish = (result: File | null) => {
     onDone(result);
@@ -97,7 +102,11 @@ export const VideoTrimDialog = ({
           </div>
 
           <video
-            src={`${url}#t=0.1`}
+            src={url ?? undefined}
+            onLoadedMetadata={(event) => {
+              // Shows the first frame instead of a black box.
+              event.currentTarget.currentTime = 0.1;
+            }}
             controls
             preload="metadata"
             playsInline
