@@ -48,6 +48,8 @@ export type Attachment = {
   /** Bytes. */
   size: number;
   mime: string;
+  /** A video is stored after the upload response. */
+  status: 'uploading' | 'ready' | 'failed';
 };
 
 /** Note under a task. `bot` names the MCP token that wrote it (never the secret). */
@@ -95,7 +97,12 @@ export type Recurring = {
 export type TimeKind = 'day' | 'week' | 'month' | 'year';
 
 export type NoticeBody =
-  | { tone: 'success'; message: string }
+  | {
+      tone: 'success';
+      message: string;
+      /** Navigates on from the toast. */
+      action?: { label: string; run: () => void };
+    }
   | {
       tone: 'error';
       title: string;

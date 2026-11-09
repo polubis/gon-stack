@@ -38,4 +38,14 @@ describe('attachment rules', () => {
     expect(formatFileSize(2048)).toBe('2 KB');
     expect(formatFileSize(3 * 1024 * 1024)).toBe('3.0 MB');
   });
+
+  it('accepts a video up to 20 MB and refuses a bigger one', () => {
+    const video = { type: 'video/mp4', name: 'a.mp4' };
+    expect(
+      attachmentRejection(file({ ...video, size: 20 * 1024 * 1024 })),
+    ).toBeNull();
+    expect(
+      attachmentRejection(file({ ...video, size: 20 * 1024 * 1024 + 1 })),
+    ).not.toBeNull();
+  });
 });

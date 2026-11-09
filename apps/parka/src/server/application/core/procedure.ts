@@ -57,6 +57,8 @@ const createProcedureFactory = <TIn, TOut, TExtra>({
         sessions: SessionStore;
         origin: string;
         signal: AbortSignal;
+        /** Keeps work running after the response went out. */
+        waitUntil: (work: Promise<unknown>) => void;
       } & TExtra,
     ) => Promise<TOut>;
   }) => {
@@ -74,6 +76,7 @@ const createProcedureFactory = <TIn, TOut, TExtra>({
           sessions: sessionStore(context),
           origin: new URL(context.request.url).origin,
           signal: context.request.signal,
+          waitUntil: (work) => context.locals.cfContext.waitUntil(work),
           ...extra,
         });
         return await schema.parseOutput(result);

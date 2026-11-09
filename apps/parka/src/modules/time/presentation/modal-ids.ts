@@ -108,7 +108,7 @@ export const deletedAttachmentIdOf = (modal: string): string | null =>
 
 const VIEW_ATTACHMENT_PREFIX = 'attachment-view:';
 
-/** Full-screen view of an image attachment. */
+/** Full-screen view of an image or video attachment. */
 export const viewAttachmentModal = (id: string): string =>
   `${VIEW_ATTACHMENT_PREFIX}${id}`;
 
@@ -126,3 +126,6 @@ export const deletedCommentIdOf = (modal: string): string | null =>
   modal.startsWith(DELETE_COMMENT_PREFIX)
     ? modal.slice(DELETE_COMMENT_PREFIX.length)
     : null;
+
+/** Trim step shown after a video is picked (the file itself lives in state). */
+export const TRIM_ATTACHMENT_MODAL = 'attachment-trim';

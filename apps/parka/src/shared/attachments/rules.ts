@@ -7,6 +7,9 @@ export const ATTACHMENT_MAX_BYTES = 5 * 1024 * 1024;
 /** Largest photo accepted for upload (checked before the size reduction). */
 export const ATTACHMENT_MAX_IMAGE_SOURCE_BYTES = 5 * 1024 * 1024;
 
+/** Largest video accepted (and stored); videos are never re-encoded on the server. */
+export const ATTACHMENT_MAX_VIDEO_BYTES = 20 * 1024 * 1024;
+
 /** Lossy WebP quality of re-encoded images (see `attachment-image.ts`). */
 export const ATTACHMENT_IMAGE_QUALITY = 75;
 
@@ -17,6 +20,11 @@ export const ATTACHMENT_MIME_TYPES = [
   'image/gif',
   'application/pdf',
   'text/plain',
+  'video/mp4',
+  'video/webm',
+  'video/quicktime',
+  'video/x-matroska',
+  'video/ogg',
 ] as const;
 
 export const ATTACHMENT_ACCEPT = ATTACHMENT_MIME_TYPES.join(',');
@@ -27,14 +35,19 @@ type Candidate = Pick<File, 'name' | 'size' | 'type'>;
 
 export const isImageMime = (mime: string): boolean => mime.startsWith('image/');
 
+export const isVideoMime = (mime: string): boolean => mime.startsWith('video/');
+
 const megabytes = (bytes: number): number => bytes / 1024 / 1024;
 
 /** Why a file cannot be attached, or `null` when it can. */
 export const attachmentRejection = (file: Candidate): string | null => {
   if (!(ATTACHMENT_MIME_TYPES as readonly string[]).includes(file.type))
-    return 'Dozwolone są obrazy, PDF i pliki tekstowe';
+    return 'Dozwolone są obrazy, wideo, PDF i pliki tekstowe';
   if (file.size === 0) return 'Plik jest pusty';
-  if (isImageMime(file.type)) {
+  if (isVideoMime(file.type)) {
+    if (file.size > ATTACHMENT_MAX_VIDEO_BYTES)
+      return `Wideo jest większe niż ${megabytes(ATTACHMENT_MAX_VIDEO_BYTES)} MB`;
+  } else if (isImageMime(file.type)) {
     if (file.size > ATTACHMENT_MAX_IMAGE_SOURCE_BYTES)
       return `Zdjęcie jest większe niż ${megabytes(ATTACHMENT_MAX_IMAGE_SOURCE_BYTES)} MB`;
   } else if (file.size > ATTACHMENT_MAX_BYTES)

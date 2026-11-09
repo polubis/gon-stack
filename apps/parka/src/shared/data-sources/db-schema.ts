@@ -684,6 +684,7 @@ export type Database = {
           mime: string;
           name: string;
           size: number;
+          status: string;
           task_id: string;
           user_id: string;
         };
@@ -694,6 +695,7 @@ export type Database = {
           mime: string;
           name: string;
           size: number;
+          status?: string;
           task_id: string;
           user_id: string;
         };
@@ -703,6 +705,7 @@ export type Database = {
           mime?: string;
           name?: string;
           size?: number;
+          status?: string;
           task_id?: string;
           user_id?: string;
         };

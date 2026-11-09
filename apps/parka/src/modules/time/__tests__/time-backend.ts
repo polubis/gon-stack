@@ -88,11 +88,14 @@ export const setupTimeBackend = () => {
     commentFailure: null as Json | null,
     /** Slows comment writes, to see the app before the server answers. */
     commentDelayMs: 0,
+    /** Slows file uploads, to cancel one in flight. */
+    uploadDelayMs: 0,
     uploadResult: {
       id: 'a-new',
       name: 'file',
       size: 1,
       mime: 'text/plain',
+      status: 'ready',
     } as Json,
   };
 
@@ -148,6 +151,7 @@ export const setupTimeBackend = () => {
       '/api/time/tasks/:id/attachments/',
       async ({ request, params }) => {
         calls.push({ method: 'POST', url: request.url });
+        if (state.uploadDelayMs) await delay(state.uploadDelayMs);
         if (state.failAttachmentWrites) return HttpResponse.json(FAILURE);
 
         // jsdom files do not survive the fetch form encoder: the test says
@@ -361,6 +365,7 @@ export const setupTimeBackend = () => {
     state.failCommentWrites = false;
     state.commentFailure = null;
     state.commentDelayMs = 0;
+    state.uploadDelayMs = 0;
     state.owner = { name: 'Anna Kowalska', avatarUrl: null };
   });
   beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
