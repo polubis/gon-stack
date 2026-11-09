@@ -5,6 +5,7 @@ import type {
   Expense,
   Limit,
   Notice,
+  Period,
   Recurring,
   Summary,
 } from '../domain/models';
@@ -21,6 +22,8 @@ export const createStore = () => {
   const $limits = atom<Limit[]>([]);
   const $recurring = atom<Recurring[]>([]);
   const $notice = atom<Notice | null>(null);
+  /** Period asked for last; a silent refresh reloads it. */
+  const $period = atom<Period | null>(null);
   const $avatar = atom<Avatar | null>(null);
 
   return {
@@ -33,6 +36,7 @@ export const createStore = () => {
     $limits,
     $recurring,
     $notice,
+    $period,
     $avatar,
   };
 };

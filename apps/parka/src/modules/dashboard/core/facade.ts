@@ -14,6 +14,7 @@ import type {
 export const createFacade = (store: Store, trigger: Registry['trigger']) => {
   return {
     load: (period: Period) => trigger('[TRIGGER]_LOAD', { period }),
+    refresh: () => trigger('[TRIGGER]_REFRESH'),
     updateExpense: (expense: Expense, period: Period) =>
       trigger('[TRIGGER]_UPDATE_EXPENSE', { expense, period }),
     removeExpense: (id: ExpenseId, period: Period) =>

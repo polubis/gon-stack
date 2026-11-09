@@ -5,6 +5,7 @@ import type { Store } from './store';
 export const createFacade = (store: Store, trigger: Registry['trigger']) => {
   return {
     load: () => trigger('[TRIGGER]_LOAD'),
+    refresh: () => trigger('[TRIGGER]_REFRESH'),
     useExpenses: () => store.$expenses.use(),
     useCategories: () => useSortedCategories(store.$categories.use()),
     useRecurring: () => store.$recurring.use(),

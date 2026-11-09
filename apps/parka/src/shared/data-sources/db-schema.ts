@@ -952,6 +952,10 @@ export type Database = {
         Returns: Json;
       };
       mcp_get_task: { Args: { p_id: string; p_token: string }; Returns: Json };
+      mcp_notify_change: {
+        Args: { p_domain: string; p_token: string };
+        Returns: boolean;
+      };
       mcp_header_user: { Args: Record<PropertyKey, never>; Returns: string };
       mcp_list_categories: { Args: { p_token: string }; Returns: Json };
       mcp_list_expenses: {

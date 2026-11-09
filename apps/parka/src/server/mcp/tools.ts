@@ -54,6 +54,15 @@ const jsonSchema = (schema: z.ZodType, io: 'input' | 'output') => {
   return rest;
 };
 
+/** Every write tool changes tasks, categories or priorities: the time module. */
+const announceWrite = async (gateway: McpGateway) => {
+  try {
+    await gateway.notifyChange('time');
+  } catch {
+    // The write is done; a missed live refresh must not fail it.
+  }
+};
+
 const defineTool = <I extends z.ZodType, O extends z.ZodType>(tool: {
   name: string;
   title: string;
@@ -81,6 +90,7 @@ const defineTool = <I extends z.ZodType, O extends z.ZodType>(tool: {
     try {
       const out = tool.output.safeParse(await tool.run(parsed.data, gateway));
       if (!out.success) return failure('The server returned unexpected data');
+      if (!tool.annotations.readOnlyHint) await announceWrite(gateway);
       return {
         content: text(JSON.stringify(out.data)),
         structuredContent: out.data as Record<string, unknown>,

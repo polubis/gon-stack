@@ -18,6 +18,7 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
   return {
     load: (kind: TimeKind, from: string, to: string) =>
       trigger('[TRIGGER]_LOAD', { kind, from, to }),
+    refresh: () => trigger('[TRIGGER]_REFRESH'),
     createTask: (task: Task) => trigger('[TRIGGER]_CREATE_TASK', { task }),
     createBacklogTask: (task: BacklogTask) =>
       trigger('[TRIGGER]_CREATE_BACKLOG_TASK', { task }),
