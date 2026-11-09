@@ -73,6 +73,11 @@ export const TIME_E2E_IDS = [
   'time:comment-input',
   'time:comment-save',
   'time:comment-cancel',
+  'time:history',
+  'time:history-toggle',
+  'time:history-skeleton',
+  'time:history-error',
+  'time:history-empty',
 ] as const;
 
 export type TimeDynamicE2eId =
@@ -98,6 +103,7 @@ export type TimeDynamicE2eId =
   | `time:comment-author:${string}`
   | `time:comment-time:${string}`
   | `time:comment-edit:${string}`
-  | `time:comment-delete:${string}`;
+  | `time:comment-delete:${string}`
+  | `time:history-entry:${string}`;
 
 export type TimeE2eId = (typeof TIME_E2E_IDS)[number] | TimeDynamicE2eId;

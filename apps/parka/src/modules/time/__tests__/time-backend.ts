@@ -82,6 +82,9 @@ export const setupTimeBackend = () => {
     /** Comments per task id and who owns the account. */
     comments: {} as Record<string, Json[]>,
     owner: { name: 'Anna Kowalska', avatarUrl: null } as Json,
+    /** History entries per task id (newest first), read only like the server. */
+    history: {} as Record<string, Json[]>,
+    failHistoryReads: false,
     failCommentReads: false,
     failCommentWrites: false,
     /** What a failing comment write answers; defaults to a server error. */
@@ -170,6 +173,14 @@ export const setupTimeBackend = () => {
           (item) => item.id !== params.id,
         );
       return HttpResponse.json({ code: 200, ok: true });
+    }),
+    http.get('/api/time/tasks/:id/history/', async ({ request, params }) => {
+      calls.push({ method: 'GET', url: request.url });
+      if (state.failHistoryReads) return HttpResponse.json(FAILURE);
+      return HttpResponse.json({
+        code: 200,
+        data: { items: state.history[params.id as string] ?? [] },
+      });
     }),
     http.get('/api/time/tasks/:id/comments/', async ({ request, params }) => {
       calls.push({ method: 'GET', url: request.url });
@@ -361,6 +372,8 @@ export const setupTimeBackend = () => {
     state.failAttachmentReads = false;
     state.failAttachmentWrites = false;
     state.comments = {};
+    state.history = {};
+    state.failHistoryReads = false;
     state.failCommentReads = false;
     state.failCommentWrites = false;
     state.commentFailure = null;

@@ -176,6 +176,8 @@ export const API_ROUTER = {
   timeTaskComments: (taskId: string) =>
     `/api/time/tasks/${taskId}/comments/` as const,
   timeCommentById: routeById('/api/time/comments/'),
+  timeTaskHistory: (taskId: string) =>
+    `/api/time/tasks/${taskId}/history/` as const,
   timeRecurring: route('/api/time/recurring/'),
   timeRecurringById: routeById('/api/time/recurring/'),
   timeCategories: route('/api/time/categories/'),

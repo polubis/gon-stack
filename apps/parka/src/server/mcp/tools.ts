@@ -184,6 +184,39 @@ const attachment = () =>
       ),
   });
 
+const historyEntry = () =>
+  z.object({
+    id: z.string(),
+    kind: z.enum([
+      'created',
+      'updated',
+      'attachment_added',
+      'attachment_removed',
+      'comment_added',
+      'comment_edited',
+      'comment_removed',
+    ]),
+    field: z
+      .enum([
+        'title',
+        'description',
+        'category',
+        'priority',
+        'day',
+        'at',
+        'done',
+        'in_progress',
+      ])
+      .nullable()
+      .describe('Only for `updated`: the field that changed'),
+    from: z.string().nullable().describe('Value before (text, names, files)'),
+    to: z.string().nullable().describe('Value after'),
+    at: z.string(),
+    author: z.enum(['owner', 'bot']),
+    botName: z.string().nullable().describe('Name of the token behind it'),
+    botRef: z.string().nullable(),
+  });
+
 const comment = () =>
   z.object({
     id: z.string(),
@@ -530,6 +563,20 @@ export const MCP_TOOLS: readonly RegisteredTool[] = [
       const added = await gateway.addTaskComment(args.taskId, args.body);
       if (!added) throw new ToolError(`Task "${args.taskId}" not found`);
       return added as z.input<ReturnType<typeof comment>>;
+    },
+  }),
+  defineTool({
+    name: 'get_task_history',
+    title: 'Task history',
+    description:
+      'Lists what happened to a task, newest first: creation, each changed field (before and after), attachments added or removed and comments written, edited or deleted. Each entry says who did it: the owner or a bot (token name and short id). Read only; the history cannot be changed.',
+    input: z.strictObject({ taskId: id() }),
+    output: z.object({ items: z.array(historyEntry()) }),
+    annotations: READ_ONLY,
+    run: async (args, gateway) => {
+      const found = await gateway.listTaskHistory(args.taskId);
+      if (!found) throw new ToolError(`Task "${args.taskId}" not found`);
+      return found as { items: z.input<ReturnType<typeof historyEntry>>[] };
     },
   }),
   defineTool({

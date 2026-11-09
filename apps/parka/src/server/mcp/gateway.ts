@@ -84,6 +84,7 @@ export type McpGateway = {
   deleteTaskAttachment: (id: string) => Promise<unknown>;
   listTaskComments: (taskId: string) => Promise<unknown>;
   addTaskComment: (taskId: string, body: string) => Promise<unknown>;
+  listTaskHistory: (taskId: string) => Promise<unknown>;
   listCategories: () => Promise<unknown>;
   createCategory: (input: {
     name: string;
@@ -264,6 +265,8 @@ export const createSupabaseGateway = (
       unwrap(
         await db.rpc('mcp_add_task_comment', { p_token, p_task_id, p_body }),
       ),
+    listTaskHistory: async (p_task_id) =>
+      unwrap(await db.rpc('mcp_list_task_history', { p_token, p_task_id })),
     listCategories: async () =>
       unwrap(await db.rpc('mcp_list_categories', { p_token })),
     createCategory: async (c) =>

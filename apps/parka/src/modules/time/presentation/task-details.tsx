@@ -10,6 +10,7 @@ import { descriptionModal, editBacklogModal, editTaskModal } from './modal-ids';
 import { ModalShell } from './modal-shell';
 import { TaskAttachments } from './task-attachments';
 import { TaskComments } from './task-comments';
+import { TaskHistory } from './task-history';
 import { TaskKey } from './task-key';
 
 /** Roughly what fits the clamp when layout can't be measured. */
@@ -103,6 +104,7 @@ export const TaskDetails = ({
         {task.description ? <ClampedDescription task={task} /> : null}
         <TaskAttachments taskId={task.id} />
         <TaskComments taskId={task.id} />
+        <TaskHistory taskId={task.id} />
         <div className="mt-1 flex justify-end">
           <Button
             data-e2e="time:task-details-edit"

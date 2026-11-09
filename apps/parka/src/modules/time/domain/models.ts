@@ -63,6 +63,35 @@ export type TaskComment = {
   bot: { name: string; ref: string } | null;
 };
 
+/** One immutable fact about a task. `bot` names the MCP token behind it; `null` is the owner. */
+export type TaskHistoryEntry = {
+  id: string;
+  kind:
+    | 'created'
+    | 'updated'
+    | 'attachment_added'
+    | 'attachment_removed'
+    | 'comment_added'
+    | 'comment_edited'
+    | 'comment_removed';
+  /** Only for `updated`. */
+  field:
+    | 'title'
+    | 'description'
+    | 'category'
+    | 'priority'
+    | 'day'
+    | 'at'
+    | 'done'
+    | 'in_progress'
+    | null;
+  from: string | null;
+  to: string | null;
+  /** ISO time it happened. */
+  at: string;
+  bot: { name: string; ref: string } | null;
+};
+
 /** The account owner: the human side of every comment. */
 export type CommentOwner = { name: string; avatarUrl: string | null };
 
