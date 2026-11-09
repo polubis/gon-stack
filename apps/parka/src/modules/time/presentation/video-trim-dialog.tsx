@@ -102,7 +102,7 @@ export const VideoTrimDialog = ({
           </div>
 
           <video
-            src={url ?? undefined}
+            src={url?.startsWith('blob:') ? url : undefined}
             onLoadedMetadata={(event) => {
               // Shows the first frame instead of a black box.
               event.currentTarget.currentTime = 0.1;
