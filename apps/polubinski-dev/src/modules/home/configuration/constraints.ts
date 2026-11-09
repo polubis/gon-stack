@@ -67,7 +67,7 @@ const appConfig = {
   },
   contactSection: {
     id: 'contact',
-    calendarLink: 'https://calendar.app.google/unoaL2rV1MhKvVvZ8',
+    calendarLink: 'https://calendar.app.google/UwgthuL9bYZmyRRn6',
     linkedInLink:
       'https://www.linkedin.com/in/adrian-po%C5%82ubi%C5%84ski-281ab2172/',
   },
