@@ -24,6 +24,7 @@ export const createTimeTask = privateProcedure({
           at: input.at,
           done: input.done,
           in_progress: input.inProgress && !input.done,
+          status_id: input.inProgress && !input.done ? input.statusId : null,
           ...deviceColumns(input.device),
         },
         { onConflict: 'user_id,id' },
@@ -31,7 +32,7 @@ export const createTimeTask = privateProcedure({
       .select()
       .single();
     if (error?.code === '23503')
-      throw new BadRequest(error, 'Unknown category or priority');
+      throw new BadRequest(error, 'Unknown category, priority or status');
     if (error) throw fromSupabaseError(error);
 
     return {

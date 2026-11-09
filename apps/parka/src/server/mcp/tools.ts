@@ -110,7 +110,15 @@ const title = () => z.string().trim().min(1).max(160);
 const description = () => z.string().trim().max(5000);
 const ref = (what: string) =>
   z.string().trim().min(1).max(100).describe(`${what} id or name`);
-const taskStatus = () => z.enum(['open', 'in_progress', 'done']);
+const taskStatus = () =>
+  z
+    .string()
+    .trim()
+    .min(1)
+    .max(100)
+    .describe(
+      'open, in_progress, done, or the id or name of a custom step from list_statuses',
+    );
 const id = () => z.string().trim().min(1).max(100);
 const limit = () => z.number().int().min(1).max(100).default(DEFAULT_LIMIT);
 const cursor = () =>
@@ -159,7 +167,12 @@ const task = () =>
     key: z.string().describe('Unique readable task key, e.g. QXT-7'),
     title: z.string(),
     description: z.string().nullable(),
-    status: z.enum(['open', 'in_progress', 'done']),
+    status: z
+      .string()
+      .describe('open, done, in_progress or the id of a custom step'),
+    statusName: z
+      .string()
+      .describe('Label of the status, as the user named it'),
     day: z.string().nullable().describe('Null for a backlog task'),
     at: z.string().nullable().describe('HH:MM; null lasts the whole day'),
     categoryId: z.string(),
@@ -206,6 +219,7 @@ const historyEntry = () =>
         'at',
         'done',
         'in_progress',
+        'status',
       ])
       .nullable()
       .describe('Only for `updated`: the field that changed'),
@@ -259,6 +273,13 @@ const priority = () =>
     id: z.string(),
     name: z.string(),
     value: z.number().int().describe('1 (least) to 10 (most)'),
+  });
+
+const status = () =>
+  z.object({
+    id: z.string().describe('open, done, in_progress or a custom step id'),
+    name: z.string(),
+    kind: z.enum(['open', 'step', 'done']),
   });
 
 const categoryName = () => z.string().trim().min(1).max(40);
@@ -337,7 +358,12 @@ export const MCP_TOOLS: readonly RegisteredTool[] = [
     description:
       "Lists the signed-in user's tasks, scheduled ones by day and time, then backlog ones. Filter by status, day range, scope or category (the task's tag, e.g. Automatyzacja). Paginated.",
     input: z.strictObject({
-      status: z.enum(['open', 'in_progress', 'done', 'all']).default('all'),
+      status: z
+        .union([z.literal('all'), taskStatus()])
+        .default('all')
+        .describe(
+          'all, or one status: open, in_progress, done or a custom step (list_statuses)',
+        ),
       from: day().optional().describe('First day, inclusive'),
       to: day().optional().describe('Last day, inclusive'),
       scope: z
@@ -380,7 +406,7 @@ export const MCP_TOOLS: readonly RegisteredTool[] = [
     name: 'set_task_status',
     title: 'Set task status',
     description:
-      'Sets a task to open, in_progress (started, not finished) or done. A backlog task (no day) can only be open: give it a day with update_task first. Safe to repeat.',
+      "Sets a task to open, done, or one of the user's steps between them (in_progress by default, plus custom ones: see list_statuses). A backlog task (no day) can only be open: give it a day with update_task first. Safe to repeat.",
     input: z.strictObject({
       id: id(),
       status: taskStatus(),
@@ -648,6 +674,19 @@ export const MCP_TOOLS: readonly RegisteredTool[] = [
         throw new ToolError(`Category "${args.id}" not found`);
       return { id: args.id, deleted: true as const };
     },
+  }),
+  defineTool({
+    name: 'list_statuses',
+    title: 'List task statuses',
+    description:
+      'Lists the task workflow in order: open, the steps the user configured (in_progress is the default one), done. A task moves along it; pass an id or name to set_task_status, update_task or list_tasks.',
+    input: z.strictObject({}),
+    output: z.object({ items: z.array(status()) }),
+    annotations: READ_ONLY,
+    run: async (_args, gateway) =>
+      (await gateway.listStatuses()) as {
+        items: z.input<ReturnType<typeof status>>[];
+      },
   }),
   defineTool({
     name: 'list_priorities',

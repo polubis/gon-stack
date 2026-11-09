@@ -677,6 +677,28 @@ export type Database = {
           },
         ];
       };
+      time_statuses: {
+        Row: {
+          id: string;
+          name: string;
+          position: number;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          id: string;
+          name: string;
+          position: number;
+          user_id: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          position?: number;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       time_task_attachments: {
         Row: {
           created_at: string;
@@ -869,6 +891,7 @@ export type Database = {
           occurrence_date: string | null;
           priority_id: string;
           recurring_id: string | null;
+          status_id: string | null;
           title: string;
           user_id: string;
         };
@@ -893,6 +916,7 @@ export type Database = {
           occurrence_date?: string | null;
           priority_id: string;
           recurring_id?: string | null;
+          status_id?: string | null;
           title: string;
           user_id: string;
         };
@@ -916,6 +940,7 @@ export type Database = {
           occurrence_date?: string | null;
           priority_id?: string;
           recurring_id?: string | null;
+          status_id?: string | null;
           title?: string;
           user_id?: string;
         };
@@ -939,6 +964,13 @@ export type Database = {
             columns: ['user_id', 'recurring_id'];
             isOneToOne: false;
             referencedRelation: 'time_recurring';
+            referencedColumns: ['user_id', 'id'];
+          },
+          {
+            foreignKeyName: 'time_tasks_status_fk';
+            columns: ['user_id', 'status_id'];
+            isOneToOne: false;
+            referencedRelation: 'time_statuses';
             referencedColumns: ['user_id', 'id'];
           },
         ];
@@ -1024,6 +1056,7 @@ export type Database = {
         Returns: Json;
       };
       mcp_list_priorities: { Args: { p_token: string }; Returns: Json };
+      mcp_list_statuses: { Args: { p_token: string }; Returns: Json };
       mcp_list_task_attachments: {
         Args: { p_task_id: string; p_token: string };
         Returns: Json;
@@ -1061,6 +1094,10 @@ export type Database = {
         Args: { p_ref: string; p_user: string };
         Returns: string;
       };
+      mcp_resolve_status: {
+        Args: { p_ref: string; p_user: string };
+        Returns: string;
+      };
       mcp_set_task_status: {
         Args: { p_id: string; p_status: string; p_token: string };
         Returns: Json;
@@ -1093,6 +1130,10 @@ export type Database = {
         Returns: undefined;
       };
       seed_time_defaults: { Args: { target: string }; Returns: undefined };
+      task_step_name: {
+        Args: { p_progress: boolean; p_status: string; p_user: string };
+        Returns: string;
+      };
     };
     Enums: {
       [_ in never]: never;

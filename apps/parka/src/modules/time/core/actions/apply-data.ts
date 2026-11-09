@@ -14,6 +14,7 @@ export const applyData = (
   if (store.$pending.get() > 0 || store.$writeSeq.get() !== seq) return false;
   store.$categories.set(data.categories);
   store.$priorities.set(sortPriorities(data.priorities));
+  store.$statuses.set(data.statuses);
   store.$tasks.set(sortTasks(data.tasks));
   store.$backlog.set(data.backlog);
   store.$loaded.set({ from: range.from, to: range.to });

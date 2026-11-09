@@ -46,6 +46,8 @@ const updated = (entry: TaskHistoryEntry): string => {
         : 'Cofnięto oznaczenie „zrobione”';
     case 'in_progress':
       return entry.to === 'true' ? 'Rozpoczęto zadanie' : 'Wstrzymano zadanie';
+    case 'status':
+      return `Zmieniono status: ${entry.from ?? '—'} → ${entry.to ?? '—'}`;
     case null:
       return 'Zmieniono zadanie';
   }

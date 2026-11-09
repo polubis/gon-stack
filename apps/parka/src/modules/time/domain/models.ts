@@ -7,6 +7,7 @@ export type TaskId = Brand<string, 'TaskId'>;
 export type RecurringId = Brand<string, 'TimeRecurringId'>;
 export type CategoryId = Brand<string, 'TimeCategoryId'>;
 export type PriorityId = Brand<string, 'TimePriorityId'>;
+export type StatusId = Brand<string, 'TimeStatusId'>;
 
 export type Category = {
   id: CategoryId;
@@ -18,6 +19,9 @@ export type Category = {
 
 /** A priority is a name plus a weight: 1 (least) .. 10 (most) important. */
 export type Priority = { id: PriorityId; name: string; value: number };
+
+/** A step of the task workflow between open and done (`in_progress` is built in). */
+export type Status = { id: StatusId; name: string };
 
 export type Task = {
   id: TaskId;
@@ -35,6 +39,8 @@ export type Task = {
   done: boolean;
   /** Being worked on now; never together with `done`. */
   inProgress: boolean;
+  /** Custom step of a started task; `null` is the built-in `in_progress` step. */
+  statusId: StatusId | null;
   /** Browser the task was created in; `null` for older tasks and rule occurrences. */
   device: Device | null;
   /** Rule the task came from; `null` for an ordinary one. */
@@ -84,6 +90,7 @@ export type TaskHistoryEntry = {
     | 'at'
     | 'done'
     | 'in_progress'
+    | 'status'
     | null;
   from: string | null;
   to: string | null;

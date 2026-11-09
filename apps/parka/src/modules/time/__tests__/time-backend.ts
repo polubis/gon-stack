@@ -42,6 +42,7 @@ export const task = (overrides: Json = {}): Json => ({
   at: '09:00',
   done: false,
   inProgress: false,
+  statusId: null,
   device: null,
   recurringId: null,
   occurrenceDate: null,
@@ -68,6 +69,8 @@ export const setupTimeBackend = () => {
     backlog: [] as Json[],
     categories: [...CATEGORIES] as Json[],
     priorities: [...PRIORITIES] as Json[],
+    /** Steps between open and done, like the server's default. */
+    statuses: [{ id: 'in_progress', name: 'W trakcie' }] as Json[],
     failWrites: false,
     /** What the user set for the creating device; the server adds it on create. */
     deviceProfile: null as Json | null,
@@ -132,6 +135,7 @@ export const setupTimeBackend = () => {
         data: {
           categories: state.categories,
           priorities: state.priorities,
+          statuses: state.statuses,
           tasks: state.tasks.filter(
             (t) => (t.day as string) >= from && (t.day as string) <= to,
           ),
@@ -348,6 +352,12 @@ export const setupTimeBackend = () => {
       state.categories = state.categories.filter((c) => c.id !== params.id);
       return HttpResponse.json({ code: 200, ok: true });
     }),
+    http.put('/api/time/statuses/', async ({ request }) => {
+      const body = await record(request);
+      if (state.failWrites) return HttpResponse.json(FAILURE);
+      state.statuses = body!.statuses as Json[];
+      return HttpResponse.json({ code: 200, data: body });
+    }),
     http.post('/api/time/priorities/', async ({ request }) => {
       const body = await record(request);
       if (state.failWrites) return HttpResponse.json(FAILURE);
@@ -360,6 +370,7 @@ export const setupTimeBackend = () => {
     calls.length = 0;
     created = 0;
     state.createDelayMs = 0;
+    state.statuses = [{ id: 'in_progress', name: 'W trakcie' }];
     state.tasks = [];
     state.backlog = [];
     state.categories = [...CATEGORIES];
@@ -387,6 +398,9 @@ export const setupTimeBackend = () => {
 
   return {
     state,
+    statuses: (statuses: Json[]) => {
+      state.statuses = statuses;
+    },
     seed: (tasks: Json[]) => {
       state.tasks = [...tasks];
     },

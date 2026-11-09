@@ -16,7 +16,8 @@ export class McpAuthError extends Error {}
 /** The database refused the call for a reason the model may read and act on. */
 export class McpInputError extends Error {}
 
-export type TaskStatus = 'open' | 'in_progress' | 'done';
+/** `open`, `in_progress`, `done`, or the id or name of a custom step (see `list_statuses`). */
+export type TaskStatus = string;
 
 export type TaskQuery = {
   status: TaskStatus | 'all';
@@ -93,6 +94,7 @@ export type McpGateway = {
   }) => Promise<unknown>;
   updateCategory: (id: string, patch: CategoryPatch) => Promise<unknown>;
   deleteCategory: (id: string) => Promise<unknown>;
+  listStatuses: () => Promise<unknown>;
   listPriorities: () => Promise<unknown>;
   createPriority: (input: { name: string; value: number }) => Promise<unknown>;
   listExpenses: (query: ExpenseQuery) => Promise<unknown>;
@@ -171,6 +173,8 @@ export const createSupabaseGateway = (
           p_category: q.category ?? undefined,
         }),
       ),
+    listStatuses: async () =>
+      unwrap(await db.rpc('mcp_list_statuses', { p_token })),
     getTask: async (p_id) =>
       unwrap(await db.rpc('mcp_get_task', { p_token, p_id })),
     setTaskStatus: async (p_id, p_status) =>

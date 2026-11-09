@@ -11,6 +11,7 @@ import {
   timeCategoryInput,
   timePriority,
   timeRecurring,
+  timeStatus,
   timeTask,
 } from './general';
 
@@ -39,6 +40,8 @@ export const listTimeSchema = () =>
         data: z.object({
           categories: z.array(timeCategory()),
           priorities: z.array(timePriority()),
+          /** The steps between open and done, in order. */
+          statuses: z.array(timeStatus()),
           tasks: z.array(timeTask()),
           /** Tasks without a day, whatever the range. */
           backlog: z.array(timeBacklogTask()),
@@ -153,6 +156,39 @@ export const createTimePrioritySchema = () =>
     in: timePriority(),
     out: z.union([
       z.object({ code: z.literal(201), data: timePriority() }),
+      errorOut(),
+    ]),
+  });
+
+/** The whole ordered list of steps between open and done replaces the stored one. */
+export const saveTimeStatusesSchema = () =>
+  z.object({
+    in: z.object({
+      statuses: z
+        .array(timeStatus())
+        .min(1)
+        .max(10)
+        .superRefine((list, ctx) => {
+          const ids = new Set(list.map((s) => s.id));
+          const names = new Set(list.map((s) => s.name.toLowerCase()));
+          if (ids.size !== list.length)
+            ctx.addIssue({ code: 'custom', message: 'Duplicate status id' });
+          if (names.size !== list.length)
+            ctx.addIssue({ code: 'custom', message: 'Duplicate status name' });
+          if (!ids.has('in_progress'))
+            ctx.addIssue({
+              code: 'custom',
+              message: 'The in_progress step stays',
+            });
+          if (ids.has('open') || ids.has('done'))
+            ctx.addIssue({ code: 'custom', message: 'Reserved status id' });
+        }),
+    }),
+    out: z.union([
+      z.object({
+        code: z.literal(200),
+        data: z.object({ statuses: z.array(timeStatus()) }),
+      }),
       errorOut(),
     ]),
   });

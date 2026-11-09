@@ -13,7 +13,13 @@ export const sendTimeTaskToBacklog = privateProcedure({
   handler: async (input, { db, user }) => {
     const { data, error } = await db
       .from('time_tasks')
-      .update({ day: null, at: null, done: false, in_progress: false })
+      .update({
+        day: null,
+        at: null,
+        done: false,
+        in_progress: false,
+        status_id: null,
+      })
       .eq('id', input.id)
       .eq('user_id', user.id)
       .is('recurring_id', null)

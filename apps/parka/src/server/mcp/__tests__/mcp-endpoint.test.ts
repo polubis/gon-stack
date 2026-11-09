@@ -13,6 +13,7 @@ const TASK = {
   title: 'Pay rent',
   description: null,
   status: 'open',
+  statusName: 'Do zrobienia',
   day: '2026-10-24',
   at: null,
   categoryId: 'home',
@@ -131,6 +132,16 @@ const fakeGateway = (
     deleteCategory: async (id) => {
       await record('deleteCategory', id);
       throw new McpInputError('category is in use');
+    },
+    listStatuses: async () => {
+      await record('listStatuses');
+      return {
+        items: [
+          { id: 'open', name: 'Do zrobienia', kind: 'open' },
+          { id: 'tstatus-review', name: 'Review', kind: 'step' },
+          { id: 'done', name: 'Zrobione', kind: 'done' },
+        ],
+      };
     },
     listPriorities: async () => {
       await record('listPriorities');
@@ -298,6 +309,7 @@ describe('mcp tools list', () => {
       'list_categories',
       'list_expenses',
       'list_priorities',
+      'list_statuses',
       'list_task_attachments',
       'list_task_comments',
       'list_tasks',
@@ -454,6 +466,30 @@ describe('mcp status change', () => {
     ]);
   });
 
+  it('lists the workflow with the steps the user configured', async () => {
+    const { rpc } = setup();
+
+    const { json } = await rpc('tools/call', {
+      name: 'list_statuses',
+      arguments: {},
+    });
+
+    expect(
+      json.result.structuredContent.items.map((s: { id: string }) => s.id),
+    ).toEqual(['open', 'tstatus-review', 'done']);
+  });
+
+  it('moves a task to a custom status by its name', async () => {
+    const { rpc, calls } = setup();
+
+    await rpc('tools/call', {
+      name: 'set_task_status',
+      arguments: { id: 't-1', status: 'Review' },
+    });
+
+    expect(calls).toEqual([{ name: 'setTaskStatus', args: ['t-1', 'Review'] }]);
+  });
+
   it('lists only tasks in progress', async () => {
     const { rpc, calls } = setup();
 
@@ -477,12 +513,12 @@ describe('mcp status change', () => {
     expect(calls).toEqual([]);
   });
 
-  it('refuses a status other than open, in progress or done', async () => {
+  it('refuses an empty status', async () => {
     const { rpc, calls } = setup();
 
     const { json } = await rpc('tools/call', {
       name: 'set_task_status',
-      arguments: { id: 't-1', status: 'deleted' },
+      arguments: { id: 't-1', status: '  ' },
     });
 
     expect(json.result.isError).toBe(true);

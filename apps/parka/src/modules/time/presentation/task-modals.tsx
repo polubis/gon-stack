@@ -14,6 +14,7 @@ import {
   BACKLOG_MODAL,
   NEW_BACKLOG_MODAL,
   CATEGORIES_MODAL,
+  STATUSES_MODAL,
   deletedCategoryIdOf,
   deletedIdOf,
   describedIdOf,
@@ -31,6 +32,7 @@ import {
   viewedIdOf,
 } from './modal-ids';
 import { PriorityDialog } from './priority-dialog';
+import { StatusesDialog } from './statuses-dialog';
 import { TaskDialog } from './task-dialog';
 import { TaskDescription, TaskDetails } from './task-details';
 
@@ -98,6 +100,8 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
       return <CategoryDialog key={modal} modal={modal} />;
     if (modal === NEW_PRIORITY_MODAL)
       return <PriorityDialog key={modal} modal={modal} />;
+    if (modal === STATUSES_MODAL)
+      return <StatusesDialog key={modal} modal={modal} />;
     if (modal === CATEGORIES_MODAL)
       return <CategoriesDialog key={modal} modal={modal} />;
 

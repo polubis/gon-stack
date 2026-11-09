@@ -41,6 +41,13 @@ export const timePriority = () =>
     value: z.number().int().min(1).max(10),
   });
 
+/** A step of the task workflow between open and done; `in_progress` is built in. */
+export const timeStatus = () =>
+  z.object({
+    id: z.string().regex(/^[\w-]{1,64}$/),
+    name: z.string().trim().min(1).max(40),
+  });
+
 export const timeTask = () =>
   z.object({
     id: z.string().min(1),
@@ -60,6 +67,8 @@ export const timeTask = () =>
     done: z.boolean(),
     /** Being worked on now; never together with `done`. */
     inProgress: z.boolean().default(false),
+    /** Custom step of a started task; `null` is the built-in `in_progress` step. */
+    statusId: z.string().min(1).nullable().default(null),
     /** Device the task was created from; `null` for older tasks and rule occurrences. */
     device: device().nullable().default(null),
     /** Rule this task came from; `null` for an ordinary one. Server-set. */

@@ -22,13 +22,14 @@ export const updateTimeTask = privateProcedure({
         at: input.at,
         done: input.done,
         in_progress: input.inProgress && !input.done,
+        status_id: input.inProgress && !input.done ? input.statusId : null,
       })
       .eq('id', input.id)
       .eq('user_id', user.id)
       .select()
       .maybeSingle();
     if (error?.code === '23503')
-      throw new BadRequest(error, 'Unknown category or priority');
+      throw new BadRequest(error, 'Unknown category, priority or status');
     if (error) throw fromSupabaseError(error);
     if (!data) throw new NotFound(undefined, 'Task not found');
 

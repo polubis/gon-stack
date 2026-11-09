@@ -78,6 +78,12 @@ export const TIME_E2E_IDS = [
   'time:history-skeleton',
   'time:history-error',
   'time:history-empty',
+  'time:statuses-open',
+  'time:statuses-dialog',
+  'time:statuses-edit',
+  'time:statuses-save',
+  'time:status-add',
+  'time:task-status',
 ] as const;
 
 export type TimeDynamicE2eId =
@@ -104,6 +110,7 @@ export type TimeDynamicE2eId =
   | `time:comment-time:${string}`
   | `time:comment-edit:${string}`
   | `time:comment-delete:${string}`
-  | `time:history-entry:${string}`;
+  | `time:history-entry:${string}`
+  | `time:status-name:${string}`;
 
 export type TimeE2eId = (typeof TIME_E2E_IDS)[number] | TimeDynamicE2eId;

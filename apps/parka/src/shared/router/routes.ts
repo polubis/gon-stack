@@ -183,6 +183,7 @@ export const API_ROUTER = {
   timeCategories: route('/api/time/categories/'),
   timeCategoryById: routeById('/api/time/categories/'),
   timePriorities: route('/api/time/priorities/'),
+  timeStatuses: route('/api/time/statuses/'),
   settings: route('/api/settings/'),
   mcpTokens: route('/api/mcp-tokens/'),
   mcpTokenById: routeById('/api/mcp-tokens/'),
