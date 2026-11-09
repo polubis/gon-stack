@@ -171,6 +171,7 @@ export const API_ROUTER = {
   timeTaskAttachments: (taskId: string) =>
     `/api/time/tasks/${taskId}/attachments/` as const,
   timeAttachmentById: routeById('/api/time/attachments/'),
+  dataChangeEvents: route('/api/data-changes/events/'),
   timeAttachmentEvents: route('/api/time/attachments/events/'),
   timeTaskComments: (taskId: string) =>
     `/api/time/tasks/${taskId}/comments/` as const,

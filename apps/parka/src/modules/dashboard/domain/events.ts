@@ -27,6 +27,7 @@ export type Event =
       '[TRIGGER]_DELETE_RECURRING',
       { id: RecurringId; period: Period }
     >
+  | TriggerEvent<'[TRIGGER]_REFRESH'>
   | TriggerEvent<'[TRIGGER]_DISMISS_NOTICE'>
   | TaskEvent<'[TASK]_LOAD', { period: Period }>
   | FactEvent<'[FACT]_RECURRING_CHANGED', { period: Period }>

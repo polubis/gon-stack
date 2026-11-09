@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/shared/data-sources/db-schema';
+import type { DataDomain } from '@schemas/data-changes';
 import {
   prepareAttachment,
   type AttachmentImages,
@@ -70,6 +71,8 @@ export type NewAttachment = { name: string; mime: string; bytes: ArrayBuffer };
  */
 export type McpGateway = {
   authenticate: () => Promise<void>;
+  /** Tells the owner's open app to reload what an MCP write changed. */
+  notifyChange: (domain: DataDomain) => Promise<void>;
   listTasks: (query: TaskQuery) => Promise<unknown>;
   getTask: (id: string) => Promise<unknown>;
   setTaskStatus: (id: string, status: TaskStatus) => Promise<unknown>;
@@ -150,6 +153,9 @@ export const createSupabaseGateway = (
   return {
     authenticate: async () => {
       unwrap(await db.rpc('mcp_authenticate', { p_token }));
+    },
+    notifyChange: async (domain) => {
+      unwrap(await db.rpc('mcp_notify_change', { p_token, p_domain: domain }));
     },
     listTasks: async (q) =>
       unwrap(

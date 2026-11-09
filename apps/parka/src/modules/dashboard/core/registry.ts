@@ -9,6 +9,7 @@ import { updateLimit } from './handlers/update-limit';
 import { removeLimit } from './handlers/delete-limit';
 import { updateRecurring } from './handlers/update-recurring';
 import { removeRecurring } from './handlers/delete-recurring';
+import { refresh } from './handlers/refresh';
 import { dismissNotice } from './handlers/dismiss-notice';
 import { reloadOnRecurringChange } from './handlers/reload-on-recurring-change';
 import { reloadOnExpenseChange } from './handlers/reload-on-expense-change';
@@ -28,6 +29,7 @@ export const createRegistry = (store: Store) => {
     removeLimit(store, bus),
     updateRecurring(store, bus),
     removeRecurring(store, bus),
+    refresh(store, bus),
     dismissNotice(store, bus),
     reloadOnRecurringChange(store, bus),
     reloadOnExpenseChange(store, bus),

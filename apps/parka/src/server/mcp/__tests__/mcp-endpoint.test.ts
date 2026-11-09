@@ -60,7 +60,12 @@ type RpcJson = {
 type Calls = { name: string; args: unknown[] }[];
 
 /** In-memory stand-in for the database: one valid token, one task. */
-const fakeGateway = (calls: Calls, valid = true): McpGateway => {
+const fakeGateway = (
+  calls: Calls,
+  valid = true,
+  notices: string[] = [],
+  failNotice = false,
+): McpGateway => {
   const guard = async () => {
     if (!valid) throw new McpAuthError();
   };
@@ -70,6 +75,11 @@ const fakeGateway = (calls: Calls, valid = true): McpGateway => {
   };
   return {
     authenticate: guard,
+    notifyChange: async (domain) => {
+      await guard();
+      if (failNotice) throw new Error('realtime down');
+      notices.push(domain);
+    },
     listTasks: async (q) => {
       await record('listTasks', q);
       return { items: [TASK], nextOffset: q.offset === 0 ? 25 : null };
@@ -156,13 +166,21 @@ const fakeGateway = (calls: Calls, valid = true): McpGateway => {
   };
 };
 
-const setup = (options: { valid?: boolean; limit?: number } = {}) => {
+const setup = (
+  options: { valid?: boolean; limit?: number; failNotice?: boolean } = {},
+) => {
   const calls: Calls = [];
+  const notices: string[] = [];
   let gatewaysOpened = 0;
   const deps = {
     gatewayFor: () => {
       gatewaysOpened += 1;
-      return fakeGateway(calls, options.valid ?? true);
+      return fakeGateway(
+        calls,
+        options.valid ?? true,
+        notices,
+        options.failNotice,
+      );
     },
     tokenLimiter: createRateLimiter({
       limit: options.limit ?? 1000,
@@ -191,7 +209,7 @@ const setup = (options: { valid?: boolean; limit?: number } = {}) => {
     const response = await post({ jsonrpc: '2.0', id: 1, method, params });
     return { response, json: (await response.json()) as RpcJson };
   };
-  return { calls, post, rpc, deps, opened: () => gatewaysOpened };
+  return { calls, notices, post, rpc, deps, opened: () => gatewaysOpened };
 };
 
 describe('mcp handshake', () => {
@@ -1038,5 +1056,37 @@ describe('mcp token issuing', () => {
 
     expect(issued.expiresAt).toBe('2026-10-31T00:00:00.000Z');
     expect((await issueMcpToken(null, new Date())).expiresAt).toBeNull();
+  });
+});
+
+describe('mcp live refresh', () => {
+  it('announces a time change after a write tool', async () => {
+    const { rpc, notices } = setup();
+
+    await rpc('tools/call', {
+      name: 'set_task_status',
+      arguments: { id: 't-1', status: 'done' },
+    });
+
+    expect(notices).toEqual(['time']);
+  });
+
+  it('stays silent after a read tool', async () => {
+    const { rpc, notices } = setup();
+
+    await rpc('tools/call', { name: 'list_tasks', arguments: {} });
+
+    expect(notices).toEqual([]);
+  });
+
+  it('keeps the write result when the announcement fails', async () => {
+    const { rpc } = setup({ failNotice: true });
+
+    const { json } = await rpc('tools/call', {
+      name: 'set_task_status',
+      arguments: { id: 't-1', status: 'done' },
+    });
+
+    expect(json.result.structuredContent.status).toBe('done');
   });
 });

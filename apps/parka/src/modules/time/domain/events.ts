@@ -29,4 +29,5 @@ export type Event =
   | TriggerEvent<'[TRIGGER]_UPDATE_CATEGORY', { category: Category }>
   | TriggerEvent<'[TRIGGER]_DELETE_CATEGORY', { id: CategoryId }>
   | TriggerEvent<'[TRIGGER]_CREATE_PRIORITY', { priority: Priority }>
+  | TriggerEvent<'[TRIGGER]_REFRESH'>
   | TriggerEvent<'[TRIGGER]_DISMISS_NOTICE'>;

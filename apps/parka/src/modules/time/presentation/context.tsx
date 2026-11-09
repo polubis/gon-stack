@@ -16,6 +16,7 @@ import {
 import { sortByUsage } from '../domain/category-usage';
 import { newCategoryId, newPriorityId } from '../domain/ids';
 import type { Category, Priority } from '../domain/models';
+import { useDataChanges } from '@/shared/data-sync/presentation/use-data-changes';
 import { useClock } from './clock';
 
 const dateFromUrl = (): string => {
@@ -67,6 +68,9 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
     const unsub = register();
     return () => unsub();
   }, [register]);
+
+  // MCP changed the data: reload the shown range quietly.
+  useDataChanges('time', facade.refresh);
 
   // Back / Forward may land on another `date`.
   useEffect(() => {

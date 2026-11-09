@@ -10,6 +10,7 @@ export const load = (store: Store, { ofType }: Bus) =>
       store.$initialized.set(true);
       store.$error.reset();
     }),
+    tap(({ period }) => store.$period.set(period)),
     switchMap(({ period }) =>
       // Deferred: runs after switchMap dropped the previous load, whose
       // `finalize` resets the flag, so the flag is never reset under a live load.
