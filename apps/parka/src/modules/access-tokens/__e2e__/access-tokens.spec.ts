@@ -208,6 +208,7 @@ const commands = {
       'list_categories',
       'list_expenses',
       'list_priorities',
+      'list_statuses',
       'list_task_attachments',
       'list_task_comments',
       'list_tasks',

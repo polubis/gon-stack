@@ -81,6 +81,12 @@ describe('history label', () => {
     expect(updated('in_progress', 'true', 'false')).toBe('Wstrzymano zadanie');
   });
 
+  it('shows a move between steps by their names', () => {
+    expect(updated('status', 'W trakcie', 'Review')).toBe(
+      'Zmieniono status: W trakcie → Review',
+    );
+  });
+
   it('describes attachments and comments', () => {
     expect(
       describeHistory(entry({ kind: 'attachment_added', to: 'plan.pdf' })),

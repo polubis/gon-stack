@@ -4,9 +4,12 @@ import type {
   Category,
   Notice,
   Priority,
+  Status,
   Task,
   TimeKind,
 } from '../domain/models';
+
+import { DEFAULT_STATUSES } from '../domain/status';
 
 export type Range = { from: string; to: string };
 
@@ -15,6 +18,7 @@ export const createStore = () => {
   const $backlog = atom<BacklogTask[]>([]);
   const $categories = atom<Category[]>([]);
   const $priorities = atom<Priority[]>([]);
+  const $statuses = atom<Status[]>(DEFAULT_STATUSES);
   const $initializing = atom(true);
   const $isLoading = atom(false);
   const $error = atom<string | null>(null);
@@ -42,6 +46,7 @@ export const createStore = () => {
     $backlog,
     $categories,
     $priorities,
+    $statuses,
     $initializing,
     $isLoading,
     $error,

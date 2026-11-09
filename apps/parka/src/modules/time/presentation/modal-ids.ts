@@ -13,6 +13,7 @@ export const DESCRIPTION_EDITOR_MODAL = 'description-editor';
 export const NEW_CATEGORY_MODAL = 'category-new';
 export const NEW_PRIORITY_MODAL = 'priority-new';
 export const CATEGORIES_MODAL = 'categories';
+export const STATUSES_MODAL = 'statuses';
 
 const EDIT_CATEGORY_PREFIX = 'category-edit:';
 const DELETE_CATEGORY_PREFIX = 'category-delete:';

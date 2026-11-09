@@ -43,10 +43,17 @@ export const toTimeTask = (row: TaskRow, profiles?: ProfilesByDevice) => ({
   at: toHourMinute(row.at),
   done: row.done,
   inProgress: row.in_progress,
+  statusId: row.status_id,
   device: toDevice(row, profiles),
   recurringId: row.recurring_id,
   occurrenceDate: row.occurrence_date,
 });
+
+/** No stored step: the user never configured anything and keeps the built-in one. */
+export const toTimeStatuses = (rows: { id: string; name: string }[]) =>
+  rows.length > 0
+    ? rows.map(({ id, name }) => ({ id, name }))
+    : [{ id: 'in_progress', name: 'W trakcie' }];
 
 export const toTimeRecurring = (row: RuleRow) => ({
   id: row.id,

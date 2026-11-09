@@ -78,6 +78,7 @@ const stubTime = async (page: Page) => {
               },
             ],
             priorities: [{ id: 'medium', name: 'Średni', value: 5 }],
+            statuses: [{ id: 'in_progress', name: 'W trakcie' }],
             tasks: [],
             backlog: [],
           },

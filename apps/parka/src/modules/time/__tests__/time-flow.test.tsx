@@ -336,7 +336,7 @@ describe('time task maintenance', () => {
     await user.click(box);
 
     expect(box).toBeChecked();
-    expect(await screen.findByText('Zadanie zrobione.')).toBeVisible();
+    expect(await screen.findByText('Zadanie: Zrobione.')).toBeVisible();
     await waitFor(() => expect(backend.writes()).toHaveLength(2));
     expect(backend.writes()[1]).toMatchObject({
       method: 'PUT',

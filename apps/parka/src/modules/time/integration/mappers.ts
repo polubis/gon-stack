@@ -12,6 +12,8 @@ import type {
   Priority,
   PriorityId,
   RecurringId,
+  Status,
+  StatusId,
   Task,
   TaskId,
 } from '../domain/models';
@@ -23,6 +25,7 @@ type ListData = InferOut<
 
 type CategoryDto = ListData['categories'][number];
 type PriorityDto = ListData['priorities'][number];
+type StatusDto = ListData['statuses'][number];
 type TaskDto = ListData['tasks'][number];
 type BacklogDto = ListData['backlog'][number];
 
@@ -42,6 +45,11 @@ export const toPriority = (dto: PriorityDto): Priority => ({
   id: dto.id as PriorityId,
   name: dto.name,
   value: dto.value,
+});
+
+export const toStatus = (dto: StatusDto): Status => ({
+  id: dto.id as StatusId,
+  name: dto.name,
 });
 
 export const toBacklogTask = (dto: BacklogDto): BacklogTask => ({
@@ -65,6 +73,7 @@ export const toTask = (dto: TaskDto): Task => ({
   at: dto.at,
   done: dto.done,
   inProgress: dto.inProgress,
+  statusId: dto.statusId as StatusId | null,
   device: dto.device,
   recurringId: dto.recurringId as RecurringId | null,
 });

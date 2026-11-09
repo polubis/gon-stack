@@ -11,6 +11,7 @@ import type {
   deleteTimeRecurringSchema,
   deleteTimeTaskSchema,
   listTimeSchema,
+  saveTimeStatusesSchema,
   sendTimeTaskToBacklogSchema,
   updateTimeTaskSchema,
 } from '@schemas/time';
@@ -24,10 +25,17 @@ import type {
   Priority,
   Recurring,
   RecurringId,
+  Status,
   Task,
   TaskId,
 } from '../domain/models';
-import { toBacklogTask, toCategory, toPriority, toTask } from './mappers';
+import {
+  toBacklogTask,
+  toCategory,
+  toPriority,
+  toStatus,
+  toTask,
+} from './mappers';
 
 type Out<T extends () => z.ZodType<{ out: unknown }>> = z.infer<
   ReturnType<T>
@@ -38,6 +46,7 @@ const JSON_HEADERS = { 'Content-Type': 'application/json' };
 export type TimeData = {
   categories: Category[];
   priorities: Priority[];
+  statuses: Status[];
   tasks: Task[];
   backlog: BacklogTask[];
 };
@@ -67,6 +76,7 @@ const readTime = async (from: string, to: string): Promise<TimeData> => {
   return {
     categories: json.data.categories.map(toCategory),
     priorities: json.data.priorities.map(toPriority),
+    statuses: json.data.statuses.map(toStatus),
     tasks: json.data.tasks.map(toTask),
     backlog: json.data.backlog.map(toBacklogTask),
   };
@@ -200,6 +210,18 @@ export const postPriority = async (priority: Priority): Promise<Priority> => {
   const json = (await response.json()) as Out<typeof createTimePrioritySchema>;
   if (json.code !== 201) throw new Error(json.message);
   return toPriority(json.data);
+};
+
+/** Replaces the whole ordered list of steps. */
+export const putStatuses = async (statuses: Status[]): Promise<Status[]> => {
+  const response = await send(API_ROUTER.timeStatuses(), {
+    method: 'PUT',
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ statuses }),
+  });
+  const json = (await response.json()) as Out<typeof saveTimeStatusesSchema>;
+  if (json.code !== 200) throw new Error(json.message);
+  return json.data.statuses.map(toStatus);
 };
 
 export const postRecurring = async (recurring: Recurring): Promise<void> => {

@@ -9,6 +9,7 @@ import type {
   Priority,
   Recurring,
   RecurringId,
+  Status,
   Task,
   TaskId,
   TimeKind,
@@ -43,12 +44,15 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
       trigger('[TRIGGER]_DELETE_CATEGORY', { id }),
     createPriority: (priority: Priority) =>
       trigger('[TRIGGER]_CREATE_PRIORITY', { priority }),
+    saveStatuses: (statuses: Status[]) =>
+      trigger('[TRIGGER]_SAVE_STATUSES', { statuses }),
     notify: (notice: NoticeBody) => notify(store, notice),
     dismissNotice: () => trigger('[TRIGGER]_DISMISS_NOTICE'),
     useTasks: () => store.$tasks.use(),
     useBacklog: () => store.$backlog.use(),
     useCategories: () => store.$categories.use(),
     usePriorities: () => store.$priorities.use(),
+    useStatuses: () => store.$statuses.use(),
     useLoaded: () => store.$loaded.use(),
     useInitializing: () => store.$initializing.use(),
     useIsLoading: () => store.$isLoading.use(),

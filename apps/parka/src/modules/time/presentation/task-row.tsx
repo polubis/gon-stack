@@ -6,7 +6,8 @@ import {
   useEntrance,
   type ChangePhase,
 } from '@/shared/ui/list-changes';
-import type { BacklogTask, Task } from '../domain/models';
+import type { BacklogTask, Status, Task } from '../domain/models';
+import { nextStep, stepName, stepOf, withStep } from '../domain/status';
 import { useContext } from './context';
 import { editBacklogModal, editTaskModal, viewTaskModal } from './modal-ids';
 import { PriorityBadge } from './priority-badge';
@@ -25,26 +26,21 @@ type Props = {
   phase?: ChangePhase;
 };
 
-/** Todo, then in progress, then done, then todo again. */
-const nextStatus = (task: Task): { task: Task; message: string } =>
-  task.done
-    ? {
-        task: { ...task, done: false, inProgress: false },
-        message: 'Zadanie do zrobienia.',
-      }
-    : task.inProgress
-      ? {
-          task: { ...task, done: true, inProgress: false },
-          message: 'Zadanie zrobione.',
-        }
-      : {
-          task: { ...task, inProgress: true },
-          message: 'Zadanie w trakcie.',
-        };
+/** The next step of the user's workflow, then back to the first. */
+const advance = (
+  task: Task,
+  statuses: Status[],
+): { task: Task; message: string } => {
+  const step = nextStep(task, statuses);
+  return {
+    task: withStep(task, step),
+    message: `Zadanie: ${stepName(step, statuses)}.`,
+  };
+};
 
 /** Task line: status cycle, title (opens details), a muted meta line, edit and a "more" menu. Backlog tasks have no status. */
 export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
-  const { categories, priorities, updateTask } = useContext();
+  const { categories, priorities, statuses, updateTask } = useContext();
   const board = 'day' in task ? task : null;
   const category = categories.find((item) => item.id === task.categoryId);
   const priority = priorities.find((item) => item.id === task.priorityId);
@@ -75,7 +71,7 @@ export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
           aria-label={`Zrobione: ${task.title}`}
           data-e2e={`time:task-done:${task.id}`}
           onClick={() => {
-            const next = nextStatus(board);
+            const next = advance(board, statuses);
             updateTask(next.task, next.message);
           }}
           className="grid h-8 w-8 shrink-0 place-items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
@@ -128,7 +124,7 @@ export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
               data-e2e={`time:task-progress-badge:${task.id}`}
               className="font-medium text-brand"
             >
-              W trakcie
+              {stepName(stepOf(board), statuses)}
             </span>
           ) : null}
           {board?.recurringId != null ? <RecurringMark /> : null}

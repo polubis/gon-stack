@@ -4,6 +4,7 @@ import { closeModalThen, openModal } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
 import { DESCRIPTION_CLAMP_LINES } from '../configuration/constraints';
 import type { BacklogTask, Task } from '../domain/models';
+import { stepName, stepOf } from '../domain/status';
 import { PriorityBadge } from './priority-badge';
 import { useContext } from './context';
 import { descriptionModal, editBacklogModal, editTaskModal } from './modal-ids';
@@ -63,7 +64,7 @@ export const TaskDetails = ({
   modal: string;
   task: Task | BacklogTask;
 }) => {
-  const { categories, priorities } = useContext();
+  const { categories, priorities, statuses } = useContext();
   const category = categories.find((item) => item.id === task.categoryId);
   const priority = priorities.find((item) => item.id === task.priorityId);
   const edit = () =>
@@ -99,7 +100,9 @@ export const TaskDetails = ({
           ) : null}
           {priority ? <PriorityBadge priority={priority} /> : null}
           {isBoardTask(task) && task.done ? <span>Zrobione</span> : null}
-          {isBoardTask(task) && task.inProgress ? <span>W trakcie</span> : null}
+          {isBoardTask(task) && task.inProgress ? (
+            <span>{stepName(stepOf(task), statuses)}</span>
+          ) : null}
         </p>
         {task.description ? <ClampedDescription task={task} /> : null}
         <TaskAttachments taskId={task.id} />

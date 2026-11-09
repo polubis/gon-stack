@@ -114,6 +114,7 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
     /** Most used first (loaded tasks and backlog), ties keep stored order. */
     categories: sortByUsage(categories, [...tasks, ...backlog]),
     priorities: facade.usePriorities(),
+    statuses: facade.useStatuses(),
     initializing: facade.useInitializing(),
     loaded,
     isLoading: facade.useIsLoading(),
@@ -127,6 +128,7 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
     updateTask: facade.updateTask,
     sendTaskToBacklog: facade.sendTaskToBacklog,
     deleteTask: facade.deleteTask,
+    saveStatuses: facade.saveStatuses,
     createRecurring: facade.createRecurring,
     stopRecurring: facade.stopRecurring,
     updateCategory: facade.updateCategory,

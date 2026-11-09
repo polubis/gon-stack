@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Repeat, Trash2 } from 'lucide-react';
+import { PICKER_LINK } from './picker-link';
 import {
   currentDevice,
   loadDeviceHints,
@@ -18,10 +19,18 @@ import {
 } from '../configuration/constraints';
 import { newRecurringId, newTaskId } from '../domain/ids';
 import type { CategoryId, PriorityId, Task } from '../domain/models';
+import {
+  IN_PROGRESS,
+  stepName,
+  stepOf,
+  withStep,
+  workflow,
+  type Step,
+} from '../domain/status';
 import { CategoryPicker } from './category-picker';
 import { useContext } from './context';
 import { DescriptionField } from './description-field';
-import { deleteTaskModal, stopSeriesModal } from './modal-ids';
+import { deleteTaskModal, STATUSES_MODAL, stopSeriesModal } from './modal-ids';
 import { ModalShell } from './modal-shell';
 import { PriorityPicker } from './priority-picker';
 import { RecurringMark } from './recurring-mark';
@@ -51,6 +60,7 @@ export const TaskDialog = ({
     newCategory,
     newPriority,
     createTask,
+    statuses,
     updateTask,
     createRecurring,
   } = useContext();
@@ -86,8 +96,10 @@ export const TaskDialog = ({
   const [day, setDay] = useState(task?.day ?? defaultDay);
   const [allDay, setAllDay] = useState(!editing || task.at === null);
   const [at, setAt] = useState(task?.at ?? DEFAULT_TIME);
-  const [done, setDone] = useState(task?.done ?? false);
-  const [inProgress, setInProgress] = useState(task?.inProgress ?? false);
+  const [pickedStep, setStep] = useState<Step>(task ? stepOf(task) : 'open');
+  const steps = workflow(statuses);
+  // A step removed while the form is open reads as the built-in one.
+  const step = steps.includes(pickedStep) ? pickedStep : IN_PROGRESS;
   const [repeat, setRepeat] = useState(startRepeating);
   const [interval, setInterval] = useState<RecurringInterval>('weekly');
   const [endDate, setEndDate] = useState('');
@@ -147,12 +159,13 @@ export const TaskDialog = ({
       priorityId,
       day,
       at: allDay ? null : at,
-      done,
-      inProgress: inProgress && !done,
+      done: false,
+      inProgress: false,
+      statusId: null,
       device: task?.device ?? currentDevice(),
       recurringId: task?.recurringId ?? null,
     };
-    if (editing) updateTask(next);
+    if (editing) updateTask(withStep(next, step));
     else createTask(next);
     closeModal(modal);
   };
@@ -287,28 +300,27 @@ export const TaskDialog = ({
           <TaskDeviceDetail device={task.device} />
         ) : null}
         {editing ? (
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm font-medium">Zrobione</span>
-            <Toggle
-              label="Zrobione"
-              checked={done}
-              onChange={(value) => {
-                setDone(value);
-                if (value) setInProgress(false);
-              }}
-            />
-          </div>
-        ) : null}
-        {editing ? (
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm font-medium">W trakcie</span>
-            <Toggle
-              label="W trakcie"
-              checked={inProgress}
-              onChange={(value) => {
-                setInProgress(value);
-                if (value) setDone(false);
-              }}
+          <div>
+            <div className="mb-1 flex items-center justify-between gap-2">
+              <span className="text-sm font-medium text-ink-soft">Status</span>
+              <button
+                type="button"
+                data-e2e="time:statuses-edit"
+                onClick={() => openModal(STATUSES_MODAL)}
+                className={PICKER_LINK}
+              >
+                Edytuj statusy
+              </button>
+            </div>
+            <Select
+              aria-label="Status"
+              data-e2e="time:task-status"
+              value={step}
+              options={steps.map((value) => ({
+                value,
+                label: stepName(value, statuses),
+              }))}
+              onValueChange={(value) => setStep(value as Step)}
             />
           </div>
         ) : null}

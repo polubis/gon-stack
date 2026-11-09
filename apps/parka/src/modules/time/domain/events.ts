@@ -6,6 +6,7 @@ import type {
   Priority,
   Recurring,
   RecurringId,
+  Status,
   Task,
   TaskId,
   TimeKind,
@@ -29,5 +30,6 @@ export type Event =
   | TriggerEvent<'[TRIGGER]_UPDATE_CATEGORY', { category: Category }>
   | TriggerEvent<'[TRIGGER]_DELETE_CATEGORY', { id: CategoryId }>
   | TriggerEvent<'[TRIGGER]_CREATE_PRIORITY', { priority: Priority }>
+  | TriggerEvent<'[TRIGGER]_SAVE_STATUSES', { statuses: Status[] }>
   | TriggerEvent<'[TRIGGER]_REFRESH'>
   | TriggerEvent<'[TRIGGER]_DISMISS_NOTICE'>;
