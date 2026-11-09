@@ -14,6 +14,7 @@ const REAL_BACKEND_SPECS = [
   '**/__e2e__/accounts.spec.ts',
   '**/modules/time/__e2e__/time.spec.ts',
   '**/modules/time/__e2e__/mcp-live-refresh.spec.ts',
+  '**/modules/time/__e2e__/task-history.spec.ts',
   '**/modules/access-tokens/__e2e__/access-tokens.spec.ts',
   '**/server/__e2e__/rest-endpoints.spec.ts',
   '**/server/__e2e__/token-clock-skew.spec.ts',

@@ -40,6 +40,18 @@ const COMMENT = {
   botRef: '0b9a4a52',
 };
 
+const HISTORY_ENTRY = {
+  id: '8f0c2b7e-6a43-4c1e-8d55-0e1f2a3b4c5d',
+  kind: 'updated',
+  field: 'title',
+  from: 'Old',
+  to: 'New',
+  at: '2026-11-10T10:00:00.000Z',
+  author: 'bot',
+  botName: 'Claude Desktop',
+  botRef: '0b9a4a52',
+};
+
 type RpcJson = {
   error: { code: number };
   result: {
@@ -158,6 +170,10 @@ const fakeGateway = (
     addTaskComment: async (taskId, body) => {
       await record('addTaskComment', taskId, body);
       return taskId === 't-1' ? { ...COMMENT, body } : null;
+    },
+    listTaskHistory: async (taskId) => {
+      await record('listTaskHistory', taskId);
+      return taskId === 't-1' ? { items: [HISTORY_ENTRY] } : null;
     },
     deleteTaskAttachment: async (id) => {
       await record('deleteTaskAttachment', id);
@@ -278,6 +294,7 @@ describe('mcp tools list', () => {
       'delete_task_attachment',
       'get_expense',
       'get_task',
+      'get_task_history',
       'list_categories',
       'list_expenses',
       'list_priorities',
@@ -688,6 +705,36 @@ describe('mcp task management', () => {
 
     expect(json.result.structuredContent).toEqual({ items: [COMMENT] });
     expect(JSON.stringify(json)).not.toContain(TOKEN);
+  });
+
+  it('reads the history of a task, signed by who did it, never a token', async () => {
+    const { rpc, calls } = setup();
+
+    const { json } = await call(rpc, 'get_task_history', { taskId: 't-1' });
+
+    expect(json.result.structuredContent).toEqual({ items: [HISTORY_ENTRY] });
+    expect(JSON.stringify(json)).not.toContain(TOKEN);
+    expect(calls).toEqual([{ name: 'listTaskHistory', args: ['t-1'] }]);
+  });
+
+  it('says so when the history of a missing task is asked', async () => {
+    const { rpc } = setup();
+
+    const { json } = await call(rpc, 'get_task_history', { taskId: 'missing' });
+
+    expect(json.result.isError).toBe(true);
+    expect(json.result.content[0].text).toMatch(/not found/);
+  });
+
+  it('offers no way to write the history', async () => {
+    const { rpc } = setup();
+
+    const { json } = await rpc('tools/list');
+    const names = (json.result.tools as { name: string }[]).map((t) => t.name);
+
+    expect(names.filter((n) => /history/.test(n))).toEqual([
+      'get_task_history',
+    ]);
   });
 
   it('adds a comment to a task', async () => {

@@ -771,6 +771,64 @@ export type Database = {
           },
         ];
       };
+      time_task_history: {
+        Row: {
+          bot_name: string | null;
+          bot_ref: string | null;
+          created_at: string;
+          field: string | null;
+          id: string;
+          kind: string;
+          mcp_token_id: string | null;
+          new_value: string | null;
+          old_value: string | null;
+          task_id: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          bot_name?: string | null;
+          bot_ref?: string | null;
+          created_at?: string;
+          field?: string | null;
+          id?: string;
+          kind: string;
+          mcp_token_id?: string | null;
+          new_value?: string | null;
+          old_value?: string | null;
+          task_id: string;
+          user_id: string;
+        };
+        Update: {
+          bot_name?: string | null;
+          bot_ref?: string | null;
+          created_at?: string;
+          field?: string | null;
+          id?: string;
+          kind?: string;
+          mcp_token_id?: string | null;
+          new_value?: string | null;
+          old_value?: string | null;
+          task_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'time_task_history_mcp_token_id_fkey';
+            columns: ['mcp_token_id'];
+            isOneToOne: false;
+            referencedRelation: 'mcp_tokens';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'time_task_history_task_fk';
+            columns: ['user_id', 'task_id'];
+            isOneToOne: false;
+            referencedRelation: 'time_tasks';
+            referencedColumns: ['user_id', 'id'];
+          },
+        ];
+      };
       time_task_keys: {
         Row: {
           last_number: number;
@@ -952,10 +1010,6 @@ export type Database = {
         Returns: Json;
       };
       mcp_get_task: { Args: { p_id: string; p_token: string }; Returns: Json };
-      mcp_notify_change: {
-        Args: { p_domain: string; p_token: string };
-        Returns: boolean;
-      };
       mcp_header_user: { Args: Record<PropertyKey, never>; Returns: string };
       mcp_list_categories: { Args: { p_token: string }; Returns: Json };
       mcp_list_expenses: {
@@ -978,6 +1032,10 @@ export type Database = {
         Args: { p_task_id: string; p_token: string };
         Returns: Json;
       };
+      mcp_list_task_history: {
+        Args: { p_task_id: string; p_token: string };
+        Returns: Json;
+      };
       mcp_list_tasks: {
         Args: {
           p_backlog?: boolean;
@@ -990,6 +1048,10 @@ export type Database = {
           p_token: string;
         };
         Returns: Json;
+      };
+      mcp_notify_change: {
+        Args: { p_domain: string; p_token: string };
+        Returns: boolean;
       };
       mcp_resolve_category: {
         Args: { p_ref: string; p_user: string };
@@ -1017,6 +1079,17 @@ export type Database = {
       next_task_key: { Args: { p_user: string }; Returns: string };
       record_field_use: {
         Args: { p_field: string; p_value: string };
+        Returns: undefined;
+      };
+      record_task_history: {
+        Args: {
+          p_field?: string;
+          p_kind: string;
+          p_new?: string;
+          p_old?: string;
+          p_task: string;
+          p_user: string;
+        };
         Returns: undefined;
       };
       seed_time_defaults: { Args: { target: string }; Returns: undefined };

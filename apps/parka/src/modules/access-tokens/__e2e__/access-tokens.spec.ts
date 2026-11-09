@@ -204,6 +204,7 @@ const commands = {
       'delete_task_attachment',
       'get_expense',
       'get_task',
+      'get_task_history',
       'list_categories',
       'list_expenses',
       'list_priorities',

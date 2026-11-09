@@ -288,3 +288,52 @@ export const deleteTaskCommentSchema = () =>
       writeErrors,
     ]),
   });
+
+export const TASK_HISTORY_KINDS = [
+  'created',
+  'updated',
+  'attachment_added',
+  'attachment_removed',
+  'comment_added',
+  'comment_edited',
+  'comment_removed',
+] as const;
+
+export const TASK_HISTORY_FIELDS = [
+  'title',
+  'description',
+  'category',
+  'priority',
+  'day',
+  'at',
+  'done',
+  'in_progress',
+] as const;
+
+/** One immutable fact about a task; `bot` names the MCP token behind it (never the secret). */
+const taskHistoryEntry = () =>
+  z.object({
+    id: z.uuid(),
+    kind: z.enum(TASK_HISTORY_KINDS),
+    /** Only for `updated`: which field changed. */
+    field: z.enum(TASK_HISTORY_FIELDS).nullable(),
+    from: z.string().nullable(),
+    to: z.string().nullable(),
+    at: z.string(),
+    bot: z
+      .object({ name: z.string().min(1), ref: z.string().min(1) })
+      .nullable(),
+  });
+
+/** Read only: history is written by the database, never through the API. */
+export const listTaskHistorySchema = () =>
+  z.object({
+    in: z.object({ id: z.string().min(1) }),
+    out: z.union([
+      z.object({
+        code: z.literal(200),
+        data: z.object({ items: z.array(taskHistoryEntry()) }),
+      }),
+      writeErrors,
+    ]),
+  });
