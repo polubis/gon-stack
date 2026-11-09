@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { issueMcpToken } from '../../domain/mcp-token';
 import { McpAuthError, McpInputError, type McpGateway } from '../gateway';
-import { handleMcpRequest } from '../http';
+import { handleMcpRequest, handleMcpUpload } from '../http';
 import { createRateLimiter } from '../rate-limit';
 
 const URL_ = 'https://parka.test/api/mcp/';
@@ -1135,5 +1135,82 @@ describe('mcp live refresh', () => {
     });
 
     expect(json.result.structuredContent.status).toBe('done');
+  });
+});
+
+describe('mcp raw attachment upload', () => {
+  const upload = (
+    deps: ReturnType<typeof setup>['deps'],
+    {
+      query = 'taskId=t-1&name=demo.mp4',
+      type = 'video/mp4',
+      size = 6 * 1024 * 1024,
+      auth = `Bearer ${TOKEN}`,
+    }: { query?: string; type?: string; size?: number; auth?: string } = {},
+  ) =>
+    handleMcpUpload(
+      new Request(`https://parka.test/api/mcp/attachments/?${query}`, {
+        method: 'POST',
+        headers: { 'Content-Type': type, Authorization: auth },
+        body: new Uint8Array(size),
+      }),
+      deps,
+    );
+
+  it('attaches a video sent as raw bytes and announces the change', async () => {
+    const { deps, calls, notices } = setup();
+
+    const response = await upload(deps);
+
+    expect(response.status).toBe(201);
+    expect(await response.json()).toMatchObject({
+      name: 'demo.mp4',
+      mime: 'video/mp4',
+      originalSize: 6 * 1024 * 1024,
+    });
+    expect(calls).toEqual([
+      { name: 'addTaskAttachment', args: ['t-1', 'demo.mp4', 'video/mp4'] },
+    ]);
+    expect(notices).toEqual(['time']);
+  });
+
+  it('refuses a video over 20 MB', async () => {
+    const { deps, calls } = setup();
+
+    const response = await upload(deps, { size: 20 * 1024 * 1024 + 1 });
+
+    expect(response.status).toBe(413);
+    expect(calls).toEqual([]);
+  });
+
+  it('refuses a type that is not allowed', async () => {
+    const { deps, calls } = setup();
+
+    const response = await upload(deps, { type: 'application/zip' });
+
+    expect(response.status).toBe(400);
+    expect(calls).toEqual([]);
+  });
+
+  it('refuses a call without the task or the name', async () => {
+    const { deps } = setup();
+
+    expect((await upload(deps, { query: 'name=demo.mp4' })).status).toBe(400);
+  });
+
+  it('answers 404 for an unknown task', async () => {
+    const { deps } = setup();
+
+    expect(
+      (await upload(deps, { query: 'taskId=nope&name=a.mp4' })).status,
+    ).toBe(404);
+  });
+
+  it('refuses a missing token and a token the database rejects', async () => {
+    const missing = await upload(setup().deps, { auth: '' });
+    const rejected = await upload(setup({ valid: false }).deps);
+
+    expect(missing.status).toBe(401);
+    expect(rejected.status).toBe(401);
   });
 });

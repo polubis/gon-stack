@@ -826,6 +826,68 @@ const commands = {
     expect(removed.structuredContent).toMatchObject({ deleted: true });
     expect((await page.request.get(href)).status()).toBe(404);
   },
+  'the mcp server takes a big video as raw bytes without base64': async ({
+    page,
+  }) => {
+    const created = await page.request.post(API_ROUTER.mcpTokens(), {
+      data: { name: 'E2E wideo', ttlDays: 1 },
+    });
+    const { token } = ((await created.json()) as { data: { token: string } })
+      .data;
+    const headers = { Authorization: `Bearer ${token}` };
+    const listed = await page.request.post(API_ROUTER.mcp(), {
+      headers,
+      data: {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/call',
+        params: { name: 'list_tasks', arguments: {} },
+      },
+    });
+    const taskId = (
+      (await listed.json()) as {
+        result: { structuredContent: { items: { id: string }[] } };
+      }
+    ).result.structuredContent.items[0]!.id;
+    const video = Buffer.concat([
+      await makeVideo(page, 2),
+      Buffer.alloc(3 * 1024 * 1024),
+    ]);
+    const url = `${API_ROUTER.mcpAttachments()}?taskId=${taskId}&name=${encodeURIComponent('agent.webm')}`;
+
+    const added = await page.request.post(url, {
+      headers: { ...headers, 'Content-Type': 'video/webm' },
+      data: video,
+    });
+    expect(added.status()).toBe(201);
+    const attachment = (await added.json()) as {
+      id: string;
+      size: number;
+      mime: string;
+    };
+    expect(attachment).toMatchObject({
+      mime: 'video/webm',
+      size: video.length,
+    });
+    const stored = await page.request.get(
+      API_ROUTER.timeAttachmentById(attachment.id),
+    );
+    expect(stored.status()).toBe(200);
+    expect((await stored.body()).length).toBe(video.length);
+
+    const refused = await page.request.post(url, {
+      headers: { ...headers, 'Content-Type': 'application/zip' },
+      data: Buffer.from('zip'),
+    });
+    expect(refused.status()).toBe(400);
+    const anonymous = await page.request.post(url, {
+      headers: { Authorization: 'Bearer nope', 'Content-Type': 'video/webm' },
+      data: video,
+    });
+    expect(anonymous.status()).toBe(401);
+
+    await page.request.delete(API_ROUTER.timeAttachmentById(attachment.id));
+  },
   'i register an account for comments': async (ctx) => {
     await registerAndConfirm(ctx, COMMENT_EMAIL, PASSWORD);
     await ctx.page.waitForLoadState('networkidle');
