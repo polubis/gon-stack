@@ -166,6 +166,12 @@ const attachment = () =>
     name: z.string(),
     size: z.number().int().describe('Stored bytes (after image reduction)'),
     mime: z.string(),
+    status: z
+      .enum(['uploading', 'ready', 'failed'])
+      .optional()
+      .describe(
+        'Only videos can be `uploading` (stored right after the response)',
+      ),
   });
 
 const comment = () =>
@@ -425,7 +431,7 @@ export const MCP_TOOLS: readonly RegisteredTool[] = [
     name: 'list_task_attachments',
     title: 'List task attachments',
     description:
-      'Lists the files attached to a task (name, stored size, type). A task has at most 5.',
+      'Lists the files attached to a task (name, stored size, type, status). A task has at most 5.',
     input: z.strictObject({ taskId: id() }),
     output: z.object({ items: z.array(attachment()) }),
     annotations: READ_ONLY,
@@ -438,7 +444,7 @@ export const MCP_TOOLS: readonly RegisteredTool[] = [
   defineTool({
     name: 'add_task_attachment',
     title: 'Attach a file to a task',
-    description: `Attaches a file given as base64 (about 6 MB of file at most per call). Allowed: ${ATTACHMENT_MIME_TYPES.join(', ')}. A stored file is at most 5 MB and a task takes 5 files. Photos are re-encoded as lossy WebP (quality 75, same pixel size) first, so the limit applies after the reduction; an animated GIF is kept as it is.`,
+    description: `Attaches a file given as base64 (about 20 MB of file at most per call). Allowed: ${ATTACHMENT_MIME_TYPES.join(', ')}. A stored file is at most 5 MB (a video: 20 MB, kept as it is) and a task takes 5 files. Photos are re-encoded as lossy WebP (quality 75, same pixel size) first, so the limit applies after the reduction; an animated GIF is kept as it is.`,
     input: z.strictObject({
       taskId: id(),
       name: z.string().trim().min(1).max(200),

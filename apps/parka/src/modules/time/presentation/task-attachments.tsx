@@ -1,10 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import {
   FileText,
   Loader2,
+  Play,
   Paperclip,
   Trash2,
   TriangleAlert,
+  X,
 } from 'lucide-react';
 import {
   ATTACHMENT_ACCEPT,
@@ -12,6 +14,7 @@ import {
   attachmentRejection,
   formatFileSize,
   isImageMime,
+  isVideoMime,
 } from '@/shared/attachments/rules';
 import { API_ROUTER } from '@/shared/router/routes';
 import {
@@ -27,11 +30,15 @@ import {
   fetchAttachments,
   postAttachment,
   removeAttachment,
+  watchAttachments,
+  type AttachmentEvent,
 } from '../integration/attachments';
 import { AttachmentViewer } from './attachment-viewer';
 import { useContext } from './context';
 import { DeleteDialog } from './delete-dialog';
+import { VideoTrimDialog } from './video-trim-dialog';
 import {
+  TRIM_ATTACHMENT_MODAL,
   deleteAttachmentModal,
   deletedAttachmentIdOf,
   viewAttachmentModal,
@@ -39,7 +46,40 @@ import {
 } from './modal-ids';
 
 const Thumb = ({ item }: { item: Attachment }) =>
-  isImageMime(item.mime) ? (
+  item.status === 'uploading' ? (
+    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand-soft text-brand">
+      <Loader2
+        className="h-5 w-5 animate-spin motion-reduce:animate-none"
+        aria-hidden="true"
+      />
+    </span>
+  ) : item.status === 'failed' ? (
+    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-danger-soft text-danger">
+      <TriangleAlert className="h-5 w-5" aria-hidden="true" />
+    </span>
+  ) : isVideoMime(item.mime) ? (
+    <button
+      type="button"
+      data-e2e={`time:attachment-thumb:${item.id}`}
+      aria-label={`Otwórz wideo: ${item.name}`}
+      onClick={() => openModal(viewAttachmentModal(item.id))}
+      className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-track focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+    >
+      <video
+        src={`${API_ROUTER.timeAttachmentById(item.id)}#t=0.1`}
+        preload="metadata"
+        muted
+        playsInline
+        tabIndex={-1}
+        aria-hidden="true"
+        className="h-full w-full object-cover"
+      />
+      <Play
+        className="absolute inset-0 m-auto h-4 w-4 text-on-brand drop-shadow"
+        aria-hidden="true"
+      />
+    </button>
+  ) : isImageMime(item.mime) ? (
     <button
       type="button"
       data-e2e={`time:attachment-thumb:${item.id}`}
@@ -76,6 +116,14 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
   const [failed, setFailed] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const [sending, setSending] = useState<
+    { key: string; name: string; percent: number }[]
+  >([]);
+  const cancels = useRef(new Map<string, AbortController>());
+  const [trim, setTrim] = useState<{
+    file: File;
+    resolve: (file: File | null) => void;
+  }>();
 
   useEffect(() => {
     let current = true;
@@ -98,10 +146,83 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
     }
   }, [items, stack]);
 
+  /** Tells how a video that was still saving ended. */
+  const announce = (before: Attachment | undefined, next: Attachment) => {
+    if (before?.status !== 'uploading') return;
+    if (next.status === 'ready')
+      notify({
+        tone: 'success',
+        message: `Wideo „${next.name}” jest gotowe`,
+        action: {
+          label: 'Otwórz',
+          run: () => openModal(viewAttachmentModal(next.id)),
+        },
+      });
+    else if (next.status === 'failed')
+      notify({
+        tone: 'error',
+        title: `Nie zapisano pliku „${next.name}”`,
+        code: 'ATTACHMENT_STORE',
+        description: 'Serwer nie zapisał pliku. Usuń go i dodaj ponownie.',
+      });
+  };
+
+  const onEvent = useEffectEvent((event: AttachmentEvent) => {
+    if (event.type === 'DELETE') {
+      setItems((current) => current?.filter((item) => item.id !== event.id));
+      return;
+    }
+    const next = event.attachment;
+    if (!next || event.taskId !== taskId) return;
+    const before = items?.find((item) => item.id === next.id);
+    setItems((current) =>
+      current?.some((item) => item.id === next.id)
+        ? current.map((item) => (item.id === next.id ? next : item))
+        : [...(current ?? []), next],
+    );
+    announce(before, next);
+  });
+  // Events missed while offline are gone: load the list again on (re)connect.
+  const onOpen = useEffectEvent(() => {
+    fetchAttachments(taskId).then(
+      (loaded) => {
+        loaded.forEach((next) =>
+          announce(
+            items?.find((item) => item.id === next.id),
+            next,
+          ),
+        );
+        setItems(loaded);
+      },
+      () => {},
+    );
+  });
+  useEffect(() => watchAttachments(onEvent, onOpen), []);
+
+  // Back (or a stale deep link) leaves the trim step: drop the picked video.
+  useEffect(() => {
+    const open = stack.includes(TRIM_ATTACHMENT_MODAL);
+    if (open && !trim) closeModal(TRIM_ATTACHMENT_MODAL);
+    // A promise settles once: resolving a finished trim again is harmless.
+    if (!open && trim) trim.resolve(null);
+  }, [stack, trim]);
+
+  const askTrim = (file: File) =>
+    new Promise<File | null>((resolve) => {
+      setTrim({ file, resolve });
+      openModal(TRIM_ATTACHMENT_MODAL);
+    });
+
   const upload = async (files: File[]) => {
     setUploading(true);
     let count = items?.length ?? 0;
-    for (const file of files) {
+    for (const picked of files) {
+      const first = attachmentRejection(picked);
+      const file =
+        first === null && isVideoMime(picked.type)
+          ? await askTrim(picked)
+          : picked;
+      if (!file) continue;
       const reason =
         count >= ATTACHMENT_MAX_COUNT
           ? `Zadanie ma już maksymalnie ${ATTACHMENT_MAX_COUNT} załączników`
@@ -115,10 +236,33 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
         });
         continue;
       }
+      const key = crypto.randomUUID();
+      const progress = (percent: number) =>
+        setSending((current) =>
+          current.map((entry) =>
+            entry.key === key ? { ...entry, percent } : entry,
+          ),
+        );
+      const controller = new AbortController();
+      cancels.current.set(key, controller);
+      setSending((current) => [
+        ...current,
+        { key, name: file.name, percent: 0 },
+      ]);
       try {
-        const { originalSize, ...added } = await postAttachment(taskId, file);
+        const { originalSize, ...added } = await postAttachment(
+          taskId,
+          file,
+          progress,
+          controller.signal,
+        );
         count += 1;
-        setItems((current) => [...(current ?? []), added]);
+        setItems((current) =>
+          current?.some((item) => item.id === added.id)
+            ? current
+            : [...(current ?? []), added],
+        );
+        if (added.status === 'uploading') continue;
         notify({
           tone: 'success',
           message:
@@ -127,6 +271,13 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
               : `Dodano plik „${added.name}”`,
         });
       } catch (error) {
+        if (controller.signal.aborted) {
+          notify({
+            tone: 'success',
+            message: `Anulowano wysyłanie „${file.name}”`,
+          });
+          continue;
+        }
         notify({
           tone: 'error',
           title: `Nie dodano pliku „${file.name}”`,
@@ -134,6 +285,9 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
           description: `Nie udało się wysłać pliku${error instanceof Error ? ` (${error.message})` : ''}. Spróbuj ponownie.`,
           retry: () => void upload([file]),
         });
+      } finally {
+        cancels.current.delete(key);
+        setSending((current) => current.filter((entry) => entry.key !== key));
       }
     }
     setUploading(false);
@@ -242,12 +396,12 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
         >
           <Skeleton className="h-14 w-full" />
         </div>
-      ) : items.length === 0 ? (
+      ) : items.length === 0 && sending.length === 0 ? (
         <EmptyState
           variant="card"
           icon={Paperclip}
           title="Brak załączników"
-          description="Dodaj zdjęcie, PDF lub plik tekstowy. Zdjęcia zostaną zmniejszone."
+          description="Dodaj zdjęcie, wideo (do 20 MB), PDF lub plik tekstowy. Zdjęcia zostaną zmniejszone."
           action={addButton}
         />
       ) : (
@@ -259,16 +413,32 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
               className="flex items-center gap-2 rounded-xl border border-line-strong bg-card px-3 py-2 text-sm"
             >
               <Thumb item={item} />
-              <a
-                href={API_ROUTER.timeAttachmentById(item.id)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="min-w-0 flex-1 truncate rounded-md font-semibold text-brand hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+              {item.status === 'ready' ? (
+                <a
+                  href={API_ROUTER.timeAttachmentById(item.id)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="min-w-0 flex-1 truncate rounded-md font-semibold text-brand hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                >
+                  {item.name}
+                </a>
+              ) : (
+                <span className="min-w-0 flex-1 truncate font-semibold">
+                  {item.name}
+                </span>
+              )}
+              <span
+                className={
+                  item.status === 'failed'
+                    ? 'shrink-0 text-xs text-danger'
+                    : 'shrink-0 text-xs text-ink-soft'
+                }
               >
-                {item.name}
-              </a>
-              <span className="shrink-0 text-xs text-ink-soft">
-                {formatFileSize(item.size)}
+                {item.status === 'uploading'
+                  ? 'Zapisywanie…'
+                  : item.status === 'failed'
+                    ? 'Błąd zapisu'
+                    : formatFileSize(item.size)}
               </span>
               <button
                 type="button"
@@ -281,9 +451,52 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
               </button>
             </li>
           ))}
+          {sending.map((entry) => (
+            <li
+              key={entry.key}
+              className="flex items-center gap-2 rounded-xl border border-line-strong bg-card px-3 py-2 text-sm"
+            >
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand-soft text-brand">
+                <Loader2
+                  className="h-5 w-5 animate-spin motion-reduce:animate-none"
+                  aria-hidden="true"
+                />
+              </span>
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="truncate font-semibold">{entry.name}</span>
+                <progress
+                  aria-label={`Wysyłanie pliku ${entry.name}`}
+                  max={100}
+                  value={entry.percent}
+                  className="h-1.5 w-full accent-brand"
+                />
+              </div>
+              <span className="shrink-0 text-xs text-ink-soft">
+                {entry.percent}%
+              </span>
+              <button
+                type="button"
+                aria-label={`Anuluj wysyłanie pliku ${entry.name}`}
+                onClick={() => cancels.current.get(entry.key)?.abort()}
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-ink-soft hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </li>
+          ))}
         </ul>
       )}
 
+      {trim && stack.includes(TRIM_ATTACHMENT_MODAL) ? (
+        <VideoTrimDialog
+          modal={TRIM_ATTACHMENT_MODAL}
+          file={trim.file}
+          onDone={(result) => {
+            trim.resolve(result);
+            setTrim(undefined);
+          }}
+        />
+      ) : null}
       {viewing ? (
         <AttachmentViewer
           modal={viewAttachmentModal(viewing.id)}

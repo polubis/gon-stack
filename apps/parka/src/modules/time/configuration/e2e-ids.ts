@@ -63,6 +63,7 @@ export const TIME_E2E_IDS = [
   'time:attachment-add',
   'time:attachment-input',
   'time:attachment-viewer',
+  'time:attachment-trim',
   'time:comments',
   'time:comments-skeleton',
   'time:comments-error',

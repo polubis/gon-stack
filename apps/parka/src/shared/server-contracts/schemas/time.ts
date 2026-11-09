@@ -163,7 +163,17 @@ const taskAttachment = () =>
     name: z.string().min(1),
     size: z.number().int().positive(),
     mime: z.string().min(1),
+    /** A video is stored after the response: `uploading` until it is `ready`. */
+    status: z.enum(['uploading', 'ready', 'failed']),
   });
+
+/** Live change of one attachment row, streamed to the browser. */
+export const attachmentEventSchema = z.object({
+  type: z.enum(['INSERT', 'UPDATE', 'DELETE']),
+  taskId: z.string().min(1).optional(),
+  attachment: taskAttachment().optional(),
+  id: z.string().min(1).optional(),
+});
 
 const attachmentFile = () =>
   z.instanceof(File).superRefine((file, ctx) => {

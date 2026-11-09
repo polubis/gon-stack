@@ -1,7 +1,9 @@
 import {
   ATTACHMENT_IMAGE_QUALITY,
   ATTACHMENT_MAX_BYTES,
+  ATTACHMENT_MAX_VIDEO_BYTES,
   isImageMime,
+  isVideoMime,
 } from '@/shared/attachments/rules';
 import { BadRequest } from '../core/error-handling';
 
@@ -82,10 +84,13 @@ export const prepareAttachment = async (
     }
   }
 
-  if (result.bytes.byteLength > ATTACHMENT_MAX_BYTES)
+  const limit = isVideoMime(file.mime)
+    ? ATTACHMENT_MAX_VIDEO_BYTES
+    : ATTACHMENT_MAX_BYTES;
+  if (result.bytes.byteLength > limit)
     throw new BadRequest(
       undefined,
-      `File is larger than ${ATTACHMENT_MAX_BYTES / 1024 / 1024} MB${isImageMime(file.mime) ? ' even after the size reduction' : ''}`,
+      `File is larger than ${limit / 1024 / 1024} MB${isImageMime(file.mime) ? ' even after the size reduction' : ''}`,
     );
   return result;
 };

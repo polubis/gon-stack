@@ -1,12 +1,12 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import { formatFileSize } from '@/shared/attachments/rules';
+import { formatFileSize, isVideoMime } from '@/shared/attachments/rules';
 import { API_ROUTER } from '@/shared/router/routes';
 import { closeModal, useModalMounted } from '@/shared/router/modal-stack';
 import type { Attachment } from '../domain/models';
 
 /**
- * Full-screen view of an image attachment, stacked over the task details.
+ * Full-screen view of an image or video attachment, stacked over the task details.
  * Radix traps focus inside, closes on Esc and returns focus to the thumbnail.
  */
 export const AttachmentViewer = ({
@@ -47,11 +47,22 @@ export const AttachmentViewer = ({
             </Dialog.Close>
           </div>
           <div className="flex min-h-0 flex-1 items-center justify-center p-2 sm:p-4">
-            <img
-              src={API_ROUTER.timeAttachmentById(attachment.id)}
-              alt={attachment.name}
-              className="max-h-full max-w-full rounded-lg object-contain"
-            />
+            {isVideoMime(attachment.mime) ? (
+              <video
+                src={API_ROUTER.timeAttachmentById(attachment.id)}
+                aria-label={attachment.name}
+                controls
+                preload="metadata"
+                playsInline
+                className="max-h-full max-w-full rounded-lg"
+              />
+            ) : (
+              <img
+                src={API_ROUTER.timeAttachmentById(attachment.id)}
+                alt={attachment.name}
+                className="max-h-full max-w-full rounded-lg object-contain"
+              />
+            )}
           </div>
         </Dialog.Content>
       </Dialog.Portal>

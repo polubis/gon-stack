@@ -585,6 +585,36 @@ describe('mcp task management', () => {
     ]);
   });
 
+  it('attaches a video of up to 20 MB', async () => {
+    const { rpc, calls } = setup();
+
+    const { json } = await call(rpc, 'add_task_attachment', {
+      taskId: 't-1',
+      name: 'demo.mp4',
+      mimeType: 'video/mp4',
+      contentBase64: btoa('x'.repeat(6 * 1024 * 1024)),
+    });
+
+    expect(json.result.isError).toBeUndefined();
+    expect(calls).toEqual([
+      { name: 'addTaskAttachment', args: ['t-1', 'demo.mp4', 'video/mp4'] },
+    ]);
+  });
+
+  it('refuses a video over 20 MB', async () => {
+    const { rpc, calls } = setup();
+
+    const { json } = await call(rpc, 'add_task_attachment', {
+      taskId: 't-1',
+      name: 'demo.mp4',
+      mimeType: 'video/mp4',
+      contentBase64: btoa('x'.repeat(20 * 1024 * 1024 + 1)),
+    });
+
+    expect(json.result.content[0].text).toMatch(/Wideo jest większe niż 20 MB/);
+    expect(calls).toEqual([]);
+  });
+
   it('refuses an attachment of a type that is not allowed', async () => {
     const { rpc, calls } = setup();
 
@@ -942,14 +972,14 @@ describe('mcp access control', () => {
   it('rejects an oversized body', async () => {
     const { post } = setup();
 
-    const response = await post(null, {}, 'x'.repeat(9 * 1024 * 1024));
+    const response = await post(null, {}, 'x'.repeat(29 * 1024 * 1024));
 
     expect(response.status).toBe(413);
   });
 
   it('rejects an oversized body that declares no length', async () => {
     const { deps } = setup();
-    const chunk = new TextEncoder().encode('x'.repeat(5 * 1024 * 1024));
+    const chunk = new TextEncoder().encode('x'.repeat(15 * 1024 * 1024));
     const body = new ReadableStream({
       start(controller) {
         controller.enqueue(chunk);

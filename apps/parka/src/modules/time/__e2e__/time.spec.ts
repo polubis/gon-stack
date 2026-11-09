@@ -51,6 +51,40 @@ const synced = (page: Page, method: string, status: number) =>
       r.status() === status,
   );
 
+/** A short moving clip recorded from a canvas (WebM), `seconds` long. */
+const makeVideo = async (page: Page, seconds: number): Promise<Buffer> => {
+  const bytes = await page.evaluate(async (length) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 320;
+    canvas.height = 180;
+    const g = canvas.getContext('2d')!;
+    const recorder = new MediaRecorder(canvas.captureStream(30), {
+      mimeType: 'video/webm',
+    });
+    const chunks: Blob[] = [];
+    recorder.ondataavailable = (event) => chunks.push(event.data);
+    const stopped = new Promise((resolve) => (recorder.onstop = resolve));
+    recorder.start();
+    const startedAt = performance.now();
+    await new Promise<void>((resolve) => {
+      const draw = () => {
+        const t = performance.now() - startedAt;
+        g.fillStyle = `hsl(${(t / 10) % 360} 70% 50%)`;
+        g.fillRect(0, 0, 320, 180);
+        g.fillStyle = '#fff';
+        g.fillRect((t / 5) % 300, 80, 20, 20);
+        if (t < length * 1000) requestAnimationFrame(draw);
+        else resolve();
+      };
+      draw();
+    });
+    recorder.stop();
+    await stopped;
+    return Array.from(new Uint8Array(await new Blob(chunks).arrayBuffer()));
+  }, seconds);
+  return Buffer.from(bytes);
+};
+
 /** A noisy test photo drawn on a canvas and saved as a near-lossless JPEG. */
 const makePhoto = async (
   page: Page,
@@ -664,6 +698,59 @@ const commands = {
       await page.keyboard.press('Escape');
       await expect(viewer).toBeHidden();
       await expect(page).not.toHaveURL(/attachment-view/);
+    },
+
+  'a video is trimmed in the browser, uploaded with progress and opened from the toast':
+    async ({ page, getByE2e }) => {
+      const clip = await makeVideo(page, 3);
+      await getByE2e('time:attachment-input').setInputFiles({
+        name: 'demo.webm',
+        mimeType: 'video/webm',
+        buffer: clip,
+      });
+      const trim = getByE2e('time:attachment-trim');
+      await expect(trim).toBeVisible();
+      await expect(page).toHaveURL(/modal=attachment-trim/);
+      await expect(
+        trim.getByText(/Długość po przycięciu: [12]\.\d s/),
+      ).toBeVisible({
+        timeout: 20_000,
+      });
+
+      await trim.getByLabel(/Początek/).fill('1');
+      await expect(
+        trim.getByText(/Długość po przycięciu: [12]\.\d s/),
+      ).toBeVisible();
+      await Promise.all([
+        page.waitForResponse(
+          (r) =>
+            r.url().includes('/attachments/') &&
+            r.request().method() === 'POST' &&
+            r.status() === 201,
+          { timeout: 90_000 },
+        ),
+        trim.getByRole('button', { name: 'Przytnij i dodaj' }).click(),
+      ]);
+      await expect(trim).toBeHidden();
+
+      const toast = getByE2e('time:toast');
+      await expect(toast).toContainText('Wideo „demo.webm” jest gotowe', {
+        timeout: 60_000,
+      });
+      await toast.getByRole('button', { name: 'Otwórz' }).click();
+      await expect(page).toHaveURL(/modal=attachment-view/);
+      const player = getByE2e('time:attachment-viewer').getByLabel('demo.webm');
+      await expect(player).toBeVisible();
+      expect(await player.evaluate((v: HTMLVideoElement) => v.autoplay)).toBe(
+        false,
+      );
+      await page.keyboard.press('Escape');
+      await reload(page);
+      await expect(
+        getByE2e('time:attachments').getByRole('button', {
+          name: 'Otwórz wideo: demo.webm',
+        }),
+      ).toBeVisible();
     },
 
   'the mcp server lists, adds a reduced photo and deletes attachments': async ({

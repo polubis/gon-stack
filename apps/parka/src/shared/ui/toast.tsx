@@ -6,7 +6,12 @@ import type { E2eId } from '@/__e2e__/selectors';
 const AUTO_DISMISS_MS = 4000;
 
 export type ToastNotice =
-  | { tone: 'success'; message: string }
+  | {
+      tone: 'success';
+      message: string;
+      /** Navigates somewhere; the toast then stays until closed or used. */
+      action?: { label: string; run: () => void };
+    }
   | {
       tone: 'error';
       title: string;
@@ -37,13 +42,13 @@ export const Toast = ({
   'data-e2e': dataE2e,
 }: Props) => {
   const close = useEffectEvent(onClose);
-  const isError = notice.tone === 'error';
+  const sticky = notice.tone === 'error' || notice.action !== undefined;
 
   useEffect(() => {
-    if (isError) return;
+    if (sticky) return;
     const timer = setTimeout(close, AUTO_DISMISS_MS);
     return () => clearTimeout(timer);
-  }, [isError]);
+  }, [sticky]);
 
   return (
     <div
@@ -89,6 +94,30 @@ export const Toast = ({
               </button>
             </div>
           ) : null}
+        </div>
+      ) : notice.action ? (
+        <div className="flex items-center justify-between gap-3">
+          <p>{notice.message}</p>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                notice.action?.run();
+              }}
+              className="rounded-lg bg-card px-3 py-1 text-xs font-semibold text-brand hover:bg-hover"
+            >
+              {notice.action.label}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Zamknij"
+              className="rounded-full p-0.5 hover:opacity-80"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
         </div>
       ) : (
         notice.message
