@@ -1,5 +1,10 @@
+import {
+  ATTACHMENT_MAX_VIDEO_BYTES,
+  attachmentRejection,
+} from '@/shared/attachments/rules';
+import { logger } from '../application/core/logger';
 import { looksLikeMcpToken } from '../domain/mcp-token';
-import type { McpGateway } from './gateway';
+import { McpAuthError, McpInputError, type McpGateway } from './gateway';
 import { handleMcpMessage, MCP_ERROR, MCP_PROTOCOL_VERSIONS } from './protocol';
 import { createRateLimiter, type RateLimiter } from './rate-limit';
 
@@ -79,6 +84,7 @@ const tooMany = (retryAfterSeconds: number): Response =>
 // Chunked bodies declare no length: stop reading at the cap, not after it.
 const readChunks = async (
   body: ReadableStream<Uint8Array>,
+  max = MAX_BODY_BYTES,
 ): Promise<Uint8Array<ArrayBuffer>[] | null> => {
   const reader = body.getReader();
   const chunks: Uint8Array<ArrayBuffer>[] = [];
@@ -87,7 +93,7 @@ const readChunks = async (
     const { done, value } = await reader.read();
     if (done) break;
     size += value.byteLength;
-    if (size > MAX_BODY_BYTES) {
+    if (size > max) {
       await reader.cancel();
       return null;
     }
@@ -114,14 +120,17 @@ const discardBody = async (request: Request): Promise<void> => {
   if (request.body && !request.bodyUsed) await readChunks(request.body);
 };
 
-const respond = async (
+type Admitted = { token: string; client: string };
+
+/** Checks shared by every MCP endpoint: method, origin, limits and a well-formed token. */
+const admit = async (
   request: Request,
   {
-    gatewayFor,
     tokenLimiter = defaultTokenLimiter,
     failureLimiter = defaultFailureLimiter,
   }: McpHttpDeps,
-): Promise<Response> => {
+  contentType: 'json' | 'any',
+): Promise<Response | Admitted> => {
   if (request.method !== 'POST')
     return rpcError(405, MCP_ERROR.invalidRequest, 'Use POST', {
       Allow: 'POST',
@@ -141,7 +150,10 @@ const respond = async (
       'Unsupported protocol version',
     );
 
-  if (!(request.headers.get('content-type') ?? '').includes('application/json'))
+  if (
+    contentType === 'json' &&
+    !(request.headers.get('content-type') ?? '').includes('application/json')
+  )
     return rpcError(415, MCP_ERROR.invalidRequest, 'Send application/json');
 
   const client = clientKey(request);
@@ -159,6 +171,18 @@ const respond = async (
   const used = tokenLimiter.hit(token.slice(0, 24));
   if (!used.allowed) return tooMany(used.retryAfterSeconds);
 
+  return { token, client };
+};
+
+const respond = async (
+  request: Request,
+  deps: McpHttpDeps,
+): Promise<Response> => {
+  const admitted = await admit(request, deps, 'json');
+  if (admitted instanceof Response) return admitted;
+  const { token, client } = admitted;
+  const failureLimiter = deps.failureLimiter ?? defaultFailureLimiter;
+
   const raw = await readBody(request);
   if (raw === null)
     return rpcError(413, MCP_ERROR.invalidRequest, 'Request too large');
@@ -170,7 +194,7 @@ const respond = async (
     return rpcError(400, MCP_ERROR.parse, 'Parse error');
   }
 
-  const outcome = await handleMcpMessage(message, gatewayFor(token));
+  const outcome = await handleMcpMessage(message, deps.gatewayFor(token));
 
   if (outcome.kind === 'accepted')
     return new Response(null, { status: 202, headers: HEADERS });
@@ -191,6 +215,78 @@ export const handleMcpRequest = async (
   deps: McpHttpDeps,
 ): Promise<Response> => {
   const response = await respond(request, deps);
+  await discardBody(request);
+  return response;
+};
+
+const uploadFailure = (status: number, message: string): Response =>
+  json(status, { error: message });
+
+const respondUpload = async (
+  request: Request,
+  deps: McpHttpDeps,
+): Promise<Response> => {
+  const admitted = await admit(request, deps, 'any');
+  if (admitted instanceof Response) return admitted;
+  const { token, client } = admitted;
+
+  const params = new URL(request.url).searchParams;
+  const taskId = params.get('taskId')?.trim();
+  const name = params.get('name')?.trim();
+  const mime = (request.headers.get('content-type') ?? '')
+    .split(';')[0]!
+    .trim()
+    .toLowerCase();
+  if (!taskId || !name)
+    return uploadFailure(400, 'Query parameters taskId and name are required');
+
+  const chunks = request.body
+    ? await readChunks(request.body, ATTACHMENT_MAX_VIDEO_BYTES)
+    : [];
+  if (chunks === null) return uploadFailure(413, 'File too large');
+  const bytes = await new Blob(chunks).arrayBuffer();
+
+  const reason = attachmentRejection({
+    name,
+    type: mime,
+    size: bytes.byteLength,
+  });
+  if (reason) return uploadFailure(400, reason);
+
+  const gateway = deps.gatewayFor(token);
+  try {
+    const added = await gateway.addTaskAttachment(taskId, {
+      name,
+      mime,
+      bytes,
+    });
+    if (!added) return uploadFailure(404, `Task "${taskId}" not found`);
+    await gateway.notifyChange('time').catch(() => undefined);
+    return json(201, added);
+  } catch (error) {
+    if (error instanceof McpAuthError) {
+      const failed = (deps.failureLimiter ?? defaultFailureLimiter).hit(client);
+      return failed.allowed
+        ? unauthorized()
+        : tooMany(failed.retryAfterSeconds);
+    }
+    if (error instanceof McpInputError)
+      return uploadFailure(400, error.message);
+    logger(error, 'error');
+    return uploadFailure(500, 'Internal error');
+  }
+};
+
+/**
+ * Raw file upload for `add_task_attachment`: `POST /api/mcp/attachments/?taskId=&name=`,
+ * file bytes as the body, its mime type as `Content-Type`, same bearer token.
+ * Keeps big files out of the JSON-RPC call (base64 must be typed by the agent).
+ */
+export const handleMcpUpload = async (
+  request: Request,
+  deps: McpHttpDeps,
+): Promise<Response> => {
+  const response = await respondUpload(request, deps);
   await discardBody(request);
   return response;
 };

@@ -487,7 +487,7 @@ export const MCP_TOOLS: readonly RegisteredTool[] = [
   defineTool({
     name: 'add_task_attachment',
     title: 'Attach a file to a task',
-    description: `Attaches a file given as base64 (about 20 MB of file at most per call). Allowed: ${ATTACHMENT_MIME_TYPES.join(', ')}. A stored file is at most 5 MB (a video: 20 MB, kept as it is) and a task takes 5 files. Photos are re-encoded as lossy WebP (quality 75, same pixel size) first, so the limit applies after the reduction; an animated GIF is kept as it is.`,
+    description: `Attaches a file given as base64: only for small files (a few KB), as you must type the whole base64 yourself. For anything bigger (screenshot, video) skip this tool and upload the raw bytes: POST to this server's /api/mcp/attachments/?taskId=<id>&name=<file name> with the same Authorization: Bearer token, the mime type as Content-Type and the file as the body (e.g. curl --data-binary @file); the answer is the attachment JSON. Same limits either way. Allowed: ${ATTACHMENT_MIME_TYPES.join(', ')}. A stored file is at most 5 MB (a video: 20 MB, kept as it is) and a task takes 5 files. Photos are re-encoded as lossy WebP (quality 75, same pixel size) first, so the limit applies after the reduction; an animated GIF is kept as it is.`,
     input: z.strictObject({
       taskId: id(),
       name: z.string().trim().min(1).max(200),
