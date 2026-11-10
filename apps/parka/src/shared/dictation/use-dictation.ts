@@ -78,6 +78,12 @@ export const useDictation = ({
   const consumed = useRef(0);
   /** Results the live session has delivered so far. */
   const delivered = useRef(0);
+  /** Segment texts the live session delivered last (kept after it stops). */
+  const session = useRef<string[]>([]);
+  /** Segment texts of the previous session, still in `base` after a resume. */
+  const carried = useRef<string[]>([]);
+  /** Whether the live session has shown whether it re-delivers `carried`. */
+  const settled = useRef(false);
   const emitError = useEffectEvent(onError);
 
   useEffect(() => {
@@ -89,16 +95,25 @@ export const useDictation = ({
     rec.interimResults = true;
     consumed.current = 0;
     delivered.current = 0;
+    session.current = [];
+    settled.current = false;
     rec.onresult = (e) => {
-      const results = Array.from(e.results);
-      delivered.current = results.length;
+      const texts = Array.from(e.results, (r) => r[0]?.transcript ?? '');
+      delivered.current = texts.length;
+      session.current = texts;
+      const old = carried.current;
+      if (!settled.current) {
+        // Phones restart a resumed session by re-delivering the segments the
+        // previous one already put into `base`; they must not be folded again.
+        const same = old.slice(0, texts.length).every((t, i) => t === texts[i]);
+        if (same && texts.length < old.length) return;
+        settled.current = true;
+        consumed.current = same && texts.length >= old.length ? old.length : 0;
+      }
       setTranscript(
-        results
+        texts
           .slice(consumed.current)
-          .reduce(
-            (text, r) => extend(text, r[0]?.transcript ?? ''),
-            base.current,
-          ),
+          .reduce((text, t) => extend(text, t), base.current),
       );
     };
     rec.onerror = (e) => {
@@ -115,6 +130,7 @@ export const useDictation = ({
       rec.onend = null;
       rec.abort();
       recognition.current = null;
+      carried.current = session.current;
     };
   }, [listening, lang]);
 
@@ -125,7 +141,10 @@ export const useDictation = ({
     /** `resume` keeps the text so far; otherwise a fresh take starts. */
     start: (resume = false) => {
       base.current = resume ? transcript : '';
-      if (!resume) setTranscript('');
+      if (!resume) {
+        carried.current = [];
+        setTranscript('');
+      }
       setListening(true);
     },
     /** Replaces the previewed text (user edit). Speech after it continues from it. */
@@ -136,6 +155,7 @@ export const useDictation = ({
     },
     reset: () => {
       base.current = '';
+      carried.current = [];
       setTranscript('');
     },
     stop: () => {

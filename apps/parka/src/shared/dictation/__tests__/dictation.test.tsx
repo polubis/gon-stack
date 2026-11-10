@@ -393,6 +393,42 @@ describe('voice popup details', () => {
   });
 });
 
+describe('resuming after a pause on a phone', () => {
+  it('does not repeat words the phone delivers again after a restart', async () => {
+    installMic();
+    render(<Form />);
+
+    await userEvent.click(mic());
+    say('kup');
+    say('kup', 'mleko');
+    say('kup', 'mleko', 'prawda');
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Zakończ dyktowanie' }),
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Dyktuj dalej' }));
+    say('kup', 'mleko', 'prawda', 'ale');
+    await userEvent.click(screen.getByRole('button', { name: 'Wstaw' }));
+
+    expect(field()).toHaveValue('kup mleko prawda ale');
+  });
+
+  it('keeps a word the user repeats after a pause', async () => {
+    installMic();
+    render(<Form />);
+
+    await userEvent.click(mic());
+    say('kup', 'mleko', 'prawda');
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Zakończ dyktowanie' }),
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Dyktuj dalej' }));
+    say('prawda');
+    await userEvent.click(screen.getByRole('button', { name: 'Wstaw' }));
+
+    expect(field()).toHaveValue('kup mleko prawda prawda');
+  });
+});
+
 describe('editing while dictating', () => {
   it('lets the preview be edited while speech keeps coming', async () => {
     installMic();
