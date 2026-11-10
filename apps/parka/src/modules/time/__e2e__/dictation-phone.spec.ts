@@ -162,3 +162,38 @@ test('dictated notes follow the speech on a phone', async ({ page }) => {
     `Ważne: ${[...SENTENCES, 'na tym kończymy'].join(' ')}`,
   );
 });
+
+test('a pause and resume on a phone does not repeat the dictated words', async ({
+  page,
+}) => {
+  await page.addInitScript(fakeSpeech);
+  await page.addInitScript(() =>
+    window.localStorage.setItem('parka:device-id', 'device-phone'),
+  );
+  await signInAsTestUser(page);
+  await stubTime(page);
+  await page.goto(`${APP_ROUTER.time()}?date=${DAY}`);
+
+  await page.getByRole('button', { name: 'Dodaj zadanie' }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByRole('textbox', { name: 'Nazwa' }).fill('Raport');
+
+  const say = (phrase: string) =>
+    page.evaluate(
+      (s) =>
+        (window as unknown as { __say: (...a: string[]) => void }).__say(s),
+      phrase,
+    );
+
+  await dialog.getByRole('button', { name: 'Dyktuj: Opis' }).click();
+  await say('prawda');
+  await say('kup mleko');
+  await page.getByRole('button', { name: 'Zakończ dyktowanie' }).click();
+  await page.getByRole('button', { name: 'Dyktuj dalej' }).click();
+  await say('i chleb');
+  await page.getByRole('button', { name: 'Wstaw' }).click();
+
+  await expect(dialog.getByLabel('Opis (opcjonalnie)')).toHaveValue(
+    'prawda kup mleko i chleb',
+  );
+});
