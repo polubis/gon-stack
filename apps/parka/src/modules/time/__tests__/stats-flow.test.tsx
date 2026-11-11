@@ -82,7 +82,7 @@ describe('time statistics tab', () => {
 });
 
 describe('time statistics journey', () => {
-  it('opens statistics, moves across weeks keeping the tab and returns to tasks', async () => {
+  it('opens statistics, moves across weeks, returns to tasks', async () => {
     backend.seed([
       task({ id: 't-1', title: 'Gotowe', done: true }),
       task({ id: 't-2', title: 'W toku', inProgress: true }),

@@ -398,7 +398,7 @@ describe('image attachments', () => {
     );
   });
 
-  it('puts the toast at the top while a popup is open', async () => {
+  it('shows the upload error outside the popup while it stays open', async () => {
     const user = userEvent.setup();
     backend.seed([task()]);
     const details = await openDetails(user);
@@ -411,7 +411,8 @@ describe('image attachments', () => {
         new File(['x'], 'virus.exe', { type: 'application/x-msdownload' }),
       );
 
-    expect(await screen.findByRole('alert')).toHaveClass('top-4');
+    expect(await screen.findByRole('alert')).toBeVisible();
+    expect(details.queryByRole('alert')).toBeNull();
   });
 });
 

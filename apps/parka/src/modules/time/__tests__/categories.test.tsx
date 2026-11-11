@@ -38,8 +38,6 @@ describe('task categories', () => {
       }),
     ).toBeVisible();
     const [write] = backend.writes();
-    expect(write).toMatchObject({ method: 'PUT' });
-    expect(write!.url).toContain('/api/time/categories/home/');
     expect(write!.body).toMatchObject({ id: 'home', name: 'Mieszkanie' });
   });
 

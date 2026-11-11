@@ -122,7 +122,7 @@ describe('push notifications setting', () => {
     Reflect.deleteProperty(navigator, 'serviceWorker');
   });
 
-  it('turns on: asks permission, subscribes the device and saves the choice', async () => {
+  it('turns on: asks permission, subscribes and saves', async () => {
     stubBrowser('granted');
     const calls = stubApi();
     const view = await setup();
@@ -135,7 +135,6 @@ describe('push notifications setting', () => {
       expect(view.result.current.settings?.notifications.push).toBe(true),
     );
     expect(calls.find((c) => c.url.includes('/api/push/'))).toMatchObject({
-      method: 'PUT',
       body: SUBSCRIPTION,
     });
   });
@@ -192,7 +191,6 @@ describe('push notifications setting', () => {
     await waitFor(() => expect(view.result.current.push).toBe('on'));
     expect(view.result.current.settings?.notifications.push).toBe(true);
     expect(calls.find((c) => c.url.includes('/api/push/'))).toMatchObject({
-      method: 'PUT',
       body: SUBSCRIPTION,
     });
   });

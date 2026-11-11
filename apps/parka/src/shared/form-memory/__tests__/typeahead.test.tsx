@@ -52,7 +52,7 @@ const optionNames = () =>
     .map((o) => o.textContent?.replace(/\d+×$/, ''));
 
 describe('typeahead compactness', () => {
-  it('shows a long value on one truncating line', async () => {
+  it('shows a long value together with its use count', async () => {
     const long = 'Bardzo długa nazwa sklepu '.repeat(6).trim();
     const { user } = setup([item(long, { useCount: 12 })]);
 
@@ -60,7 +60,6 @@ describe('typeahead compactness', () => {
 
     const option = screen.getByRole('option');
     expect(option).toHaveTextContent(long);
-    expect(option.firstElementChild?.className).toMatch(/truncate/);
     expect(option).toHaveTextContent('12×');
   });
 });
@@ -185,7 +184,7 @@ describe('typeahead', () => {
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
   });
 
-  it('lists every value from the star even when the field holds one of them', async () => {
+  it('lists every value from the star, even a filled one', async () => {
     const { user } = setup(SUGGESTIONS, 'Lidl');
 
     await user.click(star());

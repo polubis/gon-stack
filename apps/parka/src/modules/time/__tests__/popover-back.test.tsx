@@ -52,7 +52,7 @@ describe('time menus on a phone', () => {
     await waitFor(() => expect(menuOf('Dodaj')).toBeNull());
   });
 
-  it('keeps the delete confirmation open after picking Usuń in the task menu', async () => {
+  it('keeps delete confirmation open after picking Usuń', async () => {
     backend.state.tasks = [task()];
     renderTime();
     await userEvent.click(

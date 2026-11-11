@@ -209,7 +209,7 @@ describe('remembered expense form fields', () => {
     expect(screen.getByLabelText('Kategoria')).toHaveTextContent(FOOD.name);
   });
 
-  it('leaves the category on its default when the remembered one was deleted', async () => {
+  it('keeps the default category when the remembered one is gone', async () => {
     mockBackend([FOOD, FUN]);
     const first = await openNew();
     await addExpense(first.user, 'BLIK', 'Spożywcze');

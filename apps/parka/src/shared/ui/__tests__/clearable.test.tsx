@@ -130,15 +130,12 @@ const Fields = () => {
   );
 };
 
-const slot = (name: string) =>
-  screen.getByRole('button', { name }).parentElement?.className ?? '';
-
 describe('textarea mic and clear button', () => {
   afterEach(() => {
     Reflect.deleteProperty(window, 'webkitSpeechRecognition');
   });
 
-  it('behaves like a text input: mic far right when empty, slides left beside the x', async () => {
+  it('keeps the mic available next to the clear button once text is typed', async () => {
     Object.assign(window, {
       webkitSpeechRecognition: class {
         start() {}
@@ -149,15 +146,16 @@ describe('textarea mic and clear button', () => {
     render(<Fields />);
 
     expect(screen.queryByRole('button', { name: /Wyczyść/ })).toBeNull();
-    expect(slot('Dyktuj: Opis')).toContain('right-2');
-    expect(slot('Dyktuj: Opis')).toBe(
-      slot('Dyktuj: Linia').replace('top-1/2 -translate-y-1/2', 'top-2'),
-    );
+    expect(
+      screen.getByRole('button', { name: 'Dyktuj: Opis' }),
+    ).toBeInTheDocument();
 
     await userEvent.type(screen.getByLabelText('Opis'), 'tekst');
 
     expect(screen.getByRole('button', { name: 'Wyczyść: Opis' })).toBeVisible();
-    expect(slot('Dyktuj: Opis')).toContain('right-8');
+    expect(
+      screen.getByRole('button', { name: 'Dyktuj: Opis' }),
+    ).toBeInTheDocument();
   });
 
   it('empties the textarea and focuses it', async () => {

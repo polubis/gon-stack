@@ -82,8 +82,7 @@ describe('device photo in settings', () => {
     );
   });
 
-  const photo = () =>
-    document.querySelector<HTMLImageElement>('img[data-device-photo]');
+  const photo = () => screen.queryByRole('presentation', { hidden: true });
 
   it('offers to add a photo for a device without one', async () => {
     render(<Main />);

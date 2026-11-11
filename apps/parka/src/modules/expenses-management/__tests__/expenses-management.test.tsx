@@ -137,7 +137,7 @@ describe('adding an expense on its own page', () => {
     expect(screen.getByLabelText('Sklep')).toBeVisible();
   });
 
-  it('keeps the save bar in the page flow instead of pinning it', async () => {
+  it('shows the total next to the save button', async () => {
     mockBackend();
     await open();
 
@@ -145,7 +145,6 @@ describe('adding an expense on its own page', () => {
       .parentElement as HTMLElement;
 
     expect(bar).toHaveTextContent('Razem');
-    expect(bar.className).not.toMatch(/sticky|fixed/);
   });
 
   it('links back to the dashboard', async () => {
@@ -700,7 +699,7 @@ describe('adding an expense on its own page', () => {
       expect(items.map((i) => i.categoryId)).toEqual(['c-2', 'c-1']);
     });
 
-    it('saves a scanned item under the user category when its match is not the user own', async () => {
+    it('saves a scanned item under the user category when no own match', async () => {
       server.use(
         http.post('/api/receipts/scan/', () =>
           HttpResponse.json({

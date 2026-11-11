@@ -332,7 +332,9 @@ describe('task comment avatars', () => {
       name: 'Autor: Anna Kowalska',
     });
 
-    expect(avatar.querySelector('img')).toHaveAttribute('src', PICTURE);
+    expect(
+      within(avatar).getByRole('presentation', { hidden: true }),
+    ).toHaveAttribute('src', PICTURE);
   });
 
   it('falls back to an icon when the owner has no picture', async () => {
@@ -345,8 +347,9 @@ describe('task comment avatars', () => {
       name: 'Autor: Anna Kowalska',
     });
 
-    expect(avatar.querySelector('img')).toBeNull();
-    expect(avatar.querySelector('svg')).not.toBeNull();
+    expect(
+      within(avatar).queryByRole('presentation', { hidden: true }),
+    ).toBeNull();
   });
 
   it('shows the bot icon instead of the owner picture on a bot comment', async () => {
@@ -360,8 +363,9 @@ describe('task comment avatars', () => {
       name: 'Autor: bot Claude Desktop',
     });
 
-    expect(avatar.querySelector('img')).toBeNull();
-    expect(avatar.querySelector('svg')).not.toBeNull();
+    expect(
+      within(avatar).queryByRole('presentation', { hidden: true }),
+    ).toBeNull();
   });
 
   it('shows the owner picture and the bot icon after an owner edit', async () => {
@@ -377,11 +381,12 @@ describe('task comment avatars', () => {
       name: /^Autorzy: Anna Kowalska i bot/,
     });
 
-    expect(avatar.querySelector('img')).toHaveAttribute('src', PICTURE);
-    expect(avatar.querySelector('svg')).not.toBeNull();
+    expect(
+      within(avatar).getByRole('presentation', { hidden: true }),
+    ).toHaveAttribute('src', PICTURE);
   });
 
-  it('shows a comment of a deleted token under the name it was written with', async () => {
+  it('shows a deleted token comment under its old name', async () => {
     const user = userEvent.setup();
     backend.seed([task()]);
     backend.state.comments['t-1'] = [

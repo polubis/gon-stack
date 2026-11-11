@@ -47,7 +47,7 @@ let uploads: Request[] = [];
 let uploadResponse: object = { code: 200, data: { variants: variants(2) } };
 
 const chooser = () =>
-  document.querySelector<HTMLInputElement>('input[type="file"]')!;
+  screen.getByLabelText<HTMLInputElement>('Wybierz zdjęcie profilowe');
 
 const png = () =>
   new File([new Uint8Array(PNG)], 'me.png', { type: 'image/png' });

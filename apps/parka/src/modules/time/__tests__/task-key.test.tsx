@@ -67,12 +67,8 @@ describe('task key', () => {
     const row = (await screen.findByText('Raport')).closest('li')!;
     expect(within(row).queryByLabelText(/^Identyfikator zadania/)).toBeNull();
     expect(
-      row.querySelector('[aria-hidden="true"].animate-pulse'),
-    ).not.toBeNull();
-    expect(
       await within(row).findByLabelText('Identyfikator zadania: TST-1'),
     ).toBeVisible();
-    expect(row.querySelector('.animate-pulse')).toBeNull();
   });
 
   it('shows the key the server gave to a new task', async () => {

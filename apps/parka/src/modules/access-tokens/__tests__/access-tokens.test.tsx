@@ -230,7 +230,7 @@ describe('access token creation', () => {
     expect(await screen.findByText('Utworzono token.')).toBeInTheDocument();
   });
 
-  it('sends no expiry when the token should never expire', async () => {
+  it('sends no expiry for a token that never expires', async () => {
     const { user, created } = await setup([]);
     await user.click(screen.getAllByRole('button', { name: /Generuj/ })[0]!);
     const dialog = await screen.findByRole('dialog', { name: 'Nowy token' });
