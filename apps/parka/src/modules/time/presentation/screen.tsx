@@ -29,7 +29,6 @@ import { UnreadLink } from '@/modules/notifications/presentation/unread-link';
 import { rangeOf } from '../domain/schedule';
 import { AddMenu } from './add-menu';
 import { BacklogButton } from './backlog-button';
-import { StatusesButton } from './statuses-button';
 import { Provider, useContext } from './context';
 import { StatsSkeleton, ViewSkeleton } from './skeleton';
 import { Stats } from './stats';
@@ -128,7 +127,6 @@ const Screen = ({ kind, children }: Props) => {
           eyebrow="Twój"
           action={
             <>
-              <StatusesButton />
               <BacklogButton />
               <UnreadLink />
               <AddMenu

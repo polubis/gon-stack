@@ -78,6 +78,7 @@ describe('time add menu', () => {
       'Do backlogu',
       'Kategoria',
       'Priorytet',
+      'Statusy zadań',
     ]);
   });
 

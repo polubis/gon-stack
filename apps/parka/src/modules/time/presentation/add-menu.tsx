@@ -5,6 +5,7 @@ import {
   Inbox,
   ListChecks,
   Repeat,
+  Settings2,
   Tag,
   type LucideIcon,
 } from 'lucide-react';
@@ -16,6 +17,7 @@ import {
   NEW_PRIORITY_MODAL,
   NEW_RECURRING_TASK_MODAL,
   NEW_TASK_MODAL,
+  STATUSES_MODAL,
 } from './modal-ids';
 
 const OPTIONS: readonly { label: string; modal: string; icon: LucideIcon }[] = [
@@ -24,6 +26,7 @@ const OPTIONS: readonly { label: string; modal: string; icon: LucideIcon }[] = [
   { label: 'Do backlogu', modal: NEW_BACKLOG_MODAL, icon: Inbox },
   { label: 'Kategoria', modal: NEW_CATEGORY_MODAL, icon: Tag },
   { label: 'Priorytet', modal: NEW_PRIORITY_MODAL, icon: Flag },
+  { label: 'Statusy zadań', modal: STATUSES_MODAL, icon: Settings2 },
 ];
 
 const KEYS = ['ArrowDown', 'ArrowUp', 'Home', 'End'];
