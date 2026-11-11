@@ -11,10 +11,7 @@ import {
   it,
   vi,
 } from 'vitest';
-import {
-  readRemembered,
-  writeRemembered,
-} from '@/shared/form-memory/integration/storage';
+import { useRememberedField } from '@/shared/form-memory/presentation/use-remembered-field';
 import { useAuth } from '../presentation/use-auth';
 
 const ID_A = '0a0a0a0a-0a0a-4a0a-8a0a-0a0a0a0a0a0a';
@@ -23,6 +20,15 @@ const ID_B = '0b0b0b0b-0b0b-4b0b-8b0b-0b0b0b0b0b0b';
 const server = setupServer();
 const reload = vi.fn();
 const unsubscribe = vi.fn(async () => true);
+
+const rememberMerchant = (value: string) =>
+  renderHook(() =>
+    useRememberedField({ key: 'merchant' }),
+  ).result.current.remember(value);
+
+const recalledMerchant = () =>
+  renderHook(() => useRememberedField({ key: 'merchant' })).result.current
+    .recalled;
 
 const signedInAs = (id: string) =>
   server.use(
@@ -70,7 +76,7 @@ describe('account isolation on a shared browser', () => {
       expect(first.result.current.status).toBe('authenticated'),
     );
     first.unmount();
-    writeRemembered('merchant', 'Sklep A');
+    rememberMerchant('Sklep A');
     unsubscribe.mockClear();
 
     const second = renderHook(() => useAuth());
@@ -78,7 +84,7 @@ describe('account isolation on a shared browser', () => {
       expect(second.result.current.status).toBe('authenticated'),
     );
 
-    expect(readRemembered('merchant')).toBe('Sklep A');
+    expect(recalledMerchant()).toBe('Sklep A');
     expect(unsubscribe).not.toHaveBeenCalled();
   });
 
@@ -89,7 +95,7 @@ describe('account isolation on a shared browser', () => {
       expect(first.result.current.status).toBe('authenticated'),
     );
     first.unmount();
-    writeRemembered('merchant', 'Sklep A');
+    rememberMerchant('Sklep A');
     unsubscribe.mockClear();
 
     signedInAs(ID_B);
@@ -98,18 +104,18 @@ describe('account isolation on a shared browser', () => {
       expect(second.result.current.status).toBe('authenticated'),
     );
 
-    expect(readRemembered('merchant')).toBeNull();
+    expect(recalledMerchant()).toBeNull();
     expect(unsubscribe).toHaveBeenCalledTimes(1);
   });
 
   it('forgets leftovers of an unknown previous session', async () => {
-    writeRemembered('merchant', 'Sklep sprzed aktualizacji');
+    rememberMerchant('Sklep sprzed aktualizacji');
     signedInAs(ID_B);
 
     const { result } = renderHook(() => useAuth());
     await waitFor(() => expect(result.current.status).toBe('authenticated'));
 
-    expect(readRemembered('merchant')).toBeNull();
+    expect(recalledMerchant()).toBeNull();
   });
 
   it('reloads a tab that shows another account than the server reports', async () => {
