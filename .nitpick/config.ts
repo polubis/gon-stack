@@ -41,6 +41,8 @@ ${insert('aodi-framework')}
         'Bash(git commit *)',
         'Bash(git push -u origin changes-batch-*)',
         'Bash(git push origin changes-batch-*)',
+        'Bash(git push -u origin factory/*)',
+        'Bash(git push origin factory/*)',
       ],
     },
     attribution: { commit: '', pr: '' },
@@ -165,6 +167,108 @@ Show dev adequate evidence the problem is solved, e.g.:
 - decision log path (if committing),
 - commit/push outcome or fix list,
 - confirmation that dev ports were closed.
+`,
+    },
+    factory: {
+      frontmatter: {
+        name: 'factory',
+        description:
+          'Cyclic backlog worker — each run takes one tagged Parka task, implements it, opens PR, uploads evidence, cleans up. Loop is external.',
+      },
+      doc: ({ ref }) => `# Factory
+
+Cyclic worker. Run = ONE task from Parka MCP. Loop is external (\`/loop\`, cron): factory never loops itself. Next run take next task. Talk and write caveman (${ref('caveman')}).
+
+## Input
+
+- **tag** (required) — Parka category name. Missing → error, stop.
+- **details** (optional) — dev hints: narrow pick (priority, keyword), extra constraints. Never widen scope.
+
+## Statuses
+
+Never hard-code status names. At run start read the allowed statuses from Parka MCP (status enum in \`set_task_status\` / \`update_task\` schema, statuses seen on \`list_tasks\` / \`get_task\`). Map by meaning:
+
+- **todo** — not started, ready to pick (the pick filter)
+- **started** — work running
+- **finished** — work shipped
+- **blocked** — stuck. Dedicated blocked status exists → use it. Else back to **todo** plus \`BLOCKED:\` comment
+
+Several statuses fit one meaning (custom ones) → pick the closest to the flow order. No status fits → comment the gap, continue with closest, report it.
+
+## Flow
+
+### 1. Guard — first, always
+
+Task in progress locally = any of: lock file \`.evidences/factory.lock\` exists, git tree dirty, branch not \`main\`, \`git stash list\` not empty.
+
+- In progress → **error** "task in progress: <id from lock or branch>". Touch nothing. Stop.
+- Free → \`git fetch\`, local \`main\` = \`origin/main\`.
+
+### 2. Pick
+
+1. \`list_tasks\` (Parka MCP): tag, status **todo**, apply details. Then \`get_task\`.
+2. Order: priority high first, then oldest. Take first. None → say "no tasks", stop (not error).
+3. Task not about this repo (no code/config/docs of gon-stack) → comment why, leave status untouched, **error**, stop.
+4. Task unclear → comment question, leave **todo**, **error**, stop.
+
+### 3. Start
+
+1. Branch per ${ref('git')}: checkout \`main\`, pull --rebase, \`git switch -c factory/<task-id>\`.
+2. Write lock \`.evidences/factory.lock\` (task id, branch).
+3. Backlog task has no day and **started** needs one → \`update_task\` day today. Then \`set_task_status\` **started**.
+4. Comment: start, plan in 1-3 lines.
+
+### 4. Work
+
+- Follow \`rules/*.md\` (${ref('way-of-work')}, ${ref('testing')}, ${ref('security')}). Conventions around code first.
+- Add tests (pyramid), run basic repo checks for touched packages.
+- **Comment on task** at each step: decision, surprise, check result, retry. Short, facts only.
+- Side find (flaky test, other bug, tech debt, out of scope) → NOT fix. \`create_task\` to backlog: same tag, priority from \`list_priorities\`, description = what, where, how seen, parent task id. Check \`list_tasks\` backlog first, no duplicates. Comment link on current task.
+- Personal or sensitive data seen → stop all (${ref('security')}).
+
+### 5. Blocker
+
+Cannot finish (failing checks not own, missing access, spec conflict, needs dev decision):
+
+1. Comment \`BLOCKED: <reason>, tried: <list>, need: <what>\`.
+2. \`set_task_status\` **blocked** (or back to **todo** when no blocked status). Never leave **started** on stuck task. Never **finished**.
+3. Clean up (step 8). **Error** with same reason.
+
+### 6. Evidence
+
+Skill ${ref('evidence')}, key = task id, out \`.evidences/<task-id>/\`.
+
+- **No \`--worktree\`. Never use git worktree.** Need BEFORE code → \`git stash\` own changes, record BEFORE on untouched tree, \`git stash pop\`. Verify tree back as it was, stash list empty.
+- Upload final proof to task: \`add_task_attachment\` (png/mp4/webm/txt, max 5 files, video max 20 MB). Too big → shrink or log + comment.
+- Comment: what proof shows, limits.
+
+### 7. Ship
+
+1. Decision entry in \`decisions/\` (${ref('decision-log')}). Commit per ${ref('git')}: rich commit, no artifacts.
+2. Push branch, open PR (\`gh pr create\`): what, why, checks, task id. Hook fail → fix, no \`--no-verify\`.
+3. Comment PR link on task. \`set_task_status\` **finished**.
+
+### 8. Clean up — always, success or error
+
+- \`git switch main\`, delete local work branch (pushed already or abandoned).
+- Own stash gone. Tree clean.
+- Remove \`.evidences/<task-id>/\` and \`.evidences/factory.lock\`, scratch files.
+- Stop dev servers / ports started.
+
+## Rules
+
+- One task per run. Never loop, never pick second task.
+- Never worktree. Stash only for evidence BEFORE.
+- Never merge PR. Never push to \`main\`.
+- Never hide failure, never **finished** without PR and evidence.
+- Error = plain message to dev: what, why, task id, state left behind (should be none).
+
+## Output
+
+- Task id + title, branch, PR link.
+- Status changes, comments count, backlog tasks created.
+- Evidence uploaded.
+- Or: error + reason. Or: "no tasks".
 `,
     },
   },
