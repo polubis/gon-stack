@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState, type SubmitEvent } from 'react';
 import {
   currentDevice,
   loadDeviceHints,
@@ -78,7 +78,7 @@ export const BacklogAddDialog = ({
         ? 'Wybierz priorytet.'
         : null;
 
-  const submit = (e: FormEvent) => {
+  const submit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setTouched(true);
     if (titleError !== null || categoryId === undefined) return;
