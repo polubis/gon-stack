@@ -78,7 +78,6 @@ export const TIME_E2E_IDS = [
   'time:history-skeleton',
   'time:history-error',
   'time:history-empty',
-  'time:statuses-open',
   'time:statuses-dialog',
   'time:statuses-edit',
   'time:statuses-save',

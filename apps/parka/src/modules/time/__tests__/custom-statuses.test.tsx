@@ -15,7 +15,10 @@ const box = () =>
 
 const openEditor = async (user: ReturnType<typeof userEvent.setup>) => {
   await user.click(
-    await screen.findByRole('button', { name: 'Statusy zadań' }),
+    (await screen.findAllByRole('button', { name: 'Dodaj' }))[0]!,
+  );
+  await user.click(
+    await screen.findByRole('menuitem', { name: 'Statusy zadań' }),
   );
   return screen.findByRole('dialog', { name: 'Statusy zadań' });
 };

@@ -94,7 +94,8 @@ const commands = {
 
   'i add the Review step in the editor': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.time({ date: DAY }));
-    await getByE2e('time:statuses-open').click();
+    await page.getByRole('button', { name: 'Dodaj' }).first().click();
+    await page.getByRole('menuitem', { name: 'Statusy zadań' }).click();
     const dialog = getByE2e('time:statuses-dialog');
     await dialog.getByRole('button', { name: 'Dodaj status' }).click();
     await dialog
@@ -149,7 +150,8 @@ const commands = {
     page,
     getByE2e,
   }) => {
-    await getByE2e('time:statuses-open').click();
+    await page.getByRole('button', { name: 'Dodaj' }).first().click();
+    await page.getByRole('menuitem', { name: 'Statusy zadań' }).click();
     const dialog = getByE2e('time:statuses-dialog');
     await dialog.getByRole('button', { name: 'Usuń status: Review' }).click();
     await Promise.all([
