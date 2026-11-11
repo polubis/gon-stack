@@ -56,6 +56,7 @@ export const ModalShell = ({
               </Dialog.Description>
             </div>
             <Dialog.Close
+              data-e2e={`time:modal-close:${modal}`}
               aria-label="Zamknij"
               className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink-soft hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             >

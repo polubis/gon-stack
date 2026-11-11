@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
 import { test, type Ctx } from '@/__e2e__/test';
+import { expenseRow } from '@/__e2e__/locators';
 import { signInAsTestUser } from '@/__e2e__/session';
 import {
   installBackend,
@@ -47,9 +48,7 @@ const commands = {
   },
   'the "Kawiarnia" row shows the rocket': async ({ getByE2ePrefix }) => {
     await expect(
-      getByE2ePrefix('dashboard:expense:')
-        .filter({ hasText: 'Kawiarnia' })
-        .locator('[data-avatar="rocket"]'),
+      getByE2ePrefix('device:icon:', expenseRow(getByE2ePrefix, 'Kawiarnia')),
     ).toBeVisible();
   },
 } satisfies CommandRegistry<Ctx>;

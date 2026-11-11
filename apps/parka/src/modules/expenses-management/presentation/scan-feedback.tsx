@@ -41,7 +41,9 @@ export const ReceiptScanError = ({
     <p className="font-mono text-xs text-danger">{ERROR_CODES.scan}</p>
     <p className="text-sm text-ink-soft">{description}</p>
     <div className="flex w-full max-w-xs gap-2">
-      <Button onClick={onRetry}>Spróbuj ponownie</Button>
+      <Button data-e2e="expenses-management:scan-retry" onClick={onRetry}>
+        Spróbuj ponownie
+      </Button>
       <Button variant="ghost" onClick={onBack}>
         Wróć
       </Button>

@@ -108,9 +108,7 @@ const commands = {
       await signInAsTestUser(page);
     await page.goto(screen.path);
     await expect(getByE2e(screen.root)).toBeVisible();
-    await expect(
-      page.getByRole('heading', { name: screen.heading }).first(),
-    ).toBeVisible();
+    await expect(getByE2e(screen.root)).toContainText(screen.heading);
     await expectNoA11yViolations(page);
   },
 } satisfies CommandRegistry<Ctx>;

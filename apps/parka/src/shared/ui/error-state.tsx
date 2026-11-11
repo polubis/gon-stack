@@ -36,7 +36,9 @@ export const ErrorState = ({
     <p className="font-mono text-xs text-danger">{code}</p>
     <p className="text-sm text-ink-soft">{description}</p>
     <div className="flex w-full max-w-xs gap-2">
-      <Button onClick={onRetry}>Spróbuj ponownie</Button>
+      <Button data-e2e="ui:error-retry" onClick={onRetry}>
+        Spróbuj ponownie
+      </Button>
       <Button variant="ghost" href={backHref} onClick={onBackClick}>
         {backLabel}
       </Button>

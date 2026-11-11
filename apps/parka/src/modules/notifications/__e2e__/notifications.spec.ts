@@ -121,7 +121,9 @@ const commands = {
   }) => {
     const skeleton = getByE2e('notifications:skeleton');
     await expect(skeleton).toBeVisible();
-    await expect(skeleton.locator('li').first()).toBeVisible();
+    await expect(
+      getByE2e('notifications:skeleton-card', skeleton).first(),
+    ).toBeVisible();
   },
   'the first page of 20 is listed': async ({ getByE2ePrefix }) => {
     await expect(rows(getByE2ePrefix)).toHaveCount(PAGE);
@@ -154,18 +156,22 @@ const commands = {
   'the list ends with a closing line': async ({ getByE2e }) => {
     await expect(getByE2e('notifications:end')).toBeVisible();
   },
-  'every notification appears once': async ({ page }) => {
-    const ids = await page
-      .locator('[data-e2e^="notifications:row:"]')
-      .evaluateAll((nodes) => nodes.map((n) => n.getAttribute('data-e2e')));
+  'every notification appears once': async ({ getByE2ePrefix }) => {
+    const ids = await getByE2ePrefix('notifications:row:').evaluateAll(
+      (nodes) => nodes.map((n) => n.getAttribute('data-e2e')),
+    );
     expect(new Set(ids).size).toBe(TOTAL);
   },
   'the edit shows "Biedronka" struck through and "Lidl 0" highlighted': async ({
     getByE2e,
   }) => {
     const diff = getByE2e('notifications:diff:n-0');
-    await expect(diff.locator('del').first()).toContainText('Biedronka');
-    await expect(diff.locator('ins').first()).toContainText('Lidl 0');
+    await expect(
+      getByE2e('notifications:diff-removed', diff).first(),
+    ).toContainText('Biedronka');
+    await expect(
+      getByE2e('notifications:diff-added', diff).first(),
+    ).toContainText('Lidl 0');
   },
   'i mark the first notification as read': async ({ getByE2e }) => {
     await getByE2e('notifications:mark-read:n-0').click();
@@ -200,9 +206,11 @@ const commands = {
     getByE2e,
   }) => {
     const empty = getByE2e('notifications:empty');
-    await expect(empty.locator('svg')).toBeVisible();
-    await expect(empty.getByRole('heading')).toHaveText('Brak powiadomień');
-    await expect(empty.locator('p')).not.toBeEmpty();
+    await expect(getByE2e('ui:empty-icon', empty)).toBeVisible();
+    await expect(getByE2e('ui:empty-title', empty)).toHaveText(
+      'Brak powiadomień',
+    );
+    await expect(getByE2e('ui:empty-description', empty)).not.toBeEmpty();
   },
 } satisfies CommandRegistry<Ctx>;
 

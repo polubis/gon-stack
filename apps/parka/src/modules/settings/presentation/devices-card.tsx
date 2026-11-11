@@ -164,6 +164,7 @@ const DeviceRow = ({
       <div className="flex items-center gap-3">
         <DeviceBubble
           device={device}
+          data-e2e={`settings:device-bubble:${device.id}`}
           className="h-10 w-10"
           iconClassName="h-5 w-5"
         />

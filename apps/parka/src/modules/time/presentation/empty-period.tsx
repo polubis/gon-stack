@@ -21,6 +21,7 @@ export const EmptyPeriod = ({ kind }: { kind: TimeKind }) => {
       description={`Nic nie zaplanowano: ${periodTitle(kind, viewAnchor)}.`}
       action={
         <Button
+          data-e2e="time:empty-add"
           onClick={() => openModal(NEW_TASK_MODAL)}
           className="w-auto px-3 py-2"
         >

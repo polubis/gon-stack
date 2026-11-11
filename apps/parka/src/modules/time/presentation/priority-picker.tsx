@@ -50,6 +50,7 @@ export const PriorityPicker = ({
               <input
                 type="radio"
                 name="task-priority"
+                data-e2e={`time:priority-option:${item.name}`}
                 value={item.id}
                 checked={selected}
                 onChange={() => onChange(item.id)}

@@ -21,7 +21,10 @@ export const StepView = () => {
           <Illustration />
         </div>
         {/* Two-line slots: a short step never shrinks the frame (no jump). */}
-        <h2 className="mt-6 flex min-h-[2lh] items-center justify-center text-xl font-semibold tracking-tight md:text-2xl">
+        <h2
+          data-e2e="walkthrough:title"
+          className="mt-6 flex min-h-[2lh] items-center justify-center text-xl font-semibold tracking-tight md:text-2xl"
+        >
           {step.title}
         </h2>
         <p className="mt-2 min-h-[2lh] max-w-sm text-sm text-ink-soft md:text-base">

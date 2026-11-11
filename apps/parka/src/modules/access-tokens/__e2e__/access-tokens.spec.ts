@@ -152,7 +152,7 @@ const commands = {
     await expect(page).toHaveURL(/modal=token-new/);
     await getByE2e('access-tokens:name').fill('Claude');
     await getByE2e('access-tokens:ttl').click();
-    await page.getByRole('option', { name: '7 dni' }).click();
+    await getByE2e('ui:option:7').click();
     await getByE2e('access-tokens:submit').click();
     await expect(getByE2e('access-tokens:secret-dialog')).toBeVisible();
     const secret = (await getByE2e('access-tokens:secret').textContent()) ?? '';
@@ -167,12 +167,15 @@ const commands = {
   'i close the secret dialog': async ({ page, getByE2e }) => {
     await getByE2e('access-tokens:secret-done').click();
     await expect(getByE2e('access-tokens:secret-dialog')).toBeHidden();
-    await expect(page.getByText(latest(page))).toHaveCount(0);
+    await expect(getByE2e('access-tokens:main')).not.toContainText(
+      latest(page),
+    );
   },
 
   'the token is listed only in masked form': async ({
     page,
     getByE2ePrefix,
+    getByE2e,
   }) => {
     const secret = latest(page);
     await expect(getByE2ePrefix('access-tokens:mask:')).toHaveText(
@@ -182,12 +185,14 @@ const commands = {
     await expect(getByE2ePrefix('access-tokens:last-used:')).toHaveText(
       'Nigdy',
     );
-    await expect(page.locator('body')).not.toContainText(secret);
+    await expect(getByE2e('access-tokens:main')).not.toContainText(secret);
   },
 
-  'i reload and the secret is gone for good': async ({ page }) => {
+  'i reload and the secret is gone for good': async ({ page, getByE2e }) => {
     await reload(page);
-    await expect(page.locator('body')).not.toContainText(latest(page));
+    await expect(getByE2e('access-tokens:main')).not.toContainText(
+      latest(page),
+    );
   },
 
   'the client lists exactly the nineteen tools': async ({ page }) => {

@@ -88,6 +88,7 @@ const Form = ({ base }: FormProps) => {
     <>
       <div className="mx-auto w-full max-w-2xl md:px-4">
         <ScreenHeader
+          data-e2e="categories:form-header"
           title={base ? `Edytuj: ${originalName}` : 'Nowa kategoria'}
           backHref={APP_ROUTER.categories()}
         />

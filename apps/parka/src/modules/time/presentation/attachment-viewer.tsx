@@ -51,6 +51,7 @@ export const AttachmentViewer = ({
               <video
                 src={API_ROUTER.timeAttachmentById(attachment.id)}
                 aria-label={attachment.name}
+                data-e2e="time:attachment-media"
                 controls
                 preload="metadata"
                 playsInline
@@ -60,6 +61,7 @@ export const AttachmentViewer = ({
               <img
                 src={API_ROUTER.timeAttachmentById(attachment.id)}
                 alt={attachment.name}
+                data-e2e="time:attachment-media"
                 className="max-h-full max-w-full rounded-lg object-contain"
               />
             )}

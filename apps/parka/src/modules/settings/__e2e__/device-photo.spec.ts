@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
 import { test, type Ctx } from '@/__e2e__/test';
+import { expenseRow } from '@/__e2e__/locators';
 import { signInAsTestUser } from '@/__e2e__/session';
 import {
   installBackend,
@@ -43,7 +44,7 @@ const commands = {
   'i see no photo for "Chrome on Windows"': async ({ getByE2e }) => {
     await expect(getByE2e('settings:device:device-1')).toBeVisible();
     await expect(
-      getByE2e('settings:device:device-1').locator('img[data-device-photo]'),
+      getByE2e('device:photo:device-1', getByE2e('settings:device:device-1')),
     ).toHaveCount(0);
   },
   'i upload the image "desk.png" for "Chrome on Windows"': async ({
@@ -75,7 +76,7 @@ const commands = {
     getByE2e,
   }) => {
     await expect(
-      getByE2e('settings:device:device-1').locator('img[data-device-photo]'),
+      getByE2e('device:photo:device-1', getByE2e('settings:device:device-1')),
     ).toBeVisible();
   },
   'i open the expenses': async ({ page, getByE2e }) => {
@@ -84,9 +85,7 @@ const commands = {
   },
   'the "Kawiarnia" row shows my photo': async ({ getByE2ePrefix }) => {
     await expect(
-      getByE2ePrefix('dashboard:expense:')
-        .filter({ hasText: 'Kawiarnia' })
-        .locator('img[data-device-photo]'),
+      getByE2ePrefix('device:photo:', expenseRow(getByE2ePrefix, 'Kawiarnia')),
     ).toBeVisible();
   },
   'i see the crop editor': async ({ getByE2e }) => {

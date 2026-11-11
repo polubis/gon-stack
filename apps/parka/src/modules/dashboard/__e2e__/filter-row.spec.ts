@@ -52,15 +52,15 @@ const commands = {
     await expect(getByE2e('dashboard:filter:all')).toHaveText('Wszystkie 1');
   },
   'the filter row shows a scrollbar': async ({ getByE2e }) => {
-    const width = await getByE2e('dashboard:filter:all')
-      .locator('..')
-      .evaluate((el) => getComputedStyle(el).scrollbarWidth);
+    const width = await getByE2e('dashboard:filter-row').evaluate(
+      (el) => getComputedStyle(el).scrollbarWidth,
+    );
     expect(width).not.toBe('none');
   },
   'the filter row hides its scrollbar': async ({ getByE2e }) => {
-    const width = await getByE2e('dashboard:filter:all')
-      .locator('..')
-      .evaluate((el) => getComputedStyle(el).scrollbarWidth);
+    const width = await getByE2e('dashboard:filter-row').evaluate(
+      (el) => getComputedStyle(el).scrollbarWidth,
+    );
     expect(width).toBe('none');
   },
   'the last category filter can be reached': async ({ getByE2e }) => {

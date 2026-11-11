@@ -88,13 +88,12 @@ type GetByE2e = Ctx['getByE2e'];
 
 /** Opens the range list behind the icon and picks one kind. */
 const pickKind = async (
-  page: Page,
   getByE2e: GetByE2e,
   kind: PeriodKind,
 ): Promise<void> => {
   await getByE2e('period-control:kind').click();
   await getByE2e(`period-control:preset:${kind}`).click();
-  await expect(page.getByRole('list', { name: 'Zakres' })).toBeHidden();
+  await expect(getByE2e('period-control:today')).toHaveCount(0);
 };
 
 const commands = {
@@ -106,20 +105,15 @@ const commands = {
     await open(page, APP_ROUTER.dashboard());
   },
 
-  'i pick the day preset': ({ page, getByE2e }) =>
-    pickKind(page, getByE2e, 'day'),
-  'i pick the week preset': ({ page, getByE2e }) =>
-    pickKind(page, getByE2e, 'week'),
-  'i pick the month preset': ({ page, getByE2e }) =>
-    pickKind(page, getByE2e, 'month'),
-  'i pick the year preset': ({ page, getByE2e }) =>
-    pickKind(page, getByE2e, 'year'),
-  'i pick the last year preset': async ({ page, getByE2e }) => {
-    await pickKind(page, getByE2e, 'year');
+  'i pick the day preset': ({ getByE2e }) => pickKind(getByE2e, 'day'),
+  'i pick the week preset': ({ getByE2e }) => pickKind(getByE2e, 'week'),
+  'i pick the month preset': ({ getByE2e }) => pickKind(getByE2e, 'month'),
+  'i pick the year preset': ({ getByE2e }) => pickKind(getByE2e, 'year'),
+  'i pick the last year preset': async ({ getByE2e }) => {
+    await pickKind(getByE2e, 'year');
     await getByE2e('period-control:prev').click();
   },
-  'i pick the own range': ({ page, getByE2e }) =>
-    pickKind(page, getByE2e, 'custom'),
+  'i pick the own range': ({ getByE2e }) => pickKind(getByE2e, 'custom'),
   'i choose the whole of June of last year': async ({ getByE2e }) => {
     const dialog = getByE2e('dashboard:period-range-dialog');
     await expect(dialog).toBeVisible();
@@ -136,10 +130,10 @@ const commands = {
     await getByE2e('dashboard:period-range-apply').click();
     await expect(dialog).toBeHidden();
   },
-  'i jump in the calendar to June of last year': async ({ getByE2e, page }) => {
+  'i jump in the calendar to June of last year': async ({ getByE2e }) => {
     await getByE2e('dashboard:period-range-month').click();
     await getByE2e('dashboard:period-range-year').click();
-    await page.getByRole('option', { name: String(lastYear) }).click();
+    await getByE2e(`ui:option:${lastYear}`).click();
     await getByE2e(
       `dashboard:period-range-month-option:${lastYear}-06`,
     ).click();
@@ -232,17 +226,16 @@ const commands = {
       monthLabel(`${lastYear}-03`),
     );
   },
-  'the picker cannot reach the future': async ({ page }) => {
-    const values = await page
-      .locator('[data-e2e^="period-control:option:"]')
-      .evaluateAll((els) =>
+  'the picker cannot reach the future': async ({ getByE2ePrefix }) => {
+    const values = await getByE2ePrefix('period-control:option:').evaluateAll(
+      (els) =>
         els.map((el) =>
           (el.getAttribute('data-e2e') ?? '').replace(
             'period-control:option:',
             '',
           ),
         ),
-      );
+    );
     expect(values[0]).toBe(todayDay().slice(0, 7));
     expect(values.every((v) => v <= todayDay().slice(0, 7))).toBe(true);
   },

@@ -36,6 +36,7 @@ export const ProductCard = ({
       <button
         type="button"
         onClick={onToggle}
+        data-e2e={`expense-form:product-toggle:${product.id}`}
         aria-expanded={open}
         className="flex w-full items-center gap-3 text-left"
       >

@@ -43,14 +43,18 @@ export const EmptyState = ({
           card ? 'h-10 w-10' : 'h-12 w-12',
         )}
       >
-        <Icon className="h-6 w-6" aria-hidden="true" />
+        <Icon className="h-6 w-6" aria-hidden="true" data-e2e="ui:empty-icon" />
       </span>
       <Title
+        data-e2e="ui:empty-title"
         className={cn('font-semibold text-ink', card ? 'text-sm' : 'text-base')}
       >
         {title}
       </Title>
-      <p className={cn('max-w-sm text-ink-soft', card ? 'text-xs' : 'text-sm')}>
+      <p
+        data-e2e="ui:empty-description"
+        className={cn('max-w-sm text-ink-soft', card ? 'text-xs' : 'text-sm')}
+      >
         {description}
       </p>
       {action}

@@ -7,6 +7,7 @@ export const WALKTHROUGH_E2E_IDS = [
   'walkthrough:primary',
   'walkthrough:prev',
   'walkthrough:skip',
+  'walkthrough:title',
 ] as const;
 
 export type WalkthroughE2eId = (typeof WALKTHROUGH_E2E_IDS)[number];

@@ -7,6 +7,7 @@ import { interpreter, type CommandRegistry } from '@repo/vibe-test';
 import { test, type Ctx } from '@/__e2e__/test';
 import { registerAndConfirm } from '@/__e2e__/mailbox';
 import { API_ROUTER, APP_ROUTER } from '@/shared/router/routes';
+import { taskDone } from './locators';
 
 /**
  * Custom task statuses against the real Supabase backend: the user adds a step
@@ -58,8 +59,12 @@ const call = async (page: Page, name: string, args: unknown) => {
   }
 };
 
-const circle = (page: Page) =>
-  page.getByRole('checkbox', { name: 'Zrobione: Raport' });
+const circle = (prefix: Ctx['getByE2ePrefix']) => taskDone(prefix, 'Raport');
+const badge = (prefix: Ctx['getByE2ePrefix']) =>
+  prefix(
+    'time:task-progress-badge:',
+    prefix('time:task:').filter({ hasText: 'Raport' }),
+  );
 
 const commands = {
   'i register the account': async (ctx) => {
@@ -92,30 +97,32 @@ const commands = {
     ]);
   },
 
-  'i add the Review step in the editor': async ({ page, getByE2e }) => {
+  'i add the Review step in the editor': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
     await open(page, APP_ROUTER.time({ date: DAY }));
     await getByE2e('time:statuses-open').click();
     const dialog = getByE2e('time:statuses-dialog');
-    await dialog.getByRole('button', { name: 'Dodaj status' }).click();
-    await dialog
-      .getByRole('textbox', { name: 'Nazwa statusu 2' })
-      .fill('Review');
+    await getByE2e('time:status-add').click();
+    await getByE2ePrefix('time:status-name:', dialog).last().fill('Review');
     await Promise.all([
       page.waitForResponse(
         (r) => r.url().includes('/api/time/statuses') && r.status() === 200,
       ),
-      dialog.getByRole('button', { name: 'Zapisz' }).click(),
+      getByE2e('time:statuses-save').click(),
     ]);
     await expect(dialog).toBeHidden();
   },
 
-  'the circle walks through the new step': async ({ page }) => {
+  'the circle walks through the new step': async ({ page, getByE2ePrefix }) => {
     await open(page, APP_ROUTER.time({ date: DAY }));
-    const box = circle(page);
+    const box = circle(getByE2ePrefix);
     await box.click();
     await expect(box).toHaveAttribute('aria-checked', 'mixed');
     await box.click();
-    await expect(page.getByText('Review', { exact: true })).toBeVisible();
+    await expect(badge(getByE2ePrefix)).toHaveText('Review');
     await box.click();
     await expect(box).toBeChecked();
     await page.waitForLoadState('networkidle');
@@ -139,28 +146,34 @@ const commands = {
     expect(moved.result.structuredContent.statusName).toBe('Review');
   },
 
-  'the app shows the step the client set': async ({ page }) => {
+  'the app shows the step the client set': async ({ page, getByE2ePrefix }) => {
     await open(page, APP_ROUTER.time({ date: DAY }));
-    await expect(page.getByText('Review', { exact: true })).toBeVisible();
-    await expect(circle(page)).toHaveAttribute('aria-checked', 'mixed');
+    await expect(badge(getByE2ePrefix)).toHaveText('Review');
+    await expect(circle(getByE2ePrefix)).toHaveAttribute(
+      'aria-checked',
+      'mixed',
+    );
   },
 
   'removing the step sends its task back to in progress': async ({
     page,
     getByE2e,
+    getByE2ePrefix,
   }) => {
     await getByE2e('time:statuses-open').click();
     const dialog = getByE2e('time:statuses-dialog');
-    await dialog.getByRole('button', { name: 'Usuń status: Review' }).click();
+    await getByE2ePrefix('time:status-delete:', dialog).last().click();
     await Promise.all([
       page.waitForResponse(
         (r) => r.url().includes('/api/time/statuses') && r.status() === 200,
       ),
-      dialog.getByRole('button', { name: 'Zapisz' }).click(),
+      getByE2e('time:statuses-save').click(),
     ]);
     await open(page, APP_ROUTER.time({ date: DAY }));
-    await expect(page.getByText('W trakcie', { exact: true })).toBeVisible();
-    await expect(page.getByText('Review', { exact: true })).toBeHidden();
+    await expect(badge(getByE2ePrefix)).toHaveText('W trakcie');
+    await expect(
+      badge(getByE2ePrefix).filter({ hasText: 'Review' }),
+    ).toHaveCount(0);
   },
 } satisfies CommandRegistry<Ctx>;
 

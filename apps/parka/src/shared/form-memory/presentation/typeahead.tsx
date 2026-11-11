@@ -146,6 +146,7 @@ export const Typeahead = ({
             <button
               type="button"
               aria-label={`Podpowiedzi: ${label}`}
+              data-e2e={`form-memory:toggle:${field}`}
               aria-haspopup="listbox"
               aria-expanded={expanded}
               aria-controls={expanded ? listId : undefined}
@@ -170,6 +171,7 @@ export const Typeahead = ({
                 key={item.value}
                 id={`${listId}-${index}`}
                 role="option"
+                data-e2e={`form-memory:option:${item.value}`}
                 aria-selected={index === active}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => choose(item.value)}

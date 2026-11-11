@@ -21,6 +21,10 @@ import type { FinanceTourE2eId } from '@/modules/finance-tour/configuration/e2e-
 import type { PeriodControlE2eId } from '@/shared/period-control/configuration/e2e-ids';
 import type { AccessTokensE2eId } from '@/modules/access-tokens/configuration/e2e-ids';
 import type { AppUpdateE2eId } from '@/shared/app-update/configuration/e2e-ids';
+import type { DictationE2eId } from '@/shared/dictation/configuration/e2e-ids';
+import type { DeviceE2eId } from '@/shared/device/configuration/e2e-ids';
+import type { ThemeE2eId } from '@/shared/theme/configuration/e2e-ids';
+import type { UiE2eId } from '@/shared/ui/configuration/e2e-ids';
 import type { WalkthroughE2eId } from '@/shared/walkthrough/configuration/e2e-ids';
 
 // Combines every module's own `data-e2e` id union into one type used for
@@ -52,7 +56,11 @@ export type E2eId =
   | ImageEditorE2eId
   | PublicNavE2eId
   | AuthE2eId
-  | AppUpdateE2eId;
+  | AppUpdateE2eId
+  | UiE2eId
+  | DictationE2eId
+  | DeviceE2eId
+  | ThemeE2eId;
 
 declare module 'react' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

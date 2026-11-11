@@ -4,6 +4,18 @@ import { test, type Ctx } from '@/__e2e__/test';
 import { registerAndConfirm } from '@/__e2e__/mailbox';
 import { localDay } from '@/shared/date/date';
 import { API_ROUTER, APP_ROUTER } from '@/shared/router/routes';
+import {
+  attachmentDelete,
+  attachmentLink,
+  attachmentThumb,
+  commentEdit,
+  moveItem,
+  taskDelete,
+  taskDone,
+  taskEdit,
+  taskInfo,
+  taskMore,
+} from './locators';
 
 /**
  * Time module against the real Supabase backend: a fresh account gets the
@@ -141,13 +153,10 @@ const commands = {
     getByE2e,
   }) => {
     await open(page, APP_ROUTER.time({ date: DAY }));
-    await page
-      .getByRole('button', { name: 'Dodaj', exact: true })
-      .first()
-      .click();
-    await page.getByRole('menuitem', { name: 'Do backlogu' }).click();
-    const form = getByE2e('time:backlog-form');
-    await form.getByRole('textbox', { name: 'Nazwa' }).fill('Dentysta E2E');
+    await getByE2e('time:add-trigger').click();
+    await getByE2e('time:add-option:backlog-new').click();
+
+    await getByE2e('time:backlog-name').fill('Dentysta E2E');
     await Promise.all([
       synced(page, 'POST', 201),
       getByE2e('time:backlog-save').click(),
@@ -163,83 +172,63 @@ const commands = {
   'i edit the backlog task and it stays in the backlog': async ({
     page,
     getByE2e,
+    getByE2ePrefix,
   }) => {
     await getByE2e('time:backlog-open').click();
-    await page
-      .getByRole('button', { name: 'Edytuj zadanie z backlogu: Dentysta E2E' })
-      .click();
-    const form = getByE2e('time:backlog-form');
-    await form
-      .getByRole('textbox', { name: 'Nazwa' })
-      .fill('Dentysta piątek E2E');
+    await taskEdit(getByE2ePrefix, 'Dentysta E2E').click();
+
+    await getByE2e('time:backlog-name').fill('Dentysta piątek E2E');
     await Promise.all([
       synced(page, 'PUT', 200),
       getByE2e('time:backlog-save').click(),
     ]);
     await reload(page);
     await expect(page).toHaveURL(/modal=backlog/);
-    await expect(
-      page.getByRole('button', {
-        name: 'Edytuj zadanie z backlogu: Dentysta piątek E2E',
-      }),
-    ).toBeVisible();
-    await page.getByRole('button', { name: 'Zamknij' }).click();
+    await expect(taskEdit(getByE2ePrefix, 'Dentysta piątek E2E')).toBeVisible();
+    await getByE2e('time:modal-close:backlog').click();
   },
 
   'one click moves the backlog task to today and it stays there': async ({
     page,
     getByE2e,
+    getByE2ePrefix,
   }) => {
     await getByE2e('time:backlog-open').click();
     await expect(page).toHaveURL(/modal=backlog/);
-    await page
-      .getByRole('button', { name: 'Więcej: Dentysta piątek E2E' })
-      .click();
+    await taskMore(getByE2ePrefix, 'Dentysta piątek E2E').click();
     await Promise.all([
       synced(page, 'PUT', 200),
-      page
-        .getByRole('menuitem', {
-          name: 'Przenieś na dziś: Dentysta piątek E2E',
-        })
-        .click(),
+      moveItem(getByE2ePrefix, 'Przenieś na dziś').click(),
     ]);
     await expect(getByE2e('time:backlog-empty')).toBeVisible();
-    await page.getByRole('button', { name: 'Zamknij' }).click();
+    await getByE2e('time:modal-close:backlog').click();
     await open(page, APP_ROUTER.time({ date: localDay(new Date()) }));
-    await expect(
-      page.getByRole('button', { name: 'Edytuj zadanie: Dentysta piątek E2E' }),
-    ).toBeVisible();
+    await expect(taskEdit(getByE2ePrefix, 'Dentysta piątek E2E')).toBeVisible();
     await expect(getByE2e('time:backlog-open')).toHaveAccessibleName('Backlog');
   },
 
   'a picked day moves another backlog task there': async ({
     page,
     getByE2e,
+    getByE2ePrefix,
   }) => {
     await open(page, APP_ROUTER.time({ date: DAY }));
-    await page
-      .getByRole('button', { name: 'Dodaj', exact: true })
-      .first()
-      .click();
-    await page.getByRole('menuitem', { name: 'Do backlogu' }).click();
-    await getByE2e('time:backlog-form')
-      .getByRole('textbox', { name: 'Nazwa' })
-      .fill('Auto E2E');
+    await getByE2e('time:add-trigger').click();
+    await getByE2e('time:add-option:backlog-new').click();
+    await getByE2e('time:backlog-name').fill('Auto E2E');
     await Promise.all([
       synced(page, 'POST', 201),
       getByE2e('time:backlog-save').click(),
     ]);
     await getByE2e('time:backlog-open').click();
-    await page.getByRole('button', { name: 'Więcej: Auto E2E' }).click();
+    await taskMore(getByE2ePrefix, 'Auto E2E').click();
     await Promise.all([
       synced(page, 'PUT', 200),
-      page.getByLabel('Przenieś na wybrany dzień: Auto E2E').fill(NEXT_WEEK),
+      getByE2ePrefix('time:task-date:').fill(NEXT_WEEK),
     ]);
     await expect(getByE2e('time:backlog-empty')).toBeVisible();
     await open(page, APP_ROUTER.time({ date: NEXT_WEEK }));
-    await expect(
-      page.getByRole('button', { name: 'Edytuj zadanie: Auto E2E' }),
-    ).toBeVisible();
+    await expect(taskEdit(getByE2ePrefix, 'Auto E2E')).toBeVisible();
   },
 
   'i register an account for popover actions': async (ctx) => {
@@ -251,30 +240,26 @@ const commands = {
   'i add a task from the add menu and its form stays open': async ({
     page,
     getByE2e,
+    getByE2ePrefix,
   }) => {
     await open(page, APP_ROUTER.time({ date: DAY }));
-    await page
-      .getByRole('button', { name: 'Dodaj', exact: true })
-      .first()
-      .click();
-    await page.getByRole('menuitem', { name: 'Zadanie', exact: true }).click();
+    await getByE2e('time:add-fab').click();
+    await getByE2e('time:add-option:task-new').click();
     await page.waitForTimeout(500);
     const dialog = getByE2e('time:task-dialog');
     await expect(dialog).toBeVisible();
-    await dialog.getByRole('textbox', { name: 'Nazwa' }).fill('Menu E2E');
+    await getByE2e('time:task-name').fill('Menu E2E');
     await Promise.all([
       synced(page, 'POST', 201),
       getByE2e('time:task-save').click(),
     ]);
-    await expect(
-      page.getByRole('button', { name: 'Edytuj zadanie: Menu E2E' }),
-    ).toBeVisible();
+    await expect(taskEdit(getByE2ePrefix, 'Menu E2E')).toBeVisible();
   },
 
   'the delete confirmation from the task menu stays open until answered':
-    async ({ page, getByE2e }) => {
-      await page.getByRole('button', { name: 'Więcej: Menu E2E' }).click();
-      await page.getByRole('menuitem', { name: 'Usuń: Menu E2E' }).click();
+    async ({ page, getByE2e, getByE2ePrefix }) => {
+      await taskMore(getByE2ePrefix, 'Menu E2E').click();
+      await taskDelete(getByE2ePrefix).click();
       await page.waitForTimeout(500);
       await expect(getByE2e('time:delete-dialog')).toBeVisible();
       await expect(page).toHaveURL(/modal=task-delete/);
@@ -304,36 +289,36 @@ const commands = {
     page,
     getByE2e,
   }) => {
-    await getByE2e('time:empty').getByRole('button').click();
-    const dialog = getByE2e('time:task-dialog');
-    await expect(dialog.getByRole('radio', { name: 'Praca' })).toBeVisible();
-    await expect(
-      dialog.getByRole('radio', { name: 'Odpoczynek' }),
-    ).toBeVisible();
-    await expect(dialog.getByRole('radio', { name: 'Średni' })).toBeChecked();
+    await getByE2e('time:empty-add').click();
+    await expect(getByE2e('time:category-option:Praca')).toBeVisible();
+    await expect(getByE2e('time:category-option:Odpoczynek')).toBeVisible();
+    await expect(getByE2e('time:priority-option:Średni')).toBeChecked();
     await expect(page).toHaveURL(/modal=task-new/);
   },
 
-  'i add a task and it survives a reload': async ({ page, getByE2e }) => {
-    const dialog = getByE2e('time:task-dialog');
-    await dialog.getByRole('textbox', { name: 'Nazwa' }).fill('Raport E2E');
-    await dialog.getByRole('radio', { name: 'Wysoki' }).check({ force: true });
+  'i add a task and it survives a reload': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
+    await getByE2e('time:task-name').fill('Raport E2E');
+    await getByE2e('time:priority-option:Wysoki').check({ force: true });
     await Promise.all([
       synced(page, 'POST', 201),
       getByE2e('time:task-save').click(),
     ]);
     await expect(getByE2e('time:toast')).toHaveText('Dodano zadanie.');
-    await expect(
-      page.getByRole('button', { name: 'Edytuj zadanie: Raport E2E' }),
-    ).toBeVisible();
+    await expect(taskEdit(getByE2ePrefix, 'Raport E2E')).toBeVisible();
     await reload(page);
-    await expect(
-      page.getByRole('button', { name: 'Edytuj zadanie: Raport E2E' }),
-    ).toBeVisible();
+    await expect(taskEdit(getByE2ePrefix, 'Raport E2E')).toBeVisible();
   },
 
-  'the task keeps the device it was created on': async ({ page, getByE2e }) => {
-    const more = page.getByRole('button', { name: 'Więcej: Raport E2E' });
+  'the task keeps the device it was created on': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
+    const more = taskMore(getByE2ePrefix, 'Raport E2E');
     await more.click();
     await expect(getByE2e('time:task-row-device').first()).toBeVisible();
     await page.keyboard.press('Escape');
@@ -341,55 +326,46 @@ const commands = {
     await more.click();
     await expect(getByE2e('time:task-row-device').first()).toBeVisible();
     await page.keyboard.press('Escape');
-    await page
-      .getByRole('button', { name: 'Edytuj zadanie: Raport E2E' })
-      .click();
+    await taskEdit(getByE2ePrefix, 'Raport E2E').click();
     await expect(getByE2e('time:task-device')).toContainText('device-');
-    await getByE2e('time:task-dialog')
-      .getByRole('button', { name: 'Anuluj' })
-      .click();
+    await getByE2e('time:task-cancel').click();
   },
 
-  'i complete the task and it stays done after a reload': async ({ page }) => {
-    const box = page.getByRole('checkbox', { name: 'Zrobione: Raport E2E' });
+  'i complete the task and it stays done after a reload': async ({
+    page,
+    getByE2ePrefix,
+  }) => {
+    const box = taskDone(getByE2ePrefix, 'Raport E2E');
     await Promise.all([synced(page, 'PUT', 200), box.click()]);
     await expect(box).toHaveAttribute('aria-checked', 'mixed');
     await Promise.all([synced(page, 'PUT', 200), box.click()]);
     await expect(box).toBeChecked();
     await reload(page);
-    await expect(
-      page.getByRole('checkbox', { name: 'Zrobione: Raport E2E' }),
-    ).toBeChecked();
+    await expect(taskDone(getByE2ePrefix, 'Raport E2E')).toBeChecked();
   },
 
-  'i rename the task': async ({ page, getByE2e }) => {
-    await page
-      .getByRole('button', { name: 'Edytuj zadanie: Raport E2E' })
-      .click();
-    const dialog = getByE2e('time:task-dialog');
-    const title = dialog.getByRole('textbox', { name: 'Nazwa' });
+  'i rename the task': async ({ page, getByE2e, getByE2ePrefix }) => {
+    await taskEdit(getByE2ePrefix, 'Raport E2E').click();
+    const title = getByE2e('time:task-name');
     await title.fill('Raport kwartalny');
     await Promise.all([
       synced(page, 'PUT', 200),
       getByE2e('time:task-save').click(),
     ]);
     await reload(page);
-    await expect(
-      page.getByRole('button', { name: 'Edytuj zadanie: Raport kwartalny' }),
-    ).toBeVisible();
+    await expect(taskEdit(getByE2ePrefix, 'Raport kwartalny')).toBeVisible();
   },
 
   'the month view marks the day and the year view counts it': async ({
     page,
+    getByE2e,
   }) => {
     await open(page, APP_ROUTER.timeMonth({ date: DAY }));
-    await expect(
-      page.getByLabel('wtorek, 20 października, 1 zadanie'),
-    ).toBeVisible();
+    await expect(getByE2e(`time:month-day:${DAY}`)).toHaveAccessibleName(
+      'wtorek, 20 października, 1 zadanie',
+    );
     await open(page, APP_ROUTER.timeYear({ date: DAY }));
-    await expect(
-      page.getByRole('heading', { name: 'Październik' }).locator('..'),
-    ).toContainText('1 zadanie');
+    await expect(getByE2e('time:year-month:9')).toContainText('1 zadanie');
   },
 
   'the next day is empty and navigation keeps the date in the address': async ({
@@ -409,19 +385,21 @@ const commands = {
     getByE2e,
   }) => {
     await open(page, APP_ROUTER.timeWeek({ date: '2026-05-05' }));
-    await page.getByRole('button', { name: /Zakres:/ }).click();
+    await getByE2e('period-control:kind').click();
     await page.keyboard.press('End');
     await expect(getByE2e('period-control:today')).toBeFocused();
     await page.keyboard.press('Enter');
     await expect(page).toHaveURL(new RegExp(`date=${localDay(new Date())}`));
-    await expect(page.getByRole('list', { name: 'Zakres' })).toBeHidden();
+    await expect(getByE2e('period-control:today')).toHaveCount(0);
   },
 
-  'i delete the task after confirming': async ({ page, getByE2e }) => {
+  'i delete the task after confirming': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
     await open(page, APP_ROUTER.time({ date: DAY }));
-    await page
-      .getByRole('button', { name: 'Edytuj zadanie: Raport kwartalny' })
-      .click();
+    await taskEdit(getByE2ePrefix, 'Raport kwartalny').click();
     await getByE2e('time:task-delete').click();
     await expect(getByE2e('time:delete-dialog')).toBeVisible();
     await Promise.all([
@@ -444,34 +422,29 @@ const commands = {
   },
 
   'i add a weekly recurring task and its first occurrence appears once':
-    async ({ page, getByE2e }) => {
+    async ({ page, getByE2e, getByE2ePrefix }) => {
       await open(page, APP_ROUTER.time({ date: DAY }));
-      await getByE2e('time:empty').getByRole('button').click();
-      const dialog = getByE2e('time:task-dialog');
-      await dialog.getByRole('textbox', { name: 'Nazwa' }).fill('Siłownia E2E');
-      await dialog.getByRole('switch', { name: 'Powtarzaj' }).click();
+      await getByE2e('time:empty-add').click();
+      await getByE2e('time:task-name').fill('Siłownia E2E');
+      await getByE2e('time:recurring-toggle').click();
       await Promise.all([
         synced(page, 'POST', 201),
         getByE2e('time:task-save').click(),
       ]);
-      const occurrence = page.getByRole('button', {
-        name: 'Edytuj zadanie: Siłownia E2E',
-      });
+      const occurrence = taskEdit(getByE2ePrefix, 'Siłownia E2E');
       await expect(occurrence).toBeVisible();
       await expect(getByE2e('time:recurring-mark')).toHaveCount(1);
       await reload(page);
       await expect(occurrence).toHaveCount(1);
-      await page.getByRole('button', { name: 'Więcej: Siłownia E2E' }).click();
+      await taskMore(getByE2ePrefix, 'Siłownia E2E').click();
       await expect(getByE2e('time:task-row-device')).toHaveCount(0);
       await page.keyboard.press('Escape');
     },
 
   'the series reaches the following weeks and never revives a deleted task':
-    async ({ page, getByE2e }) => {
+    async ({ page, getByE2e, getByE2ePrefix }) => {
       await open(page, APP_ROUTER.time({ date: NEXT_WEEK }));
-      const occurrence = page.getByRole('button', {
-        name: 'Edytuj zadanie: Siłownia E2E',
-      });
+      const occurrence = taskEdit(getByE2ePrefix, 'Siłownia E2E');
       await expect(occurrence).toBeVisible();
 
       await occurrence.click();
@@ -490,10 +463,9 @@ const commands = {
   'i end the series and its tasks stay as ordinary ones': async ({
     page,
     getByE2e,
+    getByE2ePrefix,
   }) => {
-    await page
-      .getByRole('button', { name: 'Edytuj zadanie: Siłownia E2E' })
-      .click();
+    await taskEdit(getByE2ePrefix, 'Siłownia E2E').click();
     await getByE2e('time:recurring-stop').click();
     await Promise.all([
       synced(page, 'DELETE', 200),
@@ -501,9 +473,7 @@ const commands = {
     ]);
     await expect(getByE2e('time:recurring-mark')).toHaveCount(0);
     await open(page, APP_ROUTER.time({ date: DAY }));
-    await expect(
-      page.getByRole('button', { name: 'Edytuj zadanie: Siłownia E2E' }),
-    ).toBeVisible();
+    await expect(taskEdit(getByE2ePrefix, 'Siłownia E2E')).toBeVisible();
     await expect(getByE2e('time:recurring-mark')).toHaveCount(0);
     await open(page, APP_ROUTER.time({ date: AFTER_LATER }));
     await expect(getByE2e('time:empty')).toBeVisible();
@@ -517,36 +487,29 @@ const commands = {
   'i add a task with a 160 characters title and a description': async ({
     page,
     getByE2e,
+    getByE2ePrefix,
   }) => {
     await open(page, APP_ROUTER.time({ date: DAY }));
-    await page
-      .getByRole('button', { name: 'Dodaj', exact: true })
-      .first()
-      .click();
-    await page.getByRole('menuitem', { name: 'Zadanie', exact: true }).click();
-    const dialog = getByE2e('time:task-dialog');
-    await dialog.getByRole('textbox', { name: 'Nazwa' }).fill(LONG_TITLE);
-    await dialog
-      .getByRole('textbox', { name: 'Opis (opcjonalnie)' })
-      .fill(LONG_DESCRIPTION);
+    await getByE2e('time:add-trigger').click();
+    await getByE2e('time:add-option:task-new').click();
+    await getByE2e('time:task-name').fill(LONG_TITLE);
+    await getByE2e('time:description-input').fill(LONG_DESCRIPTION);
     await Promise.all([
       synced(page, 'POST', 201),
       getByE2e('time:task-save').click(),
     ]);
     await reload(page);
-    await expect(
-      page.getByRole('button', { name: `Edytuj zadanie: ${LONG_TITLE}` }),
-    ).toBeVisible();
+    await expect(taskEdit(getByE2ePrefix, LONG_TITLE)).toBeVisible();
   },
 
   'the description shows only in the details and opens in full': async ({
-    page,
     getByE2e,
+    getByE2ePrefix,
   }) => {
-    await expect(page.getByText('Linia 1', { exact: true })).toHaveCount(0);
-    await page
-      .getByRole('button', { name: `Szczegóły zadania: ${LONG_TITLE}` })
-      .click();
+    await expect(
+      getByE2ePrefix('time:task:').filter({ hasText: 'Linia 1' }),
+    ).toHaveCount(0);
+    await taskInfo(getByE2ePrefix, LONG_TITLE).click();
     await expect(getByE2e('time:description-clamp')).toBeVisible();
     await getByE2e('time:description-more').click();
     await expect(getByE2e('time:description-full')).toContainText('Linia 12');
@@ -560,23 +523,17 @@ const commands = {
   'i attach a file to a task and it survives a reload': async ({
     page,
     getByE2e,
+    getByE2ePrefix,
   }) => {
     await open(page, APP_ROUTER.time({ date: DAY }));
-    await page
-      .getByRole('button', { name: 'Dodaj', exact: true })
-      .first()
-      .click();
-    await page.getByRole('menuitem', { name: 'Zadanie', exact: true }).click();
-    await getByE2e('time:task-dialog')
-      .getByRole('textbox', { name: 'Nazwa' })
-      .fill('Zadanie z plikiem E2E');
+    await getByE2e('time:add-trigger').click();
+    await getByE2e('time:add-option:task-new').click();
+    await getByE2e('time:task-name').fill('Zadanie z plikiem E2E');
     await Promise.all([
       synced(page, 'POST', 201),
       getByE2e('time:task-save').click(),
     ]);
-    await page
-      .getByRole('button', { name: 'Szczegóły zadania: Zadanie z plikiem E2E' })
-      .click();
+    await taskInfo(getByE2ePrefix, 'Zadanie z plikiem E2E').click();
     await expect(getByE2e('time:attachments')).toContainText(
       'Brak załączników',
     );
@@ -590,22 +547,17 @@ const commands = {
         buffer: Buffer.from(ATTACHMENT_TEXT),
       }),
     ]);
-    await expect(
-      getByE2e('time:attachments').getByRole('link', { name: 'notatka.txt' }),
-    ).toBeVisible();
+    await expect(attachmentLink(getByE2ePrefix, 'notatka.txt')).toBeVisible();
     await reload(page);
-    await expect(
-      getByE2e('time:attachments').getByRole('link', { name: 'notatka.txt' }),
-    ).toBeVisible();
+    await expect(attachmentLink(getByE2ePrefix, 'notatka.txt')).toBeVisible();
   },
 
   'the attachment opens with its content and a wrong type is refused': async ({
     page,
     getByE2e,
+    getByE2ePrefix,
   }) => {
-    const link = getByE2e('time:attachments').getByRole('link', {
-      name: 'notatka.txt',
-    });
+    const link = attachmentLink(getByE2ePrefix, 'notatka.txt');
     const href = await link.getAttribute('href');
     const response = await page.request.get(href!);
     expect(response.status()).toBe(200);
@@ -623,8 +575,9 @@ const commands = {
   'i delete the attachment after confirming and it stays gone': async ({
     page,
     getByE2e,
+    getByE2ePrefix,
   }) => {
-    await page.getByRole('button', { name: 'Usuń plik notatka.txt' }).click();
+    await attachmentDelete(getByE2ePrefix, 'notatka.txt').click();
     await expect(page).toHaveURL(/modal=attachment-delete/);
     await Promise.all([
       page.waitForResponse(
@@ -644,7 +597,7 @@ const commands = {
     );
   },
   'a big photo is reduced in quality, keeps its size and opens full screen':
-    async ({ page, getByE2e }) => {
+    async ({ page, getByE2e, getByE2ePrefix }) => {
       const original = await makePhoto(page, 2000, 1400);
       expect(original.length).toBeLessThanOrEqual(5 * 1024 * 1024);
 
@@ -675,13 +628,12 @@ const commands = {
       expect(data.size).toBeLessThan(original.length / 2);
       expect(data.size).toBeLessThanOrEqual(5 * 1024 * 1024);
 
-      const thumb = getByE2e('time:attachments').getByRole('button', {
-        name: 'Otwórz podgląd: wakacje.webp',
-      });
+      const thumb = attachmentThumb(getByE2ePrefix, 'wakacje.webp');
       await expect(thumb).toBeVisible();
-      const href = await getByE2e('time:attachments')
-        .getByRole('link', { name: 'wakacje.webp' })
-        .getAttribute('href');
+      const href = await attachmentLink(
+        getByE2ePrefix,
+        'wakacje.webp',
+      ).getAttribute('href');
       const dimensions = await page.evaluate(async (url) => {
         const bitmap = await createImageBitmap(await (await fetch(url)).blob());
         return [bitmap.width, bitmap.height];
@@ -692,16 +644,16 @@ const commands = {
       await expect(page).toHaveURL(/modal=attachment-view/);
       const viewer = getByE2e('time:attachment-viewer');
       await expect(viewer).toBeVisible();
-      await expect(
-        viewer.getByRole('img', { name: 'wakacje.webp' }),
-      ).toBeVisible();
+      const media = getByE2e('time:attachment-media');
+      await expect(media).toBeVisible();
+      await expect(media).toHaveAccessibleName('wakacje.webp');
       await page.keyboard.press('Escape');
       await expect(viewer).toBeHidden();
       await expect(page).not.toHaveURL(/attachment-view/);
     },
 
   'a video is trimmed in the browser, uploaded with progress and opened from the toast':
-    async ({ page, getByE2e }) => {
+    async ({ page, getByE2e, getByE2ePrefix }) => {
       const clip = await makeVideo(page, 3);
       await getByE2e('time:attachment-input').setInputFiles({
         name: 'demo.webm',
@@ -711,16 +663,12 @@ const commands = {
       const trim = getByE2e('time:attachment-trim');
       await expect(trim).toBeVisible();
       await expect(page).toHaveURL(/modal=attachment-trim/);
-      await expect(
-        trim.getByText(/Długość po przycięciu: [12]\.\d s/),
-      ).toBeVisible({
+      await expect(getByE2e('time:trim-length')).toBeVisible({
         timeout: 20_000,
       });
 
-      await trim.getByLabel(/Początek/).fill('1');
-      await expect(
-        trim.getByText(/Długość po przycięciu: [12]\.\d s/),
-      ).toBeVisible();
+      await getByE2e('time:trim-start').fill('1');
+      await expect(getByE2e('time:trim-length')).toBeVisible();
       await Promise.all([
         page.waitForResponse(
           (r) =>
@@ -729,7 +677,7 @@ const commands = {
             r.status() === 201,
           { timeout: 90_000 },
         ),
-        trim.getByRole('button', { name: 'Przytnij i dodaj' }).click(),
+        getByE2e('time:trim-save').click(),
       ]);
       await expect(trim).toBeHidden();
 
@@ -737,20 +685,16 @@ const commands = {
       await expect(toast).toContainText('Wideo „demo.webm” jest gotowe', {
         timeout: 60_000,
       });
-      await toast.getByRole('button', { name: 'Otwórz' }).click();
+      await getByE2e('ui:toast-action').click();
       await expect(page).toHaveURL(/modal=attachment-view/);
-      const player = getByE2e('time:attachment-viewer').getByLabel('demo.webm');
+      const player = getByE2e('time:attachment-media');
       await expect(player).toBeVisible();
       expect(await player.evaluate((v: HTMLVideoElement) => v.autoplay)).toBe(
         false,
       );
       await page.keyboard.press('Escape');
       await reload(page);
-      await expect(
-        getByE2e('time:attachments').getByRole('button', {
-          name: 'Otwórz wideo: demo.webm',
-        }),
-      ).toBeVisible();
+      await expect(attachmentThumb(getByE2ePrefix, 'demo.webm')).toBeVisible();
     },
 
   'the mcp server lists, adds a reduced photo and deletes attachments': async ({
@@ -896,25 +840,17 @@ const commands = {
   'i comment on a task and the comment survives a reload': async ({
     page,
     getByE2e,
+    getByE2ePrefix,
   }) => {
     await open(page, APP_ROUTER.time({ date: DAY }));
-    await page
-      .getByRole('button', { name: 'Dodaj', exact: true })
-      .first()
-      .click();
-    await page.getByRole('menuitem', { name: 'Zadanie', exact: true }).click();
-    await getByE2e('time:task-dialog')
-      .getByRole('textbox', { name: 'Nazwa' })
-      .fill('Zadanie z komentarzem E2E');
+    await getByE2e('time:add-trigger').click();
+    await getByE2e('time:add-option:task-new').click();
+    await getByE2e('time:task-name').fill('Zadanie z komentarzem E2E');
     await Promise.all([
       synced(page, 'POST', 201),
       getByE2e('time:task-save').click(),
     ]);
-    await page
-      .getByRole('button', {
-        name: 'Szczegóły zadania: Zadanie z komentarzem E2E',
-      })
-      .click();
+    await taskInfo(getByE2ePrefix, 'Zadanie z komentarzem E2E').click();
     await expect(getByE2e('time:comments')).toContainText('Brak komentarzy');
     await getByE2e('time:comment-add').click();
     await getByE2e('time:comment-input').fill('Pierwszy komentarz E2E');
@@ -933,6 +869,7 @@ const commands = {
   'the mcp bot comments under its token name and a rename follows': async ({
     page,
     getByE2e,
+    getByE2ePrefix,
   }) => {
     const created = await page.request.post(API_ROUTER.mcpTokens(), {
       data: { name: 'Bot E2E', ttlDays: 1 },
@@ -986,15 +923,13 @@ const commands = {
 
     await open(page, APP_ROUTER.accessTokens());
     await expect(
-      page.getByRole('heading', { name: 'Bot po zmianie' }),
+      getByE2ePrefix('access-tokens:row:').filter({
+        hasText: 'Bot po zmianie',
+      }),
     ).toBeVisible();
 
     await open(page, APP_ROUTER.time({ date: DAY }));
-    await page
-      .getByRole('button', {
-        name: 'Szczegóły zadania: Zadanie z komentarzem E2E',
-      })
-      .click();
+    await taskInfo(getByE2ePrefix, 'Zadanie z komentarzem E2E').click();
     const comments = getByE2e('time:comments');
     await expect(comments).toContainText('Komentarz bota E2E');
     await expect(comments).toContainText('Bot po zmianie');
@@ -1005,10 +940,9 @@ const commands = {
   'the owner edits the bot comment and its avatar splits': async ({
     page,
     getByE2e,
+    getByE2ePrefix,
   }) => {
-    await getByE2e('time:comments')
-      .getByRole('button', { name: /^Edytuj komentarz: Bot po zmianie/ })
-      .click();
+    await commentEdit(getByE2ePrefix, 'Bot po zmianie').click();
     await getByE2e('time:comment-input').fill('Komentarz bota po edycji');
     await Promise.all([
       page.waitForResponse(
@@ -1020,17 +954,20 @@ const commands = {
       getByE2e('time:comment-save').click(),
     ]);
     await expect(
-      getByE2e('time:comments').getByRole('img', { name: /^Autorzy:/ }),
-    ).toBeVisible();
+      getByE2ePrefix(
+        'time:comment-avatar:',
+        getByE2ePrefix('time:comment:').filter({ hasText: 'Bot po zmianie' }),
+      ),
+    ).toHaveAccessibleName(/^Autorzy:/);
     await expect(getByE2e('time:comments')).toContainText('(edytowano)');
   },
 
   'i delete a comment after confirming and it stays gone': async ({
     page,
     getByE2e,
+    getByE2ePrefix,
   }) => {
-    await getByE2e('time:comments')
-      .getByRole('button', { name: /^Usuń komentarz/ })
+    await getByE2ePrefix('time:comment-delete:', getByE2e('time:comments'))
       .first()
       .click();
     await expect(page).toHaveURL(/modal=comment-delete/);
@@ -1055,28 +992,23 @@ const commands = {
   'i add a done task and an open task to the day': async ({
     page,
     getByE2e,
+    getByE2ePrefix,
   }) => {
     await open(page, APP_ROUTER.time({ date: DAY }));
-    await getByE2e('time:empty').getByRole('button').click();
-    const dialog = getByE2e('time:task-dialog');
-    await dialog.getByRole('textbox', { name: 'Nazwa' }).fill('Zrobione E2E');
+    await getByE2e('time:empty-add').click();
+    await getByE2e('time:task-name').fill('Zrobione E2E');
     await Promise.all([
       synced(page, 'POST', 201),
       getByE2e('time:task-save').click(),
     ]);
-    await page
-      .getByRole('button', { name: 'Dodaj', exact: true })
-      .first()
-      .click();
-    await page.getByRole('menuitem', { name: 'Zadanie', exact: true }).click();
-    await getByE2e('time:task-dialog')
-      .getByRole('textbox', { name: 'Nazwa' })
-      .fill('Otwarte E2E');
+    await getByE2e('time:add-trigger').click();
+    await getByE2e('time:add-option:task-new').click();
+    await getByE2e('time:task-name').fill('Otwarte E2E');
     await Promise.all([
       synced(page, 'POST', 201),
       getByE2e('time:task-save').click(),
     ]);
-    const box = page.getByRole('checkbox', { name: 'Zrobione: Zrobione E2E' });
+    const box = taskDone(getByE2ePrefix, 'Zrobione E2E');
     await Promise.all([synced(page, 'PUT', 200), box.click()]);
     await expect(box).toHaveAttribute('aria-checked', 'mixed');
     await Promise.all([synced(page, 'PUT', 200), box.click()]);
@@ -1084,29 +1016,17 @@ const commands = {
   },
 
   'the open-only switch hides done tasks and keeps the choice after a reload':
-    async ({ page, getByE2e }) => {
-      const toggle = getByE2e('time:open-only').getByRole('switch', {
-        name: 'Tylko niezrobione',
-      });
-      await expect(
-        page.getByRole('button', { name: 'Szczegóły zadania: Zrobione E2E' }),
-      ).toBeVisible();
+    async ({ page, getByE2e, getByE2ePrefix }) => {
+      const toggle = getByE2e('time:open-only-toggle');
+      await expect(taskInfo(getByE2ePrefix, 'Zrobione E2E')).toBeVisible();
       await toggle.click();
       await expect(toggle).toHaveAttribute('aria-checked', 'true');
-      await expect(
-        page.getByRole('button', { name: 'Szczegóły zadania: Zrobione E2E' }),
-      ).toHaveCount(0);
-      await expect(
-        page.getByRole('button', { name: 'Szczegóły zadania: Otwarte E2E' }),
-      ).toBeVisible();
+      await expect(taskInfo(getByE2ePrefix, 'Zrobione E2E')).toHaveCount(0);
+      await expect(taskInfo(getByE2ePrefix, 'Otwarte E2E')).toBeVisible();
       await reload(page);
       await expect(toggle).toHaveAttribute('aria-checked', 'true');
-      await expect(
-        page.getByRole('button', { name: 'Szczegóły zadania: Zrobione E2E' }),
-      ).toHaveCount(0);
-      await expect(
-        page.getByRole('button', { name: 'Szczegóły zadania: Otwarte E2E' }),
-      ).toBeVisible();
+      await expect(taskInfo(getByE2ePrefix, 'Zrobione E2E')).toHaveCount(0);
+      await expect(taskInfo(getByE2ePrefix, 'Otwarte E2E')).toBeVisible();
     },
 } satisfies CommandRegistry<Ctx>;
 

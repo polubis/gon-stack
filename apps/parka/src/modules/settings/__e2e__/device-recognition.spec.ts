@@ -67,10 +67,9 @@ const commands = {
   },
   'the phones have different colors': async ({ getByE2e }) => {
     const color = (id: string) =>
-      getByE2e(`settings:device:${id}`)
-        .locator('[data-device-color]')
-        .first()
-        .getAttribute('data-device-color');
+      getByE2e(`settings:device-bubble:${id}`).getAttribute(
+        'data-device-color',
+      );
     expect(await color('device-1')).not.toBe(await color('device-2'));
   },
   'each phone shows its short id': async ({ getByE2e }) => {

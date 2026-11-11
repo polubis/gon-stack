@@ -96,7 +96,7 @@ export const TaskMenu = ({ task }: { task: Task | BacklogTask }) => {
                 type="button"
                 role="menuitem"
                 aria-label={`${text}: ${task.title}`}
-                data-e2e={`time:task-move:${task.id}`}
+                data-e2e={`time:task-move:${task.id}:${label}`}
                 onClick={() => move(day, label)}
                 className={ITEM}
               >

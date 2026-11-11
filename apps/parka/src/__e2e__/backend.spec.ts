@@ -3,6 +3,7 @@ import { interpreter, type CommandRegistry } from '@repo/vibe-test';
 import { test, type Ctx } from './test';
 import { registerAndConfirm } from './mailbox';
 import { API_ROUTER, APP_ROUTER } from '@/shared/router/routes';
+import { categoryRow, expenseRow } from './locators';
 
 /**
  * End-to-end verification that every Parka feature works against the real
@@ -43,18 +44,14 @@ const commands = {
     await ctx.page.waitForTimeout(150);
   },
 
-  'the finance tour greets the new account': async ({ getByE2e, page }) => {
+  'the finance tour greets the new account': async ({ getByE2e }) => {
     await expect(getByE2e('finance-tour:dialog')).toBeVisible();
-    await expect(
-      page.getByRole('heading', { name: 'Witaj w Parce' }),
-    ).toBeVisible();
+    await expect(getByE2e('walkthrough:title')).toHaveText('Witaj w Parce');
   },
-  'i walk the tour to the end': async ({ getByE2e, page }) => {
+  'i walk the tour to the end': async ({ getByE2e }) => {
     await getByE2e('walkthrough:primary').click();
     await getByE2e('walkthrough:prev').click();
-    await expect(
-      page.getByRole('heading', { name: 'Witaj w Parce' }),
-    ).toBeVisible();
+    await expect(getByE2e('walkthrough:title')).toHaveText('Witaj w Parce');
     for (let step = 0; step < 6; step++)
       await getByE2e('walkthrough:primary').click();
     await expect(getByE2e('finance-tour:dialog')).toBeHidden();
@@ -99,6 +96,7 @@ const commands = {
   'i create a category and it survives a reload': async ({
     page,
     getByE2e,
+    getByE2ePrefix,
   }) => {
     await open(page, APP_ROUTER.categories());
     await getByE2e('categories:form-name').fill('Kultura');
@@ -106,9 +104,9 @@ const commands = {
       synced(page, 'POST', API_ROUTER.categories(), 201),
       getByE2e('categories:form-save').click(),
     ]);
-    await expect(page.getByText('Kultura')).toBeVisible();
+    await expect(categoryRow(getByE2ePrefix, 'Kultura')).toBeVisible();
     await reload(page);
-    await expect(page.getByText('Kultura')).toBeVisible();
+    await expect(categoryRow(getByE2ePrefix, 'Kultura')).toBeVisible();
   },
 
   'i add an expense with a product and save it': async ({
@@ -124,14 +122,18 @@ const commands = {
     await getByE2ePrefix('expense-form:product-price:').fill('3.20');
     await getByE2e('expense-form:save').click();
     await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
-    await expect(page.getByText('Sklep E2E Backend')).toBeVisible();
+    await expect(expenseRow(getByE2ePrefix, 'Sklep E2E Backend')).toBeVisible();
     await reload(page);
-    await expect(page.getByText('Sklep E2E Backend')).toBeVisible();
+    await expect(expenseRow(getByE2ePrefix, 'Sklep E2E Backend')).toBeVisible();
   },
 
-  'i update and delete an expense': async ({ page, getByE2e }) => {
+  'i update and delete an expense': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
     await open(page, APP_ROUTER.dashboard());
-    await page.getByRole('button', { name: /Sklep E2E Backend/ }).click();
+    await expenseRow(getByE2ePrefix, 'Sklep E2E Backend').click();
     await expect(getByE2e('dashboard:detail')).toBeVisible();
     await getByE2e('dashboard:edit').click();
     await page.waitForURL('**/app/expenses/edit/**');
@@ -143,19 +145,19 @@ const commands = {
       getByE2e('expense-form:save').click(),
     ]);
     await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
-    await expect(page.getByText('Sklep Nowy')).toBeVisible();
+    await expect(expenseRow(getByE2ePrefix, 'Sklep Nowy')).toBeVisible();
     await reload(page);
-    await expect(page.getByText('Sklep Nowy')).toBeVisible();
+    await expect(expenseRow(getByE2ePrefix, 'Sklep Nowy')).toBeVisible();
 
-    await page.getByRole('button', { name: /Sklep Nowy/ }).click();
+    await expenseRow(getByE2ePrefix, 'Sklep Nowy').click();
     await getByE2e('dashboard:delete').click();
     await Promise.all([
       synced(page, 'DELETE', API_ROUTER.expenses()),
       getByE2e('dashboard:delete-confirm').click(),
     ]);
-    await expect(page.getByText('Sklep Nowy')).toHaveCount(0);
+    await expect(expenseRow(getByE2ePrefix, 'Sklep Nowy')).toHaveCount(0);
     await reload(page);
-    await expect(page.getByText('Sklep Nowy')).toHaveCount(0);
+    await expect(expenseRow(getByE2ePrefix, 'Sklep Nowy')).toHaveCount(0);
   },
 
   'the dashboard exposes the month summary': async ({ page, getByE2e }) => {
@@ -184,9 +186,9 @@ const commands = {
     ]);
     await expect(getByE2e('dashboard:limit-form')).toHaveCount(0);
     await reload(page);
-    await expect(
-      getByE2e('dashboard:limits-dialog-list').getByText('Spożywcze'),
-    ).toBeVisible();
+    await expect(getByE2e('dashboard:limits-dialog-list')).toContainText(
+      'Spożywcze',
+    );
   },
 
   'i update my settings profile': async ({ page, getByE2e }) => {
@@ -227,14 +229,15 @@ const commands = {
   'data persisted in postgres after sign back in': async ({
     page,
     getByE2e,
+    getByE2ePrefix,
   }) => {
     await open(page, APP_ROUTER.dashboard());
     await getByE2e('account-menu:trigger').filter({ visible: true }).click();
     await expect(getByE2e('account-menu:name')).toHaveText('Anna Backendowa');
     await open(page, APP_ROUTER.categories());
-    await expect(page.getByText('Kultura')).toBeVisible();
+    await expect(categoryRow(getByE2ePrefix, 'Kultura')).toBeVisible();
     await open(page, APP_ROUTER.dashboard());
-    await expect(page.getByText('Sklep Nowy')).toHaveCount(0);
+    await expect(expenseRow(getByE2ePrefix, 'Sklep Nowy')).toHaveCount(0);
   },
 } satisfies CommandRegistry<Ctx>;
 

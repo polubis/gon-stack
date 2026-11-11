@@ -84,6 +84,19 @@ export const TIME_E2E_IDS = [
   'time:statuses-save',
   'time:status-add',
   'time:task-status',
+  'time:add-trigger',
+  'time:add-fab',
+  'time:open-only-toggle',
+  'time:empty-add',
+  'time:task-name',
+  'time:task-cancel',
+  'time:recurring-toggle',
+  'time:backlog-name',
+  'time:description-input',
+  'time:attachment-media',
+  'time:trim-start',
+  'time:trim-length',
+  'time:trim-save',
 ] as const;
 
 export type TimeDynamicE2eId =
@@ -111,6 +124,14 @@ export type TimeDynamicE2eId =
   | `time:comment-edit:${string}`
   | `time:comment-delete:${string}`
   | `time:history-entry:${string}`
-  | `time:status-name:${string}`;
+  | `time:status-name:${string}`
+  | `time:status-delete:${string}`
+  | `time:add-option:${string}`
+  | `time:modal-close:${string}`
+  | `time:category-option:${string}`
+  | `time:priority-option:${string}`
+  | `time:month-day:${string}`
+  | `time:year-month:${number}`
+  | `time:attachment-link:${string}`;
 
 export type TimeE2eId = (typeof TIME_E2E_IDS)[number] | TimeDynamicE2eId;

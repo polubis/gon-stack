@@ -127,6 +127,7 @@ export const VideoTrimDialog = ({
                 Początek: {seconds(start)}
                 <input
                   type="range"
+                  data-e2e="time:trim-start"
                   min={0}
                   max={duration}
                   step={STEP}
@@ -153,7 +154,7 @@ export const VideoTrimDialog = ({
                   className="accent-brand"
                 />
               </label>
-              <p className="text-xs text-ink-soft">
+              <p data-e2e="time:trim-length" className="text-xs text-ink-soft">
                 Długość po przycięciu: {seconds(end - start)}
               </p>
               {failed ? (
@@ -184,6 +185,7 @@ export const VideoTrimDialog = ({
               Dodaj bez przycinania
             </Button>
             <Button
+              data-e2e="time:trim-save"
               className="w-auto px-3 py-1.5 text-xs"
               disabled={trimming || !changed}
               onClick={() => void cut()}

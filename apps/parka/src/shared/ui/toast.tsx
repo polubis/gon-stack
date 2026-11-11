@@ -101,6 +101,7 @@ export const Toast = ({
           <div className="flex shrink-0 items-center gap-2">
             <button
               type="button"
+              data-e2e="ui:toast-action"
               onClick={() => {
                 onClose();
                 notice.action?.run();

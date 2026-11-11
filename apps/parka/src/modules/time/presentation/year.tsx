@@ -29,6 +29,7 @@ export const Main = () => {
             key={index}
             style={stagger(index)}
             aria-current={current ? 'date' : undefined}
+            data-e2e={`time:year-month:${index}`}
             className={cn(
               'flex animate-item-in flex-col gap-2 motion-reduce:animate-none',
               current && 'border-brand bg-brand-softer',

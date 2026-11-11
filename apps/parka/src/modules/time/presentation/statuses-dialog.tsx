@@ -108,6 +108,7 @@ export const StatusesDialog = ({ modal }: { modal: string }) => {
                   <button
                     type="button"
                     aria-label={`Usuń status: ${status.name}`}
+                    data-e2e={`time:status-delete:${status.id}`}
                     disabled={status.id === IN_PROGRESS}
                     onClick={() =>
                       setDraft((list) =>

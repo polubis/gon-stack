@@ -88,6 +88,7 @@ export const AddMenu = ({
                 key={modal}
                 type="button"
                 role="menuitem"
+                data-e2e={`time:add-option:${modal}`}
                 onClick={() => openModal(modal)}
                 className={cn(
                   'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors hover:bg-hover focus-visible:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',

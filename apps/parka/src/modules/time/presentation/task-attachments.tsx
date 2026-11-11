@@ -415,6 +415,7 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
               <Thumb item={item} />
               {item.status === 'ready' ? (
                 <a
+                  data-e2e={`time:attachment-link:${item.id}`}
                   href={API_ROUTER.timeAttachmentById(item.id)}
                   target="_blank"
                   rel="noopener noreferrer"

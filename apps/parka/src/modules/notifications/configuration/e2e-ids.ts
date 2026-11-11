@@ -13,6 +13,9 @@ export type NotificationsE2eId =
   | 'notifications:load-more'
   | 'notifications:more-error'
   | 'notifications:end'
+  | 'notifications:skeleton-card'
+  | 'notifications:diff-removed'
+  | 'notifications:diff-added'
   | `notifications:row:${string}`
   | `notifications:mark-read:${string}`
   | `notifications:read:${string}`

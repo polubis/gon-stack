@@ -44,6 +44,7 @@ const Limit = ({ summary, period }: { summary: Summary; period: Period }) => {
     return (
       <a
         href={`#${LIMITS_SECTION_ID}`}
+        data-e2e="dashboard:limit-link"
         onClick={focusSection}
         className="font-semibold text-accent underline"
       >
