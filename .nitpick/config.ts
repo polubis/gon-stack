@@ -199,7 +199,7 @@ Several statuses fit one meaning (custom ones) → pick the closest to the flow 
 
 ### 1. Guard — first, always
 
-Task in progress locally = any of: lock file \`.evidences/factory.lock\` exists, git tree dirty, branch not \`main\`, \`git stash list\` not empty.
+Task in progress locally = any of: lock file \`.evidences/factory.lock\` exists, git tree dirty, branch not \`main\`, \`git stash list\` has an entry named \`factory:*\`. Other stashes belong to the dev: ignore, never touch.
 
 - In progress → **error** "task in progress: <id from lock or branch>". Touch nothing. Stop.
 - Free → \`git fetch\`, local \`main\` = \`origin/main\`.
@@ -238,7 +238,7 @@ Cannot finish (failing checks not own, missing access, spec conflict, needs dev 
 
 Skill ${ref('evidence')}, key = task id, out \`.evidences/<task-id>/\`.
 
-- **No \`--worktree\`. Never use git worktree.** Need BEFORE code → \`git stash\` own changes, record BEFORE on untouched tree, \`git stash pop\`. Verify tree back as it was, stash list empty.
+- **No \`--worktree\`. Never use git worktree.** Need BEFORE code → \`git stash push -m "factory:<task-id>"\` own changes, record BEFORE on untouched tree, pop that exact stash by its \`factory:<task-id>\` ref (find via \`git stash list\`, never by position). Verify tree back as it was, no \`factory:*\` stash left.
 - Upload final proof to task: \`add_task_attachment\` (png/mp4/webm/txt, max 5 files, video max 20 MB). Too big → shrink or log + comment.
 - Comment: what proof shows, limits.
 
@@ -251,14 +251,14 @@ Skill ${ref('evidence')}, key = task id, out \`.evidences/<task-id>/\`.
 ### 8. Clean up — always, success or error
 
 - \`git switch main\`, delete local work branch (pushed already or abandoned).
-- Own stash gone. Tree clean.
+- No \`factory:*\` stash left. Tree clean.
 - Remove \`.evidences/<task-id>/\` and \`.evidences/factory.lock\`, scratch files.
 - Stop dev servers / ports started.
 
 ## Rules
 
 - One task per run. Never loop, never pick second task.
-- Never worktree. Stash only for evidence BEFORE.
+- Never worktree. Stash only for evidence BEFORE, always named \`factory:<task-id>\`. Never pop, drop or apply a stash not named \`factory:*\`.
 - Never merge PR. Never push to \`main\`.
 - Never hide failure, never **finished** without PR and evidence.
 - Error = plain message to dev: what, why, task id, state left behind (should be none).
