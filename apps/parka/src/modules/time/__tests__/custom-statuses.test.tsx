@@ -64,19 +64,28 @@ describe('custom task statuses', () => {
     });
   });
 
-  it('refuses an empty or repeated name', async () => {
+  it('refuses an empty name', async () => {
     const user = userEvent.setup();
     renderTime();
-
     const dialog = within(await openEditor(user));
     await user.click(dialog.getByRole('button', { name: 'Dodaj status' }));
-    await user.click(dialog.getByRole('button', { name: 'Zapisz' }));
-    expect(await dialog.findByText('Podaj nazwę statusu.')).toBeVisible();
 
+    await user.click(dialog.getByRole('button', { name: 'Zapisz' }));
+
+    expect(await dialog.findByText('Podaj nazwę statusu.')).toBeVisible();
+    expect(backend.writes()).toHaveLength(0);
+  });
+
+  it('refuses a repeated name', async () => {
+    const user = userEvent.setup();
+    renderTime();
+    const dialog = within(await openEditor(user));
+    await user.click(dialog.getByRole('button', { name: 'Dodaj status' }));
     await user.type(
       dialog.getByRole('textbox', { name: 'Nazwa statusu 2' }),
       'w trakcie',
     );
+
     await user.click(dialog.getByRole('button', { name: 'Zapisz' }));
 
     expect(
@@ -107,12 +116,11 @@ describe('custom task statuses', () => {
     backend.statuses([{ id: 'in_progress', name: 'W trakcie' }, REVIEW]);
     backend.seed([task()]);
     renderTime();
-
     const circle = await box();
+
     await user.click(circle);
     await user.click(circle);
-    expect(await screen.findByText('Zadanie: Review.')).toBeVisible();
-    expect(await screen.findByText('Review')).toBeVisible();
+    await screen.findByText('Zadanie: Review.');
     await user.click(circle);
 
     await waitFor(() => expect(backend.writes()).toHaveLength(3));
@@ -121,6 +129,20 @@ describe('custom task statuses', () => {
       { inProgress: true, statusId: REVIEW.id, done: false },
       { inProgress: false, statusId: null, done: true },
     ]);
+  });
+
+  it('names the custom step on the task after two clicks of the circle', async () => {
+    const user = userEvent.setup();
+    backend.statuses([{ id: 'in_progress', name: 'W trakcie' }, REVIEW]);
+    backend.seed([task()]);
+    renderTime();
+    const circle = await box();
+
+    await user.click(circle);
+    await user.click(circle);
+
+    expect(await screen.findByText('Zadanie: Review.')).toBeVisible();
+    expect(await screen.findByText('Review')).toBeVisible();
   });
 
   it('sets a step from the task form', async () => {

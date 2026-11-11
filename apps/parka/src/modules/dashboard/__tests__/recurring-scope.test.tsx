@@ -103,8 +103,7 @@ describe('upcoming payment', () => {
     expect(dialog.getByText(/Edytujesz ten i kolejne wydatki/)).toBeVisible();
   });
 
-  it('asks before deleting and says the rule goes, not the history', async () => {
-    const user = userEvent.setup();
+  const openRuleDeletion = async (user: ReturnType<typeof userEvent.setup>) => {
     render(<Main />);
     await user.click(await screen.findByRole('button', { name: /Netflix/ }));
     await user.click(
@@ -112,13 +111,24 @@ describe('upcoming payment', () => {
         name: 'Usuń',
       }),
     );
-    const confirm = within(
+    return within(
       await screen.findByRole('dialog', { name: /Usunąć wydatek cykliczny/ }),
     );
+  };
+
+  it('asks before deleting and says the rule goes, not the history', async () => {
+    const user = userEvent.setup();
+
+    const confirm = await openRuleDeletion(user);
 
     expect(deletes()).toHaveLength(0);
     expect(confirm.getByText(/Usuniesz regułę/)).toBeVisible();
     expect(confirm.getByText(/zostają w historii/)).toBeVisible();
+  });
+
+  it('deletes the rule once confirmed', async () => {
+    const user = userEvent.setup();
+    const confirm = await openRuleDeletion(user);
 
     await user.click(confirm.getByRole('button', { name: 'Usuń regułę' }));
 
@@ -217,23 +227,35 @@ describe('charged recurring expense', () => {
     expect(dialog.getByRole('link', { name: 'Edytuj' })).toBeVisible();
   });
 
-  it('asks before deleting and says the rule and the others stay', async () => {
-    const user = userEvent.setup();
+  const openChargedDeletion = async (
+    user: ReturnType<typeof userEvent.setup>,
+  ) => {
     render(<Main />);
     await user.click(
       within(await screen.findByRole('dialog')).getByRole('button', {
         name: 'Usuń',
       }),
     );
-    const confirm = within(
+    return within(
       await screen.findByRole('dialog', { name: /Usunąć wydatek „Netflix”/ }),
     );
+  };
+
+  it('asks before deleting and says the rule and the others stay', async () => {
+    const user = userEvent.setup();
+
+    const confirm = await openChargedDeletion(user);
 
     expect(deletes()).toHaveLength(0);
     expect(confirm.getByText(/Usuniesz tylko ten wydatek/)).toBeVisible();
     expect(
       confirm.getByText(/Reguła cykliczna i pozostałe wydatki zostają/),
     ).toBeVisible();
+  });
+
+  it('deletes only the charged expense once confirmed', async () => {
+    const user = userEvent.setup();
+    const confirm = await openChargedDeletion(user);
 
     await user.click(confirm.getByRole('button', { name: 'Usuń wydatek' }));
 
@@ -281,19 +303,27 @@ describe('many upcoming payments', () => {
     stubApi({ recurring: rules(), categories: [CATEGORY] });
   });
 
-  it('announces the three nearest and lists all in a popup', async () => {
-    const user = userEvent.setup();
+  it('announces the three nearest payments', async () => {
     render(<Main />);
+
     const panel = within(
       await screen.findByRole('region', { name: /Nadchodzące/ }),
     );
 
     expect(panel.getAllByRole('listitem')).toHaveLength(3);
     expect(panel.queryByText('Abonament 4')).toBeNull();
+  });
+
+  it('lists all payments in a popup', async () => {
+    const user = userEvent.setup();
+    render(<Main />);
+    const panel = within(
+      await screen.findByRole('region', { name: /Nadchodzące/ }),
+    );
 
     await user.click(panel.getByRole('button', { name: 'Pokaż wszystkie' }));
-    const dialog = within(await screen.findByRole('dialog'));
 
+    const dialog = within(await screen.findByRole('dialog'));
     expect(dialog.getAllByRole('listitem')).toHaveLength(5);
     expect(dialog.getByText('Abonament 4')).toBeVisible();
   });

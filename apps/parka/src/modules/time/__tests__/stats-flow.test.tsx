@@ -16,7 +16,7 @@ const row = (title: string) =>
   screen.findAllByRole('button', { name: `Edytuj zadanie: ${title}` });
 
 describe('time statistics tab', () => {
-  it('shows the tasks tab first and switches to statistics and back', async () => {
+  it('shows the tasks tab first', async () => {
     backend.seed([task({ id: 't-1', title: 'Raport' })]);
     renderTime('week');
 
@@ -25,13 +25,29 @@ describe('time statistics tab', () => {
       'aria-selected',
       'true',
     );
+  });
+
+  it('switches to statistics', async () => {
+    backend.seed([task({ id: 't-1', title: 'Raport' })]);
+    renderTime('week');
+    await row('Raport');
 
     await userEvent.click(screen.getByRole('tab', { name: 'Statystyki' }));
+
     expect(await screen.findByText('Zrealizowane zadania')).toBeVisible();
     expect(screen.queryByRole('button', { name: /Raport/ })).toBeNull();
     expect(window.location.search).toContain('view=stats');
+  });
+
+  it('switches back from statistics to the tasks', async () => {
+    backend.seed([task({ id: 't-1', title: 'Raport' })]);
+    renderTime('week');
+    await row('Raport');
+    await userEvent.click(screen.getByRole('tab', { name: 'Statystyki' }));
+    await screen.findByText('Zrealizowane zadania');
 
     await userEvent.click(screen.getByRole('tab', { name: 'Zadania' }));
+
     expect((await row('Raport'))[0]).toBeVisible();
     expect(window.location.search).not.toContain('view=stats');
   });
@@ -82,12 +98,23 @@ describe('time statistics tab', () => {
 });
 
 describe('time statistics journey', () => {
-  it('opens statistics, moves across weeks, returns to tasks', async () => {
+  const seedWeek = () =>
     backend.seed([
       task({ id: 't-1', title: 'Gotowe', done: true }),
       task({ id: 't-2', title: 'W toku', inProgress: true }),
       task({ id: 't-3', title: 'Do zrobienia' }),
     ]);
+
+  const openStats = async () => {
+    seedWeek();
+    renderTime('week');
+    await row('Gotowe');
+    await userEvent.click(screen.getByRole('tab', { name: 'Statystyki' }));
+    await screen.findByText('Zrealizowane zadania');
+  };
+
+  it('opens statistics with the completion of the week', async () => {
+    seedWeek();
     renderTime('week');
     await row('Gotowe');
 
@@ -104,6 +131,10 @@ describe('time statistics journey', () => {
         'W toku',
       ),
     ).toBeVisible();
+  });
+
+  it('moves statistics to the next week and says there are none', async () => {
+    await openStats();
 
     await userEvent.click(
       screen.getByRole('button', { name: 'Następny okres' }),
@@ -114,11 +145,24 @@ describe('time statistics journey', () => {
       'aria-selected',
       'true',
     );
+  });
+
+  it('moves statistics back to the week with data', async () => {
+    await openStats();
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Następny okres' }),
+    );
+    await screen.findByText('Brak statystyk');
 
     await userEvent.click(
       screen.getByRole('button', { name: 'Poprzedni okres' }),
     );
+
     expect(await screen.findByText('Zrealizowane zadania')).toBeVisible();
+  });
+
+  it('returns from statistics to the tasks', async () => {
+    await openStats();
 
     await userEvent.click(screen.getByRole('tab', { name: 'Zadania' }));
 

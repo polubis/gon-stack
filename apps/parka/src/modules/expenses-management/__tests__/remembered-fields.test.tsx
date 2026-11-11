@@ -181,7 +181,7 @@ describe('remembered expense form fields', () => {
     );
   });
 
-  it('suggests remembered shops while typing', async () => {
+  const typeShop = async () => {
     suggestions = fakeSuggestions([
       saved('Biedronka', { useCount: 9 }),
       saved('Lidl', { useCount: 2 }),
@@ -189,12 +189,22 @@ describe('remembered expense form fields', () => {
     mockBackend([FOOD, FUN]);
     const { user } = await openNew();
     await screen.findByDisplayValue('Biedronka');
-
     await user.clear(screen.getByLabelText('Sklep'));
     await user.type(screen.getByLabelText('Sklep'), 'li');
+    return user;
+  };
+
+  it('suggests remembered shops while typing', async () => {
+    await typeShop();
 
     expect(screen.getAllByRole('option')).toHaveLength(1);
+  });
+
+  it('fills the shop with the picked suggestion', async () => {
+    const user = await typeShop();
+
     await user.click(screen.getByRole('option', { name: /Lidl/ }));
+
     expect(screen.getByLabelText('Sklep')).toHaveValue('Lidl');
   });
 

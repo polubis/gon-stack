@@ -87,7 +87,7 @@ describe('backlog adding', () => {
 });
 
 describe('backlog list', () => {
-  it('shows an empty state with a way to add', async () => {
+  it('shows an empty state', async () => {
     const user = userEvent.setup();
     renderTime();
 
@@ -96,7 +96,16 @@ describe('backlog list', () => {
     expect(
       await list.findByRole('heading', { name: 'Backlog jest pusty' }),
     ).toBeVisible();
+  });
+
+  it('opens the add form from the empty state', async () => {
+    const user = userEvent.setup();
+    renderTime();
+    const list = await openBacklog(user);
+    await list.findByRole('heading', { name: 'Backlog jest pusty' });
+
     await user.click(list.getByRole('button', { name: 'Dodaj do backlogu' }));
+
     expect(
       await screen.findByText('Zadanie bez terminu. Dzień wybierzesz później.'),
     ).toBeVisible();
@@ -262,7 +271,7 @@ describe('backlog order', () => {
 });
 
 describe('backlog editing', () => {
-  it('edits a task and keeps it in the backlog', async () => {
+  it('opens the edit form of a backlog task with its name', async () => {
     const user = userEvent.setup();
     backend.seedBacklog([backlogTask()]);
     renderTime();
@@ -273,12 +282,29 @@ describe('backlog editing', () => {
         name: 'Edytuj zadanie z backlogu: Umówić dentystę',
       }),
     );
+
     const form = within(
       await screen.findByRole('dialog', { name: 'Edytuj zadanie z backlogu' }),
     );
     expect(modalsInUrl()).toEqual(['backlog', 'backlog-edit:b-1']);
+    expect(form.getByLabelText('Nazwa')).toHaveValue('Umówić dentystę');
+  });
+
+  it('edits a task and keeps it in the backlog', async () => {
+    const user = userEvent.setup();
+    backend.seedBacklog([backlogTask()]);
+    renderTime();
+    const list = await openBacklog(user);
+    await user.click(
+      await list.findByRole('button', {
+        name: 'Edytuj zadanie z backlogu: Umówić dentystę',
+      }),
+    );
+    const form = within(
+      await screen.findByRole('dialog', { name: 'Edytuj zadanie z backlogu' }),
+    );
     const name = form.getByLabelText('Nazwa');
-    expect(name).toHaveValue('Umówić dentystę');
+
     await user.clear(name);
     await user.type(name, 'Dentysta w piątek');
     await user.click(form.getByRole('radio', { name: 'Praca' }));
@@ -346,7 +372,7 @@ describe('backlog custom date', () => {
 });
 
 describe('backlog deleting', () => {
-  it('removes a task only after confirmation', async () => {
+  it('asks before removing a backlog task', async () => {
     const user = userEvent.setup();
     backend.seedBacklog([backlogTask()]);
     renderTime();
@@ -356,6 +382,16 @@ describe('backlog deleting', () => {
 
     expect(await screen.findByText('Usunąć zadanie?')).toBeVisible();
     expect(backend.writes()).toHaveLength(0);
+  });
+
+  it('removes a backlog task after confirmation', async () => {
+    const user = userEvent.setup();
+    backend.seedBacklog([backlogTask()]);
+    renderTime();
+    const list = await openBacklog(user);
+    await pickFromMenu(user, list, 'Usuń');
+    await screen.findByText('Usunąć zadanie?');
+
     await user.click(
       within(screen.getAllByRole('dialog').at(-1)!).getByRole('button', {
         name: 'Usuń',

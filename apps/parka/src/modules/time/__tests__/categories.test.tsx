@@ -57,16 +57,26 @@ describe('task categories', () => {
     expect(backend.writes()).toHaveLength(0);
   });
 
+  it('asks before deleting a category', async () => {
+    const user = userEvent.setup();
+    renderTime('day', undefined, '&modal=categories');
+    const form = await openEditor(user, 'Dom');
+
+    await user.click(form.getByRole('button', { name: 'Usuń kategorię' }));
+
+    await screen.findByRole('dialog', { name: 'Usunąć kategorię?' });
+    expect(backend.writes()).toHaveLength(0);
+  });
+
   it('deletes an unused category after confirmation', async () => {
     const user = userEvent.setup();
     renderTime('day', undefined, '&modal=categories');
-
     const form = await openEditor(user, 'Dom');
     await user.click(form.getByRole('button', { name: 'Usuń kategorię' }));
     const confirm = within(
       await screen.findByRole('dialog', { name: 'Usunąć kategorię?' }),
     );
-    expect(backend.writes()).toHaveLength(0);
+
     await user.click(confirm.getByRole('button', { name: 'Usuń' }));
 
     expect(await screen.findByText('Usunięto kategorię.')).toBeVisible();

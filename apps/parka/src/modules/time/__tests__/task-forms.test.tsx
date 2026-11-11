@@ -82,18 +82,29 @@ describe('time add menu', () => {
     ]);
   });
 
-  it('moves between options with arrows and closes on Escape', async () => {
-    const user = userEvent.setup();
+  const openAddMenu = async (user: ReturnType<typeof userEvent.setup>) => {
     await ready();
-
     await user.click(screen.getAllByRole('button', { name: /^Dodaj$/ })[0]!);
     await screen.findAllByRole('menuitem');
+  };
+
+  it('moves between options with arrows', async () => {
+    const user = userEvent.setup();
+    await openAddMenu(user);
+
     await user.keyboard('{ArrowDown}');
+
     expect(
       screen.getByRole('menuitem', { name: 'Zadanie cykliczne' }),
     ).toHaveFocus();
+  });
+
+  it('closes the options on Escape', async () => {
+    const user = userEvent.setup();
+    await openAddMenu(user);
 
     await user.keyboard('{Escape}');
+
     await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
   });
 
@@ -138,15 +149,23 @@ describe('time task form', () => {
     expect(dialog.getByRole('radio', { name: 'Średni' })).toBeChecked();
   });
 
-  it('selects a new priority created over the task form', async () => {
+  it('stacks the new priority form over the task form', async () => {
     const user = userEvent.setup();
     await openFromMenu(user, 'Zadanie');
 
     await user.click(screen.getByRole('button', { name: 'Nowy priorytet' }));
+
     await waitFor(() => expect(dialogs()).toHaveLength(2));
     expect(modalsInUrl()).toEqual(['task-new', 'priority-new']);
+  });
 
+  it('selects a new priority created over the task form', async () => {
+    const user = userEvent.setup();
+    await openFromMenu(user, 'Zadanie');
+    await user.click(screen.getByRole('button', { name: 'Nowy priorytet' }));
+    await waitFor(() => expect(dialogs()).toHaveLength(2));
     const form = topDialog();
+
     await user.type(form.getByRole('textbox', { name: 'Nazwa' }), 'Pilny');
     await user.click(form.getByRole('radio', { name: '7' }));
     await user.click(form.getByRole('button', { name: 'Dodaj priorytet' }));
@@ -167,16 +186,24 @@ describe('time task form', () => {
     );
   });
 
+  it('asks for a category name before adding', async () => {
+    const user = userEvent.setup();
+    await openFromMenu(user, 'Zadanie');
+    await user.click(screen.getByRole('button', { name: 'Nowa kategoria' }));
+    await waitFor(() => expect(dialogs()).toHaveLength(2));
+    const form = topDialog();
+
+    await user.click(form.getByRole('button', { name: 'Dodaj kategorię' }));
+
+    expect(await form.findByText('Podaj nazwę kategorii.')).toBeVisible();
+  });
+
   it('selects a new category created over the task form', async () => {
     const user = userEvent.setup();
     await openFromMenu(user, 'Zadanie');
-
     await user.click(screen.getByRole('button', { name: 'Nowa kategoria' }));
     await waitFor(() => expect(dialogs()).toHaveLength(2));
-
     const form = topDialog();
-    await user.click(form.getByRole('button', { name: 'Dodaj kategorię' }));
-    expect(await form.findByText('Podaj nazwę kategorii.')).toBeVisible();
 
     await user.type(form.getByRole('textbox', { name: 'Nazwa' }), 'Finanse');
     await user.click(form.getByRole('button', { name: 'Dodaj kategorię' }));

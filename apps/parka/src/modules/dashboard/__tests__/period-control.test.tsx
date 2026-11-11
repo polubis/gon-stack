@@ -128,19 +128,29 @@ describe('dashboard period control', () => {
     vi.unstubAllGlobals();
   });
 
-  it('resists a drag towards the future and snaps back', async () => {
+  it('resists a drag towards the future', async () => {
     await open();
     const main = screen.getByRole('main');
 
     fireEvent.touchStart(main, { touches: [{ clientX: 300, clientY: 200 }] });
     fireEvent.touchMove(main, { touches: [{ clientX: 200, clientY: 200 }] });
+
     const [filters, data] = Array.from(main.children) as HTMLElement[];
     expect(data!.style.transform).toBe('translateX(-20px)');
     expect(filters!.style.transform).toBe('');
+  });
+
+  it('snaps back after a drag towards the future', async () => {
+    await open();
+    const main = screen.getByRole('main');
+    const [, data] = Array.from(main.children) as HTMLElement[];
+    fireEvent.touchStart(main, { touches: [{ clientX: 300, clientY: 200 }] });
+    fireEvent.touchMove(main, { touches: [{ clientX: 200, clientY: 200 }] });
 
     fireEvent.touchEnd(main, {
       changedTouches: [{ clientX: 200, clientY: 200 }],
     });
+
     expect(data!.style.transform).toBe('');
     expect(valueButton()).toHaveTextContent('październik 2026');
   });
@@ -169,7 +179,7 @@ describe('dashboard period control', () => {
     expect(next().disabled).toBe(true);
   });
 
-  it('goes back and forward again, stopping at the present', async () => {
+  it('goes back a month and asks for it', async () => {
     const calls = await open();
 
     await userEvent.click(prev());
@@ -179,6 +189,11 @@ describe('dashboard period control', () => {
     await waitFor(() =>
       expect(asked(calls).join(' ')).toContain('kind=month&from=2026-09-01'),
     );
+  });
+
+  it('goes forward again and stops at the present', async () => {
+    await open();
+    await userEvent.click(prev());
 
     await userEvent.click(next());
 
@@ -196,7 +211,7 @@ describe('dashboard period control', () => {
     expect(valueButton()).toHaveTextContent('październik 2026');
   });
 
-  it('shows the current week, Monday to Sunday, and steps by week', async () => {
+  it('shows the current week, Monday to Sunday', async () => {
     const calls = await open();
 
     await kind('Tydzień');
@@ -206,6 +221,11 @@ describe('dashboard period control', () => {
     await waitFor(() =>
       expect(asked(calls).join(' ')).toContain('kind=week&from=2026-10-05'),
     );
+  });
+
+  it('steps by week', async () => {
+    await open();
+    await kind('Tydzień');
 
     await userEvent.click(prev());
 
@@ -215,13 +235,18 @@ describe('dashboard period control', () => {
     expect(next().disabled).toBe(false);
   });
 
-  it('shows a single day and steps by day', async () => {
+  it('shows a single day', async () => {
     await open();
 
     await kind('Dzień');
 
     expect(valueButton()).toHaveTextContent('sob. 10 paź 2026');
     expect(next().disabled).toBe(true);
+  });
+
+  it('steps by day', async () => {
+    await open();
+    await kind('Dzień');
 
     await userEvent.click(prev());
 
@@ -231,7 +256,9 @@ describe('dashboard period control', () => {
   it('returns to the present with Dziś', async () => {
     await open();
     await userEvent.click(prev());
-    expect(valueButton()).toHaveTextContent('wrzesień 2026');
+    await waitFor(() =>
+      expect(valueButton()).toHaveTextContent('wrzesień 2026'),
+    );
 
     await userEvent.click(kindButton());
     await userEvent.click(screen.getByRole('button', { name: 'Dziś' }));
@@ -240,37 +267,57 @@ describe('dashboard period control', () => {
     expect(next().disabled).toBe(true);
   });
 
-  it('shows the current year, then last year, then back to this one', async () => {
-    const calls = await open();
+  it('shows the current year', async () => {
+    await open();
 
     await kind('Rok');
-    expect(valueButton()).toHaveTextContent('2026');
-    expect(next().disabled).toBe(true);
 
-    await userEvent.click(prev());
-    expect(valueButton()).toHaveTextContent('2025');
-    await waitFor(() =>
-      expect(asked(calls).join(' ')).toContain('kind=year&from=2025-01-01'),
-    );
-
-    await userEvent.click(next());
     expect(valueButton()).toHaveTextContent('2026');
     expect(next().disabled).toBe(true);
   });
 
-  it('lists only the expenses of the selected period', async () => {
+  it('steps back to last year and asks for it', async () => {
+    const calls = await open();
+    await kind('Rok');
+
+    await userEvent.click(prev());
+
+    expect(valueButton()).toHaveTextContent('2025');
+    await waitFor(() =>
+      expect(asked(calls).join(' ')).toContain('kind=year&from=2025-01-01'),
+    );
+  });
+
+  it('steps forward again to this year', async () => {
+    await open();
+    await kind('Rok');
+    await userEvent.click(prev());
+
+    await userEvent.click(next());
+
+    expect(valueButton()).toHaveTextContent('2026');
+    expect(next().disabled).toBe(true);
+  });
+
+  it('lists only the expenses of the selected day', async () => {
     await open();
 
     await kind('Dzień');
+
     expect(
       screen.getByRole('button', { name: /^Sklep Dzisiejszy/ }),
     ).toBeTruthy();
     expect(
       screen.queryByRole('button', { name: /Zeszłotygodniowy/ }),
     ).toBeNull();
+  });
 
+  it('says there are no expenses in a month without any', async () => {
+    await open();
     await kind('Miesiąc');
+
     await userEvent.click(prev());
+
     expect(
       screen.queryByRole('button', { name: /^Sklep Dzisiejszy/ }),
     ).toBeNull();
@@ -279,9 +326,14 @@ describe('dashboard period control', () => {
         'Brak wydatków w tym okresie.',
       ),
     ).toBeTruthy();
+  });
 
+  it('lists the expenses of last year', async () => {
+    await open();
     await kind('Rok');
+
     await userEvent.click(prev());
+
     expect(
       screen.getByRole('button', { name: /^(?!Więcej).*Zeszłoroczny/ }),
     ).toBeTruthy();
@@ -347,12 +399,19 @@ describe('dashboard period control', () => {
         .getAllByRole('button')
         .map((b) => b.textContent);
 
-    it('jumps to a chosen month from a list without future months', async () => {
-      const calls = await open();
+    it('lists months up to the present only', async () => {
+      await open();
+
       const list = await openPicker('Wybierz miesiąc');
+
       const names = optionNames(list);
       expect(names[0]).toBe('październik 2026');
       expect(names).not.toContain('Listopad 2026');
+    });
+
+    it('jumps to a chosen month from the list', async () => {
+      const calls = await open();
+      const list = await openPicker('Wybierz miesiąc');
 
       await userEvent.click(
         within(list).getByRole('button', { name: 'marzec 2026' }),
@@ -374,12 +433,20 @@ describe('dashboard period control', () => {
       expect(optionNames(list)[0]).toBe('pon. 5 – niedz. 11 paź 2026');
     });
 
+    it('limits the day picker to the present', async () => {
+      await open();
+      await kind('Dzień');
+
+      const input = (await openPicker('Wybierz dzień')) as HTMLInputElement;
+
+      expect(input.type).toBe('date');
+      expect(input.max).toBe('2026-10-10');
+    });
+
     it('jumps to a chosen day', async () => {
       await open();
       await kind('Dzień');
       const input = (await openPicker('Wybierz dzień')) as HTMLInputElement;
-      expect(input.type).toBe('date');
-      expect(input.max).toBe('2026-10-10');
 
       fireEvent.change(input, { target: { value: '2026-02-14' } });
 
@@ -400,30 +467,53 @@ describe('dashboard period control', () => {
       expect(valueButton()).toHaveTextContent('pon. 2 – niedz. 8 mar 2026');
     });
 
-    it('lists only years up to the present and jumps to one', async () => {
+    it('lists years up to the present only', async () => {
       await open();
       await kind('Rok');
+
       const list = await openPicker('Wybierz rok');
+
       const years = optionNames(list);
       expect(years[0]).toBe('2026');
       expect(years).not.toContain('2027');
+    });
+
+    it('jumps to a chosen year from the list', async () => {
+      await open();
+      await kind('Rok');
+      const list = await openPicker('Wybierz rok');
 
       await userEvent.click(within(list).getByRole('button', { name: '2022' }));
 
       expect(valueButton()).toHaveTextContent('2022');
     });
 
-    it('keeps the kind list and the picker reachable from the keyboard', async () => {
+    it('reaches the picker from the keyboard', async () => {
       await open();
       prev().focus();
 
       // Next is disabled at the present, so the period follows right away.
       await userEvent.tab();
+
       expect(document.activeElement).toBe(valueButton());
+    });
+
+    it('reaches the kind list from the keyboard', async () => {
+      await open();
+      prev().focus();
+
       await userEvent.tab();
+      await userEvent.tab();
+
       expect(document.activeElement).toBe(kindButton());
+    });
+
+    it('opens the kind list with Enter', async () => {
+      await open();
+      kindButton().focus();
 
       await userEvent.keyboard('{Enter}');
+
       expect(screen.getByRole('button', { name: 'Rok' })).toBeTruthy();
     });
   });
@@ -495,7 +585,7 @@ describe('dashboard period control', () => {
       );
     });
 
-    it('steps by its own length', async () => {
+    it('steps back by its own length', async () => {
       await open();
       await kind('Własny');
       await apply(1, 'wtorek, 1 września 2026', 'środa, 30 września 2026');
@@ -504,18 +594,36 @@ describe('dashboard period control', () => {
       await userEvent.click(prev());
 
       expect(valueButton()).toHaveTextContent('niedz. 2 – pon. 31 sie 2026');
+    });
+
+    it('steps forward by its own length', async () => {
+      await open();
+      await kind('Własny');
+      await apply(1, 'wtorek, 1 września 2026', 'środa, 30 września 2026');
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+      await userEvent.click(prev());
+
       await userEvent.click(next());
+
       expect(valueButton()).toHaveTextContent('wt. 1 – śr. 30 wrz 2026');
     });
 
-    it('waits for both days before it can be applied', async () => {
+    it('cannot be applied with only the first day', async () => {
       await open();
       await kind('Własny');
 
       await userEvent.click(day('poniedziałek, 5 października 2026'));
 
       expect(applyButton().disabled).toBe(true);
+    });
+
+    it('can be applied once both days are picked', async () => {
+      await open();
+      await kind('Własny');
+      await userEvent.click(day('poniedziałek, 5 października 2026'));
+
       await userEvent.click(day('czwartek, 8 października 2026'));
+
       expect(applyButton().disabled).toBe(false);
     });
 
@@ -599,20 +707,33 @@ describe('dashboard period control', () => {
       expect(valueButton()).toHaveTextContent('wt. 3 – pon. 9 cze 2025');
     });
 
-    it('steps the year with arrows and never past the present', async () => {
+    it('does not step the year past the present', async () => {
+      await open();
+      await kind('Własny');
+
+      await userEvent.click(monthTitle());
+
+      expect(
+        within(dialog()).getByRole<HTMLButtonElement>('button', {
+          name: 'Następny rok',
+        }).disabled,
+      ).toBe(true);
+    });
+
+    it('steps the year back with the arrow', async () => {
       await open();
       await kind('Własny');
       await userEvent.click(monthTitle());
-      const nextYear = within(dialog()).getByRole<HTMLButtonElement>('button', {
-        name: 'Następny rok',
-      });
 
-      expect(nextYear.disabled).toBe(true);
       await userEvent.click(
         within(dialog()).getByRole('button', { name: 'Poprzedni rok' }),
       );
 
-      expect(nextYear.disabled).toBe(false);
+      expect(
+        within(dialog()).getByRole<HTMLButtonElement>('button', {
+          name: 'Następny rok',
+        }).disabled,
+      ).toBe(false);
       expect(
         within(dialog()).getByRole('combobox', { name: 'Rok' }),
       ).toHaveTextContent('2025');
@@ -635,7 +756,7 @@ describe('dashboard period control', () => {
       expect(grid.queryByRole('option', { name: '2027' })).toBeNull();
     });
 
-    it('opens the month grid from the keyboard and returns focus', async () => {
+    it('opens the month grid from the keyboard', async () => {
       await open();
       await kind('Własny');
       monthTitle().focus();
@@ -646,7 +767,16 @@ describe('dashboard period control', () => {
       expect(document.activeElement).toBe(
         within(dialog()).getByRole('button', { name: 'październik' }),
       );
+    });
+
+    it('returns focus to the month title when the month grid closes', async () => {
+      await open();
+      await kind('Własny');
+      monthTitle().focus();
       await userEvent.keyboard('{Enter}');
+
+      await userEvent.keyboard('{Enter}');
+
       expect(monthTitle().getAttribute('aria-expanded')).toBe('false');
       expect(document.activeElement).toBe(monthTitle());
     });

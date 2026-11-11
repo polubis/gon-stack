@@ -58,9 +58,9 @@ describe('time loading', () => {
     expect(screen.getByRole('button', { name: 'Dodaj zadanie' })).toBeVisible();
   });
 
-  it('offers a retry when loading fails', async () => {
-    const user = userEvent.setup();
+  it('explains why loading failed', async () => {
     backend.state.failReads = true;
+
     renderTime();
 
     expect(
@@ -68,9 +68,16 @@ describe('time loading', () => {
     ).toBeVisible();
     expect(screen.getByText('TIME_LOAD')).toBeVisible();
     expect(screen.getByText('Database unavailable')).toBeVisible();
+  });
 
+  it('loads the tasks after the retry', async () => {
+    const user = userEvent.setup();
+    backend.state.failReads = true;
+    renderTime();
+    await screen.findByText('Nie udało się wczytać zadań');
     backend.state.failReads = false;
     backend.seed([task()]);
+
     await user.click(screen.getByRole('button', { name: 'Spróbuj ponownie' }));
 
     expect(await row('Raport miesięczny')).toBeVisible();
@@ -130,15 +137,27 @@ describe('time navigation', () => {
     );
   });
 
-  it('reaches Dziś with the keyboard and returns to today', async () => {
-    const user = userEvent.setup();
+  const openRangeList = async (user: ReturnType<typeof userEvent.setup>) => {
     renderTime('day', '2026-11-05');
     await screen.findByRole('heading', { name: 'Brak zadań' });
-
     await user.click(screen.getByRole('button', { name: /Zakres:/ }));
     await screen.findByRole('list', { name: 'Zakres' });
+  };
+
+  it('reaches Dziś with the keyboard', async () => {
+    const user = userEvent.setup();
+    await openRangeList(user);
+
     await user.keyboard('{End}');
+
     expect(screen.getByRole('button', { name: 'Dziś' })).toHaveFocus();
+  });
+
+  it('returns to today with Dziś', async () => {
+    const user = userEvent.setup();
+    await openRangeList(user);
+    await user.keyboard('{End}');
+
     await user.keyboard('{Enter}');
 
     expect(
@@ -202,20 +221,31 @@ describe('time swipe and prefetch', () => {
     expect(window.location.search).toContain('date=2026-10-20');
   });
 
-  it('moves the content with the finger and snaps back on a short swipe', async () => {
+  it('moves the content with the finger', async () => {
     renderTime();
     await screen.findByRole('heading', { name: 'Brak zadań' });
     const main = screen.getByRole('main');
 
     fireEvent.touchStart(main, { touches: [{ clientX: 300, clientY: 200 }] });
     fireEvent.touchMove(main, { touches: [{ clientX: 250, clientY: 202 }] });
+
     const [filters, data] = Array.from(main.children) as HTMLElement[];
     expect(data!.style.transform).toBe('translateX(-30px)');
     expect(filters!.style.transform).toBe('');
+  });
+
+  it('snaps back on a short swipe', async () => {
+    renderTime();
+    await screen.findByRole('heading', { name: 'Brak zadań' });
+    const main = screen.getByRole('main');
+    const [, data] = Array.from(main.children) as HTMLElement[];
+    fireEvent.touchStart(main, { touches: [{ clientX: 300, clientY: 200 }] });
+    fireEvent.touchMove(main, { touches: [{ clientX: 250, clientY: 202 }] });
 
     fireEvent.touchEnd(main, {
       changedTouches: [{ clientX: 250, clientY: 202 }],
     });
+
     expect(data!.style.transform).toBe('');
     expect(window.location.search).toContain('date=2026-10-20');
   });
@@ -278,24 +308,34 @@ describe('time task creation', () => {
     });
   });
 
+  it('starts a new task as a whole day', async () => {
+    const user = userEvent.setup();
+    renderTime();
+
+    await user.click(
+      await screen.findByRole('button', { name: 'Dodaj zadanie' }),
+    );
+
+    const dialog = within(await screen.findByRole('dialog'));
+    expect(dialog.getByRole('switch', { name: 'Cały dzień' })).toBeChecked();
+  });
+
   it('saves a whole-day task without an hour', async () => {
     const user = userEvent.setup();
     renderTime();
     await user.click(
       await screen.findByRole('button', { name: 'Dodaj zadanie' }),
     );
-
     const dialog = within(await screen.findByRole('dialog'));
     await user.type(dialog.getByRole('textbox', { name: 'Nazwa' }), 'Rachunek');
-    expect(dialog.getByRole('switch', { name: 'Cały dzień' })).toBeChecked();
+
     await user.click(dialog.getByRole('button', { name: 'Dodaj' }));
 
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     expect(backend.writes()[0]!.body).toMatchObject({ at: null });
   });
 
-  it('rolls the task back and offers retry when the server rejects it', async () => {
-    const user = userEvent.setup();
+  const addRejectedTask = async (user: ReturnType<typeof userEvent.setup>) => {
     backend.state.failWrites = true;
     renderTime();
     await user.click(
@@ -304,16 +344,27 @@ describe('time task creation', () => {
     const dialog = within(await screen.findByRole('dialog'));
     await user.type(dialog.getByRole('textbox', { name: 'Nazwa' }), 'Kurs');
     await user.click(dialog.getByRole('button', { name: 'Dodaj' }));
+    return within(await screen.findByRole('alert'));
+  };
 
-    const toast = within(await screen.findByRole('alert'));
+  it('rolls the task back when the server rejects it', async () => {
+    const user = userEvent.setup();
+
+    const toast = await addRejectedTask(user);
+
     expect(toast.getByText('Nie udało się dodać zadania')).toBeVisible();
     expect(toast.getByText('TASK_CREATE_FAILED')).toBeVisible();
     expect(toast.getByText('Database unavailable')).toBeVisible();
     expect(
       screen.queryByRole('button', { name: /Edytuj zadanie: Kurs/ }),
     ).toBeNull();
+  });
 
+  it('adds the task after the retry once the server accepts it', async () => {
+    const user = userEvent.setup();
+    const toast = await addRejectedTask(user);
     backend.state.failWrites = false;
+
     await user.click(toast.getByRole('button', { name: /ponownie|Ponów/i }));
 
     expect(await row('Kurs')).toBeVisible();
@@ -321,17 +372,28 @@ describe('time task creation', () => {
 });
 
 describe('time task maintenance', () => {
+  it('shows a task as in progress after the first click on its circle', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    renderTime();
+    const box = await screen.findByRole('checkbox', {
+      name: 'Zrobione: Raport miesięczny',
+    });
+
+    await user.click(box);
+
+    expect(box).toHaveAttribute('aria-checked', 'mixed');
+  });
+
   it('marks a task done and saves it', async () => {
     const user = userEvent.setup();
     backend.seed([task()]);
     renderTime();
-
     const box = await screen.findByRole('checkbox', {
       name: 'Zrobione: Raport miesięczny',
     });
-    expect(box).toHaveAttribute('aria-checked', 'false');
+
     await user.click(box);
-    expect(box).toHaveAttribute('aria-checked', 'mixed');
     await user.click(box);
 
     expect(box).toBeChecked();
@@ -435,8 +497,7 @@ describe('time task maintenance', () => {
     expect(box).not.toBeChecked();
   });
 
-  it('deletes a task only after confirmation', async () => {
-    const user = userEvent.setup();
+  const askToDeleteTask = async (user: ReturnType<typeof userEvent.setup>) => {
     backend.seed([task()]);
     renderTime();
     await user.click(await row('Raport miesięczny'));
@@ -445,10 +506,22 @@ describe('time task maintenance', () => {
         name: 'Usuń',
       }),
     );
+  };
 
-    const confirm = await screen.findByText('Usunąć zadanie?');
-    expect(confirm).toBeVisible();
+  it('asks before deleting a task', async () => {
+    const user = userEvent.setup();
+
+    await askToDeleteTask(user);
+
+    expect(await screen.findByText('Usunąć zadanie?')).toBeVisible();
     expect(backend.writes()).toHaveLength(0);
+  });
+
+  it('deletes a task after confirmation', async () => {
+    const user = userEvent.setup();
+    await askToDeleteTask(user);
+    await screen.findByText('Usunąć zadanie?');
+
     await user.click(
       within(screen.getAllByRole('dialog').at(-1)!).getByRole('button', {
         name: 'Usuń',

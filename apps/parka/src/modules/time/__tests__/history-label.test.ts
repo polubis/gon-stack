@@ -87,23 +87,24 @@ describe('history label', () => {
     );
   });
 
-  it('describes attachments and comments', () => {
-    expect(
-      describeHistory(entry({ kind: 'attachment_added', to: 'plan.pdf' })),
-    ).toBe('Dodano załącznik „plan.pdf”');
-    expect(
-      describeHistory(entry({ kind: 'attachment_removed', from: 'plan.pdf' })),
-    ).toBe('Usunięto załącznik „plan.pdf”');
-    expect(describeHistory(entry({ kind: 'comment_added', to: 'Cześć' }))).toBe(
-      'Dodano komentarz: „Cześć”',
-    );
-    expect(
-      describeHistory(
-        entry({ kind: 'comment_edited', from: 'Cześć', to: 'Hej' }),
-      ),
-    ).toBe('Zmieniono komentarz: „Cześć” → „Hej”');
-    expect(
-      describeHistory(entry({ kind: 'comment_removed', from: 'Hej' })),
-    ).toBe('Usunięto komentarz: „Hej”');
+  it.each([
+    [
+      { kind: 'attachment_added', to: 'plan.pdf' },
+      'Dodano załącznik „plan.pdf”',
+    ],
+    [
+      { kind: 'attachment_removed', from: 'plan.pdf' },
+      'Usunięto załącznik „plan.pdf”',
+    ],
+    [{ kind: 'comment_added', to: 'Cześć' }, 'Dodano komentarz: „Cześć”'],
+    [
+      { kind: 'comment_edited', from: 'Cześć', to: 'Hej' },
+      'Zmieniono komentarz: „Cześć” → „Hej”',
+    ],
+    [{ kind: 'comment_removed', from: 'Hej' }, 'Usunięto komentarz: „Hej”'],
+  ] as const)('describes %j', (change, expected) => {
+    const text = describeHistory(entry({ ...change }));
+
+    expect(text).toBe(expected);
   });
 });

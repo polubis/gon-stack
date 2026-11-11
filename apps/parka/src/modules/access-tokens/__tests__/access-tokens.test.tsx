@@ -183,7 +183,7 @@ describe('access tokens list', () => {
 });
 
 describe('access token creation', () => {
-  it('shows the secret once and never again', async () => {
+  it('shows the secret right after generating', async () => {
     const { user, created } = await setup([]);
 
     await generate(user, 'Cursor');
@@ -193,6 +193,14 @@ describe('access token creation', () => {
     });
     expect(within(reveal).getByText(SECRET)).toBeInTheDocument();
     expect(created).toEqual([{ name: 'Cursor', ttlDays: 30 }]);
+  });
+
+  it('never shows the secret again once the dialog is done', async () => {
+    const { user } = await setup([]);
+    await generate(user, 'Cursor');
+    const reveal = await screen.findByRole('dialog', {
+      name: 'Twój nowy token',
+    });
 
     await user.click(within(reveal).getByRole('button', { name: 'Gotowe' }));
 
@@ -204,17 +212,22 @@ describe('access token creation', () => {
     expect(screen.getByText('parka_mcp_Zq8x…Yb6k')).toBeInTheDocument();
   });
 
-  it('points the client at the address of the site it is opened on', async () => {
-    const { user } = await setup([]);
+  it('shows the address of the site it is opened on', async () => {
+    await setup([]);
     const endpoint = `${window.location.origin}/api/mcp/`;
 
     expect(screen.getByText(endpoint)).toBeInTheDocument();
+  });
+
+  it('puts the address of the site in the command that adds the client', async () => {
+    const { user } = await setup([]);
+    const endpoint = `${window.location.origin}/api/mcp/`;
 
     await generate(user, 'Cursor');
+
     const reveal = await screen.findByRole('dialog', {
       name: 'Twój nowy token',
     });
-
     expect(
       within(reveal).getByText(
         `claude mcp add --transport http parka ${endpoint} --header "Authorization: Bearer ${SECRET}"`,
@@ -277,14 +290,24 @@ describe('access token creation', () => {
 });
 
 describe('access token management', () => {
-  it('pauses a token only after confirmation', async () => {
+  it('keeps the token active until the pause is confirmed', async () => {
     const { user } = await setup([item()]);
 
     await user.click(
       screen.getByRole('button', { name: 'Wstrzymaj token Claude Desktop' }),
     );
-    const dialog = await screen.findByRole('dialog');
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('Aktywny')).toBeInTheDocument();
+  });
+
+  it('pauses a token after confirmation', async () => {
+    const { user } = await setup([item()]);
+    await user.click(
+      screen.getByRole('button', { name: 'Wstrzymaj token Claude Desktop' }),
+    );
+    const dialog = await screen.findByRole('dialog');
+
     await user.click(within(dialog).getByRole('button', { name: 'Wstrzymaj' }));
 
     expect(await screen.findByText('Wstrzymano token.')).toBeInTheDocument();

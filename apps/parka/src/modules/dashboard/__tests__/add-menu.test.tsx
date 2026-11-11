@@ -32,6 +32,19 @@ describe('dashboard add menu', () => {
     ).toHaveAttribute('href', expect.stringContaining('type=recurring'));
   });
 
+  it('opens the category popup from the menu in the URL', async () => {
+    server.use(...readHandlers());
+    const user = userEvent.setup();
+    await openMenu(user);
+
+    await user.click(
+      await screen.findByRole('menuitem', { name: 'Kategoria' }),
+    );
+
+    await screen.findByRole('dialog', { name: 'Nowa kategoria' });
+    expect(modalsInUrl()).toEqual(['category-new']);
+  });
+
   it('adds a category from a stacked popup', async () => {
     const posted: unknown[] = [];
     server.use(
@@ -44,14 +57,12 @@ describe('dashboard add menu', () => {
     );
     const user = userEvent.setup();
     await openMenu(user);
-
     await user.click(
       await screen.findByRole('menuitem', { name: 'Kategoria' }),
     );
     const dialog = await screen.findByRole('dialog', {
       name: 'Nowa kategoria',
     });
-    expect(modalsInUrl()).toEqual(['category-new']);
 
     await user.type(screen.getByRole('textbox', { name: 'Nazwa' }), 'Kultura');
     await user.click(screen.getByRole('button', { name: 'Dodaj kategorię' }));
@@ -61,7 +72,7 @@ describe('dashboard add menu', () => {
     expect(posted).toMatchObject([{ name: 'Kultura' }]);
   });
 
-  it('lists categories and stacks the new category popup over them', async () => {
+  const openCategoryList = async (user: ReturnType<typeof userEvent.setup>) => {
     server.use(
       ...readHandlers({
         categories: [
@@ -69,18 +80,30 @@ describe('dashboard add menu', () => {
         ],
       }),
     );
-    const user = userEvent.setup();
     render(<Main />);
     await screen.findByRole('heading', { name: 'Kategorie' });
-
     await user.click(screen.getByRole('button', { name: 'Zarządzaj' }));
+  };
+
+  it('lists the categories behind the manage button', async () => {
+    const user = userEvent.setup();
+
+    await openCategoryList(user);
+
     expect(
       await screen.findByRole('link', { name: 'Edytuj kategorię Spożywcze' }),
     ).toBeInTheDocument();
+  });
+
+  it('stacks the new category popup over the list', async () => {
+    const user = userEvent.setup();
+    await openCategoryList(user);
+    await screen.findByRole('link', { name: 'Edytuj kategorię Spożywcze' });
 
     await user.click(
       screen.getByRole('button', { name: /Dodaj$/, hidden: false }),
     );
+
     await screen.findByRole('dialog', { name: 'Nowa kategoria' });
     expect(modalsInUrl()).toEqual(['categories-list', 'category-new']);
   });

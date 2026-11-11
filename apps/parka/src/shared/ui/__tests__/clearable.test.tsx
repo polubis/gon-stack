@@ -46,10 +46,14 @@ describe('clear button on text inputs', () => {
     },
   );
 
-  it('hides the button while the input is empty', async () => {
+  it('hides the button while the input is empty', () => {
     render(<TextForm initial="" />);
 
     expect(screen.queryByRole('button', { name: /Wyczyść/ })).toBeNull();
+  });
+
+  it('shows the button once the input has text', async () => {
+    render(<TextForm initial="" />);
 
     await userEvent.type(screen.getByLabelText('Nazwa'), 'a');
 
@@ -135,7 +139,7 @@ describe('textarea mic and clear button', () => {
     Reflect.deleteProperty(window, 'webkitSpeechRecognition');
   });
 
-  it('keeps the mic available next to the clear button once text is typed', async () => {
+  const stubSpeech = () =>
     Object.assign(window, {
       webkitSpeechRecognition: class {
         start() {}
@@ -143,12 +147,21 @@ describe('textarea mic and clear button', () => {
         abort() {}
       },
     });
+
+  it('offers the mic and no clear button while the field is empty', () => {
+    stubSpeech();
+
     render(<Fields />);
 
     expect(screen.queryByRole('button', { name: /Wyczyść/ })).toBeNull();
     expect(
       screen.getByRole('button', { name: 'Dyktuj: Opis' }),
     ).toBeInTheDocument();
+  });
+
+  it('keeps the mic available next to the clear button once text is typed', async () => {
+    stubSpeech();
+    render(<Fields />);
 
     await userEvent.type(screen.getByLabelText('Opis'), 'tekst');
 

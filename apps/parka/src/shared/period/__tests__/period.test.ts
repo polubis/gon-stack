@@ -58,15 +58,17 @@ describe('period', () => {
     );
   });
 
-  it('allows next only while the period ended before today', () => {
-    expect(canGoNext(currentPeriod('day', TODAY), TODAY)).toBe(false);
-    expect(canGoNext(currentPeriod('week', TODAY), TODAY)).toBe(false);
-    expect(canGoNext(currentPeriod('month', TODAY), TODAY)).toBe(false);
-    expect(canGoNext(currentPeriod('year', TODAY), TODAY)).toBe(false);
-    expect(canGoNext(periodContaining('month', '2026-09-30'), TODAY)).toBe(
-      true,
-    );
-    expect(canGoNext(periodContaining('week', '2026-10-04'), TODAY)).toBe(true);
+  it.each([
+    ['day', currentPeriod('day', TODAY), false],
+    ['week', currentPeriod('week', TODAY), false],
+    ['month', currentPeriod('month', TODAY), false],
+    ['year', currentPeriod('year', TODAY), false],
+    ['a past month', periodContaining('month', '2026-09-30'), true],
+    ['a past week', periodContaining('week', '2026-10-04'), true],
+  ])('allows next for the current %s: %s', (_name, period, expected) => {
+    const allowed = canGoNext(period, TODAY);
+
+    expect(allowed).toBe(expected);
   });
 
   it('snaps a future period to the present one', () => {

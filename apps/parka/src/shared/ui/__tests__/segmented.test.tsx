@@ -29,28 +29,63 @@ const Harness = ({ panel }: { panel?: string }) => {
 };
 
 describe('Segmented keyboard', () => {
-  it('keeps one tab in the tab order and moves with arrows, Home and End', async () => {
+  const renderTabs = () => {
     render(<Harness />);
-    const tab = (name: string) => screen.getByRole('tab', { name });
+    return (name: string) => screen.getByRole('tab', { name });
+  };
+
+  it('keeps one tab in the tab order', () => {
+    const tab = renderTabs();
 
     expect(tab('Pierwsza')).toHaveAttribute('tabindex', '0');
     expect(tab('Druga')).toHaveAttribute('tabindex', '-1');
+  });
 
+  it('moves to the next tab with ArrowRight', async () => {
+    const tab = renderTabs();
     tab('Pierwsza').focus();
+
     await userEvent.keyboard('{ArrowRight}');
+
     expect(tab('Druga')).toHaveFocus();
     expect(tab('Druga')).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('jumps to the last tab with End', async () => {
+    const tab = renderTabs();
+    tab('Pierwsza').focus();
 
     await userEvent.keyboard('{End}');
+
     expect(tab('Trzecia')).toHaveFocus();
+  });
+
+  it('wraps from the last tab to the first with ArrowRight', async () => {
+    const tab = renderTabs();
+    tab('Pierwsza').focus();
+    await userEvent.keyboard('{End}');
 
     await userEvent.keyboard('{ArrowRight}');
+
     expect(tab('Pierwsza')).toHaveFocus();
+  });
+
+  it('wraps from the first tab to the last with ArrowLeft', async () => {
+    const tab = renderTabs();
+    tab('Pierwsza').focus();
 
     await userEvent.keyboard('{ArrowLeft}');
+
     expect(tab('Trzecia')).toHaveFocus();
+  });
+
+  it('jumps to the first tab with Home', async () => {
+    const tab = renderTabs();
+    tab('Pierwsza').focus();
+    await userEvent.keyboard('{End}');
 
     await userEvent.keyboard('{Home}');
+
     expect(tab('Pierwsza')).toHaveFocus();
     expect(tab('Pierwsza')).toHaveAttribute('aria-selected', 'true');
   });

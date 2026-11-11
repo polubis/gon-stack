@@ -143,17 +143,28 @@ describe('managing remembered payment methods and shops', () => {
     );
   });
 
-  it('deletes a shop only after confirmation', async () => {
+  it('asks for confirmation before deleting a shop', async () => {
     const { user, suggestions } = await open(SEED);
     const dialog = await manage(user, 'Sklep');
 
     await user.click(
       within(dialog).getByRole('button', { name: 'Usuń: Biedronka' }),
     );
+
+    await screen.findByRole('dialog', { name: 'Usunąć „Biedronka”?' });
+    expect(suggestions.items().map((i) => i.value)).toContain('Biedronka');
+  });
+
+  it('deletes a shop after confirmation', async () => {
+    const { user, suggestions } = await open(SEED);
+    const dialog = await manage(user, 'Sklep');
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Usuń: Biedronka' }),
+    );
     const confirm = await screen.findByRole('dialog', {
       name: 'Usunąć „Biedronka”?',
     });
-    expect(suggestions.items().map((i) => i.value)).toContain('Biedronka');
+
     await user.click(within(confirm).getByRole('button', { name: 'Usuń' }));
 
     await waitFor(() =>

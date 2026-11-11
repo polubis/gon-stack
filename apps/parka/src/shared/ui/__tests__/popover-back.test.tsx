@@ -86,13 +86,20 @@ describe.each(cases)('$name on a phone', ({ ui, trigger, content }) => {
     await waitFor(() => expect(content()).toBeNull());
   });
 
-  it('keeps itself in the URL while open and leaves it once closed', async () => {
+  const modals = () =>
+    new URLSearchParams(window.location.search).getAll('modal');
+
+  it('keeps itself in the URL while open', async () => {
     render(ui);
-    const modals = () =>
-      new URLSearchParams(window.location.search).getAll('modal');
 
     await userEvent.click(screen.getByRole('button', trigger));
+
     expect(modals()).toHaveLength(1);
+  });
+
+  it('leaves the URL once closed', async () => {
+    render(ui);
+    await userEvent.click(screen.getByRole('button', trigger));
 
     await userEvent.keyboard('{Escape}');
 

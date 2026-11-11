@@ -34,15 +34,17 @@ describe('api routes', () => {
     );
   });
 
-  it('covers auth endpoints used by sign-in/up and logout', () => {
-    expect(API_ROUTER.authLogin()).toBe('/api/auth/login/');
-    expect(API_ROUTER.authRegister()).toBe('/api/auth/register/');
-    expect(API_ROUTER.authLogout()).toBe('/api/auth/logout/');
-    expect(API_ROUTER.authMe()).toBe('/api/auth/me/');
-    expect(API_ROUTER.authAccounts()).toBe('/api/auth/accounts/');
-    expect(API_ROUTER.authSwitch()).toBe('/api/auth/switch/');
-    expect(API_ROUTER.authCallback()).toBe('/api/auth/callback/');
-    expect(API_ROUTER.authConfirm()).toBe('/api/auth/confirm/');
+  it.each([
+    ['authLogin', API_ROUTER.authLogin(), '/api/auth/login/'],
+    ['authRegister', API_ROUTER.authRegister(), '/api/auth/register/'],
+    ['authLogout', API_ROUTER.authLogout(), '/api/auth/logout/'],
+    ['authMe', API_ROUTER.authMe(), '/api/auth/me/'],
+    ['authAccounts', API_ROUTER.authAccounts(), '/api/auth/accounts/'],
+    ['authSwitch', API_ROUTER.authSwitch(), '/api/auth/switch/'],
+    ['authCallback', API_ROUTER.authCallback(), '/api/auth/callback/'],
+    ['authConfirm', API_ROUTER.authConfirm(), '/api/auth/confirm/'],
+  ])('builds the %s endpoint', (_name, path, expected) => {
+    expect(path).toBe(expected);
   });
 });
 

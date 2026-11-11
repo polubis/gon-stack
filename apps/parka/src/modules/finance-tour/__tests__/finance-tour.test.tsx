@@ -145,8 +145,19 @@ describe('Finance tour works when', () => {
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent('Nie udało się zapisać przewodnika');
     expect(alert).toHaveTextContent('FINANCE_TOUR_SAVE');
+  });
+
+  it('saves the choice again after the retry', async () => {
+    const user = userEvent.setup();
+    mockBackend(null, false);
+    render(<Main />);
+    await tourHeading();
+    await user.click(screen.getByRole('button', { name: 'Pomiń' }));
+    await screen.findByRole('alert');
     mockBackend(null, true);
+
     await user.click(screen.getByRole('button', { name: 'Spróbuj ponownie' }));
+
     await waitFor(() => expect(saved).toHaveLength(2));
   });
 });

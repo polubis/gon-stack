@@ -53,22 +53,16 @@ describe('device type', () => {
 });
 
 describe('device name', () => {
-  it('reads browser and system from the user agent', () => {
-    expect(detectDeviceName({ userAgent: CHROME_WINDOWS })).toBe(
-      'Chrome on Windows',
-    );
-    expect(detectDeviceName({ userAgent: EDGE_WINDOWS })).toBe(
-      'Edge on Windows',
-    );
-    expect(detectDeviceName({ userAgent: SAFARI_IPHONE })).toBe(
-      'Safari on iOS',
-    );
-    expect(detectDeviceName({ userAgent: CHROME_PIXEL })).toBe(
-      'Chrome on Android',
-    );
-    expect(detectDeviceName({ userAgent: FIREFOX_LINUX })).toBe(
-      'Firefox on Linux',
-    );
+  it.each([
+    [CHROME_WINDOWS, 'Chrome on Windows'],
+    [EDGE_WINDOWS, 'Edge on Windows'],
+    [SAFARI_IPHONE, 'Safari on iOS'],
+    [CHROME_PIXEL, 'Chrome on Android'],
+    [FIREFOX_LINUX, 'Firefox on Linux'],
+  ])('reads browser and system from %s', (userAgent, expected) => {
+    const name = detectDeviceName({ userAgent });
+
+    expect(name).toBe(expected);
   });
 
   it('names an iPad posing as a Mac after iOS', () => {

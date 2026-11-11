@@ -10,19 +10,28 @@ afterEach(() => window.localStorage.clear());
 const toggle = () => screen.findByRole('switch', { name: 'Tylko niezrobione' });
 
 describe('open-only filter', () => {
-  it('hides done tasks once only open tasks are wanted', async () => {
+  const seedTasks = () =>
     backend.seed([
       task({ id: 't-1', title: 'Zrobione', at: '09:00', done: true }),
       task({ id: 't-2', title: 'Otwarte', at: '10:00' }),
     ]);
+
+  it('shows done tasks until only open tasks are wanted', async () => {
+    seedTasks();
     renderTime();
 
     expect(await toggle()).toHaveAttribute('aria-checked', 'false');
     expect(
       screen.getByRole('button', { name: 'Szczegóły zadania: Zrobione' }),
     ).toBeVisible();
+  });
 
-    fireEvent.click(await toggle());
+  it('hides done tasks once only open tasks are wanted', async () => {
+    seedTasks();
+    renderTime();
+    const filter = await toggle();
+
+    fireEvent.click(filter);
 
     expect(await toggle()).toHaveAttribute('aria-checked', 'true');
     expect(

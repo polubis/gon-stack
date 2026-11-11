@@ -133,19 +133,28 @@ describe('voice dictation into a text field', () => {
     expect(screen.getByLabelText('Treść')).toHaveValue('Notatka jutro rano');
   });
 
-  it('shows repeated or re-delivered results only once', async () => {
+  const dictateRepeats = async () => {
     installMic();
     render(<Form />);
-
     await userEvent.click(mic());
     say('kup mleko');
     say('kup mleko', 'kup mleko');
     say('kup mleko', 'kup mleko jutro');
     say('kup mleko', 'kup mleko jutro');
     say('kup mleko', 'kup mleko jutro', 'kup mleko jutro');
+  };
+
+  it('shows repeated or re-delivered results only once', async () => {
+    await dictateRepeats();
 
     expect(preview()).toHaveValue('kup mleko jutro');
+  });
+
+  it('inserts repeated results only once', async () => {
+    await dictateRepeats();
+
     await userEvent.click(screen.getByRole('button', { name: 'Wstaw' }));
+
     expect(field()).toHaveValue('kup mleko jutro');
   });
 
@@ -210,10 +219,9 @@ describe('voice dictation into a text field', () => {
     expect(scrollTop).toBe(480);
   });
 
-  it('does not pull the view back to the end while the user edits', async () => {
+  const dictateIntoScrollableArea = async () => {
     installMic();
     render(<Form />);
-
     await userEvent.click(mic());
     const area = preview();
     let scrollTop = 0;
@@ -228,12 +236,28 @@ describe('voice dictation into a text field', () => {
       },
     });
     say('kup mleko');
-    expect(scrollTop).toBe(480);
+    return {
+      area,
+      reset: () => {
+        scrollTop = 0;
+      },
+      scrolled: () => scrollTop,
+    };
+  };
 
-    scrollTop = 0;
-    await userEvent.type(area, 'x');
+  it('follows the speech to the end of the preview', async () => {
+    const view = await dictateIntoScrollableArea();
 
-    expect(scrollTop).toBe(0);
+    expect(view.scrolled()).toBe(480);
+  });
+
+  it('does not pull the view back to the end while the user edits', async () => {
+    const view = await dictateIntoScrollableArea();
+    view.reset();
+
+    await userEvent.type(view.area, 'x');
+
+    expect(view.scrolled()).toBe(0);
   });
 
   it('cannot accept before anything was said', async () => {
@@ -245,18 +269,25 @@ describe('voice dictation into a text field', () => {
     expect(screen.getByRole('button', { name: 'Wstaw' })).toBeDisabled();
   });
 
-  it('keeps the preview after listening stops and can continue', async () => {
+  const stopListening = async () => {
     installMic();
     render(<Form />);
-
     await userEvent.click(mic());
     say('kup mleko');
     await userEvent.click(
       screen.getByRole('button', { name: 'Zakończ dyktowanie' }),
     );
+  };
+
+  it('keeps the preview after listening stops', async () => {
+    await stopListening();
 
     expect(preview()).toHaveValue('kup mleko');
     expect(field()).toHaveValue('');
+  });
+
+  it('continues dictating after listening stopped', async () => {
+    await stopListening();
 
     await userEvent.click(screen.getByRole('button', { name: 'Dyktuj dalej' }));
     say('i chleb');
@@ -462,7 +493,7 @@ describe('editing while dictating', () => {
 });
 
 describe('screen while dictating', () => {
-  it('keeps the screen awake until the dictation is accepted', async () => {
+  const dictateWithWakeLock = async () => {
     installMic();
     const release = vi.fn(() => Promise.resolve());
     const request = vi.fn(() =>
@@ -470,12 +501,20 @@ describe('screen while dictating', () => {
     );
     vi.stubGlobal('navigator', { ...navigator, wakeLock: { request } });
     render(<Form />);
-
     await userEvent.click(mic());
     say('kup chleb');
+    return { release, request };
+  };
+
+  it('keeps the screen awake while dictating', async () => {
+    const { request, release } = await dictateWithWakeLock();
 
     expect(request).toHaveBeenCalledWith('screen');
     expect(release).not.toHaveBeenCalled();
+  });
+
+  it('lets the screen sleep once the dictation is accepted', async () => {
+    const { release } = await dictateWithWakeLock();
 
     await userEvent.click(screen.getByRole('button', { name: 'Wstaw' }));
 

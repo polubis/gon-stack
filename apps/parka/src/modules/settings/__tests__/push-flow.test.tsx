@@ -126,7 +126,7 @@ describe('push notifications setting', () => {
     stubBrowser('granted');
     const calls = stubApi();
     const view = await setup();
-    expect(view.result.current.push).toBe('off');
+    await waitFor(() => expect(view.result.current.push).toBe('off'));
 
     act(() => view.result.current.ctx.togglePush(true));
 
@@ -158,7 +158,7 @@ describe('push notifications setting', () => {
     stubBrowser('granted', true);
     stubApi();
     const view = await setup();
-    expect(view.result.current.push).toBe('on');
+    await waitFor(() => expect(view.result.current.push).toBe('on'));
 
     act(() => view.result.current.ctx.togglePush(false));
 

@@ -113,15 +113,29 @@ describe('task history', () => {
     expect(await details.findByText('Brak historii')).toBeVisible();
   });
 
-  it('shows an error with a retry that loads the history', async () => {
-    const user = userEvent.setup();
+  const openFailedHistory = async (
+    user: ReturnType<typeof userEvent.setup>,
+  ) => {
     backend.seed([task()]);
     backend.state.history['t-1'] = [entry('h-1', { kind: 'created', to: 'X' })];
     backend.state.failHistoryReads = true;
+    return openHistory(user);
+  };
 
-    const details = await openHistory(user);
+  it('shows an error when the history cannot be loaded', async () => {
+    const user = userEvent.setup();
+
+    const details = await openFailedHistory(user);
+
     expect(await details.findByRole('alert')).toHaveTextContent('HISTORY_LOAD');
+  });
+
+  it('loads the history after the retry', async () => {
+    const user = userEvent.setup();
+    const details = await openFailedHistory(user);
+    await details.findByRole('alert');
     backend.state.failHistoryReads = false;
+
     await user.click(details.getByRole('button', { name: 'Spróbuj ponownie' }));
 
     expect(await details.findByText('Utworzono zadanie „X”')).toBeVisible();

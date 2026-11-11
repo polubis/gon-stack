@@ -143,16 +143,25 @@ describe('limits managed in a modal', () => {
   });
 
   describe('limit editing', () => {
+    it('prefills the editor with the current amount and threshold', async () => {
+      mockBackend([TOTAL_LIMIT, FOOD_LIMIT]);
+      const user = await renderCard();
+
+      const dialog = await openEditor(user);
+
+      expect(within(dialog).getByLabelText('Kategoria')).toBeDisabled();
+      expect(within(dialog).getByLabelText('Limit miesięczny')).toHaveValue(
+        '300',
+      );
+      expect(within(dialog).getByLabelText(/Powiadom od/)).toHaveValue('80');
+    });
+
     it('edits the amount and the threshold of a category limit', async () => {
       mockBackend([TOTAL_LIMIT, FOOD_LIMIT]);
       const user = await renderCard();
       const dialog = await openEditor(user);
-
-      expect(within(dialog).getByLabelText('Kategoria')).toBeDisabled();
       const amount = within(dialog).getByLabelText('Limit miesięczny');
-      expect(amount).toHaveValue('300');
       const threshold = within(dialog).getByLabelText(/Powiadom od/);
-      expect(threshold).toHaveValue('80');
 
       await user.clear(amount);
       await user.type(amount, '450');
@@ -245,17 +254,27 @@ describe('limits managed in a modal', () => {
   });
 
   describe('limit creation', () => {
-    it('creates a limit for the free category with the chosen threshold', async () => {
+    it('offers no delete for a limit that is not saved yet', async () => {
       mockBackend([TOTAL_LIMIT]);
       const user = await renderCard();
       const manager = await openManager(user);
 
       await user.click(within(manager).getByRole('button', { name: /Dodaj/ }));
+
       const dialog = await screen.findByRole('dialog', { name: 'Nowy limit' });
       expect(
         within(dialog).queryByRole('button', { name: 'Usuń limit' }),
       ).toBeNull();
+    });
+
+    it('creates a limit for the free category with the chosen threshold', async () => {
+      mockBackend([TOTAL_LIMIT]);
+      const user = await renderCard();
+      const manager = await openManager(user);
+      await user.click(within(manager).getByRole('button', { name: /Dodaj/ }));
+      const dialog = await screen.findByRole('dialog', { name: 'Nowy limit' });
       const threshold = within(dialog).getByLabelText(/Powiadom od/);
+
       await user.clear(threshold);
       await user.type(threshold, '50');
       await user.click(within(dialog).getByRole('button', { name: 'Zapisz' }));
@@ -288,6 +307,21 @@ describe('limits managed in a modal', () => {
   });
 
   describe('new user', () => {
+    it('invites to set a monthly limit when there are none', async () => {
+      mockBackend([]);
+      render(
+        <Provider>
+          <Harness />
+        </Provider>,
+      );
+
+      const empty = await screen.findByRole('status');
+
+      expect(
+        within(empty).getByRole('heading', { name: 'Brak limitów' }),
+      ).toBeInTheDocument();
+    });
+
     it('sets the monthly limit from the empty state', async () => {
       mockBackend([]);
       const user = userEvent.setup();
@@ -296,11 +330,7 @@ describe('limits managed in a modal', () => {
           <Harness />
         </Provider>,
       );
-
       const empty = await screen.findByRole('status');
-      expect(
-        within(empty).getByRole('heading', { name: 'Brak limitów' }),
-      ).toBeInTheDocument();
 
       await user.click(
         within(empty).getByRole('button', { name: /Ustaw limit miesięczny/ }),

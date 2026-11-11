@@ -184,20 +184,34 @@ describe('task comments', () => {
     ).toBeVisible();
   });
 
-  it('deletes a comment only after confirmation', async () => {
-    const user = userEvent.setup();
+  const askToDeleteComment = async (
+    user: ReturnType<typeof userEvent.setup>,
+  ) => {
     backend.seed([task()]);
     backend.state.comments['t-1'] = [OWN];
     const details = await openDetails(user);
-
     await user.click(
       await details.findByRole('button', { name: /^Usuń komentarz/ }),
     );
-    expect(backend.writes()).toHaveLength(0);
+    return details;
+  };
 
+  it('asks before deleting a comment', async () => {
+    const user = userEvent.setup();
+
+    await askToDeleteComment(user);
+
+    await screen.findByRole('dialog', { name: 'Usunąć komentarz?' });
+    expect(backend.writes()).toHaveLength(0);
+  });
+
+  it('deletes a comment after confirmation', async () => {
+    const user = userEvent.setup();
+    const details = await askToDeleteComment(user);
     const confirm = within(
       await screen.findByRole('dialog', { name: 'Usunąć komentarz?' }),
     );
+
     await user.click(confirm.getByRole('button', { name: 'Usuń' }));
 
     await waitFor(() =>
@@ -244,15 +258,29 @@ describe('task comments', () => {
     expect(await details.findByText('Zadzwonić do klienta')).toBeVisible();
   });
 
-  it('offers a retry when the list cannot be loaded', async () => {
-    const user = userEvent.setup();
+  const openFailedComments = async (
+    user: ReturnType<typeof userEvent.setup>,
+  ) => {
     backend.seed([task()]);
     backend.state.failCommentReads = true;
     backend.state.comments['t-1'] = [OWN];
-    const details = await openDetails(user);
+    return openDetails(user);
+  };
+
+  it('shows an error when the comments cannot be loaded', async () => {
+    const user = userEvent.setup();
+
+    const details = await openFailedComments(user);
 
     expect(await details.findByText('COMMENTS_LOAD')).toBeVisible();
+  });
+
+  it('loads the comments after the retry', async () => {
+    const user = userEvent.setup();
+    const details = await openFailedComments(user);
+    await details.findByText('COMMENTS_LOAD');
     backend.state.failCommentReads = false;
+
     await user.click(
       details.getAllByRole('button', { name: 'Spróbuj ponownie' })[0]!,
     );
