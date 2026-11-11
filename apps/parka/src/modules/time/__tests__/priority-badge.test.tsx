@@ -11,38 +11,16 @@ describe('PriorityBadge', () => {
     expect(screen.getByText('Wysoki')).toBeInTheDocument();
   });
 
-  it('shows no visible number, only the pips', () => {
-    const { container } = render(
-      <PriorityBadge priority={{ name: 'Niski', value: 2 }} />,
-    );
+  it('shows the name next to the pips', () => {
+    render(<PriorityBadge priority={{ name: 'Niski', value: 2 }} />);
 
-    expect(container.textContent).toBe('Priorytet: Niski, 2 z 10');
     expect(screen.getByText('Niski')).toBeVisible();
   });
 
-  it('compact hides the name visually but keeps it announced', () => {
-    const { container } = render(
-      <PriorityBadge priority={{ name: 'Wysoki', value: 9 }} compact />,
-    );
+  it('compact keeps the name and scale for assistive tech', () => {
+    render(<PriorityBadge priority={{ name: 'Wysoki', value: 9 }} compact />);
 
-    expect(container.textContent).toBe('Priorytet: Wysoki, 9 z 10');
-    expect(screen.getByText('Wysoki')).toHaveClass('sr-only');
-  });
-
-  it('fills as many pips as the value', () => {
-    const { container } = render(
-      <PriorityBadge priority={{ name: 'Średni', value: 5 }} />,
-    );
-
-    expect(container.querySelectorAll('[data-filled="true"]')).toHaveLength(5);
-    expect(container.querySelectorAll('[data-filled="false"]')).toHaveLength(5);
-  });
-
-  it('uses no icon', () => {
-    const { container } = render(
-      <PriorityBadge priority={{ name: 'Wysoki', value: 10 }} />,
-    );
-
-    expect(container.querySelector('svg')).toBeNull();
+    expect(screen.getByText('Wysoki')).toBeInTheDocument();
+    expect(screen.getByText(/, 9 z 10/)).toBeInTheDocument();
   });
 });

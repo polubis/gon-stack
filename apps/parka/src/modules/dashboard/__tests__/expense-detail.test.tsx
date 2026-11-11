@@ -52,16 +52,15 @@ describe('expense popup', () => {
     expect(dialog.queryByRole('textbox')).not.toBeInTheDocument();
   });
 
-  it('shows each product with its category icon and no repeated category', async () => {
+  it('shows each product without repeating its category', async () => {
     render(<Main />);
     const dialog = within(await screen.findByRole('dialog'));
     const row = dialog.getByText('Chleb').closest('li')!;
 
-    expect(row.querySelector('svg')).not.toBeNull();
     expect(within(row).queryByText('Jedzenie')).not.toBeInTheDocument();
   });
 
-  it('keeps only name and price per product when the expense mixes categories', async () => {
+  it('shows only name and price when the expense mixes categories', async () => {
     answerApi(server, ({ url }) =>
       readBody(url, {
         expenses: [{ ...expense(), categoryId: null }],
@@ -72,7 +71,6 @@ describe('expense popup', () => {
     const dialog = within(await screen.findByRole('dialog'));
     const row = dialog.getByText('Chleb').closest('li')!;
 
-    expect(row.querySelector('svg')).not.toBeNull();
     expect(within(row).queryByText('Jedzenie')).not.toBeInTheDocument();
   });
 

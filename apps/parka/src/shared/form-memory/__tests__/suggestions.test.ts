@@ -38,7 +38,7 @@ describe('ranking suggestions', () => {
     ]);
   });
 
-  it('keeps only values containing the typed text, ignoring case and spaces', () => {
+  it('keeps only values matching the typed text', () => {
     const list = [item('Biedronka'), item('Lidl'), item('Dobry Sklep')];
 
     expect(values(rankSuggestions(list, 'merchant', '  BI '))).toEqual([

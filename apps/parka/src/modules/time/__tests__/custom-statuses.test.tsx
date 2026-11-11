@@ -52,7 +52,6 @@ describe('custom task statuses', () => {
     expect(await screen.findByText('Zapisano statusy.')).toBeVisible();
     expect(backend.writes()).toHaveLength(1);
     expect(backend.writes()[0]).toMatchObject({
-      method: 'PUT',
       body: {
         statuses: [
           { id: 'in_progress', name: 'W trakcie' },

@@ -86,7 +86,7 @@ describe('remembered form field', () => {
     expect(result.current.recalled).toBeNull();
   });
 
-  it('resolves a remembered value to the allowed one ignoring case and spaces', () => {
+  it('resolves a remembered value ignoring case and spaces', () => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ a: ' C-1 ' }));
 
     const { result } = renderHook(() =>

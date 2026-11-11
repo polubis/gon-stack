@@ -21,7 +21,6 @@ const List = ({ rows, scope }: { rows: Row[]; scope?: string }) => {
             aria-hidden={change['aria-hidden']}
             inert={change.inert}
             className={change.className}
-            data-testid={key}
           >
             {item.name}
           </li>
@@ -36,27 +35,15 @@ const Staggered = ({ rows }: { rows: Row[] }) => {
   return (
     <ul>
       {entries.map(({ key, item, phase }) => (
-        <Entering key={key} name={item.name} phase={phase} id={key} />
+        <Entering key={key} name={item.name} phase={phase} />
       ))}
     </ul>
   );
 };
 
-const Entering = ({
-  id,
-  name,
-  phase,
-}: {
-  id: string;
-  name: string;
-  phase: ChangePhase;
-}) => {
+const Entering = ({ name, phase }: { name: string; phase: ChangePhase }) => {
   const entrance = useEntrance(phase);
-  return (
-    <li data-testid={id} className={entrance.entering ? 'enter' : ''}>
-      {name}
-    </li>
-  );
+  return <li className={entrance.entering ? 'enter' : ''}>{name}</li>;
 };
 
 const stubMotion = (reduce: boolean) =>
@@ -81,7 +68,7 @@ describe('list change transitions', () => {
   it('keeps first render still', () => {
     render(<List rows={[a, b]} />);
 
-    expect(screen.getByTestId('a').className).toBe('');
+    expect(screen.getByText('Alpha').className).toBe('');
   });
 
   it('slides a created row in', () => {
@@ -89,32 +76,32 @@ describe('list change transitions', () => {
 
     rerender(<List rows={[a, b]} />);
 
-    expect(screen.getByTestId('b')).toHaveClass('animate-row-in');
-    expect(screen.getByTestId('a').className).toBe('');
+    expect(screen.getByText('Beta')).toHaveClass('animate-row-in');
+    expect(screen.getByText('Alpha').className).toBe('');
   });
 
   it('flashes an updated row then settles', () => {
     const { rerender } = render(<List rows={[a, b]} />);
 
     rerender(<List rows={[{ ...a, name: 'Alpha 2' }, b]} />);
-    expect(screen.getByTestId('a')).toHaveClass('animate-row-flash');
-    expect(screen.getByTestId('b').className).toBe('');
+    expect(screen.getByText('Alpha 2')).toHaveClass('animate-row-flash');
+    expect(screen.getByText('Beta').className).toBe('');
 
     act(() => void vi.advanceTimersByTime(1300));
-    expect(screen.getByTestId('a').className).toBe('');
+    expect(screen.getByText('Alpha 2').className).toBe('');
   });
 
   it('keeps a deleted row leaving, inert, then removes it', () => {
     const { rerender } = render(<List rows={[a, b]} />);
 
     rerender(<List rows={[b]} />);
-    const leaving = screen.getByTestId('a');
+    const leaving = screen.getByText('Alpha');
     expect(leaving).toHaveClass('animate-row-out');
     expect(leaving).toHaveAttribute('aria-hidden', 'true');
     expect(leaving).toHaveAttribute('inert');
 
     act(() => void vi.advanceTimersByTime(400));
-    expect(screen.queryByTestId('a')).not.toBeInTheDocument();
+    expect(screen.queryByText('Alpha')).not.toBeInTheDocument();
   });
 
   it('stops clipping a created row once it has grown in', () => {
@@ -123,7 +110,7 @@ describe('list change transitions', () => {
     rerender(<List rows={[a, b]} />);
     act(() => void vi.advanceTimersByTime(500));
 
-    expect(screen.getByTestId('b').className).toBe('');
+    expect(screen.getByText('Beta').className).toBe('');
   });
 
   it('keeps a flash running past the growth of a created row', () => {
@@ -134,20 +121,20 @@ describe('list change transitions', () => {
     rerender(<List rows={[{ ...a, name: 'Alpha 2' }, b, c]} />);
     act(() => void vi.advanceTimersByTime(500));
 
-    expect(screen.getByTestId('a')).toHaveClass('animate-row-flash');
+    expect(screen.getByText('Alpha 2')).toHaveClass('animate-row-flash');
   });
 
   it('never replays the entrance on a row that changed later', () => {
     const { rerender } = render(<Staggered rows={[a]} />);
-    expect(screen.getByTestId('a')).toHaveClass('enter');
+    expect(screen.getByText('Alpha')).toHaveClass('enter');
 
     rerender(<Staggered rows={[a, b]} />);
-    expect(screen.getByTestId('b')).not.toHaveClass('enter');
+    expect(screen.getByText('Beta')).not.toHaveClass('enter');
     act(() => void vi.advanceTimersByTime(1500));
     rerender(<Staggered rows={[a, { ...b, name: 'Beta 2' }]} />);
     act(() => void vi.advanceTimersByTime(1500));
 
-    expect(screen.getByTestId('b')).not.toHaveClass('enter');
+    expect(screen.getByText('Beta 2')).not.toHaveClass('enter');
   });
 
   it('swaps rows silently when the scope changes', () => {
@@ -155,8 +142,8 @@ describe('list change transitions', () => {
 
     rerender(<List rows={[b]} scope="week-2" />);
 
-    expect(screen.queryByTestId('a')).not.toBeInTheDocument();
-    expect(screen.getByTestId('b').className).toBe('');
+    expect(screen.queryByText('Alpha')).not.toBeInTheDocument();
+    expect(screen.getByText('Beta').className).toBe('');
   });
 
   it('changes instantly under reduced motion', () => {
@@ -165,7 +152,7 @@ describe('list change transitions', () => {
 
     rerender(<List rows={[b]} />);
 
-    expect(screen.queryByTestId('a')).not.toBeInTheDocument();
-    expect(screen.getByTestId('b').className).toBe('');
+    expect(screen.queryByText('Alpha')).not.toBeInTheDocument();
+    expect(screen.getByText('Beta').className).toBe('');
   });
 });

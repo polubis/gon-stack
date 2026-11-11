@@ -77,7 +77,7 @@ describe('report selectors', () => {
     });
   });
 
-  it('writes a semicolon CSV with a header and typed rows (blank category when unknown)', () => {
+  it('writes a semicolon CSV with header and typed rows', () => {
     const csv = buildCsv(
       [expense('2025-04-02T10:00:00Z', 12.5, 'c-1', true)],
       [],

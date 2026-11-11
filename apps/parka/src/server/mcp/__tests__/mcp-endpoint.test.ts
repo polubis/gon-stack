@@ -240,7 +240,7 @@ const setup = (
 };
 
 describe('mcp handshake', () => {
-  it('answers initialize with the negotiated version and the tools capability', async () => {
+  it('answers the handshake with the negotiated version', async () => {
     const { rpc } = setup();
 
     const { response, json } = await rpc('initialize', {
@@ -734,7 +734,7 @@ describe('mcp task management', () => {
     expect(json.result.content[0].text).toMatch(/not found/);
   });
 
-  it('lists the comments of a task with the bot name and ref, never a token', async () => {
+  it('lists task comments with the bot name, never a token', async () => {
     const { rpc } = setup();
 
     const { json } = await call(rpc, 'list_task_comments', { taskId: 't-1' });

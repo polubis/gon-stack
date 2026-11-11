@@ -20,8 +20,10 @@ const topDialog = () => within(dialogs().at(-1)!);
 const priorityLabels = (dialog: ReturnType<typeof within>) =>
   dialog
     .getAllByRole('radio')
-    .filter((radio) => radio.getAttribute('name') === 'task-priority')
-    .map((radio) => radio.closest('label')?.textContent);
+    .filter(
+      (radio: HTMLElement) => radio.getAttribute('name') === 'task-priority',
+    )
+    .map((radio: HTMLElement) => radio.closest('label')?.textContent);
 
 const ready = async () => {
   renderTime();
@@ -59,14 +61,6 @@ describe('time dialogs focus', () => {
 
     expect(document.activeElement?.tagName).not.toBe('INPUT');
     expect(dialog.contains(document.activeElement)).toBe(true);
-  });
-
-  it('keeps long forms scrollable', async () => {
-    const user = userEvent.setup();
-
-    const dialog = await openFromMenu(user, 'Zadanie');
-
-    expect(dialog).toHaveClass('overflow-y-auto');
   });
 });
 

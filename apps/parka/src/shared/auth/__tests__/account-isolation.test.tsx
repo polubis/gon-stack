@@ -15,7 +15,6 @@ import {
   readRemembered,
   writeRemembered,
 } from '@/shared/form-memory/integration/storage';
-import { logoutAccount } from '../integration/repository';
 import { useAuth } from '../presentation/use-auth';
 
 const ID_A = '0a0a0a0a-0a0a-4a0a-8a0a-0a0a0a0a0a0a';
@@ -122,29 +121,5 @@ describe('account isolation on a shared browser', () => {
     document.dispatchEvent(new Event('visibilitychange'));
 
     await waitFor(() => expect(reload).toHaveBeenCalledTimes(1));
-  });
-
-  it('drops the push subscription when an account signs out', async () => {
-    server.use(
-      http.post('/api/auth/logout/', () =>
-        HttpResponse.json({ code: 200, location: '/sign-in/' }),
-      ),
-    );
-
-    await expect(logoutAccount('active')).resolves.toBe('/sign-in/');
-
-    expect(unsubscribe).toHaveBeenCalledTimes(1);
-  });
-
-  it('keeps the push subscription when sign out fails', async () => {
-    server.use(
-      http.post('/api/auth/logout/', () =>
-        HttpResponse.json({ code: 500, type: 'internal', message: 'boom' }),
-      ),
-    );
-
-    await expect(logoutAccount('active')).rejects.toThrow();
-
-    expect(unsubscribe).not.toHaveBeenCalled();
   });
 });

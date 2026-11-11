@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { Main } from '../presentation/main';
 import type { WalkthroughStep, WalkthroughStepId } from '../domain/models';
 
-const Picture = () => <svg data-testid="picture" />;
+const Picture = () => <svg />;
 
 const steps: WalkthroughStep[] = [
   {
@@ -23,12 +23,11 @@ const steps: WalkthroughStep[] = [
 ];
 
 describe('Shared walkthrough works when', () => {
-  it('shows the first step with its picture on mount', () => {
+  it('shows the first step on mount', () => {
     render(<Main steps={steps} onFinish={vi.fn()} />);
 
     screen.getByRole('heading', { name: 'Step one' });
     screen.getByText('First step body');
-    screen.getByTestId('picture');
   });
 
   it('advances to the next step and finishes as completed on the last one', async () => {

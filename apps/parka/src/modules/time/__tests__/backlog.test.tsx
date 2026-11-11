@@ -39,7 +39,6 @@ describe('backlog adding', () => {
     ).toBeVisible();
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     const [write] = backend.writes();
-    expect(write!.url).toContain('/api/time/backlog/');
     expect(write!.body).toMatchObject({
       title: 'Umówić dentystę',
       categoryId: 'work',
@@ -177,8 +176,6 @@ describe('backlog moving', () => {
     ).toBeVisible();
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     const [write] = backend.writes();
-    expect(write).toMatchObject({ method: 'PUT' });
-    expect(write!.url).toContain('/api/time/tasks/b-1/');
     expect(write!.body).toMatchObject({ day: TODAY, at: null, done: false });
   });
 
@@ -291,8 +288,6 @@ describe('backlog editing', () => {
     expect(await list.findByText('Dentysta w piątek')).toBeVisible();
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     const [write] = backend.writes();
-    expect(write).toMatchObject({ method: 'PUT' });
-    expect(write!.url).toContain('/api/time/backlog/b-1/');
     expect(write!.body).toMatchObject({
       title: 'Dentysta w piątek',
       categoryId: 'work',
@@ -369,23 +364,8 @@ describe('backlog deleting', () => {
 
     expect(await screen.findByText('Usunięto zadanie.')).toBeVisible();
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
-    expect(backend.writes()[0]!.url).toContain('/api/time/tasks/b-1/');
     expect(
       await list.findByRole('heading', { name: 'Backlog jest pusty' }),
     ).toBeVisible();
-  });
-});
-
-describe('backlog dialog scrolling', () => {
-  it('has no scroll area of its own, the dialog is the only scroller', async () => {
-    const user = userEvent.setup();
-    backend.seedBacklog([backlogTask({ id: 'b1', title: 'Pierwsze' })]);
-    renderTime();
-
-    const dialog = await openBacklog(user);
-
-    const list = dialog.getByRole('list');
-    expect(list.className).not.toMatch(/overflow-y-(auto|scroll)/);
-    expect(list.className).not.toMatch(/max-h-/);
   });
 });

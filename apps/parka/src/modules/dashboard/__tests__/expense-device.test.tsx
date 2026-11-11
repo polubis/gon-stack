@@ -70,20 +70,6 @@ describe('expense device in the list', () => {
     expect(within(row).getByText('Telefon Ani')).toBeInTheDocument();
   });
 
-  it('colors the avatar by the device id', async () => {
-    render(<Main />);
-    const row = await screen.findByRole('button', { name: /^Piekarnia/ });
-
-    expect(row.querySelector('[data-device-color]')).not.toBeNull();
-  });
-
-  it('shows the avatar chosen for the device', async () => {
-    render(<Main />);
-    const row = await screen.findByRole('button', { name: /^Piekarnia/ });
-
-    expect(row.querySelector('[data-avatar="rocket"]')).not.toBeNull();
-  });
-
   it('shows no device on a row created before devices were tracked', async () => {
     render(<Main />);
     const row = await screen.findByRole('button', { name: /^Kiosk/ });

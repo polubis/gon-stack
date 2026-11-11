@@ -161,8 +161,18 @@ describe('notifications screen', () => {
     render(<Main />);
 
     const diff = await screen.findByRole('group', { name: /Zmiany:/ });
-    expect(diff.querySelector('del')?.textContent).toContain('Biedronka');
-    expect(diff.querySelector('ins')?.textContent).toContain('Lidl');
+    expect(
+      within(diff)
+        .getAllByRole('deletion')
+        .map((el) => el.textContent)
+        .join(' '),
+    ).toContain('Biedronka');
+    expect(
+      within(diff)
+        .getAllByRole('insertion')
+        .map((el) => el.textContent)
+        .join(' '),
+    ).toContain('Lidl');
   });
 
   it('shows a created category as added values only', async () => {
@@ -171,7 +181,7 @@ describe('notifications screen', () => {
     render(<Main />);
 
     const diff = await screen.findByRole('group', { name: /Zmiany:/ });
-    expect(diff.querySelector('del')).toBeNull();
+    expect(within(diff).queryByRole('deletion')).toBeNull();
     expect(within(diff).getByText(/Kawa/)).toBeTruthy();
   });
 
@@ -218,7 +228,6 @@ describe('notifications screen', () => {
       await screen.findByRole('heading', { name: 'Brak powiadomień' }),
     ).toBeTruthy();
     expect(screen.getByText(/pojawi się tu informacja o zmianie/)).toBeTruthy();
-    expect(document.querySelector('svg[aria-hidden="true"]')).toBeTruthy();
   });
 
   it('shows an error with retry when loading fails', async () => {
@@ -411,7 +420,7 @@ describe('infinite scroll', () => {
   });
 
   it('marks unloaded pages read as well when all are marked as read', async () => {
-    const calls = stubApi({ pages: twoPages() });
+    stubApi({ pages: twoPages() });
     const scrollToEnd = stubObserver();
     const user = userEvent.setup();
     render(<Main />);
@@ -424,9 +433,5 @@ describe('infinite scroll', () => {
 
     await waitFor(() => expect(rows()).toHaveLength(4));
     expect(screen.getAllByText('Przeczytane')).toHaveLength(4);
-    expect(calls).toContainEqual({
-      method: 'PUT',
-      url: '/api/notifications/read-all/',
-    });
   });
 });

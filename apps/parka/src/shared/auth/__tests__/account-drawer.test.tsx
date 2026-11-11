@@ -221,7 +221,7 @@ describe('account drawer', () => {
       name: 'Konto: a@parka.test',
     });
     await waitFor(() =>
-      expect(button.querySelector('img')).toHaveAttribute(
+      expect(within(button).getByRole('presentation')).toHaveAttribute(
         'src',
         'http://cdn/me.webp',
       ),
@@ -239,8 +239,8 @@ describe('account drawer', () => {
     const button = await screen.findByRole('button', {
       name: 'Konto: a@parka.test',
     });
-    expect(button.querySelector('img')).toBeNull();
-    expect(button.querySelector('svg')).not.toBeNull();
+    expect(within(button).queryByRole('presentation')).toBeNull();
+    expect(button).toHaveTextContent('Konto');
   });
 
   it('hides the bottom nav while the drawer is open', async () => {
@@ -309,5 +309,55 @@ describe('account drawer', () => {
     );
 
     await waitFor(() => expect(assign).toHaveBeenCalledWith('/sign-in/'));
+  });
+
+  it('drops the push subscription when signing out', async () => {
+    const unsubscribe = vi.fn(async () => true);
+    Object.defineProperty(navigator, 'serviceWorker', {
+      configurable: true,
+      value: {
+        getRegistration: async () => ({
+          pushManager: { getSubscription: async () => ({ unsubscribe }) },
+        }),
+      },
+    });
+    backend();
+    await openMenu();
+    unsubscribe.mockClear();
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Wyloguj to konto' }),
+    );
+
+    await waitFor(() => expect(unsubscribe).toHaveBeenCalledTimes(1));
+  });
+
+  it('keeps the push subscription when signing out fails', async () => {
+    const unsubscribe = vi.fn(async () => true);
+    Object.defineProperty(navigator, 'serviceWorker', {
+      configurable: true,
+      value: {
+        getRegistration: async () => ({
+          pushManager: { getSubscription: async () => ({ unsubscribe }) },
+        }),
+      },
+    });
+    backend();
+    server.use(
+      http.post('/api/auth/logout/', () =>
+        HttpResponse.json({ code: 500, type: 'internal', message: 'boom' }),
+      ),
+    );
+    await openMenu();
+    unsubscribe.mockClear();
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Wyloguj to konto' }),
+    );
+
+    expect(
+      await screen.findByText('Nie udało się wylogować'),
+    ).toBeInTheDocument();
+    expect(unsubscribe).not.toHaveBeenCalled();
   });
 });
