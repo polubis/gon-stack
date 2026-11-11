@@ -51,13 +51,21 @@ describe('task title length', () => {
 });
 
 describe('task description field', () => {
-  it('counts characters and saves the text with the task', async () => {
+  it('counts the characters of the description', async () => {
     const user = userEvent.setup();
     const form = await openNewTask(user);
 
+    await user.type(form.getByLabelText('Opis (opcjonalnie)'), 'Dwa słowa');
+
+    expect(form.getByText(/^9\/5000/)).toBeVisible();
+  });
+
+  it('saves the description with the task', async () => {
+    const user = userEvent.setup();
+    const form = await openNewTask(user);
     await user.type(form.getByLabelText('Nazwa'), 'Raport');
     await user.type(form.getByLabelText('Opis (opcjonalnie)'), 'Dwa słowa');
-    expect(form.getByText(/^9\/5000/)).toBeVisible();
+
     await user.click(form.getByRole('button', { name: 'Dodaj' }));
 
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
@@ -90,13 +98,20 @@ describe('task description field', () => {
     expect(field).toHaveValue('a'.repeat(5000));
   });
 
+  it('offers no x button while the description is empty', async () => {
+    const user = userEvent.setup();
+
+    const form = await openNewTask(user);
+
+    expect(form.queryByRole('button', { name: 'Wyczyść: Opis' })).toBeNull();
+  });
+
   it('clears the description with the x button and focuses the field', async () => {
     const user = userEvent.setup();
     const form = await openNewTask(user);
     const field = form.getByLabelText('Opis (opcjonalnie)');
-    expect(form.queryByRole('button', { name: 'Wyczyść: Opis' })).toBeNull();
-
     await user.type(field, 'coś');
+
     await user.click(form.getByRole('button', { name: 'Wyczyść: Opis' }));
 
     expect(field).toHaveValue('');
@@ -122,19 +137,28 @@ describe('task description field', () => {
 });
 
 describe('fullscreen description editor', () => {
-  it('opens over the form, syncs the text back and closes with Escape', async () => {
-    const user = userEvent.setup();
+  const openFullscreen = async (user: ReturnType<typeof userEvent.setup>) => {
     const form = await openNewTask(user);
     await user.type(form.getByLabelText('Opis (opcjonalnie)'), 'Start');
-
     await user.click(
       form.getByRole('button', { name: 'Edytuj opis na pełnym ekranie' }),
     );
-    const editor = await screen.findByLabelText('Opis w pełnym ekranie');
+    return screen.findByLabelText('Opis w pełnym ekranie');
+  };
+
+  it('opens the description editor over the form with the text', async () => {
+    const user = userEvent.setup();
+
+    const editor = await openFullscreen(user);
 
     expect(modalsInUrl()).toEqual(['task-new', 'description-editor']);
     expect(editor).toHaveValue('Start');
     expect(editor).toHaveFocus();
+  });
+
+  it('syncs the text back to the form and closes with Escape', async () => {
+    const user = userEvent.setup();
+    const editor = await openFullscreen(user);
 
     await user.type(editor, ' i dalej');
     await user.keyboard('{Escape}');

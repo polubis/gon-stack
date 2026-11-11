@@ -43,14 +43,19 @@ describe('Shared walkthrough works when', () => {
     expect(screen.queryByRole('heading')).not.toBeInTheDocument();
   });
 
-  it('goes back to the previous step', async () => {
-    const user = userEvent.setup();
+  it('offers no way back on the first step', () => {
     render(<Main steps={steps} onFinish={vi.fn()} />);
 
     expect(
       screen.queryByRole('button', { name: 'Wstecz' }),
     ).not.toBeInTheDocument();
+  });
+
+  it('goes back to the previous step', async () => {
+    const user = userEvent.setup();
+    render(<Main steps={steps} onFinish={vi.fn()} />);
     await user.click(screen.getByRole('button', { name: 'Next' }));
+
     await user.click(screen.getByRole('button', { name: 'Wstecz' }));
 
     screen.getByRole('heading', { name: 'Step one' });

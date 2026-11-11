@@ -86,7 +86,9 @@ describe('procedure error logging', () => {
 
   it('warns with unauthorized details and no empty cause field', () => {
     const log = captureLog('warn');
+
     log.emit(new Unauthorized(undefined));
+
     const parsed = log.read() as Record<string, unknown>;
     expect(parsed).not.toHaveProperty('cause');
     expect(parsed.code).toBe(401);

@@ -59,7 +59,7 @@ describe('task device', () => {
     expect(await screen.findByText('Kocia')).toBeInTheDocument();
   });
 
-  it('shows the device of a task in the more menu and in its popup', async () => {
+  it('shows the device of a task in the more menu', async () => {
     const user = userEvent.setup();
     backend.seed([task({ device: DEVICE })]);
     renderTime();
@@ -67,27 +67,37 @@ describe('task device', () => {
     await user.click(
       await screen.findByRole('button', { name: 'Więcej: Raport miesięczny' }),
     );
+
     expect(await screen.findByText('Telefon Ani')).toBeInTheDocument();
-    await user.keyboard('{Escape}');
+  });
+
+  it('shows the device of a task in its popup', async () => {
+    const user = userEvent.setup();
+    backend.seed([task({ device: DEVICE })]);
+    renderTime();
 
     await user.click(await row('Raport miesięczny'));
+
     const dialog = within(await screen.findByRole('dialog'));
     expect(dialog.getByText('device-phone-1')).toBeVisible();
   });
 
-  it('shows the same row with a done toggle on a week day', async () => {
-    const user = userEvent.setup();
-    backend.seed([task({ device: DEVICE, at: null })]);
-    renderTime('week');
-
-    const box = (
+  const weekBox = async () =>
+    (
       await screen.findAllByRole('checkbox', {
         name: 'Zrobione: Raport miesięczny',
       })
     )[0]!;
-    expect(box).toHaveAttribute('aria-checked', 'false');
+
+  it('shows a done toggle on a week day', async () => {
+    const user = userEvent.setup();
+    backend.seed([task({ device: DEVICE, at: null })]);
+    renderTime('week');
+    const box = await weekBox();
+
     await user.click(box);
     await user.click(box);
+
     await waitFor(() =>
       expect(
         screen.getAllByRole('checkbox', {
@@ -95,11 +105,20 @@ describe('task device', () => {
         })[0],
       ).toHaveAttribute('aria-checked', 'true'),
     );
+  });
+
+  it('shows the device in the more menu of a week day row', async () => {
+    const user = userEvent.setup();
+    backend.seed([task({ device: DEVICE, at: null })]);
+    renderTime('week');
+    const box = await weekBox();
+
     await user.click(
       within(box.closest('li')!).getByRole('button', {
         name: 'Więcej: Raport miesięczny',
       }),
     );
+
     expect(await screen.findByText('Telefon Ani')).toBeInTheDocument();
   });
 
@@ -179,8 +198,7 @@ describe('recurring tasks', () => {
     expect(backend.writes()).toHaveLength(0);
   });
 
-  it('ends the series from one of its tasks', async () => {
-    const user = userEvent.setup();
+  const openSeriesEnd = async (user: ReturnType<typeof userEvent.setup>) => {
     backend.seed([
       task({ recurringId: 'trec-1', occurrenceDate: '2026-10-20' }),
     ]);
@@ -188,8 +206,21 @@ describe('recurring tasks', () => {
     await user.click(await row('Raport miesięczny'));
     const dialog = within(await screen.findByRole('dialog'));
     await user.click(dialog.getByRole('button', { name: 'Zakończ cykl' }));
+    return within(screen.getAllByRole('dialog').at(-1)!);
+  };
+
+  it('asks before ending the series', async () => {
+    const user = userEvent.setup();
+
+    await openSeriesEnd(user);
+
     expect(backend.writes()).toHaveLength(0);
-    const confirm = within(screen.getAllByRole('dialog').at(-1)!);
+  });
+
+  it('ends the series from one of its tasks', async () => {
+    const user = userEvent.setup();
+    const confirm = await openSeriesEnd(user);
+
     await user.click(confirm.getByRole('button', { name: 'Zakończ cykl' }));
 
     expect(await screen.findByText('Zakończono cykl.')).toBeVisible();

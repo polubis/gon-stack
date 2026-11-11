@@ -144,23 +144,33 @@ describe('task attachments', () => {
     expect(details.queryByRole('link', { name: 'a.txt' })).toBeNull();
   });
 
-  it('deletes a file only after confirmation', async () => {
-    const user = userEvent.setup();
+  const askToDeleteFile = async (user: ReturnType<typeof userEvent.setup>) => {
     backend.seed([task()]);
     backend.state.attachments['t-1'] = [FILE];
     const details = await openDetails(user);
-
     await user.click(
       await details.findByRole('button', { name: 'Usuń plik umowa.pdf' }),
     );
+  };
+
+  it('asks before deleting a file', async () => {
+    const user = userEvent.setup();
+
+    await askToDeleteFile(user);
+
     expect(backend.writes()).toHaveLength(0);
     expect(new URLSearchParams(window.location.search).getAll('modal')).toEqual(
       ['task-view:t-1', 'attachment-delete:a-1'],
     );
+  });
 
+  it('deletes a file after confirmation', async () => {
+    const user = userEvent.setup();
+    await askToDeleteFile(user);
     const confirm = within(
       await screen.findByRole('dialog', { name: 'Usunąć plik?' }),
     );
+
     await user.click(confirm.getByRole('button', { name: 'Usuń' }));
 
     await waitFor(() =>
@@ -211,15 +221,29 @@ describe('task attachments', () => {
     ).toBeVisible();
   });
 
-  it('offers a retry when the list cannot be loaded', async () => {
-    const user = userEvent.setup();
+  const openFailedAttachments = async (
+    user: ReturnType<typeof userEvent.setup>,
+  ) => {
     backend.seed([task()]);
     backend.state.failAttachmentReads = true;
     backend.state.attachments['t-1'] = [FILE];
-    const details = await openDetails(user);
+    return openDetails(user);
+  };
+
+  it('shows an error when the list cannot be loaded', async () => {
+    const user = userEvent.setup();
+
+    const details = await openFailedAttachments(user);
 
     expect(await details.findByText('ATTACHMENTS_LOAD')).toBeVisible();
+  });
+
+  it('loads the list after the retry', async () => {
+    const user = userEvent.setup();
+    const details = await openFailedAttachments(user);
+    await details.findByText('ATTACHMENTS_LOAD');
     backend.state.failAttachmentReads = false;
+
     await user.click(details.getByRole('button', { name: 'Spróbuj ponownie' }));
 
     expect(
@@ -257,7 +281,19 @@ describe('image attachments', () => {
     ).toBeNull();
   });
 
-  it('opens the image full screen in the URL stack and closes it with Esc', async () => {
+  const openPhoto = async (user: ReturnType<typeof userEvent.setup>) => {
+    backend.seed([task()]);
+    backend.state.attachments['t-1'] = [PHOTO];
+    const details = await openDetails(user);
+    await user.click(
+      await details.findByRole('button', {
+        name: 'Otwórz podgląd: wakacje.webp',
+      }),
+    );
+    return screen.findByRole('dialog', { name: 'wakacje.webp' });
+  };
+
+  it('opens the image full screen in the URL stack', async () => {
     const user = userEvent.setup();
     backend.seed([task()]);
     backend.state.attachments['t-1'] = [PHOTO];
@@ -277,6 +313,11 @@ describe('image attachments', () => {
     ).toBeVisible();
     expect(modalsInUrl()).toEqual(['task-view:t-1', 'attachment-view:a-2']);
     expect(viewer).toContainElement(document.activeElement as HTMLElement);
+  });
+
+  it('closes the full screen image with Esc', async () => {
+    const user = userEvent.setup();
+    await openPhoto(user);
 
     await user.keyboard('{Escape}');
 
@@ -469,14 +510,12 @@ describe('video attachments', () => {
     ).toBeNull();
   });
 
-  it('offers a toast that opens the video once it is saved', async () => {
+  const finishUpload = async (user: ReturnType<typeof userEvent.setup>) => {
     vi.stubGlobal('EventSource', FakeEventSource);
-    const user = userEvent.setup({ pointerEventsCheck: 0 });
     backend.seed([task()]);
     backend.state.attachments['t-1'] = [{ ...CLIP, status: 'uploading' }];
     const details = await openDetails(user);
     await details.findByText('Zapisywanie…');
-
     act(() =>
       FakeEventSource.last?.emit({
         type: 'UPDATE',
@@ -484,11 +523,26 @@ describe('video attachments', () => {
         attachment: CLIP,
       }),
     );
+  };
+
+  it('offers a toast once the video is saved', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+
+    await finishUpload(user);
 
     expect(
       await screen.findByText('Wideo „demo.mp4” jest gotowe'),
     ).toBeVisible();
+    vi.unstubAllGlobals();
+  });
+
+  it('opens the video from the toast', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    await finishUpload(user);
+    await screen.findByText('Wideo „demo.mp4” jest gotowe');
+
     await user.click(screen.getByRole('button', { name: 'Otwórz' }));
+
     expect(
       await screen.findByRole('dialog', { name: 'demo.mp4' }),
     ).toBeVisible();

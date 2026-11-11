@@ -48,19 +48,27 @@ describe('app update banner', () => {
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 
-  it('offers a reload when a newer version is deployed', async () => {
+  it('announces a newer deployed version', async () => {
+    deployed('1.0.0+bbb');
+
+    render(<AppUpdateBanner />);
+
+    expect(await screen.findByRole('status')).toHaveTextContent(BANNER);
+  });
+
+  it('reloads the page from the banner', async () => {
     deployed('1.0.0+bbb');
     const reload = vi.fn();
     vi.stubGlobal('location', { ...window.location, reload });
     render(<AppUpdateBanner />);
+    await screen.findByRole('status');
 
-    expect(await screen.findByRole('status')).toHaveTextContent(BANNER);
     await userEvent.click(screen.getByRole('button', { name: 'Odśwież' }));
 
     expect(reload).toHaveBeenCalledOnce();
   });
 
-  it('comes back after dismissing when the tab is shown again', async () => {
+  it('hides the banner once dismissed', async () => {
     deployed('1.0.0+bbb');
     render(<AppUpdateBanner />);
     await screen.findByRole('status');
@@ -68,7 +76,20 @@ describe('app update banner', () => {
     await userEvent.click(
       screen.getByRole('button', { name: /zamknij informację/i }),
     );
+
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
+  it('comes back after dismissing when the tab is shown again', async () => {
+    deployed('1.0.0+bbb');
+    render(<AppUpdateBanner />);
+    await screen.findByRole('status');
+    await userEvent.click(
+      screen.getByRole('button', { name: /zamknij informację/i }),
+    );
+    await waitFor(() =>
+      expect(screen.queryByRole('status')).not.toBeInTheDocument(),
+    );
 
     document.dispatchEvent(new Event('visibilitychange'));
 

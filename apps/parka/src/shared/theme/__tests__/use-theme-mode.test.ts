@@ -71,12 +71,21 @@ describe('theme mode', () => {
     expect(document.documentElement.dataset.theme).toBeUndefined();
   });
 
-  it('switches with the hour while auto is on', () => {
+  it('is light at 18 while auto is on', () => {
+    vi.useFakeTimers();
+    setLocalTime(18);
+
+    const { result } = renderHook(() => useThemeMode());
+    act(() => result.current[1]('auto'));
+
+    expect(document.documentElement.dataset.theme).toBeUndefined();
+  });
+
+  it('switches to dark with the hour while auto is on', () => {
     vi.useFakeTimers();
     setLocalTime(18);
     const { result } = renderHook(() => useThemeMode());
     act(() => result.current[1]('auto'));
-    expect(document.documentElement.dataset.theme).toBeUndefined();
 
     act(() => {
       setLocalTime(19);

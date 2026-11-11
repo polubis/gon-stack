@@ -208,16 +208,24 @@ describe('adding an expense on its own page', () => {
       expect(before - Date.parse(saved)).toBeLessThan(5 * 60_000);
     });
 
+    it('requires a date and time', async () => {
+      mockBackend();
+      await open();
+
+      setDate('');
+
+      expect(screen.getByLabelText('Data i godzina')).toBeRequired();
+    });
+
     it('does not save without a date and time', async () => {
       const written = mockBackend();
       const user = await open();
-
       await user.type(screen.getByLabelText('Sklep'), 'Piekarnia');
       await user.type(screen.getByLabelText('Kwota'), '25');
       setDate('');
 
-      expect(screen.getByLabelText('Data i godzina')).toBeRequired();
       await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+
       expect(written).toHaveLength(0);
     });
 
@@ -270,10 +278,21 @@ describe('adding an expense on its own page', () => {
       );
     });
 
+    it('locks the amount and counts the products once there are some', async () => {
+      mockBackend();
+      const user = await open();
+      await user.type(screen.getByLabelText('Sklep'), 'Piekarnia');
+
+      await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+
+      expect(screen.getByLabelText(/^Kwota/)).toHaveAttribute('readonly');
+      expect(screen.getByText('Produkty (2)')).toBeVisible();
+    });
+
     it('sums products into the amount', async () => {
       const written = mockBackend();
       const user = await open();
-
       await user.type(screen.getByLabelText('Sklep'), 'Piekarnia');
       await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
       await user.type(screen.getByLabelText('Nazwa produktu'), 'Chleb');
@@ -283,8 +302,6 @@ describe('adding an expense on its own page', () => {
       await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
       await user.type(screen.getByLabelText('Nazwa produktu'), 'Bułka');
 
-      expect(screen.getByLabelText(/^Kwota/)).toHaveAttribute('readonly');
-      expect(screen.getByText('Produkty (2)')).toBeVisible();
       await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
 
       await waitFor(() => expect(written).toHaveLength(1));
@@ -350,14 +367,22 @@ describe('adding an expense on its own page', () => {
         expect(written[0]!.body).toMatchObject({ categoryId: null });
       });
 
-      it('lets the user pick again after removing every product', async () => {
+      it('hides the category picker while a product is added', async () => {
         mockBackend([CATEGORY, OTHER]);
         const user = await open();
 
         await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+
         expect(
           screen.queryByRole('combobox', { name: 'Kategoria' }),
         ).toBeNull();
+      });
+
+      it('lets the user pick again after removing every product', async () => {
+        mockBackend([CATEGORY, OTHER]);
+        const user = await open();
+        await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+
         await user.click(screen.getByRole('button', { name: 'Usuń produkt' }));
 
         expect(
@@ -821,7 +846,7 @@ describe('adding an expense on its own page', () => {
       expect(sent).toContain('name="file"');
     });
 
-    it('shows a retryable error when scanning fails', async () => {
+    const failFirstScan = () => {
       let attempts = 0;
       server.use(
         http.post('/api/receipts/scan/', () => {
@@ -835,15 +860,28 @@ describe('adding an expense on its own page', () => {
             : HttpResponse.json({ code: 200, data: DRAFT });
         }),
       );
+    };
+
+    it('shows an error with its code when scanning fails', async () => {
+      failFirstScan();
       const user = await open();
 
       await upload(user, photo());
 
       const alert = await screen.findByRole('alert');
       expect(within(alert).getByText('RECEIPT_SCAN')).toBeVisible();
+    });
+
+    it('scans again after the retry', async () => {
+      failFirstScan();
+      const user = await open();
+      await upload(user, photo());
+      const alert = await screen.findByRole('alert');
+
       await user.click(
         within(alert).getByRole('button', { name: 'Spróbuj ponownie' }),
       );
+
       await waitFor(() =>
         expect(screen.getByLabelText('Sklep')).toHaveValue('Biedronka'),
       );

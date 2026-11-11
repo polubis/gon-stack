@@ -57,11 +57,17 @@ describe('profile edit', () => {
     expect(screen.queryByRole('textbox', { name: 'E-mail' })).toBeNull();
   });
 
-  it('keeps saving disabled until the profile changes', async () => {
+  it('keeps saving disabled while the profile is unchanged', async () => {
+    openProfile();
+    await nameField();
+
+    expect(saveButton()).toBeDisabled();
+  });
+
+  it('enables saving once the profile changes', async () => {
     const user = userEvent.setup();
     openProfile();
     const name = await nameField();
-    expect(saveButton()).toBeDisabled();
 
     await user.type(name, 'm');
 

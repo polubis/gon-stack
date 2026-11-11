@@ -112,7 +112,23 @@ describe('dashboard screen', () => {
     expect(legend.getByText('100%')).toBeTruthy();
   });
 
-  it('shows six categories and lists all of them in a dialog', async () => {
+  it('shows only six categories on the card', async () => {
+    const categories = Array.from({ length: 8 }, (_, i) => ({
+      categoryId: `c-${i}`,
+      name: `Kat ${i}`,
+      color: 'green',
+      amount: 10,
+      pct: 12,
+    }));
+    stubApi(false, { categories });
+
+    render(<Main />);
+
+    expect(await screen.findByText('Kat 5')).toBeTruthy();
+    expect(screen.queryByText('Kat 6')).toBeNull();
+  });
+
+  it('lists all categories in a dialog', async () => {
     const categories = Array.from({ length: 8 }, (_, i) => ({
       categoryId: `c-${i}`,
       name: `Kat ${i}`,
@@ -122,18 +138,38 @@ describe('dashboard screen', () => {
     }));
     stubApi(false, { categories });
     const user = userEvent.setup();
-
     render(<Main />);
+    await screen.findByText('Kat 5');
 
-    expect(await screen.findByText('Kat 5')).toBeTruthy();
-    expect(screen.queryByText('Kat 6')).toBeNull();
     await user.click(screen.getByRole('button', { name: 'Pokaż wszystkie' }));
+
     const dialog = within(await screen.findByRole('dialog'));
     expect(dialog.getByText('Kat 7')).toBeTruthy();
     expect(dialog.getByText('Kat 0')).toBeTruthy();
   });
 
-  it('shows six expenses and lists all of them in a dialog', async () => {
+  it('shows only six expenses on the card', async () => {
+    const month = currentMonth();
+    const expenses = Array.from({ length: 8 }, (_, i) => ({
+      id: `e-${i}`,
+      merchant: `Sklep ${i}`,
+      date: `${month}-02T1${i}:00:00Z`,
+      amount: 10,
+      categoryId: 'c-1',
+      paymentMethod: 'card',
+      isBill: false,
+      source: 'manual',
+      items: [],
+    }));
+    answerApi(server, ({ url }) => readBody(url, { expenses }));
+
+    render(<Main />);
+
+    expect(await screen.findByText('Sklep 2')).toBeTruthy();
+    expect(screen.queryByText('Sklep 1')).toBeNull();
+  });
+
+  it('lists all expenses in a dialog', async () => {
     const month = currentMonth();
     const expenses = Array.from({ length: 8 }, (_, i) => ({
       id: `e-${i}`,
@@ -148,16 +184,38 @@ describe('dashboard screen', () => {
     }));
     answerApi(server, ({ url }) => readBody(url, { expenses }));
     const user = userEvent.setup();
-
     render(<Main />);
+    await screen.findByText('Sklep 2');
 
-    expect(await screen.findByText('Sklep 2')).toBeTruthy();
-    expect(screen.queryByText('Sklep 1')).toBeNull();
     await user.click(screen.getByRole('button', { name: 'Pokaż wszystkie' }));
+
     const dialog = within(await screen.findByRole('dialog'));
     expect(dialog.getByText('Sklep 1')).toBeTruthy();
     expect(dialog.getByText('Sklep 0')).toBeTruthy();
+  });
+
+  it('closes the list of all expenses with the close button', async () => {
+    const month = currentMonth();
+    const expenses = Array.from({ length: 8 }, (_, i) => ({
+      id: `e-${i}`,
+      merchant: `Sklep ${i}`,
+      date: `${month}-02T1${i}:00:00Z`,
+      amount: 10,
+      categoryId: 'c-1',
+      paymentMethod: 'card',
+      isBill: false,
+      source: 'manual',
+      items: [],
+    }));
+    answerApi(server, ({ url }) => readBody(url, { expenses }));
+    const user = userEvent.setup();
+    render(<Main />);
+    await screen.findByText('Sklep 2');
+    await user.click(screen.getByRole('button', { name: 'Pokaż wszystkie' }));
+    const dialog = within(await screen.findByRole('dialog'));
+
     await user.click(dialog.getByRole('button', { name: 'Zamknij' }));
+
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
@@ -311,6 +369,13 @@ describe('dashboard month expenses', () => {
 
     expect(screen.getByRole('button', { name: /^Kino Testowe/ })).toBeTruthy();
     expect(screen.queryByRole('button', { name: /^Sklep Testowy/ })).toBeNull();
+  });
+
+  it('brings every expense back with the all filter', async () => {
+    stubWithExpenses();
+    await openSeptember();
+    await screen.findByRole('button', { name: /^Sklep Testowy/ });
+    await userEvent.click(screen.getByRole('button', { name: /^Rozrywka 1/ }));
 
     await userEvent.click(screen.getByRole('button', { name: /^Wszystkie 2/ }));
 

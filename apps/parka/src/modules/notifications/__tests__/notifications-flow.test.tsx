@@ -394,7 +394,7 @@ describe('infinite scroll', () => {
     await waitFor(() => expect(rows()).toHaveLength(2));
   });
 
-  it('offers a retry when the next page fails and then continues', async () => {
+  const failNextPageOnce = () => {
     let calls = 0;
     stubApi({
       pages: {
@@ -405,14 +405,32 @@ describe('infinite scroll', () => {
             : page([updated('n-2')]),
       },
     });
+  };
+
+  it('offers a retry when the next page fails', async () => {
+    failNextPageOnce();
     const scrollToEnd = stubObserver();
-    const user = userEvent.setup();
     render(<Main />);
     await screen.findByText('Zmieniono wydatek');
 
     scrollToEnd();
+
     await screen.findByText('NOTIFICATIONS_LOAD_MORE');
     expect(rows()).toHaveLength(1);
+    expect(
+      screen.getByRole('button', { name: 'Spróbuj ponownie' }),
+    ).toBeTruthy();
+  });
+
+  it('continues with the next page after the retry', async () => {
+    failNextPageOnce();
+    const scrollToEnd = stubObserver();
+    const user = userEvent.setup();
+    render(<Main />);
+    await screen.findByText('Zmieniono wydatek');
+    scrollToEnd();
+    await screen.findByText('NOTIFICATIONS_LOAD_MORE');
+
     await user.click(screen.getByRole('button', { name: 'Spróbuj ponownie' }));
 
     await waitFor(() => expect(rows()).toHaveLength(2));

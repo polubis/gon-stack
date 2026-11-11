@@ -77,15 +77,24 @@ describe('mobile bottom nav while overlays are open', () => {
     expect(screen.getAllByRole('link', { name: 'Finanse' })).toHaveLength(2);
   });
 
-  it('hides while a select is open and returns after a choice', async () => {
+  it('hides while a select is open', async () => {
     const user = userEvent.setup();
     render(<Host />);
 
     await user.click(screen.getByRole('button', { name: /Wybór/ }));
+
     await screen.findByRole('button', { name: 'Opcja B' });
     expect(navHidden()).toBe(true);
+  });
+
+  it('returns after a choice in the select', async () => {
+    const user = userEvent.setup();
+    render(<Host />);
+    await user.click(screen.getByRole('button', { name: /Wybór/ }));
+    await screen.findByRole('button', { name: 'Opcja B' });
 
     await user.click(screen.getByRole('button', { name: 'Opcja B' }));
+
     await screen.findByRole('button', { name: /Wybór/ });
     expect(screen.queryByRole('button', { name: 'Opcja B' })).toBeNull();
     expect(navHidden()).toBe(false);
@@ -101,30 +110,57 @@ describe('mobile bottom nav while overlays are open', () => {
     expect(hidden('Nawigacja boczna')).toBe(false);
   });
 
-  it('hides while a dialog is open and returns on Escape', async () => {
+  it('hides while a dialog is open', async () => {
     const user = userEvent.setup();
     render(<Host />);
 
     await user.click(screen.getByRole('button', { name: 'Otwórz Pierwszy' }));
+
     expect(navHidden()).toBe(true);
+  });
+
+  it('returns when the dialog closes on Escape', async () => {
+    const user = userEvent.setup();
+    render(<Host />);
+    await user.click(screen.getByRole('button', { name: 'Otwórz Pierwszy' }));
 
     await user.keyboard('{Escape}');
+
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(navHidden()).toBe(false);
   });
 
-  it('stays hidden until the last of two stacked dialogs closes', async () => {
-    const user = userEvent.setup();
+  const stackTwoDialogs = async (user: ReturnType<typeof userEvent.setup>) => {
     render(<Host />);
-
     await user.click(screen.getByRole('button', { name: 'Otwórz Pierwszy' }));
     await user.click(screen.getByRole('button', { name: 'Otwórz Drugi' }));
+  };
+
+  it('stays hidden while two dialogs are stacked', async () => {
+    const user = userEvent.setup();
+
+    await stackTwoDialogs(user);
+
     expect(screen.getAllByRole('dialog', { hidden: true })).toHaveLength(2);
+    expect(navHidden()).toBe(true);
+  });
+
+  it('stays hidden after the top of two stacked dialogs closes', async () => {
+    const user = userEvent.setup();
+    await stackTwoDialogs(user);
 
     await user.click(screen.getByRole('button', { name: 'Zamknij Drugi' }));
+
     expect(navHidden()).toBe(true);
+  });
+
+  it('returns once the last of two stacked dialogs closes', async () => {
+    const user = userEvent.setup();
+    await stackTwoDialogs(user);
+    await user.click(screen.getByRole('button', { name: 'Zamknij Drugi' }));
 
     await user.click(screen.getByRole('button', { name: 'Zamknij Pierwszy' }));
+
     expect(navHidden()).toBe(false);
   });
 });

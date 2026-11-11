@@ -80,27 +80,41 @@ describe('list change transitions', () => {
     expect(screen.getByText('Alpha').className).toBe('');
   });
 
-  it('flashes an updated row then settles', () => {
+  it('flashes an updated row', () => {
     const { rerender } = render(<List rows={[a, b]} />);
 
     rerender(<List rows={[{ ...a, name: 'Alpha 2' }, b]} />);
+
     expect(screen.getByText('Alpha 2')).toHaveClass('animate-row-flash');
     expect(screen.getByText('Beta').className).toBe('');
+  });
+
+  it('settles after flashing an updated row', () => {
+    const { rerender } = render(<List rows={[a, b]} />);
+    rerender(<List rows={[{ ...a, name: 'Alpha 2' }, b]} />);
 
     act(() => void vi.advanceTimersByTime(1300));
+
     expect(screen.getByText('Alpha 2').className).toBe('');
   });
 
-  it('keeps a deleted row leaving, inert, then removes it', () => {
+  it('keeps a deleted row leaving and inert', () => {
     const { rerender } = render(<List rows={[a, b]} />);
 
     rerender(<List rows={[b]} />);
+
     const leaving = screen.getByText('Alpha');
     expect(leaving).toHaveClass('animate-row-out');
     expect(leaving).toHaveAttribute('aria-hidden', 'true');
     expect(leaving).toHaveAttribute('inert');
+  });
+
+  it('removes a deleted row once it left', () => {
+    const { rerender } = render(<List rows={[a, b]} />);
+    rerender(<List rows={[b]} />);
 
     act(() => void vi.advanceTimersByTime(400));
+
     expect(screen.queryByText('Alpha')).not.toBeInTheDocument();
   });
 
@@ -124,13 +138,25 @@ describe('list change transitions', () => {
     expect(screen.getByText('Alpha 2')).toHaveClass('animate-row-flash');
   });
 
-  it('never replays the entrance on a row that changed later', () => {
-    const { rerender } = render(<Staggered rows={[a]} />);
+  it('plays the entrance of the first render row', () => {
+    render(<Staggered rows={[a]} />);
+
     expect(screen.getByText('Alpha')).toHaveClass('enter');
+  });
+
+  it('does not play the entrance of a row added later', () => {
+    const { rerender } = render(<Staggered rows={[a]} />);
 
     rerender(<Staggered rows={[a, b]} />);
+
     expect(screen.getByText('Beta')).not.toHaveClass('enter');
+  });
+
+  it('never replays the entrance on a row that changed later', () => {
+    const { rerender } = render(<Staggered rows={[a]} />);
+    rerender(<Staggered rows={[a, b]} />);
     act(() => void vi.advanceTimersByTime(1500));
+
     rerender(<Staggered rows={[a, { ...b, name: 'Beta 2' }]} />);
     act(() => void vi.advanceTimersByTime(1500));
 

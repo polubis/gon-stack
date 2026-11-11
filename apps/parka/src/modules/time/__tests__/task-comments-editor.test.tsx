@@ -190,18 +190,29 @@ describe('task comment keyboard', () => {
 });
 
 describe('task comment editor', () => {
-  it('does not offer saving an unchanged or emptied edit', async () => {
-    const user = userEvent.setup();
+  const editOwn = async (user: ReturnType<typeof userEvent.setup>) => {
     backend.seed([task()]);
     backend.state.comments['t-1'] = [OWN];
     const details = await openDetails(user);
-
     const input = await startEditing(user, details);
-    const save = details.getByRole('button', { name: 'Zapisz' });
-    expect(save).toBeDisabled();
+    return { details, input };
+  };
+
+  it('does not offer saving an unchanged edit', async () => {
+    const user = userEvent.setup();
+
+    const { details } = await editOwn(user);
+
+    expect(details.getByRole('button', { name: 'Zapisz' })).toBeDisabled();
+  });
+
+  it('does not offer saving an emptied edit', async () => {
+    const user = userEvent.setup();
+    const { details, input } = await editOwn(user);
 
     await user.clear(input);
-    expect(save).toBeDisabled();
+
+    expect(details.getByRole('button', { name: 'Zapisz' })).toBeDisabled();
   });
 
   it('cancels an edit with the cancel button', async () => {
@@ -229,13 +240,22 @@ describe('task comment editor', () => {
     expect(backend.writes()[0]?.body).toEqual({ body: 'przycięte' });
   });
 
-  it('counts characters up to the 2000 limit', async () => {
+  it('starts counting characters from zero', async () => {
     const user = userEvent.setup();
     backend.seed([task()]);
     const details = await openDetails(user);
 
-    const input = await startComposing(user, details);
+    await startComposing(user, details);
+
     expect(details.getByText(/^0\/2000/)).toBeVisible();
+  });
+
+  it('counts characters up to the 2000 limit', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    const details = await openDetails(user);
+    const input = await startComposing(user, details);
+
     await user.type(input, 'abc');
 
     expect(details.getByText(/^3\/2000/)).toBeVisible();

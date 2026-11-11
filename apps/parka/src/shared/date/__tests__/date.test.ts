@@ -53,9 +53,11 @@ describe('day of an instant', () => {
   it('gives today in the asked zone', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-09-30T23:30:00.000Z'));
-    expect(today(WARSAW)).toBe('2026-10-01');
-    expect(today(LOS_ANGELES)).toBe('2026-09-30');
+
+    const days = [today(WARSAW), today(LOS_ANGELES)];
+
     vi.useRealTimers();
+    expect(days).toEqual(['2026-10-01', '2026-09-30']);
   });
 });
 

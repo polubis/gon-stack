@@ -101,13 +101,21 @@ describe('profile avatar in the profile modal', () => {
     expect(uploads).toHaveLength(1);
   });
 
-  it('uploads only after the crop is confirmed', async () => {
+  it('does not upload while the crop is open', async () => {
     render(<ProfileEditModal />);
     await screen.findByRole('textbox', { name: 'Imię i nazwisko' });
 
     await userEvent.upload(chooser(), png());
+
     await screen.findByRole('dialog', { name: 'Przytnij zdjęcie' });
     expect(uploads).toHaveLength(0);
+  });
+
+  it('does not upload when the crop is cancelled', async () => {
+    render(<ProfileEditModal />);
+    await screen.findByRole('textbox', { name: 'Imię i nazwisko' });
+    await userEvent.upload(chooser(), png());
+    await screen.findByRole('dialog', { name: 'Przytnij zdjęcie' });
 
     await userEvent.click(screen.getByRole('button', { name: 'Anuluj' }));
 

@@ -78,22 +78,21 @@ describe('categories creation', () => {
   it('offers a retry that adds the category again', async () => {
     stubApi({ code: 500, message: 'boom' });
     const view = await setup();
-
     act(() => view.result.current.ctx.create(NEW_CATEGORY));
     await waitFor(() => expect(view.result.current.notice?.tone).toBe('error'));
     const failure = view.result.current.notice;
     if (failure?.tone !== 'error') throw new Error('expected a failure');
-    expect(
-      [failure.title, failure.code, failure.description].every(Boolean),
-    ).toBe(true);
-
     stubApi({ code: 201, data: NEW_CATEGORY });
+
     act(() => failure.retry?.());
 
     await waitFor(() =>
       expect(view.result.current.notice?.tone).toBe('success'),
     );
     expect(view.result.current.categories).toHaveLength(2);
+    expect(
+      [failure.title, failure.code, failure.description].every(Boolean),
+    ).toBe(true);
   });
 });
 
