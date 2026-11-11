@@ -75,7 +75,7 @@ export const AddMenu = ({
               .querySelector<HTMLElement>('[role="menuitem"]')
               ?.focus();
           }}
-          className="z-(--z-popover) w-52 animate-pop-in rounded-xl border border-line-strong bg-card p-2 shadow-popover focus:outline-none motion-reduce:animate-none"
+          className="z-(--z-popover) w-52 animate-pop-in rounded-2xl border border-line bg-card p-2 shadow-popover focus:outline-none motion-reduce:animate-none"
         >
           <div
             role="menu"
@@ -90,7 +90,7 @@ export const AddMenu = ({
                 role="menuitem"
                 onClick={() => openModal(modal)}
                 className={cn(
-                  'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-hover-soft focus-visible:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+                  'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors hover:bg-hover focus-visible:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
                 )}
               >
                 <Icon className="h-4 w-4 text-ink-soft" aria-hidden="true" />

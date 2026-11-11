@@ -60,7 +60,7 @@ export const Segmented = <T extends string>({
       role="tablist"
       aria-label={label}
       onKeyDown={move}
-      className="flex gap-1 rounded-xl bg-brand-soft p-1"
+      className="flex gap-1 rounded-full bg-hover p-1"
     >
       {options.map((opt) => {
         const selected = opt.value === value;
@@ -77,9 +77,9 @@ export const Segmented = <T extends string>({
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(opt.value)}
             className={cn(
-              'flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+              'flex-1 rounded-full px-3 py-2 text-sm font-medium transition-colors duration-200 motion-reduce:transition-none',
               selected
-                ? 'bg-card text-brand-dark shadow-sm'
+                ? 'bg-brand text-on-brand shadow-cta'
                 : 'text-ink-soft hover:text-ink',
             )}
           >
@@ -112,14 +112,14 @@ export const Toggle = ({
     disabled={disabled}
     onClick={() => onChange(!checked)}
     className={cn(
-      'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+      'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none',
       checked ? 'bg-brand' : 'bg-track-strong',
     )}
   >
     <span
       className={cn(
-        'inline-block h-5 w-5 transform rounded-full bg-card shadow transition-transform',
-        checked ? 'translate-x-5' : 'translate-x-0.5',
+        'inline-block h-5.5 w-5.5 transform rounded-full shadow transition-transform duration-200 ease-enter motion-reduce:transition-none',
+        checked ? 'translate-x-5.75 bg-on-brand' : 'translate-x-0.75 bg-card',
       )}
     />
   </button>
@@ -178,13 +178,13 @@ export const Button = ({
   'data-e2e'?: E2eId;
 } & Record<string, unknown>) => {
   const base =
-    'inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
+    'pressable inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface';
   const styles =
     variant === 'primary'
-      ? 'bg-brand text-on-brand hover:bg-brand-dark'
+      ? 'cta shadow-cta hover:bg-brand-dark'
       : variant === 'danger'
         ? 'bg-card text-danger border border-danger-line hover:bg-danger-faint'
-        : 'bg-card text-brand-dark border border-line-strong hover:bg-brand-softer';
+        : 'bg-card text-ink border border-line-strong hover:bg-brand-softer';
   if (href) {
     return (
       <a
@@ -245,7 +245,7 @@ export const Field = ({
 };
 
 export const inputClass =
-  'w-full rounded-xl border border-line-strong bg-card px-3 py-2.5 text-sm outline-none focus:border-brand';
+  'w-full rounded-xl border border-line-strong bg-card px-3 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-brand focus:ring-4 focus:ring-brand/10 motion-reduce:transition-none';
 
 /** Plain `<input>` wired to the surrounding `Field` label. */
 export const Input = ({ className, id, ...props }: ComponentProps<'input'>) => {
@@ -321,14 +321,14 @@ export const Select = ({
           position="popper"
           sideOffset={4}
           collisionPadding={16}
-          className="z-(--z-popover) min-w-(--radix-select-trigger-width) overflow-hidden rounded-xl border border-line-strong bg-card text-ink shadow-popover"
+          className="z-(--z-popover) min-w-(--radix-select-trigger-width) overflow-hidden rounded-2xl border border-line bg-card text-ink shadow-popover"
         >
           <SelectPrimitive.Viewport className="max-h-72 p-1">
             {options.map((option) => (
               <SelectPrimitive.Item
                 key={option.value}
                 value={option.value}
-                className="relative flex cursor-pointer items-center rounded-lg py-2 pr-8 pl-3 text-sm outline-none select-none data-[highlighted]:bg-brand-softer data-[state=checked]:font-semibold data-[state=checked]:text-brand-dark"
+                className="relative flex cursor-pointer items-center rounded-xl py-2.5 pr-8 pl-3 text-sm outline-none select-none data-[highlighted]:bg-brand-soft data-[state=checked]:font-semibold data-[state=checked]:text-brand-dark"
               >
                 <SelectPrimitive.ItemText>
                   {option.label}

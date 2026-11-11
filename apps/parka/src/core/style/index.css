@@ -1,7 +1,33 @@
 @import 'tailwindcss';
 
+/* Outfit variable (OFL), self-hosted. Split by range: Polish lives in latin-ext. */
+@font-face {
+  font-family: Outfit;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/outfit-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: Outfit;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/outfit-latin-ext.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0,
+    U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
 /*
  * Theme tokens — single source for app colors, shadows and z-index.
+ * "Aurora" look: pearl ground with a peach/lilac aura, white cards, ink
+ * (black) actions, one lime accent that only ever fills (never text on light).
  * Light values in `:root` are the shipped look. The dark palette is opt-in
  * via `:root[data-theme='dark']`; it never follows the OS on its own.
  * Components use the Tailwind utilities generated below (`bg-card`,
@@ -15,24 +41,63 @@
   --z-toast: 40;
   --z-tooltip: 50;
 
-  --surface: #f4f7f5;
-  --card: #ffffff;
-  --ink: #10241b;
-  --ink-soft: #46564d;
-  --line: rgb(0 0 0 / 0.05);
-  --line-strong: rgb(0 0 0 / 0.1);
-  --hover: rgb(0 0 0 / 0.05);
-  --hover-soft: rgb(0 0 0 / 0.03);
-  --track: rgb(0 0 0 / 0.1);
-  --track-strong: rgb(0 0 0 / 0.15);
-  --overlay: rgb(0 0 0 / 0.4);
+  color-scheme: light;
 
-  /* Parka green palette — tuned for WCAG AA on white / with white text. */
-  --brand: #0b6e46;
-  --brand-dark: #08512f;
-  --brand-soft: #e3f2ea;
-  --brand-softer: #f1f8f4;
+  --surface: #f4f2f7;
+  --card: #ffffff;
+  --ink: #101014;
+  --ink-soft: #5a5a66;
+  --line: rgb(22 18 44 / 0.06);
+  --line-strong: rgb(22 18 44 / 0.12);
+  --hover: rgb(22 18 44 / 0.06);
+  --hover-soft: rgb(22 18 44 / 0.035);
+  --track: rgb(22 18 44 / 0.09);
+  --track-strong: rgb(22 18 44 / 0.2);
+  --overlay: rgb(16 14 28 / 0.42);
+
+  /* Ambient ground: peach bottom-left, lilac right, pearl base. */
+  --aura:
+    radial-gradient(70% 45% at 0% 100%, #ffd9c4 0%, transparent 70%),
+    radial-gradient(60% 50% at 100% 55%, #ddd4ff 0%, transparent 70%),
+    radial-gradient(50% 35% at 90% 0%, #ebe6f8 0%, transparent 70%),
+    linear-gradient(180deg, #f7f6f9, #f2f0f6);
+  --glass: rgb(255 255 255 / 0.72);
+  --glass-line: rgb(255 255 255 / 0.85);
+
+  /* Ink is the action colour: black pills, white text. */
+  --brand: #121216;
+  --brand-dark: #000000;
+  --brand-soft: #eceaf4;
+  --brand-softer: #f5f4f9;
   --on-brand: #ffffff;
+
+  /* Lime: fills only (ring, active chip, flash); text on it is `--on-accent`. */
+  --accent: #c9f158;
+  --accent-soft: #eefbc8;
+  --on-accent: #14170a;
+
+  /* Obsidian hero card. */
+  --hero: #121216;
+  --hero-glow:
+    radial-gradient(80% 90% at 100% 0%, rgb(201 241 88 / 0.2), transparent 60%),
+    radial-gradient(
+      70% 80% at 0% 100%,
+      rgb(150 120 255 / 0.22),
+      transparent 65%
+    );
+  --on-hero: #ffffff;
+  --on-hero-soft: rgb(255 255 255 / 0.66);
+  --hero-line: rgb(255 255 255 / 0.12);
+  --hero-track: rgb(255 255 255 / 0.14);
+  --hero-warn: #fdba74;
+  --hero-danger: #fda4af;
+
+  /* Sheen on the primary pill. */
+  --cta-sheen: radial-gradient(
+    120% 150% at 88% -50%,
+    rgb(255 255 255 / 0.34),
+    transparent 58%
+  );
 
   --danger: #be123c;
   --danger-strong: #e11d48;
@@ -59,29 +124,87 @@
   --device-8: #e0f2fe;
   --on-device-8: #0369a1;
 
-  --shadow-card-value: 0 1px 2px rgb(16 36 27 / 0.04);
+  --shadow-card-value:
+    inset 0 0 0 0.0625rem rgb(255 255 255 / 0.7),
+    0 0.0625rem 0.125rem rgb(24 20 50 / 0.04),
+    0 1.25rem 2.25rem -1.5rem rgb(24 20 50 / 0.22);
   --shadow-popover-value:
-    0 8px 24px rgb(16 36 27 / 0.16), 0 2px 6px rgb(16 36 27 / 0.08);
+    0 1.5rem 3rem -0.75rem rgb(24 20 50 / 0.3),
+    0 0.25rem 0.75rem rgb(24 20 50 / 0.08);
+  --shadow-cta-value:
+    inset 0 0.0625rem 0 rgb(255 255 255 / 0.24),
+    0 0.875rem 1.5rem -0.875rem rgb(18 18 22 / 0.7);
+  --shadow-dock-value:
+    inset 0 0 0 0.0625rem var(--glass-line),
+    0 1.25rem 2.5rem -1rem rgb(24 20 50 / 0.28);
 }
 
 :root[data-theme='dark'] {
-  --surface: #0d1712;
-  --card: #15221b;
-  --ink: #e6f0ea;
-  --ink-soft: #a3b5ab;
-  --line: rgb(255 255 255 / 0.1);
-  --line-strong: rgb(255 255 255 / 0.18);
+  color-scheme: dark;
+
+  --surface: #0b0b0f;
+  --card: #17171d;
+  --ink: #f4f4f7;
+  --ink-soft: #a6a6b4;
+  --line: rgb(255 255 255 / 0.08);
+  --line-strong: rgb(255 255 255 / 0.16);
   --hover: rgb(255 255 255 / 0.08);
   --hover-soft: rgb(255 255 255 / 0.05);
-  --track: rgb(255 255 255 / 0.16);
-  --track-strong: rgb(255 255 255 / 0.24);
-  --overlay: rgb(0 0 0 / 0.6);
+  --track: rgb(255 255 255 / 0.14);
+  --track-strong: rgb(255 255 255 / 0.26);
+  --overlay: rgb(0 0 0 / 0.62);
 
-  --brand: #34c88a;
-  --brand-dark: #6fdcaa;
-  --brand-soft: #143325;
-  --brand-softer: #102a1f;
-  --on-brand: #06281a;
+  --aura:
+    radial-gradient(
+      70% 45% at 0% 100%,
+      rgb(255 140 90 / 0.12),
+      transparent 70%
+    ),
+    radial-gradient(
+      60% 50% at 100% 55%,
+      rgb(130 100 255 / 0.18),
+      transparent 70%
+    ),
+    radial-gradient(50% 35% at 90% 0%, rgb(201 241 88 / 0.07), transparent 70%),
+    linear-gradient(180deg, #0d0d12, #0a0a0d);
+  --glass: rgb(26 26 33 / 0.74);
+  --glass-line: rgb(255 255 255 / 0.09);
+
+  /* Dark flips the action colour to lime with ink text. */
+  --brand: #c9f158;
+  --brand-dark: #ddf88f;
+  --brand-soft: #2a2f1a;
+  --brand-softer: #1f2215;
+  --on-brand: #12150a;
+
+  --accent: #c9f158;
+  --accent-soft: #2f3619;
+  --on-accent: #12150a;
+
+  --hero: #1c1c24;
+  --hero-glow:
+    radial-gradient(
+      80% 90% at 100% 0%,
+      rgb(201 241 88 / 0.22),
+      transparent 60%
+    ),
+    radial-gradient(
+      70% 80% at 0% 100%,
+      rgb(150 120 255 / 0.26),
+      transparent 65%
+    );
+  --on-hero: #ffffff;
+  --on-hero-soft: rgb(255 255 255 / 0.68);
+  --hero-line: rgb(255 255 255 / 0.12);
+  --hero-track: rgb(255 255 255 / 0.14);
+  --hero-warn: #fdba74;
+  --hero-danger: #fda4af;
+
+  --cta-sheen: radial-gradient(
+    120% 150% at 88% -50%,
+    rgb(255 255 255 / 0.55),
+    transparent 58%
+  );
 
   --danger: #fda4af;
   --danger-strong: #fb7185;
@@ -108,13 +231,31 @@
   --device-8: #0c3350;
   --on-device-8: #7dd3fc;
 
-  --shadow-card-value: none;
+  --shadow-card-value: inset 0 0 0 0.0625rem rgb(255 255 255 / 0.05);
   --shadow-popover-value:
-    0 8px 24px rgb(0 0 0 / 0.5), 0 2px 6px rgb(0 0 0 / 0.3);
+    0 1.5rem 3rem -0.75rem rgb(0 0 0 / 0.7), 0 0.25rem 0.75rem rgb(0 0 0 / 0.4);
+  --shadow-cta-value:
+    inset 0 0.0625rem 0 rgb(255 255 255 / 0.5),
+    0 0.875rem 1.75rem -0.875rem rgb(201 241 88 / 0.45);
+  --shadow-dock-value:
+    inset 0 0 0 0.0625rem var(--glass-line),
+    0 1.25rem 2.5rem -1rem rgb(0 0 0 / 0.8);
 }
 
 @theme inline {
-  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-sans: Outfit, ui-sans-serif, system-ui, sans-serif;
+
+  /* Softer corners app-wide: one radius scale. */
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.125rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 1.75rem;
+  --radius-4xl: 2.25rem;
+
+  /* One UI curve, one settling curve. No overshoot. */
+  --ease-ui: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
 
   --color-surface: var(--surface);
   --color-card: var(--card);
@@ -126,13 +267,25 @@
   --color-hover-soft: var(--hover-soft);
   --color-track: var(--track);
   --color-track-strong: var(--track-strong);
-  --color-overlay: var(--overlay);
 
   --color-brand: var(--brand);
   --color-brand-dark: var(--brand-dark);
   --color-brand-soft: var(--brand-soft);
   --color-brand-softer: var(--brand-softer);
   --color-on-brand: var(--on-brand);
+
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+  --color-hero: var(--hero);
+  --color-on-hero: var(--on-hero);
+  --color-on-hero-soft: var(--on-hero-soft);
+  --color-hero-line: var(--hero-line);
+  --color-hero-track: var(--hero-track);
+  --color-hero-warn: var(--hero-warn);
+  --color-hero-danger: var(--hero-danger);
+  --color-glass: var(--glass);
+  --color-glass-line: var(--glass-line);
 
   --color-danger: var(--danger);
   --color-danger-strong: var(--danger-strong);
@@ -160,6 +313,8 @@
 
   --shadow-card: var(--shadow-card-value);
   --shadow-popover: var(--shadow-popover-value);
+  --shadow-cta: var(--shadow-cta-value);
+  --shadow-dock: var(--shadow-dock-value);
 
   /* Exact former sizes (10px / 11px at the default root size), in rem. */
   --text-micro: 0.625rem;
@@ -177,7 +332,7 @@
   --animate-device-pulse: device-pulse 0.8s ease-in-out 3;
   @keyframes device-pulse {
     50% {
-      background-color: var(--brand-soft);
+      background-color: var(--accent-soft);
     }
   }
 
@@ -194,11 +349,11 @@
   }
 
   /* Staggered rows/cards; set `animation-delay` per item. Pair with `motion-reduce:animate-none`. */
-  --animate-item-in: item-in 0.3s ease-out both;
+  --animate-item-in: item-in 0.5s var(--ease-enter) both;
   @keyframes item-in {
     from {
       opacity: 0;
-      transform: translateY(-0.25rem);
+      transform: translateY(-0.375rem) scale(0.985);
     }
     to {
       opacity: 1;
@@ -207,7 +362,7 @@
   }
 
   /* View switch: gentle zoom + fade. Pair with `motion-reduce:animate-none`. */
-  --animate-view-zoom: view-zoom 0.35s ease-out;
+  --animate-view-zoom: view-zoom 0.45s var(--ease-enter);
   @keyframes view-zoom {
     from {
       opacity: 0;
@@ -219,12 +374,12 @@
     }
   }
 
-  /* Floating action button entrance. Pair with `motion-reduce:animate-none`. */
-  --animate-pop-in: pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+  /* Floating button, menu and sheet entrance. Pair with `motion-reduce:animate-none`. */
+  --animate-pop-in: pop-in 0.4s var(--ease-enter) 0.05s both;
   @keyframes pop-in {
     from {
       opacity: 0;
-      transform: scale(0.6);
+      transform: translateY(0.75rem) scale(0.96);
     }
     to {
       opacity: 1;
@@ -242,7 +397,7 @@
   }
 
   /* Side drawer entrance. Pair with `motion-reduce:animate-none`. */
-  --animate-drawer-in: drawer-in 0.25s ease-out;
+  --animate-drawer-in: drawer-in 0.4s var(--ease-enter);
   @keyframes drawer-in {
     from {
       opacity: 0;
@@ -259,7 +414,7 @@
    * rows flash, deleted rows fade out and collapse so neighbours glide up.
    * Pair with `motion-reduce:animate-none`.
    */
-  --animate-row-in: row-in 0.3s ease-out;
+  --animate-row-in: row-in 0.4s var(--ease-enter);
   @keyframes row-in {
     from {
       opacity: 0;
@@ -275,7 +430,7 @@
   --animate-row-flash: row-flash 1.2s ease-out;
   @keyframes row-flash {
     from {
-      background-color: var(--brand-soft);
+      background-color: var(--accent-soft);
     }
   }
   --animate-row-out: row-out 0.3s ease-in both;
@@ -293,11 +448,28 @@
     }
   }
 
-  --animate-view-enter: view-enter 0.3s ease-out;
+  /* Progress ring draws from empty to its value, once. Pair with `motion-reduce:animate-none`. */
+  --animate-ring-in: ring-in 1.1s var(--ease-enter) 0.15s both;
+  @keyframes ring-in {
+    from {
+      stroke-dashoffset: 100;
+    }
+  }
+
+  /* Headline figure rises into place, once. Pair with `motion-reduce:animate-none`. */
+  --animate-rise: rise 0.7s var(--ease-enter) both;
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(40%);
+    }
+  }
+
+  --animate-view-enter: view-enter 0.5s var(--ease-enter);
   @keyframes view-enter {
     from {
       opacity: 0;
-      transform: translateY(-0.5rem);
+      transform: translateY(-0.5rem) scale(0.992);
     }
     to {
       opacity: 1;
@@ -306,14 +478,92 @@
   }
 }
 
+/* Ambient ground. On `body` and on full-screen layers that cover it. */
+@utility bg-aura {
+  background-color: var(--surface);
+  background-image: var(--aura);
+  background-attachment: fixed;
+}
+
+/* Dimmed backdrop under dialogs; the page behind goes soft. */
+@utility bg-overlay {
+  background-color: var(--overlay);
+  backdrop-filter: blur(0.375rem);
+}
+
+/* Frosted floating surface: dock, sidebar, sticky bars. */
+@utility glass {
+  background-color: var(--glass);
+  backdrop-filter: blur(1.25rem) saturate(1.6);
+  box-shadow: var(--shadow-dock-value);
+}
+
+/* Primary pill: action fill + sheen + drop. */
+@utility cta {
+  background-color: var(--brand);
+  background-image: var(--cta-sheen);
+  color: var(--on-brand);
+}
+
+/* Obsidian feature card with its two glows. */
+@utility hero-card {
+  background-color: var(--hero);
+  background-image: var(--hero-glow);
+  color: var(--on-hero);
+}
+
+/*
+ * Hover/press answer for buttons and linked cards: step up on hover (fine
+ * pointer only), sink on press. Transform only; off under reduced motion.
+ */
+@utility pressable {
+  transition:
+    transform 0.15s var(--ease-ui),
+    background-color 0.15s var(--ease-ui),
+    border-color 0.15s var(--ease-ui),
+    box-shadow 0.15s var(--ease-ui),
+    color 0.15s var(--ease-ui);
+  &:active {
+    transform: translateY(0.0625rem) scale(0.985);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    &:hover:not(:active, :disabled) {
+      transform: translateY(-0.0625rem);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+    &:active,
+    &:hover:not(:active, :disabled) {
+      transform: none;
+    }
+  }
+}
+
 @layer base {
   body {
-    @apply bg-surface text-ink font-sans antialiased;
+    @apply bg-aura text-ink font-sans antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background-color: var(--accent);
+    color: var(--on-accent);
+  }
+
+  input,
+  progress {
+    accent-color: var(--brand);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-brand);
-    outline-offset: 2px;
+    outline: 0.125rem solid var(--color-brand);
+    outline-offset: 0.125rem;
   }
 
   /* Dictation popup. Pair with `motion-reduce:animate-none`. */

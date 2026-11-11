@@ -45,10 +45,12 @@ const NotificationsView = () => {
               data-e2e="notifications:mark-all-read"
               disabled={unread === 0}
               onClick={ctx.markAllRead}
-              className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-semibold text-brand-dark hover:bg-brand-softer disabled:text-ink-soft disabled:opacity-60 disabled:hover:bg-transparent"
+              className="pressable inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full border border-line bg-card px-3.5 text-xs font-semibold text-ink shadow-card hover:bg-brand-softer disabled:text-ink-soft disabled:opacity-60 disabled:hover:bg-card"
             >
               <CheckCheck className="h-4 w-4" aria-hidden="true" />
-              Oznacz wszystkie jako przeczytane
+              <span className="max-sm:sr-only">
+                Oznacz wszystkie jako przeczytane
+              </span>
             </button>
           }
         />

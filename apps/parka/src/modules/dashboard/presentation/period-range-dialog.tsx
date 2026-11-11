@@ -26,7 +26,7 @@ const WEEKDAYS = weekdayNames();
 const YEARS_BACK = 20;
 
 const MONTH_CELL =
-  'grid h-11 place-items-center rounded-lg text-sm capitalize transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:cursor-not-allowed disabled:opacity-30';
+  'grid h-11 place-items-center rounded-full text-sm capitalize transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:cursor-not-allowed disabled:opacity-30';
 
 const TITLE_BUTTON =
   'flex h-10 min-w-0 flex-1 items-center justify-center gap-1 rounded-lg px-2 text-sm font-semibold capitalize transition-colors hover:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
@@ -296,8 +296,8 @@ export const PeriodRangeDialog = ({
                     DAY_CELL,
                     day.slice(0, 7) !== month && 'text-ink-soft',
                     inside && 'bg-brand-soft text-brand',
-                    edge && 'rounded-lg bg-brand font-semibold text-on-brand',
-                    !edge && !inside && 'rounded-lg hover:bg-hover-soft',
+                    edge && 'rounded-full bg-brand font-semibold text-on-brand',
+                    !edge && !inside && 'rounded-full hover:bg-hover-soft',
                   )}
                 >
                   {Number(day.slice(8))}
@@ -316,7 +316,7 @@ export const PeriodRangeDialog = ({
         data-e2e="dashboard:period-range-apply"
         disabled={!complete}
         onClick={apply}
-        className="mt-3 h-11 w-full rounded-xl bg-brand px-3 text-sm font-semibold text-on-brand transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
+        className="mt-3 h-11 w-full rounded-full bg-brand px-3 text-sm font-semibold text-on-brand transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
       >
         Zastosuj
       </button>

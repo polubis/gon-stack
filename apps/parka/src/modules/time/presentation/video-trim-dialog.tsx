@@ -80,7 +80,7 @@ export const VideoTrimDialog = ({
         <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-overlay" />
         <Dialog.Content
           data-e2e="time:attachment-trim"
-          className="fixed inset-x-4 top-1/2 z-(--z-modal) mx-auto flex max-h-[90dvh] max-w-md -translate-y-1/2 animate-view-enter flex-col gap-3 overflow-y-auto rounded-2xl bg-card p-4 shadow-lg motion-reduce:animate-none focus:outline-none"
+          className="fixed inset-x-4 top-1/2 z-(--z-modal) mx-auto flex max-h-[90dvh] max-w-md -translate-y-1/2 animate-view-enter flex-col gap-3 overflow-y-auto rounded-4xl border border-line bg-card p-5 shadow-lg motion-reduce:animate-none focus:outline-none"
         >
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">

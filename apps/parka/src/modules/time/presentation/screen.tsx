@@ -43,7 +43,7 @@ type Props = {
 const VIEWS_PANEL = 'time-views';
 
 const ADD_BUTTON =
-  'inline-flex items-center justify-center gap-2 rounded-xl bg-brand text-sm font-semibold text-on-brand transition-colors hover:bg-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2';
+  'pressable cta shadow-cta inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold hover:bg-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2';
 
 /** Day the period is anchored on: today while it is inside, else its start. */
 const anchorOf = (period: Period, today: string): string =>
@@ -125,7 +125,7 @@ const Screen = ({ kind, children }: Props) => {
       <div className="md:px-4 lg:px-6 xl:px-12">
         <ScreenHeader
           title="Czas"
-          titleClassName="text-2xl font-bold tracking-tight lg:text-3xl"
+          eyebrow="Twój"
           action={
             <>
               <StatusesButton />
@@ -218,7 +218,7 @@ const Screen = ({ kind, children }: Props) => {
           aria-label="Dodaj"
           className={cn(
             ADD_BUTTON,
-            'pointer-events-auto absolute bottom-0 right-4 h-14 w-14 animate-pop-in rounded-full shadow-popover motion-reduce:animate-none',
+            'pointer-events-auto absolute bottom-0 right-4 h-14 w-14 animate-pop-in rounded-full motion-reduce:animate-none',
           )}
         >
           <Plus className="h-6 w-6" aria-hidden="true" />

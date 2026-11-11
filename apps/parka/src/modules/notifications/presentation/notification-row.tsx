@@ -47,7 +47,7 @@ export const NotificationRow = ({
       data-e2e={`notifications:row:${notification.id}`}
       className={cn(
         'flex min-w-0 flex-col gap-1',
-        notification.read ? 'bg-surface' : 'border-brand',
+        notification.read && 'bg-glass shadow-none',
       )}
     >
       <div className="flex items-start gap-3">

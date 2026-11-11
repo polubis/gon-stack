@@ -13,7 +13,7 @@ export const AppUpdateBanner = () => {
     <div
       role="status"
       data-e2e="app-update:banner"
-      className="fixed top-4 left-1/2 z-(--z-popover) flex w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 animate-item-in items-center gap-3 rounded-2xl border border-line-strong bg-card p-3 shadow-popover motion-reduce:animate-none sm:p-4"
+      className="fixed top-4 left-1/2 z-(--z-popover) flex w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 animate-item-in items-center gap-3 rounded-3xl border border-line bg-card p-3 shadow-popover motion-reduce:animate-none sm:p-4"
     >
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand">
         <RefreshCw className="h-5 w-5" aria-hidden="true" />
@@ -30,7 +30,7 @@ export const AppUpdateBanner = () => {
         type="button"
         onClick={() => window.location.reload()}
         data-e2e="app-update:refresh"
-        className="shrink-0 rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-on-brand hover:bg-brand-dark"
+        className="cta shadow-cta shrink-0 rounded-full px-4 py-2 text-sm font-semibold hover:bg-brand-dark"
       >
         Odśwież
       </button>

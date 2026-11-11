@@ -70,7 +70,16 @@ export const StatsSkeleton = () => (
     aria-hidden="true"
     className="flex flex-col gap-3 md:gap-4 xl:grid xl:grid-cols-12"
   >
-    <StatsCard className="xl:col-span-6" />
+    <div className="hero-card flex flex-col gap-5 rounded-4xl p-5 md:p-7 xl:col-span-6">
+      <div className="flex items-center gap-5">
+        <Skeleton className="size-28 shrink-0 rounded-full bg-hero-track md:size-32" />
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-4 w-32 bg-hero-track" />
+          <Skeleton className="h-10 w-24 bg-hero-track" />
+        </div>
+      </div>
+      <Skeleton className="h-12 w-full bg-hero-track" />
+    </div>
     <StatsCard className="xl:col-span-6" />
     <StatsCard className="xl:col-span-6" />
     <StatsCard className="xl:col-span-6" />

@@ -25,27 +25,28 @@ export const DashboardSkeleton = () => (
       className="xl:col-span-6 xl:col-start-1 xl:row-start-1"
       aria-hidden="true"
     >
-      <Card className="flex flex-col items-center gap-1 py-6 xl:h-full xl:justify-center">
-        <Skeleton className="h-4 w-40 md:h-5" />
-        <Skeleton className="h-10 w-56 md:h-12" />
-        <Skeleton className="h-5 w-24 md:h-6" />
-        <div className="mt-4 grid w-full max-w-md grid-cols-3 divide-x divide-line border-t border-line pt-4">
-          {Array.from({ length: 3 }, (_, i) => (
-            <div key={i} className="flex flex-col items-center gap-0.5 px-2">
-              <div className="flex min-h-8 items-end">
-                <Skeleton className="h-4 w-16" />
-              </div>
-              <div className="min-h-10">
-                <Skeleton
-                  className={
-                    i === 2 ? 'h-8.5 w-12 md:h-9.5' : 'h-5 w-12 md:h-6'
-                  }
-                />
-              </div>
-            </div>
-          ))}
+      <div className="hero-card flex flex-col gap-5 rounded-4xl p-5 md:p-7 xl:h-full xl:justify-between">
+        <div className="flex flex-col gap-1">
+          <div className="flex min-h-7 items-center">
+            <Skeleton className="h-4 w-40 bg-hero-track" />
+          </div>
+          <Skeleton className="h-12 w-56 bg-hero-track md:h-15" />
         </div>
-      </Card>
+        <div className="flex items-center gap-4 md:gap-6">
+          <Skeleton className="size-22 rounded-full bg-hero-track md:size-28" />
+          <div className="min-w-0 flex-1 divide-y divide-hero-line">
+            {Array.from({ length: 3 }, (_, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0"
+              >
+                <Skeleton className="h-4 w-24 bg-hero-track md:h-5" />
+                <Skeleton className="h-5 w-16 bg-hero-track md:h-6" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
 
     <Card

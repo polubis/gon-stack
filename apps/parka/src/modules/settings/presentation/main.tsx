@@ -167,7 +167,11 @@ const SettingsView = () => {
     >
       <LoadingBanner active={isLoading && !initializing} />
       <div className="md:px-4 lg:px-6 xl:px-12">
-        <ScreenHeader title="Ustawienia" action={<UnreadLink />} />
+        <ScreenHeader
+          title="Ustawienia"
+          eyebrow="Twoje"
+          action={<UnreadLink />}
+        />
       </div>
       <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2 md:gap-6 md:px-8 lg:px-10 xl:px-16">
         {error ? (

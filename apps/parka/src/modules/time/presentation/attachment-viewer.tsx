@@ -28,7 +28,7 @@ export const AttachmentViewer = ({
       <Dialog.Portal>
         <Dialog.Content
           data-e2e="time:attachment-viewer"
-          className="fixed inset-0 z-(--z-modal) flex animate-view-enter flex-col bg-surface motion-reduce:animate-none focus:outline-none"
+          className="fixed inset-0 z-(--z-modal) flex animate-view-enter flex-col bg-aura motion-reduce:animate-none focus:outline-none"
         >
           <div className="flex items-center gap-3 border-b border-line-strong bg-card px-4 py-3">
             <div className="min-w-0 flex-1">

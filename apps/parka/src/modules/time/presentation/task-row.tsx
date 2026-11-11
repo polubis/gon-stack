@@ -57,10 +57,10 @@ export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
         entrance.entering && step !== undefined ? stagger(step) : undefined
       }
       className={cn(
-        'flex items-start gap-0.5 rounded-xl py-1 pl-1 pr-0.5 transition-colors hover:bg-hover-soft',
+        'flex items-start gap-0.5 rounded-2xl py-1 pl-1 pr-0.5 transition-colors duration-200 hover:bg-hover-soft motion-reduce:transition-none',
         entrance.entering && 'animate-item-in motion-reduce:animate-none',
         change.className,
-        now && 'bg-brand-softer',
+        now && 'bg-accent-soft',
       )}
     >
       {board ? (
@@ -77,7 +77,10 @@ export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
           className="grid h-8 w-8 shrink-0 place-items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         >
           {board.done ? (
-            <CheckCircle2 className="h-5 w-5 text-brand" aria-hidden="true" />
+            <CheckCircle2
+              className="h-5.5 w-5.5 fill-accent text-on-accent"
+              aria-hidden="true"
+            />
           ) : board.inProgress ? (
             <LoaderCircle
               className="h-5 w-5 animate-spin text-brand motion-reduce:animate-none"
@@ -85,7 +88,7 @@ export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
               aria-hidden="true"
             />
           ) : (
-            <Circle className="h-5 w-5 text-ink-soft" aria-hidden="true" />
+            <Circle className="h-5.5 w-5.5 text-ink-soft" aria-hidden="true" />
           )}
         </button>
       ) : (
@@ -107,7 +110,9 @@ export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
         <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-ink-soft">
           <TaskKey taskKey={task.key} data-e2e={`time:task-key:${task.id}`} />
           {board?.at != null ? (
-            <time className="tabular-nums">{board.at}</time>
+            <time className="rounded-full bg-hover px-2 py-0.5 font-medium tabular-nums text-ink">
+              {board.at}
+            </time>
           ) : null}
           {category ? (
             <span className="inline-flex min-w-0 items-center gap-1">

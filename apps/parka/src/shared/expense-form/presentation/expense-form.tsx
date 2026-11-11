@@ -231,10 +231,10 @@ export const ExpenseForm = ({
 
         <div
           className={cn(
-            'mt-4 flex items-center gap-3 border-t border-line bg-card py-3',
+            'mt-4 flex items-center gap-3 py-3',
             dialog
-              ? 'flex-wrap'
-              : '-mx-4 px-4 md:-mx-8 md:px-8 lg:-mx-10 lg:px-10 xl:-mx-16 xl:px-16',
+              ? 'flex-wrap border-t border-line bg-card'
+              : 'mb-2 rounded-3xl border border-line bg-card pl-5 pr-3 shadow-popover',
           )}
         >
           <div className="flex-1">

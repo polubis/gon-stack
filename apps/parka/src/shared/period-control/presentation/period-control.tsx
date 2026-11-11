@@ -24,16 +24,16 @@ import {
 } from '../domain/format';
 
 const STEP_BUTTON =
-  'grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-line-strong bg-card text-ink transition-colors hover:bg-hover-soft disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
+  'pressable grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line bg-card text-ink shadow-card hover:bg-brand-softer disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
 
 const SEGMENT =
   'relative flex h-full items-center justify-center transition-colors hover:bg-hover-soft focus-visible:z-(--z-raised) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
 
 const PANEL =
-  'z-(--z-popover) rounded-xl border border-line-strong bg-card p-2 shadow-lg focus:outline-none';
+  'z-(--z-popover) rounded-2xl border border-line bg-card p-2 shadow-popover focus:outline-none';
 
 const OPTION =
-  'flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
+  'flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
 
 const JUMP_LABEL = {
   day: 'Wybierz dzień',
@@ -225,11 +225,14 @@ export const PeriodControl = ({
         }}
       >
         <Popover.Anchor asChild>
-          <div className="flex h-11 min-w-0 flex-1 rounded-xl border border-line-strong bg-card text-sm font-semibold">
+          <div className="flex h-11 min-w-0 flex-1 rounded-full border border-line bg-card text-sm font-semibold shadow-card">
             <Popover.Trigger
               data-e2e="period-control:value"
               aria-label={`${JUMP_LABEL[period.kind]}: ${periodLabel(period)}`}
-              className={cn(SEGMENT, 'min-w-0 basis-3/4 rounded-l-xl px-2')}
+              className={cn(
+                SEGMENT,
+                'min-w-0 basis-3/4 rounded-l-full pl-4 pr-2',
+              )}
             >
               <span
                 data-e2e="period-control:label"
@@ -246,7 +249,7 @@ export const PeriodControl = ({
                 aria-label={`Zakres: ${PERIOD_KIND_LABELS[period.kind]}`}
                 className={cn(
                   SEGMENT,
-                  'basis-1/4 rounded-r-xl border-l border-line-strong',
+                  'basis-1/4 rounded-r-full border-l border-line pr-1',
                 )}
               >
                 <CalendarRange

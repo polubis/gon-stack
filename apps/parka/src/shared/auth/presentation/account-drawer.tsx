@@ -42,14 +42,14 @@ type Loaded =
   | { status: 'ready'; accounts: Accounts };
 
 const ITEM =
-  'flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm text-ink hover:bg-hover focus-visible:bg-hover focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-50 aria-disabled:opacity-50';
+  'flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm text-ink hover:bg-hover focus-visible:bg-hover focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-50 aria-disabled:opacity-50';
 
 const SwitchingScreen = ({ email }: { email: string }) => (
   <div
     role="status"
     aria-live="polite"
     data-e2e="account-menu:switching"
-    className="fixed inset-0 z-(--z-modal) flex flex-col gap-4 bg-surface p-4 lg:p-8"
+    className="fixed inset-0 z-(--z-modal) flex flex-col gap-4 bg-aura p-4 lg:p-8"
   >
     <p className="text-sm font-medium text-ink-soft">
       Przełączanie na {email}…
@@ -223,13 +223,13 @@ const Drawer = ({
         <Dialog.Content
           data-e2e="account-menu:menu"
           aria-describedby={undefined}
-          className="fixed inset-y-0 right-0 z-(--z-modal) flex w-full max-w-sm animate-drawer-in flex-col overflow-y-auto overscroll-contain bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-popover focus:outline-none motion-reduce:animate-none"
+          className="fixed inset-y-2 right-2 z-(--z-modal) flex w-[calc(100%-1rem)] max-w-sm animate-drawer-in flex-col overflow-y-auto overscroll-contain rounded-4xl border border-line bg-card p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-popover focus:outline-none motion-reduce:animate-none"
         >
-          <div className="flex items-start gap-3">
+          <div className="hero-card flex items-start gap-3 rounded-3xl p-4">
             <AccountAvatar
               label={name ?? user.email}
               avatarUrl={profile.avatarUrl ?? user.avatarUrl}
-              className="size-14 text-xl"
+              className="size-14 bg-accent text-xl text-on-accent"
             />
             <div className="min-w-0 flex-1">
               <Dialog.Title
@@ -239,13 +239,15 @@ const Drawer = ({
                 {name ?? user.email}
               </Dialog.Title>
               {name ? (
-                <p className="truncate text-sm text-ink-soft">{user.email}</p>
+                <p className="truncate text-sm text-on-hero-soft">
+                  {user.email}
+                </p>
               ) : null}
               <button
                 type="button"
                 data-e2e="account-menu:edit"
                 onClick={() => openModal(PROFILE_MODAL)}
-                className="mt-2 inline-flex items-center gap-2 rounded-lg border border-line-strong px-3 py-1.5 text-sm font-medium hover:bg-hover focus-visible:outline-2 focus-visible:outline-brand"
+                className="pressable mt-3 inline-flex items-center gap-2 rounded-full border border-hero-line px-3.5 py-2 text-sm font-medium hover:bg-hero-track focus-visible:outline-2 focus-visible:outline-accent"
               >
                 <Pencil className="size-4" aria-hidden="true" />
                 Edytuj profil
@@ -253,7 +255,7 @@ const Drawer = ({
             </div>
             <Dialog.Close
               aria-label="Zamknij"
-              className="grid size-8 shrink-0 place-items-center rounded-full text-ink-soft transition-colors hover:bg-hover focus-visible:outline-2 focus-visible:outline-brand"
+              className="grid size-8 shrink-0 place-items-center rounded-full text-on-hero-soft transition-colors hover:bg-hero-track focus-visible:outline-2 focus-visible:outline-accent"
             >
               <X className="size-4" aria-hidden="true" />
             </Dialog.Close>

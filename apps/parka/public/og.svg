@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Parka">
-  <rect width="1200" height="630" fill="#0b6e46" />
-  <g transform="translate(485 160) scale(10)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M11 20a10 10 0 0010-10 25.9 25.9 0 00-1.04-7.281 1 1 0 00-1.755-.325C15.833 5.5 13 5.5 9.8 6.1A7 7 0 0011 20" />
-    <path d="M2 21a5 5 0 012.911-4.544C7.613 15.212 8.351 15.24 11 13" />
+  <rect width="1200" height="630" fill="#121216" />
+  <g transform="translate(485 160) scale(10)" fill="none" stroke="#c9f158" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M11 20a10 10 0 0010-10 25.9 25.9 0 00-1.04-7.281 1 1 0 00-1.755-.325C15.833 5.5 13 5.5 9.8 6.1A7 7 0 0011 20"/>
+    <path d="M2 21a5 5 0 012.911-4.544C7.613 15.212 8.351 15.24 11 13"/>
   </g>
-  <text x="600" y="480" fill="#fff" font-size="72" font-weight="600" text-anchor="middle" font-family="Inter, Arial, sans-serif">
+  <text x="600" y="480" fill="#fff" font-size="72" font-weight="600" text-anchor="middle" font-family="Outfit, Inter, Arial, sans-serif">
     Parka
   </text>
 </svg>

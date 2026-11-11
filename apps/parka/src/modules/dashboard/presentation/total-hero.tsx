@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react';
 import { TrendingDown, TrendingUp } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
-import { Card } from '@/shared/ui/layout';
-import { ProgressBar } from '@/shared/ui/controls';
+import { Ring } from '@/shared/ui/ring';
 import { LIMITS_SECTION_ID } from '../configuration/constraints';
 import { limitForPeriod, type Period } from '@/shared/period/period';
 import { money, percent } from '../domain/format';
@@ -12,11 +11,9 @@ import { focusSection } from './focus-section';
 import { limitTone } from './selectors';
 
 const Stat = ({ label, children }: { label: string; children: ReactNode }) => (
-  <div className="flex min-w-0 flex-col items-center gap-0.5 px-2">
-    <dt className="flex min-h-8 items-end text-center text-xs text-ink-soft">
-      {label}
-    </dt>
-    <dd className="flex min-h-10 w-full flex-col items-center text-sm font-semibold tabular-nums md:text-base">
+  <div className="flex min-w-0 items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
+    <dt className="min-w-0 text-xs text-on-hero-soft md:text-sm">{label}</dt>
+    <dd className="shrink-0 text-sm font-semibold tabular-nums md:text-base">
       {children}
     </dd>
   </div>
@@ -48,29 +45,19 @@ const Limit = ({ summary, period }: { summary: Summary; period: Period }) => {
       <a
         href={`#${LIMITS_SECTION_ID}`}
         onClick={focusSection}
-        className="font-semibold text-brand-dark underline"
+        className="font-semibold text-accent underline"
       >
         Ustaw limit
       </a>
     );
   }
   const left = limit - summary.total;
-  const pct = (summary.total / limit) * 100;
   return (
-    <span className="flex w-full flex-col items-center gap-1.5">
-      <span
-        data-e2e="dashboard:limit-left"
-        className={cn(left < 0 && 'text-danger-strong')}
-      >
-        {money(Math.abs(left))}
-      </span>
-      <span className="block w-full max-w-24">
-        <ProgressBar
-          pct={pct}
-          tone={limitTone(pct)}
-          label={`Wykorzystano ${Math.round(pct)}% limitu na ${LIMIT_NOUN[period.kind]} (${money(limit)})`}
-        />
-      </span>
+    <span
+      data-e2e="dashboard:limit-left"
+      className={cn(left < 0 && 'text-hero-danger')}
+    >
+      {money(Math.abs(left))}
     </span>
   );
 };
@@ -84,53 +71,69 @@ export const TotalHero = ({
 }) => {
   const shown = Math.round(summary.change) !== 0;
   const up = summary.change > 0;
+  const limit = scaledLimit(summary, period);
+  const pct = limit === null ? null : (summary.total / limit) * 100;
 
   return (
-    <Card className="flex flex-col items-center gap-1 py-6 text-center xl:h-full xl:justify-center">
-      <p className="text-xs text-ink-soft md:text-sm">
-        Wydatki {PERIOD_NOUN[period.kind]}
-      </p>
-      <p
-        data-e2e="dashboard:total"
-        className="text-4xl font-bold tracking-tight tabular-nums md:text-5xl"
-      >
-        {money(summary.total)}
-      </p>
-      {shown ? (
+    <div className="hero-card flex flex-col gap-5 rounded-4xl p-5 shadow-popover md:p-7 xl:h-full xl:justify-between">
+      <div className="flex flex-col gap-1">
+        <div className="flex min-h-7 items-center justify-between gap-3">
+          <p className="text-sm text-on-hero-soft">
+            Wydatki {PERIOD_NOUN[period.kind]}
+          </p>
+          {shown ? (
+            <p
+              data-e2e="dashboard:change"
+              className="flex items-center gap-1 rounded-full bg-hero-track px-2.5 py-1 text-xs font-medium"
+            >
+              {up ? (
+                <TrendingUp
+                  className="h-3.5 w-3.5 text-hero-danger"
+                  aria-hidden="true"
+                />
+              ) : (
+                <TrendingDown
+                  className="h-3.5 w-3.5 text-accent"
+                  aria-hidden="true"
+                />
+              )}
+              {percent(summary.change)}
+            </p>
+          ) : null}
+        </div>
         <p
-          data-e2e="dashboard:change"
-          className="flex h-5 items-center gap-1 text-sm font-medium text-ink-soft md:h-6 md:text-base"
+          data-e2e="dashboard:total"
+          className="animate-rise text-5xl font-semibold tracking-tight tabular-nums motion-reduce:animate-none md:text-6xl"
         >
-          {up ? (
-            <TrendingUp
-              className="h-4 w-4 text-danger-strong"
-              aria-hidden="true"
-            />
-          ) : (
-            <TrendingDown
-              className="h-4 w-4 text-brand-dark"
-              aria-hidden="true"
-            />
-          )}
-          {percent(summary.change)}
+          {money(summary.total)}
         </p>
-      ) : (
-        // Same height as the change row: the card never jumps.
-        <span className="block h-5 md:h-6" aria-hidden="true" />
-      )}
-      <dl className="mt-4 grid w-full max-w-md grid-cols-3 divide-x divide-line border-t border-line pt-4">
-        <Stat label="Średnio dziennie">
-          <span data-e2e="dashboard:daily-average">
-            {money(summary.dailyAverage)}
-          </span>
-        </Stat>
-        <Stat label="Transakcje">
-          <span data-e2e="dashboard:transactions">{summary.transactions}</span>
-        </Stat>
-        <Stat label={limitLabel(summary, period)}>
-          <Limit summary={summary} period={period} />
-        </Stat>
-      </dl>
-    </Card>
+      </div>
+      <div className="flex items-center gap-4 md:gap-6">
+        {pct === null ? null : (
+          <Ring
+            surface="hero"
+            pct={pct}
+            tone={limitTone(pct)}
+            label={`Wykorzystano ${Math.round(pct)}% limitu na ${LIMIT_NOUN[period.kind]} (${money(limit ?? 0)})`}
+            className="size-22 md:size-28"
+          />
+        )}
+        <dl className="min-w-0 flex-1 divide-y divide-hero-line">
+          <Stat label="Średnio dziennie">
+            <span data-e2e="dashboard:daily-average">
+              {money(summary.dailyAverage)}
+            </span>
+          </Stat>
+          <Stat label="Transakcje">
+            <span data-e2e="dashboard:transactions">
+              {summary.transactions}
+            </span>
+          </Stat>
+          <Stat label={limitLabel(summary, period)}>
+            <Limit summary={summary} period={period} />
+          </Stat>
+        </dl>
+      </div>
+    </div>
   );
 };
