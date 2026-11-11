@@ -131,6 +131,7 @@ const Screen = ({ kind, children }: Props) => {
               <UnreadLink />
               <AddMenu
                 side="bottom"
+                data-e2e="time:add-trigger"
                 className={cn(ADD_BUTTON, 'h-11 shrink-0 px-4 max-md:hidden')}
               >
                 <Plus className="h-4 w-4" aria-hidden="true" />
@@ -196,6 +197,7 @@ const Screen = ({ kind, children }: Props) => {
                       </span>
                       <Toggle
                         label="Tylko niezrobione"
+                        data-e2e="time:open-only-toggle"
                         checked={openOnly}
                         onChange={setOpenOnly}
                       />
@@ -214,6 +216,7 @@ const Screen = ({ kind, children }: Props) => {
         <AddMenu
           side="top"
           aria-label="Dodaj"
+          data-e2e="time:add-fab"
           className={cn(
             ADD_BUTTON,
             'pointer-events-auto absolute bottom-0 right-4 h-14 w-14 animate-pop-in rounded-full motion-reduce:animate-none',

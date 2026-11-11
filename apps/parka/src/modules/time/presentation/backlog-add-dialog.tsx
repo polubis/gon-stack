@@ -112,6 +112,7 @@ export const BacklogAddDialog = ({
         <Field label="Nazwa">
           <ClearableInput
             type="text"
+            data-e2e="time:backlog-name"
             value={title}
             maxLength={TASK_TITLE_MAX_LENGTH}
             onChange={(e) => setTitle(e.target.value)}

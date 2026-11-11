@@ -20,6 +20,7 @@ export const CATEGORIES_E2E_IDS = [
   'categories:toast',
   'categories:new-dialog',
   'categories:list-dialog',
+  'categories:form-header',
 ] as const;
 
 export type CategoriesE2eDynamicId =

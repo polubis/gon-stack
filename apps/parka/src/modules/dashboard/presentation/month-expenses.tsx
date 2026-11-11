@@ -332,6 +332,7 @@ export const MonthExpenses = ({
         <div
           role="group"
           aria-label="Filtruj wydatki wg kategorii"
+          data-e2e="dashboard:filter-row"
           className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden md:mx-0 md:px-0 md:pb-1 md:[scrollbar-width:thin]"
         >
           <Chip

@@ -161,6 +161,7 @@ export const VoiceOverlay = ({
         <textarea
           ref={preview}
           aria-label="Podgląd dyktowania"
+          data-e2e="dictation:preview"
           placeholder="Zacznij mówić…"
           value={transcript}
           onChange={(e) => {
@@ -173,6 +174,7 @@ export const VoiceOverlay = ({
         <button
           ref={toggle}
           type="button"
+          data-e2e="dictation:toggle"
           onClick={onToggle}
           className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-ink hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         >
@@ -186,6 +188,7 @@ export const VoiceOverlay = ({
         <div className="flex w-full gap-2">
           <button
             type="button"
+            data-e2e="dictation:cancel"
             onClick={onCancel}
             className="flex-1 rounded-full bg-hover px-5 py-2 text-sm font-medium text-ink hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           >
@@ -193,6 +196,7 @@ export const VoiceOverlay = ({
           </button>
           <button
             type="button"
+            data-e2e="dictation:insert"
             disabled={transcript === ''}
             onClick={onAccept}
             className="flex flex-1 items-center justify-center gap-2 rounded-full bg-ink px-5 py-2 text-sm font-medium text-card hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:opacity-40"

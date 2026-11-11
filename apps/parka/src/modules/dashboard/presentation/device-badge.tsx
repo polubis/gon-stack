@@ -10,7 +10,12 @@ import { DeviceBubble } from '@/shared/device/presentation/device-bubble';
 export const DeviceBadge = ({ device }: { device: Device }) => (
   <span className="flex min-w-0 items-center gap-1">
     <DeviceBubble device={device} className="h-5 w-5" iconClassName="h-3 w-3" />
-    <span className="truncate max-sm:sr-only">{deviceLabel(device)}</span>
+    <span
+      data-e2e={`dashboard:expense-device-name:${device.id}`}
+      className="truncate max-sm:sr-only"
+    >
+      {deviceLabel(device)}
+    </span>
     <span className="shrink-0 text-caption text-ink-soft max-sm:sr-only">
       {deviceShortId(device.id)}
     </span>

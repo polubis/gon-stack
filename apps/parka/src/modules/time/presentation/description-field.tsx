@@ -109,6 +109,7 @@ export const DescriptionField = ({ value, onChange }: Props) => {
         maxLength={TASK_DESCRIPTION_MAX_LENGTH}
         aria-describedby={counterId}
         label="Opis"
+        data-e2e="time:description-input"
         onChange={(e) => onChange(e.target.value)}
         placeholder="Dodatkowe informacje o zadaniu"
         className="max-h-48 resize-y"

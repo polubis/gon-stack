@@ -44,15 +44,25 @@ const commands = {
     await getByE2e('dashboard:upcoming-toggle').click();
     await expect(getByE2e('dashboard:upcoming-dialog')).toBeVisible();
   },
-  'the panel announces only the three nearest': async ({ getByE2e }) => {
+  'the panel announces only the three nearest': async ({
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
     const panel = getByE2e('dashboard:upcoming');
     await panel.scrollIntoViewIfNeeded();
-    await expect(panel.getByRole('listitem')).toHaveCount(3);
-    await expect(panel.getByText('Abonament 4')).toHaveCount(0);
-  },
-  'the list holds all five payments': async ({ getByE2e }) => {
+    await expect(getByE2ePrefix('dashboard:upcoming:', panel)).toHaveCount(3);
     await expect(
-      getByE2e('dashboard:upcoming-dialog').getByRole('listitem'),
+      getByE2ePrefix('dashboard:upcoming:', panel).filter({
+        hasText: 'Abonament 4',
+      }),
+    ).toHaveCount(0);
+  },
+  'the list holds all five payments': async ({ getByE2e, getByE2ePrefix }) => {
+    await expect(
+      getByE2ePrefix(
+        'dashboard:upcoming:',
+        getByE2e('dashboard:upcoming-dialog'),
+      ),
     ).toHaveCount(5);
   },
 } satisfies CommandRegistry<Ctx>;

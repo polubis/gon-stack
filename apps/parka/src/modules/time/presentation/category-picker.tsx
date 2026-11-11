@@ -62,6 +62,7 @@ export const CategoryPicker = ({
               <input
                 type="radio"
                 name="task-category"
+                data-e2e={`time:category-option:${item.name}`}
                 value={item.id}
                 checked={item.id === value}
                 onChange={() => onChange(item.id)}

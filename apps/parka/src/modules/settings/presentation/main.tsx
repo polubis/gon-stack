@@ -1,3 +1,4 @@
+import type { E2eId } from '@/__e2e__/selectors';
 import { useEffect, type ReactNode } from 'react';
 import {
   ChevronRight,
@@ -31,20 +32,42 @@ import { SettingsSkeleton } from './settings-skeleton';
 const ThemeLabel = ({
   icon: Icon,
   text,
+  mode,
 }: {
   icon: LucideIcon;
   text: string;
+  mode: ThemeMode;
 }) => (
   <span className="inline-flex items-center gap-1.5">
-    <Icon className="h-4 w-4" aria-hidden="true" />
+    <Icon
+      className="h-4 w-4"
+      aria-hidden="true"
+      data-e2e={`settings:theme-icon:${mode}`}
+    />
     {text}
   </span>
 );
 
-const THEME_OPTIONS: { value: ThemeMode; label: ReactNode }[] = [
-  { value: 'auto', label: <ThemeLabel icon={SunMoon} text="Auto" /> },
-  { value: 'dark', label: <ThemeLabel icon={Moon} text="Ciemny" /> },
-  { value: 'light', label: <ThemeLabel icon={Sun} text="Jasny" /> },
+const THEME_OPTIONS: {
+  value: ThemeMode;
+  label: ReactNode;
+  'data-e2e': E2eId;
+}[] = [
+  {
+    value: 'auto',
+    label: <ThemeLabel icon={SunMoon} text="Auto" mode="auto" />,
+    'data-e2e': 'settings:theme:auto',
+  },
+  {
+    value: 'dark',
+    label: <ThemeLabel icon={Moon} text="Ciemny" mode="dark" />,
+    'data-e2e': 'settings:theme:dark',
+  },
+  {
+    value: 'light',
+    label: <ThemeLabel icon={Sun} text="Jasny" mode="light" />,
+    'data-e2e': 'settings:theme:light',
+  },
 ];
 
 const SettingsContent = ({ settings }: { settings: Settings }) => {

@@ -22,7 +22,10 @@ export type SettingsE2eDynamicId =
   | `settings:device-name:${string}`
   | `settings:device-this:${string}`
   | `settings:device-photo-input:${string}`
-  | `settings:device-photo-change:${string}`;
+  | `settings:device-photo-change:${string}`
+  | `settings:device-bubble:${string}`
+  | `settings:theme:${string}`
+  | `settings:theme-icon:${string}`;
 
 export type SettingsE2eId =
   (typeof SETTINGS_E2E_IDS)[number] | SettingsE2eDynamicId;

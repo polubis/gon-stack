@@ -183,6 +183,7 @@ export const TaskDialog = ({
         <Field label="Nazwa">
           <ClearableInput
             type="text"
+            data-e2e="time:task-name"
             value={title}
             maxLength={TASK_TITLE_MAX_LENGTH}
             onChange={(e) => setTitle(e.target.value)}
@@ -250,7 +251,12 @@ export const TaskDialog = ({
                 <Repeat className="h-4 w-4" aria-hidden="true" />
                 Powtarzaj
               </span>
-              <Toggle label="Powtarzaj" checked={repeat} onChange={setRepeat} />
+              <Toggle
+                label="Powtarzaj"
+                data-e2e="time:recurring-toggle"
+                checked={repeat}
+                onChange={setRepeat}
+              />
             </div>
             {repeat ? (
               <div className="grid grid-cols-2 gap-3">
@@ -339,6 +345,7 @@ export const TaskDialog = ({
           <div className="ml-auto flex gap-2">
             <Button
               variant="ghost"
+              data-e2e="time:task-cancel"
               onClick={() => closeModal(modal)}
               className="w-auto"
             >

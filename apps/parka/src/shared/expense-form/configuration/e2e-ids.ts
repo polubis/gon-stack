@@ -17,7 +17,8 @@ export type ExpenseFormDynamicE2eId =
   | `expense-form:product-qty:${string | number}`
   | `expense-form:product-discount:${string | number}`
   | `expense-form:product-category:${string | number}`
-  | `expense-form:product-remove:${string | number}`;
+  | `expense-form:product-remove:${string | number}`
+  | `expense-form:product-toggle:${string | number}`;
 
 export type ExpenseFormE2eId =
   (typeof EXPENSE_FORM_E2E_IDS)[number] | ExpenseFormDynamicE2eId;

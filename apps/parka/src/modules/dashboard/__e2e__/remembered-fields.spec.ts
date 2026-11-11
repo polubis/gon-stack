@@ -57,22 +57,23 @@ const commands = {
   'i type "bi" in the shop': async ({ getByE2e }) => {
     await getByE2e('expense-form:merchant').fill('bi');
   },
-  'i open the shop suggestions with the star': async ({ page }) => {
-    await page.getByRole('button', { name: 'Podpowiedzi: Sklep' }).click();
+  'i open the shop suggestions with the star': async ({ getByE2e }) => {
+    await getByE2e('form-memory:toggle:merchant').click();
   },
   'i type "Rossmann" in the shop': async ({ getByE2e }) => {
     await getByE2e('expense-form:merchant').fill('Rossmann');
   },
-  'i pick the shop "Bistro" from the suggestions': async ({ page }) => {
-    await page.getByRole('option', { name: /Bistro/ }).click();
+  'i pick the shop "Bistro" from the suggestions': async ({ getByE2e }) => {
+    await getByE2e('form-memory:option:Bistro').click();
   },
   'i add the expense for 20 in category "Spożywcze"': async ({
     getByE2e,
     page,
+    getByE2ePrefix,
   }) => {
     await getByE2e('expense-form:amount').fill('20');
     await getByE2e('expense-form:category').click();
-    await page.getByRole('option', { name: 'Spożywcze' }).click();
+    await getByE2ePrefix('ui:option:').filter({ hasText: 'Spożywcze' }).click();
     await getByE2e('expense-form:save').click();
     await expect(getByE2e('dashboard:main')).toBeVisible();
     await settle(page);
@@ -80,11 +81,12 @@ const commands = {
   'i add "  Biedronka " paid with "BLIK" in category "Spożywcze"': async ({
     getByE2e,
     page,
+    getByE2ePrefix,
   }) => {
     await getByE2e('expense-form:merchant').fill('  Biedronka ');
     await getByE2e('expense-form:amount').fill('20');
     await getByE2e('expense-form:category').click();
-    await page.getByRole('option', { name: 'Spożywcze' }).click();
+    await getByE2ePrefix('ui:option:').filter({ hasText: 'Spożywcze' }).click();
     await getByE2e('expense-form:method').fill('BLIK');
     await getByE2e('expense-form:save').click();
     await expect(getByE2e('dashboard:main')).toBeVisible();
@@ -103,16 +105,18 @@ const commands = {
     await settle(page);
   },
 
-  'the shop suggestions are "Biedronka" then "Bistro"': async ({ page }) => {
-    await expect(page.getByRole('option')).toHaveText([
+  'the shop suggestions are "Biedronka" then "Bistro"': async ({
+    getByE2ePrefix,
+  }) => {
+    await expect(getByE2ePrefix('form-memory:option:')).toHaveText([
       /^Biedronka/,
       /^Bistro/,
     ]);
   },
   'the shop suggestions are "Biedronka", "Lidl" and "Bistro"': async ({
-    page,
+    getByE2ePrefix,
   }) => {
-    await expect(page.getByRole('option')).toHaveText([
+    await expect(getByE2ePrefix('form-memory:option:')).toHaveText([
       /^Biedronka/,
       /^Lidl/,
       /^Bistro/,

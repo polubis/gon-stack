@@ -19,20 +19,26 @@ import { navigateTo } from '@/shared/router/navigation';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { stashReceipt } from '@/shared/receipt-handoff/receipt-handoff';
 
-type Option = { label: string; icon: LucideIcon } & (
+type Option = { id: string; label: string; icon: LucideIcon } & (
   { href: string } | { modal: string } | { pick: 'photo' | 'file' }
 );
 
 const OPTIONS: readonly Option[] = [
-  { label: 'Wydatek', icon: Receipt, href: APP_ROUTER.newExpense() },
   {
+    id: 'expense',
+    label: 'Wydatek',
+    icon: Receipt,
+    href: APP_ROUTER.newExpense(),
+  },
+  {
+    id: 'recurring',
     label: 'Wydatek cykliczny',
     icon: Repeat,
     href: APP_ROUTER.newExpense({ type: 'recurring' }),
   },
-  { label: 'Ze zdjęcia', icon: Camera, pick: 'photo' },
-  { label: 'Z pliku', icon: Upload, pick: 'file' },
-  { label: 'Kategoria', icon: Tag, modal: NEW_CATEGORY_MODAL },
+  { id: 'photo', label: 'Ze zdjęcia', icon: Camera, pick: 'photo' },
+  { id: 'file', label: 'Z pliku', icon: Upload, pick: 'file' },
+  { id: 'category', label: 'Kategoria', icon: Tag, modal: NEW_CATEGORY_MODAL },
 ];
 
 const KEYS = ['ArrowDown', 'ArrowUp', 'Home', 'End'];
@@ -125,6 +131,7 @@ export const AddMenu = ({
                   <a
                     key={option.label}
                     role="menuitem"
+                    data-e2e={`dashboard:add-option:${option.id}`}
                     href={option.href}
                     className={ITEM}
                   >
@@ -135,6 +142,7 @@ export const AddMenu = ({
                     key={option.label}
                     type="button"
                     role="menuitem"
+                    data-e2e={`dashboard:add-option:${option.id}`}
                     onClick={() => {
                       if ('modal' in option) openFromMenu(option.modal);
                       else {

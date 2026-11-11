@@ -1,3 +1,4 @@
+import type { E2eId } from '@/__e2e__/selectors';
 import { useEffect, useState } from 'react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import {
@@ -27,9 +28,17 @@ import { ReceiptUpload } from './receipt-upload';
 import { RecurringForm } from './recurring-form';
 import { PageSkeleton } from './skeleton';
 
-const KINDS: { value: ExpenseKind; label: string }[] = [
-  { value: 'normal', label: 'Normalny' },
-  { value: 'recurring', label: 'Cykliczny' },
+const KINDS: { value: ExpenseKind; label: string; 'data-e2e': E2eId }[] = [
+  {
+    value: 'normal',
+    label: 'Normalny',
+    'data-e2e': 'expenses-management:kind-normal',
+  },
+  {
+    value: 'recurring',
+    label: 'Cykliczny',
+    'data-e2e': 'expenses-management:kind-recurring',
+  },
 ];
 
 const initialKind = (): ExpenseKind =>

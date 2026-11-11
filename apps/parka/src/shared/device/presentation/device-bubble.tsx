@@ -44,6 +44,7 @@ export const DeviceBubble = ({
       {device.photo ? (
         <img
           data-device-photo=""
+          data-e2e={`device:photo:${device.id}`}
           alt=""
           src={device.photo.variants.at(-1)?.url}
           srcSet={device.photo.variants
@@ -56,6 +57,7 @@ export const DeviceBubble = ({
         <DeviceAvatar
           avatar={device.avatar}
           type={device.type}
+          data-e2e={`device:icon:${device.id}`}
           className={iconClassName}
         />
       )}

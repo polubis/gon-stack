@@ -48,33 +48,27 @@ const commands = {
   'my browser translates the page': async ({ page }) => {
     await page.evaluate(translate);
   },
-  'i pick the category "Rozrywka"': async ({ getByE2e, page }) => {
+  'i pick the category "Rozrywka"': async ({ getByE2e, getByE2ePrefix }) => {
     await getByE2e('expense-form:category').click();
-    await page.getByRole('option', { name: 'Rozrywka' }).click();
+    await getByE2ePrefix('ui:option:').filter({ hasText: 'Rozrywka' }).click();
   },
-  'i pick the category "Spożywcze"': async ({ getByE2e, page }) => {
+  'i pick the category "Spożywcze"': async ({ getByE2e, getByE2ePrefix }) => {
     await getByE2e('expense-form:category').click();
-    await page.getByRole('option', { name: 'Spożywcze' }).click();
+    await getByE2ePrefix('ui:option:').filter({ hasText: 'Spożywcze' }).click();
   },
   'the form is still usable with category "Spożywcze"': async ({
     getByE2e,
-    page,
   }) => {
     await expect(getByE2e('expense-form:form')).toBeVisible();
     await expect(getByE2e('expense-form:category')).toContainText('Spożywcze');
-    await expect(
-      page.getByRole('button', { name: 'Spróbuj ponownie' }),
-    ).toHaveCount(0);
+    await expect(getByE2e('ui:error-retry')).toHaveCount(0);
+    await expect(getByE2e('expenses-management:scan-retry')).toHaveCount(0);
   },
-  'the form is still usable with category "Rozrywka"': async ({
-    getByE2e,
-    page,
-  }) => {
+  'the form is still usable with category "Rozrywka"': async ({ getByE2e }) => {
     await expect(getByE2e('expense-form:form')).toBeVisible();
     await expect(getByE2e('expense-form:category')).toContainText('Rozrywka');
-    await expect(
-      page.getByRole('button', { name: 'Spróbuj ponownie' }),
-    ).toHaveCount(0);
+    await expect(getByE2e('ui:error-retry')).toHaveCount(0);
+    await expect(getByE2e('expenses-management:scan-retry')).toHaveCount(0);
   },
 } satisfies CommandRegistry<Ctx>;
 

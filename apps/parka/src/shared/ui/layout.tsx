@@ -1,9 +1,9 @@
-import type { ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { onBackClick } from '@/shared/router/navigation';
 
-type ScreenHeaderProps = {
+type ScreenHeaderProps = Omit<ComponentProps<'header'>, 'title'> & {
   title: string;
   /** Light line above the title (decorative, two-weight headline). */
   eyebrow?: string;
@@ -18,8 +18,9 @@ export const ScreenHeader = ({
   backHref,
   action,
   titleClassName,
+  ...props
 }: ScreenHeaderProps) => (
-  <header className="flex items-center gap-3 px-4 pb-3 pt-5">
+  <header {...props} className="flex items-center gap-3 px-4 pb-3 pt-5">
     {backHref ? (
       <a
         href={backHref}

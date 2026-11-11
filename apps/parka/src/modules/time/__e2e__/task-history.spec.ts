@@ -7,6 +7,7 @@ import { interpreter, type CommandRegistry } from '@repo/vibe-test';
 import { test, type Ctx } from '@/__e2e__/test';
 import { registerAndConfirm } from '@/__e2e__/mailbox';
 import { API_ROUTER, APP_ROUTER } from '@/shared/router/routes';
+import { taskInfo } from './locators';
 
 /**
  * Task history against the real Supabase backend: the database records what
@@ -59,11 +60,9 @@ const call = async (page: Page, name: string, args: unknown) => {
   }
 };
 
-const openHistory = async ({ page, getByE2e }: Ctx) => {
+const openHistory = async ({ page, getByE2e, getByE2ePrefix }: Ctx) => {
   await open(page, APP_ROUTER.time({ date: DAY }));
-  await page
-    .getByRole('button', { name: 'Szczegóły zadania: Zmieniony tytuł' })
-    .click();
+  await taskInfo(getByE2ePrefix, 'Zmieniony tytuł').click();
   await getByE2e('time:history-toggle').click();
   return getByE2e('time:history');
 };
@@ -111,26 +110,23 @@ const commands = {
   },
 
   'a change of the owner joins the trail unsigned': async (ctx) => {
-    const { page, getByE2e } = ctx;
+    const { page, getByE2e, getByE2ePrefix } = ctx;
     await open(page, APP_ROUTER.time({ date: DAY }));
-    await page
-      .getByRole('button', { name: 'Szczegóły zadania: Zmieniony tytuł' })
-      .click();
+    await taskInfo(getByE2ePrefix, 'Zmieniony tytuł').click();
     await getByE2e('time:task-details-edit').click();
-    await getByE2e('time:task-dialog')
-      .getByRole('textbox', { name: 'Nazwa' })
-      .fill('Tytuł właściciela');
+    await getByE2e('time:task-name').fill('Tytuł właściciela');
     await Promise.all([
       page.waitForResponse(
         (r) => r.url().includes('/api/time/') && r.status() === 200,
       ),
       getByE2e('time:task-save').click(),
     ]);
-    await page
-      .getByRole('button', { name: 'Szczegóły zadania: Tytuł właściciela' })
-      .click();
+    await taskInfo(getByE2ePrefix, 'Tytuł właściciela').click();
     await getByE2e('time:history-toggle').click();
-    const newest = getByE2e('time:history').getByRole('listitem').first();
+    const newest = getByE2ePrefix(
+      'time:history-entry:',
+      getByE2e('time:history'),
+    ).first();
     await expect(newest).toContainText(
       'Zmieniono tytuł: „Zmieniony tytuł” → „Tytuł właściciela”',
     );

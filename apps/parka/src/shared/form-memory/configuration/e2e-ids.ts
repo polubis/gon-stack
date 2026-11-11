@@ -14,7 +14,9 @@ export type FormMemoryDynamicE2eId =
   | `form-memory:manage:${string}`
   | `form-memory:manage-row:${string}`
   | `form-memory:manage-edit:${string}`
-  | `form-memory:manage-delete:${string}`;
+  | `form-memory:manage-delete:${string}`
+  | `form-memory:toggle:${string}`
+  | `form-memory:option:${string}`;
 
 export type FormMemoryE2eId =
   (typeof FORM_MEMORY_E2E_IDS)[number] | FormMemoryDynamicE2eId;

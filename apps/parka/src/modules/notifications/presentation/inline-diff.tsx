@@ -33,6 +33,7 @@ export const InlineDiff = ({
           return (
             <del
               key={i}
+              data-e2e="notifications:diff-removed"
               className={cn(
                 'rounded-sm bg-danger-soft px-0.5 text-danger line-through',
               )}
@@ -45,6 +46,7 @@ export const InlineDiff = ({
           return (
             <ins
               key={i}
+              data-e2e="notifications:diff-added"
               className="rounded-sm bg-brand-soft px-0.5 font-medium text-brand-dark underline"
             >
               <span className="sr-only">dodano: </span>

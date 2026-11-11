@@ -102,7 +102,10 @@ const SENTENCES = [
   'i można było od razu przejść do kolejnego etapu',
 ];
 
-test('dictated notes follow the speech on a phone', async ({ page }) => {
+test('dictated notes follow the speech on a phone', async ({
+  page,
+  getByE2e,
+}) => {
   await page.addInitScript(fakeSpeech);
   await page.addInitScript(() =>
     window.localStorage.setItem('parka:device-id', 'device-phone'),
@@ -111,12 +114,12 @@ test('dictated notes follow the speech on a phone', async ({ page }) => {
   await stubTime(page);
   await page.goto(`${APP_ROUTER.time()}?date=${DAY}`);
 
-  await page.getByRole('button', { name: 'Dodaj zadanie' }).click();
-  const dialog = page.getByRole('dialog');
-  await dialog.getByRole('textbox', { name: 'Nazwa' }).fill('Raport');
+  await getByE2e('time:empty-add').click();
 
-  await dialog.getByRole('button', { name: 'Dyktuj: Opis' }).click();
-  const preview = page.getByRole('textbox', { name: 'Podgląd dyktowania' });
+  await getByE2e('time:task-name').fill('Raport');
+
+  await getByE2e('dictation:start:Opis').click();
+  const preview = getByE2e('dictation:preview');
   await expect(preview).toBeVisible();
   for (const sentence of SENTENCES) {
     await page.evaluate(
@@ -157,14 +160,15 @@ test('dictated notes follow the speech on a phone', async ({ page }) => {
   expect(height).toBeGreaterThanOrEqual(128);
 
   await page.waitForTimeout(600);
-  await dialog.getByRole('button', { name: 'Wstaw' }).click();
-  await expect(dialog.getByLabel('Opis (opcjonalnie)')).toHaveValue(
+  await getByE2e('dictation:insert').click();
+  await expect(getByE2e('time:description-input')).toHaveValue(
     `Ważne: ${[...SENTENCES, 'na tym kończymy'].join(' ')}`,
   );
 });
 
 test('a pause and resume on a phone does not repeat the dictated words', async ({
   page,
+  getByE2e,
 }) => {
   await page.addInitScript(fakeSpeech);
   await page.addInitScript(() =>
@@ -174,9 +178,9 @@ test('a pause and resume on a phone does not repeat the dictated words', async (
   await stubTime(page);
   await page.goto(`${APP_ROUTER.time()}?date=${DAY}`);
 
-  await page.getByRole('button', { name: 'Dodaj zadanie' }).click();
-  const dialog = page.getByRole('dialog');
-  await dialog.getByRole('textbox', { name: 'Nazwa' }).fill('Raport');
+  await getByE2e('time:empty-add').click();
+
+  await getByE2e('time:task-name').fill('Raport');
 
   const say = (phrase: string) =>
     page.evaluate(
@@ -185,15 +189,15 @@ test('a pause and resume on a phone does not repeat the dictated words', async (
       phrase,
     );
 
-  await dialog.getByRole('button', { name: 'Dyktuj: Opis' }).click();
+  await getByE2e('dictation:start:Opis').click();
   await say('prawda');
   await say('kup mleko');
-  await page.getByRole('button', { name: 'Zakończ dyktowanie' }).click();
-  await page.getByRole('button', { name: 'Dyktuj dalej' }).click();
+  await getByE2e('dictation:toggle').click();
+  await getByE2e('dictation:toggle').click();
   await say('i chleb');
-  await page.getByRole('button', { name: 'Wstaw' }).click();
+  await getByE2e('dictation:insert').click();
 
-  await expect(dialog.getByLabel('Opis (opcjonalnie)')).toHaveValue(
+  await expect(getByE2e('time:description-input')).toHaveValue(
     'prawda kup mleko i chleb',
   );
 });

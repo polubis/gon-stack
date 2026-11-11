@@ -95,9 +95,16 @@ const commands = {
     ids.set(page, created.result.structuredContent.id);
   },
 
-  'both tabs show the task without a reload': async ({ page }) => {
+  'both tabs show the task without a reload': async ({
+    page,
+    getByE2ePrefix,
+  }) => {
     for (const tab of [page, tabs.get(page)!])
-      await expect(tab.getByText('Dodane przez MCP')).toBeVisible({
+      await expect(
+        getByE2ePrefix('time:task:', tab).filter({
+          hasText: 'Dodane przez MCP',
+        }),
+      ).toBeVisible({
         timeout: 15_000,
       });
   },
@@ -109,12 +116,23 @@ const commands = {
     });
   },
 
-  'both tabs show the new title and not the old one': async ({ page }) => {
+  'both tabs show the new title and not the old one': async ({
+    page,
+    getByE2ePrefix,
+  }) => {
     for (const tab of [page, tabs.get(page)!]) {
-      await expect(tab.getByText('Zmienione przez MCP')).toBeVisible({
+      await expect(
+        getByE2ePrefix('time:task:', tab).filter({
+          hasText: 'Zmienione przez MCP',
+        }),
+      ).toBeVisible({
         timeout: 15_000,
       });
-      await expect(tab.getByText('Dodane przez MCP')).toHaveCount(0);
+      await expect(
+        getByE2ePrefix('time:task:', tab).filter({
+          hasText: 'Dodane przez MCP',
+        }),
+      ).toHaveCount(0);
     }
   },
 

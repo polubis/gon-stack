@@ -70,6 +70,7 @@ export const DictationButton = ({ target, label, className }: Props) => {
         type="button"
         aria-label={`${open ? 'Zatrzymaj dyktowanie' : 'Dyktuj'}: ${label}`}
         aria-pressed={open}
+        data-e2e={`dictation:start:${label}`}
         disabled={open}
         onClick={begin}
         className={cn(

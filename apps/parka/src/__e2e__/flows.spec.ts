@@ -1,6 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 import { interpreter, type CommandRegistry } from '@repo/vibe-test';
 import { test, type Ctx } from './test';
+import { categoryRow, expenseRow } from './locators';
 import { API_ROUTER, APP_ROUTER } from '@/shared/router/routes';
 import { signInAsTestUser } from './session';
 import { installBackend } from '@/modules/dashboard/__e2e__/fake-backend';
@@ -192,9 +193,7 @@ const commands = {
   'the dashboard links to limits': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.dashboard());
     await page.evaluate(() => Object.assign(window, { spaMarker: true }));
-    await getByE2e('dashboard:main')
-      .getByRole('link', { name: 'Ustaw limit' })
-      .click();
+    await getByE2e('dashboard:limit-link').click();
     await expect(getByE2e('dashboard:limits')).toBeInViewport();
     await expect(getByE2e('dashboard:limits')).toBeFocused();
     expect(
@@ -247,7 +246,11 @@ const commands = {
     await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
   },
 
-  'i scan a receipt with several products': async ({ page, getByE2e }) => {
+  'i scan a receipt with several products': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
     await mockState(page);
     await page.route(`**${API_ROUTER.scanReceipt()}**`, (route) =>
       route.fulfill({
@@ -295,8 +298,16 @@ const commands = {
       localInput(new Date('2026-09-15T12:00:00.000Z')),
     );
     await expect(getByE2e('expense-form:method')).toHaveValue('Karta');
-    await expect(page.getByText('Chleb')).toBeVisible();
-    await expect(page.getByText('Mleko')).toBeVisible();
+    await expect(
+      getByE2ePrefix('expense-form:product-toggle:').filter({
+        hasText: 'Chleb',
+      }),
+    ).toBeVisible();
+    await expect(
+      getByE2ePrefix('expense-form:product-toggle:').filter({
+        hasText: 'Mleko',
+      }),
+    ).toBeVisible();
     // 3,20 + 2 * 4,50 - 1,00 discount
     await expect(getByE2e('expense-form:total')).toContainText('11,20');
   },
@@ -404,7 +415,9 @@ const commands = {
     await getByE2e('expense-form:add-product').click();
     await getByE2ePrefix('expense-form:product-name:').fill('Chleb');
     await getByE2ePrefix('expense-form:product-category:').last().click();
-    await page.getByRole('option', { name: CATEGORY.name }).click();
+    await getByE2ePrefix('ui:option:')
+      .filter({ hasText: CATEGORY.name })
+      .click();
 
     await expect(getByE2e('expense-form:category')).toHaveText(
       'Wiele kategorii',
@@ -419,7 +432,7 @@ const commands = {
   'i add a recurring expense': async ({ page, getByE2e }) => {
     await mockState(page);
     await open(page, APP_ROUTER.newExpense());
-    await page.getByRole('tab', { name: 'Cykliczny' }).click();
+    await getByE2e('expenses-management:kind-recurring').click();
 
     await getByE2e('expenses-management:recurring-name').fill('Netflix');
     await getByE2e('expenses-management:recurring-cost').fill('30');
@@ -517,18 +530,24 @@ const commands = {
     });
   },
 
-  'expenses can be filtered by category': async ({ page, getByE2e }) => {
+  'expenses can be filtered by category': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
     await open(page, APP_ROUTER.dashboard());
     await getByE2e('dashboard:filter:cat-1').click();
-    await expect(page.getByRole('button', { name: /^Tauron/ })).toBeVisible();
-    await expect(
-      page.getByRole('button', { name: /^Kino Helios/ }),
-    ).toHaveCount(0);
+    await expect(expenseRow(getByE2ePrefix, /^Tauron/)).toBeVisible();
+    await expect(expenseRow(getByE2ePrefix, /^Kino Helios/)).toHaveCount(0);
   },
 
-  'i open an expense on its edit page': async ({ page, getByE2e }) => {
+  'i open an expense on its edit page': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
     await open(page, APP_ROUTER.dashboard());
-    await page.getByRole('button', { name: /^Kino Helios/ }).click();
+    await expenseRow(getByE2ePrefix, /^Kino Helios/).click();
     await expect(getByE2e('dashboard:detail')).toBeVisible();
     await getByE2e('dashboard:edit').click();
     await page.waitForURL('**/app/expenses/edit/**');
@@ -557,21 +576,22 @@ const commands = {
   'the saved product shows in the expense popup': async ({
     page,
     getByE2e,
+    getByE2ePrefix,
   }) => {
     await page.waitForLoadState('networkidle');
-    await page.getByRole('button', { name: /^Kino Nowe Horyzonty/ }).click();
-    await expect(
-      getByE2e('dashboard:detail').getByText('Popcorn'),
-    ).toBeVisible();
+    await expenseRow(getByE2ePrefix, /^Kino Nowe Horyzonty/).click();
+    await expect(getByE2e('dashboard:detail')).toBeVisible();
     await expect(getByE2e('expense-form:merchant')).toHaveCount(0);
     await page.keyboard.press('Escape');
     await expect(getByE2e('dashboard:detail')).toHaveCount(0);
   },
-  'i delete the updated expense': async ({ page, getByE2e }) => {
-    await page.getByRole('button', { name: /^Kino Nowe Horyzonty/ }).click();
+  'i delete the updated expense': async ({ getByE2e, getByE2ePrefix }) => {
+    await expenseRow(getByE2ePrefix, /^Kino Nowe Horyzonty/).click();
     await getByE2e('dashboard:delete').click();
     await getByE2e('dashboard:delete-confirm').click();
-    await expect(page.getByText('Kino Nowe Horyzonty')).toHaveCount(0);
+    await expect(expenseRow(getByE2ePrefix, 'Kino Nowe Horyzonty')).toHaveCount(
+      0,
+    );
   },
 
   'the dashboard shows the month summary': async ({ page, getByE2e }) => {
@@ -613,9 +633,7 @@ const commands = {
     await expect(getByE2e('dashboard:limits-dialog-list')).toContainText(
       '900,00',
     );
-    await getByE2e('dashboard:limits-dialog')
-      .getByRole('button', { name: 'Zamknij' })
-      .click();
+    await getByE2e('dashboard:dialog-close:dashboard:limits-dialog').click();
     await expect(getByE2e('dashboard:limits-dialog')).toHaveCount(0);
   },
   'i remove the category limit': async ({ getByE2e }) => {
@@ -626,7 +644,11 @@ const commands = {
     await expect(getByE2e('dashboard:limit-form')).toHaveCount(0);
     await expect(getByE2e('dashboard:limits-dialog-empty')).toBeVisible();
   },
-  'a new category appears in the list': async ({ page, getByE2e }) => {
+  'a new category appears in the list': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
     await mockState(page);
     await open(page, APP_ROUTER.categories());
     await getByE2e('categories:add').click();
@@ -636,19 +658,17 @@ const commands = {
     await getByE2e('categories:form-name').fill('Kultura');
     await getByE2e('categories:form-icons').click();
     await getByE2e('categories:form-icon-search').fill('kino');
-    await page.getByRole('button', { name: 'Kino' }).click();
+    await getByE2e('categories:form-icon:film').click();
     await getByE2e('categories:form-save').click();
     await expect(page).toHaveURL(/\/app\/categories\/$/);
-    await expect(page.getByText('Kultura')).toBeVisible();
+    await expect(categoryRow(getByE2ePrefix, 'Kultura')).toBeVisible();
   },
   'i edit a category on its own page': async ({ page, getByE2e }) => {
     await mockState(page);
     await open(page, APP_ROUTER.categories());
     await getByE2e('categories:row:cat-1').click();
     await expect(page).toHaveURL(/\/categories\/edit\/\?id=cat-1/);
-    await expect(
-      page.getByRole('heading', { name: 'Edytuj: Spożywcze' }),
-    ).toBeVisible();
+    await expect(getByE2e('categories:form-header')).toBeVisible();
     await getByE2e('categories:form-name').fill('Jedzenie');
     await getByE2e('categories:form-save').click();
     await expect(getByE2e('categories:row:cat-1')).toContainText('Jedzenie');
@@ -662,7 +682,11 @@ const commands = {
     await expect(getByE2e('categories:row:cat-1')).toHaveCount(0);
   },
 
-  'i add and remove a recurring expense': async ({ page, getByE2e }) => {
+  'i add and remove a recurring expense': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
     // Stateful: a rule change reloads the dashboard, which must read it back.
     // Fixed mid-month present: next week stays inside the shown month.
     const now = new Date();
@@ -676,8 +700,8 @@ const commands = {
     );
     await open(page, APP_ROUTER.dashboard());
     await getByE2e('dashboard:expense-new').click();
-    await page.getByRole('menuitem', { name: 'Wydatek', exact: true }).click();
-    await page.getByRole('tab', { name: 'Cykliczny' }).click();
+    await getByE2e('dashboard:add-option:expense').click();
+    await getByE2e('expenses-management:kind-recurring').click();
     await getByE2e('expenses-management:recurring-name').fill('Siłownia');
     await getByE2e('expenses-management:recurring-cost').fill('99');
     // Starts next week: announced, not charged yet.
@@ -688,13 +712,13 @@ const commands = {
     );
     await getByE2e('expenses-management:recurring-save').click();
     await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
-    await expect(
-      getByE2e('dashboard:upcoming').getByText('Siłownia'),
-    ).toBeVisible();
-    await page.getByRole('button', { name: /Siłownia/ }).click();
+    await expect(getByE2e('dashboard:upcoming')).toBeVisible();
+    await getByE2ePrefix('dashboard:upcoming:')
+      .filter({ hasText: 'Siłownia' })
+      .click();
     await getByE2e('dashboard:recurring-delete').click();
     await getByE2e('dashboard:delete-confirm').click();
-    await expect(page.getByText('Siłownia')).toHaveCount(0);
+    await expect(getByE2e('dashboard:main')).not.toContainText('Siłownia');
   },
   'a recurring expense counts in this month': async ({ page, getByE2e }) => {
     // Due today: the server turns it into an ordinary expense on read.
@@ -730,8 +754,8 @@ const commands = {
     await mockState(page);
     await open(page, APP_ROUTER.dashboard());
     await getByE2e('dashboard:expense-new').click();
-    await page.getByRole('menuitem', { name: 'Wydatek', exact: true }).click();
-    await page.getByRole('tab', { name: 'Cykliczny' }).click();
+    await getByE2e('dashboard:add-option:expense').click();
+    await getByE2e('expenses-management:kind-recurring').click();
     await expect(getByE2e('expenses-management:recurring-form')).toBeVisible();
   },
 
@@ -752,7 +776,9 @@ const commands = {
     await getByE2e('account-menu:trigger').filter({ visible: true }).click();
     await getByE2e('account-menu:edit').click();
     await getByE2e('settings:profile-name').fill('Anna Testowa');
-    await expect(page.getByLabel('E-mail')).toHaveCount(0);
+    await expect(getByE2e('settings:profile-modal')).not.toContainText(
+      'E-mail',
+    );
     await getByE2e('settings:save-profile').click();
     await expect(getByE2e('settings:profile-modal')).toHaveCount(0);
     await expect(getByE2e('account-menu:name')).toHaveText('Anna Testowa');

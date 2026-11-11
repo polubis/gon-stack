@@ -48,6 +48,7 @@ export const Main = () => {
               key={day}
               style={stagger(Math.floor((index + leadingBlanks) / 7))}
               aria-current={today ? 'date' : undefined}
+              data-e2e={`time:month-day:${day}`}
               aria-label={`${fullDate(day)}, ${marks.length ? pluralTasks(marks.length) : 'brak zadań'}`}
               className={cn(
                 'flex min-h-14 min-w-0 animate-item-in flex-col items-center gap-1 rounded-lg border p-1 md:min-h-24 md:items-start md:p-2 motion-reduce:animate-none',

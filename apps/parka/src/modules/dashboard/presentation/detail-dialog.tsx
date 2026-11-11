@@ -72,6 +72,7 @@ export const DetailDialog = ({
               </Dialog.Description>
             </div>
             <Dialog.Close
+              data-e2e={`dashboard:dialog-close:${dataE2e}`}
               aria-label="Zamknij"
               className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink-soft transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             >

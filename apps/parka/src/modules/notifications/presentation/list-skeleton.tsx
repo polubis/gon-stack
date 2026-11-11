@@ -6,7 +6,11 @@ const DIFF_ROWS = 3;
 
 /** Mirrors `NotificationRow`: icon + dot, title and body, time, diff block, action. */
 const CardSkeleton = () => (
-  <Card as="li" className="flex min-w-0 flex-col gap-1">
+  <Card
+    as="li"
+    data-e2e="notifications:skeleton-card"
+    className="flex min-w-0 flex-col gap-1"
+  >
     <div className="flex items-start gap-3">
       <span className="relative shrink-0">
         <Skeleton className="h-9 w-9 rounded-full" />

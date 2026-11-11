@@ -74,6 +74,8 @@ export const DASHBOARD_E2E_IDS = [
   'dashboard:upcoming-toggle',
   'dashboard:upcoming-dialog',
   'dashboard:upcoming-badge',
+  'dashboard:limit-link',
+  'dashboard:filter-row',
 ] as const;
 
 export type DashboardDynamicE2eId =
@@ -84,7 +86,10 @@ export type DashboardDynamicE2eId =
   | `dashboard:limit-edit:${string | number}`
   | `dashboard:filter:${string | number}`
   | `dashboard:period-range-day:${string}`
-  | `dashboard:period-range-month-option:${string}`;
+  | `dashboard:period-range-month-option:${string}`
+  | `dashboard:expense-device-name:${string}`
+  | `dashboard:add-option:${string}`
+  | `dashboard:dialog-close:${string}`;
 
 export type DashboardE2eId =
   (typeof DASHBOARD_E2E_IDS)[number] | DashboardDynamicE2eId;

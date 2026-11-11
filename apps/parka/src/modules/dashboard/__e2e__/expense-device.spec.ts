@@ -52,9 +52,14 @@ const commands = {
     const row = getByE2ePrefix('dashboard:expense:').filter({
       hasText: 'Kawiarnia',
     });
-    await expect(row.locator('svg.lucide-smartphone')).toBeVisible();
+    await expect(getByE2ePrefix('device:icon:', row)).toHaveClass(
+      /lucide-smartphone/,
+    );
     // Screen-reader only: the name takes no room in the row.
-    const box = await row.getByText('iOS 17 · Safari').boundingBox();
+    const box = await getByE2ePrefix(
+      'dashboard:expense-device-name:',
+      row,
+    ).boundingBox();
     expect(box?.width ?? 0).toBeLessThanOrEqual(1);
   },
   'the popup names the device and its id': async ({ getByE2e }) => {

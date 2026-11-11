@@ -13,7 +13,7 @@ import type { E2eId } from '@/__e2e__/selectors';
 import { usePopoverOpen } from './use-popover-open';
 
 type SegmentedProps<T extends string> = {
-  options: { value: T; label: ReactNode }[];
+  options: { value: T; label: ReactNode; 'data-e2e'?: E2eId }[];
   value: T;
   onChange: (value: T) => void;
   label: string;
@@ -69,6 +69,7 @@ export const Segmented = <T extends string>({
             key={opt.value}
             type="button"
             role="tab"
+            data-e2e={opt['data-e2e']}
             id={panel ? segmentedIds(panel, opt.value).tab : undefined}
             aria-selected={selected}
             aria-controls={
@@ -91,25 +92,22 @@ export const Segmented = <T extends string>({
   );
 };
 
-type ToggleProps = {
+type ToggleProps = Omit<
+  ComponentProps<'button'>,
+  'onChange' | 'children' | 'className'
+> & {
   checked: boolean;
   onChange: (checked: boolean) => void;
   label: string;
-  disabled?: boolean;
 };
 
-export const Toggle = ({
-  checked,
-  onChange,
-  label,
-  disabled = false,
-}: ToggleProps) => (
+export const Toggle = ({ checked, onChange, label, ...props }: ToggleProps) => (
   <button
+    {...props}
     type="button"
     role="switch"
     aria-checked={checked}
     aria-label={label}
-    disabled={disabled}
     onClick={() => onChange(!checked)}
     className={cn(
       'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none',
@@ -328,6 +326,7 @@ export const Select = ({
               <SelectPrimitive.Item
                 key={option.value}
                 value={option.value}
+                data-e2e={`ui:option:${option.value}`}
                 className="relative flex cursor-pointer items-center rounded-xl py-2.5 pr-8 pl-3 text-sm outline-none select-none data-[highlighted]:bg-brand-soft data-[state=checked]:font-semibold data-[state=checked]:text-brand-dark"
               >
                 <SelectPrimitive.ItemText>

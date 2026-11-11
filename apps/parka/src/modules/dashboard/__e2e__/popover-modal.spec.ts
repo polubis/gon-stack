@@ -21,14 +21,11 @@ const commands = {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(200);
   },
-  'i open the add menu': async ({ page }) => {
-    await page
-      .getByRole('button', { name: 'Dodaj', exact: true })
-      .first()
-      .click();
+  'i open the add menu': async ({ getByE2e }) => {
+    await getByE2e('dashboard:expense-fab').click();
   },
-  'i pick the category option': async ({ page }) => {
-    await page.getByRole('menuitem', { name: 'Kategoria' }).click();
+  'i pick the category option': async ({ getByE2e }) => {
+    await getByE2e('dashboard:add-option:category').click();
   },
   'i press the browser Back button': async ({ page }) => {
     await page.goBack();
@@ -39,8 +36,8 @@ const commands = {
     await expect(getByE2e('categories:form-name')).toBeVisible();
     expect(modals(page)).toEqual(['category-new']);
   },
-  'the add menu is closed': async ({ page }) => {
-    await expect(page.getByRole('menu', { name: 'Dodaj' })).toHaveCount(0);
+  'the add menu is closed': async ({ getByE2e }) => {
+    await expect(getByE2e('dashboard:add-menu')).toHaveCount(0);
   },
   'the form is closed and the url is clean': async ({ page, getByE2e }) => {
     await expect(getByE2e('categories:form-name')).toHaveCount(0);

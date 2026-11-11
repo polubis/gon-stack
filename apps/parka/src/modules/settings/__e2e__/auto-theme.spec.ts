@@ -9,6 +9,8 @@ const HOUR_MS = 60 * 60 * 1000;
 
 const THEME_TABS = ['Auto', 'Ciemny', 'Jasny'] as const;
 
+const MODES = { Auto: 'auto', Ciemny: 'dark', Jasny: 'light' } as const;
+
 const commands = {
   'it is 12:00 in the afternoon': async ({ page }) => {
     await page.clock.install({ time: new Date(2026, 10, 5, 12, 0) });
@@ -29,9 +31,7 @@ const commands = {
   'each theme tab shows its icon': async ({ getByE2e }) => {
     for (const name of THEME_TABS) {
       await expect(
-        getByE2e('settings:appearance')
-          .getByRole('tab', { name })
-          .locator('svg'),
+        getByE2e(`settings:theme-icon:${MODES[name]}`),
       ).toBeVisible();
     }
   },
@@ -39,16 +39,17 @@ const commands = {
     { getByE2e },
     name: (typeof THEME_TABS)[number],
   ) => {
-    await getByE2e('settings:appearance').getByRole('tab', { name }).click();
-    await expect(
-      getByE2e('settings:appearance').getByRole('tab', { name }),
-    ).toHaveAttribute('aria-selected', 'true');
+    await getByE2e(`settings:theme:${MODES[name]}`).click();
+    await expect(getByE2e(`settings:theme:${MODES[name]}`)).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
   },
-  'the page is light': async ({ page }) => {
-    await expect(page.locator('html')).not.toHaveAttribute('data-theme');
+  'the page is light': async ({ getByE2e }) => {
+    await expect(getByE2e('theme:root')).not.toHaveAttribute('data-theme');
   },
-  'the page is dark': async ({ page }) => {
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  'the page is dark': async ({ getByE2e }) => {
+    await expect(getByE2e('theme:root')).toHaveAttribute('data-theme', 'dark');
   },
 } satisfies CommandRegistry<Ctx>;
 
