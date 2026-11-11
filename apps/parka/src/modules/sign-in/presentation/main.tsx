@@ -1,8 +1,8 @@
 import { ClearableInput } from '@/shared/ui/clearable';
 import { useEffect, useState } from 'react';
 import type { SubmitEvent } from 'react';
-import { Leaf } from 'lucide-react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
+import { BrandMark } from '@/shared/ui/brand-mark';
 import { Button, Field } from '@/shared/ui/controls';
 import { ErrorState } from '@/shared/ui/error-state';
 import { navigateTo } from '@/shared/router/navigation';
@@ -36,16 +36,14 @@ const SignInView = () => {
   return (
     <div
       data-e2e="auth:main"
-      className="flex flex-1 w-full flex-col justify-center md:items-center md:bg-brand-softer md:px-8 md:py-16"
+      className="flex w-full flex-1 flex-col justify-center px-4 py-8 md:items-center md:px-8 md:py-16"
     >
-      <div className="mx-auto w-full max-w-md px-6 py-12 md:rounded-3xl md:border md:border-line md:bg-card md:p-10 md:shadow-card lg:p-12">
-        <span className="mb-6 grid h-14 w-14 place-items-center rounded-2xl bg-brand-soft text-brand">
-          <Leaf className="h-7 w-7" aria-hidden="true" />
-        </span>
-        <h1 className="text-2xl font-semibold tracking-tight">
+      <div className="mx-auto w-full max-w-md animate-view-enter rounded-4xl border border-line bg-card p-6 shadow-popover motion-reduce:animate-none md:p-10 lg:p-12">
+        <BrandMark className="mb-6 size-14" />
+        <h1 className="text-4xl font-semibold leading-none tracking-tight">
           Witaj ponownie!
         </h1>
-        <p className="mt-1 text-sm text-ink-soft">
+        <p className="mt-2 text-sm text-ink-soft">
           Zaloguj się, aby kontynuować.
         </p>
 

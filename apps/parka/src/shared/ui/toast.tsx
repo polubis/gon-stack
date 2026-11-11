@@ -58,7 +58,7 @@ export const Toast = ({
       onPointerDown={(e) => e.stopPropagation()}
       onFocus={(e) => e.stopPropagation()}
       className={cn(
-        'pointer-events-auto fixed inset-x-4 bottom-24 z-(--z-toast) mx-auto max-w-md rounded-xl px-4 py-3 text-sm shadow-lg',
+        'pointer-events-auto fixed inset-x-4 bottom-24 z-(--z-toast) mx-auto max-w-md rounded-3xl px-4 py-3 text-sm shadow-popover',
         notice.tone === 'error'
           ? 'border border-danger-line bg-danger-soft text-danger'
           : 'bg-brand font-medium text-on-brand',
@@ -88,7 +88,7 @@ export const Toast = ({
                   onClose();
                   notice.retry?.();
                 }}
-                className="rounded-lg border border-danger-line bg-card px-3 py-1 text-xs font-semibold text-danger hover:bg-danger-faint"
+                className="rounded-full border border-danger-line bg-card px-3 py-1 text-xs font-semibold text-danger hover:bg-danger-faint"
               >
                 Spróbuj ponownie
               </button>
@@ -105,7 +105,7 @@ export const Toast = ({
                 onClose();
                 notice.action?.run();
               }}
-              className="rounded-lg bg-card px-3 py-1 text-xs font-semibold text-brand hover:bg-hover"
+              className="rounded-full bg-card px-3 py-1 text-xs font-semibold text-brand hover:bg-hover"
             >
               {notice.action.label}
             </button>

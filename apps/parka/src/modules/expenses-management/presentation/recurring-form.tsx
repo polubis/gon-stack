@@ -210,7 +210,7 @@ export const RecurringForm = ({ draft }: { draft: ReceiptDraft | null }) => {
         </div>
       </div>
 
-      <div className="sticky bottom-0 -mx-4 mt-4 flex items-center justify-end border-t border-line bg-card px-4 py-3 md:-mx-8 md:px-8 lg:-mx-10 lg:px-10 xl:-mx-16 xl:px-16">
+      <div className="sticky bottom-2 mt-4 flex items-center justify-end rounded-3xl border border-line bg-card px-3 py-3 shadow-popover">
         <Button
           type="submit"
           className="w-auto px-6"

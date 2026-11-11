@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { Main } from '../presentation/main';
 
 describe('Home landing works when', () => {
@@ -26,5 +26,13 @@ describe('Home landing works when', () => {
       'href',
       '/sign-in/',
     );
+  });
+
+  it('keeps the sample screens out of the way of screen readers', () => {
+    render(<Main />);
+
+    screen.getByText('Zadania na dziś');
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('heading')).toHaveLength(1);
   });
 });

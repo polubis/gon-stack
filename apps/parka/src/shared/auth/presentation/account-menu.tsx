@@ -31,10 +31,10 @@ export const AccountMenu = ({ placement }: Props) => {
       aria-label={`Konto: ${user.email}`}
       onClick={() => openModal(ACCOUNT_MODAL)}
       className={cn(
-        'flex items-center rounded-xl focus-visible:outline-2 focus-visible:outline-brand',
+        'flex items-center rounded-full focus-visible:outline-2 focus-visible:outline-brand',
         side
-          ? 'w-full gap-3 px-3 py-2 hover:bg-hover'
-          : 'flex-1 flex-col gap-1 py-1 text-xs font-medium text-ink-soft',
+          ? 'w-full gap-3 bg-hover-soft p-2 pr-3 hover:bg-hover'
+          : 'h-12 grow justify-center px-4 text-ink-soft hover:bg-hover hover:text-ink',
       )}
     >
       {side ? (
@@ -57,12 +57,12 @@ export const AccountMenu = ({ placement }: Props) => {
             <AccountAvatar
               label={user.email}
               avatarUrl={avatarUrl}
-              className="size-5"
+              className="size-7"
             />
           ) : (
             <UserRound className="size-5" aria-hidden="true" />
           )}
-          Konto
+          <span className="sr-only">Konto</span>
         </>
       )}
     </button>

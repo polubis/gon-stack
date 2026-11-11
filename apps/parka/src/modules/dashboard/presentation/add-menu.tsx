@@ -38,7 +38,7 @@ const OPTIONS: readonly Option[] = [
 const KEYS = ['ArrowDown', 'ArrowUp', 'Home', 'End'];
 
 export const ITEM =
-  'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-hover-soft focus-visible:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
+  'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors hover:bg-hover focus-visible:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
 
 /** Arrow, Home and End keys move focus between the menu items. */
 export const moveFocus = (e: KeyboardEvent<HTMLElement>) => {
@@ -103,7 +103,7 @@ export const AddMenu = ({
                 .querySelector<HTMLElement>('[role="menuitem"]')
                 ?.focus();
             }}
-            className="z-(--z-popover) w-56 animate-pop-in rounded-xl border border-line-strong bg-card p-2 shadow-popover focus:outline-none motion-reduce:animate-none"
+            className="z-(--z-popover) w-56 animate-pop-in rounded-2xl border border-line bg-card p-2 shadow-popover focus:outline-none motion-reduce:animate-none"
           >
             <div
               role="menu"
@@ -178,4 +178,4 @@ export const AddMenu = ({
 
 /** Look of the "Dodaj" trigger, same as the time module. */
 export const ADD_BUTTON =
-  'inline-flex items-center justify-center gap-2 rounded-xl bg-brand text-sm font-semibold text-on-brand transition-colors hover:bg-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2';
+  'pressable cta shadow-cta inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold hover:bg-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2';

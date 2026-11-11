@@ -5,6 +5,7 @@ import { Donut } from '@/shared/ui/charts';
 import { Button, ProgressBar } from '@/shared/ui/controls';
 import { EmptyState } from '@/shared/ui/empty-state';
 import { Card } from '@/shared/ui/layout';
+import { Ring } from '@/shared/ui/ring';
 import { dayLabel } from '@/shared/date/date';
 import { openModal } from '@/shared/router/modal-stack';
 import type { TimeKind } from '../domain/models';
@@ -33,7 +34,7 @@ const decimal = (value: number): string =>
 
 const Stat = ({ label, children }: { label: string; children: ReactNode }) => (
   <div className="flex min-w-0 flex-col items-center gap-0.5 px-2">
-    <dt className="flex min-h-8 items-end text-center text-xs text-ink-soft">
+    <dt className="flex min-h-8 items-end text-center text-xs text-on-hero-soft">
       {label}
     </dt>
     <dd className="text-sm font-semibold tabular-nums md:text-base">
@@ -50,24 +51,29 @@ const Row = ({ label, children }: { label: string; children: ReactNode }) => (
 );
 
 const Hero = ({ stats }: { stats: TaskStats }) => (
-  <Card className="flex flex-col items-center gap-1 py-6 text-center xl:col-span-6 xl:col-start-1 xl:row-start-1 xl:h-full xl:justify-center">
-    <p className="text-xs text-ink-soft md:text-sm">Zrealizowane zadania</p>
-    <p
-      data-e2e="time:stats-completion"
-      className="text-4xl font-bold tracking-tight tabular-nums md:text-5xl"
-    >
-      {stats.completion}%
-    </p>
-    <p className="text-sm font-medium text-ink-soft md:text-base">
-      {stats.done} z {stats.total}
-    </p>
-    <span className="mt-2 block w-full max-w-xs">
-      <ProgressBar
+  <div className="hero-card flex flex-col justify-center gap-5 rounded-4xl p-5 shadow-popover md:p-7 xl:col-span-6 xl:col-start-1 xl:row-start-1 xl:h-full">
+    <div className="flex items-center gap-5">
+      <Ring
+        surface="hero"
         pct={stats.completion}
         label={`Zrealizowano ${stats.completion}% zadań (${stats.done} z ${stats.total})`}
-      />
-    </span>
-    <dl className="mt-4 grid w-full max-w-md grid-cols-3 divide-x divide-line border-t border-line pt-4">
+        className="size-28 md:size-32"
+      >
+        <span
+          data-e2e="time:stats-completion"
+          className="text-2xl tracking-tight md:text-3xl"
+        >
+          {stats.completion}%
+        </span>
+      </Ring>
+      <div className="min-w-0">
+        <p className="text-sm text-on-hero-soft">Zrealizowane zadania</p>
+        <p className="animate-rise text-4xl font-semibold tracking-tight tabular-nums motion-reduce:animate-none md:text-5xl">
+          {stats.done} z {stats.total}
+        </p>
+      </div>
+    </div>
+    <dl className="grid grid-cols-3 divide-x divide-hero-line border-t border-hero-line pt-4">
       <Stat label="Wszystkie">
         <span data-e2e="time:stats-total">{stats.total}</span>
       </Stat>
@@ -77,13 +83,13 @@ const Hero = ({ stats }: { stats: TaskStats }) => (
       <Stat label="Po terminie">
         <span
           data-e2e="time:stats-overdue"
-          className={cn(stats.overdue > 0 && 'text-danger-strong')}
+          className={cn(stats.overdue > 0 && 'text-hero-danger')}
         >
           {stats.overdue}
         </span>
       </Stat>
     </dl>
-  </Card>
+  </div>
 );
 
 const StatusCard = ({ stats }: { stats: TaskStats }) => (

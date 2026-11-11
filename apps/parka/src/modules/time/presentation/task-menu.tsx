@@ -22,7 +22,7 @@ import { deleteTaskModal } from './modal-ids';
 import { TaskDeviceBadge } from './task-device';
 
 const ITEM =
-  'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-hover-soft focus-visible:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
+  'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors hover:bg-hover focus-visible:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
 
 /** `2026-10-30` as `pt. 30 paź`. */
 const shortDay = (day: string): string => dayLabel(day, 'short', false);
@@ -82,7 +82,7 @@ export const TaskMenu = ({ task }: { task: Task | BacklogTask }) => {
               .querySelector<HTMLElement>('[role="menuitem"]')
               ?.focus();
           }}
-          className="z-(--z-popover) w-64 animate-pop-in rounded-xl border border-line-strong bg-card p-2 shadow-popover focus:outline-none motion-reduce:animate-none"
+          className="z-(--z-popover) w-64 animate-pop-in rounded-2xl border border-line bg-card p-2 shadow-popover focus:outline-none motion-reduce:animate-none"
         >
           <div
             role="menu"

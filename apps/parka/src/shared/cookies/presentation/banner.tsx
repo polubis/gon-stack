@@ -20,7 +20,7 @@ export const Banner = ({
     role="region"
     aria-label={copy.banner.title}
     data-e2e="cookies:banner"
-    className="fixed bottom-4 left-1/2 z-(--z-modal) flex max-h-[90dvh] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 flex-col gap-4 overflow-y-auto rounded-2xl border border-line-strong bg-card p-5 shadow-popover sm:bottom-6 sm:max-w-2xl sm:p-6"
+    className="fixed bottom-4 left-1/2 z-(--z-modal) flex max-h-[90dvh] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 flex-col gap-4 overflow-y-auto rounded-4xl border border-line bg-card p-5 shadow-popover sm:bottom-6 sm:max-w-2xl sm:p-6"
   >
     <div className="flex items-center gap-3">
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand">
@@ -58,7 +58,7 @@ export const Banner = ({
         type="button"
         onClick={onManagePreferences}
         data-e2e="cookies:manage-preferences"
-        className="rounded-lg border border-line-strong px-4 py-2.5 text-center text-sm font-semibold text-ink hover:bg-hover sm:flex-1"
+        className="rounded-full border border-line-strong px-4 py-2.5 text-center text-sm font-semibold text-ink hover:bg-hover sm:flex-1"
       >
         {copy.banner.managePreferences}
       </button>
@@ -66,7 +66,7 @@ export const Banner = ({
         type="button"
         onClick={onRejectOptional}
         data-e2e="cookies:reject-optional"
-        className="rounded-lg border border-line-strong px-4 py-2.5 text-center text-sm font-semibold text-ink hover:bg-hover sm:flex-1"
+        className="rounded-full border border-line-strong px-4 py-2.5 text-center text-sm font-semibold text-ink hover:bg-hover sm:flex-1"
       >
         {copy.banner.rejectOptional}
       </button>
@@ -74,7 +74,7 @@ export const Banner = ({
         type="button"
         onClick={onAcceptAll}
         data-e2e="cookies:accept-all"
-        className="rounded-lg bg-brand px-4 py-2.5 text-center text-sm font-semibold text-on-brand hover:bg-brand-dark sm:flex-1"
+        className="cta shadow-cta rounded-full px-4 py-2.5 text-center text-sm font-semibold hover:bg-brand-dark sm:flex-1"
       >
         {copy.banner.acceptAll}
       </button>

@@ -19,13 +19,13 @@ const Link = () => {
       href={APP_ROUTER.notifications()}
       aria-label={label}
       data-e2e="notifications:unread-link"
-      className="relative grid h-9 w-9 place-items-center rounded-full text-ink-soft hover:bg-hover"
+      className="pressable relative grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line bg-card text-ink shadow-card hover:bg-brand-softer"
     >
       <Bell className="h-5 w-5" aria-hidden="true" />
       {unread > 0 ? (
         <span
           aria-hidden="true"
-          className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-danger-strong px-1 text-micro font-bold text-on-brand"
+          className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-danger-strong px-1 text-micro font-bold text-on-brand ring-2 ring-surface"
         >
           {unread > 9 ? '9+' : unread}
         </span>

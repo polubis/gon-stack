@@ -35,3 +35,12 @@ describe('screen header back link', () => {
     );
   });
 });
+
+describe('screen header title', () => {
+  it('names the screen by its title alone when an eyebrow leads it', () => {
+    render(<ScreenHeader title="Czas" eyebrow="Twój" />);
+
+    screen.getByRole('heading', { level: 1, name: 'Czas' });
+    screen.getByText('Twój');
+  });
+});

@@ -76,12 +76,12 @@ const Shell = () => {
 
   return (
     <OverlayNavProvider>
-      <div className="flex h-dvh w-full flex-col overflow-hidden bg-surface lg:flex-row">
+      <div className="flex h-dvh w-full flex-col overflow-hidden bg-aura lg:flex-row">
         <NavSlot placement="side">
           <SyncedAppNav placement="side" />
         </NavSlot>
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto">
+          <div className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto max-lg:mask-b-from-[calc(100%-1.25rem)]">
             <Outlet />
           </div>
           <NavSlot placement="bottom">

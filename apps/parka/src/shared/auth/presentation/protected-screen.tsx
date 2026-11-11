@@ -4,7 +4,7 @@ import { APP_ROUTER } from '@/shared/router/routes';
 
 /** Signed-out fallback: explains the restriction; the user chooses to go on. */
 export const ProtectedScreen = () => (
-  <main className="flex min-h-dvh flex-col items-center justify-center gap-3 bg-surface px-4 text-center">
+  <main className="flex min-h-dvh flex-col items-center justify-center gap-3 bg-aura px-4 text-center">
     <span className="grid size-12 place-items-center rounded-full bg-card text-ink-soft">
       <Lock className="size-6" aria-hidden="true" />
     </span>

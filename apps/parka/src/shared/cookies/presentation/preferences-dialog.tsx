@@ -29,7 +29,7 @@ export const PreferencesDialog = ({
       <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-overlay" />
       <Dialog.Content
         data-e2e="cookies:preferences"
-        className="fixed inset-0 z-(--z-modal) flex flex-col bg-card focus:outline-none sm:inset-auto sm:left-1/2 sm:top-1/2 sm:h-auto sm:max-h-[85vh] sm:w-full sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:border sm:border-line sm:shadow-card"
+        className="fixed inset-0 z-(--z-modal) flex flex-col bg-card focus:outline-none sm:inset-auto sm:left-1/2 sm:top-1/2 sm:h-auto sm:max-h-[85vh] sm:w-full sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-4xl sm:border sm:border-line sm:shadow-popover"
       >
         <div className="flex items-center justify-between gap-4 border-b border-line p-5 sm:p-6">
           <div className="flex items-center gap-2">
@@ -121,7 +121,7 @@ export const PreferencesDialog = ({
             type="button"
             onClick={onRejectOptional}
             data-e2e="cookies:reject-optional"
-            className="rounded-lg border border-line-strong px-5 py-2.5 text-sm font-semibold text-ink hover:bg-hover"
+            className="rounded-full border border-line-strong px-5 py-2.5 text-sm font-semibold text-ink hover:bg-hover"
           >
             {copy.preferences.rejectOptional}
           </button>
@@ -129,7 +129,7 @@ export const PreferencesDialog = ({
             type="button"
             onClick={onSavePreferences}
             data-e2e="cookies:save-preferences"
-            className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand hover:bg-brand-dark sm:border sm:border-brand sm:bg-transparent sm:text-brand sm:hover:bg-brand-soft"
+            className="rounded-full border border-line-strong px-5 py-2.5 text-sm font-semibold text-ink hover:bg-hover"
           >
             {copy.preferences.savePreferences}
           </button>
@@ -137,7 +137,7 @@ export const PreferencesDialog = ({
             type="button"
             onClick={onAcceptAll}
             data-e2e="cookies:accept-all"
-            className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand hover:bg-brand-dark"
+            className="cta shadow-cta rounded-full px-5 py-2.5 text-sm font-semibold hover:bg-brand-dark"
           >
             {copy.preferences.acceptAll}
           </button>

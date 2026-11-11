@@ -205,7 +205,7 @@ const DashboardView = () => {
           aria-label="Dodaj"
           className={cn(
             ADD_BUTTON,
-            'pointer-events-auto absolute bottom-0 right-4 h-14 w-14 animate-pop-in rounded-full shadow-popover motion-reduce:animate-none',
+            'pointer-events-auto absolute bottom-0 right-4 h-14 w-14 animate-pop-in rounded-full motion-reduce:animate-none',
           )}
         >
           <Plus className="h-6 w-6" aria-hidden="true" />
