@@ -29,10 +29,9 @@ const stubApi = (deleteResponse: object) =>
       : readBody(url, { expenses: [EXPENSE] }),
   );
 
-const summaryReads = (calls: ReturnType<typeof stubApi>) =>
+const expenseReads = (calls: ReturnType<typeof stubApi>) =>
   calls.filter(
-    ({ url }) =>
-      url.includes('/api/dashboard') && url.includes('from=2025-04-01'),
+    ({ method, url }) => method === 'GET' && url.includes('/api/expenses'),
   ).length;
 
 const setup = async () => {
@@ -68,24 +67,24 @@ describe('dashboard expenses removal', () => {
     );
   });
 
-  it('reads the summary again once the removal is saved', async () => {
+  it('reads the expenses again once the removal is saved', async () => {
     const calls = stubApi({ code: 200, ok: true });
     const view = await setup();
-    await waitFor(() => expect(summaryReads(calls)).toBe(1));
+    await waitFor(() => expect(expenseReads(calls)).toBe(1));
 
     act(() => view.result.current.ctx.removeExpense('e-1' as ExpenseId, MONTH));
 
-    await waitFor(() => expect(summaryReads(calls)).toBe(2));
+    await waitFor(() => expect(expenseReads(calls)).toBe(2));
   });
 
-  it('keeps the summary as it was when removal fails', async () => {
+  it('reads nothing more when removal fails', async () => {
     const calls = stubApi({ code: 500, message: 'boom' });
     const view = await setup();
 
     act(() => view.result.current.ctx.removeExpense('e-1' as ExpenseId, MONTH));
 
     await waitFor(() => expect(view.result.current.notice?.tone).toBe('error'));
-    expect(summaryReads(calls)).toBe(1);
+    expect(expenseReads(calls)).toBe(1);
   });
 
   it('brings the expense back and reports an error when removal fails', async () => {

@@ -24,7 +24,6 @@ export type CategorySlice = {
 };
 
 export type Summary = {
-  userName: string;
   /** Selected period total. */
   total: number;
   /** Selected period vs the one before it, in percent. */
@@ -165,7 +164,6 @@ export type CategoryProgress = TotalProgress & {
 
 /** Everything the dashboard shows, loaded together: all or nothing. */
 export type DashboardData = {
-  summary: Summary;
   expenses: Expense[];
   categories: Category[];
   limits: Limit[];

@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  toCategory,
-  toExpense,
-  toLimit,
-  toSummary,
-} from '../integration/mappers';
+import { toCategory, toExpense, toLimit } from '../integration/mappers';
 
 describe('dashboard expense mappers', () => {
   it('maps an expense DTO with its receipt items', () => {
@@ -85,41 +80,6 @@ describe('dashboard expense mappers', () => {
     expect(
       toCategory({ id: 'c-1', name: 'Food', icon: 'cart', color: '#fff' }),
     ).toEqual({ id: 'c-1', name: 'Food', icon: 'cart', color: '#fff' });
-  });
-
-  it('maps a summary DTO with its new month fields', () => {
-    const series = [{ index: 1, total: 4 }];
-    const previousSeries = [{ index: 1, total: 8 }];
-
-    const summary = toSummary({
-      userName: 'Anna',
-      total: 10,
-      change: 25,
-      previousTotal: 8,
-      transactions: 3,
-      dailyAverage: 1.5,
-      series,
-      previousSeries,
-      monthlyLimit: null,
-      categories: [
-        { categoryId: 'c-1', name: 'Food', color: 'green', amount: 6, pct: 60 },
-      ],
-    });
-
-    expect(summary).toEqual({
-      userName: 'Anna',
-      total: 10,
-      change: 25,
-      previousTotal: 8,
-      transactions: 3,
-      dailyAverage: 1.5,
-      series,
-      previousSeries,
-      monthlyLimit: null,
-      categories: [
-        { id: 'c-1', name: 'Food', color: 'green', amount: 6, pct: 60 },
-      ],
-    });
   });
 });
 

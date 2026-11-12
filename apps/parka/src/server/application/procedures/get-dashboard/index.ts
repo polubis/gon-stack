@@ -9,7 +9,7 @@ import {
   shiftPeriod,
   todayDay,
 } from '@/shared/period/period';
-import { summarizeDashboard } from '@/server/domain/dashboard';
+import { summarizeDashboard } from '@/shared/dashboard-summary/summarize';
 import { materializeRecurring } from '../../shared/recurring';
 import { fromSupabaseError } from '../../adapter/supabase';
 

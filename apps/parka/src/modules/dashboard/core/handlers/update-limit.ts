@@ -7,28 +7,19 @@ import { putLimit } from '../../integration/repository';
 
 export const updateLimit = (store: Store, { ofType, emit }: Bus) =>
   ofType('[TRIGGER]_UPDATE_LIMIT').pipe(
-    map(({ limit }) => ({
-      limit,
-      previous: store.$limits.get(),
-      previousSummary: store.$data.get(),
-    })),
-    tap(({ limit, previousSummary }) => {
+    map(({ limit }) => ({ limit, previous: store.$limits.get() })),
+    tap(({ limit }) => {
       store.$limits.set(
         store.$limits.get().map((l) => (l.id === limit.id ? limit : l)),
       );
-      // The "left to limit" KPI reads the total limit from the summary.
-      if (limit.scope === 'total' && previousSummary) {
-        store.$data.set({ ...previousSummary, monthlyLimit: limit.amount });
-      }
     }),
-    concatMap(({ limit, previous, previousSummary }) =>
+    concatMap(({ limit, previous }) =>
       from(putLimit(limit)).pipe(
         tap(() =>
           notify(store, { tone: 'success', message: 'Zapisano limit.' }),
         ),
         catchError((error: unknown) => {
           store.$limits.set(previous);
-          store.$data.set(previousSummary);
           notify(store, {
             tone: 'error',
             title: 'Nie udało się zapisać limitu',

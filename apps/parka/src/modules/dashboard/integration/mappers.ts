@@ -1,5 +1,4 @@
 import type { z } from 'zod';
-import type { Schema } from '@schemas/dashboard';
 import type { listExpensesSchema } from '@schemas/expenses';
 import type { listCategoriesSchema } from '@schemas/categories';
 import type { listLimitsSchema } from '@schemas/limits';
@@ -17,7 +16,6 @@ import type {
   Recurring,
   RecurringId,
   RecurringItemId,
-  Summary,
 } from '../domain/models';
 
 type ExpenseDto = InferOut<
@@ -39,27 +37,6 @@ type RecurringDto = InferOut<
   z.infer<ReturnType<typeof listRecurringSchema>>['out'],
   200
 >['data'][number];
-
-export const toSummary = (
-  dto: InferOut<Schema['out'], 200>['data'],
-): Summary => ({
-  userName: dto.userName,
-  total: dto.total,
-  change: dto.change,
-  previousTotal: dto.previousTotal,
-  transactions: dto.transactions,
-  dailyAverage: dto.dailyAverage,
-  series: dto.series,
-  previousSeries: dto.previousSeries,
-  monthlyLimit: dto.monthlyLimit,
-  categories: dto.categories.map((c) => ({
-    id: c.categoryId as CategoryId,
-    name: c.name,
-    color: c.color,
-    amount: c.amount,
-    pct: c.pct,
-  })),
-});
 
 export const toExpense = (dto: ExpenseDto): Expense => ({
   id: dto.id as ExpenseId,

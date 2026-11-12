@@ -8,7 +8,7 @@ import {
   summarizeDashboard,
   type DashboardCategory,
   type DashboardExpense,
-} from '../dashboard';
+} from '../summarize';
 
 const categories: DashboardCategory[] = [
   { id: 'food', name: 'Food', color: 'green' },

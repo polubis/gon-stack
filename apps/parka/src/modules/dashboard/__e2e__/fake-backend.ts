@@ -1,5 +1,5 @@
 import type { Page, Route } from '@playwright/test';
-import { summarizeDashboard } from '@/server/domain/dashboard';
+import { summarizeDashboard } from '@/shared/dashboard-summary/summarize';
 import {
   clampPeriod,
   resolvePeriod,
