@@ -172,10 +172,20 @@ describe('time statistics journey', () => {
   });
 });
 
+/** Navigator writing the real history (popovers live in it) and reporting pushes. */
+const historyNavigator = (push: (path: string) => void) => ({
+  push: (path: string, state?: Record<string, unknown>) => {
+    push(path);
+    window.history.pushState(state ?? null, '', path);
+  },
+  replace: (path: string, state?: Record<string, unknown>) =>
+    window.history.replaceState(state ?? window.history.state, '', path),
+});
+
 describe('time statistics period kind', () => {
   it('keeps the statistics tab when another kind of period is picked', async () => {
     const push = vi.fn();
-    registerNavigator({ push, replace: vi.fn() });
+    registerNavigator(historyNavigator(push));
     backend.seed([task({ id: 't-1' })]);
     renderTime('week', '2026-10-20', '&view=stats');
     await screen.findByText('Zrealizowane zadania');
@@ -192,7 +202,7 @@ describe('time statistics period kind', () => {
 
   it('leaves the tab out of the link from the task lists', async () => {
     const push = vi.fn();
-    registerNavigator({ push, replace: vi.fn() });
+    registerNavigator(historyNavigator(push));
     backend.seed([task({ id: 't-1' })]);
     renderTime('week');
     await screen.findAllByRole('button', { name: /^Edytuj zadanie/ });

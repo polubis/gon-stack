@@ -10,6 +10,9 @@ import { Settings2, Star } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { ClearableInput } from '@/shared/ui/clearable';
 import { useField } from '@/shared/ui/controls';
+import { PickerScreen } from '@/shared/ui/picker-screen';
+import { useIsMobile } from '@/shared/ui/use-mobile';
+import { usePopoverOpen } from '@/shared/ui/use-popover-open';
 import {
   rankSuggestions,
   type Suggestion,
@@ -35,6 +38,8 @@ const same = (a: string, b: string): boolean =>
 /**
  * Text input with a combobox list of remembered values: filtered as you type,
  * most used first. A star button inside the field opens the list on demand.
+ * On mobile the input stays a plain field and the star opens a full-screen
+ * picker with its own filter input (focused) above the list.
  */
 export const Typeahead = ({
   value,
@@ -53,19 +58,28 @@ export const Typeahead = ({
   const [active, setActive] = useState(-1);
   const [browse, setBrowse] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const starRef = useRef<HTMLButtonElement>(null);
   const fieldCtx = useField();
+  const mobile = useIsMobile();
+  const picker = usePopoverOpen(`typeahead:${field}`);
+  const [filter, setFilter] = useState('');
 
   const ranked = rankSuggestions(suggestions, field, browse ? '' : value);
   const settled =
     !browse && ranked.length === 1 && same(ranked[0].value, value);
   const expanded =
-    open && !disabled && !readOnly && ranked.length > 0 && !settled;
+    !mobile && open && !disabled && !readOnly && ranked.length > 0 && !settled;
   const activeOption = expanded ? ranked[active] : undefined;
   const hasAny = rankSuggestions(suggestions, field, '').length > 0;
   const label =
     props['aria-label'] ?? fieldCtx?.label ?? props.placeholder ?? 'pole';
 
   const toggle = () => {
+    if (mobile) {
+      setFilter('');
+      picker.setOpen(true);
+      return;
+    }
     wrapRef.current?.querySelector('input')?.focus();
     setActive(-1);
     setBrowse(true);
@@ -85,6 +99,13 @@ export const Typeahead = ({
     setBrowse(false);
     setOpen(false);
   };
+
+  const pick = (next: string) => {
+    onValueChange(next);
+    picker.setOpen(false);
+  };
+
+  const shown = rankSuggestions(suggestions, field, filter);
 
   const keyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     onKeyDown?.(event);
@@ -144,11 +165,12 @@ export const Typeahead = ({
         trailing={
           hasAny && !disabled && !readOnly ? (
             <button
+              ref={starRef}
               type="button"
               aria-label={`Podpowiedzi: ${label}`}
               data-e2e={`form-memory:toggle:${field}`}
-              aria-haspopup="listbox"
-              aria-expanded={expanded}
+              aria-haspopup={mobile ? 'dialog' : 'listbox'}
+              aria-expanded={mobile ? picker.open : expanded}
               aria-controls={expanded ? listId : undefined}
               onClick={toggle}
               className="grid h-5 w-5 place-items-center rounded-full text-ink-soft hover:bg-brand-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
@@ -208,6 +230,76 @@ export const Typeahead = ({
             </div>
           ) : null}
         </div>
+      ) : null}
+      {mobile ? (
+        <PickerScreen
+          open={picker.open}
+          onClose={() => picker.setOpen(false)}
+          title={label}
+          returnFocus={starRef}
+          data-e2e="form-memory:picker"
+          header={
+            <ClearableInput
+              data-picker-focus=""
+              type="search"
+              aria-label={`Szukaj: ${label}`}
+              placeholder="Szukaj"
+              autoComplete="off"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            />
+          }
+        >
+          {shown.length > 0 ? (
+            <ul
+              role="listbox"
+              aria-label={`Podpowiedzi: ${label}`}
+              className="flex flex-col gap-1"
+            >
+              {shown.map((item) => (
+                <li
+                  key={item.value}
+                  role="option"
+                  aria-selected={same(item.value, value)}
+                  data-e2e={`form-memory:option:${item.value}`}
+                  tabIndex={0}
+                  onClick={() => pick(item.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      pick(item.value);
+                    }
+                  }}
+                  className="flex min-w-0 cursor-pointer items-center gap-2 rounded-xl px-3 py-3 text-sm hover:bg-brand-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand aria-selected:font-semibold"
+                >
+                  <span className="min-w-0 flex-1 truncate">{item.value}</span>
+                  {item.useCount > 0 ? (
+                    <span className="shrink-0 text-xs text-ink-soft tabular-nums">
+                      {item.useCount}×
+                    </span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-ink-soft">
+              {filter.trim()
+                ? `Brak wyników dla "${filter.trim()}"`
+                : 'Brak podpowiedzi'}
+            </p>
+          )}
+          {onManage ? (
+            <button
+              type="button"
+              data-e2e={`form-memory:manage:${field}`}
+              onClick={onManage}
+              className="mt-3 flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-brand-dark hover:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            >
+              <Settings2 className="h-4 w-4" aria-hidden="true" />
+              Zarządzaj
+            </button>
+          ) : null}
+        </PickerScreen>
       ) : null}
     </div>
   );

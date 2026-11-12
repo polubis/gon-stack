@@ -1,5 +1,6 @@
 export const FORM_MEMORY_E2E_IDS = [
   'form-memory:manage-dialog',
+  'form-memory:picker',
   'form-memory:manage-list',
   'form-memory:manage-empty',
   'form-memory:manage-edit-input',

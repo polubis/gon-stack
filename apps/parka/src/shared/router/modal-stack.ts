@@ -96,23 +96,59 @@ export const openModal = (id: string): void => {
   notify();
 };
 
+const pathOf = (url: URL): string => url.pathname + url.search + url.hash;
+
 /**
- * Closes a modal. The topmost one opened by a push steps Back (same as the
- * browser button); a deep-linked or buried one just leaves the URL.
+ * Stepping Back drops the URL the modal was opened from over any query change
+ * made while it was open (e.g. a period picked in a popover that then closes).
+ * Re-applies those changes once Back has settled.
  */
-export const closeModal = (id: string): void => {
-  if (typeof window === 'undefined') return;
+const keepQueryAcrossBack = (): void => {
+  queueMicrotask(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete(PARAM);
+    const target = pathOf(url);
+    const base = window.location.pathname;
+    window.addEventListener(
+      'popstate',
+      () => {
+        const now = new URL(window.location.href);
+        if (now.pathname !== base) return;
+        const wanted = new URL(target, window.location.origin);
+        now.searchParams
+          .getAll(PARAM)
+          .forEach((id) => wanted.searchParams.append(PARAM, id));
+        if (pathOf(now) !== pathOf(wanted))
+          replaceUrl(pathOf(wanted), window.history.state);
+      },
+      // Capture: run before the app's own popstate readers see the old URL.
+      { once: true, capture: true },
+    );
+  });
+};
+
+const close = (id: string, keepQuery: boolean): void => {
   const stack = read();
   const index = stack.lastIndexOf(id);
   if (index === -1) return;
   if (index === stack.length - 1 && pushedDepth() === stack.length) {
     if (closing === id) return;
     closing = id;
+    if (keepQuery) keepQueryAcrossBack();
     window.history.back();
     return;
   }
   replaceUrl(hrefWith(stack.filter((_, i) => i !== index)));
   notify();
+};
+
+/**
+ * Closes a modal. The topmost one opened by a push steps Back (same as the
+ * browser button); a deep-linked or buried one just leaves the URL.
+ */
+export const closeModal = (id: string): void => {
+  if (typeof window === 'undefined') return;
+  close(id, true);
 };
 
 /**
@@ -143,7 +179,7 @@ export const closeModalThen = (id: string, then: () => void): void => {
     pushedDepth() === stack.length &&
     closing !== id;
   if (goesBack) window.addEventListener('popstate', then, { once: true });
-  closeModal(id);
+  close(id, false);
   if (!goesBack) then();
 };
 

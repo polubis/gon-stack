@@ -60,6 +60,25 @@ const commands = {
   'i open the shop suggestions with the star': async ({ getByE2e }) => {
     await getByE2e('form-memory:toggle:merchant').click();
   },
+  'the picker fills the screen and its filter is focused': async ({
+    page,
+    getByE2e,
+  }) => {
+    const box = await getByE2e('form-memory:picker').boundingBox();
+    const view = page.viewportSize()!;
+    expect(box?.width).toBe(view.width);
+    expect(box?.height).toBe(view.height);
+    await expect(
+      page.getByRole('searchbox', { name: 'Szukaj: Sklep' }),
+    ).toBeFocused();
+  },
+  'i filter the picker by "bi"': async ({ page }) => {
+    await page.getByRole('searchbox', { name: 'Szukaj: Sklep' }).fill('bi');
+  },
+  'the picker keeps its full-screen height': async ({ page, getByE2e }) => {
+    const box = await getByE2e('form-memory:picker').boundingBox();
+    expect(box?.height).toBe(page.viewportSize()!.height);
+  },
   'i type "Rossmann" in the shop': async ({ getByE2e }) => {
     await getByE2e('expense-form:merchant').fill('Rossmann');
   },
@@ -204,6 +223,25 @@ test.describe('remembered expense form fields', () => {
       ['i add the expense for 20 in category "Spożywcze"'],
       ['i open the page for adding an expense again'],
       ['the shop is "Rossmann"'],
+    );
+  });
+});
+
+test.describe('remembered shops on a phone', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('the star opens a full-screen picker with a focused filter', async ({
+    e2e,
+  }) => {
+    await interpreter(commands, e2e)(
+      ['i open the page for adding an expense with remembered shops'],
+      ['i open the shop suggestions with the star'],
+      ['the picker fills the screen and its filter is focused'],
+      ['i filter the picker by "bi"'],
+      ['the shop suggestions are "Biedronka" then "Bistro"'],
+      ['the picker keeps its full-screen height'],
+      ['i pick the shop "Bistro" from the suggestions'],
+      ['the shop is "Bistro"'],
     );
   });
 });

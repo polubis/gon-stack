@@ -1,4 +1,3 @@
-import { useState, useSyncExternalStore } from 'react';
 import {
   closeModal,
   openModal,
@@ -7,47 +6,28 @@ import {
   useModalStack,
 } from '@/shared/router/modal-stack';
 
-const NARROW = '(max-width: 39.99rem)';
 const PREFIX = 'popover:';
 
-const subscribe = (notify: () => void) => {
-  const query = window.matchMedia?.(NARROW);
-  query?.addEventListener('change', notify);
-  return () => query?.removeEventListener('change', notify);
-};
-
-const isNarrow = () => window.matchMedia?.(NARROW).matches ?? false;
-
 /**
- * Open state of every popover, menu and select. Wide screens keep it local; narrow
- * ones keep it in the URL modal stack (one history entry), so Back closes
- * just the popover and a reload restores it. `key` must be stable.
+ * Open state of every popover, menu and select, on every screen size. It
+ * lives in the URL modal stack (one history entry), so Back closes just the
+ * popover, Forward reopens it, it stacks with modals and a reload restores
+ * it. `key` must be stable.
  */
 export const usePopoverOpen = (key: string) => {
   const id = `${PREFIX}${key}`;
-  const narrow = useSyncExternalStore(subscribe, isNarrow, () => false);
   const stack = useModalStack();
-  const [local, setLocal] = useState(false);
-  const open = narrow ? stack.includes(id) : local;
-  useModalMounted(id, narrow && open);
+  const open = stack.includes(id);
+  useModalMounted(id, open);
 
   return {
     open,
-    setOpen: (next: boolean) => {
-      if (!narrow) setLocal(next);
-      else if (next) openModal(id);
-      else closeModal(id);
-    },
+    setOpen: (next: boolean) => (next ? openModal(id) : closeModal(id)),
     /**
      * Closes the popover and opens `modal` in its place. Never chain
      * `setOpen(false)` with `openModal`: closing steps Back asynchronously
      * and would undo the modal just pushed.
      */
-    openModal: (modal: string) => {
-      if (!narrow) {
-        setLocal(false);
-        openModal(modal);
-      } else replaceModal(id, modal);
-    },
+    openModal: (modal: string) => replaceModal(id, modal),
   };
 };

@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import {
   CalendarArrowUp,
@@ -32,7 +33,10 @@ type Target = { day: string; label: string; text: string; Icon: LucideIcon };
 /** "More" popover of a task row: quick moves, backlog, delete and where the task came from. */
 export const TaskMenu = ({ task }: { task: Task | BacklogTask }) => {
   const { now, updateTask, moveBacklogTask, sendTaskToBacklog } = useContext();
-  const { open, setOpen, openModal } = usePopoverOpen(`task-menu:${task.id}`);
+  // A repeating task shows once per day: each row needs its own popover id.
+  const { open, setOpen, openModal } = usePopoverOpen(
+    `task-menu:${task.id}:${useId()}`,
+  );
   const board = 'day' in task ? task : null;
   const targets: Target[] = [
     { day: now.day, label: 'dziś', text: 'Przenieś na dziś', Icon: Sun },
@@ -59,7 +63,7 @@ export const TaskMenu = ({ task }: { task: Task | BacklogTask }) => {
     else moveBacklogTask(task.id, day, label);
   };
   return (
-    <Popover.Root open={open} onOpenChange={setOpen}>
+    <Popover.Root modal open={open} onOpenChange={setOpen}>
       <Popover.Trigger
         aria-haspopup="menu"
         aria-label={`Więcej: ${task.title}`}

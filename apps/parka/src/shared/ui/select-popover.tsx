@@ -1,9 +1,11 @@
-import { useId, type ReactNode } from 'react';
+import { useId, useRef, type ReactNode } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import type { E2eId } from '@/__e2e__/selectors';
 import { inputClass } from './controls';
+import { PickerScreen } from './picker-screen';
+import { useIsMobile } from './use-mobile';
 import { usePopoverOpen } from './use-popover-open';
 
 type Props = {
@@ -15,7 +17,7 @@ type Props = {
   'data-e2e'?: E2eId;
 };
 
-/** Select-like field that opens one fixed popover on every screen size. */
+/** Select-like field: a popover on desktop, a full-screen picker on mobile. */
 export const SelectPopover = ({
   label,
   value,
@@ -25,6 +27,8 @@ export const SelectPopover = ({
   const { open, setOpen } = usePopoverOpen(label);
   const labelId = useId();
   const triggerId = useId();
+  const mobile = useIsMobile();
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   return (
     <div>
@@ -34,33 +38,66 @@ export const SelectPopover = ({
       >
         {label}
       </span>
-      <Popover.Root open={open} onOpenChange={setOpen}>
-        <Popover.Trigger
-          id={triggerId}
-          aria-labelledby={`${labelId} ${triggerId}`}
-          data-e2e={e2e}
-          className={cn(
-            inputClass,
-            'flex items-center justify-between gap-2 text-left',
-          )}
-        >
-          <span className="flex min-w-0 items-center gap-2">{value}</span>
-          <ChevronDown
-            className="h-4 w-4 shrink-0 text-ink-soft"
-            aria-hidden="true"
-          />
-        </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Content
-            align="start"
-            sideOffset={4}
-            collisionPadding={16}
-            className="z-(--z-popover) w-(--radix-popover-trigger-width) rounded-xl border border-line-strong bg-card p-3 focus:outline-none"
+      {mobile ? (
+        <>
+          <button
+            ref={triggerRef}
+            type="button"
+            id={triggerId}
+            aria-labelledby={`${labelId} ${triggerId}`}
+            aria-haspopup="dialog"
+            aria-expanded={open}
+            data-e2e={e2e}
+            onClick={() => setOpen(true)}
+            className={cn(
+              inputClass,
+              'flex items-center justify-between gap-2 text-left',
+            )}
+          >
+            <span className="flex min-w-0 items-center gap-2">{value}</span>
+            <ChevronDown
+              className="h-4 w-4 shrink-0 text-ink-soft"
+              aria-hidden="true"
+            />
+          </button>
+          <PickerScreen
+            open={open}
+            onClose={() => setOpen(false)}
+            title={label}
+            returnFocus={triggerRef}
           >
             {children(() => setOpen(false))}
-          </Popover.Content>
-        </Popover.Portal>
-      </Popover.Root>
+          </PickerScreen>
+        </>
+      ) : (
+        <Popover.Root modal open={open} onOpenChange={setOpen}>
+          <Popover.Trigger
+            id={triggerId}
+            aria-labelledby={`${labelId} ${triggerId}`}
+            data-e2e={e2e}
+            className={cn(
+              inputClass,
+              'flex items-center justify-between gap-2 text-left',
+            )}
+          >
+            <span className="flex min-w-0 items-center gap-2">{value}</span>
+            <ChevronDown
+              className="h-4 w-4 shrink-0 text-ink-soft"
+              aria-hidden="true"
+            />
+          </Popover.Trigger>
+          <Popover.Portal>
+            <Popover.Content
+              align="start"
+              sideOffset={4}
+              collisionPadding={16}
+              className="z-(--z-popover) w-(--radix-popover-trigger-width) rounded-xl border border-line-strong bg-card p-3 focus:outline-none"
+            >
+              {children(() => setOpen(false))}
+            </Popover.Content>
+          </Popover.Portal>
+        </Popover.Root>
+      )}
     </div>
   );
 };

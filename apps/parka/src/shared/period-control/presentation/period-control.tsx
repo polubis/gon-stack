@@ -188,9 +188,11 @@ export const PeriodControl = ({
   const { open: valueOpen, setOpen: setValueOpen } = usePopoverOpen(
     'period-control:value',
   );
-  const { open: kindOpen, setOpen: setKindOpen } = usePopoverOpen(
-    'period-control:kind',
-  );
+  const {
+    open: kindOpen,
+    setOpen: setKindOpen,
+    openModal: openFromKind,
+  } = usePopoverOpen('period-control:kind');
   const range = useModal(PERIOD_RANGE_MODAL);
   const own = period.kind === 'custom';
   const next = allowFuture || canGoNext(period, today);
@@ -215,6 +217,7 @@ export const PeriodControl = ({
       </button>
 
       <Popover.Root
+        modal
         open={valueOpen && !own}
         onOpenChange={(open) => {
           if (own) {
@@ -243,7 +246,7 @@ export const PeriodControl = ({
               </span>
             </Popover.Trigger>
 
-            <Popover.Root open={kindOpen} onOpenChange={setKindOpen}>
+            <Popover.Root modal open={kindOpen} onOpenChange={setKindOpen}>
               <Popover.Trigger
                 data-e2e="period-control:kind"
                 aria-label={`Zakres: ${PERIOD_KIND_LABELS[period.kind]}`}
@@ -276,8 +279,9 @@ export const PeriodControl = ({
                           onClick={() => {
                             if (kind !== period.kind)
                               onChange(currentPeriod(kind, today));
-                            setKindOpen(false);
-                            if (kind === 'custom') range.open();
+                            if (kind === 'custom')
+                              openFromKind(PERIOD_RANGE_MODAL);
+                            else setKindOpen(false);
                           }}
                           className={cn(
                             OPTION,
