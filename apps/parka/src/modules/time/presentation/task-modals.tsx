@@ -17,7 +17,6 @@ import {
   STATUSES_MODAL,
   deletedCategoryIdOf,
   deletedIdOf,
-  describedIdOf,
   editCategoryModal,
   editedBacklogIdOf,
   editedCategoryIdOf,
@@ -34,7 +33,7 @@ import {
 import { PriorityDialog } from './priority-dialog';
 import { StatusesDialog } from './statuses-dialog';
 import { TaskDialog } from './task-dialog';
-import { TaskDescription, TaskDetails } from './task-details';
+import { TaskDetails } from './task-details';
 
 /** Renders the popups that are open in the URL stack. */
 export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
@@ -58,7 +57,6 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
         editedIdOf(modal) ??
         editedBacklogIdOf(modal) ??
         viewedIdOf(modal) ??
-        describedIdOf(modal) ??
         deletedIdOf(modal) ??
         stoppedIdOf(modal);
       if (
@@ -141,12 +139,6 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
       (task) => task.id === viewedIdOf(modal),
     );
     if (viewed) return <TaskDetails key={modal} modal={modal} task={viewed} />;
-
-    const described = [...tasks, ...backlog].find(
-      (task) => task.id === describedIdOf(modal),
-    );
-    if (described)
-      return <TaskDescription key={modal} modal={modal} task={described} />;
 
     const editedBacklog = backlog.find(
       (task) => task.id === editedBacklogIdOf(modal),

@@ -222,22 +222,16 @@ describe('task details', () => {
     expect(details.queryByRole('region', { name: 'Opis' })).toBeNull();
   });
 
-  it('offers the whole text of a long description on show more', async () => {
+  it('shows the whole text of a long description with no show more', async () => {
     const user = userEvent.setup();
     backend.seed([task({ description: LONG })]);
     renderTime();
 
     const details = await openDetails(user);
-    await user.click(
-      details.getByRole('button', {
-        name: 'Pokaż cały opis: Raport miesięczny',
-      }),
-    );
 
-    expect(modalsInUrl()).toEqual(['task-view:t-1', 'task-description:t-1']);
-    const full = await screen.findByRole('region', { name: 'Pełny opis' });
-    expect(full).toHaveTextContent('Linia 1');
-    expect(full).toHaveTextContent('Linia 12');
+    expect(details.getByText(/Linia 12/)).toBeVisible();
+    expect(details.queryByRole('button', { name: /Pokaż/ })).toBeNull();
+    expect(modalsInUrl()).toEqual(['task-view:t-1']);
   });
 
   it('goes from details to the editor', async () => {

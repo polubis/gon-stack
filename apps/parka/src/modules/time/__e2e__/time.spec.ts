@@ -502,7 +502,7 @@ const commands = {
     await expect(taskEdit(getByE2ePrefix, LONG_TITLE)).toBeVisible();
   },
 
-  'the description shows only in the details and opens in full': async ({
+  'the description shows only in the details, in full': async ({
     getByE2e,
     getByE2ePrefix,
   }) => {
@@ -510,8 +510,6 @@ const commands = {
       getByE2ePrefix('time:task:').filter({ hasText: 'Linia 1' }),
     ).toHaveCount(0);
     await taskInfo(getByE2ePrefix, LONG_TITLE).click();
-    await expect(getByE2e('time:description-clamp')).toBeVisible();
-    await getByE2e('time:description-more').click();
     await expect(getByE2e('time:description-full')).toContainText('Linia 12');
   },
 
@@ -1053,7 +1051,7 @@ test('task description and long title survive the real backend', async ({
   await interpreter(commands, e2e)(
     ['i register an account for descriptions'],
     ['i add a task with a 160 characters title and a description'],
-    ['the description shows only in the details and opens in full'],
+    ['the description shows only in the details, in full'],
   );
 });
 
