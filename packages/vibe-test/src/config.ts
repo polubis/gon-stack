@@ -43,7 +43,8 @@ export const createPlaywrightConfig = ({
         webServerCommand ??
         `pnpm exec wrangler dev --ip ${host} --port ${port} --show-interactive-dev-session=false`,
       url: baseURL,
-      reuseExistingServer: !process.env.CI,
+      // Opt-in only: a leftover server on the port may serve stale code.
+      reuseExistingServer: process.env.VIBE_REUSE_SERVER === '1',
       timeout: 120000,
     },
     projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],

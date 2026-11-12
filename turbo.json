@@ -4,6 +4,7 @@
   "agentGuidance": false,
   "globalEnv": [
     "CI",
+    "VIBE_REUSE_SERVER",
     "PUBLIC_SUPABASE_URL",
     "PUBLIC_SUPABASE_PUBLISHABLE_KEY",
     "AUTH_CALLBACK_URL",
