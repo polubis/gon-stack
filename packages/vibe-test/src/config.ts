@@ -15,6 +15,9 @@ export type CreatePlaywrightConfigOptions = {
   testIgnore?: string | string[];
 };
 
+/** Title marker of visual specs: they run only in the pinned Docker image (`pnpm test:e2e:visual`). */
+const visualTestTitle = 'matches visual baseline';
+
 export const createPlaywrightConfig = ({
   port,
   host = '127.0.0.1',
@@ -25,7 +28,13 @@ export const createPlaywrightConfig = ({
 }: CreatePlaywrightConfigOptions): PlaywrightTestConfig => {
   const baseURL = `http://${host}:${port}`;
 
+  // Visual baselines depend on OS and fonts: native runs skip them, the Docker run (VIBE_VISUAL) runs only them.
+  const visualRun = !!process.env.VIBE_VISUAL;
+
   return {
+    ...(visualRun
+      ? { grep: new RegExp(visualTestTitle) }
+      : { grepInvert: new RegExp(visualTestTitle) }),
     testDir,
     testMatch,
     testIgnore,

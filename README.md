@@ -82,6 +82,7 @@ pnpm --filter <app> dev           # one app
 | Run everything    | `pnpm dev`                         | One command, all apps         |
 | Unit tests        | `pnpm test`                        | Behavior, not internals       |
 | E2E tests         | `pnpm pw:install && pnpm test:e2e` | Runs against the built worker |
+| Visual e2e        | `pnpm test:e2e:visual` (`:update` rewrites baselines) | Docker, pinned Playwright image, `-linux.png` baselines only; native e2e skips visual specs |
 | Lint + types      | `pnpm lint && pnpm check-types`    | Strict TypeScript             |
 | Full CI locally   | `pnpm ci:verify`                   | Format, lint, types, test, build, e2e (pre-commit) |
 | Rules in sync     | `pnpm nitpick:check`               | Docs match code               |
