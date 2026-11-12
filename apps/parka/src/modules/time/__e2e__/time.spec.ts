@@ -32,6 +32,7 @@ const ATTACHMENT_EMAIL = `e2e-time-attachment-${Date.now()}@parka.test`;
 const COMMENT_EMAIL = `e2e-time-comment-${Date.now()}@parka.test`;
 const OPEN_ONLY_EMAIL = `e2e-time-open-only-${Date.now()}@parka.test`;
 const UPFRONT_EMAIL = `e2e-time-upfront-${Date.now()}@parka.test`;
+const BAR_EMAIL = `e2e-time-backlog-bar-${Date.now()}@parka.test`;
 const PASSWORD = 'secret123';
 const ATTACHMENT_TEXT = 'Treść załącznika E2E';
 const LONG_TITLE = `Długi tytuł ${'x'.repeat(147)}`;
@@ -1017,6 +1018,48 @@ const commands = {
     expect(new URL(reads[0]!).searchParams.get('from')).toBeNull();
   },
 
+  'i register an account for the backlog bar': async (ctx) => {
+    await registerAndConfirm(ctx, BAR_EMAIL, PASSWORD);
+    await ctx.page.waitForLoadState('networkidle');
+  },
+
+  'a long backlog keeps the add button flush with the bottom of the dialog':
+    async ({ page, getByE2e }) => {
+      for (let i = 0; i < 14; i++) {
+        const res = await page.request.post(API_ROUTER.timeBacklog(), {
+          data: {
+            id: `task-bar-${i}`,
+            key: null,
+            title: `Zadanie backlogu ${i}`,
+            description: null,
+            categoryId: 'work',
+            priorityId: 'medium',
+            device: null,
+          },
+        });
+        expect(res.status()).toBe(201);
+      }
+      await open(page, `${APP_ROUTER.time({ date: DAY })}&modal=backlog`);
+      const dialog = getByE2e('time:backlog-dialog');
+      const add = getByE2e('time:backlog-add');
+      await expect(add).toBeVisible();
+      const scrolls = await dialog.evaluate(
+        (el) => el.scrollHeight > el.clientHeight,
+      );
+      expect(scrolls).toBe(true);
+      const gap = async () => {
+        const [d, b] = await Promise.all([
+          dialog.boundingBox(),
+          add.boundingBox(),
+        ]);
+        return d!.y + d!.height - (b!.y + b!.height);
+      };
+      // Padding of the dialog (20 px) plus its border, no extra empty band.
+      expect(await gap()).toBeLessThanOrEqual(22);
+      await dialog.evaluate((el) => el.scrollTo({ top: el.scrollHeight }));
+      expect(await gap()).toBeLessThanOrEqual(22);
+    },
+
   'i register an account for the open-only filter': async (ctx) => {
     await registerAndConfirm(ctx, OPEN_ONLY_EMAIL, PASSWORD);
     await ctx.page.waitForLoadState('networkidle');
@@ -1178,5 +1221,14 @@ test('moving between days reads the tasks once on the real backend', async ({
     ['i register an account for upfront loading'],
     ['i add a task to the day'],
     ['moving between days and back reads the list only once'],
+  );
+});
+
+test('the backlog add button sits flush with the dialog bottom on the real backend', async ({
+  e2e,
+}) => {
+  await interpreter(commands, e2e)(
+    ['i register an account for the backlog bar'],
+    ['a long backlog keeps the add button flush with the bottom of the dialog'],
   );
 });
