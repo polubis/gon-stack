@@ -92,7 +92,7 @@ export const AddMenu = ({
 
   return (
     <>
-      <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Root modal open={open} onOpenChange={setOpen}>
         <Popover.Trigger {...trigger} aria-haspopup="menu">
           {children}
         </Popover.Trigger>

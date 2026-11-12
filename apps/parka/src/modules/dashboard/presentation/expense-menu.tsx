@@ -12,7 +12,7 @@ export const ExpenseMenu = ({ expense }: { expense: Expense }) => {
   const { open, setOpen } = usePopoverOpen(`expense-menu:${expense.id}`);
   const label = `Więcej: ${expense.merchant}`;
   return (
-    <Popover.Root open={open} onOpenChange={setOpen}>
+    <Popover.Root modal open={open} onOpenChange={setOpen}>
       <Popover.Trigger
         aria-haspopup="menu"
         aria-label={label}

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Field } from '@/shared/ui/controls';
 import type { Suggestion } from '../domain/suggestions';
 import { Typeahead } from '../presentation/typeahead';
@@ -217,5 +217,63 @@ describe('typeahead', () => {
     expect(
       screen.getByRole('button', { name: 'Wyczyść: Sklep' }),
     ).toBeInTheDocument();
+  });
+});
+
+describe('typeahead on a phone', () => {
+  const phone = () =>
+    vi.stubGlobal(
+      'matchMedia',
+      (query: string) =>
+        ({
+          matches: true,
+          media: query,
+          addEventListener: () => {},
+          removeEventListener: () => {},
+        }) as unknown as MediaQueryList,
+    );
+  beforeEach(phone);
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('opens a full-screen picker with a focused filter input on top', async () => {
+    const { user } = setup();
+
+    await user.click(star());
+
+    const filter = await screen.findByRole('searchbox', {
+      name: 'Szukaj: Sklep',
+    });
+    await waitFor(() => expect(filter).toHaveFocus());
+    expect(optionNames()).toEqual(['Biedronka', 'Lidl', 'Bistro']);
+  });
+
+  it('filters the list by the typed phrase', async () => {
+    const { user } = setup();
+    await user.click(star());
+
+    await user.type(
+      await screen.findByRole('searchbox', { name: 'Szukaj: Sklep' }),
+      'bi',
+    );
+
+    expect(optionNames()).toEqual(['Biedronka', 'Bistro']);
+  });
+
+  it('fills the field with the chosen value and closes the picker', async () => {
+    const { user, input } = setup();
+    await user.click(star());
+
+    await user.click(await screen.findByRole('option', { name: /Lidl/ }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(input).toHaveValue('Lidl');
+  });
+
+  it('keeps the field itself free of an inline list', async () => {
+    const { user, input } = setup();
+
+    await user.type(input, 'bi');
+
+    expect(screen.queryByRole('listbox')).toBeNull();
   });
 });

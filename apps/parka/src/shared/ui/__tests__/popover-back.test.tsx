@@ -132,7 +132,8 @@ describe('two add menus on one phone page', () => {
 
     expect(screen.getAllByRole('menu')).toHaveLength(1);
     expect(
-      screen.getByRole('button', { name: 'Dodaj w nagłówku' }),
+      // The open popover hides the rest of the page from assistive tech.
+      screen.getByRole('button', { name: 'Dodaj w nagłówku', hidden: true }),
     ).toHaveAttribute('aria-expanded', 'false');
   });
 
@@ -155,12 +156,12 @@ describe('menu on a desktop', () => {
   beforeEach(() => useScreen(false));
   afterEach(() => vi.unstubAllGlobals());
 
-  it('opens without touching the URL', async () => {
+  it('opens and keeps itself in the URL', async () => {
     render(<ExpenseMenu expense={expense} />);
 
     await userEvent.click(screen.getByRole('button', { name: 'Więcej: Lidl' }));
 
     expect(screen.getByRole('menu')).toBeTruthy();
-    expect(window.location.search).toBe('');
+    expect(window.location.search).toContain('modal=');
   });
 });

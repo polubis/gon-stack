@@ -37,6 +37,9 @@ const commands = {
   'i press Escape': async ({ page }) => {
     await page.keyboard.press('Escape');
   },
+  'i click on the name field outside the select': async ({ getByE2e }) => {
+    await getByE2e('categories:form-name').click({ force: true });
+  },
   'i click outside the select': async ({ page }) => {
     await page.mouse.click(5, 5);
   },
@@ -61,8 +64,18 @@ const commands = {
     await page.goBack();
     await expect(page).toHaveURL(/\/app\/categories\/$/);
   },
-  'the select stays out of the URL': async ({ page }) => {
-    expect(selects(page)).toEqual([]);
+  'the select is a full-screen picker': async ({ page, getByE2e }) => {
+    const box = await page.getByRole('dialog', { name: 'Ikona' }).boundingBox();
+    const view = page.viewportSize()!;
+    expect(box?.width).toBe(view.width);
+    expect(box?.height).toBe(view.height);
+    await expect(getByE2e('categories:form-icon-search')).toBeVisible();
+  },
+  'the select is a dropdown, not a full-screen dialog': async ({ page }) => {
+    await expect(page.getByRole('dialog', { name: 'Ikona' })).toHaveCount(0);
+  },
+  'the click did not reach the field below': async ({ getByE2e }) => {
+    await expect(getByE2e('categories:form-name')).not.toBeFocused();
   },
   'the select reopens after a reload': async ({ page, getByE2e }) => {
     await page.reload();
@@ -84,14 +97,17 @@ test.describe('on a narrow screen', () => {
     );
   });
 
-  test('a click outside, a choice and Esc close it without a double Back', async ({
-    e2e,
-  }) => {
+  test('the select is a full-screen picker', async ({ e2e }) => {
     await interpreter(commands, e2e)(
       ['i open the new category form'],
       ['i open the icon select'],
-      ['i click outside the select'],
-      ['the select is closed and the form stays'],
+      ['the select is a full-screen picker'],
+    );
+  });
+
+  test('a choice and Esc close it without a double Back', async ({ e2e }) => {
+    await interpreter(commands, e2e)(
+      ['i open the new category form'],
       ['i pick the first color'],
       ['the select is closed and the form stays'],
       ['i open the icon select'],
@@ -112,13 +128,35 @@ test.describe('on a narrow screen', () => {
 test.describe('on a wide screen', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
-  test('the select is a dropdown that does not touch history', async ({
+  test('the select is a dropdown kept in the URL, closed by Back', async ({
     e2e,
   }) => {
     await interpreter(commands, e2e)(
       ['i open the new category form'],
       ['i open the icon select'],
-      ['the select stays out of the URL'],
+      ['the select is a dropdown, not a full-screen dialog'],
+      ['the select is a history entry'],
+      ['i press the browser Back button'],
+      ['the select is closed and the form stays'],
+    );
+  });
+
+  test('a click outside closes it without reaching what is below', async ({
+    e2e,
+  }) => {
+    await interpreter(commands, e2e)(
+      ['i open the new category form'],
+      ['i open the icon select'],
+      ['i click on the name field outside the select'],
+      ['the select is closed and the form stays'],
+      ['the click did not reach the field below'],
+    );
+  });
+
+  test('Esc closes it', async ({ e2e }) => {
+    await interpreter(commands, e2e)(
+      ['i open the new category form'],
+      ['i open the icon select'],
       ['i press Escape'],
       ['the select is closed and the form stays'],
     );

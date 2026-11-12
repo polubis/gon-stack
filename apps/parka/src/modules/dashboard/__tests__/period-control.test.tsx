@@ -433,7 +433,9 @@ describe('dashboard period control', () => {
 
       fireEvent.change(input, { target: { value: '2026-02-14' } });
 
-      expect(valueButton()).toHaveTextContent('sob. 14 lut 2026');
+      await waitFor(() =>
+        expect(valueButton()).toHaveTextContent('sob. 14 lut 2026'),
+      );
     });
 
     it('jumps to a chosen week', async () => {

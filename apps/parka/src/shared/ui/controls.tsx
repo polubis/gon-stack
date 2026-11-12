@@ -2,6 +2,7 @@ import {
   createContext,
   useContext,
   useId,
+  useRef,
   type ComponentProps,
   type KeyboardEvent,
   type ReactNode,
@@ -10,6 +11,8 @@ import * as SelectPrimitive from '@radix-ui/react-select';
 import { Check, ChevronDown } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import type { E2eId } from '@/__e2e__/selectors';
+import { PickerScreen } from './picker-screen';
+import { useIsMobile } from './use-mobile';
 import { usePopoverOpen } from './use-popover-open';
 
 type SegmentedProps<T extends string> = {
@@ -259,7 +262,10 @@ export const Input = ({ className, id, ...props }: ComponentProps<'input'>) => {
 
 export type SelectOption = { value: string; label: ReactNode };
 
-/** Radix select wired to the surrounding `Field` label. Empty value shows `placeholder`. */
+/**
+ * Select wired to the surrounding `Field` label. Empty value shows `placeholder`.
+ * Dropdown on desktop, full-screen picker on mobile.
+ */
 export const Select = ({
   options,
   value,
@@ -281,6 +287,72 @@ export const Select = ({
   const { open, setOpen } = usePopoverOpen(
     props['data-e2e'] ?? id ?? field?.id ?? 'field',
   );
+  const mobile = useIsMobile();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const selected = options.find((option) => option.value === value);
+
+  if (mobile)
+    return (
+      <>
+        <button
+          {...props}
+          ref={triggerRef}
+          type="button"
+          id={id ?? field?.id}
+          disabled={disabled}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          data-placeholder={selected ? undefined : ''}
+          onClick={() => setOpen(true)}
+          className={cn(
+            inputClass,
+            'flex items-center justify-between gap-2 text-left disabled:opacity-60 data-[placeholder]:text-ink-soft',
+            className,
+          )}
+        >
+          <span className="min-w-0 truncate">
+            {selected?.label ?? placeholder}
+          </span>
+          <ChevronDown
+            className="h-4 w-4 shrink-0 text-ink-soft"
+            aria-hidden="true"
+          />
+        </button>
+        <PickerScreen
+          open={open}
+          onClose={() => setOpen(false)}
+          title={field?.label ?? placeholder ?? 'Wybierz'}
+          returnFocus={triggerRef}
+        >
+          <div
+            role="listbox"
+            aria-label={field?.label ?? placeholder ?? 'Wybierz'}
+            className="flex flex-col gap-1"
+          >
+            {options.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                role="option"
+                aria-selected={option.value === value}
+                data-e2e={`ui:option:${option.value}`}
+                onClick={() => {
+                  onValueChange(option.value);
+                  setOpen(false);
+                }}
+                className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-sm hover:bg-brand-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand aria-selected:font-semibold aria-selected:text-brand-dark"
+              >
+                {option.label}
+                {option.value === value ? (
+                  <Check className="h-4 w-4" aria-hidden="true" />
+                ) : null}
+              </button>
+            ))}
+          </div>
+        </PickerScreen>
+      </>
+    );
+
   return (
     <SelectPrimitive.Root
       open={open}
@@ -302,9 +374,7 @@ export const Select = ({
         <span className="min-w-0 truncate">
           <SelectPrimitive.Value placeholder={placeholder}>
             {/* Own keyed node: page translation wraps text in <font>, which breaks React's in-place text swap. */}
-            <span key={value}>
-              {options.find((option) => option.value === value)?.label}
-            </span>
+            <span key={value}>{selected?.label}</span>
           </SelectPrimitive.Value>
         </span>
         <SelectPrimitive.Icon asChild>
