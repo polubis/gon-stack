@@ -1,4 +1,10 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
@@ -125,6 +131,45 @@ describe('account drawer', () => {
     expect(
       screen.getByRole('radio', { name: /b@parka.test/ }),
     ).not.toBeChecked();
+  });
+
+  it('shows the freshly set profile picture on the active account row', async () => {
+    backend();
+    setProfileSummary({ avatarUrl: 'http://cdn/new.webp' });
+    await openMenu();
+
+    const row = await screen.findByRole('radio', { name: /a@parka.test/ });
+    expect(within(row).getByRole('presentation')).toHaveAttribute(
+      'src',
+      'http://cdn/new.webp',
+    );
+  });
+
+  it('falls back to the initial when an account picture fails to load', async () => {
+    backend();
+    server.use(
+      http.get('/api/auth/accounts/', () =>
+        HttpResponse.json({
+          code: 200,
+          activeId: ID_A,
+          accounts: [
+            { userId: ID_A, email: 'a@parka.test', avatarUrl: null },
+            {
+              userId: ID_B,
+              email: 'b@parka.test',
+              avatarUrl: 'http://cdn/gone.webp',
+            },
+          ],
+        }),
+      ),
+    );
+    await openMenu();
+
+    const row = await screen.findByRole('radio', { name: /b@parka.test/ });
+    fireEvent.error(within(row).getByRole('presentation'));
+
+    expect(within(row).queryByRole('presentation')).toBeNull();
+    expect(row).toHaveTextContent('B');
   });
 
   it('offers adding an account and signing out', async () => {

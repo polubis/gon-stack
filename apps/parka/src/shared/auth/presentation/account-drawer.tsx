@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import {
   Check,
@@ -34,7 +34,7 @@ import {
 } from '../integration/repository';
 import { AccountAvatar } from './account-avatar';
 import { useAuthContext } from './context';
-import { useProfileSummary } from './profile-summary';
+import { useProfileSummary, type ProfileSummary } from './profile-summary';
 
 type Loaded =
   | { status: 'loading' }
@@ -43,6 +43,31 @@ type Loaded =
 
 const ITEM =
   'flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm text-ink hover:bg-hover focus-visible:bg-hover focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-50 aria-disabled:opacity-50';
+
+const DESKTOP = '(min-width: 1024px)';
+const GAP = 12;
+
+/**
+ * Desktop: spot beside the nav trigger, bottom edges level, so the drawer
+ * opens next to the avatar it belongs to. `null` on mobile or without trigger.
+ */
+const anchorBesideTrigger = (): CSSProperties | null => {
+  if (!window.matchMedia?.(DESKTOP).matches) return null;
+  const rect = [
+    ...document.querySelectorAll('[data-e2e="account-menu:trigger"]'),
+  ]
+    .map((el) => el.getBoundingClientRect())
+    .find((r) => r.width > 0);
+  if (!rect) return null;
+  return {
+    left: rect.right + GAP,
+    bottom: window.innerHeight - rect.bottom,
+    top: 'auto',
+    right: 'auto',
+    width: '24rem',
+    maxHeight: `calc(100% - ${window.innerHeight - rect.bottom}px - 0.5rem)`,
+  };
+};
 
 const SwitchingScreen = ({ email }: { email: string }) => (
   <div
@@ -64,6 +89,7 @@ const SwitchingScreen = ({ email }: { email: string }) => (
 const Options = ({
   state,
   user,
+  profile,
   busy,
   onSwitch,
   onLogout,
@@ -71,6 +97,7 @@ const Options = ({
 }: {
   state: Loaded;
   user: AuthUser;
+  profile: ProfileSummary;
   busy: boolean;
   onSwitch: (account: Account) => void;
   onLogout: (target: 'active' | 'all') => void;
@@ -135,7 +162,11 @@ const Options = ({
             >
               <AccountAvatar
                 label={account.email}
-                avatarUrl={account.avatarUrl}
+                avatarUrl={
+                  active
+                    ? (profile.avatarUrl ?? account.avatarUrl)
+                    : account.avatarUrl
+                }
               />
               <span className="min-w-0 flex-1 truncate">{account.email}</span>
               {active ? (
@@ -194,6 +225,7 @@ const Drawer = ({
   onLogout: (target: 'active' | 'all') => void;
 }) => {
   const profile = useProfileSummary();
+  const [anchor] = useState(anchorBesideTrigger);
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<Loaded>({ status: 'loading' });
   useModalMounted(ACCOUNT_MODAL);
@@ -222,6 +254,7 @@ const Drawer = ({
         <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-overlay" />
         <Dialog.Content
           data-e2e="account-menu:menu"
+          style={anchor ?? undefined}
           aria-describedby={undefined}
           className="fixed inset-y-2 right-2 z-(--z-modal) flex w-[calc(100%-1rem)] max-w-sm animate-drawer-in flex-col overflow-y-auto overscroll-contain rounded-4xl border border-line bg-card p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-popover focus:outline-none motion-reduce:animate-none"
         >
@@ -264,6 +297,7 @@ const Drawer = ({
             <Options
               state={state}
               user={user}
+              profile={profile}
               busy={busy}
               onSwitch={onSwitch}
               onLogout={onLogout}
