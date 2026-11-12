@@ -1,5 +1,4 @@
 import type { z } from 'zod';
-import type { Schema } from '@schemas/dashboard';
 import {
   deleteExpenseSchema,
   listExpensesSchema,
@@ -27,18 +26,10 @@ import type {
   ExpenseId,
   Limit,
   LimitId,
-  Period,
   Recurring,
   RecurringId,
-  Summary,
 } from '../domain/models';
-import {
-  toCategory,
-  toExpense,
-  toLimit,
-  toRecurring,
-  toSummary,
-} from './mappers';
+import { toCategory, toExpense, toLimit, toRecurring } from './mappers';
 
 const cache = createRequestCache();
 
@@ -75,32 +66,6 @@ type UpdateRecurringOut = z.infer<
 type DeleteRecurringOut = z.infer<
   ReturnType<typeof deleteRecurringSchema>
 >['out'];
-
-export const fetchSummary = async (
-  period: Period,
-  signal: AbortSignal,
-): Promise<Summary> => {
-  const response = await fetch(
-    API_ROUTER.dashboard({
-      kind: period.kind,
-      from: period.from,
-      to: period.kind === 'custom' ? period.to : undefined,
-      tz: browserTimeZone(),
-    }),
-    {
-      headers: { Accept: 'application/json' },
-      signal,
-    },
-  );
-
-  const json = (await response.json()) as Schema['out'];
-
-  if (json.code !== 200) {
-    throw new Error(json.message);
-  }
-
-  return toSummary(json.data);
-};
 
 export const fetchExpenses = async (
   signal: AbortSignal,
@@ -219,29 +184,19 @@ export const deleteRecurring = async (id: RecurringId): Promise<void> => {
   if (json.code !== 200) throw new Error(json.message);
 };
 
-const summaryKey = (period: Period) =>
-  `summary:${period.kind}:${period.from}:${period.to}`;
-
-/** Warms the summary of a period the user is likely to open next. */
-export const prefetchSummary = (period: Period) =>
-  cache.prefetch(summaryKey(period), () => fetchSummary(period, SHARED));
-
 /**
  * Single entry point for reading: every read of the dashboard in parallel.
  * Each read first turns due recurring charges into expenses on the server;
- * that is idempotent, so parallel reads never double a charge. Only the
- * summary depends on the period; the rest is shared between periods.
+ * that is idempotent, so parallel reads never double a charge. Statistics of
+ * any period are counted from the expenses, so nothing here depends on one.
  */
-export const fetchDashboard = async (
-  period: Period,
-): Promise<DashboardData> => {
-  const [summary, expenses, categories, limits, recurring] = await Promise.all([
-    cache.read(summaryKey(period), () => fetchSummary(period, SHARED)),
+export const fetchDashboard = async (): Promise<DashboardData> => {
+  const [expenses, categories, limits, recurring] = await Promise.all([
     cache.read('expenses', () => fetchExpenses(SHARED)),
     cache.read('categories', () => fetchCategories(SHARED)),
     cache.read('limits', () => fetchLimits(SHARED)),
     cache.read('recurring', () => fetchRecurring(SHARED)),
   ]);
 
-  return { summary, expenses, categories, limits, recurring };
+  return { expenses, categories, limits, recurring };
 };

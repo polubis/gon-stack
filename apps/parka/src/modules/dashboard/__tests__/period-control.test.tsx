@@ -7,7 +7,6 @@ import {
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { pickOption } from '@/__tests__/pick-option';
-import { http, HttpResponse } from 'msw';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Main } from '../presentation/main';
 import { answerApi, readBody, startBackend } from './dashboard-backend';
@@ -42,8 +41,11 @@ const stubApi = () =>
     }),
   );
 
+/** Reads that fetch finance data; moving between periods must add none. */
 const asked = (calls: ReturnType<typeof stubApi>) =>
-  calls.map(({ url }) => url).filter((url) => url.includes('/api/dashboard'));
+  calls
+    .map(({ url }) => url)
+    .filter((url) => !/\/api\/(avatar|notifications)/.test(url));
 
 const next = () =>
   screen.getByRole<HTMLButtonElement>('button', { name: 'Następny okres' });
@@ -157,18 +159,14 @@ describe('dashboard period control', () => {
 
   it('opens the previous month without asking for it again', async () => {
     const calls = await open();
-    await waitFor(() =>
-      expect(asked(calls).join(' ')).toContain('from=2026-09-01'),
-    );
+    const before = asked(calls).length;
 
     await userEvent.click(prev());
 
     await waitFor(() =>
       expect(valueButton()).toHaveTextContent('wrzesień 2026'),
     );
-    expect(
-      asked(calls).filter((url) => url.includes('from=2026-09-01')),
-    ).toHaveLength(1);
+    expect(asked(calls)).toHaveLength(before);
   });
 
   it('opens on the current month and cannot go forward', async () => {
@@ -179,16 +177,15 @@ describe('dashboard period control', () => {
     expect(next().disabled).toBe(true);
   });
 
-  it('goes back a month and asks for it', async () => {
+  it('goes back a month without asking for it', async () => {
     const calls = await open();
+    const before = asked(calls).length;
 
     await userEvent.click(prev());
 
     expect(valueButton()).toHaveTextContent('wrzesień 2026');
     expect(next().disabled).toBe(false);
-    await waitFor(() =>
-      expect(asked(calls).join(' ')).toContain('kind=month&from=2026-09-01'),
-    );
+    expect(asked(calls)).toHaveLength(before);
   });
 
   it('goes forward again and stops at the present', async () => {
@@ -213,14 +210,13 @@ describe('dashboard period control', () => {
 
   it('shows the current week, Monday to Sunday', async () => {
     const calls = await open();
+    const before = asked(calls).length;
 
     await kind('Tydzień');
 
     expect(valueButton()).toHaveTextContent('pon. 5 – niedz. 11 paź 2026');
     expect(screen.getByText('Wydatki w tym tygodniu')).toBeTruthy();
-    await waitFor(() =>
-      expect(asked(calls).join(' ')).toContain('kind=week&from=2026-10-05'),
-    );
+    expect(asked(calls)).toHaveLength(before);
   });
 
   it('steps by week', async () => {
@@ -276,16 +272,15 @@ describe('dashboard period control', () => {
     expect(next().disabled).toBe(true);
   });
 
-  it('steps back to last year and asks for it', async () => {
+  it('steps back to last year without asking for it', async () => {
     const calls = await open();
     await kind('Rok');
+    const before = asked(calls).length;
 
     await userEvent.click(prev());
 
     expect(valueButton()).toHaveTextContent('2025');
-    await waitFor(() =>
-      expect(asked(calls).join(' ')).toContain('kind=year&from=2025-01-01'),
-    );
+    expect(asked(calls)).toHaveLength(before);
   });
 
   it('steps forward again to this year', async () => {
@@ -372,25 +367,14 @@ describe('dashboard period control', () => {
     expect(asked(calls).every((url) => !url.includes('2030'))).toBe(true);
   });
 
-  it('keeps the data visible while the next period loads', async () => {
+  it('keeps the data visible and loads nothing when the period moves', async () => {
     await open();
-    let release = () => {};
-    server.use(
-      http.all(
-        '/api/*',
-        ({ request }) =>
-          new Promise<Response>((resolve) => {
-            release = () => resolve(HttpResponse.json(readBody(request.url)));
-          }),
-      ),
-    );
 
     await userEvent.click(prev());
     await userEvent.click(prev());
 
     expect(screen.getByText('Wydatki w tym miesiącu')).toBeTruthy();
-    expect(screen.getByText('Ładowanie danych')).toBeTruthy();
-    release();
+    expect(screen.queryByText('Ładowanie danych')).toBeNull();
   });
 
   describe('quick jump', () => {
@@ -411,6 +395,7 @@ describe('dashboard period control', () => {
 
     it('jumps to a chosen month from the list', async () => {
       const calls = await open();
+      const before = asked(calls).length;
       const list = await openPicker('Wybierz miesiąc');
 
       await userEvent.click(
@@ -419,9 +404,7 @@ describe('dashboard period control', () => {
 
       expect(valueButton()).toHaveTextContent('marzec 2026');
       expect(screen.queryByLabelText('Wybierz miesiąc')).toBeNull();
-      await waitFor(() =>
-        expect(asked(calls).join(' ')).toContain('kind=month&from=2026-03-01'),
-      );
+      expect(asked(calls)).toHaveLength(before);
     });
 
     it('opens the picker of the chosen range', async () => {
@@ -553,19 +536,16 @@ describe('dashboard period control', () => {
       ).toBe('true');
     });
 
-    it('shows the chosen from-to range and asks for it', async () => {
+    it('shows the chosen from-to range without asking for it', async () => {
       const calls = await open();
+      const before = asked(calls).length;
       await kind('Własny');
 
       await apply(1, 'wtorek, 1 września 2026', 'środa, 30 września 2026');
 
       await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
       expect(valueButton()).toHaveTextContent('wt. 1 – śr. 30 wrz 2026');
-      await waitFor(() =>
-        expect(asked(calls).join(' ')).toContain(
-          'kind=custom&from=2026-09-01&to=2026-09-30',
-        ),
-      );
+      expect(asked(calls)).toHaveLength(before);
       expect(window.location.search).toContain(
         'range=custom&from=2026-09-01&to=2026-09-30',
       );
@@ -823,7 +803,13 @@ describe('dashboard period control', () => {
     const openWithLimit = async () => {
       window.history.replaceState(null, '', '/app/');
       answerApi(server, ({ url }) => {
-        const body = readBody(url, {
+        return readBody(url, {
+          expenses: [
+            {
+              ...expense('e-limit', 'Sklep Limitowy', '2026-10-10T12:00:00Z'),
+              amount: 10,
+            },
+          ],
           limits: [
             {
               id: 'l-0',
@@ -833,9 +819,6 @@ describe('dashboard period control', () => {
             },
           ],
         });
-        return url.includes('/api/dashboard')
-          ? { ...body, data: { ...body.data, monthlyLimit: 3100 } }
-          : body;
       });
       render(<Main />);
       await screen.findByText('Limity');

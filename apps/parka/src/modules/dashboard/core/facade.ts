@@ -1,4 +1,8 @@
+import { useMemo } from 'react';
+import { browserTimeZone } from '@/shared/date/date';
+import { todayDay } from '@/shared/period/period';
 import { useSortedCategories } from '@/shared/expense-category/sorted';
+import { summarizePeriod } from '../domain/summary';
 import type { Registry } from './registry';
 import type { Store } from './store';
 import type {
@@ -30,7 +34,27 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
     useInitialized: () => store.$initialized.use(),
     useLoading: () => store.$loading.use(),
     useError: () => store.$error.use(),
-    useData: () => store.$data.use(),
+    useData: () => {
+      const ready = store.$ready.use();
+      const period = store.$period.use();
+      const expenses = store.$expenses.use();
+      const categories = store.$categories.use();
+      const limits = store.$limits.use();
+      return useMemo(
+        () =>
+          ready && period
+            ? summarizePeriod({
+                expenses,
+                categories,
+                limits,
+                period,
+                today: todayDay(),
+                timeZone: browserTimeZone(),
+              })
+            : null,
+        [ready, period, expenses, categories, limits],
+      );
+    },
     useExpenses: () => store.$expenses.use(),
     useCategories: () => useSortedCategories(store.$categories.use()),
     useLimits: () => store.$limits.use(),

@@ -6,71 +6,79 @@ import { currentMonth } from '../domain/format';
 import { Main } from '../presentation/main';
 import { answerApi, readBody, startBackend } from './dashboard-backend';
 
-const SUMMARY = {
-  userName: 'Anna Kowalska',
-  total: 10,
-  change: 25,
-  previousTotal: 8,
-  transactions: 3,
-  dailyAverage: 1.5,
-  series: [
-    { index: 1, total: 4 },
-    { index: 2, total: 6 },
-  ],
-  previousSeries: [
-    { index: 1, total: 8 },
-    { index: 2, total: 0 },
-  ],
-  monthlyLimit: 100,
-  categories: [
-    {
-      categoryId: 'c-1',
-      name: 'Jedzenie',
-      color: 'green',
-      amount: 42,
-      pct: 100,
-    },
-  ],
-};
+const month: string = currentMonth();
+const previousMonth = shiftPeriod(
+  currentPeriod('month', todayDay()),
+  -1,
+).from.slice(0, 7);
+
+/** Noon UTC on the first: the same calendar day in every time zone. */
+const spend = (
+  id: string,
+  amount: number,
+  categoryId = 'c-1',
+  at: string = month,
+) => ({
+  id,
+  merchant: `Sklep ${id}`,
+  date: `${at}-01T12:00:00Z`,
+  amount,
+  categoryId,
+  paymentMethod: 'card',
+  isBill: false,
+  source: 'manual',
+  items: [],
+});
+
+const LIMIT = { id: 'l-1', scope: 'total', amount: 100, alertAt: 80 };
+const FOOD = { id: 'c-1', name: 'Jedzenie', icon: 'cart', color: 'green' };
 
 const server = startBackend();
 
-const stubApi = (failing = false, overrides: Partial<typeof SUMMARY> = {}) =>
+const stubApi = (failing = false, reads: Parameters<typeof readBody>[1] = {}) =>
   answerApi(server, ({ url }) =>
     failing
       ? { code: 500, message: 'boom' }
-      : {
-          code: 200,
-          data: url.includes('/api/dashboard')
-            ? { ...SUMMARY, ...overrides }
-            : [],
-        },
+      : readBody(url, { categories: [FOOD], limits: [LIMIT], ...reads }),
   );
+
+const legendOfCategories = async () => {
+  const donut = await screen.findByRole('img', {
+    name: /Rozkład wydatków wg kategorii/,
+  });
+  const figure = donut.closest('figure');
+  if (!figure) throw new Error('No category figure.');
+  return figure;
+};
 
 describe('dashboard screen', () => {
   it('shows the month total with its change', async () => {
-    stubApi();
+    stubApi(false, {
+      expenses: [
+        spend('a', 4),
+        spend('b', 6),
+        spend('c', 8, 'c-1', previousMonth),
+      ],
+    });
 
     render(<Main />);
 
     await waitFor(() =>
       expect(screen.getByRole('heading', { name: 'Finanse' })).toBeTruthy(),
     );
-    expect(screen.getByText(/10,00/)).toBeTruthy();
+    expect(screen.getAllByText(/10,00/).length).toBeGreaterThan(0);
     expect(screen.getByText('+25%')).toBeTruthy();
     expect(screen.getByText('Średnio dziennie')).toBeTruthy();
-    expect(screen.getByText(/1,50/)).toBeTruthy();
-    expect(screen.getByText('3')).toBeTruthy();
     expect(screen.getByText(/90,00/)).toBeTruthy();
     expect(
-      screen.getByRole('progressbar', {
+      screen.getAllByRole('progressbar', {
         name: /Wykorzystano 10% limitu na miesiąc/,
-      }),
-    ).toBeTruthy();
+      }).length,
+    ).toBeGreaterThan(0);
   });
 
   it('says how far over the limit spending went', async () => {
-    stubApi(false, { total: 130 });
+    stubApi(false, { expenses: [spend('a', 130)] });
 
     render(<Main />);
 
@@ -79,7 +87,7 @@ describe('dashboard screen', () => {
   });
 
   it('warns when spending is close to the limit', async () => {
-    stubApi(false, { total: 85 });
+    stubApi(false, { expenses: [spend('a', 85)] });
 
     render(<Main />);
 
@@ -88,7 +96,7 @@ describe('dashboard screen', () => {
   });
 
   it('hides the change when spending did not move', async () => {
-    stubApi(false, { change: 0 });
+    stubApi();
 
     render(<Main />);
 
@@ -97,7 +105,7 @@ describe('dashboard screen', () => {
   });
 
   it('lists each category with its amount and share', async () => {
-    stubApi();
+    stubApi(false, { expenses: [spend('a', 42)] });
 
     render(<Main />);
 
@@ -114,34 +122,39 @@ describe('dashboard screen', () => {
 
   it('shows only six categories on the card', async () => {
     const categories = Array.from({ length: 8 }, (_, i) => ({
-      categoryId: `c-${i}`,
+      id: `c-${i}`,
       name: `Kat ${i}`,
+      icon: 'cart',
       color: 'green',
-      amount: 10,
-      pct: 12,
     }));
-    stubApi(false, { categories });
+    stubApi(false, {
+      categories,
+      expenses: categories.map((c, i) => spend(`e-${i}`, 10, c.id)),
+    });
 
     render(<Main />);
 
-    expect(await screen.findByText('Kat 5')).toBeTruthy();
-    expect(screen.queryByText('Kat 6')).toBeNull();
+    const legend = within(await legendOfCategories());
+    expect(legend.getByText('Kat 5')).toBeTruthy();
+    expect(legend.queryByText('Kat 6')).toBeNull();
   });
 
   it('lists all categories in a dialog', async () => {
     const categories = Array.from({ length: 8 }, (_, i) => ({
-      categoryId: `c-${i}`,
+      id: `c-${i}`,
       name: `Kat ${i}`,
+      icon: 'cart',
       color: 'green',
-      amount: 10,
-      pct: 12,
     }));
-    stubApi(false, { categories });
+    stubApi(false, {
+      categories,
+      expenses: categories.map((c, i) => spend(`e-${i}`, 10, c.id)),
+    });
     const user = userEvent.setup();
     render(<Main />);
-    await screen.findByText('Kat 5');
+    const legend = within(await legendOfCategories());
 
-    await user.click(screen.getByRole('button', { name: 'Pokaż wszystkie' }));
+    await user.click(legend.getByRole('button', { name: 'Pokaż wszystkie' }));
 
     const dialog = within(await screen.findByRole('dialog'));
     expect(dialog.getByText('Kat 7')).toBeTruthy();
@@ -230,23 +243,27 @@ describe('dashboard screen', () => {
     ).toBeNull();
   });
 
-  it('asks the backend for the previous month after going back', async () => {
-    const calls = stubApi();
+  it('shows the previous month after going back without asking again', async () => {
+    const calls = stubApi(false, {
+      expenses: [spend('a', 4), spend('b', 7, 'c-1', previousMonth)],
+    });
     render(<Main />);
-    await waitFor(() => expect(calls).not.toHaveLength(0));
-    const previous = shiftPeriod(currentPeriod('month', todayDay()), -1);
+    await screen.findByRole('button', { name: /^Sklep a/ });
+    const asked = calls.length;
 
     await userEvent.click(
       screen.getByRole('button', { name: 'Poprzedni okres' }),
     );
 
-    await waitFor(() =>
-      expect(
-        calls.some(({ url }) =>
-          url.includes(`kind=month&from=${previous.from}`),
-        ),
-      ).toBe(true),
-    );
+    expect(
+      await screen.findByRole('button', { name: /^Sklep b/ }),
+    ).toBeTruthy();
+    expect(
+      calls
+        .map(({ url }) => url)
+        .slice(asked)
+        .filter((url) => !url.includes('/api/avatar')),
+    ).toEqual([]);
   });
 
   it('shows a skeleton until all the data arrived', async () => {
@@ -268,18 +285,20 @@ describe('dashboard screen', () => {
     const dashboardCalls = calls.filter(
       ({ url }) => !url.includes('/api/notifications'),
     );
-    // Five reads for the month plus the summary of the month before it.
-    expect(dashboardCalls).toHaveLength(7);
+    expect(dashboardCalls.map(({ url }) => url.split('?')[0]).sort()).toEqual([
+      '/api/avatar/',
+      '/api/categories/',
+      '/api/expenses/',
+      '/api/limits/',
+      '/api/recurring/',
+    ]);
   });
 
   it('shows only the failure screen when any part fails to load', async () => {
     answerApi(server, ({ url }) =>
       url.includes('/api/limits')
         ? { code: 500, message: 'boom' }
-        : {
-            code: 200,
-            data: url.includes('/api/dashboard') ? SUMMARY : [],
-          },
+        : readBody(url),
     );
 
     render(<Main />);
@@ -340,9 +359,7 @@ describe('dashboard month expenses', () => {
                 color: 'red',
               },
             ]
-          : url.includes('/api/dashboard')
-            ? SUMMARY
-            : [],
+          : [],
     }));
 
   const openSeptember = async () => {

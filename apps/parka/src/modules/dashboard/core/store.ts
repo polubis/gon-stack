@@ -7,7 +7,6 @@ import type {
   Notice,
   Period,
   Recurring,
-  Summary,
 } from '../domain/models';
 
 export const createStore = () => {
@@ -16,7 +15,8 @@ export const createStore = () => {
   /** One flag for the whole screen: all or nothing. */
   const $loading = atom(false);
   const $error = atom<string | null>(null);
-  const $data = atom<Summary | null>(null);
+  /** Set once the reads landed: moving between periods needs no more. */
+  const $ready = atom(false);
   const $expenses = atom<Expense[]>([]);
   const $categories = atom<Category[]>([]);
   const $limits = atom<Limit[]>([]);
@@ -30,7 +30,7 @@ export const createStore = () => {
     $initialized,
     $loading,
     $error,
-    $data,
+    $ready,
     $expenses,
     $categories,
     $limits,

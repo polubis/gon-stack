@@ -42,11 +42,12 @@ const mockState = async (
     recurring?: unknown[];
     categories?: unknown[];
     limits?: unknown[];
+    expenses?: unknown[];
   } = {},
 ): Promise<void> => {
   const collections: [string, unknown[]][] = [
     [API_ROUTER.categories(), rows.categories ?? [CATEGORY]],
-    [API_ROUTER.expenses(), []],
+    [API_ROUTER.expenses(), rows.expenses ?? []],
     [API_ROUTER.limits(), rows.limits ?? []],
     [API_ROUTER.recurring(), rows.recurring ?? []],
     [API_ROUTER.notifications(), []],
@@ -70,31 +71,6 @@ const mockState = async (
       });
     });
   }
-  // The dashboard loads its summary together with every list: all or nothing.
-  await page.route(
-    `**${API_ROUTER.dashboard({ kind: '', from: '' })}**`,
-    async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          code: 200,
-          data: {
-            total: 0,
-            change: 0,
-            previousTotal: 0,
-            userName: 'Anna',
-            transactions: 0,
-            dailyAverage: 0,
-            series: [],
-            previousSeries: [],
-            monthlyLimit: null,
-            categories: [],
-          },
-        }),
-      });
-    },
-  );
   await page.route(`**${API_ROUTER.settings()}**`, async (route) => {
     await route.fulfill({
       status: 200,
@@ -131,45 +107,29 @@ const commands = {
   },
 
   'i mock the dashboard totals': async ({ page }) => {
-    await mockState(page);
-    // Dashboard is backend-only (see modules/dashboard/AGENTS.md) — stub the
-    // response so the view has deterministic per-month totals to assert
-    // against.
+    // The dashboard counts totals from the expenses it reads, so give it one
+    // expense per month with a deterministic amount.
     const current = new Date();
     const previous = new Date(
       Date.UTC(current.getUTCFullYear(), current.getUTCMonth() - 1, 1),
     );
-    const totals: Record<string, number> = {
-      [yearMonth(current)]: 1234,
-      [yearMonth(previous)]: 999,
-    };
-    await page.route(
-      `**${API_ROUTER.dashboard({ kind: '', from: '' })}**`,
-      async (route) => {
-        const month = new URL(route.request().url()).searchParams
-          .get('from')
-          ?.slice(0, 7);
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            code: 200,
-            data: {
-              total: (month && totals[month]) ?? 0,
-              change: 0,
-              previousTotal: 0,
-              userName: 'Anna',
-              transactions: 0,
-              dailyAverage: 0,
-              series: [],
-              previousSeries: [],
-              monthlyLimit: null,
-              categories: [],
-            },
-          }),
-        });
-      },
-    );
+    const expense = (id: string, amount: number, at: string) => ({
+      id,
+      merchant: `Sklep ${id}`,
+      date: `${at}-01T12:00:00Z`,
+      amount,
+      categoryId: CATEGORY.id,
+      paymentMethod: 'Karta',
+      isBill: false,
+      source: 'manual',
+      items: [],
+    });
+    await mockState(page, {
+      expenses: [
+        expense('current', 1234, yearMonth(current)),
+        expense('previous', 999, yearMonth(previous)),
+      ],
+    });
   },
   'the dashboard shows the current month totals': async ({
     page,
