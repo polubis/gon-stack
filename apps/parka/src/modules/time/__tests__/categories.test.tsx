@@ -31,7 +31,6 @@ describe('task categories', () => {
     await user.type(name, 'Mieszkanie');
     await user.click(form.getByRole('button', { name: 'Zapisz zmiany' }));
 
-    expect(await screen.findByText('Zapisano zmiany.')).toBeVisible();
     expect(
       await screen.findByRole('button', {
         name: 'Edytuj kategorię Mieszkanie',
@@ -79,7 +78,6 @@ describe('task categories', () => {
 
     await user.click(confirm.getByRole('button', { name: 'Usuń' }));
 
-    expect(await screen.findByText('Usunięto kategorię.')).toBeVisible();
     expect(
       screen.queryByRole('button', { name: 'Edytuj kategorię Dom' }),
     ).toBeNull();

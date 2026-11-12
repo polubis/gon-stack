@@ -97,7 +97,6 @@ describe('profile avatar in the profile modal', () => {
       expect(img).toHaveAttribute('src', expect.stringContaining('v=2')),
     );
     expect(img).toHaveAttribute('srcset', expect.stringContaining('32w'));
-    expect(await screen.findByText('Zmieniono zdjęcie.')).toBeVisible();
     expect(uploads).toHaveLength(1);
   });
 

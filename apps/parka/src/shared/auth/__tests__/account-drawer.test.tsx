@@ -24,7 +24,6 @@ import { AccountDrawer } from '../presentation/account-drawer';
 import { AccountMenu } from '../presentation/account-menu';
 import { setProfileSummary } from '../presentation/profile-summary';
 import { AuthProvider } from '../presentation/context';
-import { SWITCH_TOAST_KEY } from '../configuration/constraints';
 
 const ID_A = '0a0a0a0a-0a0a-4a0a-8a0a-0a0a0a0a0a0a';
 const ID_B = '0b0b0b0b-0b0b-4b0b-8b0b-0b0b0b0b0b0b';
@@ -314,7 +313,7 @@ describe('account drawer', () => {
     );
   });
 
-  it('switches account and leaves a toast for the reloaded page', async () => {
+  it('switches account and reloads onto the dashboard', async () => {
     const switched = backend();
     await openMenu();
 
@@ -326,9 +325,6 @@ describe('account drawer', () => {
       expect(assign).toHaveBeenCalledWith(APP_ROUTER.dashboard()),
     );
     expect(switched).toEqual([{ userId: ID_B }]);
-    expect(window.sessionStorage.getItem(SWITCH_TOAST_KEY)).toBe(
-      'b@parka.test',
-    );
   });
 
   it('reports a failed switch and stays on the current account', async () => {

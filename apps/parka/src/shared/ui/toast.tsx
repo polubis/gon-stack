@@ -1,9 +1,7 @@
-import { useEffect, useEffectEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import type { E2eId } from '@/__e2e__/selectors';
-
-const AUTO_DISMISS_MS = 4000;
 
 export type ToastNotice =
   | {
@@ -30,10 +28,27 @@ type Props = {
   'data-e2e'?: E2eId;
 };
 
+const STACK_ID = 'toast-stack';
+
+/** One shared top container, so every mounted toast stacks instead of overlapping. */
+const getStack = (): HTMLElement => {
+  const existing = document.getElementById(STACK_ID);
+  if (existing) return existing;
+  const stack = document.createElement('div');
+  stack.id = STACK_ID;
+  // A live region is skipped when a modal hides the rest of the page.
+  stack.setAttribute('aria-live', 'polite');
+  stack.className =
+    'pointer-events-none fixed inset-x-4 top-4 z-(--z-toast) mx-auto flex max-w-sm flex-col gap-2';
+  document.body.appendChild(stack);
+  return stack;
+};
+
 /**
- * Transient feedback for create/update/delete. Mount with a fresh `key` per
- * message. Success: plain message, auto-dismissed. Failure pattern:
- * `title : tech-code : description : close : retry`, kept until closed.
+ * Feedback for failures only: successes stay silent (the UI already shows
+ * them). Failure pattern: `title : tech-code : description : close : retry`,
+ * kept until closed. Mount with a fresh `key` per message; mounted toasts
+ * stack at the top of the screen.
  */
 export const Toast = ({
   notice,
@@ -41,88 +56,50 @@ export const Toast = ({
   className,
   'data-e2e': dataE2e,
 }: Props) => {
-  const close = useEffectEvent(onClose);
-  const sticky = notice.tone === 'error' || notice.action !== undefined;
+  if (notice.tone !== 'error') return null;
 
-  useEffect(() => {
-    if (sticky) return;
-    const timer = setTimeout(close, AUTO_DISMISS_MS);
-    return () => clearTimeout(timer);
-  }, [sticky]);
-
-  return (
+  return createPortal(
     <div
-      role={notice.tone === 'error' ? 'alert' : 'status'}
+      role="alert"
       data-e2e={dataE2e}
       // Keep an open modal from treating the toast as an outside click/focus.
       onPointerDown={(e) => e.stopPropagation()}
       onFocus={(e) => e.stopPropagation()}
       className={cn(
-        'pointer-events-auto fixed inset-x-4 bottom-24 z-(--z-toast) mx-auto max-w-md rounded-3xl px-4 py-3 text-sm shadow-popover',
-        notice.tone === 'error'
-          ? 'border border-danger-line bg-danger-soft text-danger'
-          : 'bg-brand font-medium text-on-brand',
+        'pointer-events-auto w-full rounded-2xl border border-line bg-card px-3 py-2 text-xs shadow-card',
         className,
       )}
     >
-      {notice.tone === 'error' ? (
-        <div className="flex flex-col gap-1">
-          <div className="flex items-start justify-between gap-3">
-            <p className="font-semibold text-ink">{notice.title}</p>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Zamknij"
-              className="shrink-0 rounded-full p-0.5 text-ink-soft hover:text-ink"
-            >
-              <X className="h-4 w-4" aria-hidden="true" />
-            </button>
-          </div>
-          <p className="font-mono text-xs">{notice.code}</p>
-          <p className="text-ink-soft">{notice.description}</p>
-          {notice.retry ? (
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => {
-                  onClose();
-                  notice.retry?.();
-                }}
-                className="rounded-full border border-danger-line bg-card px-3 py-1 text-xs font-semibold text-danger hover:bg-danger-faint"
-              >
-                Spróbuj ponownie
-              </button>
-            </div>
-          ) : null}
+      <div className="flex flex-col gap-0.5">
+        <div className="flex items-start justify-between gap-3">
+          <p className="font-semibold text-ink">{notice.title}</p>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Zamknij"
+            className="shrink-0 rounded-full p-0.5 text-ink-soft hover:text-ink"
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+          </button>
         </div>
-      ) : notice.action ? (
-        <div className="flex items-center justify-between gap-3">
-          <p>{notice.message}</p>
-          <div className="flex shrink-0 items-center gap-2">
+        <p className="font-mono text-ink-soft">{notice.code}</p>
+        <p className="text-ink-soft">{notice.description}</p>
+        {notice.retry ? (
+          <div className="flex justify-end">
             <button
               type="button"
-              data-e2e="ui:toast-action"
               onClick={() => {
                 onClose();
-                notice.action?.run();
+                notice.retry?.();
               }}
-              className="rounded-full bg-card px-3 py-1 text-xs font-semibold text-brand hover:bg-hover"
+              className="rounded-full border border-danger-line bg-card px-3 py-1 font-semibold text-danger hover:bg-danger-faint"
             >
-              {notice.action.label}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Zamknij"
-              className="rounded-full p-0.5 hover:opacity-80"
-            >
-              <X className="h-4 w-4" aria-hidden="true" />
+              Spróbuj ponownie
             </button>
           </div>
-        </div>
-      ) : (
-        notice.message
-      )}
-    </div>
+        ) : null}
+      </div>
+    </div>,
+    getStack(),
   );
 };

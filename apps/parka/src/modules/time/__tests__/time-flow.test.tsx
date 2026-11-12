@@ -294,7 +294,6 @@ describe('time task creation', () => {
     await user.click(dialog.getByRole('button', { name: 'Dodaj' }));
 
     expect(await row('Kurs')).toBeVisible();
-    expect(await screen.findByText('Dodano zadanie.')).toBeVisible();
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     expect(backend.writes()[0]).toMatchObject({
       body: {
@@ -397,7 +396,6 @@ describe('time task maintenance', () => {
     await user.click(box);
 
     expect(box).toBeChecked();
-    expect(await screen.findByText('Zadanie: Zrobione.')).toBeVisible();
     await waitFor(() => expect(backend.writes()).toHaveLength(2));
     expect(backend.writes()[1]).toMatchObject({
       body: { id: 't-1', done: true, inProgress: false },
@@ -533,7 +531,6 @@ describe('time task maintenance', () => {
         screen.queryByRole('button', { name: /Edytuj zadanie: Raport/ }),
       ).toBeNull(),
     );
-    expect(await screen.findByText('Usunięto zadanie.')).toBeVisible();
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
   });
 
@@ -598,9 +595,6 @@ describe('time task maintenance', () => {
       }),
     );
 
-    expect(
-      await screen.findByText('Przeniesiono „Raport miesięczny” na jutro.'),
-    ).toBeVisible();
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     expect(backend.writes()[0]!.body).toMatchObject({
       id: 't-1',
@@ -638,9 +632,6 @@ describe('time task maintenance', () => {
       }),
     );
 
-    expect(
-      await screen.findByText('Wrzucono „Raport miesięczny” do backlogu.'),
-    ).toBeVisible();
     expect(
       screen.queryByRole('button', { name: 'Więcej: Raport miesięczny' }),
     ).toBeNull();

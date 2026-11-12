@@ -33,7 +33,6 @@ describe('backlog adding', () => {
     await user.type(form.getByLabelText('Nazwa'), 'Umówić dentystę');
     await user.click(form.getByRole('button', { name: 'Dodaj' }));
 
-    expect(await screen.findByText('Dodano do backlogu.')).toBeVisible();
     expect(
       screen.getByRole('button', { name: 'Backlog, zadań: 1' }),
     ).toBeVisible();
@@ -188,9 +187,6 @@ describe('backlog moving', () => {
     await pickFromMenu(user, list, 'Przenieś na dziś');
 
     expect(
-      await screen.findByText('Przeniesiono „Umówić dentystę” na dziś.'),
-    ).toBeVisible();
-    expect(
       await list.findByRole('heading', { name: 'Backlog jest pusty' }),
     ).toBeVisible();
     await closeBacklog(user);
@@ -326,7 +322,6 @@ describe('backlog editing', () => {
     await user.click(form.getByRole('radio', { name: 'Praca' }));
     await user.click(form.getByRole('button', { name: 'Zapisz' }));
 
-    expect(await screen.findByText('Zapisano zmiany.')).toBeVisible();
     expect(await list.findByText('Dentysta w piątek')).toBeVisible();
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     const [write] = backend.writes();
@@ -373,9 +368,6 @@ describe('backlog custom date', () => {
       { target: { value: '2026-10-30' } },
     );
 
-    expect(
-      await screen.findByText('Przeniesiono „Umówić dentystę” na pt. 30 paź.'),
-    ).toBeVisible();
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     expect(backend.writes()[0]!.body).toMatchObject({
       day: '2026-10-30',
@@ -414,7 +406,6 @@ describe('backlog deleting', () => {
       }),
     );
 
-    expect(await screen.findByText('Usunięto zadanie.')).toBeVisible();
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     expect(
       await list.findByRole('heading', { name: 'Backlog jest pusty' }),

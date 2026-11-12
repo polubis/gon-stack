@@ -24,7 +24,6 @@ import {
   ERROR_CODES,
   MAX_ACCOUNTS,
   PROFILE_MODAL,
-  SWITCH_TOAST_KEY,
 } from '../configuration/constraints';
 import type { Account, Accounts, AuthUser } from '../domain/models';
 import {
@@ -342,11 +341,6 @@ export const AccountDrawer = () => {
     setSwitchingTo(account);
     try {
       await switchAccount(account.id);
-      try {
-        window.sessionStorage.setItem(SWITCH_TOAST_KEY, account.email);
-      } catch {
-        // Private mode: the switch worked, only the confirmation toast is lost.
-      }
       window.location.assign(APP_ROUTER.dashboard());
     } catch {
       setSwitchingTo(null);

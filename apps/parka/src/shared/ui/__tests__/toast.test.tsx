@@ -44,7 +44,7 @@ describe('Toast', () => {
     expect(onClose).toHaveBeenCalledOnce();
   });
 
-  it('keeps a success as a plain message', () => {
+  it('stays silent on a success', () => {
     render(
       <Toast
         notice={{ tone: 'success', message: 'Zapisano zmiany.' }}
@@ -52,8 +52,24 @@ describe('Toast', () => {
       />,
     );
 
-    expect(screen.getByRole('status')).toHaveTextContent('Zapisano zmiany.');
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.queryByText('Zapisano zmiany.')).not.toBeInTheDocument();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
+  it('stacks several failures in one group at the top', () => {
+    render(
+      <>
+        <Toast notice={failure()} onClose={vi.fn()} />
+        <Toast
+          notice={{ ...failure(), title: 'Drugi błąd' } as ToastNotice}
+          onClose={vi.fn()}
+        />
+      </>,
+    );
+
+    const [first, second] = screen.getAllByRole('alert');
+    expect(first?.parentElement).toBe(second?.parentElement);
+    expect(first?.parentElement).toHaveClass('top-4');
   });
 });
 

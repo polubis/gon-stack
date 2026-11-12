@@ -321,7 +321,6 @@ describe('task comment failures', () => {
     await user.keyboard('{Enter}');
 
     expect(await details.findByText('Za drugim razem')).toBeVisible();
-    expect(await screen.findByText('Dodano komentarz')).toBeVisible();
   });
 
   it('restores the old text and explains when saving an edit fails', async () => {

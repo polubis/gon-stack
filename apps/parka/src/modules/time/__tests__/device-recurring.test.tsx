@@ -155,7 +155,6 @@ describe('recurring tasks', () => {
     await user.click(dialog.getByRole('button', { name: 'Dodaj' }));
 
     expect(await row('Siłownia')).toBeVisible();
-    expect(await screen.findByText('Dodano zadanie cykliczne.')).toBeVisible();
     const writes = backend.writes();
     expect(writes).toHaveLength(1);
     expect(writes[0]).toMatchObject({
@@ -223,7 +222,6 @@ describe('recurring tasks', () => {
 
     await user.click(confirm.getByRole('button', { name: 'Zakończ cykl' }));
 
-    expect(await screen.findByText('Zakończono cykl.')).toBeVisible();
     expect(backend.writes()).toHaveLength(1);
     expect(backend.writes()[0]).toMatchObject({});
     await waitFor(() =>

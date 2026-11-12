@@ -161,7 +161,6 @@ const commands = {
       synced(page, 'POST', 201),
       getByE2e('time:backlog-save').click(),
     ]);
-    await expect(getByE2e('time:toast')).toHaveText('Dodano do backlogu.');
     await expect(getByE2e('time:empty')).toBeVisible();
     await reload(page);
     await expect(getByE2e('time:backlog-open')).toHaveAccessibleName(
@@ -307,7 +306,6 @@ const commands = {
       synced(page, 'POST', 201),
       getByE2e('time:task-save').click(),
     ]);
-    await expect(getByE2e('time:toast')).toHaveText('Dodano zadanie.');
     await expect(taskEdit(getByE2ePrefix, 'Raport E2E')).toBeVisible();
     await reload(page);
     await expect(taskEdit(getByE2ePrefix, 'Raport E2E')).toBeVisible();
@@ -650,7 +648,7 @@ const commands = {
       await expect(page).not.toHaveURL(/attachment-view/);
     },
 
-  'a video is trimmed in the browser, uploaded with progress and opened from the toast':
+  'a video is trimmed in the browser, uploaded with progress and opened from its thumbnail':
     async ({ page, getByE2e, getByE2ePrefix }) => {
       const clip = await makeVideo(page, 3);
       await getByE2e('time:attachment-input').setInputFiles({
@@ -679,11 +677,9 @@ const commands = {
       ]);
       await expect(trim).toBeHidden();
 
-      const toast = getByE2e('time:toast');
-      await expect(toast).toContainText('Wideo „demo.webm” jest gotowe', {
-        timeout: 60_000,
-      });
-      await getByE2e('ui:toast-action').click();
+      const thumb = attachmentThumb(getByE2ePrefix, 'demo.webm');
+      await expect(thumb).toBeVisible({ timeout: 60_000 });
+      await thumb.click();
       await expect(page).toHaveURL(/modal=attachment-view/);
       const player = getByE2e('time:attachment-media');
       await expect(player).toBeVisible();
