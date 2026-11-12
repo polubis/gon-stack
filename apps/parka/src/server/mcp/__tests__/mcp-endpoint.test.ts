@@ -283,6 +283,19 @@ describe('mcp handshake', () => {
 });
 
 describe('mcp tools list', () => {
+  it('tells agents to upload big files as raw bytes with a curl example', async () => {
+    const { rpc } = setup();
+
+    const { json } = await rpc('tools/list');
+
+    const tool = (
+      json.result.tools as { name: string; description: string }[]
+    ).find((t) => t.name === 'add_task_attachment');
+    expect(tool?.description).toContain('/api/mcp/attachments/?taskId=');
+    expect(tool?.description).toContain('curl');
+    expect(tool?.description).toContain('never print it');
+  });
+
   it('lists the tools with schemas and honest annotations', async () => {
     const { rpc } = setup();
 
