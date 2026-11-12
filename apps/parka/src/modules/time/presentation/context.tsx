@@ -16,6 +16,7 @@ import {
 import { sortByUsage } from '../domain/category-usage';
 import { newCategoryId, newPriorityId } from '../domain/ids';
 import type { Category, Priority } from '../domain/models';
+import { resetTimeReads } from '../integration/repository';
 import { useDataChanges } from '@/shared/data-sync/presentation/use-data-changes';
 import { useClock } from './clock';
 
@@ -66,10 +67,14 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
 
   useLayoutEffect(() => {
     const unsub = register();
-    return () => unsub();
+    return () => {
+      unsub();
+      // Leaving the view drops what it read: the next visit starts clean.
+      resetTimeReads();
+    };
   }, [register]);
 
-  // MCP changed the data: reload the shown range quietly.
+  // MCP changed the data: reload quietly.
   useDataChanges('time', facade.refresh);
 
   // Back / Forward may land on another `date`.
@@ -84,11 +89,6 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
 
   return {
     anchor,
-    /** Day the shown data belongs to: lags behind `anchor` while a reload runs. */
-    viewAnchor:
-      loaded && (anchor < loaded.from || anchor > loaded.to)
-        ? loaded.from
-        : anchor,
     setAnchor: (day: string) => {
       setAnchorState(day);
       writeQueryParam(DATE_PARAM, day);
@@ -111,7 +111,7 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
       saveOpenOnly(next);
     },
     backlog,
-    /** Most used first (loaded tasks and backlog), ties keep stored order. */
+    /** Most used first (all tasks and backlog), ties keep stored order. */
     categories: sortByUsage(categories, [...tasks, ...backlog]),
     priorities: facade.usePriorities(),
     statuses: facade.useStatuses(),

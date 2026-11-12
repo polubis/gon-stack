@@ -20,18 +20,23 @@ const MAX_RANGE_DAYS = 400;
 
 const writeErrors = z.union([errorOut(), notFoundOut()]);
 
-/** Categories, priorities and the tasks whose day lies in `from..to`. */
+/**
+ * Categories, priorities and the tasks with a day. Without `from` all of them
+ * come back; `to` is how far recurring rules are turned into tasks.
+ */
 export const listTimeSchema = () =>
   z.object({
     in: z
       .object({
-        from: z.string().refine(isDay, 'Invalid day'),
+        from: z.string().refine(isDay, 'Invalid day').optional(),
         to: z.string().refine(isDay, 'Invalid day'),
         /** Zone whose clock decides when today is over. */
         tz: z.string().refine(isTimeZone, 'Unknown time zone').optional(),
       })
       .refine(
-        ({ from, to }) => from <= to && daysBetween(from, to) <= MAX_RANGE_DAYS,
+        ({ from, to }) =>
+          from === undefined ||
+          (from <= to && daysBetween(from, to) <= MAX_RANGE_DAYS),
         'Invalid range',
       ),
     out: z.union([

@@ -53,7 +53,7 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
     useCategories: () => store.$categories.use(),
     usePriorities: () => store.$priorities.use(),
     useStatuses: () => store.$statuses.use(),
-    useLoaded: () => store.$loaded.use(),
+    useLoaded: () => store.$horizon.use() !== null,
     useInitializing: () => store.$initializing.use(),
     useIsLoading: () => store.$isLoading.use(),
     useError: () => store.$error.use(),

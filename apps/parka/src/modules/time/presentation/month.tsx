@@ -17,7 +17,7 @@ export const Main = () => {
     visibleTasks: tasks,
     categories,
     priorities,
-    viewAnchor: anchor,
+    anchor,
     now,
   } = useContext();
   const { leadingBlanks, days } = monthGrid(anchor);

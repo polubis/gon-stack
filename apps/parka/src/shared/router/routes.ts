@@ -162,7 +162,7 @@ export const API_ROUTER = {
   recurringById: routeById('/api/recurring/'),
   time: routeWithRequiredQuery<
     '/api/time/',
-    { from: string; to: string; tz?: string }
+    { from?: string; to: string; tz?: string }
   >('/api/time/'),
   timeTasks: route('/api/time/tasks/'),
   timeBacklog: route('/api/time/backlog/'),

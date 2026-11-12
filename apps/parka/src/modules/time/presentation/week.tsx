@@ -210,7 +210,7 @@ const HourGrid = ({ days }: { days: string[] }) => {
 
 /** Week view: all-day tasks apart from tasks pinned to an hour. */
 export const Main = () => {
-  const { visibleTasks: tasks, viewAnchor: anchor } = useContext();
+  const { visibleTasks: tasks, anchor } = useContext();
   const days = weekDays(anchor);
   if (!tasks.some((task) => days.includes(task.day)))
     return <EmptyPeriod kind="week" />;

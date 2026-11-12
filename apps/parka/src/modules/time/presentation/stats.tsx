@@ -331,7 +331,7 @@ const DetailsCard = ({ stats }: { stats: TaskStats }) => (
 
 /** Statistics tab: the loaded period as one dashboard, like the finance one. */
 export const Stats = ({ kind }: { kind: TimeKind }) => {
-  const { tasks, backlog, categories, priorities, now, viewAnchor, isLoading } =
+  const { tasks, backlog, categories, priorities, now, anchor, isLoading } =
     useContext();
   const stats = taskStats({
     tasks,
@@ -339,7 +339,7 @@ export const Stats = ({ kind }: { kind: TimeKind }) => {
     categories,
     priorities,
     kind,
-    anchor: viewAnchor,
+    anchor,
     today: now.day,
   });
 
@@ -351,7 +351,7 @@ export const Stats = ({ kind }: { kind: TimeKind }) => {
         data-e2e="time:stats-empty"
         icon={ChartColumn}
         title="Brak statystyk"
-        description={`Nic nie zaplanowano: ${periodTitle(kind, viewAnchor)}.`}
+        description={`Nic nie zaplanowano: ${periodTitle(kind, anchor)}.`}
         action={
           <Button
             onClick={() => openModal(NEW_TASK_MODAL)}
