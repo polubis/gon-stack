@@ -111,6 +111,22 @@ describe('backlog list', () => {
     ).toBeVisible();
   });
 
+  it('opens the add form from the button under a long list', async () => {
+    const user = userEvent.setup();
+    backend.seedBacklog(
+      Array.from({ length: 15 }, (_, i) =>
+        backlogTask({ id: `b-${i}`, title: `Zadanie ${i}` }),
+      ),
+    );
+    renderTime();
+    const list = await openBacklog(user);
+    await list.findByText('Zadanie 14');
+
+    await user.click(list.getByRole('button', { name: 'Dodaj do backlogu' }));
+
+    expect(modalsInUrl()).toEqual(['backlog', 'backlog-new']);
+  });
+
   it('lists waiting tasks and keeps the list in the address', async () => {
     const user = userEvent.setup();
     backend.seedBacklog([

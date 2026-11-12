@@ -69,13 +69,16 @@ export const BacklogDialog = ({ modal }: { modal: string }) => {
                 <TaskRow key={key} task={item} phase={phase} />
               ))}
             </ul>
-            <Button
-              data-e2e="time:backlog-add"
-              onClick={() => openModal(NEW_BACKLOG_MODAL)}
-              className="w-auto self-end px-3 py-2"
-            >
-              <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj do backlogu
-            </Button>
+            <div className="sticky bottom-0 -mx-5 -mb-5 flex justify-end bg-card px-5 pb-5 pt-3">
+              <Button
+                data-e2e="time:backlog-add"
+                onClick={() => openModal(NEW_BACKLOG_MODAL)}
+                className="w-auto px-3 py-2"
+              >
+                <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj do
+                backlogu
+              </Button>
+            </div>
           </>
         )}
       </div>

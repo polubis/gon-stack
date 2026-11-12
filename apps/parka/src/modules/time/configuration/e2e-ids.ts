@@ -54,8 +54,6 @@ export const TIME_E2E_IDS = [
   'time:task-details',
   'time:task-details-edit',
   'time:task-details-key',
-  'time:description-clamp',
-  'time:description-more',
   'time:description-full',
   'time:attachments',
   'time:attachments-skeleton',
