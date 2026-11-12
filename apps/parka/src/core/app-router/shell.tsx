@@ -7,7 +7,6 @@ import {
 import { Main as FinanceTour } from '@/modules/finance-tour/presentation/main';
 import { AppUpdateBanner } from '@/shared/app-update/presentation/app-update-banner';
 import { AccountDrawer } from '@/shared/auth/presentation/account-drawer';
-import { AccountSwitchToast } from '@/shared/auth/presentation/account-switch-toast';
 import { ProtectedScreen } from '@/shared/auth/presentation/protected-screen';
 import { withAuth } from '@/shared/auth/presentation/with-auth';
 import { Provider as OverlayNavProvider } from '@/shared/navigation/overlay-nav/presentation/context';
@@ -89,7 +88,6 @@ const Shell = () => {
           </NavSlot>
         </div>
         <AppUpdateBanner />
-        <AccountSwitchToast />
         <AccountProfileSync />
         <AccountDrawer />
         <ProfileEditModal />

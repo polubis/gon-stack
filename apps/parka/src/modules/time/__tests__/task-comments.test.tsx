@@ -113,7 +113,6 @@ describe('task comments', () => {
     await user.click(details.getByRole('button', { name: 'Dodaj' }));
 
     expect(await details.findByText('Pierwsza notatka')).toBeVisible();
-    expect(await screen.findByText('Dodano komentarz')).toBeVisible();
     expect(backend.state.comments['t-1']).toHaveLength(1);
     expect(backend.writes()[0]?.body).toEqual({ body: 'Pierwsza notatka' });
   });
@@ -159,7 +158,6 @@ describe('task comments', () => {
 
     expect(await details.findByText('Zadzwonić jutro')).toBeVisible();
     expect(await details.findByText('(edytowano)')).toBeVisible();
-    expect(await screen.findByText('Zapisano komentarz')).toBeVisible();
   });
 
   it('splits the avatar after the owner edits a bot comment', async () => {
@@ -218,7 +216,6 @@ describe('task comments', () => {
       expect(details.queryByText('Zadzwonić do klienta')).toBeNull(),
     );
     expect(backend.state.comments['t-1']).toEqual([]);
-    expect(await screen.findByText('Usunięto komentarz')).toBeVisible();
   });
 
   it('keeps the comment when the confirmation is cancelled', async () => {

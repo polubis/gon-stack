@@ -52,7 +52,6 @@ describe('custom task statuses', () => {
     );
     await user.click(dialog.getByRole('button', { name: 'Zapisz' }));
 
-    expect(await screen.findByText('Zapisano statusy.')).toBeVisible();
     expect(backend.writes()).toHaveLength(1);
     expect(backend.writes()[0]).toMatchObject({
       body: {
@@ -120,7 +119,6 @@ describe('custom task statuses', () => {
 
     await user.click(circle);
     await user.click(circle);
-    await screen.findByText('Zadanie: Review.');
     await user.click(circle);
 
     await waitFor(() => expect(backend.writes()).toHaveLength(3));
@@ -141,7 +139,6 @@ describe('custom task statuses', () => {
     await user.click(circle);
     await user.click(circle);
 
-    expect(await screen.findByText('Zadanie: Review.')).toBeVisible();
     expect(await screen.findByText('Review')).toBeVisible();
   });
 

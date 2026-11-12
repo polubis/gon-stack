@@ -76,7 +76,6 @@ describe('task attachments', () => {
     expect(
       await details.findByRole('link', { name: 'notatka.txt' }),
     ).toBeVisible();
-    expect(await screen.findByText('Dodano plik „notatka.txt”')).toBeVisible();
     expect(backend.state.attachments['t-1']).toHaveLength(1);
   });
 
@@ -177,7 +176,6 @@ describe('task attachments', () => {
       expect(screen.queryByRole('link', { name: 'umowa.pdf' })).toBeNull(),
     );
     expect(backend.state.attachments['t-1']).toEqual([]);
-    expect(await screen.findByText('Usunięto plik „umowa.pdf”')).toBeVisible();
   });
 
   it('keeps the file when the confirmation is cancelled', async () => {
@@ -389,12 +387,6 @@ describe('image attachments', () => {
         details.getByLabelText('Wybierz pliki'),
         new File(['x'], 'wakacje.jpg', { type: 'image/jpeg' }),
       );
-
-    expect(
-      await screen.findByText(
-        'Dodano „wakacje.webp”, zmniejszono z 8.0 MB do 1.0 MB',
-      ),
-    ).toBeVisible();
   });
 
   it('refuses a photo over 5 MB', async () => {
@@ -510,45 +502,6 @@ describe('video attachments', () => {
     ).toBeNull();
   });
 
-  const finishUpload = async (user: ReturnType<typeof userEvent.setup>) => {
-    vi.stubGlobal('EventSource', FakeEventSource);
-    backend.seed([task()]);
-    backend.state.attachments['t-1'] = [{ ...CLIP, status: 'uploading' }];
-    const details = await openDetails(user);
-    await details.findByText('Zapisywanie…');
-    act(() =>
-      FakeEventSource.last?.emit({
-        type: 'UPDATE',
-        taskId: 't-1',
-        attachment: CLIP,
-      }),
-    );
-  };
-
-  it('offers a toast once the video is saved', async () => {
-    const user = userEvent.setup({ pointerEventsCheck: 0 });
-
-    await finishUpload(user);
-
-    expect(
-      await screen.findByText('Wideo „demo.mp4” jest gotowe'),
-    ).toBeVisible();
-    vi.unstubAllGlobals();
-  });
-
-  it('opens the video from the toast', async () => {
-    const user = userEvent.setup({ pointerEventsCheck: 0 });
-    await finishUpload(user);
-    await screen.findByText('Wideo „demo.mp4” jest gotowe');
-
-    await user.click(screen.getByRole('button', { name: 'Otwórz' }));
-
-    expect(
-      await screen.findByRole('dialog', { name: 'demo.mp4' }),
-    ).toBeVisible();
-    vi.unstubAllGlobals();
-  });
-
   it('warns when a video could not be saved', async () => {
     vi.stubGlobal('EventSource', FakeEventSource);
     const user = userEvent.setup();
@@ -649,9 +602,6 @@ describe('video attachments', () => {
     // The request needs a moment to leave the browser before it can be cut.
     await new Promise((resolve) => setTimeout(resolve, 100));
     await user.click(cancel);
-    expect(
-      await screen.findByText('Anulowano wysyłanie „notatka.txt”'),
-    ).toBeVisible();
     expect(details.queryByRole('progressbar')).toBeNull();
     expect(details.queryByRole('link', { name: 'notatka.txt' })).toBeNull();
   });
@@ -667,9 +617,6 @@ describe('video attachments', () => {
     backend.state.attachments['t-1'] = [CLIP];
     act(() => FakeEventSource.last?.onopen?.());
 
-    expect(
-      await screen.findByText('Wideo „demo.mp4” jest gotowe'),
-    ).toBeVisible();
     expect(
       await details.findByRole('button', { name: 'Otwórz wideo: demo.mp4' }),
     ).toBeVisible();

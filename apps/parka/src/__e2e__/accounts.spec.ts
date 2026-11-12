@@ -389,16 +389,9 @@ const commands = {
     await getByE2e('account-menu:trigger').filter({ visible: true }).click();
     const item = getByE2e(`account-menu:account:${idA}`);
     await expect(item).toHaveAttribute('aria-checked', 'false');
-    await item.click();
-    // The dashboard URL is already current, so only the toast shown after the
-    // switch reload proves the new account is active.
-    await getByE2e('account-menu:switched-toast').waitFor();
+    // The dashboard URL is already current: the switch reloads the page.
+    await Promise.all([page.waitForEvent('load'), item.click()]);
     await page.waitForLoadState('networkidle');
-  },
-  'the switch is confirmed with a toast': async ({ getByE2e }) => {
-    await expect(getByE2e('account-menu:switched-toast')).toContainText(
-      EMAIL_A,
-    );
   },
   'the menu marks A as the active account': async ({ page, getByE2e }) => {
     await getByE2e('account-menu:trigger').filter({ visible: true }).click();
@@ -460,7 +453,6 @@ test('one browser holds several accounts and switches between them', async ({
     ['account B stores its own expense, recurring rule and notification'],
     ['account B holds nothing of account A and cannot reach it'],
     ['i switch to account A from the account menu'],
-    ['the switch is confirmed with a toast'],
     ['only the data of account A is visible'],
     ['account A holds all of its own data and nothing of account B'],
     ['the menu marks A as the active account'],
@@ -494,10 +486,11 @@ const switchTo = async (ctx: Ctx, email: string): Promise<void> => {
   const id = await idOf(page, email);
   await open(page, APP_ROUTER.dashboard());
   await getByE2e('account-menu:trigger').filter({ visible: true }).click();
-  await getByE2e(`account-menu:account:${id}`).click();
-  // The dashboard URL is already current, so only the toast shown after the
-  // switch reload proves the new account is active.
-  await getByE2e('account-menu:switched-toast').waitFor();
+  // The dashboard URL is already current: the switch reloads the page.
+  await Promise.all([
+    page.waitForEvent('load'),
+    getByE2e(`account-menu:account:${id}`).click(),
+  ]);
   await page.waitForLoadState('networkidle');
 };
 

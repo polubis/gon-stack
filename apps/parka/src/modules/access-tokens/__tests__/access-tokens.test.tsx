@@ -239,8 +239,6 @@ describe('access token creation', () => {
     const { user } = await setup([]);
 
     await generate(user, 'Cursor');
-
-    expect(await screen.findByText('Utworzono token.')).toBeInTheDocument();
   });
 
   it('sends no expiry for a token that never expires', async () => {
@@ -310,7 +308,6 @@ describe('access token management', () => {
 
     await user.click(within(dialog).getByRole('button', { name: 'Wstrzymaj' }));
 
-    expect(await screen.findByText('Wstrzymano token.')).toBeInTheDocument();
     expect(screen.getByText('Wstrzymany')).toBeInTheDocument();
   });
 
@@ -321,7 +318,6 @@ describe('access token management', () => {
       screen.getByRole('button', { name: 'Wznów token Claude Desktop' }),
     );
 
-    expect(await screen.findByText('Wznowiono token.')).toBeInTheDocument();
     expect(screen.getByText('Aktywny')).toBeInTheDocument();
   });
 
@@ -395,7 +391,6 @@ describe('access token management', () => {
     const dialog = await screen.findByRole('dialog');
     await user.click(within(dialog).getByRole('button', { name: 'Usuń' }));
 
-    expect(await screen.findByText('Usunięto token.')).toBeInTheDocument();
     expect(screen.queryByText('Claude Desktop')).not.toBeInTheDocument();
     expect(screen.getByText('Nie masz jeszcze tokenów')).toBeInTheDocument();
   });

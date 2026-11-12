@@ -108,9 +108,6 @@ describe('device photo in settings', () => {
     );
     expect(photo()).toHaveAttribute('srcset', expect.stringContaining('32w'));
     expect(
-      await screen.findByText('Zmieniono zdjęcie urządzenia.'),
-    ).toBeVisible();
-    expect(
       await screen.findByRole('button', { name: 'Zmień zdjęcie urządzenia' }),
     ).toBeVisible();
     expect(uploads).toHaveLength(1);
