@@ -286,6 +286,7 @@ Skill ${ref('evidence')}, key = task id, out \`.evidences/<task-id>/\`.
     'e2e-via-commands': { source: './skills/e2e-via-commands' },
     evidence: { source: './skills/evidence' },
     'feature-workflow': { source: './skills/feature-workflow' },
+    gdpr: { source: './skills/gdpr' },
     'loop-article-web': { source: './skills/loop-article-web' },
     'mp4-powerpoint': { source: './skills/mp4-powerpoint' },
     mti: { source: './skills/mti' },
