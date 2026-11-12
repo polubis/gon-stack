@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { cn } from '@repo/react-kit/cn';
 
 type Props = {
@@ -7,10 +8,12 @@ type Props = {
 };
 
 /** Round picture, or the first letter of `label` while none is set. */
-export const AccountAvatar = ({ label, avatarUrl, className }: Props) =>
-  avatarUrl ? (
+export const AccountAvatar = ({ label, avatarUrl, className }: Props) => {
+  const [broken, setBroken] = useState<string | null>(null);
+  return avatarUrl && broken !== avatarUrl ? (
     <img
       src={avatarUrl}
+      onError={() => setBroken(avatarUrl)}
       alt=""
       referrerPolicy="no-referrer"
       className={cn('size-8 shrink-0 rounded-full object-cover', className)}
@@ -26,3 +29,4 @@ export const AccountAvatar = ({ label, avatarUrl, className }: Props) =>
       {(label[0] ?? '?').toUpperCase()}
     </span>
   );
+};
