@@ -1028,6 +1028,16 @@ const commands = {
       await expect(taskInfo(getByE2ePrefix, 'Zrobione E2E')).toHaveCount(0);
       await expect(taskInfo(getByE2ePrefix, 'Otwarte E2E')).toBeVisible();
     },
+  'the open-only row hugs the list edge on a wide screen': async ({
+    page,
+    getByE2e,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    const row = await getByE2e('time:open-only').boundingBox();
+    const toggle = await getByE2e('time:open-only-toggle').boundingBox();
+    expect(row && toggle).toBeTruthy();
+    expect(toggle!.x - row!.x).toBeLessThan(200);
+  },
 } satisfies CommandRegistry<Ctx>;
 
 test('time works against the real Supabase backend', async ({ e2e }) => {
@@ -1124,5 +1134,6 @@ test('the open-only filter hides done tasks on the real backend', async ({
     [
       'the open-only switch hides done tasks and keeps the choice after a reload',
     ],
+    ['the open-only row hugs the list edge on a wide screen'],
   );
 });

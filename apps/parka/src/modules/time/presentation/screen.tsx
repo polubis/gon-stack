@@ -190,7 +190,7 @@ const Screen = ({ kind, children }: Props) => {
                   <>
                     <div
                       data-e2e="time:open-only"
-                      className="flex items-center justify-between gap-3 px-1"
+                      className="flex items-center justify-between gap-3 px-1 md:justify-start md:px-0"
                     >
                       <span className="text-sm font-medium">
                         Tylko niezrobione
