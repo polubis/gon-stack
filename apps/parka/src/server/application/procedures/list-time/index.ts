@@ -19,16 +19,13 @@ export const listTime = privateProcedure({
     await materializeTimeRecurring(db, user.id, input.to);
     if (input.tz) await notifyUnfinishedTasks(db, user.id, input.tz);
     const profiles = await loadProfiles(db);
+    const dated = db.from('time_tasks').select('*').not('day', 'is', null);
     const [categories, priorities, statuses, tasks, backlog] =
       await Promise.all([
         db.from('time_categories').select('*').order('name'),
         db.from('time_priorities').select('*').order('value'),
         db.from('time_statuses').select('*').order('position').order('id'),
-        db
-          .from('time_tasks')
-          .select('*')
-          .gte('day', input.from)
-          .lte('day', input.to)
+        (input.from ? dated.gte('day', input.from).lte('day', input.to) : dated)
           .order('day')
           .order('at', { nullsFirst: false }),
         db

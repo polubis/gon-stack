@@ -31,6 +31,7 @@ const POPOVER_EMAIL = `e2e-time-popover-${Date.now()}@parka.test`;
 const ATTACHMENT_EMAIL = `e2e-time-attachment-${Date.now()}@parka.test`;
 const COMMENT_EMAIL = `e2e-time-comment-${Date.now()}@parka.test`;
 const OPEN_ONLY_EMAIL = `e2e-time-open-only-${Date.now()}@parka.test`;
+const UPFRONT_EMAIL = `e2e-time-upfront-${Date.now()}@parka.test`;
 const PASSWORD = 'secret123';
 const ATTACHMENT_TEXT = 'Treść załącznika E2E';
 const LONG_TITLE = `Długi tytuł ${'x'.repeat(147)}`;
@@ -473,8 +474,10 @@ const commands = {
     await open(page, APP_ROUTER.time({ date: DAY }));
     await expect(taskEdit(getByE2ePrefix, 'Siłownia E2E')).toBeVisible();
     await expect(getByE2e('time:recurring-mark')).toHaveCount(0);
+    // Rules are materialized to the end of the loaded year: those stay too.
     await open(page, APP_ROUTER.time({ date: AFTER_LATER }));
-    await expect(getByE2e('time:empty')).toBeVisible();
+    await expect(taskEdit(getByE2ePrefix, 'Siłownia E2E')).toBeVisible();
+    await expect(getByE2e('time:recurring-mark')).toHaveCount(0);
   },
 
   'i register an account for descriptions': async (ctx) => {
@@ -978,6 +981,42 @@ const commands = {
     await expect(getByE2e('time:comments')).toContainText('Komentarze (1)');
   },
 
+  'i register an account for upfront loading': async (ctx) => {
+    await registerAndConfirm(ctx, UPFRONT_EMAIL, PASSWORD);
+    await ctx.page.waitForLoadState('networkidle');
+  },
+
+  'i add a task to the day': async ({ page, getByE2e }) => {
+    await open(page, APP_ROUTER.time({ date: DAY }));
+    await getByE2e('time:empty-add').click();
+    await getByE2e('time:task-name').fill('Z góry E2E');
+    await Promise.all([
+      synced(page, 'POST', 201),
+      getByE2e('time:task-save').click(),
+    ]);
+  },
+
+  'moving between days and back reads the list only once': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
+    const reads: string[] = [];
+    page.on('request', (request) => {
+      const { pathname } = new URL(request.url());
+      if (request.method() === 'GET' && pathname === '/api/time/')
+        reads.push(request.url());
+    });
+    await reload(page);
+    await expect(taskInfo(getByE2ePrefix, 'Z góry E2E')).toBeVisible();
+    await getByE2e('period-control:next').click();
+    await expect(getByE2e('time:empty')).toBeVisible();
+    await getByE2e('period-control:prev').click();
+    await expect(taskInfo(getByE2ePrefix, 'Z góry E2E')).toBeVisible();
+    expect(reads).toHaveLength(1);
+    expect(new URL(reads[0]!).searchParams.get('from')).toBeNull();
+  },
+
   'i register an account for the open-only filter': async (ctx) => {
     await registerAndConfirm(ctx, OPEN_ONLY_EMAIL, PASSWORD);
     await ctx.page.waitForLoadState('networkidle');
@@ -1129,5 +1168,15 @@ test('the open-only filter hides done tasks on the real backend', async ({
       'the open-only switch hides done tasks and keeps the choice after a reload',
     ],
     ['the open-only row hugs the list edge on a wide screen'],
+  );
+});
+
+test('moving between days reads the tasks once on the real backend', async ({
+  e2e,
+}) => {
+  await interpreter(commands, e2e)(
+    ['i register an account for upfront loading'],
+    ['i add a task to the day'],
+    ['moving between days and back reads the list only once'],
   );
 });

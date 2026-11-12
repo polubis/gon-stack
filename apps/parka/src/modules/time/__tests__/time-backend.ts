@@ -128,7 +128,7 @@ export const setupTimeBackend = () => {
       if (state.delayMs) await delay(state.delayMs);
       if (state.failReads) return HttpResponse.json(FAILURE);
       const url = new URL(request.url);
-      const from = url.searchParams.get('from') ?? '';
+      const from = url.searchParams.get('from');
       const to = url.searchParams.get('to') ?? '';
       return HttpResponse.json({
         code: 200,
@@ -136,8 +136,11 @@ export const setupTimeBackend = () => {
           categories: state.categories,
           priorities: state.priorities,
           statuses: state.statuses,
+          // Like the server: without `from` every task with a day comes back.
           tasks: state.tasks.filter(
-            (t) => (t.day as string) >= from && (t.day as string) <= to,
+            (t) =>
+              from === null ||
+              ((t.day as string) >= from && (t.day as string) <= to),
           ),
           backlog: state.backlog,
         },

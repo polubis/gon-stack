@@ -1,37 +1,47 @@
-import { catchError, EMPTY, finalize, from, map, switchMap, tap } from 'rxjs';
+import {
+  catchError,
+  EMPTY,
+  filter,
+  finalize,
+  from,
+  map,
+  switchMap,
+  tap,
+} from 'rxjs';
 import type { Store } from '../store';
 import type { Bus } from '../bus';
-import { neighbourPeriods, periodContaining } from '@/shared/period/period';
-import { fetchTime, prefetchTime } from '../../integration/repository';
+import { fetchTime } from '../../integration/repository';
 import { applyData } from '../actions/apply-data';
+import { horizonFor } from '../actions/horizon';
 
+/**
+ * Reads every task once; moving between ranges reads nothing again. Only a
+ * range past the horizon (recurring rules not yet turned into tasks) reads.
+ */
 export const load = (store: Store, { ofType }: Bus) => {
   let latest = 0;
   return ofType('[TRIGGER]_LOAD').pipe(
     tap(({ kind, from, to }) => {
-      store.$isLoading.set(true);
       store.$error.reset();
       store.$range.set({ kind, from, to });
+    }),
+    filter(({ to }) => {
+      const horizon = store.$horizon.get();
+      return horizon === null || to > horizon || store.$stale.get();
+    }),
+    tap(() => {
+      store.$isLoading.set(true);
       store.$stale.set(false);
     }),
-    map((event) => ({
-      event,
+    map(({ to }) => ({
+      horizon: horizonFor(to),
       seq: store.$writeSeq.get(),
       id: ++latest,
     })),
-    switchMap(({ event, id, seq }) =>
-      from(fetchTime(event.from, event.to)).pipe(
+    switchMap(({ horizon, id, seq }) =>
+      from(fetchTime(horizon)).pipe(
         tap((data) => {
-          if (!applyData(store, event, data, seq)) {
-            store.$stale.set(true);
-            return;
-          }
-          // Idle time warms the ranges a swipe or arrow reaches next.
-          neighbourPeriods(
-            periodContaining(event.kind, event.from),
-            event.to,
-            true,
-          ).forEach(({ from, to }) => prefetchTime(from, to));
+          if (!applyData(store, horizon, data, seq)) store.$stale.set(true);
         }),
         catchError((error: unknown) => {
           store.$error.set(

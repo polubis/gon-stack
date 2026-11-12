@@ -9,7 +9,7 @@ import { NEW_TASK_MODAL } from './modal-ids';
 
 /** No tasks in the viewed period: names the period and offers the first one. */
 export const EmptyPeriod = ({ kind }: { kind: TimeKind }) => {
-  const { viewAnchor, isLoading, openOnly } = useContext();
+  const { anchor, isLoading, openOnly } = useContext();
   // A reload may still bring tasks: claim emptiness only once it ends.
   if (isLoading) return null;
   return (
@@ -18,7 +18,7 @@ export const EmptyPeriod = ({ kind }: { kind: TimeKind }) => {
       icon={CalendarPlus}
       // Filter on: name it, so an empty list is not read as no tasks at all.
       title={openOnly ? 'Brak niezrobionych zadań' : 'Brak zadań'}
-      description={`Nic nie zaplanowano: ${periodTitle(kind, viewAnchor)}.`}
+      description={`Nic nie zaplanowano: ${periodTitle(kind, anchor)}.`}
       action={
         <Button
           data-e2e="time:empty-add"

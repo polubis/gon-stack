@@ -13,12 +13,6 @@ const row = (title: string) =>
 
 const queryParams = (url: string) => new URL(url).searchParams;
 
-const readsOf = (from: string, to: string) =>
-  backend.reads().filter(({ url }) => {
-    const params = queryParams(url);
-    return params.get('from') === from && params.get('to') === to;
-  });
-
 describe('time loading', () => {
   it('shows tasks of the day in time order with the current hour marked', async () => {
     backend.seed([
@@ -101,7 +95,7 @@ describe('time navigation', () => {
       screen.getByRole('group', { name: 'Zakres czasu' }),
     ).toHaveTextContent('śr. 21 paź 2026');
     expect(window.location.search).toContain('date=2026-10-21');
-    expect(readsOf('2026-10-21', '2026-10-21')).toHaveLength(1);
+    expect(backend.reads()).toHaveLength(1);
   });
 
   it('returns to today with the Dziś option', async () => {
@@ -132,9 +126,7 @@ describe('time navigation', () => {
       await screen.findByRole('group', { name: 'Zakres czasu' }),
     ).toHaveTextContent('pon. 19 – niedz. 25 paź 2026');
     expect(window.location.search).toContain('date=2026-10-20');
-    await waitFor(() =>
-      expect(readsOf('2026-10-19', '2026-10-25')).toHaveLength(1),
-    );
+    expect(backend.reads()).toHaveLength(1);
   });
 
   const openRangeList = async (user: ReturnType<typeof userEvent.setup>) => {
@@ -180,20 +172,20 @@ describe('time navigation', () => {
     );
   });
 
-  it('asks for the whole week in the week view', async () => {
+  it('asks for every task at once, whatever the view', async () => {
     renderTime('week');
     await screen.findByRole('heading', { name: 'Brak zadań' });
 
     const first = backend.reads()[0]!;
-    expect(queryParams(first.url).get('from')).toBe('2026-10-19');
-    expect(queryParams(first.url).get('to')).toBe('2026-10-25');
+    expect(queryParams(first.url).get('from')).toBeNull();
+    expect(queryParams(first.url).get('to')).toBe('2026-12-31');
     expect(
       screen.getByRole('group', { name: 'Zakres czasu' }),
     ).toHaveTextContent('pon. 19 – niedz. 25 paź 2026');
   });
 });
 
-describe('time swipe and prefetch', () => {
+describe('time swipe', () => {
   const swipe = (target: HTMLElement, from: number, to: number) => {
     fireEvent.touchStart(target, {
       touches: [{ clientX: from, clientY: 200 }],
@@ -268,14 +260,11 @@ describe('time swipe and prefetch', () => {
     const user = userEvent.setup();
     renderTime();
     await screen.findByRole('heading', { name: 'Brak zadań' });
-    await waitFor(() =>
-      expect(readsOf('2026-10-21', '2026-10-21')).toHaveLength(1),
-    );
 
     await user.click(screen.getByRole('button', { name: 'Następny okres' }));
 
     await screen.findByText(/21 października 2026/);
-    expect(readsOf('2026-10-21', '2026-10-21')).toHaveLength(1);
+    expect(backend.reads()).toHaveLength(1);
   });
 });
 
@@ -740,46 +729,53 @@ describe('time views', () => {
 });
 
 describe('time reloading', () => {
-  it('keeps tasks under a loading bar while the next period loads', async () => {
+  it('moves to the next period at once, without a request or loading bar', async () => {
     const user = userEvent.setup();
     backend.seed([
       task(),
       task({ id: 't-2', title: 'Jutro', day: '2026-10-21' }),
     ]);
-    backend.state.delayMs = 300;
     renderTime();
     await row('Raport miesięczny');
-    await waitFor(() =>
-      expect(screen.queryByText('Ładowanie danych')).toBeNull(),
-    );
 
     await user.click(screen.getByRole('button', { name: 'Następny okres' }));
 
-    expect(await screen.findByText('Ładowanie danych')).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'Edytuj zadanie: Raport miesięczny' }),
-    ).toBeVisible();
-    expect(screen.queryByRole('heading', { name: 'Brak zadań' })).toBeNull();
     expect(await row('Jutro')).toBeVisible();
-    await waitFor(() =>
-      expect(screen.queryByText('Ładowanie danych')).toBeNull(),
-    );
+    expect(screen.queryByText('Ładowanie danych')).toBeNull();
+    expect(backend.reads()).toHaveLength(1);
+  });
+
+  it('reads again only past the horizon of recurring rules', async () => {
+    const user = userEvent.setup();
+    renderTime('month', '2026-12-01');
+    await screen.findByRole('heading', { name: 'Brak zadań' });
+    expect(backend.reads()).toHaveLength(1);
+
+    await user.click(screen.getByRole('button', { name: 'Poprzedni okres' }));
+    await screen.findByRole('heading', { name: 'Brak zadań' });
+    expect(backend.reads()).toHaveLength(1);
+
+    await user.click(screen.getByRole('button', { name: 'Następny okres' }));
+    await user.click(screen.getByRole('button', { name: 'Następny okres' }));
+
+    await waitFor(() => expect(backend.reads()).toHaveLength(2));
+    expect(queryParams(backend.reads()[1]!.url).get('to')).toBe('2027-12-31');
   });
 
   it('keeps the shown view when switching the date back and forth', async () => {
     const user = userEvent.setup();
     backend.seed([task()]);
-    backend.state.delayMs = 200;
     renderTime();
     await row('Raport miesięczny');
 
     await user.click(screen.getByRole('button', { name: 'Poprzedni okres' }));
     expect(
-      screen.getByRole('button', { name: 'Edytuj zadanie: Raport miesięczny' }),
-    ).toBeVisible();
-    expect(
       await screen.findByRole('heading', { name: 'Brak zadań' }),
     ).toBeVisible();
+
+    await user.click(screen.getByRole('button', { name: 'Następny okres' }));
+    expect(await row('Raport miesięczny')).toBeVisible();
+    expect(backend.reads()).toHaveLength(1);
   });
 
   it('drops the modal of a task that does not exist', async () => {

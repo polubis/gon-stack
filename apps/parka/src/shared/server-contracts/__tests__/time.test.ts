@@ -110,9 +110,24 @@ describe('time contracts', () => {
     ).toBe(false);
   });
 
-  it('requires the range of a listing', () => {
+  it('requires the end of a listing', () => {
     expect(
       listTimeSchema().shape.in.safeParse({ from: '2026-10-19' }).success,
+    ).toBe(false);
+  });
+
+  it('lists every task when only the end is given', () => {
+    expect(
+      listTimeSchema().shape.in.safeParse({ to: '2027-12-31' }).success,
+    ).toBe(true);
+  });
+
+  it('rejects a range that ends before it starts', () => {
+    expect(
+      listTimeSchema().shape.in.safeParse({
+        from: '2026-10-20',
+        to: '2026-10-19',
+      }).success,
     ).toBe(false);
   });
 

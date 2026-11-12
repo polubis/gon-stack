@@ -18,6 +18,7 @@ export const createRecurring = (store: Store, bus: Bus) => {
             message: 'Dodano zadanie cykliczne.',
           });
           const range = store.$range.get();
+          store.$horizon.reset();
           if (range) emit('[TRIGGER]_LOAD', range);
         }),
         catchError((error: unknown) => {

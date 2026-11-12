@@ -66,9 +66,10 @@ const send = async (...args: Parameters<typeof fetch>) => {
 /** A freshly opened module never starts from reads another module outdated. */
 export const resetTimeReads = () => cache.clear();
 
-const readTime = async (from: string, to: string): Promise<TimeData> => {
+/** Every task with a day, rules materialized up to `until`. */
+const readTime = async (until: string): Promise<TimeData> => {
   const response = await fetch(
-    API_ROUTER.time({ from, to, tz: browserTimeZone() }),
+    API_ROUTER.time({ to: until, tz: browserTimeZone() }),
     { headers: { Accept: 'application/json' } },
   );
   const json = (await response.json()) as Out<typeof listTimeSchema>;
@@ -82,15 +83,9 @@ const readTime = async (from: string, to: string): Promise<TimeData> => {
   };
 };
 
-const timeKey = (from: string, to: string) => `${from}:${to}`;
-
-/** Warms a range the user is likely to open next. */
-export const prefetchTime = (from: string, to: string) =>
-  cache.prefetch(timeKey(from, to), () => readTime(from, to));
-
 /** Nothing else in this module reads. */
-export const fetchTime = (from: string, to: string): Promise<TimeData> =>
-  cache.read(timeKey(from, to), () => readTime(from, to));
+export const fetchTime = (until: string): Promise<TimeData> =>
+  cache.read(until, () => readTime(until));
 
 export const postTask = async (task: Task): Promise<Task> => {
   const response = await send(API_ROUTER.timeTasks(), {

@@ -23,8 +23,8 @@ export const createStore = () => {
   const $isLoading = atom(false);
   const $error = atom<string | null>(null);
   const $notice = atom<Notice | null>(null);
-  /** Range the data in `$tasks` was loaded for. */
-  const $loaded = atom<Range | null>(null);
+  /** Last day recurring rules were turned into tasks for; null before the first read. */
+  const $horizon = atom<string | null>(null);
   /** Range asked for last. */
   const $range = atom<(Range & { kind: TimeKind }) | null>(null);
   /** Writes in flight; a load answered meanwhile is dropped and repeated. */
@@ -51,7 +51,7 @@ export const createStore = () => {
     $isLoading,
     $error,
     $notice,
-    $loaded,
+    $horizon,
     $range,
     $pending,
     $stale,

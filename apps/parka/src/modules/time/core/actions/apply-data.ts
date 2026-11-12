@@ -1,12 +1,12 @@
 import { sortPriorities } from '../../domain/priority';
 import { sortTasks } from '../../domain/schedule';
 import type { TimeData } from '../../integration/repository';
-import type { Range, Store } from '../store';
+import type { Store } from '../store';
 
 /** Puts a read into the store; `false` when a write meanwhile made it outdated. */
 export const applyData = (
   store: Store,
-  range: Range,
+  horizon: string,
   data: TimeData,
   seq: number,
 ): boolean => {
@@ -17,6 +17,6 @@ export const applyData = (
   store.$statuses.set(data.statuses);
   store.$tasks.set(sortTasks(data.tasks));
   store.$backlog.set(data.backlog);
-  store.$loaded.set({ from: range.from, to: range.to });
+  store.$horizon.set(horizon);
   return true;
 };

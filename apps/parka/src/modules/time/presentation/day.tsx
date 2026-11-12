@@ -14,7 +14,7 @@ export const Main = () => {
   const {
     visibleTasks: tasks,
     priorities,
-    viewAnchor: anchor,
+    anchor,
     now,
     initializing,
   } = useContext();
