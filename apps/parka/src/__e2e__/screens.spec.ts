@@ -20,7 +20,7 @@ const SCREENS: Screen[] = [
   },
   {
     path: APP_ROUTER.newExpense(),
-    root: 'expenses-management:main',
+    root: 'expenses-management:modal',
     heading: /Nowy wydatek/,
   },
   { path: APP_ROUTER.reports(), root: 'reports:main', heading: /Raport/ },

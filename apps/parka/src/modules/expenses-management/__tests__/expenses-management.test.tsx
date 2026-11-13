@@ -1,6 +1,7 @@
 import {
   fireEvent,
   render,
+  type RenderResult,
   screen,
   waitFor,
   within,
@@ -20,7 +21,15 @@ import {
   vi,
 } from 'vitest';
 
-const { navigateTo } = vi.hoisted(() => ({ navigateTo: vi.fn() }));
+const { navigateTo, handoff } = vi.hoisted(() => ({
+  navigateTo: vi.fn(),
+  handoff: { file: null as File | null },
+}));
+
+// jsdom cannot read the data URL the real hand-off stores in sessionStorage.
+vi.mock('@/shared/receipt-handoff/receipt-handoff', () => ({
+  takeReceipt: async () => handoff.file,
+}));
 
 vi.mock('@/shared/router/navigation', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/shared/router/navigation')>()),
@@ -79,22 +88,32 @@ const mockScan = () =>
     ),
   );
 
+let view: RenderResult;
+
 const open = async () => {
-  // Let the tests pick any file type; the app validates it itself.
-  const user = userEvent.setup({ applyAccept: false });
-  render(<Main />);
+  const user = userEvent.setup();
+  view = render(<Main />);
   await screen.findByRole('tablist', { name: 'Rodzaj wydatku' });
   return user;
+};
+
+/** Closes the product popup and waits until the form is reachable again. */
+const closeProduct = async (user: Awaited<ReturnType<typeof open>>) => {
+  await user.click(screen.getByRole('button', { name: 'Gotowe' }));
+  await waitFor(() =>
+    expect(screen.queryByLabelText('Nazwa produktu')).not.toBeInTheDocument(),
+  );
 };
 
 const photo = (type = 'image/jpeg', bytes = 8) =>
   new File([new Uint8Array(bytes)], 'receipt.jpg', { type });
 
-const upload = async (
-  user: Awaited<ReturnType<typeof open>>,
-  file: File,
-  label = 'Plik ze zdjęciem paragonu',
-) => user.upload(screen.getByLabelText(label), file);
+/** A photo picked in the "Dodaj" menu reaches the page through the hand-off. */
+const upload = async (_user: Awaited<ReturnType<typeof open>>, file: File) => {
+  handoff.file = file;
+  view.unmount();
+  await open();
+};
 
 /** Local `YYYY-MM-DDTHH:mm`, the value a `datetime-local` input takes. */
 const localInput = (date: Date) =>
@@ -119,11 +138,12 @@ describe('adding an expense on its own page', () => {
   });
   afterEach(() => {
     server.resetHandlers();
+    handoff.file = null;
     navigateTo.mockClear();
   });
   afterAll(() => server.close());
 
-  it('offers the expense type and receipt upload above the form', async () => {
+  it('offers the expense type above the form and no receipt upload', async () => {
     mockBackend();
     await open();
 
@@ -132,8 +152,12 @@ describe('adding an expense on its own page', () => {
       'true',
     );
     expect(screen.getByRole('tab', { name: 'Cykliczny' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Wgraj z pliku' })).toBeEnabled();
-    expect(screen.getByRole('button', { name: 'Zrób zdjęcie' })).toBeEnabled();
+    expect(
+      screen.queryByRole('button', { name: 'Wgraj z pliku' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Zrób zdjęcie' }),
+    ).not.toBeInTheDocument();
     expect(screen.getByLabelText('Sklep')).toBeVisible();
   });
 
@@ -147,14 +171,14 @@ describe('adding an expense on its own page', () => {
     expect(bar).toHaveTextContent('Razem');
   });
 
-  it('links back to the dashboard', async () => {
+  it('shows the form in a popup that closes back to the dashboard', async () => {
     mockBackend();
-    await open();
+    const user = await open();
 
-    expect(screen.getByRole('link', { name: 'Wróć' })).toHaveAttribute(
-      'href',
-      '/app/',
-    );
+    const popup = screen.getByRole('dialog', { name: 'Nowy wydatek' });
+    await user.click(within(popup).getByRole('button', { name: 'Zamknij' }));
+
+    expect(navigateTo).toHaveBeenCalledWith('/app/');
   });
 
   describe('manual expense', () => {
@@ -284,7 +308,9 @@ describe('adding an expense on its own page', () => {
       await user.type(screen.getByLabelText('Sklep'), 'Piekarnia');
 
       await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await closeProduct(user);
       await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await closeProduct(user);
 
       expect(screen.getByLabelText(/^Kwota/)).toHaveAttribute('readonly');
       expect(screen.getByText('Produkty (2)')).toBeVisible();
@@ -299,14 +325,43 @@ describe('adding an expense on its own page', () => {
       await user.type(screen.getByLabelText('Cena'), '3,20');
       await user.clear(screen.getByLabelText('Ilość'));
       await user.type(screen.getByLabelText('Ilość'), '2');
+      await closeProduct(user);
       await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
       await user.type(screen.getByLabelText('Nazwa produktu'), 'Bułka');
+      await closeProduct(user);
 
       await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
 
       await waitFor(() => expect(written).toHaveLength(1));
       expect(written[0]!.body).toMatchObject({ amount: 6.4 });
       expect(written[0]!.body.items).toHaveLength(2);
+    });
+
+    it('edits a product in a popup over the form', async () => {
+      mockBackend();
+      const user = await open();
+
+      await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await user.type(screen.getByLabelText('Nazwa produktu'), 'Chleb');
+      const popup = screen.getByRole('dialog', { name: 'Chleb' });
+      await user.click(within(popup).getByRole('button', { name: 'Gotowe' }));
+
+      expect(
+        await screen.findByRole('button', { name: /Chleb/ }),
+      ).toBeVisible();
+      expect(screen.queryByLabelText('Nazwa produktu')).not.toBeInTheDocument();
+    });
+
+    it('reopens a product popup from its row', async () => {
+      mockBackend();
+      const user = await open();
+      await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await user.type(screen.getByLabelText('Nazwa produktu'), 'Chleb');
+      await closeProduct(user);
+
+      await user.click(screen.getByRole('button', { name: /Chleb/ }));
+
+      expect(screen.getByLabelText('Nazwa produktu')).toHaveValue('Chleb');
     });
 
     it('takes a removed product out of the amount', async () => {
@@ -317,7 +372,7 @@ describe('adding an expense on its own page', () => {
       await user.type(screen.getByLabelText('Cena'), '10');
       await user.click(screen.getByRole('button', { name: 'Usuń produkt' }));
 
-      expect(screen.getByText('Produkty (0)')).toBeVisible();
+      expect(await screen.findByText('Produkty (0)')).toBeVisible();
       expect(screen.getByLabelText('Kwota')).not.toHaveAttribute('readonly');
     });
 
@@ -340,6 +395,7 @@ describe('adding an expense on its own page', () => {
           screen.getByLabelText('Kategoria produktu'),
           'Rozrywka',
         );
+        await closeProduct(user);
 
         expect(screen.getByText('Rozrywka', { selector: 'p' })).toBeVisible();
         await saveWithProducts(user);
@@ -355,11 +411,13 @@ describe('adding an expense on its own page', () => {
         await user.type(screen.getByLabelText('Nazwa produktu'), 'Chleb');
         await pickOption(
           user,
-          screen.getAllByLabelText('Kategoria produktu')[0]!,
+          screen.getByLabelText('Kategoria produktu'),
           'Spożywcze',
         );
+        await closeProduct(user);
         await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
         await user.type(screen.getByLabelText('Nazwa produktu'), 'Kino');
+        await closeProduct(user);
 
         expect(screen.getByText('Wiele kategorii')).toBeVisible();
         await saveWithProducts(user);
@@ -440,9 +498,6 @@ describe('adding an expense on its own page', () => {
       await user.click(screen.getByRole('tab', { name: 'Cykliczny' }));
 
       expect(screen.getByLabelText('Koszt płatności')).toBeVisible();
-      expect(
-        screen.getByRole('button', { name: 'Wgraj z pliku' }),
-      ).toBeVisible();
       expect(window.location.search).toBe('?type=recurring');
     });
 
@@ -509,6 +564,7 @@ describe('adding an expense on its own page', () => {
       await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
       await user.type(screen.getByLabelText('Nazwa produktu'), name);
       await user.type(screen.getByLabelText('Cena'), price);
+      await closeProduct(user);
     };
 
     it('takes the cost and category from the products', async () => {
@@ -554,6 +610,7 @@ describe('adding an expense on its own page', () => {
       await user.click(screen.getByRole('tab', { name: 'Cykliczny' }));
       await user.type(screen.getByLabelText('Nazwa'), 'Zakupy');
       await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await closeProduct(user);
       await user.click(
         screen.getByRole('button', { name: 'Dodaj wydatek cykliczny' }),
       );
@@ -631,19 +688,6 @@ describe('adding an expense on its own page', () => {
   describe('receipt photo', () => {
     beforeEach(() => mockBackend());
 
-    it.each([
-      ['Wgraj z pliku', 'Plik ze zdjęciem paragonu'],
-      ['Zrób zdjęcie', 'Zdjęcie paragonu z aparatu'],
-    ])('opens the file picker after clicking "%s"', async (button, input) => {
-      const user = await open();
-      const opened = vi.fn();
-      screen.getByLabelText(input).addEventListener('click', opened);
-
-      await user.click(screen.getByRole('button', { name: button }));
-
-      expect(opened).toHaveBeenCalledTimes(1);
-    });
-
     it('fills the form from an uploaded receipt without extra steps', async () => {
       mockScan();
       const user = await open();
@@ -655,17 +699,6 @@ describe('adding an expense on its own page', () => {
       );
       expect(screen.getByText('Produkty (1)')).toBeVisible();
       expect(screen.getByLabelText(/^Kwota/)).toHaveValue('42.5');
-    });
-
-    it('fills the form from a camera photo', async () => {
-      mockScan();
-      const user = await open();
-
-      await upload(user, photo('image/png'), 'Zdjęcie paragonu z aparatu');
-
-      await waitFor(() =>
-        expect(screen.getByLabelText('Sklep')).toHaveValue('Biedronka'),
-      );
     });
 
     it('saves a scanned expense as a receipt expense', async () => {
@@ -926,20 +959,16 @@ describe('adding an expense on its own page', () => {
       );
     });
 
-    it('opens the file picker again after retrying a rejected file', async () => {
+    it('goes back to a blank form when retrying a rejected file', async () => {
       const user = await open();
       await upload(user, photo('application/pdf'));
       const alert = await screen.findByRole('alert');
-      const opened = vi.fn();
-      screen
-        .getByLabelText('Plik ze zdjęciem paragonu')
-        .addEventListener('click', opened);
 
       await user.click(
         within(alert).getByRole('button', { name: 'Spróbuj ponownie' }),
       );
 
-      expect(opened).toHaveBeenCalledTimes(1);
+      expect(screen.getByLabelText('Sklep')).toHaveValue('');
     });
   });
 });

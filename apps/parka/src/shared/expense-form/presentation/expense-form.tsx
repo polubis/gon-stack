@@ -1,6 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Check, LoaderCircle } from 'lucide-react';
-import { cn } from '@repo/react-kit/cn';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { Button, Field, Input, Select, inputClass } from '@/shared/ui/controls';
@@ -26,8 +25,6 @@ type Props = {
   base: ExpenseFormValues | null;
   categories: Category[];
   saving: boolean;
-  /** `page` = own route, `dialog` = popup over the dashboard. Same fields. */
-  layout: 'page' | 'dialog';
   submitLabel: string;
   /** Prefill the best remembered shop, payment method and category (adding, not editing). */
   prefill?: boolean;
@@ -41,13 +38,11 @@ export const ExpenseForm = ({
   base,
   categories,
   saving,
-  layout,
   submitLabel,
   prefill = false,
   actions,
   onSubmit,
 }: Props) => {
-  const dialog = layout === 'dialog';
   const suggestions = useSuggestions();
   // `null` = untouched: shows the form's base, else the best remembered value.
   const [merchantInput, setMerchantInput] = useState<string | null>(null);
@@ -81,8 +76,6 @@ export const ExpenseForm = ({
   const {
     products,
     setProducts,
-    openId,
-    setOpenId,
     submitted,
     hasProducts,
     total,
@@ -124,19 +117,9 @@ export const ExpenseForm = ({
         className="flex flex-1 flex-col"
         data-e2e="expense-form:form"
       >
-        <div
-          className={cn(
-            'flex flex-1 flex-col gap-4',
-            !dialog &&
-              'md:gap-6 lg:grid lg:grid-cols-3 lg:content-start lg:items-start',
-          )}
-        >
+        <div className="flex flex-1 flex-col gap-4">
           {categories.length === 0 ? (
-            <Card
-              data-e2e="expense-form:no-categories"
-              role="status"
-              className="lg:col-span-3"
-            >
+            <Card data-e2e="expense-form:no-categories" role="status">
               <p className="text-sm text-ink-soft">
                 Aby zapisać wydatek, dodaj najpierw kategorię (np. sugerowane).
               </p>
@@ -221,22 +204,12 @@ export const ExpenseForm = ({
             products={products}
             categories={categories}
             newProductCategoryId={selected ?? defaultCategoryId(categories)}
-            layout={layout}
             submitted={submitted}
-            openId={openId}
-            onOpenIdChange={setOpenId}
             onChange={setProducts}
           />
         </div>
 
-        <div
-          className={cn(
-            'mt-4 flex items-center gap-3 py-3',
-            dialog
-              ? 'flex-wrap border-t border-line bg-card'
-              : 'mb-2 rounded-3xl border border-line bg-card pl-5 pr-3 shadow-popover',
-          )}
-        >
+        <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-line pt-3">
           <div className="flex-1">
             <p className="text-xs text-ink-soft">Razem</p>
             <p

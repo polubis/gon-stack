@@ -54,7 +54,6 @@ export const NewExpenseForm = ({
       base={base}
       categories={categories}
       saving={saving}
-      layout="page"
       prefill={!source}
       submitLabel="Dodaj wydatek"
       onSubmit={(values) =>
