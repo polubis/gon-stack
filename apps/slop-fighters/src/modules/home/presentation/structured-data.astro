@@ -1,0 +1,9 @@
+---
+type Props = {
+  data: object | object[];
+};
+
+const { data }: Props = Astro.props;
+---
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(data)} />
