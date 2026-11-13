@@ -10,7 +10,7 @@ import { API_ROUTER, APP_ROUTER } from '@/shared/router/routes';
 
 /**
  * MCP writes reach the open app live, against the real Supabase backend: two
- * tabs of one browser share a single stream, and both show what an MCP client
+ * tabs of one browser each hold their own stream, and both show what an MCP client
  * changed without a reload.
  */
 
@@ -136,8 +136,8 @@ const commands = {
     }
   },
 
-  'the browser holds one stream for both tabs': async ({ page }) => {
-    expect(streams.get(page)).toHaveLength(1);
+  'each tab holds its own stream': async ({ page }) => {
+    expect(streams.get(page)).toHaveLength(2);
   },
 } satisfies CommandRegistry<Ctx>;
 
@@ -156,7 +156,7 @@ test.describe('mcp live refresh', () => {
       ['both tabs show the task without a reload'],
       ['the client renames the task'],
       ['both tabs show the new title and not the old one'],
-      ['the browser holds one stream for both tabs'],
+      ['each tab holds its own stream'],
     );
   });
 });
