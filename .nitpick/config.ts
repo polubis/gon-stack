@@ -102,7 +102,7 @@ Read before work:
 ## Flow
 
 1. Complex work (e.g. CRUD, many layers, DB + API + UI): write a short plan first.
-2. Pick proof level now (${ref('evidence')} table), before first edit. If it needs BEFORE (time/interaction bug), capture it on untouched code first.
+2. Pick proof now: ${ref('evidence')} image (pure UI) or video (interaction), before first edit.
 3. Execute yourself. Tests follow the **pyramid** (\`rules/testing.md\`).
 4. Run **basic repo checks** (typecheck/lint/test for touched packages).
 5. Show dev proof at the chosen level, cheapest sufficient. Wait for acceptance.

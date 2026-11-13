@@ -1,79 +1,64 @@
 ---
 name: evidence
-description: Proof that a change works. Picks cheapest sufficient proof (test, screenshot, video, before/after). Use when dev asks for proof, evidence, "video", "przed i po", "dowod", "pokaz ze dziala", or when worker must show proof of a change.
+description: Visual proof of UI change via script. One labeled image for pure UI change, or labeled recording trimmed to key part and slowed at key moment. Use when dev asks for proof, evidence, "video", "dowod", "pokaz ze dziala".
 ---
 
 # Evidence
 
-Cheapest enough proof. Script does heavy lift: `evidence.mjs`. Agent writes only tiny scenario.
+Script `evidence.mjs` does heavy lift. Agent writes tiny scenario.
 
-## Pick level first
+## Pick
 
-| Change | Proof |
-| --- | --- |
-| Logic bug / regression | Red test on old code, green on new. No video |
-| Static look (spacing, color, copy) | `--mode shot`, before/after, marked element |
-| New feature | `--mode single`, one video, no BEFORE |
-| Time/interaction bug (history, Back, animation) | `--mode before-after`: BEFORE then AFTER, sequential |
-| Responsive change | `--mode responsive`: one PNG board, shot per viewport, labeled by width |
-| Side-by-side iframe | Only if dev asks explicit. Iframes share session history, break Back |
-
-Non-UI change: tests only.
-
-## Budget
-
-Max 1-3 scenes, ~10 s each. One repair try. Then report with limits.
+- Pure UI look (spacing, color, copy, layout): `--mode image`. One PNG, changed components boxed + numbered labels.
+- Interaction, animation, flow: `--mode video`. One `<out>.webm`, labeled, trimmed, slowed.
+- Image first. Video only if change needs time to be seen.
 
 ## Run
 
-Script generic. All repo facts via args or `rules/`/repo docs. Playwright resolved from `--playwright-from` (dir with `@playwright/test`, default cwd).
-
 ```
-node <skill>/evidence.mjs --scenario <file.mjs> --mode single|before-after|shot|responsive   --url <AFTER> [--before-url <BEFORE>] [--viewport 390x844] [--viewports 320,480,768x900]   --out <name> --out-dir .evidences/<KEY> [--timezone UTC] [--locale en-US]   [--backend <probeUrl>] [--serve "cmd|readyUrl|cwd"]... [--worktree <dir>] [--hold-ms 3000]
+node <skill>/evidence.mjs --scenario <file.mjs> --mode image|video --url <URL> --out <name> --out-dir .evidences/<KEY> [--viewport 390x844] [--slow-factor 3] [--timezone UTC] [--locale en-US] [--playwright-from <dir>]
 ```
 
-Scenario (scratch dir, never repo) = ES module:
+- `<KEY>`: tracker key, `none` or `pr-<id>`. Required. Missing -> ask.
+- One run on `--url`. Scenario does the change from prompt.
+- Output only to `--out-dir`. Scenario + temp files in scratch dir.
+
+## Scenario
 
 ```js
-export default async ({ page, mark, unmark, card, hold, log, frame, phase, baseUrl, vw }) => {
-  await page.getByRole('button', { name: 'Menu' }).click();
-  await mark(page.getByRole('dialog'), 'Modal open', true); // green; false = red
-  log('modals', await page.getByRole('dialog').count());   // log values, not screenshots
-  await frame('modal');                                    // max 3 key frames
-  await hold(2000); await unmark();
+export default async ({ page, mark, unmark, start, slow, hold, log }) => {
+  await page.getByRole('link', { name: 'Tasks' }).click(); // setup, cut from video
+  await start();                                           // video begins here
+  await mark(page.getByRole('button', { name: 'Add' }), 'New button', 'good');
+  await slow(async () => {                                 // key moment, slowed
+    await page.getByRole('button', { name: 'Add' }).click();
+    await mark(page.getByRole('dialog'), 'Dialog slides in');
+    await hold(1500);
+  });
+  log('dialogs', await page.getByRole('dialog').count());
 };
-export const mock = async (ctx) => {}; // optional: ctx.route fallback
 ```
 
-Script gives: marks, title cards, `recordVideo`, fixed tz/locale, reduced motion, `<out-dir>/<out>.log.txt`, cleanup in `finally` (servers, worktree, git status before/after).
-
-### Responsive
-
-`--viewports` list of `W` or `WxH` (default H 800). Same scenario runs per viewport (`vw` given, `mark` optional). Board `<out>.responsive.png` built with Playwright only (no ffmpeg/sharp). Viewport list: take from `rules/ui.md`, never from skill. Read board: labels + shots must match.
-
-## Backend
-
-Prefer real dev backend; start it per repo docs. Mock only if unreachable and scenario exports `mock`; log `backend=MOCK`, report says so. Else fail. `--backend <url>` probes.
-
-## BEFORE code
-
-`--worktree <dir>` = `git worktree add HEAD`, removed at end. Uncommitted work in main = AFTER. Never edit main tree. No `node_modules` link into worktree (removal deletes main files); install inside it. `{WT}` in `--serve` cmd/cwd = worktree dir. Check main still builds after.
-
-## Verify
-
-Read log + 2-3 key frames. Caption must match logged value. Never claim unseen.
+- `mark(locator, caption, kind)`: box + numbered label. Kind `good` green, `bad` red, `info` blue. Labels never overlap. Stays until `unmark()`.
+- `start()`: all before it cut from video. Call once, right before key part. No-op in image.
+- `slow(fn, factor?)`: CSS animations + `hold` run at `1/factor` inside `fn`. Default 3.
+- `hold(ms)`: pause so label readable.
+- `log(key, value)`: line in `<out>.log.txt`.
 
 ## Rules
 
-- Highlight hold 3-4 s; title card 3 s.
-- Personal/sensitive data seen -> stop (`rules/security.md`).
-- No `ffmpeg` -> `.webm` only. No fake `.mp4`.
-- Evidence dir always `.evidences/<KEY>/` (repo root, gitignored): `<KEY>` = tracker key (`VYB-238`), or `none` without a task, or PR id (`pr-31`). Never scratchpad, never repo tree outside `.evidences/`. Never commit artifacts.
-- Key is required input. No key given -> ask before running.
-- Scratch dir only for scenario file and temp files, never for outputs.
+- Image: mark every changed component. Caption = short fact.
+- Video: 1-3 moments, ~10 s. No login/navigation/idle in recording. Slow only the change.
+- JS-driven animation not slowed. Label it, `hold` longer.
+- Trim needs ffmpeg (`FFMPEG` env, PATH, or Playwright bundled). None -> untrimmed `.webm`, say so. Never fake `.mp4`.
+- Personal/sensitive data visible -> stop (`rules/security.md`).
+
+## Verify
+
+Read log, view 2-3 frames. Caption must match logged value. Never claim unseen.
 
 ## Report
 
-- Path (absolute, under `.evidences/<KEY>/`): video / shots / log
-- Per scene: BEFORE vs AFTER, logged values
-- Limits: mock, dev server vs build, dropped scenes, repair
+- Absolute paths under `.evidences/<KEY>/`: image or video + log
+- Per mark/moment: what changed
+- Limits: untrimmed, JS animation not slowed
