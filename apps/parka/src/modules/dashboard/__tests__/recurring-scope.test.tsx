@@ -184,8 +184,12 @@ describe('upcoming payment with products', () => {
     const dialog = within(await screen.findByRole('dialog'));
 
     await user.click(dialog.getByRole('button', { name: /Dodaj produkt/ }));
-    await user.type(dialog.getByLabelText('Nazwa produktu'), 'Masło');
-    await user.type(dialog.getByLabelText('Cena'), '7');
+    await user.type(screen.getByLabelText('Nazwa produktu'), 'Masło');
+    await user.type(screen.getByLabelText('Cena'), '7');
+    await user.click(screen.getByRole('button', { name: 'Gotowe' }));
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Nazwa produktu')).not.toBeInTheDocument(),
+    );
     await user.click(dialog.getByRole('button', { name: 'Zapisz zmiany' }));
 
     await waitFor(() => expect(saved).not.toBeNull());
@@ -200,8 +204,9 @@ describe('upcoming payment with products', () => {
     const dialog = within(await screen.findByRole('dialog'));
 
     await user.click(dialog.getByRole('button', { name: /Chleb/ }));
-    await user.click(dialog.getByRole('button', { name: /Usuń produkt/ }));
+    await user.click(screen.getByRole('button', { name: /Usuń produkt/ }));
 
+    expect(await screen.findByText('Produkty (0)')).toBeVisible();
     expect(dialog.getByLabelText('Koszt płatności')).not.toHaveAttribute(
       'readonly',
     );

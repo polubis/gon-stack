@@ -4,6 +4,7 @@ import { test, type Ctx } from './test';
 import { categoryRow, expenseRow } from './locators';
 import { API_ROUTER, APP_ROUTER } from '@/shared/router/routes';
 import { signInAsTestUser } from './session';
+import { stashReceiptPhoto } from './stash-receipt';
 import { installBackend } from '@/modules/dashboard/__e2e__/fake-backend';
 
 /**
@@ -188,15 +189,8 @@ const commands = {
         }),
       }),
     );
+    await stashReceiptPhoto(page);
     await open(page, APP_ROUTER.newExpense());
-    await getByE2e('expenses-management:upload-input').setInputFiles({
-      name: 'receipt.png',
-      mimeType: 'image/png',
-      buffer: Buffer.from(
-        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
-        'base64',
-      ),
-    });
 
     await expect(getByE2e('expense-form:merchant')).toHaveValue(
       'Testowy Sklep E2E',
@@ -243,15 +237,8 @@ const commands = {
         }),
       }),
     );
+    await stashReceiptPhoto(page);
     await open(page, APP_ROUTER.newExpense());
-    await getByE2e('expenses-management:upload-input').setInputFiles({
-      name: 'receipt.png',
-      mimeType: 'image/png',
-      buffer: Buffer.from(
-        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
-        'base64',
-      ),
-    });
 
     await expect(getByE2e('expense-form:merchant')).toHaveValue('Biedronka');
     await expect(getByE2e('expense-form:date')).toHaveValue(
@@ -313,6 +300,7 @@ const commands = {
     await expect(price).toHaveValue('');
     await price.pressSequentially('3,20');
     await expect(price).toHaveValue('3,20');
+    await getByE2e('expense-form:product-done').click();
     await expect(getByE2e('expense-form:total')).toContainText('3,20');
     await getByE2e('expense-form:date').fill('2026-03-10T14:30');
 
@@ -353,6 +341,7 @@ const commands = {
 
     const name = getByE2ePrefix('expense-form:product-name:');
     await expect(name).toHaveValue('');
+    await getByE2e('expense-form:product-done').click();
     await getByE2e('expense-form:save').click();
     await expect(name).toHaveAttribute('aria-invalid', 'true');
     await expect(page).toHaveURL(new RegExp(APP_ROUTER.newExpense()));
@@ -371,6 +360,7 @@ const commands = {
 
     await getByE2e('expense-form:add-product').click();
     await getByE2ePrefix('expense-form:product-name:').fill('Bilet');
+    await getByE2e('expense-form:product-done').click();
     await expect(getByE2e('expense-form:category')).toHaveText('Rozrywka');
     await getByE2e('expense-form:add-product').click();
     await getByE2ePrefix('expense-form:product-name:').fill('Chleb');
@@ -378,6 +368,7 @@ const commands = {
     await getByE2ePrefix('ui:option:')
       .filter({ hasText: CATEGORY.name })
       .click();
+    await getByE2e('expense-form:product-done').click();
 
     await expect(getByE2e('expense-form:category')).toHaveText(
       'Wiele kategorii',
@@ -523,6 +514,7 @@ const commands = {
     await getByE2e('expense-form:add-product').click();
     await getByE2ePrefix('expense-form:product-name:').fill('Popcorn');
     await getByE2ePrefix('expense-form:product-price:').fill('12');
+    await getByE2e('expense-form:product-done').click();
     await expect(getByE2e('expense-form:total')).toContainText('12,00');
     const saved = page.waitForRequest(
       (r) => r.method() === 'PUT' && r.url().includes(API_ROUTER.expenses()),

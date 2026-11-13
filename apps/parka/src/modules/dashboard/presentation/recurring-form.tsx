@@ -53,8 +53,6 @@ export const RecurringForm = ({
   const {
     products,
     setProducts,
-    openId,
-    setOpenId,
     submitted,
     hasProducts,
     total,
@@ -183,10 +181,7 @@ export const RecurringForm = ({
         products={products}
         categories={categories}
         newProductCategoryId={selected ?? defaultCategoryId(categories)}
-        layout="dialog"
         submitted={submitted}
-        openId={openId}
-        onOpenIdChange={setOpenId}
         onChange={setProducts}
       />
       {children}

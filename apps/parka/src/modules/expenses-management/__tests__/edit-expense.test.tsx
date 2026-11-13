@@ -143,6 +143,10 @@ describe('editing an expense on its own page', () => {
     await user.click(screen.getByRole('button', { name: 'Dodaj produkt' }));
     await user.type(screen.getByLabelText('Nazwa produktu'), 'Masło');
     await user.type(screen.getByLabelText('Cena'), '7');
+    await user.click(screen.getByRole('button', { name: 'Gotowe' }));
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Nazwa produktu')).not.toBeInTheDocument(),
+    );
     await user.click(screen.getByRole('button', { name: 'Zapisz zmiany' }));
 
     await waitFor(() => expect(written).toHaveLength(1));
@@ -162,6 +166,7 @@ describe('editing an expense on its own page', () => {
 
     await user.click(await screen.findByRole('button', { name: /Chleb/ }));
     await user.click(screen.getByRole('button', { name: 'Usuń produkt' }));
+    await screen.findByText('Produkty (0)');
     await user.click(screen.getByRole('button', { name: 'Zapisz zmiany' }));
 
     await waitFor(() => expect(written).toHaveLength(1));

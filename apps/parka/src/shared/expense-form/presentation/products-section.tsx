@@ -1,25 +1,23 @@
 import { Plus } from 'lucide-react';
-import { cn } from '@repo/react-kit/cn';
+import {
+  closeModal,
+  closeModalThen,
+  openModal,
+  useModalStack,
+} from '@/shared/router/modal-stack';
 import { createProduct, patchProduct } from '../domain/products';
-import type {
-  Category,
-  CategoryId,
-  Product,
-  ProductId,
-} from '../domain/models';
+import type { Category, CategoryId, Product } from '../domain/models';
 import { ProductCard } from './product-card';
+import { ProductDialog } from './product-dialog';
+import { productModal } from './product-modal-id';
 
 type Props = {
   products: Product[];
   categories: Category[];
   /** Category a freshly added product starts with. */
   newProductCategoryId: CategoryId;
-  /** `page` = own route (wide grid), `dialog` = popup. */
-  layout: 'page' | 'dialog';
   /** Marks unnamed products invalid (after a save attempt). */
   submitted: boolean;
-  openId: ProductId | null;
-  onOpenIdChange: (id: ProductId | null) => void;
   onChange: (products: Product[]) => void;
 };
 
@@ -28,25 +26,19 @@ export const ProductsSection = ({
   products,
   categories,
   newProductCategoryId,
-  layout,
   submitted,
-  openId,
-  onOpenIdChange,
   onChange,
 }: Props) => {
-  const dialog = layout === 'dialog';
+  const stack = useModalStack();
 
   const addProduct = () => {
     const product = createProduct(newProductCategoryId, '');
     onChange([...products, product]);
-    onOpenIdChange(product.id);
+    openModal(productModal(product.id));
   };
 
   return (
-    <section
-      aria-labelledby="products-heading"
-      className={cn('space-y-2', !dialog && 'lg:col-span-2')}
-    >
+    <section aria-labelledby="products-heading" className="space-y-2">
       <div className="flex items-center justify-between">
         <h2
           id="products-heading"
@@ -65,29 +57,13 @@ export const ProductsSection = ({
       </div>
 
       {products.length > 0 ? (
-        <ul
-          className={cn(
-            'space-y-2',
-            !dialog &&
-              'md:grid md:grid-cols-2 md:items-start md:gap-4 md:space-y-0',
-          )}
-        >
+        <ul className="space-y-2">
           {products.map((product) => (
             <ProductCard
               key={product.id}
               product={product}
               categories={categories}
-              open={openId === product.id}
-              invalid={submitted && !product.name.trim()}
-              onToggle={() =>
-                onOpenIdChange(openId === product.id ? null : product.id)
-              }
-              onPatch={(patch) =>
-                onChange(patchProduct(products, product.id, patch))
-              }
-              onRemove={() =>
-                onChange(products.filter((p) => p.id !== product.id))
-              }
+              onEdit={() => openModal(productModal(product.id))}
             />
           ))}
         </ul>
@@ -96,6 +72,27 @@ export const ProductsSection = ({
           Opcjonalnie dodaj produkty. Wtedy kwota policzy się sama.
         </p>
       )}
+      {products.map((product) => {
+        const id = productModal(product.id);
+        return stack.includes(id) ? (
+          <ProductDialog
+            key={product.id}
+            modal={id}
+            product={product}
+            categories={categories}
+            invalid={submitted && !product.name.trim()}
+            onPatch={(patch) =>
+              onChange(patchProduct(products, product.id, patch))
+            }
+            onRemove={() =>
+              closeModalThen(id, () =>
+                onChange(products.filter((p) => p.id !== product.id)),
+              )
+            }
+            onClose={() => closeModal(id)}
+          />
+        ) : null;
+      })}
     </section>
   );
 };

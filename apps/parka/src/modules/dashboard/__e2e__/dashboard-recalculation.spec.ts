@@ -142,6 +142,7 @@ const commands = {
     await getByE2e('expense-form:add-product').click();
     await getByE2ePrefix('expense-form:product-name:').fill('Chleb');
     await getByE2ePrefix('expense-form:product-price:').fill('25');
+    await getByE2e('expense-form:product-done').click();
     await getByE2e('expense-form:save').click();
     await page.waitForURL(`**${APP_ROUTER.dashboard()}**`);
     await page.waitForLoadState('networkidle');
@@ -211,8 +212,11 @@ const commands = {
   },
   'i add an expense from an uploaded receipt': async ({ page, getByE2e }) => {
     await getByE2e('dashboard:expense-new').click();
-    await getByE2e('dashboard:add-option:expense').click();
-    await getByE2e('expenses-management:upload-input').setInputFiles({
+    const chooser = page.waitForEvent('filechooser');
+    await getByE2e('dashboard:add-option:file').click();
+    await (
+      await chooser
+    ).setFiles({
       name: 'receipt.png',
       mimeType: 'image/png',
       buffer: Buffer.from(
@@ -253,6 +257,7 @@ const commands = {
     await getByE2e('expense-form:add-product').click();
     await getByE2ePrefix('expense-form:product-name:').fill('Chleb');
     await getByE2ePrefix('expense-form:product-price:').fill('12');
+    await getByE2e('expense-form:product-done').click();
     await expect(getByE2e('dashboard:recurring-form-cost')).toHaveAttribute(
       'readonly',
       '',

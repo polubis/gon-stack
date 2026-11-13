@@ -32,7 +32,6 @@ export const EditExpenseForm = ({
         base={expense}
         categories={categories}
         saving={saving}
-        layout="page"
         submitLabel="Zapisz zmiany"
         actions={
           <Button

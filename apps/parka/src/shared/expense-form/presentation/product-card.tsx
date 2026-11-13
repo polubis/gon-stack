@@ -1,11 +1,7 @@
-import { ClearableInput } from '@/shared/ui/clearable';
-import { ChevronDown, Trash2 } from 'lucide-react';
-import { cn } from '@repo/react-kit/cn';
+import { ChevronRight } from 'lucide-react';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
-import { Field, Select } from '@/shared/ui/controls';
 import { Card } from '@/shared/ui/layout';
-import { NumberInput } from '@/shared/ui/number-input';
 import { money } from '../domain/format';
 import { productTotal, resolveCategory } from '../domain/products';
 import type { Category, Product } from '../domain/models';
@@ -13,31 +9,21 @@ import type { Category, Product } from '../domain/models';
 type Props = {
   product: Product;
   categories: Category[];
-  open: boolean;
-  invalid: boolean;
-  onToggle: () => void;
-  onPatch: (patch: Partial<Omit<Product, 'id'>>) => void;
-  onRemove: () => void;
+  /** Opens the product's editor popup. */
+  onEdit: () => void;
 };
 
-export const ProductCard = ({
-  product,
-  categories,
-  open,
-  invalid,
-  onToggle,
-  onPatch,
-  onRemove,
-}: Props) => {
+/** One product row: summary only, editing happens in `ProductDialog`. */
+export const ProductCard = ({ product, categories, onEdit }: Props) => {
   const category = resolveCategory(categories, product.categoryId);
 
   return (
-    <Card as="li" className="space-y-3">
+    <Card as="li">
       <button
         type="button"
-        onClick={onToggle}
+        onClick={onEdit}
         data-e2e={`expense-form:product-toggle:${product.id}`}
-        aria-expanded={open}
+        aria-haspopup="dialog"
         className="flex w-full items-center gap-3 text-left"
       >
         <CategoryAvatar category={category} />
@@ -52,82 +38,8 @@ export const ProductCard = ({
         <span className="text-sm font-semibold tabular-nums">
           {money(productTotal(product))}
         </span>
-        <ChevronDown
-          className={cn(
-            'h-4 w-4 text-ink-soft transition-transform motion-reduce:transition-none',
-            open && 'rotate-180',
-          )}
-          aria-hidden="true"
-        />
+        <ChevronRight className="h-4 w-4 text-ink-soft" aria-hidden="true" />
       </button>
-
-      {open ? (
-        <div className="grid grid-cols-2 gap-3 border-t border-line pt-3">
-          <div className="col-span-2">
-            <Field
-              label="Nazwa produktu"
-              hint={invalid ? 'Podaj nazwę produktu.' : undefined}
-            >
-              <ClearableInput
-                value={product.name}
-                required
-                aria-invalid={invalid}
-                autoFocus={invalid}
-                data-e2e={`expense-form:product-name:${product.id}`}
-                onChange={(e) => onPatch({ name: e.target.value })}
-              />
-            </Field>
-          </div>
-          <Field label="Cena">
-            <NumberInput
-              value={product.unitPrice}
-              data-e2e={`expense-form:product-price:${product.id}`}
-              onValueChange={(unitPrice) => onPatch({ unitPrice })}
-            />
-          </Field>
-          <Field label="Ilość">
-            <NumberInput
-              integer
-              value={product.quantity}
-              data-e2e={`expense-form:product-qty:${product.id}`}
-              onValueChange={(quantity) => onPatch({ quantity })}
-            />
-          </Field>
-          <Field label="Rabat">
-            <NumberInput
-              value={product.discount}
-              data-e2e={`expense-form:product-discount:${product.id}`}
-              onValueChange={(discount) => onPatch({ discount })}
-            />
-          </Field>
-          <Field label="Kategoria produktu">
-            <Select
-              value={product.categoryId}
-              data-e2e={`expense-form:product-category:${product.id}`}
-              options={
-                categories.length === 0
-                  ? [{ value: product.categoryId, label: 'Bez kategorii' }]
-                  : categories.map((c) => ({
-                      value: c.id,
-                      label: categoryLabel(c.name),
-                    }))
-              }
-              onValueChange={(id) => {
-                const next = categories.find((c) => c.id === id);
-                if (next) onPatch({ categoryId: next.id });
-              }}
-            />
-          </Field>
-          <button
-            type="button"
-            data-e2e={`expense-form:product-remove:${product.id}`}
-            onClick={onRemove}
-            className="col-span-2 inline-flex items-center justify-center gap-2 rounded-xl py-2 text-sm font-medium text-danger hover:bg-danger-faint"
-          >
-            <Trash2 className="h-4 w-4" aria-hidden="true" /> Usuń produkt
-          </button>
-        </div>
-      ) : null}
     </Card>
   );
 };

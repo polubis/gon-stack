@@ -10,7 +10,6 @@ import { APP_ROUTER } from '@/shared/router/routes';
 import { takeReceipt } from '@/shared/receipt-handoff/receipt-handoff';
 import { Segmented } from '@/shared/ui/controls';
 import { ErrorState } from '@/shared/ui/error-state';
-import { ScreenHeader } from '@/shared/ui/layout';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
 import { Toast } from '@/shared/ui/toast';
 import {
@@ -24,7 +23,8 @@ import type { ExpenseKind } from '../domain/models';
 import { Provider, useContext } from './context';
 import { EditExpenseForm } from './edit-expense-form';
 import { NewExpenseForm } from './new-expense-form';
-import { ReceiptUpload } from './receipt-upload';
+import { FormModal } from './form-modal';
+import { ReceiptScan } from './receipt-scan';
 import { RecurringForm } from './recurring-form';
 import { PageSkeleton } from './skeleton';
 
@@ -91,19 +91,18 @@ const ExpensesManagementView = () => {
       className="relative flex flex-1 flex-col"
     >
       <LoadingBanner active={isLoading && !initializing} />
-      <div className="md:px-4 lg:px-6 xl:px-12">
-        <ScreenHeader
-          title={
-            editing
-              ? 'Edytuj wydatek'
-              : duplicateId
-                ? 'Duplikuj wydatek'
-                : 'Nowy wydatek'
-          }
-          backHref={APP_ROUTER.dashboard({ month: month ?? undefined })}
-        />
-      </div>
-      <main className="flex flex-1 flex-col gap-4 px-4 pb-4 pt-2 md:gap-6 md:px-8 lg:px-10 xl:px-16">
+      <FormModal
+        title={
+          editing
+            ? 'Edytuj wydatek'
+            : duplicateId
+              ? 'Duplikuj wydatek'
+              : 'Nowy wydatek'
+        }
+        onClose={() =>
+          navigateTo(APP_ROUTER.dashboard({ month: month ?? undefined }))
+        }
+      >
         {error ? (
           <ErrorState
             data-e2e="expenses-management:load-error"
@@ -141,10 +140,7 @@ const ExpensesManagementView = () => {
           )
         ) : (
           <>
-            <div
-              data-e2e="expenses-management:kind-nav"
-              className="md:max-w-md"
-            >
+            <div data-e2e="expenses-management:kind-nav">
               <Segmented<ExpenseKind>
                 label="Rodzaj wydatku"
                 options={KINDS}
@@ -153,24 +149,24 @@ const ExpensesManagementView = () => {
               />
             </div>
             {kind === 'normal' ? (
-              <ReceiptUpload>
+              <ReceiptScan>
                 <NewExpenseForm
                   key={scanned?.id ?? 0}
                   draft={scanned?.draft ?? null}
                   source={null}
                 />
-              </ReceiptUpload>
+              </ReceiptScan>
             ) : (
-              <ReceiptUpload>
+              <ReceiptScan>
                 <RecurringForm
                   key={scanned?.id ?? 0}
                   draft={scanned?.draft ?? null}
                 />
-              </ReceiptUpload>
+              </ReceiptScan>
             )}
           </>
         )}
-      </main>
+      </FormModal>
 
       {notice ? (
         <Toast

@@ -49,8 +49,6 @@ export const RecurringForm = ({ draft }: { draft: ReceiptDraft | null }) => {
   const {
     products,
     setProducts,
-    openId,
-    setOpenId,
     submitted,
     hasProducts,
     total,
@@ -201,16 +199,13 @@ export const RecurringForm = ({ draft }: { draft: ReceiptDraft | null }) => {
             products={products}
             categories={categories}
             newProductCategoryId={selected ?? defaultCategoryId(categories)}
-            layout="dialog"
             submitted={submitted}
-            openId={openId}
-            onOpenIdChange={setOpenId}
             onChange={setProducts}
           />
         </div>
       </div>
 
-      <div className="sticky bottom-2 mt-4 flex items-center justify-end rounded-3xl border border-line bg-card px-3 py-3 shadow-popover">
+      <div className="mt-4 flex items-center justify-end border-t border-line pt-3">
         <Button
           type="submit"
           className="w-auto px-6"
