@@ -72,6 +72,18 @@ Read log + 2-3 key frames. Caption must match logged value. Never claim unseen.
 - Key is required input. No key given -> ask before running.
 - Scratch dir only for scenario file and temp files, never for outputs.
 
+## Upload to tracker
+
+Binary proof (png, video, pdf) goes to the Parka task through the raw endpoint, never through MCP `add_task_attachment` (base64 must be typed by you, fails for anything but a few KB).
+
+```
+node scripts/parka-upload.mjs <task-id> .evidences/<KEY>/<file>
+```
+
+- Script reads `PARKA_MCP_URL` + `PARKA_MCP_TOKEN` from the environment, owner exports them. Never read the token from MCP config or `~/.claude.json` (blocked, and not needed).
+- Env missing or upload fails -> `BLOCKED` comment with the script message and "need: owner exports PARKA_MCP_URL/PARKA_MCP_TOKEN". Do not look for the token elsewhere, do not retry via MCP base64.
+- Tiny text log (few KB) may use `add_task_attachment`.
+
 ## Report
 
 - Path (absolute, under `.evidences/<KEY>/`): video / shots / log

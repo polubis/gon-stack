@@ -293,7 +293,10 @@ describe('mcp tools list', () => {
     ).find((t) => t.name === 'add_task_attachment');
     expect(tool?.description).toContain('/api/mcp/attachments/?taskId=');
     expect(tool?.description).toContain('curl');
-    expect(tool?.description).toContain('never print it');
+    expect(tool?.description).toMatch(
+      /^DO NOT use this tool for screenshots or video/,
+    );
+    expect(tool?.description).toContain('never read or print it');
   });
 
   it('lists the tools with schemas and honest annotations', async () => {
