@@ -284,4 +284,39 @@ describe('task comments', () => {
 
     expect(await details.findByText('Zadzwonić do klienta')).toBeVisible();
   });
+
+  it('shows two comments first and the rest after show more', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    backend.state.comments['t-1'] = ['a', 'b', 'c', 'd'].map((body, i) => ({
+      ...OWN,
+      id: `c-${i}`,
+      body: `Notatka ${body}`,
+    }));
+
+    const details = await openDetails(user);
+
+    expect(await details.findByText('Notatka a')).toBeVisible();
+    expect(details.getByText('Notatka b')).toBeVisible();
+    expect(details.queryByText('Notatka c')).not.toBeInTheDocument();
+    await user.click(details.getByRole('button', { name: 'Pokaż więcej (2)' }));
+    expect(details.getByText('Notatka c')).toBeVisible();
+    expect(details.getByText('Notatka d')).toBeVisible();
+    expect(
+      details.queryByRole('button', { name: /Pokaż więcej/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('offers no show more for two comments', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    backend.state.comments['t-1'] = [OWN, BOT];
+
+    const details = await openDetails(user);
+
+    expect(await details.findByText('Raport gotowy')).toBeVisible();
+    expect(
+      details.queryByRole('button', { name: /Pokaż więcej/ }),
+    ).not.toBeInTheDocument();
+  });
 });

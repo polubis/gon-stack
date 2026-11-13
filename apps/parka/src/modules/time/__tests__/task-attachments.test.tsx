@@ -622,4 +622,25 @@ describe('video attachments', () => {
     ).toBeVisible();
     vi.unstubAllGlobals();
   });
+
+  it('shows two files first and the rest after show more', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    backend.state.attachments['t-1'] = [1, 2, 3].map((n) => ({
+      ...FILE,
+      id: `a-${n}`,
+      name: `plik-${n}.pdf`,
+    }));
+
+    const details = await openDetails(user);
+
+    expect(
+      await details.findByRole('link', { name: 'plik-2.pdf' }),
+    ).toBeVisible();
+    expect(
+      details.queryByRole('link', { name: 'plik-3.pdf' }),
+    ).not.toBeInTheDocument();
+    await user.click(details.getByRole('button', { name: 'Pokaż więcej (1)' }));
+    expect(details.getByRole('link', { name: 'plik-3.pdf' })).toBeVisible();
+  });
 });

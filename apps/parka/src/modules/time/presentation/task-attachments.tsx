@@ -36,6 +36,7 @@ import {
 import { AttachmentViewer } from './attachment-viewer';
 import { useContext } from './context';
 import { DeleteDialog } from './delete-dialog';
+import { PREVIEW_COUNT, ShowMore } from './show-more';
 import { VideoTrimDialog } from './video-trim-dialog';
 import {
   TRIM_ATTACHMENT_MODAL,
@@ -116,6 +117,7 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
   const [failed, setFailed] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const [expanded, setExpanded] = useState(false);
   const [sending, setSending] = useState<
     { key: string; name: string; percent: number }[]
   >([]);
@@ -215,6 +217,7 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
 
   const upload = async (files: File[]) => {
     setUploading(true);
+    setExpanded(true);
     let count = items?.length ?? 0;
     for (const picked of files) {
       const first = attachmentRejection(picked);
@@ -392,9 +395,11 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
       ) : !items ? (
         <div
           data-e2e="time:attachments-skeleton"
-          className="flex flex-col gap-2"
+          className="flex flex-col gap-1.5"
         >
-          <Skeleton className="h-14 w-full" />
+          {Array.from({ length: PREVIEW_COUNT }, (_, i) => (
+            <Skeleton key={i} className="h-14 w-full" />
+          ))}
         </div>
       ) : items.length === 0 && sending.length === 0 ? (
         <EmptyState
@@ -406,7 +411,7 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
         />
       ) : (
         <ul className="flex flex-col gap-1.5">
-          {items.map((item) => (
+          {(expanded ? items : items.slice(0, PREVIEW_COUNT)).map((item) => (
             <li
               key={item.id}
               data-e2e={`time:attachment:${item.id}`}
@@ -487,6 +492,13 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
           ))}
         </ul>
       )}
+      {items && !expanded ? (
+        <ShowMore
+          data-e2e="time:attachments-more"
+          hidden={items.length - PREVIEW_COUNT}
+          onClick={() => setExpanded(true)}
+        />
+      ) : null}
 
       {trim && stack.includes(TRIM_ATTACHMENT_MODAL) ? (
         <VideoTrimDialog

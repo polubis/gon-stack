@@ -67,6 +67,8 @@ export const TIME_E2E_IDS = [
   'time:comments-error',
   'time:comments-empty',
   'time:comment-add',
+  'time:comments-more',
+  'time:attachments-more',
   'time:comment-form',
   'time:comment-input',
   'time:comment-save',
