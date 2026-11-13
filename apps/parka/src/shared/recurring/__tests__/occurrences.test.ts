@@ -62,6 +62,17 @@ describe('due occurrences', () => {
     expect(dueOccurrences(rule({ active: false }), '2025-08-20')).toEqual([]);
   });
 
+  it('repeats daily', () => {
+    const daily = rule({ interval: 'daily', startDate: '2025-05-30' });
+
+    expect(dueOccurrences(daily, '2025-06-02')).toEqual([
+      '2025-05-30',
+      '2025-05-31',
+      '2025-06-01',
+      '2025-06-02',
+    ]);
+  });
+
   it('repeats weekly', () => {
     const weekly = rule({ interval: 'weekly', startDate: '2025-05-01' });
 

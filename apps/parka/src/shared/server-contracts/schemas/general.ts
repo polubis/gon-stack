@@ -104,7 +104,7 @@ export const timeRecurring = () =>
       .string()
       .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
       .nullable(),
-    interval: recurringInterval(),
+    interval: timeRecurringInterval(),
     startDate: z.string().refine(isDay, 'Invalid day'),
     endDate: z.string().refine(isDay, 'Invalid day').nullable().default(null),
     active: z.boolean().default(true),
@@ -183,6 +183,10 @@ export const limit = () =>
   });
 
 export const recurringInterval = () => z.enum(['weekly', 'monthly', 'yearly']);
+
+/** Tasks also repeat every day; recurring expenses do not. */
+export const timeRecurringInterval = () =>
+  z.enum(['daily', 'weekly', 'monthly', 'yearly']);
 
 /** A rule is an instruction: it never counts into any total. */
 export const recurring = () =>

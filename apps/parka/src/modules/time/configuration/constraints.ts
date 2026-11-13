@@ -1,6 +1,6 @@
 import { weekdayNames } from '@/shared/date/date';
 import { APP_ROUTER } from '@/shared/router/routes';
-import type { RecurringInterval } from '@/shared/recurring/occurrences';
+import type { TaskRecurringInterval } from '@/shared/recurring/occurrences';
 import type { TimeKind } from '../domain/models';
 
 export const FEATURE_NAME = 'Time';
@@ -75,7 +75,8 @@ export const PRIORITY_VALUES: readonly number[] = Array.from(
 /** Id of the built-in medium priority, preselected for a new task. */
 export const DEFAULT_PRIORITY_ID = 'medium';
 
-export const INTERVALS: { value: RecurringInterval; label: string }[] = [
+export const INTERVALS: { value: TaskRecurringInterval; label: string }[] = [
+  { value: 'daily', label: 'Co dzień' },
   { value: 'weekly', label: 'Co tydzień' },
   { value: 'monthly', label: 'Co miesiąc' },
   { value: 'yearly', label: 'Co rok' },

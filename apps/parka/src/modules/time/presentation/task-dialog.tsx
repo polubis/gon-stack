@@ -7,7 +7,7 @@ import {
 } from '@/shared/device/integration/current-device';
 import { dayLabel } from '@/shared/date/date';
 import { isDay } from '@/shared/period/period';
-import type { RecurringInterval } from '@/shared/recurring/occurrences';
+import type { TaskRecurringInterval } from '@/shared/recurring/occurrences';
 import { Button, Field, Input, Select, Toggle } from '@/shared/ui/controls';
 import { ClearableInput } from '@/shared/ui/clearable';
 import { closeModal, openModal } from '@/shared/router/modal-stack';
@@ -101,7 +101,7 @@ export const TaskDialog = ({
   // A step removed while the form is open reads as the built-in one.
   const step = steps.includes(pickedStep) ? pickedStep : IN_PROGRESS;
   const [repeat, setRepeat] = useState(startRepeating);
-  const [interval, setInterval] = useState<RecurringInterval>('weekly');
+  const [interval, setInterval] = useState<TaskRecurringInterval>('weekly');
   const [endDate, setEndDate] = useState('');
   const [touched, setTouched] = useState(false);
 
@@ -266,7 +266,7 @@ export const TaskDialog = ({
                     data-e2e="time:recurring-interval"
                     options={INTERVALS}
                     onValueChange={(value) =>
-                      setInterval(value as RecurringInterval)
+                      setInterval(value as TaskRecurringInterval)
                     }
                   />
                 </Field>
