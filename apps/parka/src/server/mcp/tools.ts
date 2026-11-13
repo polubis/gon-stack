@@ -3,6 +3,7 @@ import {
   ATTACHMENT_MIME_TYPES,
   attachmentRejection,
 } from '@/shared/attachments/rules';
+import { API_ROUTER } from '@/shared/router/routes';
 import { isDay } from '@/shared/period/period';
 import { CATEGORY_ICON_IDS } from '@/shared/ui/category-icon-ids';
 import { McpInputError, type McpGateway } from './gateway';
@@ -23,6 +24,9 @@ export type ToolResult = {
   isError?: boolean;
 };
 
+/** What the transport knows and tools may need (e.g. to build an absolute URL). */
+export type ToolContext = { origin: string };
+
 export type RegisteredTool = {
   name: string;
   title: string;
@@ -30,7 +34,11 @@ export type RegisteredTool = {
   inputSchema: Record<string, unknown>;
   outputSchema: Record<string, unknown>;
   annotations: ToolAnnotations;
-  call: (args: unknown, gateway: McpGateway) => Promise<ToolResult>;
+  call: (
+    args: unknown,
+    gateway: McpGateway,
+    context: ToolContext,
+  ) => Promise<ToolResult>;
 };
 
 const DEFAULT_LIMIT = 25;
@@ -70,7 +78,11 @@ const defineTool = <I extends z.ZodType, O extends z.ZodType>(tool: {
   input: I;
   output: O;
   annotations: ToolAnnotations;
-  run: (args: z.infer<I>, gateway: McpGateway) => Promise<z.input<O>>;
+  run: (
+    args: z.infer<I>,
+    gateway: McpGateway,
+    context: ToolContext,
+  ) => Promise<z.input<O>>;
 }): RegisteredTool => ({
   name: tool.name,
   title: tool.title,
@@ -78,7 +90,7 @@ const defineTool = <I extends z.ZodType, O extends z.ZodType>(tool: {
   inputSchema: jsonSchema(tool.input, 'input'),
   outputSchema: jsonSchema(tool.output, 'output'),
   annotations: tool.annotations,
-  call: async (args, gateway) => {
+  call: async (args, gateway, context) => {
     const parsed = tool.input.safeParse(args ?? {});
     if (!parsed.success) {
       return failure(
@@ -88,7 +100,9 @@ const defineTool = <I extends z.ZodType, O extends z.ZodType>(tool: {
       );
     }
     try {
-      const out = tool.output.safeParse(await tool.run(parsed.data, gateway));
+      const out = tool.output.safeParse(
+        await tool.run(parsed.data, gateway, context),
+      );
       if (!out.success) return failure('The server returned unexpected data');
       if (!tool.annotations.readOnlyHint) await announceWrite(gateway);
       return {
@@ -247,17 +261,6 @@ const comment = () =>
       .nullable()
       .describe('Short id of that token, safe to show (never the secret)'),
   });
-
-const decodeBase64 = (value: string): ArrayBuffer => {
-  try {
-    const binary = atob(value);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    return bytes.buffer;
-  } catch {
-    throw new ToolError('contentBase64 is not valid base64');
-  }
-};
 
 const category = () =>
   z.object({
@@ -511,35 +514,36 @@ export const MCP_TOOLS: readonly RegisteredTool[] = [
     },
   }),
   defineTool({
-    name: 'add_task_attachment',
-    title: 'Attach a file to a task',
-    description: `Attaches a file given as base64: only for small files (a few KB), as you must type the whole base64 yourself. For anything bigger than a few KB (screenshot, video) skip this tool and upload the raw bytes: POST to this server's /api/mcp/attachments/?taskId=<id>&name=<file name> with the same Authorization: Bearer token, the mime type as Content-Type and the file as the body; the answer is the attachment JSON. Example: curl -sS -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: video/mp4" --data-binary @demo.mp4 "<server origin>/api/mcp/attachments/?taskId=<id>&name=demo.mp4" (take the token from your MCP config, never print it). Same limits either way. Allowed: ${ATTACHMENT_MIME_TYPES.join(', ')}. A stored file is at most 5 MB (a video: 20 MB, kept as it is) and a task takes 5 files. Photos are re-encoded as lossy WebP (quality 75, same pixel size) first, so the limit applies after the reduction; an animated GIF is kept as it is.`,
+    name: 'request_attachment_upload',
+    title: 'Get a one-time URL to attach a file',
+    description: `The only way to attach a file (screenshot, video, log, anything). Returns a one-time upload URL bound to this task, name and type; it expires in 5 minutes and works once. Then send the raw bytes without any Authorization header and without reading any config: curl -sS -X POST -H "Content-Type: <mimeType>" --data-binary @<file> "<uploadUrl>" (the answer is the attachment JSON). Treat the URL like a secret: do not log or paste it. A used, expired, wrong-type or oversized upload spends the URL: request a new one. Allowed: ${ATTACHMENT_MIME_TYPES.join(', ')}. A stored file is at most 5 MB (a video: 20 MB, kept as it is) and a task takes 5 files. Photos are re-encoded as lossy WebP (quality 75, same pixel size) first, so the limit applies after the reduction; an animated GIF is kept as it is.`,
     input: z.strictObject({
       taskId: id(),
       name: z.string().trim().min(1).max(200),
       mimeType: z.enum(ATTACHMENT_MIME_TYPES),
-      contentBase64: z.string().min(1),
     }),
-    output: attachment().extend({
-      originalSize: z.number().int().describe('Bytes you sent'),
+    output: z.object({
+      uploadUrl: z.string().describe('POST the raw file here, once'),
+      contentType: z.string().describe('Send exactly this Content-Type'),
+      expiresAt: z.string().describe('ISO time the URL stops working'),
     }),
     annotations: WRITE,
-    run: async (args, gateway) => {
-      const bytes = decodeBase64(args.contentBase64);
+    run: async (args, gateway, context) => {
       const reason = attachmentRejection({
         name: args.name,
         type: args.mimeType,
-        size: bytes.byteLength,
+        size: 1,
       });
       if (reason) throw new ToolError(reason);
-      const added = await gateway.addTaskAttachment(args.taskId, {
+      const issued = await gateway.requestAttachmentUpload(args.taskId, {
         name: args.name,
         mime: args.mimeType,
-        bytes,
       });
-      if (!added) throw new ToolError(`Task "${args.taskId}" not found`);
-      return added as z.input<ReturnType<typeof attachment>> & {
-        originalSize: number;
+      if (!issued) throw new ToolError(`Task "${args.taskId}" not found`);
+      return {
+        uploadUrl: `${context.origin}${API_ROUTER.mcpUploads()}?ticket=${issued.ticket}`,
+        contentType: args.mimeType,
+        expiresAt: issued.expiresAt,
       };
     },
   }),

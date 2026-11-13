@@ -64,7 +64,39 @@ export type NewTask = {
 
 export type CategoryPatch = { name?: string; icon?: string; color?: string };
 
-export type NewAttachment = { name: string; mime: string; bytes: ArrayBuffer };
+export type UploadRequest = { name: string; mime: string };
+
+/** A one-time upload ticket: shown once, bound to one task, name and type. */
+export type UploadTicket = { ticket: string; expiresAt: string };
+
+/** What a claimed ticket allows: one file for one task. */
+export type UploadTarget = {
+  userId: string;
+  taskId: string;
+  name: string;
+  mime: string;
+};
+
+export type StoredAttachment = {
+  id: string;
+  name: string;
+  size: number;
+  mime: string;
+  originalSize: number;
+};
+
+/**
+ * What the one-time URL may do, with the ticket as the only credential:
+ * burn it (`claim`), then store one file for the task it was issued for.
+ */
+export type UploadGateway = {
+  /** `null` for an unknown, expired or already used ticket. */
+  claim: () => Promise<UploadTarget | null>;
+  store: (
+    target: UploadTarget,
+    bytes: ArrayBuffer,
+  ) => Promise<StoredAttachment>;
+};
 
 /**
  * Everything the MCP surface may do with the data: what the tasks UI does
@@ -81,7 +113,11 @@ export type McpGateway = {
   updateTask: (id: string, patch: TaskPatch) => Promise<unknown>;
   deleteTask: (id: string) => Promise<unknown>;
   listTaskAttachments: (taskId: string) => Promise<unknown>;
-  addTaskAttachment: (taskId: string, file: NewAttachment) => Promise<unknown>;
+  /** The one way to attach a file: `null` for an unknown task. */
+  requestAttachmentUpload: (
+    taskId: string,
+    file: UploadRequest,
+  ) => Promise<UploadTicket | null>;
   deleteTaskAttachment: (id: string) => Promise<unknown>;
   listTaskComments: (taskId: string) => Promise<unknown>;
   addTaskComment: (taskId: string, body: string) => Promise<unknown>;
@@ -122,10 +158,7 @@ const unwrap = ({ data, error, status }: RpcResult): unknown => {
  * and every function filters by that owner, so no other account's rows are
  * reachable.
  */
-export const createSupabaseGateway = (
-  token: string,
-  images: AttachmentImages,
-): McpGateway => {
+export const createSupabaseGateway = (token: string): McpGateway => {
   const db = createClient<Database>(
     import.meta.env.PUBLIC_PARKA_SUPABASE_URL,
     import.meta.env.PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY,
@@ -213,48 +246,15 @@ export const createSupabaseGateway = (
       const found = await attachmentsOf(taskId);
       return found ? { items: found.items } : null;
     },
-    addTaskAttachment: async (taskId, file) => {
-      const found = await attachmentsOf(taskId);
-      if (!found) return null;
-      const prepared = await prepareAttachment(images, {
-        bytes: file.bytes,
-        name: file.name,
-        mime: file.mime,
-      }).catch((error: unknown) => {
-        throw new McpInputError(
-          error instanceof Error ? error.message : 'Invalid file',
-        );
-      });
-      const id = crypto.randomUUID();
-      const path = taskAttachmentPath(found.userId, id);
-      const upload = await files().upload(path, prepared.bytes, {
-        contentType: prepared.mime,
-      });
-      if (upload.error) throw new Error('MCP file upload failed');
-      try {
-        const row = unwrap(
-          await db.rpc('mcp_add_task_attachment', {
-            p_token,
-            p_task_id: taskId,
-            p_id: id,
-            p_name: prepared.name,
-            p_size: prepared.bytes.byteLength,
-            p_mime: prepared.mime,
-          }),
-        ) as { id: string; name: string; size: number; mime: string };
-        return {
-          id: row.id,
-          name: row.name,
-          size: row.size,
-          mime: row.mime,
-          originalSize: prepared.originalSize,
-        };
-      } catch (error) {
-        // Never leave a file nobody points at.
-        await files().remove([path]);
-        throw error;
-      }
-    },
+    requestAttachmentUpload: async (taskId, file) =>
+      unwrap(
+        await db.rpc('mcp_request_upload', {
+          p_token,
+          p_task_id: taskId,
+          p_name: file.name,
+          p_mime: file.mime,
+        }),
+      ) as UploadTicket | null,
     deleteTaskAttachment: async (p_id) => {
       const owner = unwrap(
         await db.rpc('mcp_delete_task_attachment', { p_token, p_id }),
@@ -311,5 +311,72 @@ export const createSupabaseGateway = (
       ),
     getExpense: async (p_id) =>
       unwrap(await db.rpc('mcp_get_expense', { p_token, p_id })),
+  };
+};
+
+/**
+ * Talks to Postgres and Storage with the anonymous API key and the upload
+ * ticket as the only credential. The database resolves the owner from the
+ * ticket, and storage policies allow only that owner's folder until the file
+ * is recorded.
+ */
+export const createSupabaseUploadGateway = (
+  ticket: string,
+  images: AttachmentImages,
+): UploadGateway => {
+  const client = createClient<Database>(
+    import.meta.env.PUBLIC_PARKA_SUPABASE_URL,
+    import.meta.env.PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY,
+    {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { 'x-upload-ticket': ticket } },
+    },
+  );
+  const files = () => client.storage.from(TASK_ATTACHMENT_BUCKET);
+
+  return {
+    claim: async () =>
+      unwrap(
+        await client.rpc('mcp_claim_upload', { p_ticket: ticket }),
+      ) as UploadTarget | null,
+    store: async (target, bytes) => {
+      const prepared = await prepareAttachment(images, {
+        bytes,
+        name: target.name,
+        mime: target.mime,
+      }).catch((error: unknown) => {
+        throw new McpInputError(
+          error instanceof Error ? error.message : 'Invalid file',
+        );
+      });
+      const id = crypto.randomUUID();
+      const path = taskAttachmentPath(target.userId, id);
+      const upload = await files().upload(path, prepared.bytes, {
+        contentType: prepared.mime,
+      });
+      if (upload.error) throw new Error('MCP file upload failed');
+      try {
+        const row = unwrap(
+          await client.rpc('mcp_finish_upload', {
+            p_ticket: ticket,
+            p_id: id,
+            p_name: prepared.name,
+            p_size: prepared.bytes.byteLength,
+            p_mime: prepared.mime,
+          }),
+        ) as { id: string; name: string; size: number; mime: string };
+        return {
+          id: row.id,
+          name: row.name,
+          size: row.size,
+          mime: row.mime,
+          originalSize: prepared.originalSize,
+        };
+      } catch (error) {
+        // Never leave a file nobody points at.
+        await files().remove([path]);
+        throw error;
+      }
+    },
   };
 };
