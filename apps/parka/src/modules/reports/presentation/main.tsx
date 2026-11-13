@@ -51,7 +51,10 @@ const ReportsView = () => {
     );
 
   return (
-    <div data-e2e="reports:main" className="relative flex flex-1 flex-col">
+    <div
+      data-e2e="reports:main"
+      className="relative flex flex-1 animate-view-enter flex-col motion-reduce:animate-none"
+    >
       <LoadingBanner active={isLoading && !initializing} />
       <div className="md:px-4 lg:px-6 xl:px-12">
         <ScreenHeader title="Raport" backHref={APP_ROUTER.settings()} />

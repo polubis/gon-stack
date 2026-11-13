@@ -31,7 +31,7 @@ beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
-const stubApi = (ok: boolean) =>
+const stubApi = (ok: boolean, expenses: unknown[] = [EXPENSE]) =>
   server.use(
     http.get('/api/categories/', () =>
       HttpResponse.json(
@@ -40,7 +40,7 @@ const stubApi = (ok: boolean) =>
     ),
     http.get('/api/expenses/', () =>
       HttpResponse.json(
-        ok ? { code: 200, data: [EXPENSE] } : { code: 500, message: 'boom' },
+        ok ? { code: 200, data: expenses } : { code: 500, message: 'boom' },
       ),
     ),
   );
@@ -71,5 +71,34 @@ describe('data export page', () => {
       (screen.getByRole('button', { name: 'Eksportuj' }) as HTMLButtonElement)
         .disabled,
     ).toBe(true);
+  });
+
+  it('shows an empty state and blocks export when there are no expenses', async () => {
+    stubApi(true, []);
+    render(<Main />);
+
+    expect(await screen.findByText('Brak danych do eksportu')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Eksportuj' })).toHaveProperty(
+      'disabled',
+      true,
+    );
+  });
+
+  it('recovers after retrying a failed load', async () => {
+    stubApi(false);
+    render(<Main />);
+    await screen.findByRole('alert');
+
+    stubApi(true);
+    await userEvent.click(
+      screen.getByRole('button', { name: /ponów|spróbuj/i }),
+    );
+
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Eksportuj' })).toHaveProperty(
+        'disabled',
+        false,
+      ),
+    );
   });
 });
