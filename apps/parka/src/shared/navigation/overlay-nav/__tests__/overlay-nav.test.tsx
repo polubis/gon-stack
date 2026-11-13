@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as Dialog from '@radix-ui/react-dialog';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { SelectPopover } from '@/shared/ui/select-popover';
 import { Provider } from '../presentation/context';
 import { NavSlot } from '../presentation/nav-slot';
@@ -162,5 +162,30 @@ describe('mobile bottom nav while overlays are open', () => {
     await user.click(screen.getByRole('button', { name: 'Zamknij Pierwszy' }));
 
     expect(navHidden()).toBe(false);
+  });
+});
+
+afterEach(() => {
+  delete document.documentElement.dataset.navCollapsed;
+});
+
+describe('floating button rail next to the bottom nav', () => {
+  const state = () => document.documentElement.dataset.navCollapsed;
+
+  it('stays still until the nav first hides', () => {
+    render(<Host />);
+
+    expect(state()).toBeUndefined();
+  });
+
+  it('glides while the nav hides and when it returns', async () => {
+    const user = userEvent.setup();
+    render(<Host />);
+
+    await user.click(screen.getByRole('button', { name: 'Otwórz Pierwszy' }));
+    await waitFor(() => expect(state()).toBe('true'));
+
+    await user.keyboard('{Escape}');
+    expect(state()).toBe('false');
   });
 });
