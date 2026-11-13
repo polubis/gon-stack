@@ -191,7 +191,7 @@ export const API_ROUTER = {
   mcpTokenRevoke: (id: string) => `/api/mcp-tokens/${id}/revoke/` as const,
   mcpTokenResume: (id: string) => `/api/mcp-tokens/${id}/resume/` as const,
   mcp: route('/api/mcp/'),
-  mcpAttachments: route('/api/mcp/attachments/'),
+  mcpUploads: route('/api/mcp/uploads/'),
   financeTour: route('/api/finance-tour/'),
   push: route('/api/push/'),
   avatar: route('/api/avatar/'),

@@ -1,7 +1,7 @@
 import z from 'zod';
 import { logger } from '../application/core/logger';
 import { McpAuthError, type McpGateway } from './gateway';
-import { MCP_TOOLS, type RegisteredTool } from './tools';
+import { MCP_TOOLS, type RegisteredTool, type ToolContext } from './tools';
 
 export const MCP_PROTOCOL_VERSIONS = [
   '2025-11-25',
@@ -92,6 +92,7 @@ const negotiate = (requested: string): string =>
 export const handleMcpMessage = async (
   message: unknown,
   gateway: McpGateway,
+  context: ToolContext,
 ): Promise<McpOutcome> => {
   if (Array.isArray(message))
     return fail(null, ERROR.invalidRequest, 'Batching is not supported', 400);
@@ -146,7 +147,7 @@ export const handleMcpMessage = async (
         await gateway.authenticate();
         return fail(id, ERROR.invalidParams, `Unknown tool: ${call.data.name}`);
       }
-      return ok(id, await tool.call(call.data.arguments, gateway));
+      return ok(id, await tool.call(call.data.arguments, gateway, context));
     }
 
     return fail(id, ERROR.methodNotFound, `Method not found: ${method}`);

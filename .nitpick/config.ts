@@ -239,7 +239,7 @@ Cannot finish (failing checks not own, missing access, spec conflict, needs dev 
 Skill ${ref('evidence')}, key = task id, out \`.evidences/<task-id>/\`.
 
 - **No \`--worktree\`. Never use git worktree.** Need BEFORE code → \`git stash push -m "factory:<task-id>"\` own changes, record BEFORE on untouched tree, pop that exact stash by its \`factory:<task-id>\` ref (find via \`git stash list\`, never by position). Verify tree back as it was, no \`factory:*\` stash left.
-- Upload final proof to task (png/mp4/webm/txt, max 5 files, video max 20 MB). Tiny file (few KB) → \`add_task_attachment\`. Screenshot, video, anything bigger → raw bytes: \`curl -sS -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: <mime>" --data-binary @<file> "<mcp origin>/api/mcp/attachments/?taskId=<id>&name=<file>"\`. Token from MCP config, never print or log it. Never skip a video for size: over limit → shrink, then upload.
+- Upload final proof to task (png/mp4/webm/txt, max 5 files, video max 20 MB). One path for every file, also tiny logs: Parka MCP \`request_attachment_upload(taskId, name, mimeType)\` returns a one-time \`uploadUrl\` (5 min, one use); then \`curl -sS -X POST -H "Content-Type: <mime>" --data-binary @<file> "<uploadUrl>"\`. No Authorization header, never read MCP config or tokens, never print or log the URL. Used, expired, wrong-type or oversized upload spends the URL: request a new one. Never skip a video for size: over limit → shrink, then upload.
 - Task needs proof (UI change, video/screenshot asked) and upload failed → **blocked** + comment, never **finished**.
 - Comment: what proof shows, limits.
 

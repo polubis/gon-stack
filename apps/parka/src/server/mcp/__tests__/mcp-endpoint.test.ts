@@ -1,6 +1,12 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { issueMcpToken } from '../../domain/mcp-token';
-import { McpAuthError, McpInputError, type McpGateway } from '../gateway';
+import {
+  McpAuthError,
+  McpInputError,
+  type McpGateway,
+  type UploadGateway,
+  type UploadTarget,
+} from '../gateway';
 import { handleMcpRequest, handleMcpUpload } from '../http';
 import { createRateLimiter } from '../rate-limit';
 
@@ -23,6 +29,8 @@ const TASK = {
   priorityValue: 9,
   recurring: false,
 };
+
+const TICKET = `parka_up_${'a1'.repeat(32)}`;
 
 const ATTACHMENT = {
   id: '0bc01207-5250-4718-a917-8041238c93d2',
@@ -163,15 +171,10 @@ const fakeGateway = (
       await record('listTaskAttachments', taskId);
       return taskId === TASK.id ? { items: [ATTACHMENT] } : null;
     },
-    addTaskAttachment: async (taskId, file) => {
-      await record('addTaskAttachment', taskId, file.name, file.mime);
+    requestAttachmentUpload: async (taskId, file) => {
+      await record('requestAttachmentUpload', taskId, file.name, file.mime);
       return taskId === TASK.id
-        ? {
-            ...ATTACHMENT,
-            name: file.name,
-            mime: file.mime,
-            originalSize: file.bytes.byteLength,
-          }
+        ? { ticket: TICKET, expiresAt: '2026-11-13T10:05:00.000Z' }
         : null;
     },
     listTaskComments: async (taskId) => {
@@ -283,17 +286,18 @@ describe('mcp handshake', () => {
 });
 
 describe('mcp tools list', () => {
-  it('tells agents to upload big files as raw bytes with a curl example', async () => {
+  it('tells agents the one upload path: a one-time URL, no Authorization', async () => {
     const { rpc } = setup();
 
     const { json } = await rpc('tools/list');
 
+    const names = (json.result.tools as { name: string }[]).map((t) => t.name);
     const tool = (
       json.result.tools as { name: string; description: string }[]
-    ).find((t) => t.name === 'add_task_attachment');
-    expect(tool?.description).toContain('/api/mcp/attachments/?taskId=');
+    ).find((t) => t.name === 'request_attachment_upload');
     expect(tool?.description).toContain('curl');
-    expect(tool?.description).toContain('never print it');
+    expect(tool?.description).toContain('without any Authorization header');
+    expect(names).not.toContain('add_task_attachment');
   });
 
   it('lists the tools with schemas and honest annotations', async () => {
@@ -308,7 +312,6 @@ describe('mcp tools list', () => {
     }[];
 
     expect(tools.map((t) => t.name).sort()).toEqual([
-      'add_task_attachment',
       'add_task_comment',
       'create_category',
       'create_priority',
@@ -326,6 +329,7 @@ describe('mcp tools list', () => {
       'list_task_attachments',
       'list_task_comments',
       'list_tasks',
+      'request_attachment_upload',
       'set_task_status',
       'update_category',
       'update_task',
@@ -647,104 +651,75 @@ describe('mcp task management', () => {
     expect(json.result.structuredContent).toEqual({ items: [ATTACHMENT] });
   });
 
-  it('attaches a file given as base64 and reports the sizes', async () => {
+  it('hands out a one-time upload URL bound to the task, name and type', async () => {
     const { rpc, calls } = setup();
 
-    const { json } = await call(rpc, 'add_task_attachment', {
+    const { json } = await call(rpc, 'request_attachment_upload', {
       taskId: 't-1',
-      name: 'notatka.txt',
-      mimeType: 'text/plain',
-      contentBase64: btoa('hello'),
+      name: 'demo.mp4',
+      mimeType: 'video/mp4',
     });
 
-    expect(json.result.structuredContent).toMatchObject({
-      name: 'notatka.txt',
-      originalSize: 5,
+    expect(json.result.structuredContent).toEqual({
+      uploadUrl: `https://parka.test/api/mcp/uploads/?ticket=${TICKET}`,
+      contentType: 'video/mp4',
+      expiresAt: '2026-11-13T10:05:00.000Z',
     });
     expect(calls).toEqual([
       {
-        name: 'addTaskAttachment',
-        args: ['t-1', 'notatka.txt', 'text/plain'],
+        name: 'requestAttachmentUpload',
+        args: ['t-1', 'demo.mp4', 'video/mp4'],
       },
     ]);
   });
 
-  it('attaches a video of up to 20 MB', async () => {
+  it('refuses an upload URL for a type that is not allowed', async () => {
     const { rpc, calls } = setup();
 
-    const { json } = await call(rpc, 'add_task_attachment', {
-      taskId: 't-1',
-      name: 'demo.mp4',
-      mimeType: 'video/mp4',
-      contentBase64: btoa('x'.repeat(6 * 1024 * 1024)),
-    });
-
-    expect(json.result.isError).toBeUndefined();
-    expect(calls).toEqual([
-      { name: 'addTaskAttachment', args: ['t-1', 'demo.mp4', 'video/mp4'] },
-    ]);
-  });
-
-  it('refuses a video over 20 MB', async () => {
-    const { rpc, calls } = setup();
-
-    const { json } = await call(rpc, 'add_task_attachment', {
-      taskId: 't-1',
-      name: 'demo.mp4',
-      mimeType: 'video/mp4',
-      contentBase64: btoa('x'.repeat(20 * 1024 * 1024 + 1)),
-    });
-
-    expect(json.result.content[0].text).toMatch(/Wideo jest większe niż 20 MB/);
-    expect(calls).toEqual([]);
-  });
-
-  it('refuses an attachment of a type that is not allowed', async () => {
-    const { rpc, calls } = setup();
-
-    const { json } = await call(rpc, 'add_task_attachment', {
+    const { json } = await call(rpc, 'request_attachment_upload', {
       taskId: 't-1',
       name: 'virus.exe',
       mimeType: 'application/x-msdownload',
-      contentBase64: btoa('MZ'),
     });
 
     expect(json.result.isError).toBe(true);
     expect(calls).toEqual([]);
   });
 
-  it('refuses a document over 5 MB and broken base64', async () => {
+  it('refuses a name that is too long', async () => {
     const { rpc, calls } = setup();
 
-    const big = await call(rpc, 'add_task_attachment', {
+    const { json } = await call(rpc, 'request_attachment_upload', {
       taskId: 't-1',
-      name: 'duzy.pdf',
-      mimeType: 'application/pdf',
-      contentBase64: btoa('x'.repeat(5 * 1024 * 1024 + 1)),
-    });
-    const broken = await call(rpc, 'add_task_attachment', {
-      taskId: 't-1',
-      name: 'a.txt',
+      name: 'a'.repeat(201),
       mimeType: 'text/plain',
-      contentBase64: '***',
     });
 
-    expect(big.json.result.content[0].text).toMatch(/większy niż 5 MB/);
-    expect(broken.json.result.content[0].text).toMatch(/base64/);
+    expect(json.result.isError).toBe(true);
     expect(calls).toEqual([]);
   });
 
-  it('says so when attaching to a task that does not exist', async () => {
+  it('says so when asking for an upload URL on a task that does not exist', async () => {
     const { rpc } = setup();
 
-    const { json } = await call(rpc, 'add_task_attachment', {
+    const { json } = await call(rpc, 'request_attachment_upload', {
       taskId: 'missing',
       name: 'a.txt',
       mimeType: 'text/plain',
-      contentBase64: btoa('a'),
     });
 
     expect(json.result.content[0].text).toMatch(/not found/);
+  });
+
+  it('no longer takes files as base64', async () => {
+    const { rpc } = setup();
+
+    const { json } = await rpc('tools/call', {
+      name: 'add_task_attachment',
+      arguments: {},
+    });
+
+    expect(json.error.code).toBe(-32602);
   });
 
   it('lists task comments with the bot name, never a token', async () => {
@@ -1187,27 +1162,83 @@ describe('mcp live refresh', () => {
   });
 });
 
-describe('mcp raw attachment upload', () => {
+describe('mcp one-time attachment upload', () => {
+  type Spent = { target: UploadTarget; expiresAt: number; used: boolean };
+
+  /** Models the database: a ticket works once, until it expires. */
+  const uploads = (options: { stored?: () => Promise<never> } = {}) => {
+    const tickets = new Map<string, Spent>();
+    const stored: { name: string; size: number }[] = [];
+    const clock = { now: 0 };
+    const issue = (
+      target: Partial<UploadTarget> = {},
+      ticket = TICKET,
+      ttl = 5 * 60_000,
+    ) =>
+      tickets.set(ticket, {
+        target: {
+          userId: 'u-1',
+          taskId: 't-1',
+          name: 'demo.mp4',
+          mime: 'video/mp4',
+          ...target,
+        },
+        expiresAt: clock.now + ttl,
+        used: false,
+      });
+    const deps = {
+      failureLimiter: createRateLimiter({ limit: 3, windowMs: 60_000 }),
+      uploadGatewayFor: (ticket: string): UploadGateway => ({
+        claim: async () => {
+          const found = tickets.get(ticket);
+          if (!found || found.used || found.expiresAt <= clock.now) return null;
+          found.used = true;
+          return found.target;
+        },
+        store: async (target, bytes) => {
+          if (options.stored) return options.stored();
+          stored.push({ name: target.name, size: bytes.byteLength });
+          return {
+            id: ATTACHMENT.id,
+            name: target.name,
+            mime: target.mime,
+            size: bytes.byteLength,
+            originalSize: bytes.byteLength,
+          };
+        },
+      }),
+    };
+    return { deps, issue, stored, clock };
+  };
+
   const upload = (
-    deps: ReturnType<typeof setup>['deps'],
+    deps: ReturnType<typeof uploads>['deps'],
     {
-      query = 'taskId=t-1&name=demo.mp4',
+      ticket = TICKET,
       type = 'video/mp4',
-      size = 6 * 1024 * 1024,
-      auth = `Bearer ${TOKEN}`,
-    }: { query?: string; type?: string; size?: number; auth?: string } = {},
+      size = 3 * 1024 * 1024,
+      headers = {},
+      method = 'POST',
+    }: {
+      ticket?: string;
+      type?: string;
+      size?: number;
+      headers?: Record<string, string>;
+      method?: string;
+    } = {},
   ) =>
     handleMcpUpload(
-      new Request(`https://parka.test/api/mcp/attachments/?${query}`, {
-        method: 'POST',
-        headers: { 'Content-Type': type, Authorization: auth },
-        body: new Uint8Array(size),
+      new Request(`https://parka.test/api/mcp/uploads/?ticket=${ticket}`, {
+        method,
+        headers: { 'Content-Type': type, ...headers },
+        body: method === 'POST' ? new Uint8Array(size) : undefined,
       }),
       deps,
     );
 
-  it('attaches a video sent as raw bytes and announces the change', async () => {
-    const { deps, calls, notices } = setup();
+  it('stores a 3 MB video sent to the URL without any Authorization', async () => {
+    const { deps, issue, stored } = uploads();
+    issue();
 
     const response = await upload(deps);
 
@@ -1215,51 +1246,151 @@ describe('mcp raw attachment upload', () => {
     expect(await response.json()).toMatchObject({
       name: 'demo.mp4',
       mime: 'video/mp4',
-      originalSize: 6 * 1024 * 1024,
+      originalSize: 3 * 1024 * 1024,
     });
-    expect(calls).toEqual([
-      { name: 'addTaskAttachment', args: ['t-1', 'demo.mp4', 'video/mp4'] },
-    ]);
-    expect(notices).toEqual(['time']);
+    expect(stored).toEqual([{ name: 'demo.mp4', size: 3 * 1024 * 1024 }]);
   });
 
-  it('refuses a video over 20 MB', async () => {
-    const { deps, calls } = setup();
+  it('refuses a URL used a second time', async () => {
+    const { deps, issue, stored } = uploads();
+    issue();
+    await upload(deps);
 
-    const response = await upload(deps, { size: 20 * 1024 * 1024 + 1 });
+    const again = await upload(deps);
 
-    expect(response.status).toBe(413);
-    expect(calls).toEqual([]);
+    expect(again.status).toBe(401);
+    expect(stored).toHaveLength(1);
   });
 
-  it('refuses a type that is not allowed', async () => {
-    const { deps, calls } = setup();
+  it('refuses an expired URL', async () => {
+    const { deps, issue, clock, stored } = uploads();
+    issue();
+    clock.now += 5 * 60_000 + 1;
+
+    const response = await upload(deps);
+
+    expect(response.status).toBe(401);
+    expect(stored).toEqual([]);
+  });
+
+  it('refuses a ticket that was never issued or is malformed', async () => {
+    const { deps, stored } = uploads();
+
+    const unknown = await upload(deps, {
+      ticket: `parka_up_${'b2'.repeat(32)}`,
+    });
+    const malformed = await upload(deps, { ticket: 'nope' });
+
+    expect(unknown.status).toBe(401);
+    expect(malformed.status).toBe(401);
+    expect(stored).toEqual([]);
+  });
+
+  it('refuses another type than the URL was issued for and spends it', async () => {
+    const { deps, issue, stored } = uploads();
+    issue();
+
+    const wrong = await upload(deps, { type: 'application/zip' });
+    const retry = await upload(deps);
+
+    expect(wrong.status).toBe(415);
+    expect(retry.status).toBe(401);
+    expect(stored).toEqual([]);
+  });
+
+  it('refuses a type that is not allowed even when the URL says so', async () => {
+    const { deps, issue, stored } = uploads();
+    issue({ name: 'a.zip', mime: 'application/zip' });
 
     const response = await upload(deps, { type: 'application/zip' });
 
     expect(response.status).toBe(400);
-    expect(calls).toEqual([]);
+    expect(stored).toEqual([]);
   });
 
-  it('refuses a call without the task or the name', async () => {
-    const { deps } = setup();
+  it('refuses a video over 20 MB, declared or streamed', async () => {
+    const { deps, issue, stored } = uploads();
+    issue();
+    issue({}, `parka_up_${'c3'.repeat(32)}`);
 
-    expect((await upload(deps, { query: 'name=demo.mp4' })).status).toBe(400);
+    const declared = await upload(deps, {
+      headers: { 'Content-Length': String(20 * 1024 * 1024 + 1) },
+      size: 1,
+    });
+    const streamed = await upload(deps, {
+      ticket: `parka_up_${'c3'.repeat(32)}`,
+      size: 20 * 1024 * 1024 + 1,
+    });
+
+    expect(declared.status).toBe(413);
+    expect(streamed.status).toBe(413);
+    expect(stored).toEqual([]);
   });
 
-  it('answers 404 for an unknown task', async () => {
-    const { deps } = setup();
+  it('refuses a document over 5 MB and an empty file', async () => {
+    const { deps, issue, stored } = uploads();
+    issue({ name: 'a.pdf', mime: 'application/pdf' });
+    issue({ name: 'b.txt', mime: 'text/plain' }, `parka_up_${'d4'.repeat(32)}`);
 
-    expect(
-      (await upload(deps, { query: 'taskId=nope&name=a.mp4' })).status,
-    ).toBe(404);
+    const big = await upload(deps, {
+      type: 'application/pdf',
+      size: 5 * 1024 * 1024 + 1,
+    });
+    const empty = await upload(deps, {
+      ticket: `parka_up_${'d4'.repeat(32)}`,
+      type: 'text/plain',
+      size: 0,
+    });
+
+    expect(big.status).toBe(400);
+    expect(empty.status).toBe(400);
+    expect(stored).toEqual([]);
   });
 
-  it('refuses a missing token and a token the database rejects', async () => {
-    const missing = await upload(setup().deps, { auth: '' });
-    const rejected = await upload(setup({ valid: false }).deps);
+  it('only takes POST', async () => {
+    const { deps, issue } = uploads();
+    issue();
 
-    expect(missing.status).toBe(401);
-    expect(rejected.status).toBe(401);
+    const response = await upload(deps, { method: 'GET' });
+
+    expect(response.status).toBe(405);
+  });
+
+  it('stops a client that keeps guessing tickets', async () => {
+    const { deps } = uploads();
+
+    const statuses: number[] = [];
+    for (let i = 0; i < 5; i++)
+      statuses.push((await upload(deps, { ticket: 'nope' })).status);
+
+    expect(statuses).toEqual([401, 401, 401, 429, 429]);
+  });
+
+  it('never leaks the ticket in errors or logs', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const broken = uploads({
+      stored: async () => {
+        throw new Error('storage exploded');
+      },
+    });
+    broken.issue();
+    const used = uploads();
+    used.issue();
+    await upload(used.deps);
+
+    const responses = [
+      await upload(broken.deps),
+      await upload(used.deps),
+      await upload(used.deps, { ticket: 'nope' }),
+    ];
+    const seen = [
+      ...(await Promise.all(responses.map((r) => r.text()))),
+      ...log.mock.calls.map((c) => JSON.stringify(c)),
+    ].join('\n');
+    log.mockRestore();
+
+    expect(responses[0]!.status).toBe(500);
+    expect(seen).not.toContain(TICKET);
+    expect(seen).not.toContain(TOKEN);
   });
 });

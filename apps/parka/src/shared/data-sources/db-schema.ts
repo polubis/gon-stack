@@ -276,6 +276,54 @@ export type Database = {
         };
         Relationships: [];
       };
+      mcp_upload_tickets: {
+        Row: {
+          claimed_at: string | null;
+          created_at: string;
+          expires_at: string;
+          finished_at: string | null;
+          mcp_token_id: string | null;
+          mime: string;
+          name: string;
+          task_id: string;
+          ticket_hash: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          claimed_at?: string | null;
+          created_at?: string;
+          expires_at: string;
+          finished_at?: string | null;
+          mcp_token_id?: string | null;
+          mime: string;
+          name: string;
+          task_id: string;
+          ticket_hash: string;
+          user_id: string;
+        };
+        Update: {
+          claimed_at?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          finished_at?: string | null;
+          mcp_token_id?: string | null;
+          mime?: string;
+          name?: string;
+          task_id?: string;
+          ticket_hash?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'mcp_upload_tickets_mcp_token_id_fkey';
+            columns: ['mcp_token_id'];
+            isOneToOne: false;
+            referencedRelation: 'mcp_tokens';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       notification_preferences: {
         Row: {
           email: boolean;
@@ -984,22 +1032,12 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
       };
-      mcp_add_task_attachment: {
-        Args: {
-          p_id: string;
-          p_mime: string;
-          p_name: string;
-          p_size: number;
-          p_task_id: string;
-          p_token: string;
-        };
-        Returns: Json;
-      };
       mcp_add_task_comment: {
         Args: { p_body: string; p_task_id: string; p_token: string };
         Returns: Json;
       };
       mcp_authenticate: { Args: { p_token: string }; Returns: boolean };
+      mcp_claim_upload: { Args: { p_ticket: string }; Returns: Json };
       mcp_create_category: {
         Args: {
           p_color: string;
@@ -1036,6 +1074,16 @@ export type Database = {
       mcp_delete_task_attachment: {
         Args: { p_id: string; p_token: string };
         Returns: string;
+      };
+      mcp_finish_upload: {
+        Args: {
+          p_id: string;
+          p_mime: string;
+          p_name: string;
+          p_size: number;
+          p_ticket: string;
+        };
+        Returns: Json;
       };
       mcp_get_expense: {
         Args: { p_id: string; p_token: string };
@@ -1086,6 +1134,15 @@ export type Database = {
         Args: { p_domain: string; p_token: string };
         Returns: boolean;
       };
+      mcp_request_upload: {
+        Args: {
+          p_mime: string;
+          p_name: string;
+          p_task_id: string;
+          p_token: string;
+        };
+        Returns: Json;
+      };
       mcp_resolve_category: {
         Args: { p_ref: string; p_user: string };
         Returns: string;
@@ -1103,6 +1160,8 @@ export type Database = {
         Returns: Json;
       };
       mcp_task_json: { Args: { p_id: string; p_user: string }; Returns: Json };
+      mcp_ticket_hash: { Args: { p_ticket: string }; Returns: string };
+      mcp_ticket_user: { Args: Record<PropertyKey, never>; Returns: string };
       mcp_token_user: { Args: { p_token: string }; Returns: string };
       mcp_update_category: {
         Args: { p_id: string; p_patch: Json; p_token: string };

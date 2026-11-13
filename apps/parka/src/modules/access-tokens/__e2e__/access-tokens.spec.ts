@@ -199,7 +199,6 @@ const commands = {
     const { status, json } = await mcp(page, latest(page), 'tools/list');
     expect(status).toBe(200);
     expect(json.result!.tools!.map((t) => t.name).sort()).toEqual([
-      'add_task_attachment',
       'add_task_comment',
       'create_category',
       'create_priority',
@@ -217,6 +216,7 @@ const commands = {
       'list_task_attachments',
       'list_task_comments',
       'list_tasks',
+      'request_attachment_upload',
       'set_task_status',
       'update_category',
       'update_task',

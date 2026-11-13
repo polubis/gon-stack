@@ -695,80 +695,92 @@ const commands = {
       await expect(attachmentThumb(getByE2ePrefix, 'demo.webm')).toBeVisible();
     },
 
-  'the mcp server lists, adds a reduced photo and deletes attachments': async ({
-    page,
-  }) => {
-    const created = await page.request.post(API_ROUTER.mcpTokens(), {
-      data: { name: 'E2E załączniki', ttlDays: 1 },
-    });
-    const { token } = ((await created.json()) as { data: { token: string } })
-      .data;
-    const call = async (name: string, args: Record<string, unknown>) => {
-      const response = await page.request.post(API_ROUTER.mcp(), {
-        headers: { Authorization: `Bearer ${token}` },
-        data: {
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'tools/call',
-          params: { name, arguments: args },
-        },
+  'the mcp server lists, adds a reduced photo through a ticket and deletes attachments':
+    async ({ page }) => {
+      const created = await page.request.post(API_ROUTER.mcpTokens(), {
+        data: { name: 'E2E załączniki', ttlDays: 1 },
       });
-      expect(response.status()).toBe(200);
-      return (
-        (await response.json()) as {
-          result: {
-            isError?: boolean;
-            structuredContent: {
-              items: { id: string }[];
-              id: string;
-              size: number;
+      const { token } = ((await created.json()) as { data: { token: string } })
+        .data;
+      const call = async (name: string, args: Record<string, unknown>) => {
+        const response = await page.request.post(API_ROUTER.mcp(), {
+          headers: { Authorization: `Bearer ${token}` },
+          data: {
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'tools/call',
+            params: { name, arguments: args },
+          },
+        });
+        expect(response.status()).toBe(200);
+        return (
+          (await response.json()) as {
+            result: {
+              isError?: boolean;
+              structuredContent: {
+                items: { id: string }[];
+                id: string;
+                size: number;
+                uploadUrl: string;
+              };
             };
-          };
-        }
-      ).result;
-    };
+          }
+        ).result;
+      };
 
-    const tasks = await call('list_tasks', {});
-    const taskId = tasks.structuredContent.items[0]!.id;
-    const before = await call('list_task_attachments', { taskId });
-    const photo = await makePhoto(page, 2000, 1400);
-    const added = await call('add_task_attachment', {
-      taskId,
-      name: 'mcp.jpg',
-      mimeType: 'image/jpeg',
-      contentBase64: photo.toString('base64'),
-    });
-    expect(added.isError).toBeFalsy();
-    expect(added.structuredContent).toMatchObject({
-      name: 'mcp.webp',
-      mime: 'image/webp',
-      originalSize: photo.length,
-    });
-    expect(added.structuredContent.size).toBeLessThan(photo.length / 2);
+      const tasks = await call('list_tasks', {});
+      const taskId = tasks.structuredContent.items[0]!.id;
+      const before = await call('list_task_attachments', { taskId });
+      const photo = await makePhoto(page, 2000, 1400);
+      const issued = await call('request_attachment_upload', {
+        taskId,
+        name: 'mcp.jpg',
+        mimeType: 'image/jpeg',
+      });
+      expect(issued.isError).toBeFalsy();
+      const sent = await page.request.post(issued.structuredContent.uploadUrl, {
+        headers: { 'Content-Type': 'image/jpeg' },
+        data: photo,
+      });
+      expect(sent.status()).toBe(201);
+      const added = {
+        structuredContent: (await sent.json()) as {
+          id: string;
+          size: number;
+          name: string;
+          mime: string;
+          originalSize: number;
+        },
+      };
+      expect(added.structuredContent).toMatchObject({
+        name: 'mcp.webp',
+        mime: 'image/webp',
+        originalSize: photo.length,
+      });
+      expect(added.structuredContent.size).toBeLessThan(photo.length / 2);
 
-    const after = await call('list_task_attachments', { taskId });
-    expect(after.structuredContent.items).toHaveLength(
-      before.structuredContent.items.length + 1,
-    );
-    const href = API_ROUTER.timeAttachmentById(added.structuredContent.id);
-    expect((await page.request.get(href)).status()).toBe(200);
+      const after = await call('list_task_attachments', { taskId });
+      expect(after.structuredContent.items).toHaveLength(
+        before.structuredContent.items.length + 1,
+      );
+      const href = API_ROUTER.timeAttachmentById(added.structuredContent.id);
+      expect((await page.request.get(href)).status()).toBe(200);
 
-    const refused = await call('add_task_attachment', {
-      taskId,
-      name: 'virus.exe',
-      mimeType: 'text/plain',
-      contentBase64: 'not base64!!',
-    });
-    expect(refused.isError).toBe(true);
+      const refused = await call('request_attachment_upload', {
+        taskId,
+        name: 'virus.exe',
+        mimeType: 'application/x-msdownload',
+      });
+      expect(refused.isError).toBe(true);
 
-    const removed = await call('delete_task_attachment', {
-      id: added.structuredContent.id,
-      confirm: true,
-    });
-    expect(removed.structuredContent).toMatchObject({ deleted: true });
-    expect((await page.request.get(href)).status()).toBe(404);
-  },
-  'the mcp server takes a big video as raw bytes without base64': async ({
+      const removed = await call('delete_task_attachment', {
+        id: added.structuredContent.id,
+        confirm: true,
+      });
+      expect(removed.structuredContent).toMatchObject({ deleted: true });
+      expect((await page.request.get(href)).status()).toBe(404);
+    },
+  'the mcp server takes a big video through a one-time upload url': async ({
     page,
   }) => {
     const created = await page.request.post(API_ROUTER.mcpTokens(), {
@@ -795,10 +807,29 @@ const commands = {
       await makeVideo(page, 2),
       Buffer.alloc(3 * 1024 * 1024),
     ]);
-    const url = `${API_ROUTER.mcpAttachments()}?taskId=${taskId}&name=${encodeURIComponent('agent.webm')}`;
+    const requestUrl = async (name: string, mimeType: string) => {
+      const issued = await page.request.post(API_ROUTER.mcp(), {
+        headers,
+        data: {
+          jsonrpc: '2.0',
+          id: 2,
+          method: 'tools/call',
+          params: {
+            name: 'request_attachment_upload',
+            arguments: { taskId, name, mimeType },
+          },
+        },
+      });
+      return (
+        (await issued.json()) as {
+          result: { structuredContent: { uploadUrl: string } };
+        }
+      ).result.structuredContent.uploadUrl;
+    };
+    const url = await requestUrl('agent.webm', 'video/webm');
 
     const added = await page.request.post(url, {
-      headers: { ...headers, 'Content-Type': 'video/webm' },
+      headers: { 'Content-Type': 'video/webm' },
       data: video,
     });
     expect(added.status()).toBe(201);
@@ -817,16 +848,24 @@ const commands = {
     expect(stored.status()).toBe(200);
     expect((await stored.body()).length).toBe(video.length);
 
-    const refused = await page.request.post(url, {
-      headers: { ...headers, 'Content-Type': 'application/zip' },
-      data: Buffer.from('zip'),
-    });
-    expect(refused.status()).toBe(400);
-    const anonymous = await page.request.post(url, {
-      headers: { Authorization: 'Bearer nope', 'Content-Type': 'video/webm' },
+    const reused = await page.request.post(url, {
+      headers: { 'Content-Type': 'video/webm' },
       data: video,
     });
-    expect(anonymous.status()).toBe(401);
+    expect(reused.status()).toBe(401);
+    const wrongType = await page.request.post(
+      await requestUrl('agent2.webm', 'video/webm'),
+      {
+        headers: { 'Content-Type': 'application/zip' },
+        data: Buffer.from('z'),
+      },
+    );
+    expect(wrongType.status()).toBe(415);
+    const forged = await page.request.post(
+      `${new URL(url).origin}${API_ROUTER.mcpUploads()}?ticket=parka_up_${'0'.repeat(64)}`,
+      { headers: { 'Content-Type': 'video/webm' }, data: video },
+    );
+    expect(forged.status()).toBe(401);
 
     await page.request.delete(API_ROUTER.timeAttachmentById(attachment.id));
   },
@@ -1174,7 +1213,9 @@ test('task attachments upload, open and delete on the real backend', async ({
     ['the attachment opens with its content and a wrong type is refused'],
     ['i delete the attachment after confirming and it stays gone'],
     ['a big photo is reduced in quality, keeps its size and opens full screen'],
-    ['the mcp server lists, adds a reduced photo and deletes attachments'],
+    [
+      'the mcp server lists, adds a reduced photo through a ticket and deletes attachments',
+    ],
   );
 });
 
