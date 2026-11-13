@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ClearableInput, ClearableTextarea } from '../clearable';
 import { Field, Input, Select } from '../controls';
 import { NumberInput } from '../number-input';
@@ -181,5 +181,32 @@ describe('textarea mic and clear button', () => {
 
     expect(screen.getByLabelText('Opis')).toHaveValue('');
     expect(screen.getByLabelText('Opis')).toHaveFocus();
+  });
+});
+
+describe('textarea fullscreen button', () => {
+  it('is absent without an expand handler', () => {
+    render(<Fields />);
+
+    expect(screen.queryByRole('button', { name: /pełnym ekranie/ })).toBeNull();
+  });
+
+  it('calls the expand handler on click, with or without a value', async () => {
+    const onExpand = vi.fn();
+    render(
+      <ClearableTextarea
+        aria-label="Opis"
+        value=""
+        onChange={() => {}}
+        onExpand={onExpand}
+        expandLabel="Edytuj opis na pełnym ekranie"
+      />,
+    );
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Edytuj opis na pełnym ekranie' }),
+    );
+
+    expect(onExpand).toHaveBeenCalledTimes(1);
   });
 });

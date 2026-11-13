@@ -1,6 +1,6 @@
 import { useId, useRef } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { Maximize2, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import {
   closeModal,
@@ -109,22 +109,16 @@ export const DescriptionField = ({ value, onChange }: Props) => {
         maxLength={TASK_DESCRIPTION_MAX_LENGTH}
         aria-describedby={counterId}
         label="Opis"
+        onExpand={() => openModal(DESCRIPTION_EDITOR_MODAL)}
+        expandLabel="Edytuj opis na pełnym ekranie"
+        expandE2e="time:description-expand"
         data-e2e="time:description-input"
         onChange={(e) => onChange(e.target.value)}
         placeholder="Dodatkowe informacje o zadaniu"
         className="max-h-48 resize-y"
       />
-      <div className="mt-1 flex items-center justify-between gap-3">
+      <div className="mt-1">
         <Counter id={counterId} value={value} />
-        <button
-          type="button"
-          data-e2e="time:description-expand"
-          aria-label="Edytuj opis na pełnym ekranie"
-          onClick={() => openModal(DESCRIPTION_EDITOR_MODAL)}
-          className="grid h-8 w-8 place-items-center rounded-full text-ink-soft hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-        >
-          <Maximize2 className="h-4 w-4" aria-hidden="true" />
-        </button>
       </div>
       {editing ? <FullscreenEditor value={value} onChange={onChange} /> : null}
     </div>
