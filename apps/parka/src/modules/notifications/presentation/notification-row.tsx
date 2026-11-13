@@ -40,6 +40,8 @@ export const NotificationRow = ({
 }) => {
   const ctx = useContext();
   const Icon = ICON[notification.kind];
+  const selecting = ctx.useSelecting();
+  const selected = ctx.useSelected().includes(notification.id);
 
   return (
     <Card
@@ -51,6 +53,16 @@ export const NotificationRow = ({
       )}
     >
       <div className="flex items-start gap-3">
+        {selecting ? (
+          <input
+            type="checkbox"
+            data-e2e={`notifications:select:${notification.id}`}
+            checked={selected}
+            onChange={() => ctx.toggleSelected(notification.id)}
+            aria-label={`Zaznacz: ${notification.title}`}
+            className="mt-2.5 h-4.5 w-4.5 shrink-0 accent-brand"
+          />
+        ) : null}
         <span className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-soft text-brand">
           <Icon className="h-4.5 w-4.5" aria-hidden="true" />
           {notification.read ? null : (

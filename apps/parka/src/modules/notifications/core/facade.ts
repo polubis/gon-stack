@@ -8,6 +8,11 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
     loadMore: () => trigger('[TRIGGER]_LOAD_MORE'),
     markRead: (id: NotificationId) => trigger('[TRIGGER]_MARK_READ', { id }),
     markAllRead: () => trigger('[TRIGGER]_MARK_ALL_READ'),
+    toggleSelecting: () => trigger('[TRIGGER]_TOGGLE_SELECTING'),
+    toggleSelected: (id: NotificationId) =>
+      trigger('[TRIGGER]_TOGGLE_SELECTED', { id }),
+    selectAll: () => trigger('[TRIGGER]_SELECT_ALL'),
+    deleteSelected: () => trigger('[TRIGGER]_DELETE_SELECTED'),
     dismissNotice: () => trigger('[TRIGGER]_DISMISS_NOTICE'),
     useNotifications: () => store.$notifications.use(),
     useUnreadCount: () => store.$unread.use(),
@@ -17,6 +22,8 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
     useLoadingMore: () => store.$loadingMore.use(),
     useMoreError: () => store.$moreError.use(),
     useError: () => store.$error.use(),
+    useSelecting: () => store.$selecting.use(),
+    useSelected: () => store.$selected.use(),
     useNotice: () => store.$notice.use(),
   };
 };

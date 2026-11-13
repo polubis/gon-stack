@@ -10,3 +10,7 @@ export const ERROR_CODES = {
   loadMore: 'NOTIFICATIONS_LOAD_MORE',
   render: 'NOTIFICATIONS_RENDER',
 } as const;
+
+/** URL ids (see `shared/router/modal-stack`) of the bulk-delete menu and its confirmation. */
+export const ACTIONS_MENU_KEY = 'notifications-actions';
+export const DELETE_MODAL = 'notifications-delete';

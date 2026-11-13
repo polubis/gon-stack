@@ -1,5 +1,6 @@
 import {
   listNotificationsSchema,
+  NOTIFICATIONS_RETENTION_DAYS,
   notificationEvent,
 } from '@schemas/notifications';
 import { BadRequest } from '../../core/error-handling';
@@ -23,6 +24,16 @@ export const listNotifications = privateProcedure({
   schema: withZodSchema({ schema: listNotificationsSchema }),
 })({
   handler: async (input, { db }) => {
+    // No scheduler here: expired rows go the next time the user looks.
+    const cutoff = new Date(
+      Date.now() - NOTIFICATIONS_RETENTION_DAYS * 24 * 60 * 60 * 1000,
+    ).toISOString();
+    const purged = await db
+      .from('notifications')
+      .delete()
+      .lt('created_at', cutoff);
+    if (purged.error) throw fromSupabaseError(purged.error);
+
     let query = db
       .from('notifications')
       .select('*')

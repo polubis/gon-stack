@@ -82,7 +82,11 @@ const installBackend = async (
         }, listDelay),
       );
     }
-    if (url.pathname === API_ROUTER.notificationsReadAll()) {
+    if (route.request().method() === 'DELETE') {
+      const { ids } = route.request().postDataJSON() as { ids: string[] };
+      const gone = new Set(ids);
+      state.splice(0, state.length, ...state.filter((n) => !gone.has(n.id)));
+    } else if (url.pathname === API_ROUTER.notificationsReadAll()) {
       state.forEach((n) => (n.read = true));
     } else {
       const id = url.pathname.split('/').filter(Boolean).at(-1);
@@ -202,6 +206,36 @@ const commands = {
     await expect(getByE2e('notifications:mark-all-read')).toBeDisabled();
     await expect(rows(getByE2ePrefix)).toHaveCount(PAGE);
   },
+  'i select two notifications': async ({ getByE2e }) => {
+    await getByE2e('notifications:select-toggle').click();
+    await getByE2e('notifications:select:n-0').check();
+    await getByE2e('notifications:select:n-1').check();
+  },
+  'i delete the selected ones from the actions menu': async ({
+    page,
+    getByE2e,
+  }) => {
+    await getByE2e('notifications:actions-trigger').click();
+    await expect(getByE2e('notifications:actions-menu')).toBeVisible();
+    await getByE2e('notifications:delete-selected').click();
+    expect(new URL(page.url()).searchParams.toString()).not.toBe('');
+    await getByE2e('dashboard:delete-confirm').click();
+  },
+  'the two are gone and the rest stays': async ({
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
+    await expect(getByE2e('notifications:row:n-0')).toHaveCount(0);
+    await expect(getByE2e('notifications:row:n-1')).toHaveCount(0);
+    await expect(rows(getByE2ePrefix)).toHaveCount(PAGE - 2);
+  },
+  'the screen says old notifications vanish after 30 days': async ({
+    getByE2e,
+  }) => {
+    await expect(getByE2e('notifications:retention-note')).toContainText(
+      '30 dni',
+    );
+  },
   'the empty state has an icon, a title and a description': async ({
     getByE2e,
   }) => {
@@ -249,6 +283,18 @@ test.describe('notifications', () => {
       ['i open the notifications'],
       ['i mark all as read'],
       ['everything is read and still listed'],
+    );
+  });
+
+  test('a user selects notifications and deletes them after confirming', async ({
+    e2e,
+  }) => {
+    await interpreter(commands, e2e)(
+      ['i open the notifications'],
+      ['the screen says old notifications vanish after 30 days'],
+      ['i select two notifications'],
+      ['i delete the selected ones from the actions menu'],
+      ['the two are gone and the rest stays'],
     );
   });
 

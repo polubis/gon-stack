@@ -113,6 +113,11 @@ export const notification = () =>
 export const NOTIFICATIONS_PAGE_SIZE = 20;
 export const NOTIFICATIONS_MAX_PAGE_SIZE = 50;
 
+/** Notifications older than this many days are deleted automatically. */
+export const NOTIFICATIONS_RETENTION_DAYS = 30;
+
+export const NOTIFICATIONS_MAX_DELETE = 100;
+
 /**
  * Newest first, cursor paginated. Read notifications are never filtered out;
  * `unread` is the server-side total, independent of the page.
@@ -164,5 +169,16 @@ export const deleteNotificationSchema = () =>
     out: z.union([
       z.object({ code: z.literal(200), ok: z.literal(true) }),
       writeErrors,
+    ]),
+  });
+
+export const deleteNotificationsSchema = () =>
+  z.object({
+    in: z.object({
+      ids: z.array(z.string().min(1)).min(1).max(NOTIFICATIONS_MAX_DELETE),
+    }),
+    out: z.union([
+      z.object({ code: z.literal(200), deleted: z.number().int().min(0) }),
+      errorOut(),
     ]),
   });
