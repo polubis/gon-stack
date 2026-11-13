@@ -6,6 +6,7 @@ import { LoadingBanner } from '@/shared/ui/loading-banner';
 import { cn } from '@repo/react-kit/cn';
 import { CategoryModals } from '@/modules/categories/presentation/category-modals';
 import { Toast } from '@/shared/ui/toast';
+import { NavFollow } from '@/shared/navigation/overlay-nav/presentation/nav-follow';
 import {
   closeModal,
   openModal,
@@ -198,7 +199,7 @@ const DashboardView = () => {
       <CategoryModals />
       {/* Zero-height sticky rail: the button floats above the content, which
           scrolls clear of it thanks to the bottom padding of <main>. */}
-      <div className="pointer-events-none sticky bottom-4 z-(--z-raised) h-0 md:hidden">
+      <NavFollow className="pointer-events-none sticky bottom-4 z-(--z-raised) h-0 md:hidden">
         <AddMenu
           side="top"
           data-e2e="dashboard:expense-fab"
@@ -210,7 +211,7 @@ const DashboardView = () => {
         >
           <Plus className="h-6 w-6" aria-hidden="true" />
         </AddMenu>
-      </div>
+      </NavFollow>
     </div>
   );
 };
