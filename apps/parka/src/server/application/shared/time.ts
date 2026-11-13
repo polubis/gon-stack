@@ -15,8 +15,12 @@ type RuleRow = Database['public']['Tables']['time_recurring']['Row'];
 const toHourMinute = (value: string | null): string | null =>
   value === null ? null : value.slice(0, 5);
 
-const toInterval = (value: string): 'weekly' | 'monthly' | 'yearly' =>
-  value === 'monthly' || value === 'yearly' ? value : 'weekly';
+const toInterval = (
+  value: string,
+): 'daily' | 'weekly' | 'monthly' | 'yearly' =>
+  value === 'daily' || value === 'monthly' || value === 'yearly'
+    ? value
+    : 'weekly';
 
 export const toTimeBacklogTask = (
   row: TaskRow,

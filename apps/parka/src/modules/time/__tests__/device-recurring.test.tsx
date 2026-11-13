@@ -169,6 +169,22 @@ describe('recurring tasks', () => {
     expect(screen.getByText('Cykliczne')).toBeInTheDocument();
   });
 
+  it('repeats a task every day', async () => {
+    const user = userEvent.setup();
+    renderTime();
+    const dialog = await openAddDialog(user);
+    await user.type(dialog.getByRole('textbox', { name: 'Nazwa' }), 'Woda');
+    await user.click(dialog.getByRole('switch', { name: 'Powtarzaj' }));
+    await user.click(dialog.getByRole('combobox', { name: 'Częstotliwość' }));
+    await user.click(await screen.findByRole('option', { name: 'Co dzień' }));
+    await user.click(dialog.getByRole('button', { name: 'Dodaj' }));
+
+    expect(await row('Woda')).toBeVisible();
+    expect(backend.writes()[0]).toMatchObject({
+      body: { title: 'Woda', interval: 'daily' },
+    });
+  });
+
   it('offers no repeat when editing a task', async () => {
     const user = userEvent.setup();
     backend.seed([task()]);

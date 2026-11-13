@@ -1,6 +1,6 @@
 import type { Brand } from '@repo/type-beast/brand';
 import type { Device } from '@/shared/device/domain/models';
-import type { RecurringInterval } from '@/shared/recurring/occurrences';
+import type { TaskRecurringInterval } from '@/shared/recurring/occurrences';
 import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
 
 export type TaskId = Brand<string, 'TaskId'>;
@@ -123,7 +123,7 @@ export type Recurring = {
   priorityId: PriorityId;
   /** `HH:MM`; `null` lasts the whole day. */
   at: string | null;
-  interval: RecurringInterval;
+  interval: TaskRecurringInterval;
   /** `YYYY-MM-DD`, first occurrence. */
   startDate: string;
   /** `YYYY-MM-DD`; `null` never ends. */

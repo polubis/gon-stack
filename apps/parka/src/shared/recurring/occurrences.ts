@@ -1,11 +1,14 @@
 export type RecurringInterval = 'weekly' | 'monthly' | 'yearly';
 
+/** Tasks also repeat every day; expenses do not. */
+export type TaskRecurringInterval = 'daily' | RecurringInterval;
+
 /**
  * When a series happens, whatever it makes (an expense, a task). Days are
  * plain calendar days (`YYYY-MM-DD`), compared as strings.
  */
 export type RecurringSchedule = {
-  interval: RecurringInterval;
+  interval: TaskRecurringInterval;
   /** First occurrence. */
   startDate: string;
   /** Last day an occurrence may fall on; `null` = never ends. */
@@ -58,6 +61,8 @@ const addMonths = (day: string, months: number): string => {
  */
 const occurrenceAt = (rule: RecurringSchedule, step: number): string => {
   switch (rule.interval) {
+    case 'daily':
+      return toDay(new Date(toDate(rule.startDate).getTime() + step * DAY_MS));
     case 'weekly':
       return toDay(
         new Date(toDate(rule.startDate).getTime() + step * 7 * DAY_MS),

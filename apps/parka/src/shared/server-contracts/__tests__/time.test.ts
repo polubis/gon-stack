@@ -172,8 +172,17 @@ describe('time recurring contracts', () => {
     });
   });
 
+  it('accepts a daily rule', () => {
+    expect(
+      createTimeRecurringSchema().shape.in.safeParse({
+        ...RULE,
+        interval: 'daily',
+      }).success,
+    ).toBe(true);
+  });
+
   it.each([
-    ['an unknown interval', { interval: 'daily' }],
+    ['an unknown interval', { interval: 'hourly' }],
     ['a blank title', { title: ' ' }],
     ['a malformed start', { startDate: '20.10.2026' }],
     ['an hour out of range', { at: '25:00' }],
