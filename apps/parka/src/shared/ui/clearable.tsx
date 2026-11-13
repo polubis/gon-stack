@@ -4,7 +4,7 @@ import {
   type ReactNode,
   type RefObject,
 } from 'react';
-import { X } from 'lucide-react';
+import { Maximize2, X } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { DictationButton } from '@/shared/dictation/dictation-button';
 import { Input, inputClass, useField } from './controls';
@@ -125,9 +125,16 @@ const Adornments = ({
 export const ClearableTextarea = ({
   className,
   label: shortLabel,
+  onExpand,
+  expandLabel = 'Edytuj na pełnym ekranie',
+  expandE2e,
   'aria-label': ariaLabel,
   ...props
 }: ComponentProps<'textarea'> & {
+  /** Shows a fullscreen button inside the field, under the mic and "x" buttons. */
+  onExpand?: () => void;
+  expandLabel?: string;
+  expandE2e?: ComponentProps<'button'>['data-e2e'];
   /** Short name used by the mic and "x" buttons when the field's own label is long. */
   label?: string;
 }) => {
@@ -148,6 +155,17 @@ export const ClearableTextarea = ({
       />
       {editable ? (
         <Adornments target={ref} label={label} filled={filled} top="top-2" />
+      ) : null}
+      {onExpand ? (
+        <button
+          type="button"
+          data-e2e={expandE2e}
+          aria-label={expandLabel}
+          onClick={onExpand}
+          className={cn('absolute right-2 top-10', BUTTON_CLASS)}
+        >
+          <Maximize2 className="h-4 w-4" aria-hidden="true" />
+        </button>
       ) : null}
     </div>
   );
