@@ -28,6 +28,7 @@ import { CommentAvatar } from './comment-avatar';
 import { useContext } from './context';
 import { DeleteDialog } from './delete-dialog';
 import { deleteCommentModal, deletedCommentIdOf } from './modal-ids';
+import { PREVIEW_COUNT, ShowMore } from './show-more';
 
 const PENDING = 'pending:';
 
@@ -237,6 +238,7 @@ export const TaskComments = ({ taskId }: { taskId: TaskId }) => {
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [composing, setComposing] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [editingId, setEditingId] = useState<string>();
   const counter = useRef(0);
 
@@ -268,6 +270,7 @@ export const TaskComments = ({ taskId }: { taskId: TaskId }) => {
   const add = async (body: string) => {
     const tempId = `${PENDING}${++counter.current}`;
     setComposing(false);
+    setExpanded(true);
     patch((current) => [
       ...current,
       {
@@ -396,8 +399,13 @@ export const TaskComments = ({ taskId }: { taskId: TaskId }) => {
           </Button>
         </div>
       ) : !loaded ? (
-        <div data-e2e="time:comments-skeleton" className="flex flex-col gap-2">
-          <Skeleton className="h-14 w-full" />
+        <div
+          data-e2e="time:comments-skeleton"
+          className="flex flex-col gap-1.5"
+        >
+          {Array.from({ length: PREVIEW_COUNT }, (_, i) => (
+            <Skeleton key={i} className="h-14 w-full" />
+          ))}
         </div>
       ) : (
         <>
@@ -413,7 +421,10 @@ export const TaskComments = ({ taskId }: { taskId: TaskId }) => {
           ) : null}
           {loaded.items.length > 0 ? (
             <ul className="flex flex-col gap-1.5">
-              {loaded.items.map((comment) => (
+              {(expanded
+                ? loaded.items
+                : loaded.items.slice(0, PREVIEW_COUNT)
+              ).map((comment) => (
                 <Item
                   key={comment.id}
                   comment={comment}
@@ -426,6 +437,13 @@ export const TaskComments = ({ taskId }: { taskId: TaskId }) => {
               ))}
             </ul>
           ) : null}
+          {expanded ? null : (
+            <ShowMore
+              data-e2e="time:comments-more"
+              hidden={loaded.items.length - PREVIEW_COUNT}
+              onClick={() => setExpanded(true)}
+            />
+          )}
           {composing ? (
             <Editor
               initial=""
