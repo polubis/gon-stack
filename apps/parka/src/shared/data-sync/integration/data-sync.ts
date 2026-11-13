@@ -1,8 +1,7 @@
 import { dataChangeSchema, type DataDomain } from '@schemas/data-changes';
 import { API_ROUTER } from '@/shared/router/routes';
 
-const NAME = 'parka-data-sync';
-const LEADER_LOCK = 'parka-data-sync-leader';
+const RETRY_MS = 3000;
 
 const listeners = new Map<DataDomain, Set<() => void>>();
 let leave: (() => void) | undefined;
@@ -10,66 +9,64 @@ let leave: (() => void) | undefined;
 const dispatch = (domain: DataDomain) =>
   listeners.get(domain)?.forEach((listener) => listener());
 
-/** Opens the one stream of this browser; returns the function closing it. */
-const lead = (relay: (domain: DataDomain) => void): (() => void) => {
-  const source = new EventSource(API_ROUTER.dataChangeEvents());
+const reloadAll = () => listeners.forEach((_, domain) => dispatch(domain));
+
+/** Opens this tab's own stream; returns the function closing it. */
+const connect = (): (() => void) => {
+  if (typeof EventSource === 'undefined') return () => {};
+  let source: EventSource | undefined;
+  let retry: ReturnType<typeof setTimeout> | undefined;
   let connected = false;
-  source.onopen = () => {
-    // Notices sent while the stream was down are gone: reload everything.
-    if (connected) listeners.forEach((_, domain) => relay(domain));
-    connected = true;
-  };
-  source.onmessage = ({ data }) => {
-    const notice = dataChangeSchema.safeParse(JSON.parse(data));
-    if (notice.success) relay(notice.data.domain);
-  };
-  return () => source.close();
-};
 
-const join = (): (() => void) => {
-  if (typeof BroadcastChannel === 'undefined') return () => {};
-  const channel = new BroadcastChannel(NAME);
-  channel.onmessage = ({ data }) => {
-    const notice = dataChangeSchema.safeParse({ domain: data });
-    if (notice.success) dispatch(notice.data.domain);
-  };
-  const relay = (domain: DataDomain) => {
-    dispatch(domain);
-    channel.postMessage(domain);
-  };
-
-  if (typeof EventSource === 'undefined') return () => channel.close();
-  if (typeof navigator === 'undefined' || !('locks' in navigator)) {
-    const close = lead(relay);
-    return () => {
-      close();
-      channel.close();
+  const open = () => {
+    source?.close();
+    const next = new EventSource(API_ROUTER.dataChangeEvents());
+    source = next;
+    next.onopen = () => {
+      // Notices sent while the stream was down are gone: reload everything.
+      if (connected) reloadAll();
+      connected = true;
     };
-  }
+    next.onmessage = ({ data }) => {
+      const notice = dataChangeSchema.safeParse(JSON.parse(data));
+      if (notice.success) dispatch(notice.data.domain);
+    };
+    next.onerror = () => {
+      // Browser gives up (CLOSED) on some failures: reopen ourselves.
+      if (next.readyState !== EventSource.CLOSED) return;
+      clearTimeout(retry);
+      retry = setTimeout(open, RETRY_MS);
+    };
+  };
 
-  // Only the tab holding the lock streams; when it closes, the next waiting
-  // tab gets the lock and takes over.
-  const abort = new AbortController();
-  void navigator.locks
-    .request(LEADER_LOCK, { signal: abort.signal }, () => {
-      const close = lead(relay);
-      return new Promise<void>((release) => {
-        abort.signal.addEventListener('abort', () => {
-          close();
-          release();
-        });
-      });
-    })
-    .catch(() => {});
+  // Phone locked / tab frozen: stream may be dead without any event, and
+  // notices are lost. On return reopen it and reload through REST.
+  const resume = () => {
+    if (document.visibilityState === 'hidden') return;
+    open();
+    if (connected) reloadAll();
+  };
+  const onPageShow = ({ persisted }: PageTransitionEvent) => {
+    if (persisted) resume();
+  };
+
+  open();
+  document.addEventListener('visibilitychange', resume);
+  window.addEventListener('pageshow', onPageShow);
+  window.addEventListener('online', resume);
   return () => {
-    abort.abort();
-    channel.close();
+    clearTimeout(retry);
+    source?.close();
+    document.removeEventListener('visibilitychange', resume);
+    window.removeEventListener('pageshow', onPageShow);
+    window.removeEventListener('online', resume);
   };
 };
 
 /**
- * Calls `listener` whenever MCP changed this user's `domain` data, in every
- * open tab, over a single server stream per browser. Returns the unsubscribe.
+ * Calls `listener` whenever MCP changed this user's `domain` data. Each tab
+ * owns its server stream (no cross-tab sharing). The notice carries only the
+ * domain: listeners refetch over REST. Returns the unsubscribe.
  */
 export const watchDataChanges = (
   domain: DataDomain,
@@ -77,7 +74,7 @@ export const watchDataChanges = (
 ): (() => void) => {
   const set = listeners.get(domain) ?? new Set();
   listeners.set(domain, set.add(listener));
-  leave ??= join();
+  leave ??= connect();
 
   return () => {
     set.delete(listener);
