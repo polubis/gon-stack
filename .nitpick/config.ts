@@ -18,12 +18,14 @@ export default config({
   entry: {
     doc: ({ insert, ref }) => `# gon-stack \`.claude\`
 
-Follow these rules:
+## Rules
 
 ${insert('aodi-framework')}
 
 - ${ref('git')}
-- ${ref('way-of-work')}`,
+- ${ref('way-of-work')}
+
+${insert('project-map')}`,
   },
   settings: {
     mcp: {
@@ -312,6 +314,7 @@ Skill ${ref('evidence')}, key = task id, out \`.evidences/<task-id>/\`.
   refs: {
     'aodi-framework': aodiFramework,
     'frontend-architecture': './references/frontend-architecture.md',
+    'project-map': './references/project-map.md',
     'herdr-keyboard': './references/herdr-keyboard.md',
   },
   rules: {
