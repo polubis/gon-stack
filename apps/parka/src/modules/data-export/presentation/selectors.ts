@@ -12,7 +12,7 @@ const plDate = new Intl.DateTimeFormat('pl-PL', {
 
 const HEADER = ['Data', 'Sklep', 'Kategoria', 'Kwota', 'Metoda płatności'];
 
-export const dateLabel = (iso: string): string => plDate.format(new Date(iso));
+const dateLabel = (iso: string): string => plDate.format(new Date(iso));
 
 export const toRows = (
   expenses: Expense[],

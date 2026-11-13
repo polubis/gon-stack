@@ -737,7 +737,21 @@ const commands = {
   },
 
   'financial data exports as csv': async ({ page, getByE2e }) => {
-    await mockState(page);
+    await mockState(page, {
+      expenses: [
+        {
+          id: 'exported',
+          merchant: 'Sklep exported',
+          date: `${yearMonth(new Date())}-01T12:00:00Z`,
+          amount: 1234,
+          categoryId: CATEGORY.id,
+          paymentMethod: 'Karta',
+          isBill: false,
+          source: 'manual',
+          items: [],
+        },
+      ],
+    });
     await open(page, APP_ROUTER.dataExport());
     const [download] = await Promise.all([
       page.waitForEvent('download'),

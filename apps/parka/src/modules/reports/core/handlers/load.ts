@@ -1,6 +1,7 @@
 import { catchError, EMPTY, finalize, from, map, switchMap, tap } from 'rxjs';
 import type { Store } from '../store';
 import type { Bus } from '../bus';
+import { setReportData } from '../actions/set-report-data';
 import {
   fetchCategories,
   fetchExpenses,
@@ -22,11 +23,7 @@ export const load = (store: Store, { ofType }: Bus) =>
           fetchRecurring(ctrl.signal),
         ]),
       ).pipe(
-        tap(([expenses, categories, recurring]) => {
-          store.$expenses.set(expenses);
-          store.$categories.set(categories);
-          store.$recurring.set(recurring);
-        }),
+        tap((data) => setReportData(store, data)),
         catchError((error) => {
           const isAbort =
             error instanceof DOMException && error.name === 'AbortError';

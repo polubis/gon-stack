@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Check, FileDown, FileText } from 'lucide-react';
+import { Check, FileDown, FileText, Receipt } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { Button } from '@/shared/ui/controls';
+import { EmptyState } from '@/shared/ui/empty-state';
 import { Card, ScreenHeader } from '@/shared/ui/layout';
 import { ErrorState } from '@/shared/ui/error-state';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
@@ -27,13 +28,18 @@ const DataExportView = () => {
     ctx.load();
   }, [ctx]);
 
+  const isEmpty = !initializing && error === null && expenses.length === 0;
+
   const exportNow = () => {
     download(toFile(format, toRows(expenses, categories)));
     setDone(true);
   };
 
   return (
-    <div data-e2e="data-export:main" className="relative flex flex-1 flex-col">
+    <div
+      data-e2e="data-export:main"
+      className="relative flex flex-1 animate-view-enter flex-col motion-reduce:animate-none"
+    >
       <LoadingBanner active={isLoading && !initializing} />
       <div className="md:px-4 lg:px-6 xl:px-12">
         <ScreenHeader title="Eksport danych" backHref={APP_ROUTER.privacy()} />
@@ -55,6 +61,23 @@ const DataExportView = () => {
           />
         ) : null}
 
+        {isEmpty ? (
+          <EmptyState
+            data-e2e="data-export:empty"
+            icon={Receipt}
+            title="Brak danych do eksportu"
+            description="Dodaj pierwszy wydatek, aby pobrać swoje dane."
+            action={
+              <Button
+                className="w-auto px-3 py-2"
+                href={APP_ROUTER.dashboard()}
+              >
+                Dodaj wydatek
+              </Button>
+            }
+          />
+        ) : null}
+
         <fieldset className="grid gap-2 md:max-w-2xl md:grid-cols-2 md:gap-4">
           <legend className="mb-2 text-sm font-semibold">Format</legend>
           {FORMATS.map((f) => (
@@ -71,7 +94,7 @@ const DataExportView = () => {
                 name="format"
                 value={f}
                 checked={f === format}
-                data-e2e="data-export:format"
+                data-e2e={`data-export:format:${f}`}
                 onChange={() => {
                   setFormat(f);
                   setDone(false);
@@ -90,7 +113,7 @@ const DataExportView = () => {
         <Button
           data-e2e="data-export:run"
           className="md:max-w-xs"
-          disabled={initializing || error !== null}
+          disabled={initializing || error !== null || isEmpty}
           onClick={exportNow}
         >
           Eksportuj
