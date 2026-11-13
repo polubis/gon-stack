@@ -101,12 +101,15 @@ const stubApi = ({
   pages: Record<string, Reply>;
   write?: object;
 }) => {
-  const calls: { method: string; url: string }[] = [];
+  const calls: { method: string; url: string; body?: unknown }[] = [];
   server.use(
     http.all('/api/*', async ({ request }) => {
       const { pathname, searchParams, search } = new URL(request.url);
-      calls.push({ method: request.method, url: pathname + search });
-      if (request.method === 'PUT') return HttpResponse.json(write);
+      const body =
+        request.method === 'DELETE' ? await request.json() : undefined;
+      calls.push({ method: request.method, url: pathname + search, body });
+      if (request.method === 'PUT' || request.method === 'DELETE')
+        return HttpResponse.json(write);
       const reply = pages[searchParams.get('cursor') ?? 'first']!;
       return HttpResponse.json(
         typeof reply === 'function' ? await reply() : reply,
@@ -451,5 +454,125 @@ describe('infinite scroll', () => {
 
     await waitFor(() => expect(rows()).toHaveLength(4));
     expect(screen.getAllByText('Przeczytane')).toHaveLength(4);
+  });
+
+  describe('deleting', () => {
+    beforeEach(() => window.history.replaceState(null, '', '/'));
+
+    const three = () =>
+      page([updated('n-1'), updated('n-2'), created('n-3', true)]);
+
+    const startSelecting = async (user: ReturnType<typeof userEvent.setup>) => {
+      await screen.findAllByText('Zmieniono wydatek');
+      await user.click(screen.getByRole('button', { name: 'Zaznacz' }));
+    };
+
+    it('says old notifications are removed after 30 days', async () => {
+      stubApi({ pages: { first: three() } });
+
+      render(<Main />);
+
+      expect(
+        await screen.findByText(
+          'Powiadomienia starsze niż 30 dni są usuwane automatycznie.',
+        ),
+      ).toBeTruthy();
+    });
+
+    it('deletes only the selected notifications after confirmation', async () => {
+      const calls = stubApi({ pages: { first: three() } });
+      const user = userEvent.setup();
+      render(<Main />);
+      await startSelecting(user);
+
+      await user.click(
+        screen.getAllByRole('checkbox', {
+          name: /Zaznacz: Zmieniono wydatek/,
+        })[0]!,
+      );
+      await user.click(screen.getByRole('button', { name: 'Akcje' }));
+      await user.click(
+        screen.getByRole('menuitem', { name: 'Usuń zaznaczone (1)' }),
+      );
+      await user.click(await screen.findByRole('button', { name: 'Usuń' }));
+
+      await waitFor(() => expect(rows()).toHaveLength(2));
+      expect(calls.find((c) => c.method === 'DELETE')?.body).toEqual({
+        ids: ['n-1'],
+      });
+      expect(screen.getByRole('button', { name: 'Zaznacz' })).toBeTruthy();
+    });
+
+    it('keeps everything when the confirmation is cancelled', async () => {
+      const calls = stubApi({ pages: { first: three() } });
+      const user = userEvent.setup();
+      render(<Main />);
+      await startSelecting(user);
+      await user.click(
+        screen.getByRole('button', { name: 'Zaznacz wszystkie' }),
+      );
+      await user.click(screen.getByRole('button', { name: 'Akcje' }));
+      await user.click(
+        screen.getByRole('menuitem', { name: 'Usuń zaznaczone (3)' }),
+      );
+
+      await user.click(await screen.findByRole('button', { name: 'Anuluj' }));
+
+      await waitFor(() =>
+        expect(screen.queryByRole('button', { name: 'Usuń' })).toBeNull(),
+      );
+      expect(rows()).toHaveLength(3);
+      expect(calls.some((c) => c.method === 'DELETE')).toBe(false);
+    });
+
+    it('cannot delete while nothing is selected', async () => {
+      stubApi({ pages: { first: three() } });
+      const user = userEvent.setup();
+      render(<Main />);
+      await startSelecting(user);
+
+      await user.click(screen.getByRole('button', { name: 'Akcje' }));
+
+      expect(
+        (
+          screen.getByRole('menuitem', {
+            name: 'Usuń zaznaczone (0)',
+          }) as HTMLButtonElement
+        ).disabled,
+      ).toBe(true);
+    });
+
+    it('leaves select mode without deleting', async () => {
+      stubApi({ pages: { first: three() } });
+      const user = userEvent.setup();
+      render(<Main />);
+      await startSelecting(user);
+
+      await user.click(screen.getByRole('button', { name: 'Anuluj' }));
+
+      expect(screen.queryByRole('checkbox')).toBeNull();
+      expect(screen.getByRole('button', { name: 'Zaznacz' })).toBeTruthy();
+    });
+
+    it('brings the notifications back when deleting fails', async () => {
+      stubApi({
+        pages: { first: three() },
+        write: { code: 500, type: 'internal-server', message: 'boom' },
+      });
+      const user = userEvent.setup();
+      render(<Main />);
+      await startSelecting(user);
+      await user.click(
+        screen.getByRole('button', { name: 'Zaznacz wszystkie' }),
+      );
+      await user.click(screen.getByRole('button', { name: 'Akcje' }));
+      await user.click(
+        screen.getByRole('menuitem', { name: 'Usuń zaznaczone (3)' }),
+      );
+      await user.click(await screen.findByRole('button', { name: 'Usuń' }));
+
+      await screen.findByText('NOTIFICATION_DELETE_FAILED');
+      expect(rows()).toHaveLength(3);
+    });
   });
 });

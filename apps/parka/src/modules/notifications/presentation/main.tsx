@@ -1,14 +1,17 @@
 import { useEffect } from 'react';
-import { CheckCheck } from 'lucide-react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { ErrorState } from '@/shared/ui/error-state';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
 import { ScreenHeader } from '@/shared/ui/layout';
 import { Toast } from '@/shared/ui/toast';
+import { NOTIFICATIONS_RETENTION_DAYS } from '@schemas/notifications';
 import { ERROR_CODES } from '../configuration/constraints';
 import { Provider, useContext } from './context';
+import { DeleteDialog } from './delete-dialog';
+import { HeaderActions } from './header-actions';
 import { Router } from './router';
+import { SelectionBar } from './selection-bar';
 
 const unreadLabel = (count: number): string =>
   count === 0
@@ -20,6 +23,7 @@ const unreadLabel = (count: number): string =>
 const NotificationsView = () => {
   const ctx = useContext();
   const unread = ctx.useUnreadCount();
+  const selecting = ctx.useSelecting();
   const total = ctx.useNotifications().length;
   const initializing = ctx.useInitializing();
   const isLoading = ctx.useIsLoading();
@@ -39,20 +43,7 @@ const NotificationsView = () => {
         <ScreenHeader
           title="Powiadomienia"
           backHref={APP_ROUTER.settings()}
-          action={
-            <button
-              type="button"
-              data-e2e="notifications:mark-all-read"
-              disabled={unread === 0}
-              onClick={ctx.markAllRead}
-              className="pressable inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full border border-line bg-card px-3.5 text-xs font-semibold text-ink shadow-card hover:bg-brand-softer disabled:text-ink-soft disabled:opacity-60 disabled:hover:bg-card"
-            >
-              <CheckCheck className="h-4 w-4" aria-hidden="true" />
-              <span className="max-sm:sr-only">
-                Oznacz wszystkie jako przeczytane
-              </span>
-            </button>
-          }
+          action={<HeaderActions />}
         />
       </div>
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 px-4 pb-6 pt-2 md:gap-4 md:px-8">
@@ -65,8 +56,17 @@ const NotificationsView = () => {
             {unreadLabel(unread)}
           </p>
         )}
+        {selecting ? <SelectionBar /> : null}
         <Router />
+        <p
+          data-e2e="notifications:retention-note"
+          className="text-center text-xs text-ink-soft"
+        >
+          Powiadomienia starsze niż {NOTIFICATIONS_RETENTION_DAYS} dni są
+          usuwane automatycznie.
+        </p>
       </main>
+      <DeleteDialog />
       {notice ? (
         <Toast
           key={notice.id}

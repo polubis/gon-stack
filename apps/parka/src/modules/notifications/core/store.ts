@@ -1,5 +1,5 @@
 import { atom } from '@repo/react-kit/supa-store';
-import type { Notice, Notification } from '../domain/models';
+import type { Notice, Notification, NotificationId } from '../domain/models';
 
 export const createStore = () => {
   const $notifications = atom<Notification[]>([]);
@@ -12,6 +12,9 @@ export const createStore = () => {
   const $moreError = atom<string | null>(null);
   const $error = atom<string | null>(null);
   const $notice = atom<Notice | null>(null);
+  /** Select mode: rows show a checkbox and the header offers the bulk menu. */
+  const $selecting = atom(false);
+  const $selected = atom<NotificationId[]>([]);
 
   return {
     $notifications,
@@ -23,6 +26,8 @@ export const createStore = () => {
     $moreError,
     $error,
     $notice,
+    $selecting,
+    $selected,
   };
 };
 

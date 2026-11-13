@@ -16,6 +16,15 @@ export type NotificationsE2eId =
   | 'notifications:skeleton-card'
   | 'notifications:diff-removed'
   | 'notifications:diff-added'
+  | 'notifications:select-toggle'
+  | 'notifications:actions-trigger'
+  | 'notifications:actions-menu'
+  | 'notifications:delete-selected'
+  | 'notifications:selection-bar'
+  | 'notifications:select-all'
+  | 'notifications:cancel-select'
+  | 'notifications:retention-note'
+  | `notifications:select:${string}`
   | `notifications:row:${string}`
   | `notifications:mark-read:${string}`
   | `notifications:read:${string}`
