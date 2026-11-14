@@ -36,10 +36,16 @@ const taskKey = (task: { id: string }) => task.id;
 
 /** One day card: tasks in time order (all-day first); changes animate in place. */
 const DayCard = ({ day, index }: { day: string; index: number }) => {
-  const { visibleTasks: tasks, priorities, now, initializing } = useContext();
+  const {
+    visibleTasks: tasks,
+    priorities,
+    now,
+    initializing,
+    filters,
+  } = useContext();
   const scope = `${day}:${initializing}`;
   const today = day === now.day;
-  const ofDay = tasksOn(tasks, day, priorities);
+  const ofDay = tasksOn(tasks, day, priorities, filters.sort);
   const timed = ofDay.filter(isTimed);
   const nowIndex = today ? nowIndexOf(timed, now.time) : -1;
   const allDayRows = useListChanges(

@@ -17,9 +17,10 @@ export const Main = () => {
     anchor,
     now,
     initializing,
+    filters,
   } = useContext();
   const scope = `${anchor}:${initializing}`;
-  const day = tasksOn(tasks, anchor, priorities);
+  const day = tasksOn(tasks, anchor, priorities, filters.sort);
   const scheduled = day.filter(isTimed);
   const unscheduled = day.filter((task) => task.at === null);
   const scheduledRows = useListChanges(scheduled, taskKey, scope);
