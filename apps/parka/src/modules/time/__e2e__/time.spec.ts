@@ -24,6 +24,7 @@ import {
  */
 
 const EMAIL = `e2e-time-${Date.now()}@parka.test`;
+const VIEWS_EMAIL = `e2e-time-views-${Date.now()}@parka.test`;
 const RECURRING_EMAIL = `e2e-time-recurring-${Date.now()}@parka.test`;
 const BACKLOG_EMAIL = `e2e-time-backlog-${Date.now()}@parka.test`;
 const DESCRIPTION_EMAIL = `e2e-time-description-${Date.now()}@parka.test`;
@@ -142,6 +143,11 @@ const makePhoto = async (
 const commands = {
   'i register a new account': async (ctx) => {
     await registerAndConfirm(ctx, EMAIL, PASSWORD);
+    await ctx.page.waitForLoadState('networkidle');
+  },
+
+  'i register an account for the views': async (ctx) => {
+    await registerAndConfirm(ctx, VIEWS_EMAIL, PASSWORD);
     await ctx.page.waitForLoadState('networkidle');
   },
 
@@ -319,13 +325,21 @@ const commands = {
     getByE2ePrefix,
   }) => {
     const more = taskMore(getByE2ePrefix, 'Raport E2E');
+    const menu = page.getByRole('menu');
+    // Escape is only handled once focus is inside the menu; pressed earlier it
+    // is lost and the open menu then blocks the next click.
+    const closeMenu = async () => {
+      await expect(menu.getByRole('menuitem').first()).toBeFocused();
+      await page.keyboard.press('Escape');
+      await expect(menu).toBeHidden();
+    };
     await more.click();
     await expect(getByE2e('time:task-row-device').first()).toBeVisible();
-    await page.keyboard.press('Escape');
+    await closeMenu();
     await reload(page);
     await more.click();
     await expect(getByE2e('time:task-row-device').first()).toBeVisible();
-    await page.keyboard.press('Escape');
+    await closeMenu();
     await taskEdit(getByE2ePrefix, 'Raport E2E').click();
     await expect(getByE2e('time:task-device')).toContainText('device-');
     await getByE2e('time:task-cancel').click();
@@ -1163,6 +1177,20 @@ test('time works against the real Supabase backend', async ({ e2e }) => {
     ['i add a task and it survives a reload'],
     ['the task keeps the device it was created on'],
     ['i complete the task and it stays done after a reload'],
+    ['i rename the task'],
+  );
+});
+
+// Split off the first flow: one test covering both took about 27 s of the 30 s
+// test timeout on an idle machine, and timed out whenever the backend was busy.
+test('time views and deleting a task work against the real Supabase backend', async ({
+  e2e,
+}) => {
+  await interpreter(commands, e2e)(
+    ['i register an account for the views'],
+    ['the day view of an empty account names the day'],
+    ['the new account starts with default categories and priorities'],
+    ['i add a task and it survives a reload'],
     ['i rename the task'],
     ['the month view marks the day and the year view counts it'],
     ['the next day is empty and navigation keeps the date in the address'],

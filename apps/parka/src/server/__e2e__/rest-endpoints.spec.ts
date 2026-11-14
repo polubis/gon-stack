@@ -91,6 +91,10 @@ const categoryIdByPage = new WeakMap<Page, string>();
 const commands = {
   'i register and sign in': async (ctx) => {
     await registerAndConfirm(ctx, EMAIL, PASSWORD);
+    // The signed-in app listens for data changes and refetches with its zone,
+    // which charges due recurring payments. Leave it so only this spec's own
+    // requests read the account.
+    await ctx.page.goto('about:blank');
   },
 
   'a new account has no categories': async ({ page }) => {

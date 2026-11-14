@@ -1,3 +1,4 @@
+import { availableParallelism } from 'node:os';
 import { devices, type PlaywrightTestConfig } from '@playwright/test';
 
 export type CreatePlaywrightConfigOptions = {
@@ -30,6 +31,9 @@ export const createPlaywrightConfig = ({
     testMatch,
     testIgnore,
     fullyParallel: true,
+    // Playwright defaults to half the cores; the specs are I/O bound against one
+    // server, so one worker per core cuts wall time without loosening any test.
+    workers: Math.max(2, availableParallelism()),
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,
     reporter: 'html',
