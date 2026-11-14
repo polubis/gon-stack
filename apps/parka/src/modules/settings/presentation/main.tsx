@@ -27,6 +27,7 @@ import {
 import type { Settings } from '../domain/models';
 import { DevicesCard } from './devices-card';
 import { Provider, useContext } from './context';
+import { setKnownDeviceCount, useOwnerEyebrow } from './owner-eyebrow';
 import { SettingsSkeleton } from './settings-skeleton';
 
 const ThemeLabel = ({
@@ -179,20 +180,27 @@ const SettingsView = () => {
   const initializing = ctx.useInitializing();
   const isLoading = ctx.useIsLoading();
 
+  const eyebrow = useOwnerEyebrow('Twoje');
+  const deviceCount = settings?.devices.length;
+
   useEffect(() => {
     ctx.load();
   }, [ctx]);
 
+  useEffect(() => {
+    if (deviceCount !== undefined) setKnownDeviceCount(deviceCount);
+  }, [deviceCount]);
+
   return (
     <div
       data-e2e="settings:main"
-      className="relative mx-auto flex w-full max-w-6xl flex-1 animate-view-enter flex-col motion-reduce:animate-none"
+      className="relative mx-auto flex w-full max-w-7xl flex-1 animate-view-enter flex-col motion-reduce:animate-none"
     >
       <LoadingBanner active={isLoading && !initializing} />
       <div className="md:px-4 lg:px-6 xl:px-12">
         <ScreenHeader
           title="Ustawienia"
-          eyebrow="Twoje"
+          eyebrow={eyebrow}
           action={<UnreadLink />}
         />
       </div>
