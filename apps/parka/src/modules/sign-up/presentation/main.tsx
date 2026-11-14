@@ -49,7 +49,7 @@ const SignUpView = () => {
         </p>
 
         <form className="mt-6 space-y-4" onSubmit={submit} noValidate>
-          <Field label="E-mail">
+          <Field label="E-mail" required>
             <ClearableInput
               type="email"
               name="email"
@@ -60,7 +60,7 @@ const SignUpView = () => {
               placeholder="twoj@email.com"
             />
           </Field>
-          <Field label="Hasło">
+          <Field label="Hasło" required>
             <ClearableInput
               type="password"
               name="password"

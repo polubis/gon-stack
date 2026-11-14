@@ -609,6 +609,10 @@ Skill ${ref('evidence')}, key = task id, out \`.evidences/<task-id>/\`.
         importance: 'A',
         doc: 'Proper empty states display with pattern: `icon:title:description:primary-action`',
       },
+      'ux-required-mark': {
+        importance: 'A',
+        doc: 'Form labels of required fields get a red asterisk (aria-hidden, `Field required`); optional fields get none',
+      },
       'ux-change-transitions': {
         importance: 'A',
         doc: 'Every create/update/delete shows a transition on the changed item: create fades + slides in, update flashes a brief highlight, delete fades + slides out and neighbours glide into the gap. All disabled with `motion-reduce`, no jumping UI',

@@ -100,7 +100,7 @@ const Form = ({ base }: FormProps) => {
           data-e2e="categories:form"
           className="space-y-6"
         >
-          <Field label="Nazwa">
+          <Field label="Nazwa" required>
             <ClearableInput
               leading={
                 <span

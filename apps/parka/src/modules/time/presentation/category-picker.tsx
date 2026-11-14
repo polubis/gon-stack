@@ -13,7 +13,7 @@ export const CategoryPicker = ({
 }) => {
   const { categories } = useContext();
   return (
-    <Field label="Kategoria">
+    <Field label="Kategoria" required>
       <Select
         data-e2e="time:category-select"
         value={value ?? ''}

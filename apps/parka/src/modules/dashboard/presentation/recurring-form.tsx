@@ -89,7 +89,7 @@ export const RecurringForm = ({
       className="space-y-3"
       data-e2e="dashboard:recurring-form"
     >
-      <Field label="Nazwa">
+      <Field label="Nazwa" required>
         <ClearableInput
           required
           value={name}
@@ -99,6 +99,7 @@ export const RecurringForm = ({
         />
       </Field>
       <Field
+        required
         label="Koszt płatności"
         hint={hasProducts ? 'Suma produktów poniżej.' : undefined}
       >
@@ -122,6 +123,7 @@ export const RecurringForm = ({
         />
       </Field>
       <Field
+        required
         label="Pierwsza płatność"
         hint="Wydatek powstaje dopiero, gdy minie dzień płatności. Wcześniej jest tylko nadchodzący i nie liczy się do podsumowania."
       >
@@ -146,6 +148,7 @@ export const RecurringForm = ({
         />
       </Field>
       <Field
+        required={!hasProducts}
         label="Kategoria"
         hint={hasProducts ? 'Wynika z kategorii produktów.' : undefined}
       >

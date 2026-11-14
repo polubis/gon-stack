@@ -105,7 +105,7 @@ export const RecurringForm = ({ draft }: { draft: ReceiptDraft | null }) => {
             Wydatek powstanie w dniu płatności. Do tego czasu będzie tylko
             nadchodzący i nie wliczy się do podsumowania ani limitów.
           </p>
-          <Field label="Nazwa">
+          <Field label="Nazwa" required>
             <ClearableInput
               required
               value={name}
@@ -115,6 +115,7 @@ export const RecurringForm = ({ draft }: { draft: ReceiptDraft | null }) => {
             />
           </Field>
           <Field
+            required
             label="Koszt płatności"
             hint={hasProducts ? 'Suma produktów poniżej.' : undefined}
           >
@@ -137,6 +138,7 @@ export const RecurringForm = ({ draft }: { draft: ReceiptDraft | null }) => {
             />
           </Field>
           <Field
+            required
             label="Pierwsza płatność"
             hint="Płatność w przeszłości od razu nalicza minione terminy."
           >
@@ -161,6 +163,7 @@ export const RecurringForm = ({ draft }: { draft: ReceiptDraft | null }) => {
             />
           </Field>
           <Field
+            required={!hasProducts}
             label="Kategoria"
             hint={hasProducts ? 'Wynika z kategorii produktów.' : undefined}
           >

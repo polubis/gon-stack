@@ -40,7 +40,7 @@ export const PriorityDialog = ({ modal }: { modal: string }) => {
       description="Nazwa i ważność od 1 do 10: 8-10 wysoki, 4-7 średni, 1-3 niski."
     >
       <form onSubmit={submit} noValidate className="space-y-5">
-        <Field label="Nazwa">
+        <Field label="Nazwa" required>
           <ClearableInput
             type="text"
             value={name}

@@ -61,7 +61,7 @@ export const CategoryDialog = ({
       description="Nazwa, kolor i ikona kategorii."
     >
       <form onSubmit={submit} noValidate className="space-y-5">
-        <Field label="Nazwa">
+        <Field label="Nazwa" required>
           <ClearableInput
             leading={
               <span

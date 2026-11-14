@@ -179,7 +179,7 @@ export const TaskDialog = ({
       }
     >
       <form onSubmit={submit} noValidate className="flex flex-col gap-4">
-        <Field label="Nazwa">
+        <Field label="Nazwa" required>
           <ClearableInput
             type="text"
             data-e2e="time:task-name"
@@ -207,7 +207,7 @@ export const TaskDialog = ({
         <CategoryPicker value={categoryId} onChange={setCategoryId} />
         <PriorityPicker value={priorityId} onChange={setPriorityId} />
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Dzień">
+          <Field label="Dzień" required>
             <Input
               type="date"
               value={day}
@@ -215,7 +215,7 @@ export const TaskDialog = ({
               onChange={(e) => setDay(e.target.value)}
             />
           </Field>
-          <Field label="Godzina">
+          <Field label="Godzina" required={!allDay}>
             <Input
               type="time"
               value={at}

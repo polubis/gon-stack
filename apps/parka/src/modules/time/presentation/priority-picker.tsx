@@ -20,6 +20,7 @@ export const PriorityPicker = ({
   const { priorities } = useContext();
   return (
     <Field
+      required
       label="Priorytet"
       action={
         <button

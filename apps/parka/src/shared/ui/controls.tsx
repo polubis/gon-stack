@@ -222,20 +222,32 @@ export const Field = ({
   children,
   hint,
   action,
+  required,
 }: {
   label: string;
   children: React.ReactNode;
   hint?: string;
+  /** Marks the field as required: red asterisk after the label. Optional fields get none. */
+  required?: boolean;
   /** Control shown on the label row, right-aligned (e.g. a "new" link). */
   action?: React.ReactNode;
 }) => {
   const id = useId();
+  // Pseudo-element, so the asterisk stays out of the label text and accessible name.
+  const mark = required
+    ? "after:ml-0.5 after:text-danger after:content-['*']"
+    : undefined;
+  const marked = { 'data-required': required ? '' : undefined };
   return (
     <FieldContext.Provider value={{ id, label }}>
       <div className="block">
         {action ? (
           <div className="mb-1 flex items-center justify-between gap-2">
-            <label htmlFor={id} className="text-sm font-medium text-ink-soft">
+            <label
+              htmlFor={id}
+              {...marked}
+              className={cn('text-sm font-medium text-ink-soft', mark)}
+            >
               {label}
             </label>
             {action}
@@ -243,7 +255,8 @@ export const Field = ({
         ) : (
           <label
             htmlFor={id}
-            className="mb-1 block text-sm font-medium text-ink-soft"
+            {...marked}
+            className={cn('mb-1 block text-sm font-medium text-ink-soft', mark)}
           >
             {label}
           </label>

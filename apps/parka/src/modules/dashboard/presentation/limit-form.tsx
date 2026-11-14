@@ -102,7 +102,7 @@ export const LimitForm = ({
         className="space-y-3"
         data-e2e="dashboard:limit-form"
       >
-        <Field label="Kategoria">
+        <Field label="Kategoria" required>
           <Select
             required
             disabled={Boolean(limit)}
@@ -112,7 +112,7 @@ export const LimitForm = ({
             onValueChange={setScope}
           />
         </Field>
-        <Field label="Limit miesięczny">
+        <Field label="Limit miesięczny" required>
           <NumberInput
             required
             value={shownAmount}
@@ -121,6 +121,7 @@ export const LimitForm = ({
           />
         </Field>
         <Field
+          required
           label="Powiadom od (% limitu)"
           hint="Powiadomienie w aplikacji dostaniesz zawsze. Push, jeśli włączysz go w ustawieniach."
         >
