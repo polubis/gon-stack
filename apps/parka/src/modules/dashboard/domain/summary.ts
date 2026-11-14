@@ -1,13 +1,7 @@
 import { summarizeDashboard } from '@/shared/dashboard-summary/summarize';
 import { shiftPeriod } from '@/shared/period/period';
-import type {
-  Category,
-  CategoryId,
-  Expense,
-  Limit,
-  Period,
-  Summary,
-} from './models';
+import type { Category, CategoryId, Expense, Limit, Summary } from './models';
+import type { Period } from '@/shared/period/period';
 
 /**
  * Statistics of `period` counted from the loaded expenses: moving between

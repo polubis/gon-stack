@@ -10,10 +10,10 @@ import type {
   ExpenseId,
   Limit,
   LimitId,
-  Period,
   Recurring,
   RecurringId,
 } from '../domain/models';
+import type { Period } from '@/shared/period/period';
 
 export const createFacade = (store: Store, trigger: Registry['trigger']) => {
   return {
