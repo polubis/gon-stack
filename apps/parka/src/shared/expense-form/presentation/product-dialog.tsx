@@ -59,6 +59,7 @@ export const ProductDialog = ({
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
               <Field
+                required
                 label="Nazwa produktu"
                 hint={invalid ? 'Podaj nazwę produktu.' : undefined}
               >

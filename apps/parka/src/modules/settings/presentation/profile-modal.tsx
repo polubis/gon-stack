@@ -43,7 +43,7 @@ const ProfileForm = ({
         if (canSave) onSave(next);
       }}
     >
-      <Field label="Imię i nazwisko">
+      <Field label="Imię i nazwisko" required>
         <ClearableInput
           value={name}
           autoComplete="name"

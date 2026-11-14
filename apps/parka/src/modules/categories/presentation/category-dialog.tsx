@@ -52,7 +52,7 @@ export const CategoryDialog = ({ modal }: { modal: string }) => {
         data-e2e="categories:form"
         className="space-y-5"
       >
-        <Field label="Nazwa">
+        <Field label="Nazwa" required>
           <ClearableInput
             leading={
               <span

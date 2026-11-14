@@ -133,7 +133,7 @@ export const ExpenseForm = ({
           ) : null}
 
           <Card className="space-y-3">
-            <Field label="Sklep">
+            <Field label="Sklep" required>
               <Typeahead
                 required
                 field="merchant"
@@ -146,6 +146,7 @@ export const ExpenseForm = ({
               />
             </Field>
             <Field
+              required
               label="Kwota"
               hint={hasProducts ? 'Suma produktów poniżej.' : undefined}
             >
@@ -157,7 +158,7 @@ export const ExpenseForm = ({
                 onValueChange={setAmount}
               />
             </Field>
-            <Field label="Data i godzina">
+            <Field label="Data i godzina" required>
               <Input
                 type="datetime-local"
                 required
@@ -167,6 +168,7 @@ export const ExpenseForm = ({
               />
             </Field>
             <Field
+              required={!hasProducts}
               label="Kategoria"
               hint={hasProducts ? 'Wynika z kategorii produktów.' : undefined}
             >

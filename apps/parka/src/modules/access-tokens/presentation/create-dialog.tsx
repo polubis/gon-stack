@@ -43,7 +43,11 @@ export const CreateDialog = ({ modal }: { modal: string }) => {
           ctx.create(name.trim(), toTtlDays(ttl));
         }}
       >
-        <Field label="Nazwa" hint="Np. nazwa aplikacji, z której korzystasz.">
+        <Field
+          label="Nazwa"
+          required
+          hint="Np. nazwa aplikacji, z której korzystasz."
+        >
           <ClearableInput
             value={name}
             maxLength={NAME_MAX_LENGTH}

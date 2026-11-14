@@ -109,7 +109,7 @@ export const BacklogAddDialog = ({
       }
     >
       <form onSubmit={submit} noValidate className="flex flex-col gap-4">
-        <Field label="Nazwa">
+        <Field label="Nazwa" required>
           <ClearableInput
             type="text"
             data-e2e="time:backlog-name"
