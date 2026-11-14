@@ -18,4 +18,14 @@ describe('bottom app nav', () => {
       'aria-current',
     );
   });
+
+  it('shows icons only, no visible section titles', () => {
+    render(<AppNav active="time" />);
+
+    expect(screen.getByRole('link', { name: 'Czas' })).toHaveTextContent(
+      /^Czas$/,
+    );
+    expect(screen.getByText('Czas')).toHaveClass('sr-only');
+    expect(screen.getByText('Finanse')).toHaveClass('sr-only');
+  });
 });

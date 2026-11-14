@@ -283,7 +283,8 @@ describe('dashboard screen', () => {
 
     await screen.findByText('Limity');
     const dashboardCalls = calls.filter(
-      ({ url }) => !url.includes('/api/notifications'),
+      ({ url }) =>
+        !url.includes('/api/notifications') && !url.includes('/api/settings'),
     );
     expect(dashboardCalls.map(({ url }) => url.split('?')[0]).sort()).toEqual([
       '/api/avatar/',

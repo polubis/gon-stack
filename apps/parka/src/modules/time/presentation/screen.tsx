@@ -17,6 +17,7 @@ import {
   type Period,
 } from '@/shared/period/period';
 import { navigateTo } from '@/shared/router/navigation';
+import { useOwnerEyebrow } from '@/modules/settings/presentation/owner-eyebrow';
 import {
   ERROR_CODES,
   TIME_KINDS,
@@ -98,6 +99,7 @@ const Screen = ({ kind, children }: Props) => {
     load,
     dismissNotice,
   } = useContext();
+  const eyebrow = useOwnerEyebrow('Twój');
   const period = periodContaining(kind, anchor);
   const { gesture, contentRef, go } = usePeriodSwipe({
     period,
@@ -117,13 +119,13 @@ const Screen = ({ kind, children }: Props) => {
   return (
     <div
       data-e2e={id}
-      className="relative flex flex-1 animate-view-zoom flex-col overflow-x-clip motion-reduce:animate-none"
+      className="relative mx-auto flex w-full max-w-7xl flex-1 animate-view-zoom flex-col overflow-x-clip motion-reduce:animate-none"
     >
       <LoadingBanner active={isLoading && !initializing} />
       <div className="md:px-4 lg:px-6 xl:px-12">
         <ScreenHeader
           title="Czas"
-          eyebrow="Twój"
+          eyebrow={eyebrow}
           action={
             <>
               <BacklogButton />

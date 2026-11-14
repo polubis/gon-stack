@@ -27,6 +27,8 @@ import { LimitsCard } from './limits-card';
 import { expenseModal, expenseOfModal } from './modal-ids';
 import { MonthExpenses } from './month-expenses';
 import { Header } from './header';
+import { PeriodRangeDialog } from './period-range-dialog';
+import { PeriodControl } from '@/shared/period-control/presentation/period-control';
 import { TotalHero } from './total-hero';
 import { RecurringDetail } from './recurring-detail';
 import { upcomingCharges } from './selectors';
@@ -159,18 +161,19 @@ const DashboardView = () => {
   return (
     <div
       data-e2e="dashboard:main"
-      className="relative flex flex-1 animate-view-enter flex-col overflow-x-clip motion-reduce:animate-none"
+      className="relative mx-auto flex w-full max-w-7xl flex-1 animate-view-enter flex-col overflow-x-clip motion-reduce:animate-none"
     >
       <LoadingBanner active={loading && ready} />
+      <Header avatar={avatar} />
       <main
         {...gesture}
-        className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-3 px-4 pb-24 pt-4 md:gap-4 md:px-8 md:pb-6 lg:px-10 lg:pt-8 xl:px-16"
+        className="flex flex-1 flex-col gap-3 px-4 pb-24 pt-2 md:gap-4 md:px-8 md:pb-6 lg:px-10 xl:px-16"
       >
-        <Header
+        <PeriodControl
           period={period}
           today={today}
-          avatar={avatar}
-          onPeriodChange={go}
+          onChange={go}
+          renderRange={(range) => <PeriodRangeDialog {...range} />}
         />
 
         <div
