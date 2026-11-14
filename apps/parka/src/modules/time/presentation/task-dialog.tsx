@@ -46,6 +46,9 @@ type Props = {
   startRepeating?: boolean;
 };
 
+const intervalPhrase = (interval: TaskRecurringInterval): string =>
+  (INTERVALS.find((i) => i.value === interval)?.label ?? '').toLowerCase();
+
 /** Add / edit task popup; saving is optimistic (see the store handlers). */
 export const TaskDialog = ({
   modal,
@@ -101,8 +104,7 @@ export const TaskDialog = ({
   const step = steps.includes(pickedStep) ? pickedStep : IN_PROGRESS;
   const [repeat, setRepeat] = useState(startRepeating);
   const [interval, setInterval] = useState<TaskRecurringInterval>('weekly');
-  // A deadline makes the task one-off; the form says so instead of repeating.
-  const [deadlineNotice, setDeadlineNotice] = useState(false);
+  const [endDate, setEndDate] = useState('');
   const [touched, setTouched] = useState(false);
 
   // The model code is async; have it by the time the user submits.
@@ -113,8 +115,13 @@ export const TaskDialog = ({
   const titleError = title.trim() === '' ? 'Podaj nazwę zadania.' : null;
   const dayError = day === '' ? 'Podaj dzień.' : null;
   const atError = !allDay && at === '' ? 'Podaj godzinę.' : null;
+  const endError =
+    repeat && endDate !== '' && endDate < day
+      ? 'Koniec nie może być przed pierwszym dniem.'
+      : null;
   const invalid =
     titleError !== null ||
+    endError !== null ||
     dayError !== null ||
     atError !== null ||
     categoryId === undefined ||
@@ -140,7 +147,7 @@ export const TaskDialog = ({
         at: allDay ? null : at,
         interval,
         startDate: day,
-        endDate: null,
+        endDate: endDate || null,
       });
       closeModal(modal);
       return;
@@ -250,10 +257,7 @@ export const TaskDialog = ({
                 label="Powtarzaj"
                 data-e2e="time:recurring-toggle"
                 checked={repeat}
-                onChange={(value) => {
-                  setRepeat(value);
-                  setDeadlineNotice(false);
-                }}
+                onChange={setRepeat}
               />
             </div>
             {repeat ? (
@@ -268,33 +272,34 @@ export const TaskDialog = ({
                     }
                   />
                 </Field>
-                <Field label="Termin (opcjonalnie)">
+                <Field label="Koniec (opcjonalnie)">
                   <Input
                     type="date"
-                    value=""
+                    value={endDate}
                     min={day}
                     data-e2e="time:recurring-end"
-                    onChange={(e) => {
-                      if (e.target.value === '') return;
-                      setRepeat(false);
-                      setDeadlineNotice(true);
-                    }}
+                    aria-invalid={touched && endError !== null}
+                    onChange={(e) => setEndDate(e.target.value)}
                   />
                 </Field>
               </div>
             ) : null}
-            {deadlineNotice && !repeat ? (
+            {touched && endError ? (
+              <span role="alert" className="-mt-3 block text-xs text-danger">
+                {endError}
+              </span>
+            ) : null}
+            {repeat && endDate !== '' && endError === null ? (
               <span
                 role="status"
-                data-e2e="time:recurring-deadline-notice"
+                data-e2e="time:recurring-end-notice"
                 className="-mt-3 flex items-start gap-1.5 text-xs text-muted"
               >
                 <Info
                   className="mt-0.5 h-3.5 w-3.5 shrink-0"
                   aria-hidden="true"
                 />
-                Zadanie z terminem nie jest cykliczne. Zapiszemy je jako
-                jednorazowe.
+                {`Zadanie dodamy ${intervalPhrase(interval)} od ${day} do ${endDate} włącznie.`}
               </span>
             ) : null}
           </>

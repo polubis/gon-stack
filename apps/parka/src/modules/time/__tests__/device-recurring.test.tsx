@@ -195,28 +195,52 @@ describe('recurring tasks', () => {
     expect(dialog.queryByRole('switch', { name: 'Powtarzaj' })).toBeNull();
   });
 
-  it('saves a task with a deadline as a one-off and says so', async () => {
+  it('keeps a task repeating until the end day and says so', async () => {
     const user = userEvent.setup();
     renderTime();
     const dialog = await openAddDialog(user);
     await user.type(dialog.getByRole('textbox', { name: 'Nazwa' }), 'Siłownia');
     await user.click(dialog.getByRole('switch', { name: 'Powtarzaj' }));
     await user.type(
-      dialog.getByLabelText('Termin (opcjonalnie)'),
-      '2026-10-25',
+      dialog.getByLabelText('Koniec (opcjonalnie)'),
+      '2026-11-25',
     );
 
     expect(
       await dialog.findByText(
-        'Zadanie z terminem nie jest cykliczne. Zapiszemy je jako jednorazowe.',
+        'Zadanie dodamy co tydzień od 2026-10-20 do 2026-11-25 włącznie.',
       ),
     ).toBeVisible();
-    expect(dialog.getByRole('switch', { name: 'Powtarzaj' })).not.toBeChecked();
+    expect(dialog.getByRole('switch', { name: 'Powtarzaj' })).toBeChecked();
 
     await user.click(dialog.getByRole('button', { name: 'Dodaj' }));
     expect(await row('Siłownia')).toBeVisible();
-    expect(backend.writes()[0]).not.toHaveProperty('body.interval');
-    expect(screen.queryByText('Cykliczne')).toBeNull();
+    expect(backend.writes()[0]).toMatchObject({
+      body: {
+        interval: 'weekly',
+        startDate: '2026-10-20',
+        endDate: '2026-11-25',
+      },
+    });
+    expect(screen.getByText('Cykliczne')).toBeInTheDocument();
+  });
+
+  it('rejects an end before the first day', async () => {
+    const user = userEvent.setup();
+    renderTime();
+    const dialog = await openAddDialog(user);
+    await user.type(dialog.getByRole('textbox', { name: 'Nazwa' }), 'Siłownia');
+    await user.click(dialog.getByRole('switch', { name: 'Powtarzaj' }));
+    await user.type(
+      dialog.getByLabelText('Koniec (opcjonalnie)'),
+      '2026-10-01',
+    );
+    await user.click(dialog.getByRole('button', { name: 'Dodaj' }));
+
+    expect(
+      await dialog.findByText('Koniec nie może być przed pierwszym dniem.'),
+    ).toBeVisible();
+    expect(backend.writes()).toHaveLength(0);
   });
 
   const openSeriesEnd = async (user: ReturnType<typeof userEvent.setup>) => {
