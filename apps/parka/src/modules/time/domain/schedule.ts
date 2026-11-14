@@ -1,4 +1,5 @@
 import { addDays, periodContaining } from '@/shared/period/period';
+import type { TaskSort } from './filters';
 import type { Priority, Task, TimeKind } from './models';
 import { priorityWeight } from './priority';
 
@@ -24,15 +25,30 @@ export const sortTasks = (
     );
   });
 
+const byTitle = (a: Task, b: Task): number =>
+  a.title.localeCompare(b.title, 'pl');
+
+/** Tasks of a day in the chosen order (`time` is the default `sortTasks`). */
 export const tasksOn = (
   tasks: readonly Task[],
   day: string,
   priorities: readonly Priority[],
-): Task[] =>
-  sortTasks(
+  sort: TaskSort = 'time',
+): Task[] => {
+  const ofDay = sortTasks(
     tasks.filter((task) => task.day === day),
     priorities,
   );
+  if (sort === 'title') return ofDay.sort(byTitle);
+  // Stable: ties keep the time order.
+  if (sort === 'priority')
+    return ofDay.sort(
+      (a, b) =>
+        priorityWeight(priorities, b.priorityId) -
+        priorityWeight(priorities, a.priorityId),
+    );
+  return ofDay;
+};
 
 export const isTimed = (task: Task): task is Task & { at: string } =>
   task.at !== null;

@@ -8,12 +8,14 @@ import { CategoriesDialog } from './categories-dialog';
 import { CategoryDialog } from './category-dialog';
 import { useContext } from './context';
 import { DeleteDialog } from './delete-dialog';
+import { FiltersDrawer } from './filters-drawer';
 import { BacklogAddDialog } from './backlog-add-dialog';
 import { BacklogDialog } from './backlog-dialog';
 import {
   BACKLOG_MODAL,
   NEW_BACKLOG_MODAL,
   CATEGORIES_MODAL,
+  FILTERS_MODAL,
   STATUSES_MODAL,
   deletedCategoryIdOf,
   deletedIdOf,
@@ -92,6 +94,8 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
       );
     if (modal === BACKLOG_MODAL)
       return <BacklogDialog key={modal} modal={modal} />;
+    if (modal === FILTERS_MODAL)
+      return <FiltersDrawer key={modal} modal={modal} />;
     if (modal === NEW_BACKLOG_MODAL)
       return <BacklogAddDialog key={modal} modal={modal} />;
     if (modal === NEW_CATEGORY_MODAL)

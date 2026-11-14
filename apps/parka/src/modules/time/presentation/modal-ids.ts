@@ -7,6 +7,9 @@ export const NEW_RECURRING_TASK_MODAL = 'task-new-recurring';
 export const BACKLOG_MODAL = 'backlog';
 export const NEW_BACKLOG_MODAL = 'backlog-new';
 
+/** Side panel with the filters and sorting of the task lists. */
+export const FILTERS_MODAL = 'filters';
+
 /** Fullscreen editor of a task description, stacked over the task form. */
 export const DESCRIPTION_EDITOR_MODAL = 'description-editor';
 

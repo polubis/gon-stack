@@ -1149,29 +1149,23 @@ const commands = {
     await expect(box).toBeChecked();
   },
 
-  'the open-only switch hides done tasks and keeps the choice after a reload':
+  'the filters panel hides done tasks and keeps the choice after a reload':
     async ({ page, getByE2e, getByE2ePrefix }) => {
-      const toggle = getByE2e('time:open-only-toggle');
       await expect(taskInfo(getByE2ePrefix, 'Zrobione E2E')).toBeVisible();
-      await toggle.click();
-      await expect(toggle).toHaveAttribute('aria-checked', 'true');
+      await getByE2e('time:filters-open').click();
+      const drawer = getByE2e('time:filters-drawer');
+      await drawer.getByRole('button', { name: 'Niezrobione' }).click();
+      await getByE2e('time:filters-apply').click();
+      await expect(drawer).toHaveCount(0);
       await expect(taskInfo(getByE2ePrefix, 'Zrobione E2E')).toHaveCount(0);
       await expect(taskInfo(getByE2ePrefix, 'Otwarte E2E')).toBeVisible();
       await reload(page);
-      await expect(toggle).toHaveAttribute('aria-checked', 'true');
       await expect(taskInfo(getByE2ePrefix, 'Zrobione E2E')).toHaveCount(0);
       await expect(taskInfo(getByE2ePrefix, 'Otwarte E2E')).toBeVisible();
+      await expect(getByE2e('time:filters-open')).toHaveAccessibleName(
+        'Filtry, aktywne: 1',
+      );
     },
-  'the open-only row hugs the list edge on a wide screen': async ({
-    page,
-    getByE2e,
-  }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
-    const row = await getByE2e('time:open-only').boundingBox();
-    const toggle = await getByE2e('time:open-only-toggle').boundingBox();
-    expect(row && toggle).toBeTruthy();
-    expect(toggle!.x - row!.x).toBeLessThan(200);
-  },
 } satisfies CommandRegistry<Ctx>;
 
 test('time works against the real Supabase backend', async ({ e2e }) => {
@@ -1275,16 +1269,13 @@ test('a modal opened from a popover action stays open on a phone', async ({
   );
 });
 
-test('the open-only filter hides done tasks on the real backend', async ({
+test('the filters panel hides done tasks on the real backend', async ({
   e2e,
 }) => {
   await interpreter(commands, e2e)(
     ['i register an account for the open-only filter'],
     ['i add a done task and an open task to the day'],
-    [
-      'the open-only switch hides done tasks and keeps the choice after a reload',
-    ],
-    ['the open-only row hugs the list edge on a wide screen'],
+    ['the filters panel hides done tasks and keeps the choice after a reload'],
   );
 });
 

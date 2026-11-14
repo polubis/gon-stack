@@ -13,6 +13,12 @@ import {
   VIEW_PARAM,
   type TimeView,
 } from '../configuration/constraints';
+import {
+  applyFilters,
+  filtersFromParams,
+  filtersToParams,
+  type TaskFilters,
+} from '../domain/filters';
 import { sortByUsage } from '../domain/category-usage';
 import { newCategoryId, newPriorityId } from '../domain/ids';
 import type { Category, Priority } from '../domain/models';
@@ -28,24 +34,8 @@ const dateFromUrl = (): string => {
 const viewFromUrl = (): TimeView =>
   readQueryParam(VIEW_PARAM) === 'stats' ? 'stats' : 'tasks';
 
-/** Per-viewer preference: remembered across visits, safe to lose. */
-const OPEN_ONLY_KEY = 'parka:time-open-only';
-
-const openOnlyFromStorage = (): boolean => {
-  try {
-    return window.localStorage.getItem(OPEN_ONLY_KEY) === '1';
-  } catch {
-    return false;
-  }
-};
-
-const saveOpenOnly = (value: boolean) => {
-  try {
-    window.localStorage.setItem(OPEN_ONLY_KEY, value ? '1' : '0');
-  } catch {
-    // Storage blocked: the filter still works for this visit.
-  }
-};
+const filtersFromUrl = (): TaskFilters =>
+  filtersFromParams(new URLSearchParams(window.location.search));
 
 /**
  * The module store plus the viewed day (`anchor`, mirrored in the `date`
@@ -56,7 +46,7 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
   const [{ facade, register }] = useState(createMediator);
   const [anchor, setAnchorState] = useState(dateFromUrl);
   const [view, setViewState] = useState(viewFromUrl);
-  const [openOnly, setOpenOnlyState] = useState(openOnlyFromStorage);
+  const [filters, setFiltersState] = useState(filtersFromUrl);
   const [newCategory, setNewCategory] = useState<Category>();
   const [newPriority, setNewPriority] = useState<Priority>();
   const now = useClock();
@@ -82,6 +72,7 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
     const onPop = () => {
       setAnchorState(dateFromUrl());
       setViewState(viewFromUrl());
+      setFiltersState(filtersFromUrl());
     };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
@@ -103,12 +94,13 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
     newCategory,
     newPriority,
     tasks,
-    /** Tasks the lists show: `tasks` minus done ones while `openOnly` is on. */
-    visibleTasks: openOnly ? tasks.filter((task) => !task.done) : tasks,
-    openOnly,
-    setOpenOnly: (next: boolean) => {
-      setOpenOnlyState(next);
-      saveOpenOnly(next);
+    /** Tasks the lists show: `tasks` narrowed by the filters. */
+    visibleTasks: applyFilters(tasks, filters),
+    /** Filters and sort of the lists; mirrored in the query params. */
+    filters,
+    setFilters: (next: TaskFilters) => {
+      setFiltersState(next);
+      writeQueryParams(filtersToParams(next));
     },
     backlog,
     /** Most used first (all tasks and backlog), ties keep stored order. */

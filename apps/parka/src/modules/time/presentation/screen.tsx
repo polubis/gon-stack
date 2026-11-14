@@ -8,7 +8,7 @@ import { LoadingBanner } from '@/shared/ui/loading-banner';
 import { Toast } from '@/shared/ui/toast';
 import { FabRail } from '@/shared/navigation/overlay-nav/presentation/fab-rail';
 import { APP_ROUTER } from '@/shared/router/routes';
-import { Segmented, segmentedIds, Toggle } from '@/shared/ui/controls';
+import { Segmented, segmentedIds } from '@/shared/ui/controls';
 import { PeriodControl } from '@/shared/period-control/presentation/period-control';
 import { usePeriodSwipe } from '@/shared/period-control/presentation/use-period-swipe';
 import {
@@ -24,11 +24,13 @@ import {
   VIEW_PARAM,
 } from '../configuration/constraints';
 import type { TimeE2eId } from '../configuration/e2e-ids';
+import { FILTER_PARAMS } from '../domain/filters';
 import type { TimeKind } from '../domain/models';
 import { UnreadLink } from '@/modules/notifications/presentation/unread-link';
 import { rangeOf } from '../domain/schedule';
 import { AddMenu } from './add-menu';
 import { BacklogButton } from './backlog-button';
+import { FiltersButton } from './filters-button';
 import { Provider, useContext } from './context';
 import { StatsSkeleton, ViewSkeleton } from './skeleton';
 import { Stats } from './stats';
@@ -62,6 +64,12 @@ const usePeriodChange = (kind: TimeKind) => {
     if (!target) return;
     const url = new URL(target.href(day), window.location.origin);
     if (view === 'stats') url.searchParams.set(VIEW_PARAM, 'stats');
+    // Filters follow the user from day to week to month.
+    const current = new URLSearchParams(window.location.search);
+    Object.values(FILTER_PARAMS).forEach((name) => {
+      const value = current.get(name);
+      if (value !== null) url.searchParams.set(name, value);
+    });
     navigateTo(url.pathname + url.search);
   };
 };
@@ -93,8 +101,6 @@ const Screen = ({ kind, children }: Props) => {
     notice,
     view,
     setView,
-    openOnly,
-    setOpenOnly,
     load,
     dismissNotice,
   } = useContext();
@@ -128,6 +134,7 @@ const Screen = ({ kind, children }: Props) => {
             <>
               <BacklogButton />
               <UnreadLink />
+              <FiltersButton />
               <AddMenu
                 side="bottom"
                 data-e2e="time:add-trigger"
@@ -183,27 +190,7 @@ const Screen = ({ kind, children }: Props) => {
                 aria-labelledby={segmentedIds(VIEWS_PANEL, view).tab}
                 className="flex flex-col gap-4 md:gap-6"
               >
-                {view === 'stats' ? (
-                  <Stats kind={kind} />
-                ) : (
-                  <>
-                    <div
-                      data-e2e="time:open-only"
-                      className="flex items-center justify-between gap-3 px-1 md:justify-start md:px-0"
-                    >
-                      <span className="text-sm font-medium">
-                        Tylko niezrobione
-                      </span>
-                      <Toggle
-                        label="Tylko niezrobione"
-                        data-e2e="time:open-only-toggle"
-                        checked={openOnly}
-                        onChange={setOpenOnly}
-                      />
-                    </div>
-                    {children}
-                  </>
-                )}
+                {view === 'stats' ? <Stats kind={kind} /> : children}
               </div>
             </div>
           )}
