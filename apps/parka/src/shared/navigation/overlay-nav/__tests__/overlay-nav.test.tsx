@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as Dialog from '@radix-ui/react-dialog';
-import { afterEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { SelectPopover } from '@/shared/ui/select-popover';
 import { Provider } from '../presentation/context';
+import { FabRail } from '../presentation/fab-rail';
 import { NavSlot } from '../presentation/nav-slot';
 
 const Dlg = ({
@@ -165,27 +166,31 @@ describe('mobile bottom nav while overlays are open', () => {
   });
 });
 
-afterEach(() => {
-  delete document.documentElement.dataset.navCollapsed;
-});
+describe('overlay sequence with a floating add button', () => {
+  const Page = () => (
+    <Provider>
+      <NavSlot placement="bottom">
+        <nav aria-label="Nawigacja dolna">
+          <a href="/app/">Finanse</a>
+        </nav>
+      </NavSlot>
+      <FabRail>
+        <button type="button">Dodaj</button>
+      </FabRail>
+      <Dlg name="Pierwszy" />
+    </Provider>
+  );
 
-describe('floating button rail next to the bottom nav', () => {
-  const state = () => document.documentElement.dataset.navCollapsed;
-
-  it('stays still until the nav first hides', () => {
-    render(<Host />);
-
-    expect(state()).toBeUndefined();
-  });
-
-  it('glides while the nav hides and when it returns', async () => {
+  it('keeps the button usable and brings the nav back after rapid toggling', async () => {
     const user = userEvent.setup();
-    render(<Host />);
+    render(<Page />);
 
-    await user.click(screen.getByRole('button', { name: 'Otwórz Pierwszy' }));
-    await waitFor(() => expect(state()).toBe('true'));
+    for (let i = 0; i < 3; i++) {
+      await user.click(screen.getByRole('button', { name: 'Otwórz Pierwszy' }));
+      await user.keyboard('{Escape}');
+    }
 
-    await user.keyboard('{Escape}');
-    expect(state()).toBe('false');
+    await waitFor(() => expect(navHidden()).toBe(false));
+    expect(screen.getByRole('button', { name: 'Dodaj' })).toBeVisible();
   });
 });

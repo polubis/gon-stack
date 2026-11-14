@@ -387,23 +387,6 @@
     }
   }
 
-  /* Bottom-nav follower: the layout shifts by the nav height in one step (when
-     the nav collapses or returns), so the button starts offset by that amount
-     (`--bottom-nav-h`) and glides to rest. Transform only; pair with
-     `motion-reduce:animate-none`. */
-  --animate-nav-follow-hide: nav-follow-hide 0.2s var(--ease-enter) backwards;
-  @keyframes nav-follow-hide {
-    from {
-      transform: translateY(calc(var(--bottom-nav-h, 0px) * -1));
-    }
-  }
-  --animate-nav-follow-show: nav-follow-show 0.2s var(--ease-enter) backwards;
-  @keyframes nav-follow-show {
-    from {
-      transform: translateY(var(--bottom-nav-h, 0px));
-    }
-  }
-
   /* Current-time dot; pair with `motion-reduce:animate-none`. */
   --animate-now-pulse: now-pulse 2s ease-in-out 3;
   @keyframes now-pulse {

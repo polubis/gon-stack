@@ -10,6 +10,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
+import { useSequencedOpen } from '@/shared/navigation/overlay-nav/presentation/use-sequenced-open';
 import { usePopoverOpen } from '@/shared/ui/use-popover-open';
 import {
   NEW_BACKLOG_MODAL,
@@ -60,8 +61,9 @@ export const AddMenu = ({
   side: 'top' | 'bottom';
 }) => {
   const { open, setOpen, openModal } = usePopoverOpen(`add-menu:${side}`);
+  const sequenced = useSequencedOpen(`add-menu:${side}`, open, setOpen);
   return (
-    <Popover.Root modal open={open} onOpenChange={setOpen}>
+    <Popover.Root modal {...sequenced}>
       <Popover.Trigger {...trigger} aria-haspopup="menu">
         {children}
       </Popover.Trigger>

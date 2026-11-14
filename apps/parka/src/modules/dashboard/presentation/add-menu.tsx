@@ -14,6 +14,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { NEW_CATEGORY_MODAL } from '@/modules/categories/presentation/modal-ids';
+import { useSequencedOpen } from '@/shared/navigation/overlay-nav/presentation/use-sequenced-open';
 import { usePopoverOpen } from '@/shared/ui/use-popover-open';
 import { navigateTo } from '@/shared/router/navigation';
 import { APP_ROUTER } from '@/shared/router/routes';
@@ -79,6 +80,7 @@ export const AddMenu = ({
     setOpen,
     openModal: openFromMenu,
   } = usePopoverOpen(`add-menu:${side}`);
+  const sequenced = useSequencedOpen(`add-menu:${side}`, open, setOpen);
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
 
@@ -92,7 +94,7 @@ export const AddMenu = ({
 
   return (
     <>
-      <Popover.Root modal open={open} onOpenChange={setOpen}>
+      <Popover.Root modal {...sequenced}>
         <Popover.Trigger {...trigger} aria-haspopup="menu">
           {children}
         </Popover.Trigger>
