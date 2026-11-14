@@ -17,13 +17,17 @@ const dialogs = () => screen.queryAllByRole('dialog', { hidden: true });
 
 const topDialog = () => within(dialogs().at(-1)!);
 
-const priorityLabels = (dialog: ReturnType<typeof within>) =>
-  dialog
-    .getAllByRole('radio')
-    .filter(
-      (radio: HTMLElement) => radio.getAttribute('name') === 'task-priority',
-    )
-    .map((radio: HTMLElement) => radio.closest('label')?.textContent);
+const priorityOptions = async (
+  user: ReturnType<typeof userEvent.setup>,
+  dialog: ReturnType<typeof within>,
+) => {
+  await user.click(dialog.getByRole('combobox', { name: 'Priorytet' }));
+  const names = (await screen.findAllByRole('option')).map(
+    (option) => option.textContent,
+  );
+  await user.keyboard('{Escape}');
+  return names;
+};
 
 const ready = async () => {
   renderTime();
@@ -145,8 +149,14 @@ describe('time task form', () => {
 
     const dialog = within(await openFromMenu(user, 'Zadanie'));
 
-    expect(priorityLabels(dialog)).toEqual(['Wysoki', 'Średni', 'Niski']);
-    expect(dialog.getByRole('radio', { name: 'Średni' })).toBeChecked();
+    expect(
+      dialog.getByRole('combobox', { name: 'Priorytet' }),
+    ).toHaveTextContent('Średni');
+    expect(await priorityOptions(user, dialog)).toEqual([
+      'Wysoki',
+      'Średni',
+      'Niski',
+    ]);
   });
 
   it('stacks the new priority form over the task form', async () => {
@@ -172,8 +182,12 @@ describe('time task form', () => {
 
     await waitFor(() => expect(modalsInUrl()).toEqual(['task-new']));
     const form2 = within(screen.getByRole('dialog'));
-    expect(form2.getByRole('radio', { name: 'Pilny' })).toBeChecked();
-    expect(priorityLabels(form2)).toEqual([
+    await waitFor(() =>
+      expect(
+        form2.getByRole('combobox', { name: 'Priorytet' }),
+      ).toHaveTextContent('Pilny'),
+    );
+    expect(await priorityOptions(user, form2)).toEqual([
       'Wysoki',
       'Pilny',
       'Średni',
@@ -186,50 +200,29 @@ describe('time task form', () => {
     );
   });
 
-  it('asks for a category name before adding', async () => {
+  it('offers a category select and no extra add or browse buttons', async () => {
     const user = userEvent.setup();
-    await openFromMenu(user, 'Zadanie');
-    await user.click(screen.getByRole('button', { name: 'Nowa kategoria' }));
-    await waitFor(() => expect(dialogs()).toHaveLength(2));
-    const form = topDialog();
 
-    await user.click(form.getByRole('button', { name: 'Dodaj kategorię' }));
+    const dialog = within(await openFromMenu(user, 'Zadanie'));
 
-    expect(await form.findByText('Podaj nazwę kategorii.')).toBeVisible();
-  });
-
-  it('selects a new category created over the task form', async () => {
-    const user = userEvent.setup();
-    await openFromMenu(user, 'Zadanie');
-    await user.click(screen.getByRole('button', { name: 'Nowa kategoria' }));
-    await waitFor(() => expect(dialogs()).toHaveLength(2));
-    const form = topDialog();
-
-    await user.type(form.getByRole('textbox', { name: 'Nazwa' }), 'Finanse');
-    await user.click(form.getByRole('button', { name: 'Dodaj kategorię' }));
-
-    await waitFor(() => expect(modalsInUrl()).toEqual(['task-new']));
-    expect(
-      within(screen.getByRole('dialog')).getByRole('radio', {
-        name: 'Finanse',
-      }),
-    ).toBeChecked();
-    await waitFor(() =>
-      expect(backend.writes().map((call) => call.body)).toEqual([
-        expect.objectContaining({ name: 'Finanse' }),
-      ]),
+    expect(dialog.getByRole('combobox', { name: 'Kategoria' })).toBeVisible();
+    expect(dialog.getAllByRole('button', { name: /^Nowy|^Nowa/ })).toHaveLength(
+      1,
     );
+    expect(dialog.queryByRole('button', { name: 'Wszystkie' })).toBeNull();
+    expect(dialog.queryByRole('button', { name: 'Edytuj statusy' })).toBeNull();
   });
 
-  it('browses categories stacked over the task form', async () => {
+  it('picks a category from the select', async () => {
     const user = userEvent.setup();
-    await openFromMenu(user, 'Zadanie');
+    const dialog = within(await openFromMenu(user, 'Zadanie'));
 
-    await user.click(screen.getByRole('button', { name: 'Wszystkie' }));
+    await user.click(dialog.getByRole('combobox', { name: 'Kategoria' }));
+    await user.click(await screen.findByRole('option', { name: 'Dom' }));
 
-    await waitFor(() => expect(dialogs()).toHaveLength(2));
-    expect(modalsInUrl()).toEqual(['task-new', 'categories']);
-    expect(topDialog().getAllByRole('listitem')).toHaveLength(5);
+    expect(
+      dialog.getByRole('combobox', { name: 'Kategoria' }),
+    ).toHaveTextContent('Dom');
   });
 });
 
@@ -246,7 +239,9 @@ describe('time task edit', () => {
     );
 
     const dialog = within(await screen.findByRole('dialog'));
-    expect(dialog.getByRole('radio', { name: 'Wysoki' })).toBeChecked();
+    expect(
+      dialog.getByRole('combobox', { name: 'Priorytet' }),
+    ).toHaveTextContent('Wysoki');
     expect(dialog.getByRole('button', { name: 'Zapisz' })).toBeVisible();
   });
 

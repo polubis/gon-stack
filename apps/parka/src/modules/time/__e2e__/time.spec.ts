@@ -297,9 +297,13 @@ const commands = {
     getByE2e,
   }) => {
     await getByE2e('time:empty-add').click();
-    await expect(getByE2e('time:category-option:Praca')).toBeVisible();
-    await expect(getByE2e('time:category-option:Odpoczynek')).toBeVisible();
-    await expect(getByE2e('time:priority-option:Średni')).toBeChecked();
+    await getByE2e('time:category-select').click();
+    await expect(page.getByRole('option', { name: 'Praca' })).toBeVisible();
+    await expect(
+      page.getByRole('option', { name: 'Odpoczynek' }),
+    ).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(getByE2e('time:priority-select')).toContainText('Średni');
     await expect(page).toHaveURL(/modal=task-new/);
   },
 
@@ -309,7 +313,8 @@ const commands = {
     getByE2ePrefix,
   }) => {
     await getByE2e('time:task-name').fill('Raport E2E');
-    await getByE2e('time:priority-option:Wysoki').check({ force: true });
+    await getByE2e('time:priority-select').click();
+    await page.getByRole('option', { name: 'Wysoki' }).click();
     await Promise.all([
       synced(page, 'POST', 201),
       getByE2e('time:task-save').click(),

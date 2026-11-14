@@ -108,7 +108,7 @@ export const BacklogAddDialog = ({
           : 'Zadanie bez terminu. Dzień wybierzesz później.'
       }
     >
-      <form onSubmit={submit} noValidate className="flex flex-col gap-3">
+      <form onSubmit={submit} noValidate className="flex flex-col gap-4">
         <Field label="Nazwa">
           <ClearableInput
             type="text"
@@ -137,7 +137,7 @@ export const BacklogAddDialog = ({
         <CategoryPicker value={categoryId} onChange={setCategoryId} />
         <PriorityPicker value={priorityId} onChange={setPriorityId} />
         {touched && pickError ? (
-          <span role="alert" className="-mt-2 block text-xs text-danger">
+          <span role="alert" className="-mt-3 block text-xs text-danger">
             {pickError}
           </span>
         ) : null}
