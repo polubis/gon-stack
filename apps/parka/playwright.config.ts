@@ -8,7 +8,10 @@ const deviceUse = base.projects![0]!.use;
 // through the single wrangler dev process; running them concurrently with the
 // other 29 (mostly local-mode) specs starves their page loads and flakes.
 // Isolating them into a project that runs after the fast batch removes the
-// contention instead of loosening timeouts.
+// contention instead of loosening timeouts. More workers starve the one wrangler
+// process, so the `test:e2e` script runs the fast project on every core and this
+// one on the 2 workers set here. Each test registers its own account, so they
+// run in parallel.
 const REAL_BACKEND_SPECS = [
   '**/__e2e__/backend.spec.ts',
   '**/__e2e__/accounts.spec.ts',
@@ -23,6 +26,7 @@ const REAL_BACKEND_SPECS = [
 
 export default defineConfig({
   ...base,
+  workers: 2,
   use: {
     ...base.use,
     contextOptions: { reducedMotion: 'reduce' },
@@ -33,7 +37,6 @@ export default defineConfig({
       name: 'chromium-real-backend',
       use: deviceUse,
       testMatch: REAL_BACKEND_SPECS,
-      fullyParallel: false,
       dependencies: ['chromium'],
     },
   ],

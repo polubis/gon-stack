@@ -139,9 +139,17 @@ const commands = {
       'Review',
       'Zrobione',
     ]);
+    // The circle saves in the background: wait until the server has the task as done.
+    let doneId: string | undefined;
+    await expect
+      .poll(async () => {
+        const done = await call(page, 'list_tasks', { status: 'done' });
+        doneId = done.result.structuredContent.items[0]?.id;
+        return doneId;
+      })
+      .toBeDefined();
     const moved = await call(page, 'set_task_status', {
-      id: (await call(page, 'list_tasks', { status: 'done' })).result
-        .structuredContent.items[0]!.id,
+      id: doneId!,
       status: 'review',
     });
     expect(moved.result.structuredContent.statusName).toBe('Review');
