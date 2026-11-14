@@ -197,9 +197,10 @@ const DashboardView = () => {
         {ready ? overlays : null}
       </main>
       <CategoryModals />
-      {/* Zero-height sticky rail: the button floats above the content, which
-          scrolls clear of it thanks to the bottom padding of <main>. */}
-      <FabRail className="pointer-events-none sticky bottom-4 z-(--z-raised) h-0 md:hidden">
+      {/* Zero-height rail in the layer above the nav: the button floats over the
+          content, which scrolls clear of it thanks to the bottom padding of
+          <main>. */}
+      <FabRail className="pointer-events-none relative bottom-4 h-0 md:hidden">
         <AddMenu
           side="top"
           data-e2e="dashboard:expense-fab"

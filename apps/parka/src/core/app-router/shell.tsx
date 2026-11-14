@@ -10,6 +10,7 @@ import { AccountDrawer } from '@/shared/auth/presentation/account-drawer';
 import { ProtectedScreen } from '@/shared/auth/presentation/protected-screen';
 import { withAuth } from '@/shared/auth/presentation/with-auth';
 import { Provider as OverlayNavProvider } from '@/shared/navigation/overlay-nav/presentation/context';
+import { FabLayer } from '@/shared/navigation/overlay-nav/presentation/fab-rail';
 import { NavSlot } from '@/shared/navigation/overlay-nav/presentation/nav-slot';
 import { SyncedAppNav } from '@/shared/navigation/app-nav/presentation/synced-app-nav';
 import { navigateTo, registerNavigator } from '@/shared/router/navigation';
@@ -79,10 +80,11 @@ const Shell = () => {
         <NavSlot placement="side">
           <SyncedAppNav placement="side" />
         </NavSlot>
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto max-lg:mask-b-from-[calc(100%-1.25rem)]">
             <Outlet />
           </div>
+          <FabLayer />
           <NavSlot placement="bottom">
             <SyncedAppNav placement="bottom" />
           </NavSlot>

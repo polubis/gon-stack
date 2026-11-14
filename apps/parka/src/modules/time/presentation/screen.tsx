@@ -209,9 +209,10 @@ const Screen = ({ kind, children }: Props) => {
           )}
         </div>
       </main>
-      {/* Zero-height sticky rail (as in finance): the button floats above the
-          content, which scrolls clear of it thanks to <main> bottom padding. */}
-      <FabRail className="pointer-events-none sticky bottom-4 z-(--z-raised) h-0 md:hidden">
+      {/* Zero-height rail in the layer above the nav (as in finance): the button
+          floats over the content, which scrolls clear of it thanks to <main>
+          bottom padding. */}
+      <FabRail className="pointer-events-none relative bottom-4 h-0 md:hidden">
         <AddMenu
           side="top"
           aria-label="Dodaj"
