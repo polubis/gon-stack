@@ -284,7 +284,7 @@ export const DevicesCard = ({
       data-e2e="settings:devices"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold text-ink-soft">Urządzenia</h2>
+        <h2 className="text-base font-semibold">Urządzenia</h2>
         {devices.length > 0 ? (
           <Button
             variant="ghost"

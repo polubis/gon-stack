@@ -37,7 +37,10 @@ export const Main = () => {
           >
             <div className="flex items-baseline justify-between gap-2">
               <h2
-                className={cn('text-sm font-semibold', current && 'text-brand')}
+                className={cn(
+                  'text-base font-semibold',
+                  current && 'text-brand',
+                )}
               >
                 {monthName(index)}
               </h2>

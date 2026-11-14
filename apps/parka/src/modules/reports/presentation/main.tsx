@@ -76,7 +76,7 @@ const ReportsView = () => {
           </div>
         )}
 
-        <Card className="space-y-4 lg:col-span-2 lg:p-6">
+        <Card className="space-y-4 lg:col-span-2">
           <div>
             <p className="text-sm text-ink-soft">Twój miesiąc w liczbach</p>
             {initializing ? (

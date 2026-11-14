@@ -53,12 +53,12 @@ const DayCard = ({ day, index }: { day: string; index: number }) => {
       style={stagger(index)}
       aria-current={today ? 'date' : undefined}
       className={cn(
-        'flex animate-item-in flex-col gap-1 rounded-2xl border bg-card p-2 motion-reduce:animate-none',
+        'flex animate-item-in flex-col gap-1 rounded-3xl border bg-card p-4 motion-reduce:animate-none',
         today ? 'border-brand' : 'border-line',
       )}
     >
-      <div className="flex items-center justify-between gap-2 pl-2">
-        <h2 className={cn('text-sm font-semibold', today && 'text-brand')}>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className={cn('text-base font-semibold', today && 'text-brand')}>
           <DayName day={day} />
         </h2>
         <AddDayButton day={day} />

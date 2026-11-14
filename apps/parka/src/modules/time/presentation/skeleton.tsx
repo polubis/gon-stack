@@ -18,7 +18,7 @@ const TaskRows = () => (
 );
 
 const Month = () => (
-  <Card className="p-2 md:p-4">
+  <Card>
     <ul className="grid grid-cols-7 gap-1 md:gap-2">
       {Array.from({ length: 35 }, (_, i) => (
         <li key={i}>
@@ -48,7 +48,7 @@ export const ViewSkeleton = ({ kind }: { kind: TimeKind }) => (
     ) : kind === 'year' ? (
       <Year />
     ) : (
-      <Card className="mx-auto w-full max-w-3xl p-2 md:p-4">
+      <Card className="mx-auto w-full max-w-3xl">
         <Skeleton className="mx-2 mb-3 h-4 w-32" />
         <TaskRows />
       </Card>

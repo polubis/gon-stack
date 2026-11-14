@@ -28,7 +28,7 @@ export const Main = () => {
     categories.find((item) => item.id === id)?.color;
 
   return (
-    <Card as="section" aria-label="Kalendarz zadań" className="p-2 md:p-4">
+    <Card as="section" aria-label="Kalendarz zadań">
       <ul className="grid grid-cols-7 gap-1 md:gap-2" aria-hidden="true">
         {WEEKDAY_SHORT.map((day) => (
           <li key={day} className="text-center text-xs text-ink-soft">

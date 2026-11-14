@@ -31,9 +31,9 @@ export const Main = () => {
   const nowIndex = anchor === now.day ? nowIndexOf(scheduled, now.time) : -1;
 
   return (
-    <Card className="mx-auto flex w-full max-w-3xl flex-col gap-3 p-2 md:p-4">
+    <Card className="mx-auto flex w-full max-w-3xl flex-col gap-3">
       <section aria-labelledby="day-plan" className="flex flex-col gap-1">
-        <h2 id="day-plan" className="px-2 pt-1 text-sm font-semibold">
+        <h2 id="day-plan" className="text-base font-semibold">
           {anchor === now.day ? 'Zadania na dziś' : 'Zadania na ten dzień'}
         </h2>
         {scheduledRows.length ? (

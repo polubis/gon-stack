@@ -9,7 +9,7 @@ import { ScreenHeader } from '@/shared/ui/layout';
 import { DEFAULT_CATEGORIES } from '../configuration/constraints';
 import type { Category, CategoryId } from '../domain/models';
 import { useContext } from './context';
-import { Card } from './layout';
+import { Card } from '@/shared/ui/layout';
 import { ListSkeleton } from './list-skeleton';
 
 type Default = (typeof DEFAULT_CATEGORIES)[number];
@@ -95,7 +95,7 @@ export const Main = () => {
 
         {!initializing && missingDefaults.length > 0 ? (
           <Card className="space-y-3">
-            <h2 className="text-sm font-semibold">Sugerowane kategorie</h2>
+            <h2 className="text-base font-semibold">Sugerowane kategorie</h2>
             <ul className="flex flex-wrap gap-2">
               {missingDefaults.map((d) => (
                 <li key={d.slug}>
