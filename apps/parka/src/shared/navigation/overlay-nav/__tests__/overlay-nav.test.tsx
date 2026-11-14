@@ -5,7 +5,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { describe, expect, it } from 'vitest';
 import { SelectPopover } from '@/shared/ui/select-popover';
 import { Provider } from '../presentation/context';
-import { FabRail } from '../presentation/fab-rail';
+import { FabLayer, FabRail } from '../presentation/fab-rail';
 import { NavSlot } from '../presentation/nav-slot';
 
 const Dlg = ({
@@ -174,6 +174,7 @@ describe('overlay sequence with a floating add button', () => {
           <a href="/app/">Finanse</a>
         </nav>
       </NavSlot>
+      <FabLayer />
       <FabRail>
         <button type="button">Dodaj</button>
       </FabRail>

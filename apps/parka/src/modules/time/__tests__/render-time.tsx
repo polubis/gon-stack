@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react';
 import { vi } from 'vitest';
+import { FabLayer } from '@/shared/navigation/overlay-nav/presentation/fab-rail';
 import type { TimeKind } from '../domain/models';
 import { Main as Day } from '../presentation/day';
 import { Main as Month } from '../presentation/month';
@@ -22,8 +23,11 @@ export const renderTime = (
   window.history.replaceState(null, '', `/app/time/?date=${date}${extra}`);
   const View = VIEWS[kind];
   return render(
-    <TimeScreen kind={kind}>
-      <View />
-    </TimeScreen>,
+    <>
+      <TimeScreen kind={kind}>
+        <View />
+      </TimeScreen>
+      <FabLayer />
+    </>,
   );
 };

@@ -21,17 +21,15 @@ export const NavSlot = ({ placement, children }: Props) => {
   const stage = useStage();
   const ref = useRef<HTMLDivElement>(null);
   const hidden = stage !== 'rest';
-  const collapsed = stage === 'fabDown' || stage === 'ready';
 
   useEffect(() => {
     const node = ref.current;
-    const content = node?.firstElementChild?.firstElementChild;
-    if (placement !== 'bottom' || !node || !content) return;
+    if (placement !== 'bottom' || !node) return;
     const root = document.documentElement.style;
     const observer = new ResizeObserver(() =>
-      root.setProperty('--bottom-nav-h', `${content.clientHeight}px`),
+      root.setProperty('--bottom-nav-h', `${node.offsetHeight}px`),
     );
-    observer.observe(content);
+    observer.observe(node);
     const unregister = registerNav(node);
     return () => {
       observer.disconnect();
@@ -53,15 +51,12 @@ export const NavSlot = ({ placement, children }: Props) => {
       aria-hidden={hidden || undefined}
       data-overlay-hidden={hidden}
       className={cn(
-        'z-(--z-raised) grid shrink-0 overflow-hidden ease-out [transition-duration:120ms] [transition-property:opacity,translate] motion-reduce:transition-none lg:hidden',
-        collapsed ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]',
+        'z-(--z-raised) flow-root shrink-0 ease-out [transition-duration:120ms] [transition-property:opacity,translate] motion-reduce:transition-none lg:hidden',
         hidden &&
           'translate-y-full opacity-0 will-change-[translate,opacity] [&_nav]:backdrop-filter-none',
       )}
     >
-      <div className="min-h-0 overflow-hidden">
-        <div>{children}</div>
-      </div>
+      {children}
     </div>
   );
 };
