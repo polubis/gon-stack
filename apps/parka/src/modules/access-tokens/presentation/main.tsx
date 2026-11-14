@@ -141,9 +141,7 @@ const AccessTokensView = () => {
         {!initializing && !error ? (
           <>
             <Card as="section" className="space-y-2">
-              <h2 className="text-sm font-semibold text-ink-soft">
-                Serwer MCP
-              </h2>
+              <h2 className="text-base font-semibold">Serwer MCP</h2>
               <p className="text-sm text-ink-soft">
                 Asystent AI połączony tokenem może:
               </p>

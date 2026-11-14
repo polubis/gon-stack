@@ -16,7 +16,7 @@ const PrivacyView = () => (
     </div>
     <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2 md:gap-6 md:px-8 lg:grid lg:grid-cols-3 lg:content-start lg:items-start lg:px-10 xl:px-16">
       <Card as="section" className="space-y-3 lg:col-span-2 lg:row-span-2">
-        <h2 className="text-sm font-semibold">Twoje dane</h2>
+        <h2 className="text-base font-semibold">Twoje dane</h2>
         <ul className="space-y-3" data-e2e="privacy:points">
           {POINTS.map(({ icon: Icon, text }) => (
             <li key={text} className="flex items-start gap-3 text-sm">
@@ -30,7 +30,7 @@ const PrivacyView = () => (
       </Card>
 
       <Card as="section" className="space-y-2 lg:col-start-3">
-        <h2 className="text-sm font-semibold">Polityka prywatności</h2>
+        <h2 className="text-base font-semibold">Polityka prywatności</h2>
         <p className="text-sm text-ink-soft">
           Opisuje, jakie dane przetwarzamy, w jakim celu i jak długo.
           Przetwarzanie odbywa się wyłącznie po wyrażeniu zgody na pliki cookie.

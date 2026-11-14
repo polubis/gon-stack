@@ -90,7 +90,7 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
   return (
     <div className="flex flex-col gap-4 md:gap-6 lg:grid lg:grid-cols-2">
       <Card as="section" className="space-y-2" data-e2e="settings:appearance">
-        <h2 className="text-sm font-semibold text-ink-soft">Wygląd</h2>
+        <h2 className="text-base font-semibold">Wygląd</h2>
         <div className="py-2">
           <Segmented<ThemeMode>
             label="Motyw"
@@ -102,7 +102,7 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
       </Card>
 
       <Card as="section" className="space-y-1">
-        <h2 className="mb-1 text-sm font-semibold text-ink-soft">
+        <h2 className="mb-1 text-base font-semibold">
           Bezpieczeństwo i prywatność
         </h2>
         <p className="text-sm text-ink-soft">
@@ -112,7 +112,7 @@ const SettingsContent = ({ settings }: { settings: Settings }) => {
       </Card>
 
       <Card as="section" className="space-y-2">
-        <h2 className="text-sm font-semibold text-ink-soft">Powiadomienia</h2>
+        <h2 className="text-base font-semibold">Powiadomienia</h2>
         <ul className="divide-y divide-line" data-e2e="settings:notifications">
           {NOTIFICATION_OPTIONS.map(({ key, label }) => {
             const hint = PUSH_HINTS[push];
