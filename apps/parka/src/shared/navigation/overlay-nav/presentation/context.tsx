@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { context } from '@repo/react-kit/context';
+import { setOverlayOpen } from './nav-sequence';
 
 /**
  * Every open Radix overlay (dialog, popover, select list, menu) renders its
@@ -29,5 +30,10 @@ export const [Provider, useContext] = context('OverlayNav', () => {
     return () => observer.disconnect();
   }, []);
 
-  return { open, hidden: open > 0 };
+  useEffect(() => {
+    setOverlayOpen(open > 0);
+    return () => setOverlayOpen(false);
+  }, [open]);
+
+  return { open };
 });

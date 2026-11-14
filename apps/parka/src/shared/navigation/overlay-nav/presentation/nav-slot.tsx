@@ -1,14 +1,6 @@
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { cn } from '@repo/react-kit/cn';
-import { useContext } from './context';
-
-const SLIDE_MS = 150;
+import { registerNav, useStage } from './nav-sequence';
 
 type Props = {
   placement: 'side' | 'bottom';
@@ -16,50 +8,36 @@ type Props = {
 };
 
 /**
- * Holds the app nav. The bottom nav (mobile only) slides away while an
- * overlay is open, so the overlay gets the whole screen; hidden it is inert
- * (no focus, no reading). Only opacity and translate animate (compositor);
- * the rows collapse as one discrete step after the slide, so content reflows
- * once instead of every frame. The frosted blur is dropped while hidden: a
- * blurred backdrop re-rasterizes every frame of the slide. Motion is off under `motion-reduce`. The side nav
- * (desktop) is never touched.
+ * Holds the app nav. The bottom nav (mobile only) fades and slides away while
+ * an overlay is open, as the first step of the overlay sequence (see
+ * nav-sequence); hidden it is inert (no focus, no reading). Only opacity and
+ * translate animate (compositor); its space collapses or returns as one
+ * discrete step, between the slide and the add button's move. Its height is
+ * published as `--bottom-nav-h` for the add button. The frosted
+ * blur is dropped while hidden: a blurred backdrop re-rasterizes every frame.
+ * Motion is off under `motion-reduce`. The side nav (desktop) is never touched.
  */
 export const NavSlot = ({ placement, children }: Props) => {
-  const { hidden } = useContext();
-  const content = useRef<HTMLDivElement>(null);
+  const stage = useStage();
+  const ref = useRef<HTMLDivElement>(null);
+  const hidden = stage !== 'rest';
+  const collapsed = stage === 'fabDown' || stage === 'ready';
 
-  // Publishes the nav height so floating buttons can glide over it (NavFollow).
   useEffect(() => {
-    const node = content.current;
-    if (placement !== 'bottom' || !node) return;
+    const node = ref.current;
+    const content = node?.firstElementChild?.firstElementChild;
+    if (placement !== 'bottom' || !node || !content) return;
     const root = document.documentElement.style;
     const observer = new ResizeObserver(() =>
-      root.setProperty('--bottom-nav-h', `${node.offsetHeight}px`),
+      root.setProperty('--bottom-nav-h', `${content.clientHeight}px`),
     );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [placement]);
-
-  // The rows collapse once the slide is done, never during it.
-  const [slid, setSlid] = useState(false);
-  useEffect(() => {
-    if (!hidden) return;
-    const timer = setTimeout(() => setSlid(true), SLIDE_MS);
+    observer.observe(content);
+    const unregister = registerNav(node);
     return () => {
-      clearTimeout(timer);
-      setSlid(false);
+      observer.disconnect();
+      unregister();
     };
-  }, [hidden]);
-  const collapsed = hidden && slid;
-
-  // Same commit as the layout shift, so NavFollow rails start gliding on the
-  // very frame the content moves. Untouched until the first collapse.
-  useLayoutEffect(() => {
-    if (placement !== 'bottom') return;
-    const root = document.documentElement;
-    if (collapsed) root.dataset.navCollapsed = 'true';
-    else if (root.dataset.navCollapsed) root.dataset.navCollapsed = 'false';
-  }, [placement, collapsed]);
+  }, [placement]);
 
   if (placement === 'side')
     return (
@@ -70,18 +48,19 @@ export const NavSlot = ({ placement, children }: Props) => {
 
   return (
     <div
+      ref={ref}
       inert={hidden}
       aria-hidden={hidden || undefined}
       data-overlay-hidden={hidden}
       className={cn(
-        'z-(--z-raised) grid shrink-0 overflow-hidden ease-out [transition-property:grid-template-rows,opacity,translate] [transition-duration:0s,150ms,150ms] motion-reduce:transition-none lg:hidden',
+        'z-(--z-raised) grid shrink-0 overflow-hidden ease-out [transition-duration:120ms] [transition-property:opacity,translate] motion-reduce:transition-none lg:hidden',
         collapsed ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]',
         hidden &&
           'translate-y-full opacity-0 will-change-[translate,opacity] [&_nav]:backdrop-filter-none',
       )}
     >
       <div className="min-h-0 overflow-hidden">
-        <div ref={content}>{children}</div>
+        <div>{children}</div>
       </div>
     </div>
   );

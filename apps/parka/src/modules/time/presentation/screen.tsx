@@ -6,7 +6,7 @@ import { ErrorState } from '@/shared/ui/error-state';
 import { ScreenHeader } from '@/shared/ui/layout';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
 import { Toast } from '@/shared/ui/toast';
-import { NavFollow } from '@/shared/navigation/overlay-nav/presentation/nav-follow';
+import { FabRail } from '@/shared/navigation/overlay-nav/presentation/fab-rail';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { Segmented, segmentedIds, Toggle } from '@/shared/ui/controls';
 import { PeriodControl } from '@/shared/period-control/presentation/period-control';
@@ -211,7 +211,7 @@ const Screen = ({ kind, children }: Props) => {
       </main>
       {/* Zero-height sticky rail (as in finance): the button floats above the
           content, which scrolls clear of it thanks to <main> bottom padding. */}
-      <NavFollow className="pointer-events-none sticky bottom-4 z-(--z-raised) h-0 md:hidden">
+      <FabRail className="pointer-events-none sticky bottom-4 z-(--z-raised) h-0 md:hidden">
         <AddMenu
           side="top"
           aria-label="Dodaj"
@@ -223,7 +223,7 @@ const Screen = ({ kind, children }: Props) => {
         >
           <Plus className="h-6 w-6" aria-hidden="true" />
         </AddMenu>
-      </NavFollow>
+      </FabRail>
       <TaskModals defaultDay={defaultDay} />
       {notice ? (
         <Toast
