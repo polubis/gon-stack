@@ -33,6 +33,7 @@ export const TIME_E2E_IDS = [
   'time:task-row-device',
   'time:recurring-mark',
   'time:recurring-interval',
+  'time:recurring-deadline-notice',
   'time:recurring-end',
   'time:recurring-stop',
   'time:delete-dialog',

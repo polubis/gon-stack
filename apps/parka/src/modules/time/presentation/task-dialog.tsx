@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Repeat, Trash2 } from 'lucide-react';
+import { Info, Repeat, Trash2 } from 'lucide-react';
 import {
   currentDevice,
   loadDeviceHints,
@@ -101,7 +101,8 @@ export const TaskDialog = ({
   const step = steps.includes(pickedStep) ? pickedStep : IN_PROGRESS;
   const [repeat, setRepeat] = useState(startRepeating);
   const [interval, setInterval] = useState<TaskRecurringInterval>('weekly');
-  const [endDate, setEndDate] = useState('');
+  // A deadline makes the task one-off; the form says so instead of repeating.
+  const [deadlineNotice, setDeadlineNotice] = useState(false);
   const [touched, setTouched] = useState(false);
 
   // The model code is async; have it by the time the user submits.
@@ -112,13 +113,8 @@ export const TaskDialog = ({
   const titleError = title.trim() === '' ? 'Podaj nazwę zadania.' : null;
   const dayError = day === '' ? 'Podaj dzień.' : null;
   const atError = !allDay && at === '' ? 'Podaj godzinę.' : null;
-  const endError =
-    repeat && endDate !== '' && endDate < day
-      ? 'Koniec nie może być przed pierwszym dniem.'
-      : null;
   const invalid =
     titleError !== null ||
-    endError !== null ||
     dayError !== null ||
     atError !== null ||
     categoryId === undefined ||
@@ -144,7 +140,7 @@ export const TaskDialog = ({
         at: allDay ? null : at,
         interval,
         startDate: day,
-        endDate: endDate || null,
+        endDate: null,
       });
       closeModal(modal);
       return;
@@ -254,7 +250,10 @@ export const TaskDialog = ({
                 label="Powtarzaj"
                 data-e2e="time:recurring-toggle"
                 checked={repeat}
-                onChange={setRepeat}
+                onChange={(value) => {
+                  setRepeat(value);
+                  setDeadlineNotice(false);
+                }}
               />
             </div>
             {repeat ? (
@@ -269,21 +268,33 @@ export const TaskDialog = ({
                     }
                   />
                 </Field>
-                <Field label="Koniec (opcjonalnie)">
+                <Field label="Termin (opcjonalnie)">
                   <Input
                     type="date"
-                    value={endDate}
+                    value=""
                     min={day}
                     data-e2e="time:recurring-end"
-                    aria-invalid={touched && endError !== null}
-                    onChange={(e) => setEndDate(e.target.value)}
+                    onChange={(e) => {
+                      if (e.target.value === '') return;
+                      setRepeat(false);
+                      setDeadlineNotice(true);
+                    }}
                   />
                 </Field>
               </div>
             ) : null}
-            {touched && endError ? (
-              <span role="alert" className="-mt-3 block text-xs text-danger">
-                {endError}
+            {deadlineNotice && !repeat ? (
+              <span
+                role="status"
+                data-e2e="time:recurring-deadline-notice"
+                className="-mt-3 flex items-start gap-1.5 text-xs text-muted"
+              >
+                <Info
+                  className="mt-0.5 h-3.5 w-3.5 shrink-0"
+                  aria-hidden="true"
+                />
+                Zadanie z terminem nie jest cykliczne. Zapiszemy je jako
+                jednorazowe.
               </span>
             ) : null}
           </>
