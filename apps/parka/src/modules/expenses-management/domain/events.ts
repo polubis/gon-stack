@@ -3,6 +3,7 @@ import type { NewExpense, NewRecurring, StoredExpense } from './models';
 
 export type Event =
   | TriggerEvent<'[TRIGGER]_LOAD'>
+  | TriggerEvent<'[TRIGGER]_REFRESH'>
   | TriggerEvent<'[TRIGGER]_CREATE_EXPENSE', { expense: NewExpense }>
   | TriggerEvent<'[TRIGGER]_LOAD_EXPENSE', { id: string }>
   | TriggerEvent<'[TRIGGER]_UPDATE_EXPENSE', { expense: StoredExpense }>

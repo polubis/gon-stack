@@ -6,6 +6,7 @@ import type { NewExpense, NewRecurring, StoredExpense } from '../domain/models';
 export const createFacade = (store: Store, trigger: Registry['trigger']) => {
   return {
     load: () => trigger('[TRIGGER]_LOAD'),
+    refresh: () => trigger('[TRIGGER]_REFRESH'),
     createExpense: (expense: NewExpense) =>
       trigger('[TRIGGER]_CREATE_EXPENSE', { expense }),
     loadExpense: (id: string) => trigger('[TRIGGER]_LOAD_EXPENSE', { id }),
