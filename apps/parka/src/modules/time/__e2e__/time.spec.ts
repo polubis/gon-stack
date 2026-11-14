@@ -500,6 +500,33 @@ const commands = {
     await expect(getByE2e('time:recurring-mark')).toHaveCount(0);
   },
 
+  'a series with an end day repeats weekly up to it and says so': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
+    await open(page, APP_ROUTER.time({ date: DAY }));
+    await getByE2e('time:add-trigger').click();
+    await getByE2e('time:add-option:task-new').click();
+    await getByE2e('time:task-name').fill('Basen E2E');
+    await getByE2e('time:recurring-toggle').click();
+    await getByE2e('time:recurring-end').fill(LATER);
+    await expect(getByE2e('time:recurring-end-notice')).toContainText(
+      `co tydzień od ${DAY} do ${LATER} włącznie`,
+    );
+    await Promise.all([
+      synced(page, 'POST', 201),
+      getByE2e('time:task-save').click(),
+    ]);
+    const occurrence = taskEdit(getByE2ePrefix, 'Basen E2E');
+    for (const day of [DAY, NEXT_WEEK, LATER]) {
+      await open(page, APP_ROUTER.time({ date: day }));
+      await expect(occurrence).toBeVisible();
+    }
+    await open(page, APP_ROUTER.time({ date: AFTER_LATER }));
+    await expect(occurrence).toHaveCount(0);
+  },
+
   'i register an account for descriptions': async (ctx) => {
     await registerAndConfirm(ctx, DESCRIPTION_EMAIL, PASSWORD);
     await ctx.page.waitForLoadState('networkidle');
