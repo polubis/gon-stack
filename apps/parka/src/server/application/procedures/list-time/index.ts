@@ -16,25 +16,29 @@ export const listTime = privateProcedure({
   schema: withZodSchema({ schema: listTimeSchema }),
 })({
   handler: async (input, { db, user }) => {
+    // Independent reads start at once; only the dated tasks wait for materialization.
+    const profilesLoad = loadProfiles(db);
+    const refsLoad = Promise.all([
+      db.from('time_categories').select('*').order('name'),
+      db.from('time_priorities').select('*').order('value'),
+      db.from('time_statuses').select('*').order('position').order('id'),
+      db
+        .from('time_tasks')
+        .select('*')
+        .is('day', null)
+        .order('created_at')
+        .order('id'),
+    ]);
     await materializeTimeRecurring(db, user.id, input.to);
     if (input.tz) await notifyUnfinishedTasks(db, user.id, input.tz);
-    const profiles = await loadProfiles(db);
     const dated = db.from('time_tasks').select('*').not('day', 'is', null);
-    const [categories, priorities, statuses, tasks, backlog] =
-      await Promise.all([
-        db.from('time_categories').select('*').order('name'),
-        db.from('time_priorities').select('*').order('value'),
-        db.from('time_statuses').select('*').order('position').order('id'),
-        (input.from ? dated.gte('day', input.from).lte('day', input.to) : dated)
-          .order('day')
-          .order('at', { nullsFirst: false }),
-        db
-          .from('time_tasks')
-          .select('*')
-          .is('day', null)
-          .order('created_at')
-          .order('id'),
-      ]);
+    const tasks = await (
+      input.from ? dated.gte('day', input.from).lte('day', input.to) : dated
+    )
+      .order('day')
+      .order('at', { nullsFirst: false });
+    const [[categories, priorities, statuses, backlog], profiles] =
+      await Promise.all([refsLoad, profilesLoad]);
     if (categories.error) throw fromSupabaseError(categories.error);
     if (priorities.error) throw fromSupabaseError(priorities.error);
     if (statuses.error) throw fromSupabaseError(statuses.error);

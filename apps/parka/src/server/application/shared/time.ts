@@ -90,40 +90,45 @@ export const materializeTimeRecurring = async (
     .eq('active', true);
   if (error) throw fromSupabaseError(error);
 
-  for (const row of rows) {
-    const due = dueOccurrences(toTimeRecurring(row), until);
-    const newest = due.at(-1);
-    if (newest === undefined) continue;
+  // Rows are independent: one round trip chain per row, all rows in parallel.
+  await Promise.all(
+    rows.map(async (row) => {
+      const due = dueOccurrences(toTimeRecurring(row), until);
+      const newest = due.at(-1);
+      if (newest === undefined) return;
 
-    const { error: insertError } = await db.from('time_tasks').upsert(
-      due.map((day) => ({
-        user_id: userId,
-        id: `${row.id}:${day}`,
-        title: row.title,
-        description: row.description,
-        category_id: row.category_id,
-        priority_id: row.priority_id,
-        day,
-        at: row.at,
-        done: false,
-        recurring_id: row.id,
-        occurrence_date: day,
-      })),
-      {
-        onConflict: 'user_id,recurring_id,occurrence_date',
-        ignoreDuplicates: true,
-      },
-    );
-    if (insertError) throw fromSupabaseError(insertError);
+      const { error: insertError } = await db.from('time_tasks').upsert(
+        due.map((day) => ({
+          user_id: userId,
+          id: `${row.id}:${day}`,
+          title: row.title,
+          description: row.description,
+          category_id: row.category_id,
+          priority_id: row.priority_id,
+          day,
+          at: row.at,
+          done: false,
+          recurring_id: row.id,
+          occurrence_date: day,
+        })),
+        {
+          onConflict: 'user_id,recurring_id,occurrence_date',
+          ignoreDuplicates: true,
+        },
+      );
+      if (insertError) throw fromSupabaseError(insertError);
 
-    // Only forward: a slower parallel request must not roll the mark back.
-    const { error: markError } = await db
-      .from('time_recurring')
-      .update({ last_materialized_date: newest })
-      .eq('id', row.id)
-      .or(`last_materialized_date.is.null,last_materialized_date.lt.${newest}`);
-    if (markError) throw fromSupabaseError(markError);
-  }
+      // Only forward: a slower parallel request must not roll the mark back.
+      const { error: markError } = await db
+        .from('time_recurring')
+        .update({ last_materialized_date: newest })
+        .eq('id', row.id)
+        .or(
+          `last_materialized_date.is.null,last_materialized_date.lt.${newest}`,
+        );
+      if (markError) throw fromSupabaseError(markError);
+    }),
+  );
 };
 
 /** From this local hour on, the day counts as nearly over. */
