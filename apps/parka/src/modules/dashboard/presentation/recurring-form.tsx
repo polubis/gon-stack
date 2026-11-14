@@ -8,11 +8,8 @@ import { ProductsSection } from '@/shared/expense-form/presentation/products-sec
 import { useProducts } from '@/shared/expense-form/presentation/use-products';
 import { defaultCategoryId } from '@/shared/expense-form/domain/products';
 import type { Period } from '@/shared/period/period';
-import type {
-  CategoryId,
-  Recurring,
-  RecurringInterval,
-} from '../domain/models';
+import type { CategoryId, Recurring } from '../domain/models';
+import type { RecurringInterval } from '@/shared/recurring/occurrences';
 import { useContext } from './context';
 import { DialogActions } from './detail-dialog';
 import { intervalLabel } from './selectors';

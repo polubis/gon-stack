@@ -4,7 +4,6 @@ import type { Device } from '@/shared/device/domain/models';
 import type { RecurringInterval } from '@/shared/recurring/occurrences';
 
 export type Month = Brand<string, 'Month'>;
-export type { Period, PeriodKind } from '@/shared/period/period';
 export type CategoryId = Brand<string, 'CategoryId'>;
 export type ExpenseId = Brand<string, 'ExpenseId'>;
 export type ReceiptItemId = Brand<string, 'ReceiptItemId'>;
@@ -79,8 +78,6 @@ export type Expense = {
   occurrenceDate: string | null;
   items: ReceiptItem[];
 };
-
-export type { RecurringInterval } from '@/shared/recurring/occurrences';
 
 export type RecurringItem = {
   id: RecurringItemId;
