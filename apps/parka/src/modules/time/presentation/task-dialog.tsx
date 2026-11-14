@@ -1,6 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Repeat, Trash2 } from 'lucide-react';
-import { PICKER_LINK } from './picker-link';
 import {
   currentDevice,
   loadDeviceHints,
@@ -30,7 +29,7 @@ import {
 import { CategoryPicker } from './category-picker';
 import { useContext } from './context';
 import { DescriptionField } from './description-field';
-import { deleteTaskModal, STATUSES_MODAL, stopSeriesModal } from './modal-ids';
+import { deleteTaskModal, stopSeriesModal } from './modal-ids';
 import { ModalShell } from './modal-shell';
 import { PriorityPicker } from './priority-picker';
 import { RecurringMark } from './recurring-mark';
@@ -179,7 +178,7 @@ export const TaskDialog = ({
         editing ? 'Zmień szczegóły zadania.' : 'Wpisz nazwę, dzień i godzinę.'
       }
     >
-      <form onSubmit={submit} noValidate className="flex flex-col gap-3">
+      <form onSubmit={submit} noValidate className="flex flex-col gap-4">
         <Field label="Nazwa">
           <ClearableInput
             type="text"
@@ -228,15 +227,15 @@ export const TaskDialog = ({
           </Field>
         </div>
         {isDay(day) ? (
-          <p className="-mt-2 text-xs text-ink-soft">{dayLabel(day, 'long')}</p>
+          <p className="-mt-3 text-xs text-ink-soft">{dayLabel(day, 'long')}</p>
         ) : null}
         {touched && pickError ? (
-          <span role="alert" className="-mt-2 block text-xs text-danger">
+          <span role="alert" className="-mt-3 block text-xs text-danger">
             {pickError}
           </span>
         ) : null}
         {touched && (dayError ?? atError) ? (
-          <span role="alert" className="-mt-2 block text-xs text-danger">
+          <span role="alert" className="-mt-3 block text-xs text-danger">
             {dayError ?? atError}
           </span>
         ) : null}
@@ -283,7 +282,7 @@ export const TaskDialog = ({
               </div>
             ) : null}
             {touched && endError ? (
-              <span role="alert" className="-mt-2 block text-xs text-danger">
+              <span role="alert" className="-mt-3 block text-xs text-danger">
                 {endError}
               </span>
             ) : null}
@@ -306,20 +305,8 @@ export const TaskDialog = ({
           <TaskDeviceDetail device={task.device} />
         ) : null}
         {editing ? (
-          <div>
-            <div className="mb-1 flex items-center justify-between gap-2">
-              <span className="text-sm font-medium text-ink-soft">Status</span>
-              <button
-                type="button"
-                data-e2e="time:statuses-edit"
-                onClick={() => openModal(STATUSES_MODAL)}
-                className={PICKER_LINK}
-              >
-                Edytuj statusy
-              </button>
-            </div>
+          <Field label="Status">
             <Select
-              aria-label="Status"
               data-e2e="time:task-status"
               value={step}
               options={steps.map((value) => ({
@@ -328,7 +315,7 @@ export const TaskDialog = ({
               }))}
               onValueChange={(value) => setStep(value as Step)}
             />
-          </div>
+          </Field>
         ) : null}
         <div className="mt-1 flex items-center gap-2">
           {editing ? (

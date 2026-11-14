@@ -1,6 +1,7 @@
 import { Plus } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { openModal } from '@/shared/router/modal-stack';
+import { Field, Select } from '@/shared/ui/controls';
 import { priorityLevel } from '../domain/priority';
 import type { PriorityId } from '../domain/models';
 import { useContext } from './context';
@@ -8,7 +9,7 @@ import { NEW_PRIORITY_MODAL } from './modal-ids';
 import { PICKER_LINK } from './picker-link';
 import { PriorityMeter, PRIORITY_TONE } from './priority-badge';
 
-/** Radio segments of the priorities (highest value first), with a link to add one. */
+/** Select of the priorities (highest value first), with the one link to add one. */
 export const PriorityPicker = ({
   value,
   onChange,
@@ -18,9 +19,9 @@ export const PriorityPicker = ({
 }) => {
   const { priorities } = useContext();
   return (
-    <fieldset className="min-w-0">
-      <div className="mb-1 flex items-center justify-between gap-2">
-        <legend className="text-sm font-medium text-ink-soft">Priorytet</legend>
+    <Field
+      label="Priorytet"
+      action={
         <button
           type="button"
           onClick={() => openModal(NEW_PRIORITY_MODAL)}
@@ -29,39 +30,32 @@ export const PriorityPicker = ({
           <Plus className="h-3 w-3" aria-hidden="true" />
           Nowy priorytet
         </button>
-      </div>
-      <div className="flex flex-wrap gap-1 rounded-xl bg-brand-soft p-1">
-        {priorities.map((item) => {
-          const level = priorityLevel(item.value);
-          const selected = item.id === value;
-          return (
-            <label
-              key={item.id}
+      }
+    >
+      <Select
+        data-e2e="time:priority-select"
+        value={value ?? ''}
+        options={priorities.map((item) => ({
+          value: item.id,
+          label: (
+            <span
               className={cn(
-                'flex min-h-9 min-w-24 flex-1 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg px-2 py-1 text-sm font-medium transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand',
-                selected
-                  ? cn(
-                      PRIORITY_TONE[level],
-                      'bg-card shadow-sm ring-2 ring-current',
-                    )
-                  : 'text-ink-soft hover:text-ink',
+                'flex items-center gap-2',
+                PRIORITY_TONE[priorityLevel(item.value)],
+                'bg-transparent',
               )}
             >
-              <input
-                type="radio"
-                name="task-priority"
-                data-e2e={`time:priority-option:${item.name}`}
-                value={item.id}
-                checked={selected}
-                onChange={() => onChange(item.id)}
-                className="sr-only"
-              />
               <PriorityMeter value={item.value} />
-              <span className="truncate">{item.name}</span>
-            </label>
-          );
-        })}
-      </div>
-    </fieldset>
+              <span className="truncate text-ink">{item.name}</span>
+            </span>
+          ),
+        }))}
+        // Radix reports '' while its list catches up with a new item: ignored.
+        onValueChange={(id) => {
+          const picked = priorities.find((item) => item.id === id);
+          if (picked) onChange(picked.id);
+        }}
+      />
+    </Field>
   );
 };

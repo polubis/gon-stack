@@ -319,7 +319,8 @@ describe('backlog editing', () => {
 
     await user.clear(name);
     await user.type(name, 'Dentysta w piątek');
-    await user.click(form.getByRole('radio', { name: 'Praca' }));
+    await user.click(form.getByRole('combobox', { name: 'Kategoria' }));
+    await user.click(await screen.findByRole('option', { name: 'Praca' }));
     await user.click(form.getByRole('button', { name: 'Zapisz' }));
 
     expect(await list.findByText('Dentysta w piątek')).toBeVisible();

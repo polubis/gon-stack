@@ -79,10 +79,11 @@ export const TIME_E2E_IDS = [
   'time:history-error',
   'time:history-empty',
   'time:statuses-dialog',
-  'time:statuses-edit',
   'time:statuses-save',
   'time:status-add',
   'time:task-status',
+  'time:category-select',
+  'time:priority-select',
   'time:add-trigger',
   'time:add-fab',
   'time:open-only-toggle',
@@ -127,8 +128,6 @@ export type TimeDynamicE2eId =
   | `time:status-delete:${string}`
   | `time:add-option:${string}`
   | `time:modal-close:${string}`
-  | `time:category-option:${string}`
-  | `time:priority-option:${string}`
   | `time:month-day:${string}`
   | `time:year-month:${number}`
   | `time:attachment-link:${string}`;

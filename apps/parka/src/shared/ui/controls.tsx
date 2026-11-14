@@ -221,21 +221,33 @@ export const Field = ({
   label,
   children,
   hint,
+  action,
 }: {
   label: string;
   children: React.ReactNode;
   hint?: string;
+  /** Control shown on the label row, right-aligned (e.g. a "new" link). */
+  action?: React.ReactNode;
 }) => {
   const id = useId();
   return (
     <FieldContext.Provider value={{ id, label }}>
       <div className="block">
-        <label
-          htmlFor={id}
-          className="mb-1 block text-sm font-medium text-ink-soft"
-        >
-          {label}
-        </label>
+        {action ? (
+          <div className="mb-1 flex items-center justify-between gap-2">
+            <label htmlFor={id} className="text-sm font-medium text-ink-soft">
+              {label}
+            </label>
+            {action}
+          </div>
+        ) : (
+          <label
+            htmlFor={id}
+            className="mb-1 block text-sm font-medium text-ink-soft"
+          >
+            {label}
+          </label>
+        )}
         {children}
         {hint ? (
           <span className="mt-1 block text-xs text-ink-soft">{hint}</span>
