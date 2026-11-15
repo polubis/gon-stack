@@ -30,6 +30,8 @@ export const PickerScreen = ({
 }: Props) => (
   <Dialog.Root open={open} onOpenChange={(next) => !next && onClose()}>
     <Dialog.Portal>
+      {/* The overlay carries Radix's scroll lock: without it a picker opened over another modal gets its touch/wheel scroll cancelled by that modal's lock. */}
+      <Dialog.Overlay className="fixed inset-0 z-(--z-modal)" />
       <Dialog.Content
         data-e2e={e2e}
         aria-describedby={undefined}
