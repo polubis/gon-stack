@@ -31,22 +31,22 @@ export const getDashboard = privateProcedure({
     // Charges that came due are expenses first, then every total counts them.
     await materializeRecurring(db, user.id, today);
 
-    const [expenses, items, categories, limits, profile] = await Promise.all([
+    const [expenses, categories, limits, profile] = await Promise.all([
       db
         .from('expenses')
-        .select('id, date, amount, category_id')
+        // Products ride along with their expense: only the period's ones are
+        // read, never the whole history (which one capped read cut short).
+        .select(
+          'date, amount, category_id, receipt_items(unit_price, quantity, discount, category_id)',
+        )
         // One day wider on both sides: the zone decides the exact edge.
         .gte('date', addDays(previous.from, -1))
         .lt('date', addDays(period.to, 2)),
-      db
-        .from('receipt_items')
-        .select('expense_id, unit_price, quantity, discount, category_id'),
       db.from('categories').select('id, name, color'),
       db.from('limits').select('amount').eq('scope', 'total'),
       db.from('profiles').select('name').maybeSingle(),
     ]);
     if (expenses.error) throw fromSupabaseError(expenses.error);
-    if (items.error) throw fromSupabaseError(items.error);
     if (categories.error) throw fromSupabaseError(categories.error);
     if (limits.error) throw fromSupabaseError(limits.error);
     if (profile.error) throw fromSupabaseError(profile.error);
@@ -58,14 +58,12 @@ export const getDashboard = privateProcedure({
         date: e.date,
         amount: Number(e.amount),
         categoryId: e.category_id,
-        items: items.data
-          .filter((it) => it.expense_id === e.id)
-          .map((it) => ({
-            categoryId: it.category_id,
-            unitPrice: Number(it.unit_price),
-            quantity: Number(it.quantity),
-            discount: Number(it.discount),
-          })),
+        items: e.receipt_items.map((it) => ({
+          categoryId: it.category_id,
+          unitPrice: Number(it.unit_price),
+          quantity: Number(it.quantity),
+          discount: Number(it.discount),
+        })),
       })),
       categories: categories.data.map((c) => ({
         id: c.id,

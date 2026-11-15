@@ -1,4 +1,5 @@
 import { categoryShares } from '@/shared/expense-category/category';
+import type { Database } from '@/shared/data-sources/db-schema';
 import type { SupabaseServer } from '@/shared/data-sources/supabase-server';
 
 import { logger } from '../core/logger';
@@ -6,6 +7,10 @@ import { loadCategoryNames, recordNotificationOnce } from './notifications';
 import { fromSupabaseError } from '../adapter/supabase';
 
 type Db = Pick<SupabaseServer, 'from'>;
+type ItemRow = Pick<
+  Database['public']['Tables']['receipt_items']['Row'],
+  'expense_id' | 'unit_price' | 'quantity' | 'discount' | 'category_id'
+>;
 
 const nextMonth = (month: string): string => {
   const [year, number] = month.split('-').map(Number);
@@ -43,7 +48,7 @@ export const notifyReachedLimits = async (
           .from('receipt_items')
           .select('expense_id, unit_price, quantity, discount, category_id')
           .in('expense_id', ids)
-      : { data: [], error: null };
+      : { data: [] as ItemRow[], error: null };
     if (items.error) throw fromSupabaseError(items.error);
 
     const shares = expenses.data.flatMap((e) =>
