@@ -21,8 +21,10 @@ export const Main = () => {
   } = useContext();
   const scope = `${anchor}:${initializing}`;
   const day = tasksOn(tasks, anchor, priorities, filters.sort);
-  const scheduled = day.filter(isTimed);
-  const unscheduled = day.filter((task) => task.at === null);
+  // Title and priority orders ignore the hour: one list, not two groups.
+  const byHour = filters.sort === 'time';
+  const scheduled = byHour ? day.filter(isTimed) : [];
+  const unscheduled = byHour ? day.filter((task) => task.at === null) : day;
   const scheduledRows = useListChanges(scheduled, taskKey, scope);
   const unscheduledRows = useListChanges(unscheduled, taskKey, scope);
   // Rows include the one still leaving: the empty state waits for its exit.
@@ -32,7 +34,7 @@ export const Main = () => {
   const nowIndex = anchor === now.day ? nowIndexOf(scheduled, now.time) : -1;
 
   return (
-    <Card className="mx-auto flex w-full max-w-3xl flex-col gap-3">
+    <Card className="flex w-full flex-col gap-3">
       <section aria-labelledby="day-plan" className="flex flex-col gap-1">
         <h2 id="day-plan" className="text-base font-semibold">
           {anchor === now.day ? 'Zadania na dziś' : 'Zadania na ten dzień'}
@@ -66,7 +68,7 @@ export const Main = () => {
             </h3>
           ) : (
             <h3 id="day-loose" className="sr-only">
-              Bez godziny
+              {byHour ? 'Bez godziny' : 'Wszystkie zadania'}
             </h3>
           )}
           <ul className="flex flex-col">

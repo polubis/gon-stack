@@ -252,8 +252,17 @@ describe('time task edit', () => {
     ]);
     renderTime();
 
-    expect(await screen.findByText('Wysoki')).toBeInTheDocument();
-    expect(screen.getByText('Niski')).toBeInTheDocument();
+    const rowOf = async (title: string) =>
+      (
+        await screen.findByRole('button', { name: `Edytuj zadanie: ${title}` })
+      ).closest('li')!;
+
+    expect(
+      within(await rowOf('Raport miesięczny')).getByText('Wysoki'),
+    ).toBeInTheDocument();
+    expect(
+      within(await rowOf('Spacer')).getByText('Niski'),
+    ).toBeInTheDocument();
   });
 });
 

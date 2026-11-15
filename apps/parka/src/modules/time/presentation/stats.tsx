@@ -1,20 +1,16 @@
 import type { ReactNode } from 'react';
-import { ChartColumn, ListChecks, Plus } from 'lucide-react';
+import { ListChecks } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { Donut } from '@/shared/ui/charts';
-import { Button, ProgressBar } from '@/shared/ui/controls';
+import { ProgressBar } from '@/shared/ui/controls';
 import { EmptyState } from '@/shared/ui/empty-state';
 import { Card } from '@/shared/ui/layout';
 import { Ring } from '@/shared/ui/ring';
 import { dayLabel } from '@/shared/date/date';
-import { openModal } from '@/shared/router/modal-stack';
 import type { TimeKind } from '../domain/models';
-import { periodTitle } from '../domain/period-title';
 import type { PriorityLevel } from '../domain/priority';
 import { taskStats, type Bucket, type TaskStats } from '../domain/stats';
 import { useContext } from './context';
-import { NEW_TASK_MODAL } from './modal-ids';
-import { StatsSkeleton } from './skeleton';
 import { TaskKey } from './task-key';
 
 const PRIORITY_NAMES: Record<PriorityLevel, string> = {
@@ -51,7 +47,10 @@ const Row = ({ label, children }: { label: string; children: ReactNode }) => (
 );
 
 const Hero = ({ stats }: { stats: TaskStats }) => (
-  <div className="hero-card flex flex-col justify-center gap-5 rounded-4xl p-5 shadow-popover md:p-7 xl:col-span-6 xl:col-start-1 xl:row-start-1 xl:h-full">
+  <div
+    data-e2e="time:summary"
+    className="hero-card flex flex-col justify-center gap-5 rounded-4xl p-5 shadow-popover md:p-7 xl:-order-2 xl:col-span-6 xl:h-full"
+  >
     <div className="flex items-center gap-5">
       <Ring
         surface="hero"
@@ -93,7 +92,10 @@ const Hero = ({ stats }: { stats: TaskStats }) => (
 );
 
 const StatusCard = ({ stats }: { stats: TaskStats }) => (
-  <Card className="space-y-4 xl:col-span-6 xl:col-start-7 xl:row-start-1">
+  <Card
+    data-e2e="time:stats-status"
+    className="space-y-4 xl:-order-1 xl:col-span-6"
+  >
     <h2 className="flex min-h-9 items-center text-base font-semibold">
       Status
     </h2>
@@ -114,7 +116,7 @@ const StatusCard = ({ stats }: { stats: TaskStats }) => (
 );
 
 const CategoriesCard = ({ stats }: { stats: TaskStats }) => (
-  <Card className="space-y-4 xl:col-span-6 xl:col-start-1 xl:row-start-2">
+  <Card data-e2e="time:stats" className="space-y-4 xl:col-span-6">
     <h2 className="flex min-h-9 items-center text-base font-semibold">
       Kategorie
     </h2>
@@ -131,7 +133,7 @@ const CategoriesCard = ({ stats }: { stats: TaskStats }) => (
 );
 
 const PrioritiesCard = ({ stats }: { stats: TaskStats }) => (
-  <Card className="space-y-4 xl:col-span-6 xl:col-start-7 xl:row-start-2">
+  <Card className="space-y-4 xl:col-span-6">
     <h2 className="flex min-h-9 items-center text-base font-semibold">
       Priorytety
     </h2>
@@ -258,7 +260,7 @@ const ActivityCard = ({
 }) => {
   const title = kind === 'day' ? 'Zadania wg godziny' : 'Zadania w czasie';
   return (
-    <Card className="space-y-4 xl:col-span-12 xl:row-start-3">
+    <Card className="space-y-4 xl:col-span-12">
       <div className="flex flex-col items-start gap-2 md:flex-row md:items-center md:justify-between">
         <h2 className="text-base font-semibold">{title}</h2>
         <Legend />
@@ -272,7 +274,7 @@ const ActiveCard = ({ stats }: { stats: TaskStats }) => (
   <Card
     as="section"
     aria-labelledby="stats-active"
-    className="space-y-4 xl:col-span-6 xl:col-start-1 xl:row-start-4"
+    className="space-y-4 xl:col-span-6"
   >
     <h2
       id="stats-active"
@@ -309,7 +311,7 @@ const ActiveCard = ({ stats }: { stats: TaskStats }) => (
 );
 
 const DetailsCard = ({ stats }: { stats: TaskStats }) => (
-  <Card className="space-y-2 xl:col-span-6 xl:col-start-7 xl:row-start-4">
+  <Card className="space-y-2 xl:col-span-6">
     <h2 className="flex min-h-9 items-center text-base font-semibold">
       Szczegóły
     </h2>
@@ -329,11 +331,9 @@ const DetailsCard = ({ stats }: { stats: TaskStats }) => (
   </Card>
 );
 
-/** Statistics tab: the loaded period as one dashboard, like the finance one. */
-export const Stats = ({ kind }: { kind: TimeKind }) => {
-  const { tasks, backlog, categories, priorities, now, anchor, isLoading } =
-    useContext();
-  const stats = taskStats({
+const useStats = (kind: TimeKind): TaskStats => {
+  const { tasks, backlog, categories, priorities, now, anchor } = useContext();
+  return taskStats({
     tasks,
     backlog,
     categories,
@@ -342,34 +342,27 @@ export const Stats = ({ kind }: { kind: TimeKind }) => {
     anchor,
     today: now.day,
   });
+};
 
-  if (stats.total === 0) {
-    // A reload may still bring tasks: claim emptiness only once it ends.
-    if (isLoading) return <StatsSkeleton />;
-    return (
-      <EmptyState
-        data-e2e="time:stats-empty"
-        icon={ChartColumn}
-        title="Brak statystyk"
-        description={`Nic nie zaplanowano: ${periodTitle(kind, anchor)}.`}
-        action={
-          <Button
-            onClick={() => openModal(NEW_TASK_MODAL)}
-            className="w-auto px-3 py-2"
-          >
-            <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj zadanie
-          </Button>
-        }
-      />
-    );
-  }
+/** Number of tasks in the period; the stats sections show only with some. */
+export const usePeriodTotal = (kind: TimeKind): number => useStats(kind).total;
 
+/** First section of the screen: completion of the period. */
+export const Summary = ({ kind }: { kind: TimeKind }) => {
+  const stats = useStats(kind);
+  if (stats.total === 0) return null;
+  return <Hero stats={stats} />;
+};
+
+/**
+ * Last section of the screen: all statistics cards, below the tasks. On xl the
+ * status card moves up beside the summary through `order`.
+ */
+export const Insights = ({ kind }: { kind: TimeKind }) => {
+  const stats = useStats(kind);
+  if (stats.total === 0) return null;
   return (
-    <div
-      data-e2e="time:stats"
-      className="flex flex-col gap-3 md:gap-4 xl:grid xl:grid-cols-12 xl:content-start"
-    >
-      <Hero stats={stats} />
+    <>
       <StatusCard stats={stats} />
       <CategoriesCard stats={stats} />
       <PrioritiesCard stats={stats} />
@@ -378,6 +371,6 @@ export const Stats = ({ kind }: { kind: TimeKind }) => {
       ) : null}
       <ActiveCard stats={stats} />
       <DetailsCard stats={stats} />
-    </div>
+    </>
   );
 };

@@ -33,6 +33,7 @@ const ATTACHMENT_EMAIL = `e2e-time-attachment-${Date.now()}@parka.test`;
 const COMMENT_EMAIL = `e2e-time-comment-${Date.now()}@parka.test`;
 const OPEN_ONLY_EMAIL = `e2e-time-open-only-${Date.now()}@parka.test`;
 const UPFRONT_EMAIL = `e2e-time-upfront-${Date.now()}@parka.test`;
+const STRUCTURE_EMAIL = `e2e-time-structure-${Date.now()}@parka.test`;
 const BAR_EMAIL = `e2e-time-backlog-bar-${Date.now()}@parka.test`;
 const PASSWORD = 'secret123';
 const ATTACHMENT_TEXT = 'Treść załącznika E2E';
@@ -1103,6 +1104,59 @@ const commands = {
     expect(new URL(reads[0]!).searchParams.get('from')).toBeNull();
   },
 
+  'i register an account for the screen structure': async (ctx) => {
+    await registerAndConfirm(ctx, STRUCTURE_EMAIL, PASSWORD);
+    await ctx.page.waitForLoadState('networkidle');
+  },
+
+  'i add one task to the week': async ({ page, getByE2e }) => {
+    await open(page, APP_ROUTER.timeWeek({ date: DAY }));
+    await getByE2e('time:empty-add').click();
+    await getByE2e('time:task-name').fill('Struktura E2E');
+    await Promise.all([
+      synced(page, 'POST', 201),
+      getByE2e('time:task-save').click(),
+    ]);
+  },
+
+  'the summary comes first, the tasks next and the statistics last': async ({
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
+    const summary = getByE2e('time:summary');
+    const tasks = taskInfo(getByE2ePrefix, 'Struktura E2E').first();
+    const stats = getByE2e('time:stats');
+    await expect(summary).toBeVisible();
+    await expect(tasks).toBeVisible();
+    await expect(stats).toBeVisible();
+    const top = async (locator: typeof summary) =>
+      (await locator.boundingBox())!.y;
+    expect(await top(summary)).toBeLessThan(await top(tasks));
+    expect(await top(tasks)).toBeLessThan(await top(stats));
+  },
+
+  'on a phone every statistics card comes after the tasks': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    const summary = getByE2e('time:summary');
+    const tasks = taskInfo(getByE2ePrefix, 'Struktura E2E').first();
+    const status = getByE2e('time:stats-status');
+    const stats = getByE2e('time:stats');
+    await expect(status).toBeVisible();
+    const top = async (locator: typeof summary) =>
+      (await locator.boundingBox())!.y;
+    expect(await top(summary)).toBeLessThan(await top(tasks));
+    expect(await top(tasks)).toBeLessThan(await top(status));
+    expect(await top(status)).toBeLessThan(await top(stats));
+  },
+
+  'there is no separate statistics tab': async ({ page }) => {
+    await expect(page.getByRole('tab', { name: 'Statystyki' })).toHaveCount(0);
+  },
+
   'i register an account for the backlog bar': async (ctx) => {
     await registerAndConfirm(ctx, BAR_EMAIL, PASSWORD);
     await ctx.page.waitForLoadState('networkidle');
@@ -1223,6 +1277,18 @@ test('time views and deleting a task work against the real Supabase backend', as
     ['the range menu returns to today from another period'],
     ['i delete the task after confirming'],
     ['the api lists no tasks after the delete'],
+  );
+});
+
+test('the time screen stacks summary, tasks and statistics on the real backend', async ({
+  e2e,
+}) => {
+  await interpreter(commands, e2e)(
+    ['i register an account for the screen structure'],
+    ['i add one task to the week'],
+    ['the summary comes first, the tasks next and the statistics last'],
+    ['on a phone every statistics card comes after the tasks'],
+    ['there is no separate statistics tab'],
   );
 });
 

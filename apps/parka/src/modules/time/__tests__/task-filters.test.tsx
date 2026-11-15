@@ -183,3 +183,44 @@ describe('task filters', () => {
     expect(chip.querySelector('[data-level="high"]')).toBeInTheDocument();
   });
 });
+
+describe('task order in the day view', () => {
+  const listed = () =>
+    screen
+      .getAllByRole('button', { name: /^Szczegóły zadania/, hidden: true })
+      .map((button) => button.getAttribute('aria-label'));
+
+  it('orders timed tasks by the hour, not by creation', async () => {
+    backend.seed([
+      task({ id: 't-1', title: 'Wieczór', at: '18:30' }),
+      task({ id: 't-2', title: 'Rano', at: '07:15' }),
+      task({ id: 't-3', title: 'Południe', at: '12:00' }),
+    ]);
+    renderTime();
+
+    await screen.findAllByRole('button', { name: /^Szczegóły zadania/ });
+
+    expect(listed()).toEqual([
+      'Szczegóły zadania: Rano',
+      'Szczegóły zadania: Południe',
+      'Szczegóły zadania: Wieczór',
+    ]);
+  });
+
+  it('sorts by name across timed and whole-day tasks', async () => {
+    backend.seed([
+      task({ id: 't-1', title: 'Cały dzień Alfa', at: null }),
+      task({ id: 't-2', title: 'Bravo', at: '08:00' }),
+      task({ id: 't-3', title: 'Zebra', at: null }),
+    ]);
+    renderTime('day', '2026-10-20', '&sort=title');
+
+    await screen.findAllByRole('button', { name: /^Szczegóły zadania/ });
+
+    expect(listed()).toEqual([
+      'Szczegóły zadania: Bravo',
+      'Szczegóły zadania: Cały dzień Alfa',
+      'Szczegóły zadania: Zebra',
+    ]);
+  });
+});
