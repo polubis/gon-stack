@@ -5,7 +5,7 @@ import { NAV_ITEMS } from '../configuration/constraints';
 import type { NavKey } from '../domain/models';
 
 type Props = {
-  active: NavKey;
+  active: NavKey | null;
 };
 
 /** Desktop left sidebar (`lg` and up) for signed-in app routes. */

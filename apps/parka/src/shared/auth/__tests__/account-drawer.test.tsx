@@ -22,7 +22,9 @@ import { Provider as OverlayNavProvider } from '@/shared/navigation/overlay-nav/
 import { NavSlot } from '@/shared/navigation/overlay-nav/presentation/nav-slot';
 import { AccountDrawer } from '../presentation/account-drawer';
 import { AccountMenu } from '../presentation/account-menu';
+import { registerNavigator } from '@/shared/router/navigation';
 import { setProfileSummary } from '../presentation/profile-summary';
+import { setUnreadSummary } from '../presentation/unread-summary';
 import { AuthProvider } from '../presentation/context';
 
 const ID_A = '0a0a0a0a-0a0a-4a0a-8a0a-0a0a0a0a0a0a';
@@ -78,7 +80,7 @@ const openMenu = async () => {
     </AuthProvider>,
   );
   await userEvent.click(
-    await screen.findByRole('button', { name: 'Konto: a@parka.test' }),
+    await screen.findByRole('button', { name: /^Konto: a@parka.test/ }),
   );
 };
 
@@ -110,6 +112,8 @@ describe('account drawer', () => {
   afterEach(() => {
     window.history.replaceState(null, '', '/app/');
     setProfileSummary({ name: null, avatarUrl: null });
+    setUnreadSummary(0);
+    registerNavigator(null);
     server.resetHandlers();
     assign.mockClear();
     window.sessionStorage.clear();
@@ -169,6 +173,61 @@ describe('account drawer', () => {
 
     expect(within(row).queryByRole('presentation')).toBeNull();
     expect(row).toHaveTextContent('B');
+  });
+
+  it('shows the unread count on the account button', async () => {
+    backend();
+    setUnreadSummary(3);
+    render(
+      <AuthProvider>
+        <AccountMenu placement="bottom" />
+      </AuthProvider>,
+    );
+
+    expect(
+      await screen.findByRole('button', {
+        name: 'Konto: a@parka.test, nieprzeczytane powiadomienia: 3',
+      }),
+    ).toBeVisible();
+  });
+
+  it('keeps the account button label plain without unread notifications', async () => {
+    backend();
+    render(
+      <AuthProvider>
+        <AccountMenu placement="bottom" />
+      </AuthProvider>,
+    );
+
+    expect(
+      await screen.findByRole('button', { name: 'Konto: a@parka.test' }),
+    ).toBeVisible();
+  });
+
+  it('offers notifications with the unread count inside the open panel', async () => {
+    backend();
+    setUnreadSummary(12);
+    await openMenu();
+
+    const link = await screen.findByRole('link', { name: /Powiadomienia/ });
+    expect(link).toHaveAttribute('href', APP_ROUTER.notifications());
+    expect(link).toHaveTextContent('Nieprzeczytane: 9+');
+  });
+
+  it('takes the user to settings from the open panel', async () => {
+    backend();
+    const push = vi.fn();
+    await openMenu();
+    registerNavigator({ push, replace: vi.fn() });
+
+    const link = await screen.findByRole('link', { name: 'Ustawienia' });
+    expect(link).toHaveAttribute('href', APP_ROUTER.settings());
+    await userEvent.click(link);
+
+    await waitFor(() =>
+      expect(push).toHaveBeenCalledWith(APP_ROUTER.settings()),
+    );
+    expect(screen.queryByRole('dialog')).toBeNull();
   });
 
   it('offers adding an account and signing out', async () => {
@@ -302,7 +361,7 @@ describe('account drawer', () => {
       </AuthProvider>,
     );
     await userEvent.click(
-      await screen.findByRole('button', { name: 'Konto: a@parka.test' }),
+      await screen.findByRole('button', { name: /^Konto: a@parka.test/ }),
     );
     await screen.findByRole('dialog', { name: 'Ada' });
 

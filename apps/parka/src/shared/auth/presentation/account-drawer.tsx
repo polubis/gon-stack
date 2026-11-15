@@ -1,9 +1,16 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import {
+  useEffect,
+  useState,
+  type CSSProperties,
+  type MouseEvent,
+} from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import {
+  Bell,
   Check,
   LogOut,
   Pencil,
+  Settings,
   TriangleAlert,
   UserPlus,
   Users,
@@ -12,12 +19,14 @@ import {
 import { cn } from '@repo/react-kit/cn';
 import {
   closeModal,
+  closeModalThen,
   openModal,
   useModal,
   useModalMounted,
 } from '@/shared/router/modal-stack';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { Toast, type ToastNotice } from '@/shared/ui/toast';
+import { navigateTo } from '@/shared/router/navigation';
 import { APP_ROUTER } from '@/shared/router/routes';
 import {
   ACCOUNT_MODAL,
@@ -34,6 +43,7 @@ import {
 import { AccountAvatar } from './account-avatar';
 import { useAuthContext } from './context';
 import { useProfileSummary, type ProfileSummary } from './profile-summary';
+import { useUnreadSummary } from './unread-summary';
 
 type Loaded =
   | { status: 'loading' }
@@ -66,6 +76,52 @@ const anchorBesideTrigger = (): CSSProperties | null => {
     width: '24rem',
     maxHeight: `calc(100% - ${window.innerHeight - rect.bottom}px - 0.5rem)`,
   };
+};
+
+/** Plain in-app link that first closes the drawer, then navigates once the URL settled. */
+const goTo = (event: MouseEvent<HTMLAnchorElement>, path: string) => {
+  if (
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey
+  )
+    return;
+  event.preventDefault();
+  closeModalThen(ACCOUNT_MODAL, () => navigateTo(path));
+};
+
+const AreaLinks = () => {
+  const unread = useUnreadSummary();
+  return (
+    <nav aria-label="Obszar użytkownika" className="flex flex-col pt-3">
+      <a
+        href={APP_ROUTER.notifications()}
+        data-e2e="account-menu:notifications"
+        onClick={(event) => goTo(event, APP_ROUTER.notifications())}
+        className={ITEM}
+      >
+        <Bell className="size-4" aria-hidden="true" />
+        <span className="flex-1">Powiadomienia</span>
+        {unread > 0 ? (
+          <span className="grid h-5 min-w-5 place-items-center rounded-full bg-danger-strong px-1 text-micro font-bold text-on-brand">
+            <span className="sr-only">Nieprzeczytane: </span>
+            {unread > 9 ? '9+' : unread}
+          </span>
+        ) : null}
+      </a>
+      <a
+        href={APP_ROUTER.settings()}
+        data-e2e="account-menu:settings"
+        onClick={(event) => goTo(event, APP_ROUTER.settings())}
+        className={ITEM}
+      >
+        <Settings className="size-4" aria-hidden="true" />
+        Ustawienia
+      </a>
+    </nav>
+  );
 };
 
 const SwitchingScreen = ({ email }: { email: string }) => (
@@ -292,7 +348,9 @@ const Drawer = ({
               <X className="size-4" aria-hidden="true" />
             </Dialog.Close>
           </div>
-          <div className="mt-auto flex flex-col pt-6">
+          <AreaLinks />
+          <div role="separator" className="my-1 border-t border-line" />
+          <div className="mt-auto flex flex-col pt-2">
             <Options
               state={state}
               user={user}

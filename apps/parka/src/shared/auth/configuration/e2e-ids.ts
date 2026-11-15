@@ -10,6 +10,9 @@ export const AUTH_E2E_IDS = [
   'account-menu:logout-all',
   'account-menu:switching',
   'account-menu:toast',
+  'account-menu:unread-badge',
+  'account-menu:notifications',
+  'account-menu:settings',
 ] as const;
 
 export type AuthE2eDynamicId = `account-menu:account:${string}`;

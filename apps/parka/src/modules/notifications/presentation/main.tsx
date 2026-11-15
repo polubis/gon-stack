@@ -11,6 +11,7 @@ import { Provider, useContext } from './context';
 import { DeleteDialog } from './delete-dialog';
 import { HeaderActions } from './header-actions';
 import { Router } from './router';
+import { MirrorUnread } from './unread-sync';
 import { SelectionBar } from './selection-bar';
 
 const unreadLabel = (count: number): string =>
@@ -67,6 +68,7 @@ const NotificationsView = () => {
         </p>
       </main>
       <DeleteDialog />
+      <MirrorUnread />
       {notice ? (
         <Toast
           key={notice.id}

@@ -28,4 +28,17 @@ describe('bottom app nav', () => {
     expect(screen.getByText('Czas')).toHaveClass('sr-only');
     expect(screen.getByText('Finanse')).toHaveClass('sr-only');
   });
+
+  it('has no "Więcej" entry, settings live in the account panel', () => {
+    render(<AppNav active={null} />);
+
+    expect(screen.queryByRole('link', { name: 'Więcej' })).toBeNull();
+    expect(screen.getAllByRole('link')).toHaveLength(2);
+  });
+
+  it('highlights nothing outside finances and time', () => {
+    render(<AppNav active={null} />);
+
+    expect(screen.queryByRole('link', { current: 'page' })).toBeNull();
+  });
 });

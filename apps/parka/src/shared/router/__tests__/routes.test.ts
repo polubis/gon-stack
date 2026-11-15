@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  API_ROUTER,
-  moreSectionPaths,
-  normalizePath,
-  APP_ROUTER,
-} from '../routes';
+import { API_ROUTER, normalizePath, APP_ROUTER } from '../routes';
 
 describe('page routes', () => {
   it('returns trailing-slash paths', () => {
@@ -53,10 +48,5 @@ describe('nav helpers', () => {
     expect(normalizePath('/dashboard')).toBe('/dashboard/');
     expect(normalizePath('/dashboard/')).toBe('/dashboard/');
     expect(normalizePath('/')).toBe('/');
-  });
-
-  it('lists more-section paths from the same builders as hrefs', () => {
-    expect(moreSectionPaths()).toContain(APP_ROUTER.settings());
-    expect(moreSectionPaths()).toContain(APP_ROUTER.categories());
   });
 });

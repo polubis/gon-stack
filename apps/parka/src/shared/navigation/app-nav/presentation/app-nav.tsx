@@ -4,12 +4,11 @@ import { NAV_ITEMS } from '../configuration/constraints';
 import type { NavKey } from '../domain/models';
 
 type Props = {
-  active: NavKey;
+  active: NavKey | null;
 };
 
 /** Bottom nav for signed-in app routes. Stickiness comes from its wrapper. */
 export const AppNav = ({ active }: Props) => {
-  const current = active;
   return (
     <nav
       aria-label="Nawigacja główna"
@@ -17,7 +16,7 @@ export const AppNav = ({ active }: Props) => {
     >
       {NAV_ITEMS.filter((item) => item.mobile).map(
         ({ key, label, href, icon: Icon }) => {
-          const isActive = key === current;
+          const isActive = key === active;
           return (
             <a
               key={key}

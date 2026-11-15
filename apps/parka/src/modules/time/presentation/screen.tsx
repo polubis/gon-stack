@@ -27,7 +27,6 @@ import {
 import type { TimeE2eId } from '../configuration/e2e-ids';
 import { FILTER_PARAMS } from '../domain/filters';
 import type { TimeKind } from '../domain/models';
-import { UnreadLink } from '@/modules/notifications/presentation/unread-link';
 import { rangeOf } from '../domain/schedule';
 import { AddMenu } from './add-menu';
 import { BacklogButton } from './backlog-button';
@@ -135,7 +134,6 @@ const Screen = ({ kind, children }: Props) => {
           action={
             <>
               <BacklogButton />
-              <UnreadLink />
               <FiltersButton />
               <AddMenu
                 side="bottom"

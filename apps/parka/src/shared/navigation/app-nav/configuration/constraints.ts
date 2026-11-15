@@ -1,5 +1,5 @@
-import { Wallet, Clock, LayoutGrid } from 'lucide-react';
-import { moreSectionPaths, APP_ROUTER } from '@/shared/router/routes';
+import { Wallet, Clock } from 'lucide-react';
+import { APP_ROUTER } from '@/shared/router/routes';
 import type { NavKey } from '../domain/models';
 
 type NavItem = {
@@ -7,7 +7,7 @@ type NavItem = {
   label: string;
   href: string;
   icon: typeof Wallet;
-  /** Shown in the bottom bar; otherwise it is reachable via “Więcej”. */
+  /** Shown in the bottom bar. */
   mobile: boolean;
 };
 
@@ -26,14 +26,4 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Clock,
     mobile: true,
   },
-  {
-    key: 'more',
-    label: 'Więcej',
-    href: APP_ROUTER.settings(),
-    icon: LayoutGrid,
-    mobile: true,
-  },
 ];
-
-/** Routes that highlight the “Więcej” tab (href still `/app/settings/`). */
-export const MORE_SECTION_PATHS = moreSectionPaths();
