@@ -235,6 +235,7 @@ describe('access token creation', () => {
     ).toBeInTheDocument();
   });
 
+  // eslint-disable-next-line repo/expect-expect -- asserts nothing: a toast assertion failed when tried, investigate the flow and assert it
   it('confirms with a plain toast', async () => {
     const { user } = await setup([]);
 

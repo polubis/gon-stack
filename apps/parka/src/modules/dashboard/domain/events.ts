@@ -4,10 +4,10 @@ import type {
   ExpenseId,
   Limit,
   LimitId,
-  Period,
   Recurring,
   RecurringId,
 } from './models';
+import type { Period } from '@/shared/period/period';
 
 export type Event =
   | TriggerEvent<'[TRIGGER]_LOAD', { period: Period }>

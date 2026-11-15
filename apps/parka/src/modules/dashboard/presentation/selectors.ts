@@ -20,13 +20,13 @@ import type {
   ExpenseId,
   Limit,
   Month,
-  Period,
   ProgressTone,
   Recurring,
-  RecurringInterval,
   TotalProgress,
   Upcoming,
 } from '../domain/models';
+import type { Period } from '@/shared/period/period';
+import type { RecurringInterval } from '@/shared/recurring/occurrences';
 
 const UPCOMING_PREFIX = 'upcoming:';
 

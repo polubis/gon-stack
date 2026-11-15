@@ -6,19 +6,29 @@
   "exports": {
     "./base": "./base.js",
     "./next-js": "./next.js",
-    "./react-internal": "./react-internal.js"
+    "./react-internal": "./react-internal.js",
+    "./testing": "./testing.js",
+    "./conventions": "./conventions.js",
+    "./supabase": "./supabase.js",
+    "./exhaustive": "./exhaustive.js"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
     "@next/eslint-plugin-next": "catalog:",
     "eslint": "catalog:",
     "eslint-config-prettier": "catalog:",
+    "eslint-plugin-jsx-a11y": "catalog:",
     "eslint-plugin-only-warn": "catalog:",
     "eslint-plugin-react": "catalog:",
     "eslint-plugin-react-hooks": "catalog:",
+    "eslint-plugin-testing-library": "catalog:",
     "eslint-plugin-turbo": "catalog:",
     "globals": "catalog:",
     "typescript": "catalog:",
-    "typescript-eslint": "catalog:"
+    "typescript-eslint": "catalog:",
+    "vitest": "catalog:"
+  },
+  "scripts": {
+    "test": "vitest run"
   }
 }

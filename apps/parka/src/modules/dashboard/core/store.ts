@@ -5,9 +5,9 @@ import type {
   Expense,
   Limit,
   Notice,
-  Period,
   Recurring,
 } from '../domain/models';
+import type { Period } from '@/shared/period/period';
 
 export const createStore = () => {
   /** Flips on the first load start; nothing is shown before it. */
