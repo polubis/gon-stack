@@ -1,10 +1,12 @@
 /** Faithful copy of modules/categories/presentation/icon-picker.tsx (isolation over cross-module imports). */
 import { ClearableInput } from '@/shared/ui/clearable';
 import { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, SearchX } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { CATEGORY_ICON_OPTIONS, CategoryIcon } from '@/shared/ui/icon';
 import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
+import { Button } from '@/shared/ui/controls';
+import { EmptyState } from '@/shared/ui/empty-state';
 import { SelectPopover } from '@/shared/ui/select-popover';
 import { ICON_CATALOG, ICON_GROUPS } from '../configuration/icon-catalog';
 import type { IconGroup } from '../configuration/icon-catalog';
@@ -88,9 +90,24 @@ const Panel = ({ value, color, onChange, close }: PanelProps) => {
       </div>
 
       {visible.length === 0 ? (
-        <p className="py-4 text-center text-sm text-ink-soft">
-          Brak ikon pasujących do „{query.trim()}”.
-        </p>
+        <EmptyState
+          variant="card"
+          icon={SearchX}
+          title="Brak ikon"
+          description={`Brak ikon pasujących do „${query.trim()}”.`}
+          action={
+            <Button
+              variant="ghost"
+              className="w-auto px-3 py-2"
+              onClick={() => {
+                setQuery('');
+                setGroup('all');
+              }}
+            >
+              Wyczyść wyszukiwanie
+            </Button>
+          }
+        />
       ) : (
         <div
           data-nested-scroll=""
