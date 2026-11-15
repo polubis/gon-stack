@@ -11,6 +11,7 @@ import { ColorPicker } from './color-picker';
 import { useContext } from './context';
 import { IconPicker } from './icon-picker';
 import { ModalShell } from './modal-shell';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 
 /** New category form in a stacked modal: name with icon preview, colour, icon. */
 export const CategoryDialog = ({ modal }: { modal: string }) => {
@@ -89,14 +90,14 @@ export const CategoryDialog = ({ modal }: { modal: string }) => {
         <ColorPicker value={color} custom={null} onChange={setColor} />
         <IconPicker value={icon} color={color} onChange={setIcon} />
 
-        <div className="flex gap-2">
+        <ModalFooter className="flex gap-2">
           <Button variant="ghost" onClick={() => closeModal(modal)}>
             Anuluj
           </Button>
           <Button type="submit" data-e2e="categories:form-save">
             Dodaj kategorię
           </Button>
-        </div>
+        </ModalFooter>
       </form>
     </ModalShell>
   );

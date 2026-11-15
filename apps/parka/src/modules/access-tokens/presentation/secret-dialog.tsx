@@ -4,6 +4,7 @@ import { Check, Copy, TriangleAlert } from 'lucide-react';
 import { API_ROUTER } from '@/shared/router/routes';
 import { Button } from '@/shared/ui/controls';
 import type { Secret } from '../domain/models';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 
 type Props = {
   secret: Secret;
@@ -93,13 +94,11 @@ export const SecretDialog = ({ secret, onDone }: Props) => {
             </pre>
           </details>
 
-          <Button
-            className="mt-4"
-            data-e2e="access-tokens:secret-done"
-            onClick={onDone}
-          >
-            Gotowe
-          </Button>
+          <ModalFooter>
+            <Button data-e2e="access-tokens:secret-done" onClick={onDone}>
+              Gotowe
+            </Button>
+          </ModalFooter>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

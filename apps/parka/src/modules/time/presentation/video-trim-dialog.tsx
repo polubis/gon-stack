@@ -4,6 +4,7 @@ import { Loader2, Scissors, X } from 'lucide-react';
 import { closeModal, useModalMounted } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
 import { previewUrl, readDuration, trimVideo } from '../integration/trim-video';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 
 const STEP = 0.1;
 
@@ -175,7 +176,7 @@ export const VideoTrimDialog = ({
             />
           ) : null}
 
-          <div className="flex flex-wrap justify-end gap-2">
+          <ModalFooter className="flex flex-wrap justify-end gap-2">
             <Button
               variant="ghost"
               className="w-auto px-3 py-1.5 text-xs"
@@ -198,7 +199,7 @@ export const VideoTrimDialog = ({
               ) : null}
               Przytnij i dodaj
             </Button>
-          </div>
+          </ModalFooter>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

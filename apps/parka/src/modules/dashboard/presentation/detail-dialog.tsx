@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { useModalMounted } from '@/shared/router/modal-stack';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 
 /** Footer of every popup: delete on the left, cancel and confirm on the right. */
 export const DialogActions = ({
@@ -11,10 +12,10 @@ export const DialogActions = ({
   danger?: ReactNode;
   children: ReactNode;
 }) => (
-  <div className="mt-4 flex items-center gap-2">
+  <ModalFooter className="flex items-center gap-2">
     {danger}
     <div className="ml-auto flex gap-2">{children}</div>
-  </div>
+  </ModalFooter>
 );
 
 /** Popup shell shared by every editable row of the expenses list. */

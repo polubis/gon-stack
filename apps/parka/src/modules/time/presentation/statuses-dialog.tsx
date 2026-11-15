@@ -9,6 +9,7 @@ import type { Status } from '../domain/models';
 import { DONE_NAME, IN_PROGRESS, OPEN_NAME } from '../domain/status';
 import { useContext } from './context';
 import { ModalShell } from './modal-shell';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 
 const MAX_STATUSES = 10;
 
@@ -144,14 +145,14 @@ export const StatusesDialog = ({ modal }: { modal: string }) => {
         >
           <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj status
         </Button>
-        <div className="mt-2 flex gap-2">
+        <ModalFooter className="flex gap-2">
           <Button variant="ghost" onClick={() => closeModal(modal)}>
             Anuluj
           </Button>
           <Button type="submit" data-e2e="time:statuses-save">
             Zapisz
           </Button>
-        </div>
+        </ModalFooter>
       </form>
     </ModalShell>
   );

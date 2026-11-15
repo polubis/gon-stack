@@ -24,6 +24,7 @@ import {
   paintCrop,
   type Decoded,
 } from '../integration/crop-image';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 
 const CENTER: Center = { x: 0.5, y: 0.5 };
 
@@ -217,7 +218,7 @@ export const ImageEditor = ({
               <RotateCw className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
-          <div className="flex justify-end gap-2">
+          <ModalFooter className="flex justify-end gap-2">
             <Button
               variant="ghost"
               className="w-auto"
@@ -234,7 +235,7 @@ export const ImageEditor = ({
             >
               {saving ? 'Zapisywanie…' : 'Zatwierdź'}
             </Button>
-          </div>
+          </ModalFooter>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

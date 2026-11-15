@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { PROFILE_MODAL } from '@/shared/auth/configuration/constraints';
@@ -51,13 +52,15 @@ const ProfileForm = ({
           onChange={(e) => setName(e.target.value)}
         />
       </Field>
-      <Button
-        type="submit"
-        data-e2e="settings:save-profile"
-        disabled={!canSave}
-      >
-        Zapisz
-      </Button>
+      <ModalFooter>
+        <Button
+          type="submit"
+          data-e2e="settings:save-profile"
+          disabled={!canSave}
+        >
+          Zapisz
+        </Button>
+      </ModalFooter>
     </form>
   );
 };

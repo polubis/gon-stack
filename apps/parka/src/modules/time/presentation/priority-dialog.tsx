@@ -7,6 +7,7 @@ import { NAME_MAX_LENGTH, PRIORITY_VALUES } from '../configuration/constraints';
 import { useContext } from './context';
 import { PriorityBadge } from './priority-badge';
 import { ModalShell } from './modal-shell';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 
 /** New priority form: a name and a value from 1 to 10. */
 export const PriorityDialog = ({ modal }: { modal: string }) => {
@@ -97,12 +98,12 @@ export const PriorityDialog = ({ modal }: { modal: string }) => {
           </p>
         </fieldset>
 
-        <div className="flex gap-2">
+        <ModalFooter className="flex gap-2">
           <Button variant="ghost" onClick={() => closeModal(modal)}>
             Anuluj
           </Button>
           <Button type="submit">Dodaj priorytet</Button>
-        </div>
+        </ModalFooter>
       </form>
     </ModalShell>
   );

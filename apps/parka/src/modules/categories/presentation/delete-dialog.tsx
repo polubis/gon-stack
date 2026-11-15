@@ -1,6 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { useModalMounted } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 
 type Props = {
   /** Its id in the URL modal stack. */
@@ -32,7 +33,7 @@ export const DeleteDialog = ({ modal, name, onConfirm, onClose }: Props) => {
             Kategorii używanej przez wydatki lub limity nie da się usunąć.
             Najpierw przepnij wydatki na inne kategorie.
           </Dialog.Description>
-          <div className="mt-4 flex justify-end gap-2">
+          <ModalFooter className="flex justify-end gap-2">
             <Button variant="ghost" className="w-auto" onClick={onClose}>
               Anuluj
             </Button>
@@ -44,7 +45,7 @@ export const DeleteDialog = ({ modal, name, onConfirm, onClose }: Props) => {
             >
               Usuń
             </Button>
-          </div>
+          </ModalFooter>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

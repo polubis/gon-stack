@@ -2,6 +2,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { closeModal, useModalMounted } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
 import type { Task } from '../domain/models';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 
 type Titled = Pick<Task, 'title'>;
 
@@ -43,7 +44,7 @@ export const DeleteDialog = ({
           <Dialog.Description className="mt-1 text-sm text-ink-soft">
             {description}
           </Dialog.Description>
-          <div className="mt-4 flex justify-end gap-2">
+          <ModalFooter className="flex justify-end gap-2">
             <Button variant="ghost" className="w-auto" onClick={close}>
               Anuluj
             </Button>
@@ -55,7 +56,7 @@ export const DeleteDialog = ({
             >
               {confirmLabel}
             </Button>
-          </div>
+          </ModalFooter>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

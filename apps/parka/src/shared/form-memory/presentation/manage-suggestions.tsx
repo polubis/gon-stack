@@ -19,6 +19,7 @@ import {
   type SuggestionField,
 } from '../domain/suggestions';
 import type { useSuggestions } from './use-suggestions';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 
 const COPY: Record<
   SuggestionField,
@@ -293,7 +294,7 @@ const DeleteDialog = ({
           <Dialog.Description className="mt-1 text-sm text-ink-soft">
             {COPY[field].deleteNote}
           </Dialog.Description>
-          <div className="mt-4 flex justify-end gap-2">
+          <ModalFooter className="flex justify-end gap-2">
             <Button
               variant="ghost"
               className="w-auto"
@@ -309,7 +310,7 @@ const DeleteDialog = ({
             >
               Usuń
             </Button>
-          </div>
+          </ModalFooter>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
