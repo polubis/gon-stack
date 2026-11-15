@@ -7,12 +7,7 @@ import {
 } from '@/shared/router/navigation';
 import { isDay, todayDay } from '@/shared/period/period';
 import { createMediator } from '../core/mediator';
-import {
-  DATE_PARAM,
-  FEATURE_NAME,
-  VIEW_PARAM,
-  type TimeView,
-} from '../configuration/constraints';
+import { DATE_PARAM, FEATURE_NAME } from '../configuration/constraints';
 import {
   applyFilters,
   filtersFromParams,
@@ -31,9 +26,6 @@ const dateFromUrl = (): string => {
   return value !== null && isDay(value) ? value : todayDay();
 };
 
-const viewFromUrl = (): TimeView =>
-  readQueryParam(VIEW_PARAM) === 'stats' ? 'stats' : 'tasks';
-
 const filtersFromUrl = (): TaskFilters =>
   filtersFromParams(new URLSearchParams(window.location.search));
 
@@ -45,7 +37,6 @@ const filtersFromUrl = (): TaskFilters =>
 export const [Provider, useContext] = context(FEATURE_NAME, () => {
   const [{ facade, register }] = useState(createMediator);
   const [anchor, setAnchorState] = useState(dateFromUrl);
-  const [view, setViewState] = useState(viewFromUrl);
   const [filters, setFiltersState] = useState(filtersFromUrl);
   const [newCategory, setNewCategory] = useState<Category>();
   const [newPriority, setNewPriority] = useState<Priority>();
@@ -71,7 +62,6 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
   useEffect(() => {
     const onPop = () => {
       setAnchorState(dateFromUrl());
-      setViewState(viewFromUrl());
       setFiltersState(filtersFromUrl());
     };
     window.addEventListener('popstate', onPop);
@@ -83,12 +73,6 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
     setAnchor: (day: string) => {
       setAnchorState(day);
       writeQueryParam(DATE_PARAM, day);
-    },
-    /** Tab of the screen: the task lists or their statistics (`view` param). */
-    view,
-    setView: (next: TimeView) => {
-      setViewState(next);
-      writeQueryParams({ [VIEW_PARAM]: next === 'stats' ? 'stats' : null });
     },
     now,
     newCategory,

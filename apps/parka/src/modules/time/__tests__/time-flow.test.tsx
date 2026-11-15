@@ -424,7 +424,11 @@ describe('time task maintenance', () => {
       }),
     );
 
-    expect(await screen.findByText('W trakcie')).toBeVisible();
+    expect(
+      within((await row('Raport miesięczny')).closest('li')!).getByText(
+        'W trakcie',
+      ),
+    ).toBeVisible();
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     expect(backend.writes()[0]).toMatchObject({
       body: { id: 't-1', inProgress: true, done: false },
@@ -442,7 +446,11 @@ describe('time task maintenance', () => {
       }),
     );
 
-    expect(screen.queryByText('W trakcie')).not.toBeInTheDocument();
+    expect(
+      within((await row('Raport miesięczny')).closest('li')!).queryByText(
+        'W trakcie',
+      ),
+    ).not.toBeInTheDocument();
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     expect(backend.writes()[0]).toMatchObject({
       body: { id: 't-1', done: true, inProgress: false },

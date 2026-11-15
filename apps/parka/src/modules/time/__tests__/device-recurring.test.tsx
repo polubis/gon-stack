@@ -166,7 +166,9 @@ describe('recurring tasks', () => {
         at: null,
       },
     });
-    expect(screen.getByText('Cykliczne')).toBeInTheDocument();
+    expect(
+      within((await row('Siłownia')).closest('li')!).getByText('Cykliczne'),
+    ).toBeInTheDocument();
   });
 
   it('repeats a task every day', async () => {
@@ -222,7 +224,9 @@ describe('recurring tasks', () => {
         endDate: '2026-11-25',
       },
     });
-    expect(screen.getByText('Cykliczne')).toBeInTheDocument();
+    expect(
+      within((await row('Siłownia')).closest('li')!).getByText('Cykliczne'),
+    ).toBeInTheDocument();
   });
 
   it('rejects an end before the first day', async () => {
@@ -270,8 +274,9 @@ describe('recurring tasks', () => {
 
     expect(backend.writes()).toHaveLength(1);
     expect(backend.writes()[0]).toMatchObject({});
+    const line = (await row('Raport miesięczny')).closest('li')!;
     await waitFor(() =>
-      expect(screen.queryByText('Cykliczne')).not.toBeInTheDocument(),
+      expect(within(line).queryByText('Cykliczne')).not.toBeInTheDocument(),
     );
   });
 });

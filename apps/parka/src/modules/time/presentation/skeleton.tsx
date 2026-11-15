@@ -40,15 +40,23 @@ const Year = () => (
   </ul>
 );
 
+/** Grid span of the tasks: a day list sits beside the stats, wide views take the row. */
+export const tasksSpan = (kind: TimeKind, total: number): string =>
+  kind === 'day' && total > 0 ? 'xl:col-span-6' : 'xl:col-span-12';
+
 /** Mimics the layout of the view being loaded. */
 export const ViewSkeleton = ({ kind }: { kind: TimeKind }) => (
-  <div data-e2e="time:skeleton" aria-hidden="true">
+  <div
+    data-e2e="time:skeleton"
+    aria-hidden="true"
+    className={tasksSpan(kind, 1)}
+  >
     {kind === 'month' ? (
       <Month />
     ) : kind === 'year' ? (
       <Year />
     ) : (
-      <Card className="mx-auto w-full max-w-3xl">
+      <Card>
         <Skeleton className="mx-2 mb-3 h-4 w-32" />
         <TaskRows />
       </Card>
@@ -56,21 +64,14 @@ export const ViewSkeleton = ({ kind }: { kind: TimeKind }) => (
   </div>
 );
 
-const StatsCard = ({ className }: { className?: string }) => (
-  <Card className={className}>
-    <Skeleton className="mb-4 h-4 w-28" />
-    <Skeleton className="h-40 w-full" />
-  </Card>
-);
-
-/** Mimics the statistics dashboard: hero, status, categories, priorities, chart. */
-export const StatsSkeleton = () => (
-  <div
-    data-e2e="time:stats-skeleton"
-    aria-hidden="true"
-    className="flex flex-col gap-3 md:gap-4 xl:grid xl:grid-cols-12"
-  >
-    <div className="hero-card flex flex-col gap-5 rounded-4xl p-5 md:p-7 xl:col-span-6">
+/** Mimics the summary section: completion hero beside the status card. */
+export const SummarySkeleton = () => (
+  <>
+    <div
+      data-e2e="time:stats-skeleton"
+      aria-hidden="true"
+      className="hero-card flex flex-col gap-5 rounded-4xl p-5 md:p-7 xl:col-span-6"
+    >
       <div className="flex items-center gap-5">
         <Skeleton className="size-28 shrink-0 rounded-full bg-hero-track md:size-32" />
         <div className="flex flex-col gap-2">
@@ -80,9 +81,9 @@ export const StatsSkeleton = () => (
       </div>
       <Skeleton className="h-12 w-full bg-hero-track" />
     </div>
-    <StatsCard className="xl:col-span-6" />
-    <StatsCard className="xl:col-span-6" />
-    <StatsCard className="xl:col-span-6" />
-    <StatsCard className="xl:col-span-12" />
-  </div>
+    <Card className="xl:col-span-6" aria-hidden="true">
+      <Skeleton className="mb-4 h-4 w-28" />
+      <Skeleton className="h-40 w-full" />
+    </Card>
+  </>
 );

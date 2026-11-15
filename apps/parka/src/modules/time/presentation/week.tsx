@@ -46,10 +46,12 @@ const DayCard = ({ day, index }: { day: string; index: number }) => {
   const scope = `${day}:${initializing}`;
   const today = day === now.day;
   const ofDay = tasksOn(tasks, day, priorities, filters.sort);
-  const timed = ofDay.filter(isTimed);
+  // Title and priority orders ignore the hour: one list, not two groups.
+  const byHour = filters.sort === 'time';
+  const timed = byHour ? ofDay.filter(isTimed) : [];
   const nowIndex = today ? nowIndexOf(timed, now.time) : -1;
   const allDayRows = useListChanges(
-    ofDay.filter((task) => task.at === null),
+    byHour ? ofDay.filter((task) => task.at === null) : ofDay,
     taskKey,
     scope,
   );
@@ -105,9 +107,9 @@ const DayCards = ({ days }: { days: string[] }) => (
 
 /** Extra wide screens (2xl+): all-day row on top, then an hour axis with tasks at their hour. */
 const HourGrid = ({ days }: { days: string[] }) => {
-  const { visibleTasks: tasks, priorities, now } = useContext();
+  const { visibleTasks: tasks, priorities, now, filters } = useContext();
   const timedOf = (day: string) =>
-    tasksOn(tasks, day, priorities).filter(isTimed);
+    tasksOn(tasks, day, priorities, filters.sort).filter(isTimed);
   const nowHour = hourLabel(Number(now.time.slice(0, 2)));
   return (
     <div className="hidden overflow-hidden rounded-2xl border border-line bg-card 2xl:block">
@@ -155,7 +157,7 @@ const HourGrid = ({ days }: { days: string[] }) => {
             {days.map((day) => (
               <td key={day} className="p-1 align-top">
                 <ul className="flex min-h-9 flex-col">
-                  {tasksOn(tasks, day, priorities)
+                  {tasksOn(tasks, day, priorities, filters.sort)
                     .filter((task) => task.at === null)
                     .map((task) => (
                       <TaskRow key={task.id} task={task} />
