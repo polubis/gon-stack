@@ -1,7 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { useModalMounted } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
-import { ModalFooter } from '@/shared/ui/modal-footer';
+import { ModalFooter, MODAL_PADDING } from '@/shared/ui/modal-footer';
 
 type Props = {
   /** Its id in the URL modal stack. */
@@ -24,7 +24,7 @@ export const DeleteDialog = ({ modal, name, onConfirm, onClose }: Props) => {
         <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-overlay" />
         <Dialog.Content
           data-e2e="categories:delete-dialog"
-          className="fixed inset-x-4 bottom-[calc(var(--kb-inset,0rem)+1rem)] z-(--z-modal) mx-auto max-w-md rounded-4xl border border-line bg-card p-5 focus:outline-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2"
+          className={`fixed inset-x-4 bottom-[calc(var(--kb-inset,0rem)+1rem)] z-(--z-modal) mx-auto max-w-md rounded-4xl border border-line bg-card ${MODAL_PADDING} focus:outline-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2`}
         >
           <Dialog.Title className="text-base font-semibold">
             Usunąć kategorię „{name}”?

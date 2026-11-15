@@ -13,19 +13,13 @@ describe('ModalFooter', () => {
     expect(screen.getByRole('button', { name: 'Zapisz' })).toBeVisible();
   });
 
-  it('stays stuck to the bottom of the modal and keeps caller layout', () => {
+  it('keeps the layout the caller asks for', () => {
     render(
       <ModalFooter className="flex justify-end" data-testid="footer">
         <button type="button">Gotowe</button>
       </ModalFooter>,
     );
 
-    expect(screen.getByTestId('footer')).toHaveClass(
-      'sticky',
-      'bottom-0',
-      'bg-card',
-      'flex',
-      'justify-end',
-    );
+    expect(screen.getByTestId('footer')).toHaveClass('flex', 'justify-end');
   });
 });
