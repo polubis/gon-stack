@@ -2,7 +2,7 @@ import type { Store } from './store';
 import { load } from './handlers/load';
 import { loadMore } from './handlers/load-more';
 import { markRead } from './handlers/mark-read';
-import { markAllRead } from './handlers/mark-all-read';
+import { markSelectedRead } from './handlers/mark-selected-read';
 import { toggleSelecting } from './handlers/toggle-selecting';
 import { toggleSelected } from './handlers/toggle-selected';
 import { selectAll } from './handlers/select-all';
@@ -17,7 +17,7 @@ export const createRegistry = (store: Store) => {
     load(store, bus),
     loadMore(store, bus),
     markRead(store, bus),
-    markAllRead(store, bus),
+    markSelectedRead(store, bus),
     toggleSelecting(store, bus),
     toggleSelected(store, bus),
     selectAll(store, bus),

@@ -53,7 +53,7 @@ const json = (body: unknown, delay = 0) => ({
 
 type Options = { total: number; listDelay?: number };
 
-/** In-memory paginated notifications API: list by cursor, mark one, mark all. */
+/** In-memory paginated notifications API: list by cursor, mark one, delete. */
 const installBackend = async (
   page: Page,
   { total, listDelay = 0 }: Options,
@@ -86,8 +86,6 @@ const installBackend = async (
       const { ids } = route.request().postDataJSON() as { ids: string[] };
       const gone = new Set(ids);
       state.splice(0, state.length, ...state.filter((n) => !gone.has(n.id)));
-    } else if (url.pathname === API_ROUTER.notificationsReadAll()) {
-      state.forEach((n) => (n.read = true));
     } else {
       const id = url.pathname.split('/').filter(Boolean).at(-1);
       state.forEach((n) => {
@@ -193,17 +191,19 @@ const commands = {
       '44 nieprzeczytanych',
     );
   },
-  'i mark all as read': async ({ getByE2e }) => {
-    await getByE2e('notifications:mark-all-read').click();
+  'i mark all loaded as read from the actions menu': async ({ getByE2e }) => {
+    await getByE2e('notifications:select-toggle').click();
+    await getByE2e('notifications:select-all').click();
+    await getByE2e('notifications:actions-trigger').click();
+    await getByE2e('notifications:mark-selected-read').click();
   },
-  'everything is read and still listed': async ({
+  'the loaded ones are read and still listed': async ({
     getByE2e,
     getByE2ePrefix,
   }) => {
     await expect(getByE2e('notifications:unread-count')).toHaveText(
-      'Wszystko przeczytane',
+      `${45 - PAGE} nieprzeczytanych`,
     );
-    await expect(getByE2e('notifications:mark-all-read')).toBeDisabled();
     await expect(rows(getByE2ePrefix)).toHaveCount(PAGE);
   },
   'i select two notifications': async ({ getByE2e }) => {
@@ -276,13 +276,13 @@ test.describe('notifications', () => {
     );
   });
 
-  test('a user marks all notifications as read and they stay listed', async ({
+  test('a user selects notifications and marks them as read, they stay listed', async ({
     e2e,
   }) => {
     await interpreter(commands, e2e)(
       ['i open the notifications'],
-      ['i mark all as read'],
-      ['everything is read and still listed'],
+      ['i mark all loaded as read from the actions menu'],
+      ['the loaded ones are read and still listed'],
     );
   });
 

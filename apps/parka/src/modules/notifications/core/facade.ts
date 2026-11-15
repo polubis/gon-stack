@@ -7,7 +7,7 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
     load: () => trigger('[TRIGGER]_LOAD'),
     loadMore: () => trigger('[TRIGGER]_LOAD_MORE'),
     markRead: (id: NotificationId) => trigger('[TRIGGER]_MARK_READ', { id }),
-    markAllRead: () => trigger('[TRIGGER]_MARK_ALL_READ'),
+    markSelectedRead: () => trigger('[TRIGGER]_MARK_SELECTED_READ'),
     toggleSelecting: () => trigger('[TRIGGER]_TOGGLE_SELECTING'),
     toggleSelected: (id: NotificationId) =>
       trigger('[TRIGGER]_TOGGLE_SELECTED', { id }),

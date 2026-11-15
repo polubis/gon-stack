@@ -8,7 +8,7 @@ import { useContext } from './context';
 const ROUND_BUTTON =
   'pressable inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full border border-line bg-card px-3.5 text-xs font-semibold text-ink shadow-card hover:bg-brand-softer disabled:text-ink-soft disabled:opacity-60 disabled:hover:bg-card';
 
-/** Menu of bulk operations on the selection; today only delete. Open state lives in the URL. */
+/** Menu of bulk operations on the selection; mark read and delete. Open state lives in the URL. */
 const ActionsMenu = () => {
   const ctx = useContext();
   const count = ctx.useSelected().length;
@@ -41,6 +41,20 @@ const ActionsMenu = () => {
             <button
               type="button"
               role="menuitem"
+              data-e2e="notifications:mark-selected-read"
+              disabled={count === 0}
+              onClick={() => {
+                ctx.markSelectedRead();
+                setOpen(false);
+              }}
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-ink transition-colors hover:bg-brand-softer focus-visible:bg-brand-softer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:text-ink-soft disabled:opacity-60 disabled:hover:bg-transparent"
+            >
+              <CheckCheck className="h-4 w-4" aria-hidden="true" />
+              Oznacz zaznaczone jako przeczytane ({count})
+            </button>
+            <button
+              type="button"
+              role="menuitem"
               data-e2e="notifications:delete-selected"
               disabled={count === 0}
               onClick={() => openModal(DELETE_MODAL)}
@@ -58,27 +72,14 @@ const ActionsMenu = () => {
   );
 };
 
-/** Mark-all-read plus the select button, which turns into the actions menu in select mode. */
+/** The select button, which turns into the actions menu in select mode. */
 export const HeaderActions = () => {
   const ctx = useContext();
-  const unread = ctx.useUnreadCount();
   const selecting = ctx.useSelecting();
   const total = ctx.useNotifications().length;
 
   return (
     <>
-      <button
-        type="button"
-        data-e2e="notifications:mark-all-read"
-        disabled={unread === 0}
-        onClick={ctx.markAllRead}
-        className={ROUND_BUTTON}
-      >
-        <CheckCheck className="h-4 w-4" aria-hidden="true" />
-        <span className="max-sm:sr-only">
-          Oznacz wszystkie jako przeczytane
-        </span>
-      </button>
       {selecting ? (
         <ActionsMenu />
       ) : (
