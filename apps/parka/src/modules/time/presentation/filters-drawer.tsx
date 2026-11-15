@@ -178,7 +178,7 @@ export const FiltersDrawer = ({ modal }: { modal: string }) => {
             e.preventDefault();
             if (e.target instanceof HTMLElement) e.target.focus();
           }}
-          className="fixed inset-y-2 right-2 z-(--z-modal) flex w-[calc(100%-1rem)] max-w-sm animate-drawer-in flex-col overflow-y-auto overscroll-contain rounded-4xl border border-line bg-card p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-popover focus:outline-none motion-reduce:animate-none"
+          className="fixed inset-y-2 right-2 z-(--z-modal) flex w-[calc(100%-1rem)] max-w-sm animate-drawer-in flex-col overflow-y-auto overscroll-contain rounded-4xl border border-line bg-card p-3 pb-0 shadow-popover focus:outline-none motion-reduce:animate-none"
         >
           <div className="hero-card flex items-start gap-3 rounded-3xl p-4">
             <div className="min-w-0 flex-1">
@@ -298,7 +298,7 @@ export const FiltersDrawer = ({ modal }: { modal: string }) => {
               onChange={(sort) => setFilters({ ...filters, sort })}
             />
           </div>
-          <div className="sticky bottom-0 -mx-3 -mb-3 flex gap-2 bg-card px-4 pb-4 pt-3">
+          <div className="sticky bottom-0 -mx-3 mt-auto flex gap-2 bg-card px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
             <Button
               variant="ghost"
               data-e2e="time:filters-clear"
