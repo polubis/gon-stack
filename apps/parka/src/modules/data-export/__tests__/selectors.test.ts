@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { toFile, toRows } from '../presentation/selectors';
+import { MIXED_CATEGORY_LABEL } from '@/shared/i18n/category-label';
 import type {
   Category,
   CategoryId,
@@ -51,5 +52,25 @@ describe('data export', () => {
 
     expect(file.name).toBe('parka-dane.txt');
     expect(file.content).toContain('a | b');
+  });
+
+  it('labels an expense with products from many categories as mixed', () => {
+    const rows = toRows([{ ...EXPENSES[0], categoryId: null }], CATEGORIES);
+
+    expect(rows[1][2]).toBe(MIXED_CATEGORY_LABEL);
+  });
+
+  it('keeps the row when its category is unknown', () => {
+    const rows = toRows(
+      [{ ...EXPENSES[0], categoryId: 'gone' as CategoryId }],
+      CATEGORIES,
+    );
+
+    expect(rows[1]).toHaveLength(5);
+    expect(rows[1][1]).toBe('Shop');
+  });
+
+  it('exports only the header when there are no expenses', () => {
+    expect(toRows([], CATEGORIES)).toHaveLength(1);
   });
 });

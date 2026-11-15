@@ -101,4 +101,60 @@ describe('data export page', () => {
       ),
     );
   });
+
+  it('shows the server message when loading fails', async () => {
+    stubApi(false);
+    render(<Main />);
+
+    expect(await screen.findByText('boom')).toBeTruthy();
+  });
+
+  it('downloads the chosen format with the loaded expenses', async () => {
+    stubApi(true);
+    const blobs: Blob[] = [];
+    URL.createObjectURL = vi.fn((b: Blob | MediaSource) => {
+      blobs.push(b as Blob);
+      return 'blob:x';
+    });
+    URL.revokeObjectURL = vi.fn();
+    render(<Main />);
+    const run = screen.getByRole('button', { name: 'Eksportuj' });
+    await waitFor(() =>
+      expect((run as HTMLButtonElement).disabled).toBe(false),
+    );
+
+    await userEvent.click(screen.getByRole('radio', { name: /pdf/i }));
+    await userEvent.click(run);
+
+    await screen.findByText(/Plik został pobrany/);
+    expect(blobs).toHaveLength(1);
+    expect(await blobs[0].text()).toContain('Shop');
+    expect(blobs[0].type).toContain('text/plain');
+  });
+
+  it('hides the confirmation after switching the format', async () => {
+    stubApi(true);
+    URL.createObjectURL = vi.fn(() => 'blob:x');
+    URL.revokeObjectURL = vi.fn();
+    render(<Main />);
+    const run = screen.getByRole('button', { name: 'Eksportuj' });
+    await waitFor(() =>
+      expect((run as HTMLButtonElement).disabled).toBe(false),
+    );
+    await userEvent.click(run);
+    await screen.findByText(/Plik został pobrany/);
+
+    await userEvent.click(screen.getByRole('radio', { name: /pdf/i }));
+
+    expect(screen.queryByText(/Plik został pobrany/)).toBeNull();
+  });
+
+  it('offers csv selected by default', () => {
+    stubApi(true);
+    render(<Main />);
+
+    expect(
+      (screen.getByRole('radio', { name: /csv/i }) as HTMLInputElement).checked,
+    ).toBe(true);
+  });
 });
