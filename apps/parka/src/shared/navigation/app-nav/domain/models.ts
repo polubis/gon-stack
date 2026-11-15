@@ -1,1 +1,1 @@
-export type NavKey = 'finances' | 'time';
+export type NavKey = 'finances' | 'time' | 'knowledge';

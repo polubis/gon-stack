@@ -108,6 +108,10 @@ export const router = createRouter({
     ),
     timeTree,
     page(
+      APP_ROUTER.knowledge(),
+      () => import('@/modules/knowledge/presentation/main'),
+    ),
+    page(
       APP_ROUTER.notifications(),
       () => import('@/modules/notifications/presentation/main'),
     ),

@@ -10,5 +10,7 @@ export const activeNavKeyFromPathname = (pathname: string): NavKey | null => {
 
   if (p.startsWith(APP_ROUTER.time())) return 'time';
 
+  if (p.startsWith(APP_ROUTER.knowledge())) return 'knowledge';
+
   return null;
 };

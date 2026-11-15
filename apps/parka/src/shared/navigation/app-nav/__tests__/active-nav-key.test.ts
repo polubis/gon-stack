@@ -11,6 +11,10 @@ describe('active nav section', () => {
     expect(activeNavKeyFromPathname(APP_ROUTER.timeWeek())).toBe('time');
   });
 
+  it('marks the knowledge page as knowledge', () => {
+    expect(activeNavKeyFromPathname(APP_ROUTER.knowledge())).toBe('knowledge');
+  });
+
   it.each([APP_ROUTER.settings(), APP_ROUTER.notifications()])(
     'marks no section on %s',
     (path) => {

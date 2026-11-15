@@ -1,4 +1,4 @@
-import { Wallet, Clock } from 'lucide-react';
+import { Brain, Clock, Wallet } from 'lucide-react';
 import { APP_ROUTER } from '@/shared/router/routes';
 import type { NavKey } from '../domain/models';
 
@@ -24,6 +24,13 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Czas',
     href: APP_ROUTER.time(),
     icon: Clock,
+    mobile: true,
+  },
+  {
+    key: 'knowledge',
+    label: 'Wiedza',
+    href: APP_ROUTER.knowledge(),
+    icon: Brain,
     mobile: true,
   },
 ];
