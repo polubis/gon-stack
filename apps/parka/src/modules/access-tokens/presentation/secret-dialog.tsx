@@ -4,7 +4,7 @@ import { Check, Copy, TriangleAlert } from 'lucide-react';
 import { API_ROUTER } from '@/shared/router/routes';
 import { Button } from '@/shared/ui/controls';
 import type { Secret } from '../domain/models';
-import { ModalFooter } from '@/shared/ui/modal-footer';
+import { ModalFooter, MODAL_PADDING } from '@/shared/ui/modal-footer';
 
 type Props = {
   secret: Secret;
@@ -42,7 +42,7 @@ export const SecretDialog = ({ secret, onDone }: Props) => {
         <Dialog.Content
           data-e2e="access-tokens:secret-dialog"
           onInteractOutside={(e) => e.preventDefault()}
-          className="fixed inset-x-4 bottom-[calc(var(--kb-inset,0rem)+1rem)] z-(--z-modal) mx-auto max-h-[calc(100dvh-var(--kb-inset,0rem)-2rem)] max-w-md animate-pop-in overflow-y-auto rounded-4xl border border-line bg-card p-5 shadow-popover focus:outline-none motion-reduce:animate-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2"
+          className={`fixed inset-x-4 bottom-[calc(var(--kb-inset,0rem)+1rem)] z-(--z-modal) mx-auto max-h-[calc(100dvh-var(--kb-inset,0rem)-2rem)] max-w-md animate-pop-in overflow-y-auto rounded-4xl border border-line bg-card ${MODAL_PADDING} shadow-popover focus:outline-none motion-reduce:animate-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2`}
         >
           <Dialog.Title className="text-base font-semibold">
             {secret.kind === 'created' ? 'Twój nowy token' : 'Token zmieniony'}

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { useModalMounted } from '@/shared/router/modal-stack';
-import { ModalFooter } from '@/shared/ui/modal-footer';
+import { ModalFooter, MODAL_PADDING } from '@/shared/ui/modal-footer';
 
 /** Footer of every popup: delete on the left, cancel and confirm on the right. */
 export const DialogActions = ({
@@ -59,7 +59,7 @@ export const DetailDialog = ({
         <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-overlay" />
         <Dialog.Content
           data-e2e={dataE2e}
-          className="fixed inset-x-4 bottom-[calc(var(--kb-inset,0rem)+1rem)] z-(--z-modal) mx-auto max-h-[calc(100dvh-var(--kb-inset,0rem)-2rem)] max-w-md animate-pop-in overflow-y-auto rounded-4xl border border-line bg-card p-5 shadow-popover focus:outline-none motion-reduce:animate-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2"
+          className={`fixed inset-x-4 bottom-[calc(var(--kb-inset,0rem)+1rem)] z-(--z-modal) mx-auto max-h-[calc(100dvh-var(--kb-inset,0rem)-2rem)] max-w-md animate-pop-in overflow-y-auto rounded-4xl border border-line bg-card ${MODAL_PADDING} shadow-popover focus:outline-none motion-reduce:animate-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2`}
         >
           <div className="mb-3 flex items-center gap-3">
             {avatar}

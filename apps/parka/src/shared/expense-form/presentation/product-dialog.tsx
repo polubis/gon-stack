@@ -6,7 +6,7 @@ import { useModalMounted } from '@/shared/router/modal-stack';
 import { Button, Field, Select } from '@/shared/ui/controls';
 import { NumberInput } from '@/shared/ui/number-input';
 import type { Category, Product } from '../domain/models';
-import { ModalFooter } from '@/shared/ui/modal-footer';
+import { ModalFooter, MODAL_PADDING } from '@/shared/ui/modal-footer';
 
 type Props = {
   product: Product;
@@ -44,7 +44,7 @@ export const ProductDialog = ({
         <Dialog.Content
           data-e2e="expense-form:product-dialog"
           aria-describedby={undefined}
-          className="fixed inset-x-4 bottom-[calc(var(--kb-inset,0rem)+1rem)] z-(--z-modal) mx-auto max-h-[calc(100dvh-var(--kb-inset,0rem)-2rem)] max-w-md animate-pop-in overflow-y-auto rounded-4xl border border-line bg-card p-5 shadow-popover focus:outline-none motion-reduce:animate-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2"
+          className={`fixed inset-x-4 bottom-[calc(var(--kb-inset,0rem)+1rem)] z-(--z-modal) mx-auto max-h-[calc(100dvh-var(--kb-inset,0rem)-2rem)] max-w-md animate-pop-in overflow-y-auto rounded-4xl border border-line bg-card ${MODAL_PADDING} shadow-popover focus:outline-none motion-reduce:animate-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2`}
         >
           <div className="mb-3 flex items-center gap-3">
             <Dialog.Title className="min-w-0 flex-1 truncate text-base font-semibold">
