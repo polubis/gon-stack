@@ -60,7 +60,8 @@ export const PickerScreen = ({
         {header ? (
           <div className="border-b border-line p-4">{header}</div>
         ) : null}
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
+        {/* One scroller only: a nested one (`data-nested-scroll`) would trap touch scroll in a small box. */}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 [&_[data-nested-scroll]]:max-h-none [&_[data-nested-scroll]]:overflow-visible">
           {children}
         </div>
       </Dialog.Content>
