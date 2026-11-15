@@ -1,7 +1,6 @@
 import type { z } from 'zod';
 import type {
   listNotificationsSchema,
-  markAllNotificationsReadSchema,
   markNotificationReadSchema,
   deleteNotificationsSchema,
 } from '@schemas/notifications';
@@ -12,10 +11,6 @@ import { toPage } from './mappers';
 
 type ListOut = z.infer<ReturnType<typeof listNotificationsSchema>>['out'];
 type ReadOut = z.infer<ReturnType<typeof markNotificationReadSchema>>['out'];
-type ReadAllOut = z.infer<
-  ReturnType<typeof markAllNotificationsReadSchema>
->['out'];
-
 type DeleteOut = z.infer<ReturnType<typeof deleteNotificationsSchema>>['out'];
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
@@ -41,15 +36,6 @@ export const putRead = async (id: NotificationId): Promise<void> => {
     headers: JSON_HEADERS,
   });
   const json = (await response.json()) as ReadOut;
-  if (json.code !== 200) throw new Error(json.message);
-};
-
-export const putReadAll = async (): Promise<void> => {
-  const response = await fetch(API_ROUTER.notificationsReadAll(), {
-    method: 'PUT',
-    headers: JSON_HEADERS,
-  });
-  const json = (await response.json()) as ReadAllOut;
   if (json.code !== 200) throw new Error(json.message);
 };
 

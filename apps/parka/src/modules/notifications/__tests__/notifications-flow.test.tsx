@@ -284,24 +284,16 @@ describe('read state', () => {
     ).toHaveLength(1);
   });
 
-  it('keeps every notification visible when all are marked as read', async () => {
-    stubApi({
-      pages: { first: page([updated(), created()], { unread: 7 }) },
-    });
-    const user = userEvent.setup();
+  it('has no mark-all-as-read button in the header', async () => {
+    stubApi({ pages: { first: page([updated(), created()]) } });
     render(<Main />);
     await screen.findByText('Zmieniono wydatek');
 
-    await user.click(
-      screen.getByRole('button', { name: 'Oznacz wszystkie jako przeczytane' }),
-    );
-
-    expect(await screen.findByText('Wszystko przeczytane')).toBeTruthy();
-    expect(rows()).toHaveLength(2);
-    expect(screen.getAllByText('Przeczytane')).toHaveLength(2);
     expect(
-      screen.getByRole('button', { name: 'Oznacz wszystkie jako przeczytane' }),
-    ).toBeDisabled();
+      screen.queryByRole('button', {
+        name: 'Oznacz wszystkie jako przeczytane',
+      }),
+    ).toBeNull();
   });
 
   it('brings the unread mark back when saving fails', async () => {
@@ -440,22 +432,6 @@ describe('infinite scroll', () => {
     expect(screen.getByText('To wszystkie powiadomienia.')).toBeTruthy();
   });
 
-  it('marks unloaded pages read as well when all are marked as read', async () => {
-    stubApi({ pages: twoPages() });
-    const scrollToEnd = stubObserver();
-    const user = userEvent.setup();
-    render(<Main />);
-    await screen.findAllByText('Zmieniono wydatek');
-
-    await user.click(
-      screen.getByRole('button', { name: 'Oznacz wszystkie jako przeczytane' }),
-    );
-    scrollToEnd();
-
-    await waitFor(() => expect(rows()).toHaveLength(4));
-    expect(screen.getAllByText('Przeczytane')).toHaveLength(4);
-  });
-
   describe('deleting', () => {
     beforeEach(() => window.history.replaceState(null, '', '/'));
 
@@ -574,5 +550,82 @@ describe('infinite scroll', () => {
       await screen.findByText('NOTIFICATION_DELETE_FAILED');
       expect(rows()).toHaveLength(3);
     });
+  });
+});
+
+describe('marking selected as read', () => {
+  beforeEach(() => window.history.replaceState(null, '', '/'));
+
+  const selectFirst = async (user: ReturnType<typeof userEvent.setup>) => {
+    await screen.findAllByText('Zmieniono wydatek');
+    await user.click(screen.getByRole('button', { name: 'Zaznacz' }));
+    await user.click(
+      screen.getAllByRole('checkbox', {
+        name: /Zaznacz: Zmieniono wydatek/,
+      })[0]!,
+    );
+    await user.click(screen.getByRole('button', { name: 'Akcje' }));
+  };
+
+  it('marks only the selected notifications as read and leaves select mode', async () => {
+    const calls = stubApi({
+      pages: { first: page([updated('n-1'), updated('n-2')], { unread: 2 }) },
+    });
+    const user = userEvent.setup();
+    render(<Main />);
+    await selectFirst(user);
+
+    await user.click(
+      screen.getByRole('menuitem', {
+        name: 'Oznacz zaznaczone jako przeczytane (1)',
+      }),
+    );
+
+    expect(await screen.findByText('1 nieprzeczytane')).toBeTruthy();
+    expect(rows()).toHaveLength(2);
+    expect(screen.getAllByText('Przeczytane')).toHaveLength(1);
+    expect(screen.getByRole('button', { name: 'Zaznacz' })).toBeTruthy();
+    await waitFor(() =>
+      expect(calls.filter((c) => c.method === 'PUT').map((c) => c.url)).toEqual(
+        ['/api/notifications/n-1/'],
+      ),
+    );
+  });
+
+  it('cannot mark as read while nothing is selected', async () => {
+    stubApi({ pages: { first: page([updated('n-1')]) } });
+    const user = userEvent.setup();
+    render(<Main />);
+    await screen.findAllByText('Zmieniono wydatek');
+    await user.click(screen.getByRole('button', { name: 'Zaznacz' }));
+
+    await user.click(screen.getByRole('button', { name: 'Akcje' }));
+
+    expect(
+      (
+        screen.getByRole('menuitem', {
+          name: 'Oznacz zaznaczone jako przeczytane (0)',
+        }) as HTMLButtonElement
+      ).disabled,
+    ).toBe(true);
+  });
+
+  it('brings the unread marks back when saving fails', async () => {
+    stubApi({
+      pages: { first: page([updated('n-1')]) },
+      write: { code: 500, type: 'internal-server', message: 'boom' },
+    });
+    const user = userEvent.setup();
+    render(<Main />);
+    await selectFirst(user);
+
+    await user.click(
+      screen.getByRole('menuitem', {
+        name: 'Oznacz zaznaczone jako przeczytane (1)',
+      }),
+    );
+
+    await screen.findByText('NOTIFICATION_MARK_READ_FAILED');
+    expect(screen.getByText('1 nieprzeczytane')).toBeTruthy();
   });
 });
