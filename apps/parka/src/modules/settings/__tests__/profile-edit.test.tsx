@@ -97,13 +97,11 @@ describe('profile edit', () => {
     });
   });
 
-  it('shows notifications entry once', async () => {
+  it('keeps the notifications entry off the settings page', async () => {
     render(<Main />);
     await screen.findByText('Wygląd');
 
-    expect(screen.getAllByRole('link', { name: 'Powiadomienia' })).toHaveLength(
-      1,
-    );
+    expect(screen.queryByRole('link', { name: /Powiadomienia/ })).toBeNull();
   });
 
   it('closes after saving', async () => {

@@ -6,7 +6,6 @@ export type NotificationsE2eId =
   | 'notifications:empty'
   | 'notifications:unread-count'
   | 'notifications:toast'
-  | 'notifications:unread-link'
   | 'notifications:sentinel'
   | 'notifications:loading-more'
   | 'notifications:load-more'

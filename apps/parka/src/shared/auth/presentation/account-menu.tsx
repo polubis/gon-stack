@@ -5,6 +5,8 @@ import { ACCOUNT_MODAL } from '../configuration/constraints';
 import { AccountAvatar } from './account-avatar';
 import { useAuthContext } from './context';
 import { useProfileSummary } from './profile-summary';
+import { UnreadBadge } from './unread-badge';
+import { useUnreadSummary } from './unread-summary';
 
 type Props = {
   /** Where the nav sits; decides how the trigger looks. */
@@ -18,6 +20,7 @@ type Props = {
 export const AccountMenu = ({ placement }: Props) => {
   const auth = useAuthContext();
   const profile = useProfileSummary();
+  const unread = useUnreadSummary();
   if (auth.status !== 'authenticated') return null;
   const { user } = auth;
   const avatarUrl = profile.avatarUrl ?? user.avatarUrl;
@@ -28,10 +31,14 @@ export const AccountMenu = ({ placement }: Props) => {
       type="button"
       data-e2e="account-menu:trigger"
       aria-haspopup="dialog"
-      aria-label={`Konto: ${user.email}`}
+      aria-label={
+        unread > 0
+          ? `Konto: ${user.email}, nieprzeczytane powiadomienia: ${unread}`
+          : `Konto: ${user.email}`
+      }
       onClick={() => openModal(ACCOUNT_MODAL)}
       className={cn(
-        'flex items-center rounded-full focus-visible:outline-2 focus-visible:outline-brand',
+        'relative flex items-center rounded-full focus-visible:outline-2 focus-visible:outline-brand',
         side
           ? 'w-full gap-3 bg-hover-soft p-2 pr-3 hover:bg-hover'
           : 'h-12 grow justify-center px-4 text-ink-soft hover:bg-hover hover:text-ink',
@@ -50,6 +57,7 @@ export const AccountMenu = ({ placement }: Props) => {
             className="size-4 shrink-0 text-ink-soft"
             aria-hidden="true"
           />
+          <UnreadBadge className="left-9 right-auto top-0" />
         </>
       ) : (
         <>
@@ -63,6 +71,7 @@ export const AccountMenu = ({ placement }: Props) => {
             <UserRound className="size-5" aria-hidden="true" />
           )}
           <span className="sr-only">Konto</span>
+          <UnreadBadge className="left-1/2 right-auto top-1 ml-1" />
         </>
       )}
     </button>

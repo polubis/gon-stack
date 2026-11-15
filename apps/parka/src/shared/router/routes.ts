@@ -119,20 +119,6 @@ export type PageRouteKey = keyof typeof APP_ROUTER;
 /** Union of every literal URL the page route builders can produce. */
 export type PageUrl = ReturnType<(typeof APP_ROUTER)[PageRouteKey]>;
 
-/** Paths that highlight the "Więcej" tab in the bottom nav. */
-export const moreSectionPaths = (): readonly string[] => [
-  APP_ROUTER.settings(),
-  APP_ROUTER.categories(),
-  APP_ROUTER.categoryNew(),
-  APP_ROUTER.categoryEdit(),
-  APP_ROUTER.reports(),
-  APP_ROUTER.notifications(),
-  APP_ROUTER.privacy(),
-  APP_ROUTER.aiInfo(),
-  APP_ROUTER.dataExport(),
-  APP_ROUTER.accessTokens(),
-];
-
 /**
  * Backend API routes. Mirrors `src/pages/api/**`. Same builders are used
  * by client `fetch()` calls and by server `redirectTo` / `emailRedirectTo`

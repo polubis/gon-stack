@@ -4,6 +4,7 @@ import {
   AccountProfileSync,
   ProfileEditModal,
 } from '@/modules/settings/presentation/profile-modal';
+import { UnreadSync } from '@/modules/notifications/presentation/unread-sync';
 import { Main as FinanceTour } from '@/modules/finance-tour/presentation/main';
 import { AppUpdateBanner } from '@/shared/app-update/presentation/app-update-banner';
 import { AccountDrawer } from '@/shared/auth/presentation/account-drawer';
@@ -91,6 +92,7 @@ const Shell = () => {
         </div>
         <AppUpdateBanner />
         <AccountProfileSync />
+        <UnreadSync />
         <AccountDrawer />
         <ProfileEditModal />
         <FinanceTour />

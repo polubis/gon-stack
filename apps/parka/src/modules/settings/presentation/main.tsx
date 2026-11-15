@@ -14,7 +14,6 @@ import { Card, ScreenHeader } from '@/shared/ui/layout';
 import { ErrorState } from '@/shared/ui/error-state';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
 import { Toast } from '@/shared/ui/toast';
-import { UnreadLink } from '@/modules/notifications/presentation/unread-link';
 import type { Device } from '@/shared/device/domain/models';
 import type { ThemeMode } from '@/shared/theme/theme';
 import { useThemeMode } from '@/shared/theme/use-theme-mode';
@@ -198,11 +197,7 @@ const SettingsView = () => {
     >
       <LoadingBanner active={isLoading && !initializing} />
       <div className="md:px-4 lg:px-6 xl:px-12">
-        <ScreenHeader
-          title="Ustawienia"
-          eyebrow={eyebrow}
-          action={<UnreadLink />}
-        />
+        <ScreenHeader title="Ustawienia" eyebrow={eyebrow} />
       </div>
       <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2 md:gap-6 md:px-8 lg:px-10 xl:px-16">
         {error ? (

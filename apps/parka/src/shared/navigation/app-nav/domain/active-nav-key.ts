@@ -1,4 +1,3 @@
-import { MORE_SECTION_PATHS } from '../configuration/constraints';
 import { normalizePath, APP_ROUTER } from '@/shared/router/routes';
 import type { NavKey } from './models';
 
@@ -10,10 +9,6 @@ export const activeNavKeyFromPathname = (pathname: string): NavKey | null => {
   if (p === APP_ROUTER.dashboard()) return 'finances';
 
   if (p.startsWith(APP_ROUTER.time())) return 'time';
-
-  if (MORE_SECTION_PATHS.some((m) => p === m || p.startsWith(m))) {
-    return 'more';
-  }
 
   return null;
 };
