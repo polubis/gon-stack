@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { Main } from '../presentation/main';
 
@@ -34,5 +34,37 @@ describe('Home landing works when', () => {
     screen.getByText('Zadania na dziś');
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
     expect(screen.getAllByRole('heading')).toHaveLength(1);
+  });
+
+  it('lists everything the app helps with', () => {
+    render(<Main />);
+
+    const items = within(screen.getByRole('list')).getAllByRole('listitem');
+    expect(items.map((item) => item.textContent)).toEqual([
+      'Skanuj paragony',
+      'Pilnuj limitów',
+      'Śledź płatności cykliczne',
+    ]);
+  });
+
+  it('states the promise next to the name', () => {
+    render(<Main />);
+
+    screen.getByText('Twoje wydatki pod kontrolą.');
+    screen.getByText('Prosto, przejrzyście, bez stresu.');
+  });
+
+  it('exposes only the real list, not the sample tasks', () => {
+    render(<Main />);
+
+    expect(screen.getAllByRole('list')).toHaveLength(1);
+    expect(screen.getAllByRole('listitem')).toHaveLength(3);
+    expect(screen.getAllByRole('link')).toHaveLength(2);
+  });
+
+  it('shows no error screen when the landing renders fine', () => {
+    render(<Main />);
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 });
