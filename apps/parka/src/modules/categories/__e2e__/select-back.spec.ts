@@ -71,6 +71,19 @@ const commands = {
     expect(box?.height).toBe(view.height);
     await expect(getByE2e('categories:form-icon-search')).toBeVisible();
   },
+  'the icon list scrolls with the whole picker': async ({ page }) => {
+    const dialog = page.getByRole('dialog', { name: 'Ikona' });
+    const icon = dialog.locator('[data-e2e^="categories:form-icon:"]').first();
+    const scrollers = await icon.evaluate((el) => {
+      let count = 0;
+      for (let p = el.parentElement; p; p = p.parentElement) {
+        if (p.getAttribute('role') === 'dialog') break;
+        if (/auto|scroll/.test(getComputedStyle(p).overflowY)) count += 1;
+      }
+      return count;
+    });
+    expect(scrollers).toBe(1);
+  },
   'the select is a dropdown, not a full-screen dialog': async ({ page }) => {
     await expect(page.getByRole('dialog', { name: 'Ikona' })).toHaveCount(0);
   },
@@ -102,6 +115,16 @@ test.describe('on a narrow screen', () => {
       ['i open the new category form'],
       ['i open the icon select'],
       ['the select is a full-screen picker'],
+    );
+  });
+
+  test('the icon list is not trapped in a small scroll box', async ({
+    e2e,
+  }) => {
+    await interpreter(commands, e2e)(
+      ['i open the new category form'],
+      ['i open the icon select'],
+      ['the icon list scrolls with the whole picker'],
     );
   });
 

@@ -92,7 +92,10 @@ const Panel = ({ value, color, onChange, close }: PanelProps) => {
           Brak ikon pasujących do „{query.trim()}”.
         </p>
       ) : (
-        <div className="grid max-h-60 grid-cols-5 gap-2 overflow-y-auto pr-2">
+        <div
+          data-nested-scroll=""
+          className="grid max-h-60 grid-cols-5 gap-2 overflow-y-auto pr-2"
+        >
           {visible.map((id) => {
             const selected = id === value;
             return (
