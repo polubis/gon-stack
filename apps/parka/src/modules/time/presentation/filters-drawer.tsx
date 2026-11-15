@@ -5,6 +5,7 @@ import { cn } from '@repo/react-kit/cn';
 import { closeModal, useModalMounted } from '@/shared/router/modal-stack';
 import { ClearableInput } from '@/shared/ui/clearable';
 import { Button } from '@/shared/ui/controls';
+import { CategoryIcon } from '@/shared/ui/icon';
 import {
   activeFilterCount,
   NO_FILTERS,
@@ -19,6 +20,8 @@ import {
   type TimingFilter,
 } from '../domain/filters';
 import { useContext } from './context';
+import { PRIORITY_TONE, PriorityMeter } from './priority-badge';
+import { priorityLevel } from '../domain/priority';
 
 const CHIP =
   'pressable inline-flex min-h-9 items-center rounded-full border px-3.5 py-1.5 text-sm font-medium focus-visible:outline-2 focus-visible:outline-brand';
@@ -77,6 +80,31 @@ const Chip = ({
   >
     {children}
   </button>
+);
+
+/** Same marks as elsewhere: category icon in its color, priority pips in its tone. */
+const Mark = ({
+  pressed,
+  className,
+  style,
+  children,
+}: {
+  pressed: boolean;
+  className?: string;
+  style?: { color: string };
+  children: ReactNode;
+}) => (
+  <span
+    aria-hidden="true"
+    style={style}
+    className={cn(
+      'mr-2 inline-flex shrink-0 items-center rounded-full p-1',
+      pressed && 'bg-card',
+      className,
+    )}
+  >
+    {children}
+  </span>
 );
 
 /** Single choice: exactly one radio on. */
@@ -212,6 +240,12 @@ export const FiltersDrawer = ({ modal }: { modal: string }) => {
                     })
                   }
                 >
+                  <Mark
+                    pressed={filters.categoryIds.includes(category.id)}
+                    style={{ color: category.color }}
+                  >
+                    <CategoryIcon id={category.icon} className="size-4" />
+                  </Mark>
                   {category.name}
                 </Chip>
               ))}
@@ -228,6 +262,16 @@ export const FiltersDrawer = ({ modal }: { modal: string }) => {
                     })
                   }
                 >
+                  <Mark
+                    pressed={filters.priorityIds.includes(priority.id)}
+                    className={cn(
+                      'px-1.5',
+                      PRIORITY_TONE[priorityLevel(priority.value)],
+                      filters.priorityIds.includes(priority.id) && 'bg-card',
+                    )}
+                  >
+                    <PriorityMeter value={priority.value} />
+                  </Mark>
                   {priority.name}
                 </Chip>
               ))}

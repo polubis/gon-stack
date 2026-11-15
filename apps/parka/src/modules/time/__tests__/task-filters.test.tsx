@@ -157,4 +157,29 @@ describe('task filters', () => {
     expect(params().get('status')).toBeNull();
     expect(params().get('sort')).toBeNull();
   });
+
+  it('marks category chips with their icon in the category color', async () => {
+    const user = userEvent.setup();
+    seedTasks();
+    renderTime();
+    const panel = await openPanel(user);
+
+    const chip = panel.getByRole('button', { name: 'Dom' });
+
+    expect(chip.querySelector('svg')).toBeInTheDocument();
+    expect(chip.querySelector<HTMLElement>('[style]')).toHaveStyle({
+      color: '#c2410c',
+    });
+  });
+
+  it('marks priority chips with the pips of their level', async () => {
+    const user = userEvent.setup();
+    seedTasks();
+    renderTime();
+    const panel = await openPanel(user);
+
+    const chip = panel.getByRole('button', { name: 'Wysoki' });
+
+    expect(chip.querySelector('[data-level="high"]')).toBeInTheDocument();
+  });
 });
