@@ -12,6 +12,7 @@ import { IconPicker } from './icon-picker';
 import { useContext } from './context';
 import { deleteCategoryModal } from './modal-ids';
 import { ModalShell } from './modal-shell';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 
 /**
  * Category form (new, or `category` being edited), a stacked-modal twin of the finance category editor:
@@ -96,15 +97,6 @@ export const CategoryDialog = ({
         <ColorPicker value={color} custom={null} onChange={setColor} />
         <IconPicker value={icon} color={color} onChange={setIcon} />
 
-        <div className="flex gap-2">
-          <Button variant="ghost" onClick={() => closeModal(modal)}>
-            Anuluj
-          </Button>
-          <Button type="submit" data-e2e="time:category-save">
-            {category ? 'Zapisz zmiany' : 'Dodaj kategorię'}
-          </Button>
-        </div>
-
         {category ? (
           <div className="border-t border-line pt-5">
             <Button
@@ -116,6 +108,15 @@ export const CategoryDialog = ({
             </Button>
           </div>
         ) : null}
+
+        <ModalFooter className="flex gap-2">
+          <Button variant="ghost" onClick={() => closeModal(modal)}>
+            Anuluj
+          </Button>
+          <Button type="submit" data-e2e="time:category-save">
+            {category ? 'Zapisz zmiany' : 'Dodaj kategorię'}
+          </Button>
+        </ModalFooter>
       </form>
     </ModalShell>
   );

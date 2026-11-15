@@ -601,6 +601,10 @@ Skill ${ref('evidence')}, key = task id, out \`.evidences/<task-id>/\`.
         importance: 'A',
         doc: 'Open modals live in URL query params (stack order kept): deep link/reload restores the stack, Back closes only the topmost',
       },
+      'ux-modal-footer': {
+        importance: 'A',
+        doc: 'Modal footer (actions) is always sticky to the bottom edge: solid-color background for contrast, soft gradient fade only on its top edge so content scrolls under it smoothly. One shared component, no per-modal copies',
+      },
       'ux-input-clear': {
         importance: 'A',
         doc: 'Every text input (text/email/password/search/tel/url) has an "x" icon button (`lucide-react`) clearing it; click focuses the input. Shown only when value present. Not on select, number, date',

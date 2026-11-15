@@ -19,6 +19,7 @@ import { defaultCategoryId } from '../domain/products';
 import type { Category, CategoryId, ExpenseFormValues } from '../domain/models';
 import { ProductsSection } from './products-section';
 import { useProducts } from './use-products';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 
 type Props = {
   /** Starting values; `null` = a blank new expense. */
@@ -211,7 +212,7 @@ export const ExpenseForm = ({
           />
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-line pt-3">
+        <ModalFooter className="flex flex-wrap items-center gap-3">
           <div className="flex-1">
             <p className="text-xs text-ink-soft">Razem</p>
             <p
@@ -238,7 +239,7 @@ export const ExpenseForm = ({
             )}{' '}
             {submitLabel}
           </Button>
-        </div>
+        </ModalFooter>
       </form>
       <ManageSuggestions memory={suggestions} />
     </>

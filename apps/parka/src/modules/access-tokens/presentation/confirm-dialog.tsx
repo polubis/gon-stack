@@ -1,6 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { useModalMounted } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 
 type Props = {
   /** Its id in the URL modal stack. */
@@ -41,7 +42,7 @@ export const ConfirmDialog = ({
           <Dialog.Description className="mt-1 text-sm text-ink-soft">
             {description}
           </Dialog.Description>
-          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <ModalFooter className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button variant="ghost" className="sm:w-auto" onClick={onClose}>
               Anuluj
             </Button>
@@ -53,7 +54,7 @@ export const ConfirmDialog = ({
             >
               {confirmLabel}
             </Button>
-          </div>
+          </ModalFooter>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

@@ -6,6 +6,7 @@ import { useModalMounted } from '@/shared/router/modal-stack';
 import { Button, Field, Select } from '@/shared/ui/controls';
 import { NumberInput } from '@/shared/ui/number-input';
 import type { Category, Product } from '../domain/models';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 
 type Props = {
   product: Product;
@@ -114,7 +115,7 @@ export const ProductDialog = ({
               />
             </Field>
           </div>
-          <div className="mt-4 flex items-center gap-2">
+          <ModalFooter className="flex items-center gap-2">
             <Button
               variant="danger"
               className="w-auto"
@@ -130,7 +131,7 @@ export const ProductDialog = ({
             >
               <Check className="h-4 w-4" aria-hidden="true" /> Gotowe
             </Button>
-          </div>
+          </ModalFooter>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

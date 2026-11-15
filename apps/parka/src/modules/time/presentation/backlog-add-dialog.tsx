@@ -17,6 +17,7 @@ import { useContext } from './context';
 import { DescriptionField } from './description-field';
 import { ModalShell } from './modal-shell';
 import { PriorityPicker } from './priority-picker';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 
 /** Adds (or edits) a task without a day; saving is optimistic. */
 export const BacklogAddDialog = ({
@@ -141,7 +142,7 @@ export const BacklogAddDialog = ({
             {pickError}
           </span>
         ) : null}
-        <div className="mt-1 flex justify-end gap-2">
+        <ModalFooter className="flex justify-end gap-2">
           <Button
             variant="ghost"
             onClick={() => closeModal(modal)}
@@ -152,7 +153,7 @@ export const BacklogAddDialog = ({
           <Button type="submit" data-e2e="time:backlog-save" className="w-auto">
             {editing ? 'Zapisz' : 'Dodaj'}
           </Button>
-        </div>
+        </ModalFooter>
       </form>
     </ModalShell>
   );

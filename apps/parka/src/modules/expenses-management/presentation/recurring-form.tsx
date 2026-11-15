@@ -26,6 +26,7 @@ const INTERVALS: { value: RecurringInterval; label: string }[] = [
   { value: 'yearly', label: 'Co rok' },
 ];
 import { useContext } from './context';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 
 /**
  * Recurring expense: a rule, not an expense. A payment becomes an expense
@@ -208,7 +209,7 @@ export const RecurringForm = ({ draft }: { draft: ReceiptDraft | null }) => {
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-end border-t border-line pt-3">
+      <ModalFooter className="flex items-center justify-end">
         <Button
           type="submit"
           className="w-auto px-6"
@@ -225,7 +226,7 @@ export const RecurringForm = ({ draft }: { draft: ReceiptDraft | null }) => {
           )}{' '}
           Dodaj wydatek cykliczny
         </Button>
-      </div>
+      </ModalFooter>
     </form>
   );
 };

@@ -34,6 +34,7 @@ import { ModalShell } from './modal-shell';
 import { PriorityPicker } from './priority-picker';
 import { RecurringMark } from './recurring-mark';
 import { TaskDeviceDetail } from './task-device';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 
 type Props = {
   /** Its id in the URL modal stack. */
@@ -333,7 +334,7 @@ export const TaskDialog = ({
             />
           </Field>
         ) : null}
-        <div className="mt-1 flex items-center gap-2">
+        <ModalFooter className="flex items-center gap-2">
           {editing ? (
             <Button
               variant="danger"
@@ -358,7 +359,7 @@ export const TaskDialog = ({
               {editing ? 'Zapisz' : 'Dodaj'}
             </Button>
           </div>
-        </div>
+        </ModalFooter>
       </form>
     </ModalShell>
   );

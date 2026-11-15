@@ -1,6 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { useModalMounted } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 
 /**
  * Delete confirmation stacked over the popup it came from (the popup stays
@@ -45,7 +46,7 @@ export const ConfirmDeleteDialog = ({
           >
             {description}
           </Dialog.Description>
-          <div className="mt-4 flex justify-end gap-2">
+          <ModalFooter className="flex justify-end gap-2">
             <Button variant="ghost" className="w-auto" onClick={onClose}>
               Anuluj
             </Button>
@@ -57,7 +58,7 @@ export const ConfirmDeleteDialog = ({
             >
               {confirmLabel}
             </Button>
-          </div>
+          </ModalFooter>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

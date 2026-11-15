@@ -10,6 +10,7 @@ import {
 } from '../configuration/constraints';
 import { useContext } from './context';
 import { ModalShell } from './modal-shell';
+import { ModalFooter } from '@/shared/ui/modal-footer';
 
 const toTtlDays = (value: string): number | null =>
   value === 'never' ? null : Number(value);
@@ -67,17 +68,19 @@ export const CreateDialog = ({ modal }: { modal: string }) => {
             data-e2e="access-tokens:ttl"
           />
         </Field>
-        <Button
-          type="submit"
-          data-e2e="access-tokens:submit"
-          disabled={!canSave}
-          aria-busy={creating}
-        >
-          {creating ? (
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-          ) : null}
-          Generuj token
-        </Button>
+        <ModalFooter>
+          <Button
+            type="submit"
+            data-e2e="access-tokens:submit"
+            disabled={!canSave}
+            aria-busy={creating}
+          >
+            {creating ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : null}
+            Generuj token
+          </Button>
+        </ModalFooter>
       </form>
     </ModalShell>
   );
