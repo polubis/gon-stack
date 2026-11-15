@@ -58,6 +58,11 @@ export const APP_PAGES: readonly AppPage[] = [
     description: 'Zadania w roku.',
   },
   {
+    url: APP_ROUTER.knowledge(),
+    title: 'Wiedza | Parka',
+    description: 'Foldery i nody wiedzy przypisane do obszarów mózgu.',
+  },
+  {
     url: APP_ROUTER.notifications(),
     title: 'Powiadomienia | Parka',
     description: 'Alerty o limitach i paragonach.',

@@ -98,6 +98,7 @@ export const APP_ROUTER = {
   timeWeek: routeWithQuery<'/app/time/week/', TimeQuery>('/app/time/week/'),
   timeMonth: routeWithQuery<'/app/time/month/', TimeQuery>('/app/time/month/'),
   timeYear: routeWithQuery<'/app/time/year/', TimeQuery>('/app/time/year/'),
+  knowledge: route('/app/knowledge/'),
   notifications: route('/app/notifications/'),
   privacy: route('/app/privacy/'),
   privacyPolicy: route('/privacy-policy/'),

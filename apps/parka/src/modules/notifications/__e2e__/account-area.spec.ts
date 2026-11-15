@@ -37,7 +37,7 @@ const commands = {
       page
         .getByRole('navigation', { name: 'Nawigacja główna' })
         .getByRole('link'),
-    ).toHaveCount(2);
+    ).toHaveCount(3);
   },
   'i open the user panel': async ({ getByE2e }) => {
     await getByE2e('account-menu:trigger').filter({ visible: true }).click();
