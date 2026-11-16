@@ -1,4 +1,5 @@
-import { screen, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
+import { DeleteDialog } from '../presentation/delete-dialog';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderTime, TODAY } from './render-time';
 import { setupTimeBackend } from './time-backend';
@@ -17,6 +18,27 @@ describe('modal footer', () => {
 
     expect(
       within(footer as HTMLElement).getByRole('button', { name: 'Dodaj' }),
+    ).toBeVisible();
+    expect(footer.nextElementSibling).toBeNull();
+  });
+});
+
+describe('confirm dialog footer', () => {
+  it('ends the confirm dialog, so nothing shows below the actions', async () => {
+    render(
+      <DeleteDialog
+        modal="task-delete:t1"
+        task={{ title: 'Dentysta' }}
+        onConfirm={() => {}}
+      />,
+    );
+
+    const dialog = await screen.findByRole('dialog');
+    const footer = dialog.lastElementChild as HTMLElement;
+
+    expect(within(footer).getByRole('button', { name: 'Usuń' })).toBeVisible();
+    expect(
+      within(footer).getByRole('button', { name: 'Anuluj' }),
     ).toBeVisible();
     expect(footer.nextElementSibling).toBeNull();
   });
