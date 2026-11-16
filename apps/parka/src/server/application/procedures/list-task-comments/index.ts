@@ -17,22 +17,26 @@ export const listTaskComments = privateProcedure({
   schema: withZodSchema({ schema: listTaskCommentsSchema }),
 })({
   handler: async (input, { db, user }) => {
-    const task = await db
-      .from('time_tasks')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('id', input.id)
-      .maybeSingle();
+    // Independent reads start together; the ownership check still decides first.
+    const [task, comments, me, avatar] = await Promise.all([
+      db
+        .from('time_tasks')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('id', input.id)
+        .maybeSingle(),
+      db
+        .from('time_task_comments')
+        .select(TASK_COMMENT_COLUMNS)
+        .eq('user_id', user.id)
+        .eq('task_id', input.id)
+        .order('created_at')
+        .order('id'),
+      db.auth.getUser(),
+      db.from('profile_avatars').select('updated_at').maybeSingle(),
+    ]);
     if (task.error) throw fromSupabaseError(task.error);
     if (!task.data) throw new NotFound(undefined, 'Task not found');
-
-    const comments = await db
-      .from('time_task_comments')
-      .select(TASK_COMMENT_COLUMNS)
-      .eq('user_id', user.id)
-      .eq('task_id', input.id)
-      .order('created_at')
-      .order('id');
     if (comments.error) throw fromSupabaseError(comments.error);
 
     const tokenIds = [
@@ -45,10 +49,6 @@ export const listTaskComments = privateProcedure({
     if (tokens.error) throw fromSupabaseError(tokens.error);
     const names = tokenNames(tokens.data);
 
-    const [me, avatar] = await Promise.all([
-      db.auth.getUser(),
-      db.from('profile_avatars').select('updated_at').maybeSingle(),
-    ]);
     const meta = me.data.user?.user_metadata ?? {};
     const picture = avatar.data
       ? (toAvatar(db, user.id, avatar.data.updated_at).variants.find(

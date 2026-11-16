@@ -14,24 +14,26 @@ export const listTaskHistory = privateProcedure({
   schema: withZodSchema({ schema: listTaskHistorySchema }),
 })({
   handler: async (input, { db, user }) => {
-    const task = await db
-      .from('time_tasks')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('id', input.id)
-      .maybeSingle();
+    // Both reads start together; the ownership check still decides first.
+    const [task, history] = await Promise.all([
+      db
+        .from('time_tasks')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('id', input.id)
+        .maybeSingle(),
+      db
+        .from('time_task_history')
+        .select(
+          'id, kind, field, old_value, new_value, created_at, bot_name, bot_ref, mcp_token_id',
+        )
+        .eq('user_id', user.id)
+        .eq('task_id', input.id)
+        .order('created_at', { ascending: false })
+        .order('id'),
+    ]);
     if (task.error) throw fromSupabaseError(task.error);
     if (!task.data) throw new NotFound(undefined, 'Task not found');
-
-    const history = await db
-      .from('time_task_history')
-      .select(
-        'id, kind, field, old_value, new_value, created_at, bot_name, bot_ref, mcp_token_id',
-      )
-      .eq('user_id', user.id)
-      .eq('task_id', input.id)
-      .order('created_at', { ascending: false })
-      .order('id');
     if (history.error) throw fromSupabaseError(history.error);
 
     const tokenIds = [
