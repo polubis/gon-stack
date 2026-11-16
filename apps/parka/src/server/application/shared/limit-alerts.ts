@@ -36,11 +36,14 @@ export const notifyReachedLimits = async (
     if (limits.error) throw fromSupabaseError(limits.error);
     if (limits.data.length === 0) return;
 
-    const expenses = await db
-      .from('expenses')
-      .select('id, amount, category_id')
-      .gte('date', `${month}-01`)
-      .lt('date', nextMonth(month));
+    const [expenses, names] = await Promise.all([
+      db
+        .from('expenses')
+        .select('id, amount, category_id')
+        .gte('date', `${month}-01`)
+        .lt('date', nextMonth(month)),
+      loadCategoryNames(db),
+    ]);
     if (expenses.error) throw fromSupabaseError(expenses.error);
     const ids = expenses.data.map((e) => e.id);
     const items = ids.length
@@ -51,23 +54,27 @@ export const notifyReachedLimits = async (
       : { data: [] as ItemRow[], error: null };
     if (items.error) throw fromSupabaseError(items.error);
 
+    const itemsByExpense = new Map<string, ItemRow[]>();
+    for (const it of items.data) {
+      const list = itemsByExpense.get(it.expense_id) ?? [];
+      list.push(it);
+      itemsByExpense.set(it.expense_id, list);
+    }
+
     const shares = expenses.data.flatMap((e) =>
       categoryShares({
         amount: Number(e.amount),
         categoryId: e.category_id,
-        items: items.data
-          .filter((it) => it.expense_id === e.id)
-          .map((it) => ({
-            categoryId: it.category_id,
-            unitPrice: Number(it.unit_price),
-            quantity: Number(it.quantity),
-            discount: Number(it.discount),
-          })),
+        items: (itemsByExpense.get(e.id) ?? []).map((it) => ({
+          categoryId: it.category_id,
+          unitPrice: Number(it.unit_price),
+          quantity: Number(it.quantity),
+          discount: Number(it.discount),
+        })),
       }),
     );
-    const names = await loadCategoryNames(db);
 
-    for (const limit of limits.data) {
+    const reached = limits.data.map(async (limit) => {
       const amount = Number(limit.amount);
       const spent =
         limit.scope === 'category'
@@ -75,7 +82,7 @@ export const notifyReachedLimits = async (
               .filter((s) => s.categoryId === limit.category_id)
               .reduce((total, s) => total + s.amount, 0)
           : expenses.data.reduce((total, e) => total + Number(e.amount), 0);
-      if (amount <= 0 || (spent / amount) * 100 < limit.alert_at) continue;
+      if (amount <= 0 || (spent / amount) * 100 < limit.alert_at) return;
       await recordNotificationOnce(
         db,
         userId,
@@ -94,7 +101,8 @@ export const notifyReachedLimits = async (
           },
         },
       );
-    }
+    });
+    await Promise.all(reached);
   } catch (error) {
     logger(error, 'error');
   }
