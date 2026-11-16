@@ -39,7 +39,8 @@ export const createExpense = privateProcedure({
       .single();
     if (error) throw fromSupabaseError(error);
 
-    if (input.items.length > 0) {
+    const insertItems = async () => {
+      if (input.items.length === 0) return;
       const { error: itemsError } = await db.from('receipt_items').insert(
         input.items.map((it) => ({
           user_id: uid,
@@ -53,17 +54,25 @@ export const createExpense = privateProcedure({
         })),
       );
       if (itemsError) throw fromSupabaseError(itemsError);
-    }
+    };
 
-    await tryRecordNotifications(db, uid, [
-      {
-        kind: 'expense-created',
-        payload: {
-          expense: expenseSnapshot(data, await loadCategoryNames(db)),
-        },
-      },
+    // Independent reads overlap the items write; limits need the items stored.
+    const [profiles] = await Promise.all([
+      loadProfiles(db),
+      (async () => {
+        const [names] = await Promise.all([
+          loadCategoryNames(db),
+          insertItems(),
+        ]);
+        await tryRecordNotifications(db, uid, [
+          {
+            kind: 'expense-created',
+            payload: { expense: expenseSnapshot(data, names) },
+          },
+        ]);
+        await notifyReachedLimits(db, uid, data.date);
+      })(),
     ]);
-    await notifyReachedLimits(db, uid, data.date);
 
     return {
       code: 201 as const,
@@ -76,7 +85,7 @@ export const createExpense = privateProcedure({
         paymentMethod: data.payment_method,
         isBill: data.is_bill,
         source: data.source as 'receipt' | 'manual',
-        device: toDevice(data, await loadProfiles(db)),
+        device: toDevice(data, profiles),
         recurringId: data.recurring_id,
         occurrenceDate: data.occurrence_date,
         items: input.items,

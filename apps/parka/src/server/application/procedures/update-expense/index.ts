@@ -46,13 +46,13 @@ export const updateExpense = privateProcedure({
     if (error) throw fromSupabaseError(error);
     if (!data) throw new NotFound(undefined, 'Expense not found');
 
-    const { error: wipeError } = await db
-      .from('receipt_items')
-      .delete()
-      .eq('expense_id', input.id);
-    if (wipeError) throw fromSupabaseError(wipeError);
-
-    if (input.items.length > 0) {
+    const replaceItems = async () => {
+      const { error: wipeError } = await db
+        .from('receipt_items')
+        .delete()
+        .eq('expense_id', input.id);
+      if (wipeError) throw fromSupabaseError(wipeError);
+      if (input.items.length === 0) return;
       const { error: itemsError } = await db.from('receipt_items').insert(
         input.items.map((it) => ({
           user_id: uid,
@@ -66,19 +66,28 @@ export const updateExpense = privateProcedure({
         })),
       );
       if (itemsError) throw fromSupabaseError(itemsError);
-    }
+    };
 
-    const names = await loadCategoryNames(db);
-    await tryRecordNotifications(db, uid, [
-      {
-        kind: 'expense-updated',
-        payload: {
-          before: expenseSnapshot(previous, names),
-          after: expenseSnapshot(data, names),
-        },
-      },
+    // Independent reads overlap the items rewrite; limits need the items stored.
+    const [profiles] = await Promise.all([
+      loadProfiles(db),
+      (async () => {
+        const [names] = await Promise.all([
+          loadCategoryNames(db),
+          replaceItems(),
+        ]);
+        await tryRecordNotifications(db, uid, [
+          {
+            kind: 'expense-updated',
+            payload: {
+              before: expenseSnapshot(previous, names),
+              after: expenseSnapshot(data, names),
+            },
+          },
+        ]);
+        await notifyReachedLimits(db, uid, data.date);
+      })(),
     ]);
-    await notifyReachedLimits(db, uid, data.date);
 
     return {
       code: 200 as const,
@@ -91,7 +100,7 @@ export const updateExpense = privateProcedure({
         paymentMethod: data.payment_method,
         isBill: data.is_bill,
         source: data.source as 'receipt' | 'manual',
-        device: toDevice(data, await loadProfiles(db)),
+        device: toDevice(data, profiles),
         recurringId: data.recurring_id,
         occurrenceDate: data.occurrence_date,
         items: input.items,
