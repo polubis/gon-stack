@@ -198,4 +198,50 @@ describe('knowledge module', () => {
       await english.findByRole('checkbox', { name: /Do nauki: Phrasal verbs/ }),
     ).toBeVisible();
   });
+  it('removes a node again and offers a retry when adding it fails', async () => {
+    const user = userEvent.setup();
+    let fail = true;
+    const healthy = createMockGateway();
+    useGateway({
+      ...healthy,
+      createNode: (dto) =>
+        fail
+          ? Promise.reject(new Error('Serwer padł'))
+          : healthy.createNode(dto),
+    });
+    renderKnowledge('?modal=node-new');
+
+    const dialog = within(await screen.findByRole('dialog'));
+    await user.type(dialog.getByLabelText(/Tytuł/), 'Idiomy');
+    await user.click(dialog.getByRole('button', { name: 'Dodaj węzeł' }));
+
+    expect(await screen.findByText('Nie udało się dodać węzła')).toBeVisible();
+    expect(screen.getByText('NODE_CREATE_FAILED')).toBeVisible();
+    expect(screen.queryByText('Idiomy')).toBeNull();
+    fail = false;
+    await user.click(screen.getByRole('button', { name: 'Spróbuj ponownie' }));
+
+    expect(await screen.findByText('Idiomy')).toBeVisible();
+  });
+
+  it('brings a node back and shows an error toast when deleting fails', async () => {
+    const user = userEvent.setup();
+    useGateway({
+      ...createMockGateway(),
+      deleteNode: () => Promise.reject(new Error('Serwer padł')),
+    });
+    renderKnowledge();
+
+    await user.click(
+      await screen.findByRole('button', { name: 'Usuń węzeł: Higiena snu' }),
+    );
+    await user.click(
+      within(await screen.findByRole('dialog')).getByRole('button', {
+        name: 'Usuń',
+      }),
+    );
+
+    expect(await screen.findByText('Nie udało się usunąć węzła')).toBeVisible();
+    expect(screen.getByText('Higiena snu')).toBeVisible();
+  });
 });
