@@ -13,6 +13,13 @@ export const deleteExpense = privateProcedure({
   schema: withZodSchema({ schema: deleteExpenseSchema }),
 })({
   handler: async (input, { db, user }) => {
+    // Names are only needed after the delete; read them while the deletes run.
+    // A failed read surfaces at the old spot, not before the delete.
+    const names = loadCategoryNames(db).then(
+      (value) => ({ value }),
+      (error: unknown) => ({ error }),
+    );
+
     const { data: previous, error: previousError } = await db
       .from('expenses')
       .select('*')
@@ -36,11 +43,13 @@ export const deleteExpense = privateProcedure({
       throw new NotFound(undefined, 'Expense not found');
 
     if (previous) {
+      const loaded = await names;
+      if ('error' in loaded) throw loaded.error;
       await tryRecordNotifications(db, user.id, [
         {
           kind: 'expense-deleted',
           payload: {
-            expense: expenseSnapshot(previous, await loadCategoryNames(db)),
+            expense: expenseSnapshot(previous, loaded.value),
           },
         },
       ]);
