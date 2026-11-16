@@ -24,38 +24,40 @@ export const updateSettings = privateProcedure({
 })({
   handler: async (input, { db, user }) => {
     const uid = user.id;
-    const { error: profileError } = await db.from('profiles').upsert({
-      user_id: uid,
-      name: input.profile.name,
-    });
-    if (profileError) throw fromSupabaseError(profileError);
-
-    const { error: prefsError } = await db
-      .from('notification_preferences')
-      .upsert({
+    // Independent writes and the device ids read share one round trip. The
+    // first failure in this order is raised, as when they ran one by one.
+    const [profile, prefs, push, owned] = await Promise.all([
+      db.from('profiles').upsert({
+        user_id: uid,
+        name: input.profile.name,
+      }),
+      db.from('notification_preferences').upsert({
         user_id: uid,
         push: input.notifications.push,
         email: input.notifications.email,
         limit_warnings: input.notifications.limitWarnings,
         receipt_confirmations: input.notifications.receiptConfirmations,
         limit_alerts: input.notifications.limitAlerts,
-      });
-    if (prefsError) throw fromSupabaseError(prefsError);
-
-    // Push off means no device receives it any more.
-    if (!input.notifications.push) {
-      const { error } = await db
-        .from('push_subscriptions')
-        .delete()
-        .eq('user_id', uid);
-      if (error) throw fromSupabaseError(error);
-    }
+      }),
+      // Push off means no device receives it any more.
+      input.notifications.push
+        ? { error: null }
+        : db.from('push_subscriptions').delete().eq('user_id', uid),
+      getOwnDeviceIds(db).then(
+        (ids) => ({ ids, failure: null }),
+        (failure: unknown) => ({ ids: [] as string[], failure }),
+      ),
+    ]);
+    if (profile.error) throw fromSupabaseError(profile.error);
+    if (prefs.error) throw fromSupabaseError(prefs.error);
+    if (push.error) throw fromSupabaseError(push.error);
+    if (owned.failure) throw owned.failure;
 
     // Only avatar and custom name are writable; a device the user owns no
     // expense of is ignored.
-    const owned = new Set(await getOwnDeviceIds(db));
+    const ownedIds = new Set(owned.ids);
     const own = input.devices
-      .filter((d) => owned.has(d.id))
+      .filter((d) => ownedIds.has(d.id))
       .map((d) => ({
         id: d.id,
         avatar: d.avatar,
@@ -64,7 +66,8 @@ export const updateSettings = privateProcedure({
     const set = own.filter((d) => d.avatar || d.customName);
     const cleared = own.filter((d) => !d.avatar && !d.customName);
 
-    if (set.length) {
+    const writeSet = async () => {
+      if (!set.length) return;
       const { error } = await db.from('device_profiles').upsert(
         set.map((d) => ({
           user_id: uid,
@@ -74,8 +77,9 @@ export const updateSettings = privateProcedure({
         })),
       );
       if (error) throw fromSupabaseError(error);
-    }
-    if (cleared.length) {
+    };
+    const writeCleared = async () => {
+      if (!cleared.length) return;
       // A device with a photo keeps its row; the rest of the profile resets.
       const ids = cleared.map((d) => d.id);
       const reset = await db
@@ -89,7 +93,9 @@ export const updateSettings = privateProcedure({
         .in('device_id', ids)
         .is('photo_updated_at', null);
       if (error) throw fromSupabaseError(error);
-    }
+    };
+    // Set and cleared touch different device ids, so they overlap.
+    await Promise.all([writeSet(), writeCleared()]);
 
     return { code: 200 as const, data: input };
   },
