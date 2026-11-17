@@ -106,10 +106,8 @@ export const setupTimeBackend = () => {
   };
 
   const record = async (request: Request): Promise<Json | undefined> => {
-    const body =
-      request.method === 'GET' || request.method === 'DELETE'
-        ? undefined
-        : ((await request.clone().json()) as Json);
+    const text = request.method === 'GET' ? '' : await request.clone().text();
+    const body = text ? (JSON.parse(text) as Json) : undefined;
     calls.push({ method: request.method, url: request.url, body });
     return body;
   };

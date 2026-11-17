@@ -10,9 +10,10 @@ import { putTask } from '../../integration/repository';
 export const updateTask = (store: Store, bus: Bus) => {
   const { ofType, emit } = bus;
   return ofType('[TRIGGER]_UPDATE_TASK').pipe(
-    map(({ task, message }) => ({
+    map(({ task, message, scope }) => ({
       task,
       message,
+      scope,
       previous: store.$tasks.get().find((t) => t.id === task.id),
     })),
     tap(({ task }) => {
@@ -20,14 +21,17 @@ export const updateTask = (store: Store, bus: Bus) => {
         sortTasks(store.$tasks.get().map((t) => (t.id === task.id ? task : t))),
       );
     }),
-    concatMap(({ task, previous, message }) =>
-      from(write(store, bus, () => putTask(task))).pipe(
-        tap(() =>
+    concatMap(({ task, previous, message, scope }) =>
+      from(write(store, bus, () => putTask(task, scope))).pipe(
+        tap(() => {
           notify(store, {
             tone: 'success',
             message: message ?? 'Zapisano zmiany.',
-          }),
-        ),
+          });
+          // Other tasks of the series changed too: read them again.
+          const range = store.$range.get();
+          if (scope !== 'this' && range) emit('[TRIGGER]_LOAD', range);
+        }),
         catchError((error: unknown) => {
           const current = store.$tasks.get().find((t) => t.id === task.id);
           // Only undo our own change, not a newer one.
@@ -45,7 +49,8 @@ export const updateTask = (store: Store, bus: Bus) => {
             title: 'Nie udało się zapisać zadania',
             code: 'TASK_UPDATE_FAILED',
             description: errorMessage(error),
-            retry: () => emit('[TRIGGER]_UPDATE_TASK', { task, message }),
+            retry: () =>
+              emit('[TRIGGER]_UPDATE_TASK', { task, message, scope }),
           });
           return EMPTY;
         }),

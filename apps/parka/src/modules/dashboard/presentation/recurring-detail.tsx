@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import {
   closeModalThen,
@@ -5,10 +6,10 @@ import {
   useModal,
 } from '@/shared/router/modal-stack';
 import { ScopeNote } from '@/shared/ui/scope-note';
+import { RecurringScopeDialog } from '@/shared/ui/recurring-scope-dialog';
 import { money, plainDateLabel } from '../domain/format';
 import type { Period } from '@/shared/period/period';
-import type { Upcoming } from '../domain/models';
-import { ConfirmDeleteDialog } from './confirm-delete-dialog';
+import type { Recurring, Upcoming } from '../domain/models';
 import { useContext } from './context';
 import { DetailDialog } from './detail-dialog';
 import { deleteModal } from './modal-ids';
@@ -17,9 +18,9 @@ import { RecurringForm } from './recurring-form';
 import { categoryOf, intervalLabel } from './selectors';
 
 /**
- * Popup of an upcoming (not yet charged) payment. It stands for its rule, so
- * editing or deleting reaches this payment and the following ones; what was
- * already charged is an ordinary expense and stays untouched.
+ * Popup of an upcoming (not yet charged) payment. It stands for its rule;
+ * after confirming, the user picks how far the change reaches (the whole
+ * series, only this payment, this and the following, or only the following).
  */
 export const RecurringDetail = ({
   modal,
@@ -41,6 +42,8 @@ export const RecurringDetail = ({
     .sort((a, b) => (a.date < b.date ? 1 : -1));
   const confirmId = deleteModal(upcoming.id);
   const confirming = useModal(confirmId);
+  // The edit waits here while the user picks how far it reaches.
+  const [pending, setPending] = useState<Recurring | null>(null);
 
   return (
     <DetailDialog
@@ -62,12 +65,12 @@ export const RecurringDetail = ({
       onClose={onClose}
     >
       <ScopeNote className="mb-3" data-e2e="dashboard:scope-note">
-        Edytujesz ten i kolejne wydatki. Zmiana obejmie tę płatność oraz
-        następne; wydatki naliczone wcześniej zostają bez zmian.
+        Po zapisaniu lub usunięciu wybierzesz, czy zmiana dotyczy wszystkich
+        płatności serii, tylko tej, tej i następnych, czy tylko następnych.
       </ScopeNote>
       <RecurringForm
         recurring={recurring}
-        period={period}
+        onSave={setPending}
         onDone={onClose}
         onRemove={() => openModal(confirmId)}
       >
@@ -90,16 +93,31 @@ export const RecurringDetail = ({
           </div>
         ) : null}
       </RecurringForm>
+      {pending ? (
+        <RecurringScopeDialog
+          action="edit"
+          title={`Zapisać zmiany w „${recurring.name}”?`}
+          subject="Wybierz, które płatności tej serii objąć zmianą. Samo naliczanie nie zmienia się."
+          confirmLabel="Zapisz zmiany"
+          onClose={() => setPending(null)}
+          onConfirm={(scope) => {
+            ctx.updateRecurring(pending, period, scope, upcoming.date);
+            setPending(null);
+            onClose();
+          }}
+        />
+      ) : null}
       {confirming.isOpen ? (
-        <ConfirmDeleteDialog
+        <RecurringScopeDialog
           modal={confirmId}
+          action="delete"
           title={`Usunąć wydatek cykliczny „${recurring.name}”?`}
-          description="Usuniesz regułę: ta płatność i kolejne nie zostaną naliczone. Wydatki naliczone wcześniej zostają w historii."
-          confirmLabel="Usuń regułę"
+          subject="Wybierz, które płatności tej serii usunąć razem z ich wydatkami."
+          confirmLabel="Usuń"
           onClose={confirming.close}
-          onConfirm={() =>
+          onConfirm={(scope) =>
             closeModalThen(confirmId, () => {
-              ctx.removeRecurring(recurring.id, period);
+              ctx.removeRecurring(recurring.id, period, scope, upcoming.date);
               onClose();
             })
           }

@@ -1,3 +1,4 @@
+import type { RecurringScope } from '@/shared/recurring/occurrences';
 import type { z } from 'zod';
 import type { listCategoriesSchema } from '@schemas/categories';
 import type {
@@ -77,11 +78,14 @@ export const fetchExpense = async (
   return found ? toStoredExpense(found) : null;
 };
 
-export const putExpense = async (expense: StoredExpense): Promise<void> => {
+export const putExpense = async (
+  expense: StoredExpense,
+  scope: RecurringScope = 'this',
+): Promise<void> => {
   const response = await fetch(API_ROUTER.expenseById(expense.id), {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(toExpenseBody(expense)),
+    body: JSON.stringify({ ...toExpenseBody(expense), scope }),
   });
   const json = (await response.json()) as UpdateExpenseOut;
   if (json.code !== 200) throw new Error(json.message);

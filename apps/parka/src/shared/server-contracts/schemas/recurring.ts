@@ -1,6 +1,8 @@
 import z from 'zod';
 import { isTimeZone } from '@/shared/date/date';
-import { recurring, errorOut, notFoundOut } from './general';
+import { recurring, recurringScope, errorOut, notFoundOut } from './general';
+
+const occurrenceDate = () => z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
 /** Zone whose today decides which recurring charges have come due. */
 const tz = z.string().refine(isTimeZone, 'Unknown time zone').optional();
@@ -25,9 +27,16 @@ export const createRecurringSchema = () =>
     ]),
   });
 
+/**
+ * Without `occurrenceDate` the rule alone changes (what follows the charged
+ * expenses); with it, `scope` is read from that occurrence of the series.
+ */
 export const updateRecurringSchema = () =>
   z.object({
-    in: recurring(),
+    in: recurring().extend({
+      scope: recurringScope().default('thisAndFollowing'),
+      occurrenceDate: occurrenceDate().optional(),
+    }),
     out: z.union([
       z.object({ code: z.literal(200), data: recurring() }),
       writeErrors,
@@ -36,7 +45,11 @@ export const updateRecurringSchema = () =>
 
 export const deleteRecurringSchema = () =>
   z.object({
-    in: z.object({ id: z.string().min(1) }),
+    in: z.object({
+      id: z.string().min(1),
+      scope: recurringScope().default('all'),
+      occurrenceDate: occurrenceDate().optional(),
+    }),
     out: z.union([
       z.object({ code: z.literal(200), ok: z.literal(true) }),
       writeErrors,

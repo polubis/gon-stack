@@ -1,3 +1,4 @@
+import type { RecurringScope } from '@/shared/recurring/occurrences';
 import type { NoticeBody } from '../domain/models';
 import { notify } from './actions/notify';
 import type { Registry } from './registry';
@@ -8,7 +9,6 @@ import type {
   CategoryId,
   Priority,
   Recurring,
-  RecurringId,
   Status,
   Task,
   TaskId,
@@ -27,15 +27,17 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
       trigger('[TRIGGER]_UPDATE_BACKLOG_TASK', { task }),
     moveBacklogTask: (id: TaskId, day: string, label: string) =>
       trigger('[TRIGGER]_MOVE_BACKLOG_TASK', { id, day, label }),
-    updateTask: (task: Task, message?: string) =>
-      trigger('[TRIGGER]_UPDATE_TASK', { task, message }),
+    updateTask: (
+      task: Task,
+      message?: string,
+      scope: RecurringScope = 'this',
+    ) => trigger('[TRIGGER]_UPDATE_TASK', { task, message, scope }),
     sendTaskToBacklog: (id: TaskId) =>
       trigger('[TRIGGER]_SEND_TASK_TO_BACKLOG', { id }),
-    deleteTask: (id: TaskId) => trigger('[TRIGGER]_DELETE_TASK', { id }),
+    deleteTask: (id: TaskId, scope: RecurringScope = 'this') =>
+      trigger('[TRIGGER]_DELETE_TASK', { id, scope }),
     createRecurring: (recurring: Recurring) =>
       trigger('[TRIGGER]_CREATE_RECURRING', { recurring }),
-    stopRecurring: (id: RecurringId) =>
-      trigger('[TRIGGER]_STOP_RECURRING', { id }),
     createCategory: (category: Category) =>
       trigger('[TRIGGER]_CREATE_CATEGORY', { category }),
     updateCategory: (category: Category) =>

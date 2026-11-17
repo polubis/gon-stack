@@ -8,7 +8,6 @@ import { sendTaskToBacklog } from './handlers/send-task-to-backlog';
 import { updateTask } from './handlers/update-task';
 import { deleteTask } from './handlers/delete-task';
 import { createRecurring } from './handlers/create-recurring';
-import { stopRecurring } from './handlers/stop-recurring';
 import { createCategory } from './handlers/create-category';
 import { updateCategory } from './handlers/update-category';
 import { deleteCategory } from './handlers/delete-category';
@@ -31,7 +30,6 @@ export const createRegistry = (store: Store) => {
     sendTaskToBacklog(store, bus),
     deleteTask(store, bus),
     createRecurring(store, bus),
-    stopRecurring(store, bus),
     createCategory(store, bus),
     updateCategory(store, bus),
     deleteCategory(store, bus),

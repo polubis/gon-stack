@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
   dueOccurrences,
+  inScope,
   MAX_CATCH_UP,
+  nextOccurrence,
+  previousOccurrence,
   upcomingOccurrences,
   type RecurringRule,
+  type RecurringScope,
 } from '../occurrences';
 
 const rule = (over: Partial<RecurringRule> = {}): RecurringRule => ({
@@ -156,6 +160,55 @@ describe('upcoming occurrences', () => {
     ).toEqual([]);
     expect(upcomingOccurrences(rule({ active: false }), '2025-01-01')).toEqual(
       [],
+    );
+  });
+});
+
+describe('recurring scope', () => {
+  const days = ['2025-05-15', '2025-06-15', '2025-07-15'];
+  const reached = (scope: RecurringScope) =>
+    days.filter((day) => inScope(scope, day, '2025-06-15'));
+
+  it('reaches the whole series', () => {
+    expect(reached('all')).toEqual(days);
+  });
+
+  it('reaches only the opened occurrence', () => {
+    expect(reached('this')).toEqual(['2025-06-15']);
+  });
+
+  it('reaches the opened occurrence and what follows', () => {
+    expect(reached('thisAndFollowing')).toEqual(['2025-06-15', '2025-07-15']);
+  });
+
+  it('reaches only what follows the opened occurrence', () => {
+    expect(reached('following')).toEqual(['2025-07-15']);
+  });
+});
+
+describe('neighbouring occurrences', () => {
+  it('finds none before the first occurrence', () => {
+    expect(previousOccurrence(rule(), '2025-05-15')).toBeNull();
+  });
+
+  it('finds the occurrence right before, not the day before', () => {
+    expect(previousOccurrence(rule(), '2025-07-15')).toBe('2025-06-15');
+  });
+
+  it('keeps month-end days of the series when stepping back', () => {
+    const monthEnd = rule({ startDate: '2025-01-31' });
+
+    expect(previousOccurrence(monthEnd, '2025-03-31')).toBe('2025-02-28');
+    expect(nextOccurrence(monthEnd, '2025-02-28')).toBe('2025-03-31');
+  });
+
+  it('finds the following occurrence', () => {
+    expect(nextOccurrence(rule(), '2025-05-15')).toBe('2025-06-15');
+  });
+
+  it('finds none after the end of the series', () => {
+    expect(nextOccurrence(rule({ endDate: '2025-06-20' }), '2025-06-15')).toBe(
+      null,
     );
   });
 });

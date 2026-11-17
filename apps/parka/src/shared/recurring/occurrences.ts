@@ -132,3 +132,66 @@ export const upcomingOccurrences = (
   }
   return upcoming;
 };
+
+/** What a change of one occurrence reaches: the whole series, only it, it and what follows, or only what follows. */
+export const RECURRING_SCOPES = [
+  'all',
+  'this',
+  'thisAndFollowing',
+  'following',
+] as const;
+
+export type RecurringScope = (typeof RECURRING_SCOPES)[number];
+
+/** Whether the occurrence of `day` is reached by `scope` chosen on the `anchor` occurrence. */
+export const inScope = (
+  scope: RecurringScope,
+  day: string,
+  anchor: string,
+): boolean => {
+  switch (scope) {
+    case 'all':
+      return true;
+    case 'this':
+      return day === anchor;
+    case 'thisAndFollowing':
+      return day >= anchor;
+    case 'following':
+      return day > anchor;
+    default: {
+      const unreachable: never = scope;
+      return unreachable;
+    }
+  }
+};
+
+/** The occurrence right before `day` (ignoring the end of the series); `null` when `day` is the first. */
+export const previousOccurrence = (
+  rule: Pick<RecurringSchedule, 'interval' | 'startDate'>,
+  day: string,
+): string | null => {
+  let previous: string | null = null;
+  for (const occurrence of occurrences(
+    { ...rule, endDate: null, lastMaterializedDate: null, active: true },
+    day,
+  )) {
+    if (occurrence >= day) break;
+    previous = occurrence;
+  }
+  return previous;
+};
+
+/** The occurrence right after `day` within the series; `null` when the series ends there. */
+export const nextOccurrence = (
+  rule: Pick<RecurringSchedule, 'interval' | 'startDate' | 'endDate'>,
+  day: string,
+): string | null => {
+  const horizon = rule.endDate ?? '9999-12-31';
+  for (const occurrence of occurrences(
+    { ...rule, lastMaterializedDate: null, active: true },
+    horizon,
+  )) {
+    if (occurrence > day) return occurrence;
+  }
+  return null;
+};

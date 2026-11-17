@@ -7,9 +7,11 @@ import { putRecurring } from '../../integration/repository';
 
 export const updateRecurring = (store: Store, { ofType, emit }: Bus) =>
   ofType('[TRIGGER]_UPDATE_RECURRING').pipe(
-    map(({ recurring, period }) => ({
+    map(({ recurring, period, scope, occurrenceDate }) => ({
       recurring,
       period,
+      scope,
+      occurrenceDate,
       previous: store.$recurring.get(),
     })),
     tap(({ recurring }) => {
@@ -19,8 +21,8 @@ export const updateRecurring = (store: Store, { ofType, emit }: Bus) =>
           .map((r) => (r.id === recurring.id ? recurring : r)),
       );
     }),
-    concatMap(({ recurring, period, previous }) =>
-      from(putRecurring(recurring)).pipe(
+    concatMap(({ recurring, period, scope, occurrenceDate, previous }) =>
+      from(putRecurring(recurring, { scope, occurrenceDate })).pipe(
         tap(() => {
           notify(store, { tone: 'success', message: 'Zapisano zmiany.' });
           emit('[FACT]_RECURRING_CHANGED', { period });
@@ -33,7 +35,12 @@ export const updateRecurring = (store: Store, { ofType, emit }: Bus) =>
             code: 'RECURRING_UPDATE_FAILED',
             description: errorMessage(error),
             retry: () =>
-              emit('[TRIGGER]_UPDATE_RECURRING', { recurring, period }),
+              emit('[TRIGGER]_UPDATE_RECURRING', {
+                recurring,
+                period,
+                scope,
+                occurrenceDate,
+              }),
           });
           return EMPTY;
         }),

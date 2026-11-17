@@ -7,11 +7,33 @@ import {
 import { fromSupabaseError } from '../../adapter/supabase';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
+import { deleteTaskSeries } from '../../shared/time-scope';
 
 export const deleteTimeTask = privateProcedure({
   schema: withZodSchema({ schema: deleteTimeTaskSchema }),
 })({
   handler: async (input, { db, user }) => {
+    if (input.scope !== 'this') {
+      // The series is read from the stored row, never from the request.
+      const { data: previous, error: previousError } = await db
+        .from('time_tasks')
+        .select('recurring_id, occurrence_date')
+        .eq('id', input.id)
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (previousError) throw fromSupabaseError(previousError);
+      if (previous?.recurring_id && previous.occurrence_date) {
+        await deleteTaskSeries(
+          db,
+          user.id,
+          previous.recurring_id,
+          previous.occurrence_date,
+          input.scope,
+        );
+        return { code: 200 as const, ok: true as const };
+      }
+    }
+
     // The rows go with the task; the files do not, so they leave first.
     const attachments = await db
       .from('time_task_attachments')

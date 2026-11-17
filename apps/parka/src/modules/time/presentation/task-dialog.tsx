@@ -9,6 +9,7 @@ import { isDay } from '@/shared/period/period';
 import type { TaskRecurringInterval } from '@/shared/recurring/occurrences';
 import { Button, Field, Input, Select, Toggle } from '@/shared/ui/controls';
 import { ClearableInput } from '@/shared/ui/clearable';
+import { RecurringScopeDialog } from '@/shared/ui/recurring-scope-dialog';
 import { closeModal, openModal } from '@/shared/router/modal-stack';
 import {
   DEFAULT_PRIORITY_ID,
@@ -29,7 +30,7 @@ import {
 import { CategoryPicker } from './category-picker';
 import { useContext } from './context';
 import { DescriptionField } from './description-field';
-import { deleteTaskModal, stopSeriesModal } from './modal-ids';
+import { deleteTaskModal } from './modal-ids';
 import { ModalShell } from './modal-shell';
 import { PriorityPicker } from './priority-picker';
 import { RecurringMark } from './recurring-mark';
@@ -107,6 +108,8 @@ export const TaskDialog = ({
   const [interval, setInterval] = useState<TaskRecurringInterval>('weekly');
   const [endDate, setEndDate] = useState('');
   const [touched, setTouched] = useState(false);
+  // A recurring task waits here while the user picks how far the edit reaches.
+  const [pending, setPending] = useState<Task | null>(null);
 
   // The model code is async; have it by the time the user submits.
   useEffect(() => {
@@ -168,199 +171,216 @@ export const TaskDialog = ({
       device: task?.device ?? currentDevice(),
       recurringId: task?.recurringId ?? null,
     };
+    if (editing && next.recurringId !== null) {
+      // The edit waits while the user picks how far it reaches.
+      setPending(withStep(next, step));
+      return;
+    }
     if (editing) updateTask(withStep(next, step));
     else createTask(next);
     closeModal(modal);
   };
 
   return (
-    <ModalShell
-      modal={modal}
-      data-e2e="time:task-dialog"
-      title={editing ? 'Edytuj zadanie' : 'Nowe zadanie'}
-      description={
-        editing ? 'Zmień szczegóły zadania.' : 'Wpisz nazwę, dzień i godzinę.'
-      }
-    >
-      <form onSubmit={submit} noValidate className="flex flex-col gap-4">
-        <Field label="Nazwa" required>
-          <ClearableInput
-            type="text"
-            data-e2e="time:task-name"
-            value={title}
-            maxLength={TASK_TITLE_MAX_LENGTH}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="np. Kurs angielskiego"
-            autoComplete="off"
-            aria-invalid={touched && titleError !== null}
-            aria-describedby={
-              touched && titleError ? 'task-title-error' : undefined
-            }
-          />
-          {touched && titleError ? (
-            <span
-              id="task-title-error"
-              role="alert"
-              className="mt-1 block text-xs text-danger"
-            >
-              {titleError}
+    <>
+      <ModalShell
+        modal={modal}
+        data-e2e="time:task-dialog"
+        title={editing ? 'Edytuj zadanie' : 'Nowe zadanie'}
+        description={
+          editing ? 'Zmień szczegóły zadania.' : 'Wpisz nazwę, dzień i godzinę.'
+        }
+      >
+        <form onSubmit={submit} noValidate className="flex flex-col gap-4">
+          <Field label="Nazwa" required>
+            <ClearableInput
+              type="text"
+              data-e2e="time:task-name"
+              value={title}
+              maxLength={TASK_TITLE_MAX_LENGTH}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="np. Kurs angielskiego"
+              autoComplete="off"
+              aria-invalid={touched && titleError !== null}
+              aria-describedby={
+                touched && titleError ? 'task-title-error' : undefined
+              }
+            />
+            {touched && titleError ? (
+              <span
+                id="task-title-error"
+                role="alert"
+                className="mt-1 block text-xs text-danger"
+              >
+                {titleError}
+              </span>
+            ) : null}
+          </Field>
+          <DescriptionField value={description} onChange={setDescription} />
+          <CategoryPicker value={categoryId} onChange={setCategoryId} />
+          <PriorityPicker value={priorityId} onChange={setPriorityId} />
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Dzień" required>
+              <Input
+                type="date"
+                value={day}
+                aria-invalid={touched && dayError !== null}
+                onChange={(e) => setDay(e.target.value)}
+              />
+            </Field>
+            <Field label="Godzina" required={!allDay}>
+              <Input
+                type="time"
+                value={at}
+                disabled={allDay}
+                aria-invalid={touched && atError !== null}
+                onChange={(e) => setAt(e.target.value)}
+                className="disabled:opacity-50"
+              />
+            </Field>
+          </div>
+          {isDay(day) ? (
+            <p className="-mt-3 text-xs text-ink-soft">
+              {dayLabel(day, 'long')}
+            </p>
+          ) : null}
+          {touched && pickError ? (
+            <span role="alert" className="-mt-3 block text-xs text-danger">
+              {pickError}
             </span>
           ) : null}
-        </Field>
-        <DescriptionField value={description} onChange={setDescription} />
-        <CategoryPicker value={categoryId} onChange={setCategoryId} />
-        <PriorityPicker value={priorityId} onChange={setPriorityId} />
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Dzień" required>
-            <Input
-              type="date"
-              value={day}
-              aria-invalid={touched && dayError !== null}
-              onChange={(e) => setDay(e.target.value)}
-            />
-          </Field>
-          <Field label="Godzina" required={!allDay}>
-            <Input
-              type="time"
-              value={at}
-              disabled={allDay}
-              aria-invalid={touched && atError !== null}
-              onChange={(e) => setAt(e.target.value)}
-              className="disabled:opacity-50"
-            />
-          </Field>
-        </div>
-        {isDay(day) ? (
-          <p className="-mt-3 text-xs text-ink-soft">{dayLabel(day, 'long')}</p>
-        ) : null}
-        {touched && pickError ? (
-          <span role="alert" className="-mt-3 block text-xs text-danger">
-            {pickError}
-          </span>
-        ) : null}
-        {touched && (dayError ?? atError) ? (
-          <span role="alert" className="-mt-3 block text-xs text-danger">
-            {dayError ?? atError}
-          </span>
-        ) : null}
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-sm font-medium">Cały dzień</span>
-          <Toggle label="Cały dzień" checked={allDay} onChange={setAllDay} />
-        </div>
-        {!editing ? (
-          <>
-            <div className="flex items-center justify-between gap-3">
-              <span className="flex items-center gap-1.5 text-sm font-medium">
-                <Repeat className="h-4 w-4" aria-hidden="true" />
-                Powtarzaj
-              </span>
-              <Toggle
-                label="Powtarzaj"
-                data-e2e="time:recurring-toggle"
-                checked={repeat}
-                onChange={setRepeat}
-              />
-            </div>
-            {repeat ? (
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Częstotliwość">
-                  <Select
-                    value={interval}
-                    data-e2e="time:recurring-interval"
-                    options={INTERVALS}
-                    onValueChange={(value) =>
-                      setInterval(value as TaskRecurringInterval)
-                    }
-                  />
-                </Field>
-                <Field label="Koniec (opcjonalnie)">
-                  <Input
-                    type="date"
-                    value={endDate}
-                    min={day}
-                    data-e2e="time:recurring-end"
-                    aria-invalid={touched && endError !== null}
-                    onChange={(e) => setEndDate(e.target.value)}
-                  />
-                </Field>
-              </div>
-            ) : null}
-            {touched && endError ? (
-              <span role="alert" className="-mt-3 block text-xs text-danger">
-                {endError}
-              </span>
-            ) : null}
-            {repeat && endDate !== '' && endError === null ? (
-              <span
-                role="status"
-                data-e2e="time:recurring-end-notice"
-                className="-mt-3 flex items-start gap-1.5 text-xs text-muted"
-              >
-                <Info
-                  className="mt-0.5 h-3.5 w-3.5 shrink-0"
-                  aria-hidden="true"
-                />
-                {`Zadanie dodamy ${intervalPhrase(interval)} od ${day} do ${endDate} włącznie.`}
-              </span>
-            ) : null}
-          </>
-        ) : null}
-        {editing && task.recurringId !== null ? (
-          <div className="flex items-center justify-between gap-3">
-            <RecurringMark labelled />
-            <Button
-              variant="ghost"
-              data-e2e="time:recurring-stop"
-              onClick={() => openModal(stopSeriesModal(task.id))}
-              className="w-auto"
-            >
-              Zakończ cykl
-            </Button>
-          </div>
-        ) : null}
-        {editing && task.device ? (
-          <TaskDeviceDetail device={task.device} />
-        ) : null}
-        {editing ? (
-          <Field label="Status">
-            <Select
-              data-e2e="time:task-status"
-              value={step}
-              options={steps.map((value) => ({
-                value,
-                label: stepName(value, statuses),
-              }))}
-              onValueChange={(value) => setStep(value as Step)}
-            />
-          </Field>
-        ) : null}
-        <ModalFooter className="flex items-center gap-2">
-          {editing ? (
-            <Button
-              variant="danger"
-              data-e2e="time:task-delete"
-              onClick={() => openModal(deleteTaskModal(task.id))}
-              className="w-auto"
-            >
-              <Trash2 className="h-4 w-4" aria-hidden="true" />
-              Usuń
-            </Button>
+          {touched && (dayError ?? atError) ? (
+            <span role="alert" className="-mt-3 block text-xs text-danger">
+              {dayError ?? atError}
+            </span>
           ) : null}
-          <div className="ml-auto flex gap-2">
-            <Button
-              variant="ghost"
-              data-e2e="time:task-cancel"
-              onClick={() => closeModal(modal)}
-              className="w-auto"
-            >
-              Anuluj
-            </Button>
-            <Button type="submit" data-e2e="time:task-save" className="w-auto">
-              {editing ? 'Zapisz' : 'Dodaj'}
-            </Button>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm font-medium">Cały dzień</span>
+            <Toggle label="Cały dzień" checked={allDay} onChange={setAllDay} />
           </div>
-        </ModalFooter>
-      </form>
-    </ModalShell>
+          {!editing ? (
+            <>
+              <div className="flex items-center justify-between gap-3">
+                <span className="flex items-center gap-1.5 text-sm font-medium">
+                  <Repeat className="h-4 w-4" aria-hidden="true" />
+                  Powtarzaj
+                </span>
+                <Toggle
+                  label="Powtarzaj"
+                  data-e2e="time:recurring-toggle"
+                  checked={repeat}
+                  onChange={setRepeat}
+                />
+              </div>
+              {repeat ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Częstotliwość">
+                    <Select
+                      value={interval}
+                      data-e2e="time:recurring-interval"
+                      options={INTERVALS}
+                      onValueChange={(value) =>
+                        setInterval(value as TaskRecurringInterval)
+                      }
+                    />
+                  </Field>
+                  <Field label="Koniec (opcjonalnie)">
+                    <Input
+                      type="date"
+                      value={endDate}
+                      min={day}
+                      data-e2e="time:recurring-end"
+                      aria-invalid={touched && endError !== null}
+                      onChange={(e) => setEndDate(e.target.value)}
+                    />
+                  </Field>
+                </div>
+              ) : null}
+              {touched && endError ? (
+                <span role="alert" className="-mt-3 block text-xs text-danger">
+                  {endError}
+                </span>
+              ) : null}
+              {repeat && endDate !== '' && endError === null ? (
+                <span
+                  role="status"
+                  data-e2e="time:recurring-end-notice"
+                  className="-mt-3 flex items-start gap-1.5 text-xs text-muted"
+                >
+                  <Info
+                    className="mt-0.5 h-3.5 w-3.5 shrink-0"
+                    aria-hidden="true"
+                  />
+                  {`Zadanie dodamy ${intervalPhrase(interval)} od ${day} do ${endDate} włącznie.`}
+                </span>
+              ) : null}
+            </>
+          ) : null}
+          {editing && task.recurringId !== null ? (
+            <RecurringMark labelled />
+          ) : null}
+          {editing && task.device ? (
+            <TaskDeviceDetail device={task.device} />
+          ) : null}
+          {editing ? (
+            <Field label="Status">
+              <Select
+                data-e2e="time:task-status"
+                value={step}
+                options={steps.map((value) => ({
+                  value,
+                  label: stepName(value, statuses),
+                }))}
+                onValueChange={(value) => setStep(value as Step)}
+              />
+            </Field>
+          ) : null}
+          <ModalFooter className="flex items-center gap-2">
+            {editing ? (
+              <Button
+                variant="danger"
+                data-e2e="time:task-delete"
+                onClick={() => openModal(deleteTaskModal(task.id))}
+                className="w-auto"
+              >
+                <Trash2 className="h-4 w-4" aria-hidden="true" />
+                Usuń
+              </Button>
+            ) : null}
+            <div className="ml-auto flex gap-2">
+              <Button
+                variant="ghost"
+                data-e2e="time:task-cancel"
+                onClick={() => closeModal(modal)}
+                className="w-auto"
+              >
+                Anuluj
+              </Button>
+              <Button
+                type="submit"
+                data-e2e="time:task-save"
+                className="w-auto"
+              >
+                {editing ? 'Zapisz' : 'Dodaj'}
+              </Button>
+            </div>
+          </ModalFooter>
+        </form>
+      </ModalShell>
+      {pending ? (
+        <RecurringScopeDialog
+          action="edit"
+          title="Zapisać zmiany w zadaniu?"
+          subject={`Zadanie „${pending.title}” jest cykliczne. Wybierz, które zadania tej serii objąć zmianą. Samo tworzenie kolejnych zadań się nie zmienia.`}
+          confirmLabel="Zapisz zmiany"
+          onClose={() => setPending(null)}
+          onConfirm={(scope) => {
+            updateTask(pending, undefined, scope);
+            setPending(null);
+            closeModal(modal);
+          }}
+        />
+      ) : null}
+    </>
   );
 };

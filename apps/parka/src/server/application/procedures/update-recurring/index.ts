@@ -4,17 +4,72 @@ import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
 import { replaceRuleItems, ruleTotals, toRule } from '../../shared/recurring';
 import { fromSupabaseError } from '../../adapter/supabase';
+import {
+  editExpenses,
+  editSeriesRule,
+  seriesExpenseIds,
+} from '../../shared/recurring-scope';
 
 /**
- * Edits the rule only: expenses it already created stay as they are, so a
- * change reaches this and the following occurrences. `last_materialized_date`
- * belongs to the server and is never taken from the request.
+ * Without `occurrenceDate` edits the rule only: expenses it already created
+ * stay as they are, so a change reaches the following occurrences. With it,
+ * `scope` says which occurrences of the series (charged or not) take the
+ * change, counted from that one. `last_materialized_date` belongs to the
+ * server and is never taken from the request.
  */
 export const updateRecurring = privateProcedure({
   schema: withZodSchema({ schema: updateRecurringSchema }),
 })({
   handler: async (input, { db, user }) => {
     const { cost, categoryId } = ruleTotals(input);
+    const { occurrenceDate } = input;
+    if (occurrenceDate !== undefined) {
+      const { data: found, error: foundError } = await db
+        .from('recurring_expenses')
+        .select('id')
+        .eq('id', input.id)
+        .maybeSingle();
+      if (foundError) throw fromSupabaseError(foundError);
+      if (!found) throw new NotFound(undefined, 'Recurring expense not found');
+
+      const ids = await seriesExpenseIds(
+        db,
+        input.id,
+        input.scope,
+        occurrenceDate,
+      );
+      await editExpenses(db, user.id, ids, {
+        merchant: input.name,
+        amount: cost,
+        categoryId,
+        paymentMethod: input.paymentMethod,
+        isBill: true,
+        items: input.items,
+      });
+      await editSeriesRule(
+        db,
+        user.id,
+        input.id,
+        occurrenceDate,
+        input.scope,
+        {
+          name: input.name,
+          cost,
+          categoryId,
+          paymentMethod: input.paymentMethod,
+          items: input.items,
+        },
+        {
+          interval: input.interval,
+          startDate: input.startDate,
+          endDate: input.endDate,
+        },
+      );
+      return {
+        code: 200 as const,
+        data: { ...input, cost, categoryId },
+      };
+    }
     const { data, error } = await db
       .from('recurring_expenses')
       .update({

@@ -669,7 +669,8 @@ const commands = {
       .filter({ hasText: 'Siłownia' })
       .click();
     await getByE2e('dashboard:recurring-delete').click();
-    await getByE2e('dashboard:delete-confirm').click();
+    await getByE2e('ui:scope:all').check();
+    await getByE2e('ui:scope-confirm').click();
     await expect(getByE2e('dashboard:main')).not.toContainText('Siłownia');
   },
   'a recurring expense counts in this month': async ({ page, getByE2e }) => {

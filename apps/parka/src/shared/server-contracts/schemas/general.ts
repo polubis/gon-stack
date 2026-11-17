@@ -3,6 +3,7 @@ import { CATEGORY_ICON_IDS } from '../../ui/category-icon-ids';
 import { isDay } from '../../period/period';
 import { AVATAR_SIZES } from '../../avatar/domain/rules';
 import { DEVICE_AVATAR_IDS } from '../../device/domain/avatars';
+import { RECURRING_SCOPES } from '../../recurring/occurrences';
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -181,6 +182,9 @@ export const limit = () =>
     /** Percent of the limit from which it notifies. */
     alertAt: z.number().int().min(1).max(100),
   });
+
+/** What a change of one occurrence of a series reaches. */
+export const recurringScope = () => z.enum(RECURRING_SCOPES);
 
 export const recurringInterval = () => z.enum(['weekly', 'monthly', 'yearly']);
 

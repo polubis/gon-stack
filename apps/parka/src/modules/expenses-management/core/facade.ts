@@ -1,4 +1,5 @@
 import { useSortedCategories } from '@/shared/expense-category/sorted';
+import type { RecurringScope } from '@/shared/recurring/occurrences';
 import type { Registry } from './registry';
 import type { Store } from './store';
 import type { NewExpense, NewRecurring, StoredExpense } from '../domain/models';
@@ -10,8 +11,8 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
     createExpense: (expense: NewExpense) =>
       trigger('[TRIGGER]_CREATE_EXPENSE', { expense }),
     loadExpense: (id: string) => trigger('[TRIGGER]_LOAD_EXPENSE', { id }),
-    updateExpense: (expense: StoredExpense) =>
-      trigger('[TRIGGER]_UPDATE_EXPENSE', { expense }),
+    updateExpense: (expense: StoredExpense, scope: RecurringScope = 'this') =>
+      trigger('[TRIGGER]_UPDATE_EXPENSE', { expense, scope }),
     createRecurring: (recurring: NewRecurring) =>
       trigger('[TRIGGER]_CREATE_RECURRING', { recurring }),
     scanReceipt: (file: File) => trigger('[TRIGGER]_SCAN_RECEIPT', { file }),
