@@ -45,8 +45,8 @@ minimumReleaseAgeExclude:
   - '@turbo/windows-arm64@2.11.6'
   - eslint-plugin-turbo@2.11.6
   - globals@17.13.0
-  - next@16.4.1
-  - '@next/eslint-plugin-next@16.4.1'
+  - next@16.4.6
+  - '@next/eslint-plugin-next@16.4.6'
   - supabase@2.119.0
   - turbo@2.11.6
   - astro@7.4.7
@@ -66,6 +66,13 @@ overrides:
   postcss-selector-parser@<6.1.5: 6.1.5
   minimatch@>=10.0.0 <11.0.1: 11.0.1
 
+# Security exception (VYB-945): picomatch ReDoS GHSA-fc5q-39xc-vjpf has no patched
+# release (<=4.0.7 is latest). Dev-tooling only (lint-staged, astro). Recheck by 2026-12-17,
+# remove the entry once picomatch ships a fix.
+auditConfig:
+  ignoreGhsas:
+    - GHSA-fc5q-39xc-vjpf
+
 # Single version source for shared deps (use "catalog:" in package.json)
 catalog:
   '@astrojs/check': 0.9.10
@@ -79,7 +86,7 @@ catalog:
   '@mdxeditor/editor': 4.3.2
   '@mdxeditor/gurx': 1.2.4
   '@nanostores/react': 1.1.0
-  '@next/eslint-plugin-next': 16.4.1
+  '@next/eslint-plugin-next': 16.4.6
   '@playwright/test': 1.64.0
   '@radix-ui/react-accordion': 1.2.21
   '@radix-ui/react-dialog': 1.2.0
@@ -122,7 +129,7 @@ catalog:
   mediabunny: 1.65.2
   msw: 2.15.0
   nanostores: 1.5.5
-  next: 16.4.1
+  next: 16.4.6
   npm-check-updates: 23.1.0
   openai: 7.31.0
   postcss: 8.5.29
