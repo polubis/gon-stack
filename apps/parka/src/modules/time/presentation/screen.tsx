@@ -26,7 +26,7 @@ import { AddMenu } from './add-menu';
 import { BacklogButton } from './backlog-button';
 import { FiltersButton } from './filters-button';
 import { Provider, useContext } from './context';
-import { SummarySkeleton, ViewSkeleton, tasksSpan } from './skeleton';
+import { ScreenSkeleton, tasksSpan } from './skeleton';
 import { Insights, Summary, usePeriodTotal } from './stats';
 import { TaskModals } from './task-modals';
 
@@ -156,10 +156,7 @@ const Screen = ({ kind, children }: Props) => {
               backHref={APP_ROUTER.dashboard()}
             />
           ) : initializing || (isLoading && !loaded) ? (
-            <>
-              <SummarySkeleton />
-              <ViewSkeleton kind={kind} />
-            </>
+            <ScreenSkeleton kind={kind} anchor={anchor} />
           ) : (
             <>
               <Summary kind={kind} />
