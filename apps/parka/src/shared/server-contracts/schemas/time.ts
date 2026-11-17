@@ -378,3 +378,31 @@ export const listTaskHistorySchema = () =>
       writeErrors,
     ]),
   });
+
+/**
+ * When tasks were moved from one day to another (rows of the history, the
+ * newest first). `from` and `to` bound the days the caller wants; the instants
+ * come back with a day of slack on both ends, the caller sorts them into its
+ * own time zone.
+ */
+export const listTimeMovesSchema = () =>
+  z.object({
+    in: z
+      .object({
+        from: z.string().refine(isDay, 'Invalid day'),
+        to: z.string().refine(isDay, 'Invalid day'),
+      })
+      .refine(
+        ({ from, to }) => from <= to && daysBetween(from, to) <= 366 * 5,
+        'Invalid range',
+      ),
+    out: z.union([
+      z.object({
+        code: z.literal(200),
+        data: z.object({
+          items: z.array(z.object({ taskId: z.string(), at: z.string() })),
+        }),
+      }),
+      errorOut(),
+    ]),
+  });
