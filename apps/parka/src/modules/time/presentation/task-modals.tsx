@@ -29,9 +29,9 @@ import {
   NEW_PRIORITY_MODAL,
   NEW_RECURRING_TASK_MODAL,
   NEW_TASK_MODAL,
-  stoppedIdOf,
   viewedIdOf,
 } from './modal-ids';
+import { RecurringScopeDialog } from '@/shared/ui/recurring-scope-dialog';
 import { PriorityDialog } from './priority-dialog';
 import { StatusesDialog } from './statuses-dialog';
 import { TaskDialog } from './task-dialog';
@@ -45,7 +45,6 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
     categories,
     deleteTask,
     deleteCategory,
-    stopRecurring,
     initializing,
     isLoading,
   } = useContext();
@@ -59,8 +58,7 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
         editedIdOf(modal) ??
         editedBacklogIdOf(modal) ??
         viewedIdOf(modal) ??
-        deletedIdOf(modal) ??
-        stoppedIdOf(modal);
+        deletedIdOf(modal);
       if (
         id !== null &&
         !tasks.some((task) => task.id === id) &&
@@ -167,6 +165,22 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
     const deleted = [...tasks, ...backlog].find(
       (task) => task.id === deletedIdOf(modal),
     );
+    if (deleted && 'recurringId' in deleted && deleted.recurringId !== null)
+      return (
+        <RecurringScopeDialog
+          key={modal}
+          modal={modal}
+          action="delete"
+          title="Usunąć zadanie?"
+          subject={`Zadanie „${deleted.title}” jest cykliczne. Wybierz, które zadania tej serii usunąć. Samo tworzenie kolejnych zadań się nie zmienia.`}
+          confirmLabel="Usuń"
+          onClose={() => closeModal(modal)}
+          onConfirm={(scope) => {
+            deleteTask(deleted.id, scope);
+            closeModalThen(modal, () => closeModal(editTaskModal(deleted.id)));
+          }}
+        />
+      );
     if (deleted)
       return (
         <DeleteDialog
@@ -180,22 +194,6 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
         />
       );
 
-    const stopped = tasks.find((task) => task.id === stoppedIdOf(modal));
-    if (stopped?.recurringId)
-      return (
-        <DeleteDialog
-          key={modal}
-          modal={modal}
-          task={stopped}
-          title="Zakończyć cykl?"
-          description={`Zadanie „${stopped.title}” przestanie się powtarzać. Dotychczasowe zadania zostaną.`}
-          confirmLabel="Zakończ cykl"
-          onConfirm={() => {
-            if (stopped.recurringId) stopRecurring(stopped.recurringId);
-            closeModalThen(modal, () => closeModal(editTaskModal(stopped.id)));
-          }}
-        />
-      );
     return null;
   };
 

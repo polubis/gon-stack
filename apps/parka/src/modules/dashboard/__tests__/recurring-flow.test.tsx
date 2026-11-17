@@ -75,6 +75,8 @@ describe('recurring expenses', () => {
           cost: 45,
         },
         TEST_PERIOD,
+        'thisAndFollowing',
+        '2025-06-01',
       ),
     );
 
@@ -95,6 +97,8 @@ describe('recurring expenses', () => {
           cost: 45,
         },
         TEST_PERIOD,
+        'thisAndFollowing',
+        '2025-06-01',
       ),
     );
 
@@ -107,7 +111,12 @@ describe('recurring expenses', () => {
     const view = await setup();
 
     act(() =>
-      view.result.current.ctx.removeRecurring(NETFLIX.id as never, TEST_PERIOD),
+      view.result.current.ctx.removeRecurring(
+        NETFLIX.id as never,
+        TEST_PERIOD,
+        'all',
+        '2025-06-01',
+      ),
     );
 
     expect(view.result.current.recurring).toHaveLength(0);
@@ -121,7 +130,12 @@ describe('recurring expenses', () => {
     const view = await setup();
 
     act(() =>
-      view.result.current.ctx.removeRecurring(NETFLIX.id as never, TEST_PERIOD),
+      view.result.current.ctx.removeRecurring(
+        NETFLIX.id as never,
+        TEST_PERIOD,
+        'all',
+        '2025-06-01',
+      ),
     );
 
     await waitFor(() => expect(view.result.current.notice?.tone).toBe('error'));

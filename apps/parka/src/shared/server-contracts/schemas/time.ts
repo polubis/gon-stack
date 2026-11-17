@@ -6,6 +6,7 @@ import {
   conflictOut,
   errorOut,
   notFoundOut,
+  recurringScope,
   timeBacklogTask,
   timeCategory,
   timeCategoryInput,
@@ -94,7 +95,8 @@ export const sendTimeTaskToBacklogSchema = () =>
 
 export const updateTimeTaskSchema = () =>
   z.object({
-    in: timeTask(),
+    /** `scope` only matters for a task made by a recurring rule. */
+    in: timeTask().extend({ scope: recurringScope().default('this') }),
     out: z.union([
       z.object({ code: z.literal(200), data: timeTask() }),
       writeErrors,
@@ -103,7 +105,10 @@ export const updateTimeTaskSchema = () =>
 
 export const deleteTimeTaskSchema = () =>
   z.object({
-    in: z.object({ id: z.string().min(1) }),
+    in: z.object({
+      id: z.string().min(1),
+      scope: recurringScope().default('this'),
+    }),
     out: z.union([
       z.object({ code: z.literal(200), ok: z.literal(true) }),
       writeErrors,

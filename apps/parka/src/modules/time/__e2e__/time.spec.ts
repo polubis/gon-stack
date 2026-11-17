@@ -469,9 +469,10 @@ const commands = {
 
       await occurrence.click();
       await getByE2e('time:task-delete').click();
+      await getByE2e('ui:scope:this').check();
       await Promise.all([
         synced(page, 'DELETE', 200),
-        getByE2e('time:delete-confirm').click(),
+        getByE2e('ui:scope-confirm').click(),
       ]);
       await open(page, APP_ROUTER.time({ date: LATER }));
       await open(page, APP_ROUTER.time({ date: NEXT_WEEK }));
@@ -480,26 +481,24 @@ const commands = {
       await expect(occurrence).toBeVisible();
     },
 
-  'i end the series and its tasks stay as ordinary ones': async ({
-    page,
-    getByE2e,
-    getByE2ePrefix,
-  }) => {
-    await taskEdit(getByE2ePrefix, 'Siłownia E2E').click();
-    await getByE2e('time:recurring-stop').click();
-    await Promise.all([
-      synced(page, 'DELETE', 200),
-      getByE2e('time:delete-confirm').click(),
-    ]);
-    await expect(getByE2e('time:recurring-mark')).toHaveCount(0);
-    await open(page, APP_ROUTER.time({ date: DAY }));
-    await expect(taskEdit(getByE2ePrefix, 'Siłownia E2E')).toBeVisible();
-    await expect(getByE2e('time:recurring-mark')).toHaveCount(0);
-    // Rules are materialized to the end of the loaded year: those stay too.
-    await open(page, APP_ROUTER.time({ date: AFTER_LATER }));
-    await expect(taskEdit(getByE2ePrefix, 'Siłownia E2E')).toBeVisible();
-    await expect(getByE2e('time:recurring-mark')).toHaveCount(0);
-  },
+  'i delete only the following tasks and the opened and earlier ones stay':
+    async ({ page, getByE2e, getByE2ePrefix }) => {
+      await taskEdit(getByE2ePrefix, 'Siłownia E2E').click();
+      await getByE2e('time:task-delete').click();
+      await getByE2e('ui:scope:following').check();
+      await Promise.all([
+        synced(page, 'DELETE', 200),
+        getByE2e('ui:scope-confirm').click(),
+      ]);
+      await open(page, APP_ROUTER.time({ date: LATER }));
+      await expect(taskEdit(getByE2ePrefix, 'Siłownia E2E')).toBeVisible();
+      await expect(getByE2e('time:recurring-mark')).toHaveCount(1);
+      await open(page, APP_ROUTER.time({ date: DAY }));
+      await expect(taskEdit(getByE2ePrefix, 'Siłownia E2E')).toBeVisible();
+      // The series ended there: nothing is made for the later weeks.
+      await open(page, APP_ROUTER.time({ date: AFTER_LATER }));
+      await expect(getByE2e('time:empty')).toBeVisible();
+    },
 
   'a series with an end day repeats weekly up to it and says so': async ({
     page,
@@ -1319,7 +1318,7 @@ test('recurring time tasks follow their series on the real backend', async ({
     ['i register an account for recurring tasks'],
     ['i add a weekly recurring task and its first occurrence appears once'],
     ['the series reaches the following weeks and never revives a deleted task'],
-    ['i end the series and its tasks stay as ordinary ones'],
+    ['i delete only the following tasks and the opened and earlier ones stay'],
   );
 });
 

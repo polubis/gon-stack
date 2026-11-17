@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
@@ -107,7 +107,7 @@ describe('editing an expense on its own page', () => {
     expect(screen.queryByRole('note')).not.toBeInTheDocument();
   });
 
-  it('says a charged recurring expense is edited alone', async () => {
+  it('says a charged recurring expense belongs to a series', async () => {
     mockBackend([
       { ...STORED, recurringId: 'r-1', occurrenceDate: '2025-04-10' },
     ]);
@@ -115,7 +115,7 @@ describe('editing an expense on its own page', () => {
     await screen.findByLabelText('Sklep');
 
     expect(screen.getByRole('note')).toHaveTextContent(
-      'Edytujesz tylko jego – reguła i pozostałe wydatki zostają bez zmian.',
+      'Ten wydatek należy do serii cyklicznej.',
     );
   });
 
@@ -127,11 +127,20 @@ describe('editing an expense on its own page', () => {
     await screen.findByLabelText('Sklep');
 
     await user.click(screen.getByRole('button', { name: 'Zapisz zmiany' }));
+    expect(written).toHaveLength(0);
+    const choice = within(
+      await screen.findByRole('dialog', { name: /Zapisać zmiany/ }),
+    );
+    await user.click(
+      choice.getByRole('radio', { name: /Edytuj ten i następne/ }),
+    );
+    await user.click(choice.getByRole('button', { name: 'Zapisz zmiany' }));
 
     await waitFor(() => expect(written).toHaveLength(1));
     expect(written[0]).toMatchObject({
       recurringId: 'r-1',
       occurrenceDate: '2025-04-10',
+      scope: 'thisAndFollowing',
     });
   });
 

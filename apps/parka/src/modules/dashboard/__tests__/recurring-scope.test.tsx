@@ -100,7 +100,40 @@ describe('upcoming payment', () => {
     await user.click(await screen.findByRole('button', { name: /Netflix/ }));
     const dialog = within(await screen.findByRole('dialog'));
 
-    expect(dialog.getByText(/Edytujesz ten i kolejne wydatki/)).toBeVisible();
+    expect(dialog.getByText(/wybierzesz, czy zmiana dotyczy/)).toBeVisible();
+  });
+
+  it('asks how far a save reaches and sends the choice with the payment day', async () => {
+    const user = userEvent.setup();
+    let saved: Record<string, unknown> | null = null;
+    server.use(
+      http.put('/api/recurring/:id/', async ({ request }) => {
+        saved = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json({ code: 200, data: saved });
+      }),
+    );
+    render(<Main />);
+    await user.click(await screen.findByRole('button', { name: /Netflix/ }));
+    await user.click(
+      within(await screen.findByRole('dialog')).getByRole('button', {
+        name: 'Zapisz zmiany',
+      }),
+    );
+
+    const choice = within(
+      await screen.findByRole('dialog', { name: /Zapisać zmiany/ }),
+    );
+    expect(choice.getAllByRole('radio')).toHaveLength(4);
+    await user.click(
+      choice.getByRole('radio', { name: /Edytuj tylko następne/ }),
+    );
+    await user.click(choice.getByRole('button', { name: 'Zapisz zmiany' }));
+
+    await waitFor(() => expect(saved).not.toBeNull());
+    expect(saved).toMatchObject({
+      scope: 'following',
+      occurrenceDate: rule().startDate,
+    });
   });
 
   const openRuleDeletion = async (user: ReturnType<typeof userEvent.setup>) => {
@@ -122,18 +155,31 @@ describe('upcoming payment', () => {
     const confirm = await openRuleDeletion(user);
 
     expect(deletes()).toHaveLength(0);
-    expect(confirm.getByText(/Usuniesz regułę/)).toBeVisible();
-    expect(confirm.getByText(/zostają w historii/)).toBeVisible();
+    expect(
+      confirm.getAllByRole('radio').map((r) => r.closest('label')?.textContent),
+    ).toEqual([
+      expect.stringContaining('Usuń wszystkie'),
+      expect.stringContaining('Usuń tylko ten'),
+      expect.stringContaining('Usuń ten i następne'),
+      expect.stringContaining('Usuń tylko następne'),
+    ]);
   });
 
   it('deletes the rule once confirmed', async () => {
     const user = userEvent.setup();
     const confirm = await openRuleDeletion(user);
 
-    await user.click(confirm.getByRole('button', { name: 'Usuń regułę' }));
+    await user.click(
+      confirm.getByRole('radio', { name: /Usuń ten i następne/ }),
+    );
+    await user.click(confirm.getByRole('button', { name: 'Usuń' }));
 
     await waitFor(() => expect(deletes()).toHaveLength(1));
     expect(deletes()[0]!.url).toBe('/api/recurring/r-1/');
+    expect(deletes()[0]!.body).toEqual({
+      scope: 'thisAndFollowing',
+      occurrenceDate: rule().startDate,
+    });
     // Closing steps Back asynchronously: let it land before the next test.
     await waitFor(() => expect(window.location.search).toBe(''));
   });
@@ -191,6 +237,11 @@ describe('upcoming payment with products', () => {
       expect(screen.queryByLabelText('Nazwa produktu')).not.toBeInTheDocument(),
     );
     await user.click(dialog.getByRole('button', { name: 'Zapisz zmiany' }));
+    await user.click(
+      within(
+        await screen.findByRole('dialog', { name: /Zapisać zmiany/ }),
+      ).getByRole('button', { name: 'Zapisz zmiany' }),
+    );
 
     await waitFor(() => expect(saved).not.toBeNull());
     expect(saved).toMatchObject({ cost: 30, categoryId: 'c-1' });
@@ -226,9 +277,7 @@ describe('charged recurring expense', () => {
     render(<Main />);
     const dialog = within(await screen.findByRole('dialog'));
 
-    expect(
-      dialog.getByText(/Edycja i usunięcie dotyczą tylko jego/),
-    ).toBeVisible();
+    expect(dialog.getByText(/należy do serii cyklicznej/)).toBeVisible();
     expect(dialog.getByRole('link', { name: 'Edytuj' })).toBeVisible();
   });
 
@@ -252,20 +301,22 @@ describe('charged recurring expense', () => {
     const confirm = await openChargedDeletion(user);
 
     expect(deletes()).toHaveLength(0);
-    expect(confirm.getByText(/Usuniesz tylko ten wydatek/)).toBeVisible();
+    expect(confirm.getAllByRole('radio')).toHaveLength(4);
     expect(
-      confirm.getByText(/Reguła cykliczna i pozostałe wydatki zostają/),
-    ).toBeVisible();
+      confirm.getByRole('radio', { name: /Usuń tylko ten/ }),
+    ).toBeChecked();
   });
 
-  it('deletes only the charged expense once confirmed', async () => {
+  it('deletes the expense with the chosen scope once confirmed', async () => {
     const user = userEvent.setup();
     const confirm = await openChargedDeletion(user);
 
-    await user.click(confirm.getByRole('button', { name: 'Usuń wydatek' }));
+    await user.click(confirm.getByRole('radio', { name: /Usuń wszystkie/ }));
+    await user.click(confirm.getByRole('button', { name: 'Usuń' }));
 
     await waitFor(() => expect(deletes()).toHaveLength(1));
     expect(deletes()[0]!.url).toBe('/api/expenses/r-1:charged/');
+    expect(deletes()[0]!.body).toEqual({ scope: 'all' });
     expect(deletes().some((c) => c.url.includes('/api/recurring/'))).toBe(
       false,
     );

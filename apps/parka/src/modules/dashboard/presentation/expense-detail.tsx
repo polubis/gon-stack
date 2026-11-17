@@ -11,6 +11,7 @@ import {
 } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
 import { ScopeNote } from '@/shared/ui/scope-note';
+import { RecurringScopeDialog } from '@/shared/ui/recurring-scope-dialog';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { itemTotal, dateTimeLabel, money } from '../domain/format';
 import type { Period } from '@/shared/period/period';
@@ -61,8 +62,9 @@ export const ExpenseDetail = ({
     >
       {fromRule ? (
         <ScopeNote className="mb-3" data-e2e="dashboard:scope-note">
-          Ten wydatek został już naliczony. Edycja i usunięcie dotyczą tylko
-          jego – reguła cykliczna i pozostałe wydatki zostają bez zmian.
+          Ten wydatek należy do serii cyklicznej. Po potwierdzeniu edycji lub
+          usunięcia wybierzesz, czy zmiana dotyczy wszystkich, tylko tego, tego
+          i następnych, czy tylko następnych.
         </ScopeNote>
       ) : null}
       <dl className="space-y-2 text-sm">
@@ -165,15 +167,27 @@ export const ExpenseDetail = ({
           <Pencil className="h-4 w-4" aria-hidden="true" /> Edytuj
         </Button>
       </DialogActions>
-      {confirming.isOpen ? (
+      {confirming.isOpen && fromRule ? (
+        <RecurringScopeDialog
+          modal={confirmId}
+          action="delete"
+          title={`Usunąć wydatek „${expense.merchant}”?`}
+          subject="Wybierz, które wydatki tej serii usunąć. Samo naliczanie kolejnych płatności się nie zmienia."
+          confirmLabel="Usuń"
+          onClose={confirming.close}
+          onConfirm={(scope) =>
+            closeModalThen(confirmId, () => {
+              ctx.removeExpense(expense.id, period, scope);
+              onClose();
+            })
+          }
+        />
+      ) : null}
+      {confirming.isOpen && !fromRule ? (
         <ConfirmDeleteDialog
           modal={confirmId}
           title={`Usunąć wydatek „${expense.merchant}”?`}
-          description={
-            fromRule
-              ? 'Usuniesz tylko ten wydatek. Reguła cykliczna i pozostałe wydatki zostają, a usunięty wydatek nie pojawi się ponownie.'
-              : 'Wydatek zostanie usunięty z listy i podsumowania.'
-          }
+          description="Wydatek zostanie usunięty z listy i podsumowania."
           confirmLabel="Usuń wydatek"
           onClose={confirming.close}
           onConfirm={() =>

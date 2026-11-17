@@ -3,6 +3,7 @@ import { browserTimeZone } from '@/shared/date/date';
 import { todayDay } from '@/shared/period/period';
 import { useSortedCategories } from '@/shared/expense-category/sorted';
 import { summarizePeriod } from '../domain/summary';
+import type { RecurringScope } from '@/shared/recurring/occurrences';
 import type { Registry } from './registry';
 import type { Store } from './store';
 import type {
@@ -21,15 +22,38 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
     refresh: () => trigger('[TRIGGER]_REFRESH'),
     updateExpense: (expense: Expense, period: Period) =>
       trigger('[TRIGGER]_UPDATE_EXPENSE', { expense, period }),
-    removeExpense: (id: ExpenseId, period: Period) =>
-      trigger('[TRIGGER]_DELETE_EXPENSE', { id, period }),
+    removeExpense: (
+      id: ExpenseId,
+      period: Period,
+      scope: RecurringScope = 'this',
+    ) => trigger('[TRIGGER]_DELETE_EXPENSE', { id, period, scope }),
     createLimit: (limit: Limit) => trigger('[TRIGGER]_CREATE_LIMIT', { limit }),
     updateLimit: (limit: Limit) => trigger('[TRIGGER]_UPDATE_LIMIT', { limit }),
     removeLimit: (id: LimitId) => trigger('[TRIGGER]_DELETE_LIMIT', { id }),
-    updateRecurring: (recurring: Recurring, period: Period) =>
-      trigger('[TRIGGER]_UPDATE_RECURRING', { recurring, period }),
-    removeRecurring: (id: RecurringId, period: Period) =>
-      trigger('[TRIGGER]_DELETE_RECURRING', { id, period }),
+    updateRecurring: (
+      recurring: Recurring,
+      period: Period,
+      scope: RecurringScope,
+      occurrenceDate: string,
+    ) =>
+      trigger('[TRIGGER]_UPDATE_RECURRING', {
+        recurring,
+        period,
+        scope,
+        occurrenceDate,
+      }),
+    removeRecurring: (
+      id: RecurringId,
+      period: Period,
+      scope: RecurringScope,
+      occurrenceDate: string,
+    ) =>
+      trigger('[TRIGGER]_DELETE_RECURRING', {
+        id,
+        period,
+        scope,
+        occurrenceDate,
+      }),
     dismissNotice: () => trigger('[TRIGGER]_DISMISS_NOTICE'),
     useInitialized: () => store.$initialized.use(),
     useLoading: () => store.$loading.use(),

@@ -9,7 +9,11 @@ import {
 } from '@/shared/period/period';
 import {
   dueOccurrences,
+  inScope,
+  nextOccurrence,
+  previousOccurrence,
   type RecurringRule,
+  type RecurringScope,
 } from '@/shared/recurring/occurrences';
 
 type Row = { id: string };
@@ -171,6 +175,72 @@ export const installBackend = async (
       const newest = due.at(-1);
       if (newest) rule.lastMaterializedDate = newest;
     }
+  };
+
+  /**
+   * What a delete of the `anchor` occurrence does to the rule, like the
+   * server: the expenses it reaches go, the rule ends before it, after it, or
+   * (for a payment not charged yet) is split around it.
+   */
+  const deleteFromSeries = (
+    ruleId: string,
+    anchor: string,
+    scope: RecurringScope,
+  ) => {
+    state.expenses = state.expenses.filter(
+      (e) =>
+        !(
+          e.recurringId === ruleId &&
+          e.occurrenceDate &&
+          inScope(scope, e.occurrenceDate, anchor)
+        ),
+    );
+    const rule = state.recurring.find((r) => r.id === ruleId);
+    if (!rule) return;
+    const end = (endDate: string | null) => {
+      state.recurring =
+        endDate === null
+          ? without(state.recurring, ruleId)
+          : state.recurring.map((r) =>
+              r.id === ruleId ? { ...r, endDate } : r,
+            );
+    };
+    if (scope === 'all') return end(null);
+    if (scope === 'following') return end(anchor);
+    if (scope === 'thisAndFollowing')
+      return end(previousOccurrence(rule, anchor));
+    const upcoming =
+      rule.lastMaterializedDate === null || anchor > rule.lastMaterializedDate;
+    if (!upcoming) return;
+    const next = nextOccurrence(rule, anchor);
+    end(previousOccurrence(rule, anchor));
+    if (next !== null)
+      state.recurring.push({
+        ...rule,
+        id: crypto.randomUUID(),
+        lastMaterializedDate: anchor,
+      });
+  };
+
+  /** Writes what an edit of one occurrence shares into the others it reaches. */
+  const editSeries = (
+    ruleId: string,
+    anchor: string,
+    scope: RecurringScope,
+    values: Pick<
+      Expense,
+      'merchant' | 'amount' | 'categoryId' | 'paymentMethod'
+    >,
+    keepId?: string,
+  ) => {
+    state.expenses = state.expenses.map((e) =>
+      e.recurringId === ruleId &&
+      e.id !== keepId &&
+      e.occurrenceDate &&
+      inScope(scope, e.occurrenceDate, anchor)
+        ? { ...e, ...values }
+        : e,
+    );
   };
 
   const summary = (
@@ -362,19 +432,138 @@ export const installBackend = async (
     }
 
     if (method === 'DELETE') {
-      if (collection === 'expenses')
-        state.expenses = without(state.expenses, id);
+      const payload = (request.postDataJSON() ?? {}) as {
+        scope?: RecurringScope;
+        occurrenceDate?: string;
+      };
+      const scope = payload.scope ?? 'this';
+      if (collection === 'expenses') {
+        const opened = state.expenses.find((e) => e.id === id);
+        if (opened?.recurringId && opened.occurrenceDate && scope !== 'this')
+          deleteFromSeries(opened.recurringId, opened.occurrenceDate, scope);
+        else state.expenses = without(state.expenses, id);
+      }
       if (collection === 'limits') state.limits = without(state.limits, id);
       if (collection === 'recurring') {
-        state.recurring = without(state.recurring, id);
-        state.expenses = state.expenses.map((e) =>
-          e.recurringId === id ? { ...e, recurringId: null } : e,
-        );
+        if (payload.occurrenceDate && id)
+          deleteFromSeries(id, payload.occurrenceDate, scope);
+        else {
+          state.recurring = without(state.recurring, id);
+          state.expenses = state.expenses.map((e) =>
+            e.recurringId === id ? { ...e, recurringId: null } : e,
+          );
+        }
       }
       return json(route, { code: 200, ok: true });
     }
 
     const body = request.postDataJSON();
+    const scope = (body?.scope ?? 'this') as RecurringScope;
+    if (collection === 'expenses' && method !== 'POST') {
+      const opened = state.expenses.find((e) => e.id === body.id);
+      if (opened?.recurringId && opened.occurrenceDate && scope !== 'this') {
+        const shared = {
+          merchant: body.merchant,
+          amount: body.amount,
+          categoryId: body.categoryId,
+          paymentMethod: body.paymentMethod,
+        };
+        editSeries(
+          opened.recurringId,
+          opened.occurrenceDate,
+          scope,
+          shared,
+          body.id,
+        );
+        state.recurring = state.recurring.map((r) =>
+          r.id === opened.recurringId
+            ? {
+                ...r,
+                name: body.merchant,
+                cost: body.amount,
+                categoryId: body.categoryId,
+                paymentMethod: body.paymentMethod,
+              }
+            : r,
+        );
+        if (scope === 'following')
+          return json(route, { code: 200, data: opened });
+      }
+    }
+    if (
+      collection === 'recurring' &&
+      method !== 'POST' &&
+      typeof body.occurrenceDate === 'string'
+    ) {
+      const rule = state.recurring.find((r) => r.id === body.id);
+      if (rule) {
+        const anchor = body.occurrenceDate as string;
+        const upcoming =
+          rule.lastMaterializedDate === null ||
+          anchor > rule.lastMaterializedDate;
+        const edited = {
+          name: body.name,
+          cost: body.cost,
+          interval: body.interval,
+          startDate: body.startDate,
+          endDate: body.endDate,
+          paymentMethod: body.paymentMethod,
+          categoryId: body.categoryId,
+          items: body.items ?? [],
+        };
+        editSeries(rule.id, anchor, scope, {
+          merchant: edited.name,
+          amount: edited.cost,
+          categoryId: edited.categoryId,
+          paymentMethod: edited.paymentMethod,
+        });
+        const previous = previousOccurrence(rule, anchor);
+        const next = nextOccurrence(rule, anchor);
+        const split =
+          upcoming &&
+          (scope === 'this' ||
+            scope === 'following' ||
+            (scope === 'thisAndFollowing' && previous !== null));
+        if (!split) {
+          if (scope !== 'this' || !upcoming)
+            state.recurring = state.recurring.map((r) =>
+              r.id === rule.id ? { ...r, ...edited } : r,
+            );
+        } else {
+          const before = scope === 'following' ? anchor : previous;
+          state.recurring = state.recurring.flatMap((r) =>
+            r.id !== rule.id
+              ? [r]
+              : before === null
+                ? []
+                : [{ ...r, endDate: before }],
+          );
+          if (scope === 'this')
+            state.recurring.push({
+              ...rule,
+              ...edited,
+              id: crypto.randomUUID(),
+              startDate: anchor,
+              endDate: anchor,
+              lastMaterializedDate: null,
+            });
+          else
+            state.recurring.push({
+              ...rule,
+              ...edited,
+              id: crypto.randomUUID(),
+              lastMaterializedDate: scope === 'following' ? anchor : previous,
+            });
+          if (scope === 'this' && next !== null)
+            state.recurring.push({
+              ...rule,
+              id: crypto.randomUUID(),
+              lastMaterializedDate: anchor,
+            });
+        }
+        return json(route, { code: 200, data: body });
+      }
+    }
     const created = method === 'POST';
     if (collection === 'expenses')
       state.expenses = created

@@ -7,7 +7,6 @@ import { NumberInput } from '@/shared/ui/number-input';
 import { ProductsSection } from '@/shared/expense-form/presentation/products-section';
 import { useProducts } from '@/shared/expense-form/presentation/use-products';
 import { defaultCategoryId } from '@/shared/expense-form/domain/products';
-import type { Period } from '@/shared/period/period';
 import type {
   CategoryId,
   Recurring,
@@ -19,16 +18,17 @@ import { intervalLabel } from './selectors';
 
 const INTERVALS: RecurringInterval[] = ['weekly', 'monthly', 'yearly'];
 
-/** Edits the rule `recurring` (expenses it already made stay); it can also be removed. */
+/** Edits the rule `recurring`; it can also be removed. The caller decides what a save reaches. */
 export const RecurringForm = ({
   recurring,
-  period,
+  onSave,
   onDone,
   onRemove,
   children,
 }: {
   recurring: Recurring;
-  period: Period;
+  /** Gets the edited rule once the form is valid; the caller asks how far it reaches. */
+  onSave: (recurring: Recurring) => void;
   onDone: () => void;
   /** Asks to remove the rule; the caller confirms first. */
   onRemove: () => void;
@@ -79,8 +79,7 @@ export const RecurringForm = ({
       categoryId: derivedCategoryId,
       items: products,
     };
-    ctx.updateRecurring({ ...recurring, ...values }, period);
-    onDone();
+    onSave({ ...recurring, ...values });
   };
 
   return (

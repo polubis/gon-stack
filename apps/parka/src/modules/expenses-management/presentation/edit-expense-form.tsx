@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { ExpenseForm } from '@/shared/expense-form/presentation/expense-form';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { Button } from '@/shared/ui/controls';
 import { ScopeNote } from '@/shared/ui/scope-note';
+import { RecurringScopeDialog } from '@/shared/ui/recurring-scope-dialog';
+import type { ExpenseFormValues } from '@/shared/expense-form/domain/models';
 import type { StoredExpense } from '../domain/models';
 import { useContext } from './context';
 
@@ -16,6 +19,8 @@ export const EditExpenseForm = ({
   const ctx = useContext();
   const categories = ctx.useCategories();
   const saving = ctx.useSaving();
+  // A recurring expense waits here while the user picks how far the edit reaches.
+  const [pending, setPending] = useState<ExpenseFormValues | null>(null);
 
   return (
     <>
@@ -24,8 +29,9 @@ export const EditExpenseForm = ({
           className="mb-4 max-w-xl"
           data-e2e="expenses-management:scope-note"
         >
-          Ten wydatek został już naliczony z wydatku cyklicznego. Edytujesz
-          tylko jego – reguła i pozostałe wydatki zostają bez zmian.
+          Ten wydatek należy do serii cyklicznej. Po zapisaniu wybierzesz, czy
+          zmiana dotyczy wszystkich, tylko tego, tego i następnych, czy tylko
+          następnych.
         </ScopeNote>
       ) : null}
       <ExpenseForm
@@ -42,8 +48,25 @@ export const EditExpenseForm = ({
             Anuluj
           </Button>
         }
-        onSubmit={(values) => ctx.updateExpense({ ...expense, ...values })}
+        onSubmit={(values) =>
+          expense.recurringId !== null
+            ? setPending(values)
+            : ctx.updateExpense({ ...expense, ...values })
+        }
       />
+      {pending ? (
+        <RecurringScopeDialog
+          action="edit"
+          title={`Zapisać zmiany w „${pending.merchant}”?`}
+          subject="Wybierz, które wydatki tej serii objąć zmianą. Samo naliczanie nie zmienia się."
+          confirmLabel="Zapisz zmiany"
+          onClose={() => setPending(null)}
+          onConfirm={(scope) => {
+            ctx.updateExpense({ ...expense, ...pending }, scope);
+            setPending(null);
+          }}
+        />
+      ) : null}
     </>
   );
 };

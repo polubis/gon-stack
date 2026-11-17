@@ -17,6 +17,7 @@ import {
   updateRecurringSchema,
 } from '@schemas/recurring';
 import { browserTimeZone } from '@/shared/date/date';
+import type { RecurringScope } from '@/shared/recurring/occurrences';
 import { API_ROUTER } from '@/shared/router/routes';
 import { createRequestCache } from '@/shared/request-cache/request-cache';
 import type {
@@ -102,9 +103,14 @@ export const putExpense = async (expense: Expense): Promise<Expense> => {
   return toExpense(json.data);
 };
 
-export const deleteExpense = async (id: ExpenseId): Promise<void> => {
+export const deleteExpense = async (
+  id: ExpenseId,
+  scope: RecurringScope = 'this',
+): Promise<void> => {
   const response = await send(API_ROUTER.expenseById(id), {
     method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ scope }),
   });
   const json = (await response.json()) as DeleteExpenseOut;
   if (json.code !== 200) throw new Error(json.message);
@@ -165,20 +171,26 @@ export const fetchRecurring = async (
 
 export const putRecurring = async (
   recurring: Recurring,
+  scope?: { scope: RecurringScope; occurrenceDate: string },
 ): Promise<Recurring> => {
   const response = await send(API_ROUTER.recurringById(recurring.id), {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(recurring),
+    body: JSON.stringify({ ...recurring, ...scope }),
   });
   const json = (await response.json()) as UpdateRecurringOut;
   if (json.code !== 200) throw new Error(json.message);
   return toRecurring(json.data);
 };
 
-export const deleteRecurring = async (id: RecurringId): Promise<void> => {
+export const deleteRecurring = async (
+  id: RecurringId,
+  scope?: { scope: RecurringScope; occurrenceDate: string },
+): Promise<void> => {
   const response = await send(API_ROUTER.recurringById(id), {
     method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(scope ?? {}),
   });
   const json = (await response.json()) as DeleteRecurringOut;
   if (json.code !== 200) throw new Error(json.message);

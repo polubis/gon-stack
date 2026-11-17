@@ -36,7 +36,6 @@ export const TIME_E2E_IDS = [
   'time:recurring-interval',
   'time:recurring-end-notice',
   'time:recurring-end',
-  'time:recurring-stop',
   'time:delete-dialog',
   'time:delete-confirm',
   'time:category-dialog',

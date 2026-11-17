@@ -247,36 +247,99 @@ describe('recurring tasks', () => {
     expect(backend.writes()).toHaveLength(0);
   });
 
-  const openSeriesEnd = async (user: ReturnType<typeof userEvent.setup>) => {
+  const openRecurringTask = async (
+    user: ReturnType<typeof userEvent.setup>,
+  ) => {
     backend.seed([
       task({ recurringId: 'trec-1', occurrenceDate: '2026-10-20' }),
     ]);
     renderTime();
     await user.click(await row('Raport miesięczny'));
-    const dialog = within(await screen.findByRole('dialog'));
-    await user.click(dialog.getByRole('button', { name: 'Zakończ cykl' }));
-    return within(screen.getAllByRole('dialog').at(-1)!);
+    return within(await screen.findByRole('dialog'));
   };
 
-  it('asks before ending the series', async () => {
+  const scopeDialog = () => within(screen.getAllByRole('dialog').at(-1)!);
+
+  it('offers no separate way to end a series', async () => {
     const user = userEvent.setup();
 
-    await openSeriesEnd(user);
+    const dialog = await openRecurringTask(user);
 
+    expect(
+      dialog.queryByRole('button', { name: 'Zakończ cykl' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('asks how far a delete reaches before sending anything', async () => {
+    const user = userEvent.setup();
+    const dialog = await openRecurringTask(user);
+
+    await user.click(dialog.getByRole('button', { name: 'Usuń' }));
+
+    expect(
+      scopeDialog()
+        .getAllByRole('radio')
+        .map((radio) => radio.closest('label')?.textContent),
+    ).toEqual([
+      expect.stringContaining('Usuń wszystkie'),
+      expect.stringContaining('Usuń tylko ten'),
+      expect.stringContaining('Usuń ten i następne'),
+      expect.stringContaining('Usuń tylko następne'),
+    ]);
     expect(backend.writes()).toHaveLength(0);
   });
 
-  it('ends the series from one of its tasks', async () => {
+  it('deletes with the chosen scope', async () => {
     const user = userEvent.setup();
-    const confirm = await openSeriesEnd(user);
+    const dialog = await openRecurringTask(user);
+    await user.click(dialog.getByRole('button', { name: 'Usuń' }));
 
-    await user.click(confirm.getByRole('button', { name: 'Zakończ cykl' }));
-
-    expect(backend.writes()).toHaveLength(1);
-    expect(backend.writes()[0]).toMatchObject({});
-    const line = (await row('Raport miesięczny')).closest('li')!;
-    await waitFor(() =>
-      expect(within(line).queryByText('Cykliczne')).not.toBeInTheDocument(),
+    await user.click(
+      scopeDialog().getByRole('radio', { name: /Usuń ten i następne/ }),
     );
+    await user.click(scopeDialog().getByRole('button', { name: 'Usuń' }));
+
+    await waitFor(() => expect(backend.writes()).toHaveLength(1));
+    expect(backend.writes()[0]).toMatchObject({
+      method: 'DELETE',
+      body: { scope: 'thisAndFollowing' },
+    });
+  });
+
+  it('asks how far a save reaches and sends the choice with the task', async () => {
+    const user = userEvent.setup();
+    const dialog = await openRecurringTask(user);
+    await user.clear(dialog.getByRole('textbox', { name: 'Nazwa' }));
+    await user.type(dialog.getByRole('textbox', { name: 'Nazwa' }), 'Raport');
+    await user.click(dialog.getByRole('button', { name: 'Zapisz' }));
+
+    expect(backend.writes()).toHaveLength(0);
+    await user.click(
+      scopeDialog().getByRole('radio', { name: /Edytuj tylko następne/ }),
+    );
+    await user.click(
+      scopeDialog().getByRole('button', { name: 'Zapisz zmiany' }),
+    );
+
+    await waitFor(() => expect(backend.writes()).toHaveLength(1));
+    expect(backend.writes()[0]).toMatchObject({
+      method: 'PUT',
+      body: { title: 'Raport', scope: 'following' },
+    });
+  });
+
+  it('saves an ordinary task without asking for a scope', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    renderTime();
+    await user.click(await row('Raport miesięczny'));
+    await user.click(
+      within(await screen.findByRole('dialog')).getByRole('button', {
+        name: 'Zapisz',
+      }),
+    );
+
+    await waitFor(() => expect(backend.writes()).toHaveLength(1));
+    expect(screen.queryByRole('radio')).not.toBeInTheDocument();
   });
 });

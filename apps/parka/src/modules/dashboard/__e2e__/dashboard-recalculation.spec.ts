@@ -243,10 +243,12 @@ const commands = {
   }) => {
     await getByE2ePrefix('dashboard:upcoming:').first().click();
     await expect(getByE2e('dashboard:scope-note')).toContainText(
-      'Edytujesz ten i kolejne wydatki',
+      'wybierzesz, czy zmiana dotyczy',
     );
     await getByE2e('dashboard:recurring-form-cost').fill('45');
     await getByE2e('dashboard:recurring-form-save').click();
+    await getByE2e('ui:scope:thisAndFollowing').check();
+    await getByE2e('ui:scope-confirm').click();
     await expect(getByE2e('dashboard:recurring-form')).toHaveCount(0);
   },
   'i add a product of 12 to the upcoming payment': async ({
@@ -263,6 +265,8 @@ const commands = {
       '',
     );
     await getByE2e('dashboard:recurring-form-save').click();
+    await getByE2e('ui:scope:thisAndFollowing').check();
+    await getByE2e('ui:scope-confirm').click();
     await expect(getByE2e('dashboard:recurring-form')).toHaveCount(0);
   },
   'the upcoming payment shows 12,00': async ({ getByE2e }) => {
@@ -279,16 +283,25 @@ const commands = {
     await expect(getByE2e('dashboard:upcoming')).toContainText('Siłownia');
     await expect(getByE2e('dashboard:upcoming-badge')).toBeVisible();
   },
-  'i delete the recurring rule from its upcoming payment': async ({
+  'i delete this and the following payments from the upcoming one': async ({
     getByE2e,
     getByE2ePrefix,
   }) => {
     await getByE2ePrefix('dashboard:upcoming:').first().click();
     await getByE2e('dashboard:recurring-delete').click();
-    await expect(getByE2e('dashboard:delete-scope')).toContainText(
-      'Usuniesz regułę',
-    );
-    await getByE2e('dashboard:delete-confirm').click();
+    await expect(getByE2e('ui:scope-dialog')).toContainText('Usuń wszystkie');
+    await getByE2e('ui:scope:thisAndFollowing').check();
+    await getByE2e('ui:scope-confirm').click();
+    await expect(getByE2e('dashboard:recurring-dialog')).toHaveCount(0);
+  },
+  'i delete all payments of the series from the upcoming one': async ({
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
+    await getByE2ePrefix('dashboard:upcoming:').first().click();
+    await getByE2e('dashboard:recurring-delete').click();
+    await getByE2e('ui:scope:all').check();
+    await getByE2e('ui:scope-confirm').click();
     await expect(getByE2e('dashboard:recurring-dialog')).toHaveCount(0);
   },
   'no payment is announced': async ({ getByE2e }) => {
@@ -297,13 +310,11 @@ const commands = {
   'i delete the charged recurring expense': async ({ getByE2e }) => {
     await getByE2e(`dashboard:expense:r-1:${NETFLIX_DAY}`).click();
     await expect(getByE2e('dashboard:scope-note')).toContainText(
-      'dotyczą tylko jego',
+      'należy do serii cyklicznej',
     );
     await getByE2e('dashboard:delete').click();
-    await expect(getByE2e('dashboard:delete-scope')).toContainText(
-      'Usuniesz tylko ten wydatek',
-    );
-    await getByE2e('dashboard:delete-confirm').click();
+    await getByE2e('ui:scope:this').check();
+    await getByE2e('ui:scope-confirm').click();
     await expect(getByE2e('dashboard:detail')).toHaveCount(0);
   },
   'the next payment of the rule is still announced': async ({ getByE2e }) => {
@@ -442,11 +453,24 @@ test.describe('dashboard values after changes', () => {
     );
   });
 
-  test('deleting the rule keeps what was already charged', async ({ e2e }) => {
+  test('deleting this and the following keeps what was already charged', async ({
+    e2e,
+  }) => {
     await interpreter(commands, e2e)(
       ['i open a dashboard with a recurring expense'],
-      ['i delete the recurring rule from its upcoming payment'],
+      ['i delete this and the following payments from the upcoming one'],
       ['the month shows 130,00 over 3 charges'],
+      ['no payment is announced'],
+    );
+  });
+
+  test('deleting all payments of the series removes what was charged too', async ({
+    e2e,
+  }) => {
+    await interpreter(commands, e2e)(
+      ['i open a dashboard with a recurring expense'],
+      ['i delete all payments of the series from the upcoming one'],
+      ['the month still shows 100,00 over 2 expenses'],
       ['no payment is announced'],
     );
   });

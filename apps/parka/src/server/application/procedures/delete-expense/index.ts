@@ -8,6 +8,7 @@ import {
   tryRecordNotifications,
 } from '../../shared/notifications';
 import { fromSupabaseError } from '../../adapter/supabase';
+import { deleteSeries } from '../../shared/recurring-scope';
 
 export const deleteExpense = privateProcedure({
   schema: withZodSchema({ schema: deleteExpenseSchema }),
@@ -26,6 +27,32 @@ export const deleteExpense = privateProcedure({
       .eq('id', input.id)
       .maybeSingle();
     if (previousError) throw fromSupabaseError(previousError);
+
+    // The series is read from the stored row, never from the request.
+    if (
+      previous?.recurring_id &&
+      previous.occurrence_date &&
+      input.scope !== 'this'
+    ) {
+      await deleteSeries(
+        db,
+        user.id,
+        previous.recurring_id,
+        previous.occurrence_date,
+        input.scope,
+      );
+      if (input.scope !== 'following') {
+        const loaded = await names;
+        if ('error' in loaded) throw loaded.error;
+        await tryRecordNotifications(db, user.id, [
+          {
+            kind: 'expense-deleted',
+            payload: { expense: expenseSnapshot(previous, loaded.value) },
+          },
+        ]);
+      }
+      return { code: 200 as const, ok: true as const };
+    }
 
     const { error: itemsError } = await db
       .from('receipt_items')

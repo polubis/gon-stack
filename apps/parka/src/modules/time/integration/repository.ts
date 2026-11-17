@@ -1,3 +1,4 @@
+import type { RecurringScope } from '@/shared/recurring/occurrences';
 import type { z } from 'zod';
 import type {
   createTimeBacklogTaskSchema,
@@ -8,7 +9,6 @@ import type {
   createTimeRecurringSchema,
   createTimeTaskSchema,
   deleteTimeCategorySchema,
-  deleteTimeRecurringSchema,
   deleteTimeTaskSchema,
   listTimeSchema,
   saveTimeStatusesSchema,
@@ -24,7 +24,6 @@ import type {
   CategoryId,
   Priority,
   Recurring,
-  RecurringId,
   Status,
   Task,
   TaskId,
@@ -142,21 +141,28 @@ export const postTaskToBacklog = async (id: TaskId): Promise<BacklogTask> => {
   return toBacklogTask(json.data);
 };
 
-export const putTask = async (task: Task): Promise<Task> => {
+export const putTask = async (
+  task: Task,
+  scope: RecurringScope = 'this',
+): Promise<Task> => {
   const response = await send(API_ROUTER.timeTaskById(task.id), {
     method: 'PUT',
     headers: JSON_HEADERS,
-    body: JSON.stringify(task),
+    body: JSON.stringify({ ...task, scope }),
   });
   const json = (await response.json()) as Out<typeof updateTimeTaskSchema>;
   if (json.code !== 200) throw new Error(json.message);
   return toTask(json.data);
 };
 
-export const removeTask = async (id: TaskId): Promise<void> => {
+export const removeTask = async (
+  id: TaskId,
+  scope: RecurringScope = 'this',
+): Promise<void> => {
   const response = await send(API_ROUTER.timeTaskById(id), {
     method: 'DELETE',
     headers: JSON_HEADERS,
+    body: JSON.stringify({ scope }),
   });
   const json = (await response.json()) as Out<typeof deleteTimeTaskSchema>;
   if (json.code !== 200) throw new Error(json.message);
@@ -227,13 +233,4 @@ export const postRecurring = async (recurring: Recurring): Promise<void> => {
   });
   const json = (await response.json()) as Out<typeof createTimeRecurringSchema>;
   if (json.code !== 201) throw new Error(json.message);
-};
-
-export const removeRecurring = async (id: RecurringId): Promise<void> => {
-  const response = await send(API_ROUTER.timeRecurringById(id), {
-    method: 'DELETE',
-    headers: JSON_HEADERS,
-  });
-  const json = (await response.json()) as Out<typeof deleteTimeRecurringSchema>;
-  if (json.code !== 200) throw new Error(json.message);
 };

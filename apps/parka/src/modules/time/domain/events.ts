@@ -1,3 +1,4 @@
+import type { RecurringScope } from '@/shared/recurring/occurrences';
 import type { TriggerEvent } from '@/libs/eda';
 import type {
   BacklogTask,
@@ -5,7 +6,6 @@ import type {
   CategoryId,
   Priority,
   Recurring,
-  RecurringId,
   Status,
   Task,
   TaskId,
@@ -21,11 +21,13 @@ export type Event =
       '[TRIGGER]_MOVE_BACKLOG_TASK',
       { id: TaskId; day: string; label: string }
     >
-  | TriggerEvent<'[TRIGGER]_UPDATE_TASK', { task: Task; message?: string }>
+  | TriggerEvent<
+      '[TRIGGER]_UPDATE_TASK',
+      { task: Task; message?: string; scope: RecurringScope }
+    >
   | TriggerEvent<'[TRIGGER]_SEND_TASK_TO_BACKLOG', { id: TaskId }>
-  | TriggerEvent<'[TRIGGER]_DELETE_TASK', { id: TaskId }>
+  | TriggerEvent<'[TRIGGER]_DELETE_TASK', { id: TaskId; scope: RecurringScope }>
   | TriggerEvent<'[TRIGGER]_CREATE_RECURRING', { recurring: Recurring }>
-  | TriggerEvent<'[TRIGGER]_STOP_RECURRING', { id: RecurringId }>
   | TriggerEvent<'[TRIGGER]_CREATE_CATEGORY', { category: Category }>
   | TriggerEvent<'[TRIGGER]_UPDATE_CATEGORY', { category: Category }>
   | TriggerEvent<'[TRIGGER]_DELETE_CATEGORY', { id: CategoryId }>

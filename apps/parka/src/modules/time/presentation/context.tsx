@@ -106,7 +106,6 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
     deleteTask: facade.deleteTask,
     saveStatuses: facade.saveStatuses,
     createRecurring: facade.createRecurring,
-    stopRecurring: facade.stopRecurring,
     updateCategory: facade.updateCategory,
     deleteCategory: facade.deleteCategory,
     dismissNotice: facade.dismissNotice,
