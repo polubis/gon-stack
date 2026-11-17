@@ -88,6 +88,8 @@ export const setupTimeBackend = () => {
     /** History entries per task id (newest first), read only like the server. */
     history: {} as Record<string, Json[]>,
     failHistoryReads: false,
+    /** Moves between days (task id and instant), newest first. */
+    moves: [] as Json[],
     failCommentReads: false,
     failCommentWrites: false,
     /** What a failing comment write answers; defaults to a server error. */
@@ -178,6 +180,10 @@ export const setupTimeBackend = () => {
           (item) => item.id !== params.id,
         );
       return HttpResponse.json({ code: 200, ok: true });
+    }),
+    // Not recorded in `calls`: statistics read it beside every task read.
+    http.get('/api/time/moves/', () => {
+      return HttpResponse.json({ code: 200, data: { items: state.moves } });
     }),
     http.get('/api/time/tasks/:id/history/', async ({ request, params }) => {
       calls.push({ method: 'GET', url: request.url });
@@ -385,6 +391,7 @@ export const setupTimeBackend = () => {
     state.failAttachmentWrites = false;
     state.comments = {};
     state.history = {};
+    state.moves = [];
     state.failHistoryReads = false;
     state.failCommentReads = false;
     state.failCommentWrites = false;

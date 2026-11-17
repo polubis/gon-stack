@@ -151,6 +151,10 @@ export const API_ROUTER = {
     '/api/time/',
     { from?: string; to: string; tz?: string }
   >('/api/time/'),
+  timeMoves: routeWithRequiredQuery<
+    '/api/time/moves/',
+    { from: string; to: string }
+  >('/api/time/moves/'),
   timeTasks: route('/api/time/tasks/'),
   timeBacklog: route('/api/time/backlog/'),
   timeBacklogById: routeById('/api/time/backlog/'),

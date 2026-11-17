@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { ListChecks } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { Donut } from '@/shared/ui/charts';
@@ -9,6 +9,9 @@ import { Ring } from '@/shared/ui/ring';
 import { dayLabel } from '@/shared/date/date';
 import type { TimeKind } from '../domain/models';
 import type { PriorityLevel } from '../domain/priority';
+import { moveStats, type Move, type MoveStats } from '../domain/moves';
+import { fetchMoves } from '../integration/moves';
+import { rangeOf } from '../domain/schedule';
 import { taskStats, type Bucket, type TaskStats } from '../domain/stats';
 import { useContext } from './context';
 import { TaskKey } from './task-key';
@@ -331,6 +334,46 @@ const DetailsCard = ({ stats }: { stats: TaskStats }) => (
   </Card>
 );
 
+const MovesCard = ({ moves }: { moves: MoveStats }) => (
+  <Card data-e2e="time:stats-moves" className="space-y-2 xl:col-span-6">
+    <h2 className="flex min-h-9 items-center text-base font-semibold">
+      Przeniesienia
+    </h2>
+    <dl className="divide-y divide-line">
+      <Row label="Przeniesienia terminu">
+        <span data-e2e="time:stats-moves-total">{moves.total}</span>
+      </Row>
+      <Row label="Przeniesione zadania">
+        <span data-e2e="time:stats-moves-tasks">{moves.tasks}</span>
+      </Row>
+    </dl>
+  </Card>
+);
+
+/**
+ * Moves of tasks between days made in the viewed period. Read again when the
+ * tasks change, since a move is a change of a task's day.
+ */
+const useMoves = (kind: TimeKind): MoveStats => {
+  const { tasks, anchor } = useContext();
+  const { from, to } = rangeOf(kind, anchor);
+  const [moves, setMoves] = useState<Move[]>([]);
+  useEffect(() => {
+    let current = true;
+    fetchMoves(from, to)
+      .then((items) => {
+        if (current) setMoves(items);
+      })
+      .catch(() => {
+        if (current) setMoves([]);
+      });
+    return () => {
+      current = false;
+    };
+  }, [from, to, tasks]);
+  return moveStats(moves, from, to);
+};
+
 const useStats = (kind: TimeKind): TaskStats => {
   const { tasks, backlog, categories, priorities, now, anchor } = useContext();
   return taskStats({
@@ -360,6 +403,7 @@ export const Summary = ({ kind }: { kind: TimeKind }) => {
  */
 export const Insights = ({ kind }: { kind: TimeKind }) => {
   const stats = useStats(kind);
+  const moves = useMoves(kind);
   if (stats.total === 0) return null;
   return (
     <>
@@ -371,6 +415,7 @@ export const Insights = ({ kind }: { kind: TimeKind }) => {
       ) : null}
       <ActiveCard stats={stats} />
       <DetailsCard stats={stats} />
+      <MovesCard moves={moves} />
     </>
   );
 };

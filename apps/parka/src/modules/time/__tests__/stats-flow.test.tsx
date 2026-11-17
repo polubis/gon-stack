@@ -146,3 +146,24 @@ describe('time period kind', () => {
     expect(push).toHaveBeenCalledWith('/app/time/month/?date=2026-10-20');
   });
 });
+
+describe('moves statistics', () => {
+  it('shows how many tasks were moved in the viewed week', async () => {
+    seedWeek();
+    backend.state.moves = [
+      { taskId: 't-1', at: '2026-10-20T08:00:00.000Z' },
+      { taskId: 't-1', at: '2026-10-21T08:00:00.000Z' },
+      { taskId: 't-2', at: '2026-10-21T09:00:00.000Z' },
+      { taskId: 't-3', at: '2026-09-01T09:00:00.000Z' },
+    ];
+    renderTime('week');
+    await row('Gotowe');
+
+    const card = (
+      await screen.findByRole('heading', { name: 'Przeniesienia' })
+    ).closest('div.rounded-3xl') as HTMLElement;
+
+    expect(await within(card).findByText('3')).toBeInTheDocument();
+    expect(within(card).getByText('2')).toBeInTheDocument();
+  });
+});
