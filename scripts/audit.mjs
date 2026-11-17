@@ -26,7 +26,9 @@ try {
 const counts = report?.metadata?.vulnerabilities;
 if (!counts) fail('pnpm audit JSON has no vulnerability counts');
 
-const total = Object.values(counts).reduce((sum, count) => sum + count, 0);
+// Count advisories, not metadata: pnpm drops ignored GHSAs (pnpm-workspace.yaml
+// auditConfig.ignoreGhsas) from `advisories` but not from the metadata counts.
+const total = Object.keys(report.advisories ?? {}).length;
 if (total === 0) {
   console.log('audit: 0 vulnerabilities');
   process.exit(0);
