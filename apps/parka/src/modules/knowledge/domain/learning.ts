@@ -1,4 +1,4 @@
-import { BRAIN_AREAS, type BrainAreaId } from './brain-area';
+import { BRAIN_AREAS, isCortex, type BrainAreaId } from './brain-area';
 import type {
   Category,
   Folder,
@@ -73,6 +73,40 @@ export const areaFills = (
       fill: fillOf(nodes.filter((n) => folderIds.has(n.folderId))),
     };
   });
+
+/** Mirrors `summary` of the knowledge API (`KnowledgeSummaryDto`). */
+export type KnowledgeSummary = {
+  topics: number;
+  /** Touched: in study or mastered. */
+  startedTopics: number;
+  doneTopics: number;
+  reels: number;
+  doneReels: number;
+};
+
+/** Touched vs untouched counts; the mock has no reels yet. */
+export const summaryOf = (
+  nodes: readonly KnowledgeNode[],
+): KnowledgeSummary => ({
+  topics: nodes.length,
+  startedTopics: nodes.filter((n) => n.status !== 'to-learn').length,
+  doneTopics: nodes.filter((n) => n.status === 'learned').length,
+  reels: 0,
+  doneReels: 0,
+});
+
+/** Fill of the cortex (four lobes) vs the rest (cerebellum, brainstem). */
+export const cortexSplit = (
+  folders: readonly Folder[],
+  nodes: readonly KnowledgeNode[],
+): { cortex: number; rest: number } => {
+  const inCortex = new Set(
+    folders.filter((f) => isCortex(f.areaId)).map((f) => f.id),
+  );
+  const own = nodes.filter((n) => inCortex.has(n.folderId));
+  const other = nodes.filter((n) => !inCortex.has(n.folderId));
+  return { cortex: fillOf(own), rest: fillOf(other) };
+};
 
 export type KnowledgeStats = {
   total: number;

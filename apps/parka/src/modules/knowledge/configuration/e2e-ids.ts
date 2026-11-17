@@ -6,6 +6,7 @@ export const KNOWLEDGE_E2E_IDS = [
   'knowledge:hero',
   'knowledge:brain',
   'knowledge:progress',
+  'knowledge:cortex',
   'knowledge:folders',
   'knowledge:empty',
   'knowledge:empty-search',

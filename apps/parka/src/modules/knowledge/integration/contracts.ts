@@ -24,6 +24,15 @@ export type NodeDto = {
   status: string;
 };
 
+/** Same shape as `summary` of `GET /api/knowledge/`. */
+export type KnowledgeSummaryDto = {
+  topics: number;
+  startedTopics: number;
+  doneTopics: number;
+  reels: number;
+  doneReels: number;
+};
+
 export type KnowledgeDto = {
   categories: CategoryDto[];
   priorities: PriorityDto[];

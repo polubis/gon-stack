@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   areaFills,
+  cortexSplit,
   filterNodes,
   fillOf,
   knowledgeStats,
@@ -8,6 +9,7 @@ import {
   parseTags,
   priorityLevel,
   sortByPriority,
+  summaryOf,
 } from '../domain/learning';
 import type {
   Category,
@@ -162,5 +164,43 @@ describe('statistics', () => {
     ]);
     expect(stats.byPriority.find((p) => p.level === 'high')?.count).toBe(1);
     expect(stats.topTags[0]).toEqual({ tag: 'a', count: 2 });
+  });
+});
+
+describe('touched vs untouched summary', () => {
+  it('counts started as studying or mastered and done as mastered', () => {
+    const nodes = [
+      node({ status: 'to-learn' }),
+      node({ status: 'learning' }),
+      node({ status: 'learned' }),
+    ];
+
+    expect(summaryOf(nodes)).toEqual({
+      topics: 3,
+      startedTopics: 2,
+      doneTopics: 1,
+      reels: 0,
+      doneReels: 0,
+    });
+  });
+});
+
+describe('cortex split', () => {
+  const folders: Folder[] = [
+    { id: 'f-c' as Folder['id'], name: 'Kora', areaId: 'frontal' },
+    { id: 'f-s' as Folder['id'], name: 'Pień', areaId: 'brainstem' },
+  ];
+
+  it('fills cortex and the rest separately', () => {
+    const nodes = [
+      node({ folderId: 'f-c' as Folder['id'], status: 'learned' }),
+      node({ folderId: 'f-s' as Folder['id'], status: 'learning' }),
+    ];
+
+    expect(cortexSplit(folders, nodes)).toEqual({ cortex: 1, rest: 0.5 });
+  });
+
+  it('gives zero for a part without knowledge', () => {
+    expect(cortexSplit(folders, [])).toEqual({ cortex: 0, rest: 0 });
   });
 });
