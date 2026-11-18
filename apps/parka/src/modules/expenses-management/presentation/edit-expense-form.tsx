@@ -38,7 +38,7 @@ export const EditExpenseForm = ({
         base={expense}
         categories={categories}
         saving={saving}
-        submitLabel="Zapisz zmiany"
+        submitLabel="Zapisz"
         actions={
           <Button
             variant="ghost"
@@ -59,7 +59,7 @@ export const EditExpenseForm = ({
           action="edit"
           title={`Zapisać zmiany w „${pending.merchant}”?`}
           subject="Wybierz, które wydatki tej serii objąć zmianą. Samo naliczanie nie zmienia się."
-          confirmLabel="Zapisz zmiany"
+          confirmLabel="Zapisz"
           onClose={() => setPending(null)}
           onConfirm={(scope) => {
             ctx.updateExpense({ ...expense, ...pending }, scope);

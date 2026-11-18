@@ -21,7 +21,7 @@ export const SelectionBar = () => {
           onClick={ctx.selectAll}
           className="rounded-lg px-2 py-1 text-xs font-semibold text-brand-dark hover:bg-brand-softer"
         >
-          {selected === total ? 'Odznacz wszystkie' : 'Zaznacz wszystkie'}
+          {selected === total ? 'Odznacz' : 'Zaznacz'}
         </button>
         <button
           type="button"

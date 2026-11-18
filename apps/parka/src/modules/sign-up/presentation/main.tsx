@@ -84,7 +84,7 @@ const SignUpView = () => {
           ) : null}
 
           <Button type="submit" data-e2e="auth:submit" disabled={pending}>
-            {pending ? 'Chwila…' : 'Utwórz konto'}
+            {pending ? 'Chwila…' : 'Utwórz'}
           </Button>
         </form>
 
@@ -96,7 +96,7 @@ const SignUpView = () => {
             href={APP_ROUTER.signIn()}
             className="font-semibold text-brand-dark underline"
           >
-            Zaloguj się
+            Zaloguj
           </a>
         </p>
       </div>

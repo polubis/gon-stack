@@ -251,7 +251,7 @@ const UpcomingList = ({
           onClick={onShowAll}
           data-e2e="dashboard:upcoming-toggle"
         >
-          Pokaż wszystkie
+          Wszystkie
         </Button>
       </div>
     ) : null}
@@ -392,7 +392,7 @@ export const MonthExpenses = ({
                     className="w-auto px-3 py-1.5"
                   >
                     <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
-                    Dodaj wydatek
+                    Dodaj
                   </Button>
                 }
               />

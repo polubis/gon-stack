@@ -1,4 +1,5 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { emptyAdd } from './empty-state';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderTime, TODAY } from './render-time';
@@ -49,7 +50,7 @@ describe('time loading', () => {
         'Nic nie zaplanowano: wtorek, 20 października 2026.',
       ),
     ).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Dodaj zadanie' })).toBeVisible();
+    expect(await emptyAdd()).toBeVisible();
   });
 
   it('explains why loading failed', async () => {
@@ -72,7 +73,7 @@ describe('time loading', () => {
     backend.state.failReads = false;
     backend.seed([task()]);
 
-    await user.click(screen.getByRole('button', { name: 'Spróbuj ponownie' }));
+    await user.click(screen.getByRole('button', { name: 'Ponów' }));
 
     expect(await row('Raport miesięczny')).toBeVisible();
   });
@@ -272,9 +273,7 @@ describe('time task creation', () => {
   it('shows the new task at once and confirms with a toast', async () => {
     const user = userEvent.setup();
     renderTime();
-    await user.click(
-      await screen.findByRole('button', { name: 'Dodaj zadanie' }),
-    );
+    await user.click(await emptyAdd());
 
     const dialog = within(await screen.findByRole('dialog'));
     await user.type(dialog.getByRole('textbox', { name: 'Nazwa' }), 'Kurs');
@@ -301,9 +300,7 @@ describe('time task creation', () => {
     const user = userEvent.setup();
     renderTime();
 
-    await user.click(
-      await screen.findByRole('button', { name: 'Dodaj zadanie' }),
-    );
+    await user.click(await emptyAdd());
 
     const dialog = within(await screen.findByRole('dialog'));
     expect(dialog.getByRole('switch', { name: 'Cały dzień' })).toBeChecked();
@@ -312,9 +309,7 @@ describe('time task creation', () => {
   it('saves a whole-day task without an hour', async () => {
     const user = userEvent.setup();
     renderTime();
-    await user.click(
-      await screen.findByRole('button', { name: 'Dodaj zadanie' }),
-    );
+    await user.click(await emptyAdd());
     const dialog = within(await screen.findByRole('dialog'));
     await user.type(dialog.getByRole('textbox', { name: 'Nazwa' }), 'Rachunek');
 
@@ -327,9 +322,7 @@ describe('time task creation', () => {
   const addRejectedTask = async (user: ReturnType<typeof userEvent.setup>) => {
     backend.state.failWrites = true;
     renderTime();
-    await user.click(
-      await screen.findByRole('button', { name: 'Dodaj zadanie' }),
-    );
+    await user.click(await emptyAdd());
     const dialog = within(await screen.findByRole('dialog'));
     await user.type(dialog.getByRole('textbox', { name: 'Nazwa' }), 'Kurs');
     await user.click(dialog.getByRole('button', { name: 'Dodaj' }));

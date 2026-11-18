@@ -95,7 +95,7 @@ export const CategoryDialog = ({ modal }: { modal: string }) => {
             Anuluj
           </Button>
           <Button type="submit" data-e2e="categories:form-save">
-            Dodaj kategorię
+            Dodaj
           </Button>
         </ModalFooter>
       </form>

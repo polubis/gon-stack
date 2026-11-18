@@ -87,9 +87,7 @@ describe('device photo in settings', () => {
   it('offers to add a photo for a device without one', async () => {
     render(<Main />);
 
-    expect(
-      await screen.findByRole('button', { name: 'Dodaj zdjęcie' }),
-    ).toBeVisible();
+    expect(await screen.findByRole('button', { name: 'Dodaj' })).toBeVisible();
     expect(photo()).toBeNull();
   });
 
@@ -107,9 +105,7 @@ describe('device photo in settings', () => {
       expect(photo()).toHaveAttribute('src', expect.stringContaining('v=2')),
     );
     expect(photo()).toHaveAttribute('srcset', expect.stringContaining('32w'));
-    expect(
-      await screen.findByRole('button', { name: 'Zmień zdjęcie urządzenia' }),
-    ).toBeVisible();
+    expect(await screen.findByRole('button', { name: 'Zmień' })).toBeVisible();
     expect(uploads).toHaveLength(1);
     expect(uploads[0]).toMatch(/name="deviceId"\r\n\r\ndevice-1\r\n/);
   });

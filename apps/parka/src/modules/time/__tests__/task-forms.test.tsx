@@ -163,7 +163,7 @@ describe('time task form', () => {
     const user = userEvent.setup();
     await openFromMenu(user, 'Zadanie');
 
-    await user.click(screen.getByRole('button', { name: 'Nowy priorytet' }));
+    await user.click(screen.getByRole('button', { name: 'Nowy' }));
 
     await waitFor(() => expect(dialogs()).toHaveLength(2));
     expect(modalsInUrl()).toEqual(['task-new', 'priority-new']);
@@ -172,13 +172,13 @@ describe('time task form', () => {
   it('selects a new priority created over the task form', async () => {
     const user = userEvent.setup();
     await openFromMenu(user, 'Zadanie');
-    await user.click(screen.getByRole('button', { name: 'Nowy priorytet' }));
+    await user.click(screen.getByRole('button', { name: 'Nowy' }));
     await waitFor(() => expect(dialogs()).toHaveLength(2));
     const form = topDialog();
 
     await user.type(form.getByRole('textbox', { name: 'Nazwa' }), 'Pilny');
     await user.click(form.getByRole('radio', { name: '7' }));
-    await user.click(form.getByRole('button', { name: 'Dodaj priorytet' }));
+    await user.click(form.getByRole('button', { name: 'Dodaj' }));
 
     await waitFor(() => expect(modalsInUrl()).toEqual(['task-new']));
     const form2 = within(screen.getByRole('dialog'));

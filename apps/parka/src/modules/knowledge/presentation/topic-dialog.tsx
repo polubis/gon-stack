@@ -114,7 +114,7 @@ export const TopicDialog = ({ modal, topic, catalogId, defaultDay }: Props) => {
               onClick={() => openModal(newModal('catalog'))}
               className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium text-brand hover:bg-brand-softer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             >
-              <Plus className="h-3 w-3" aria-hidden="true" /> Nowy katalog
+              <Plus className="h-3 w-3" aria-hidden="true" /> Katalog
             </button>
           }
         >
@@ -160,7 +160,7 @@ export const TopicDialog = ({ modal, topic, catalogId, defaultDay }: Props) => {
               onClick={() => openModal(newModal('tag'))}
               className="pressable inline-flex min-h-9 items-center gap-1 rounded-full border border-dashed border-line-strong px-3 text-sm text-ink-soft hover:bg-brand-softer focus-visible:outline-2 focus-visible:outline-brand"
             >
-              <Plus className="h-4 w-4" aria-hidden="true" /> Nowy tag
+              <Plus className="h-4 w-4" aria-hidden="true" /> Tag
             </button>
           </div>
         </div>
@@ -182,7 +182,7 @@ export const TopicDialog = ({ modal, topic, catalogId, defaultDay }: Props) => {
                 className="w-auto shrink-0 px-3 py-2"
                 onClick={() => setDay('')}
               >
-                Do backlogu
+                Backlog
               </Button>
             ) : null}
           </div>

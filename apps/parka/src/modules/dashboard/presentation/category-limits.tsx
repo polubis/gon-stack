@@ -34,7 +34,7 @@ export const CategoryLimits = ({
           data-e2e="dashboard:limit-new"
           onClick={onAdd}
         >
-          <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj limit
+          <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj
         </Button>
       }
     />

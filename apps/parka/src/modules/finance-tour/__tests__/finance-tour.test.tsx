@@ -89,9 +89,7 @@ describe('Finance tour works when', () => {
       'Stałe płatności same się dopiszą',
       'Raport w jednym kliknięciu',
     ]) {
-      await user.click(
-        screen.getByRole('button', { name: /Pokaż więcej|Dalej/ }),
-      );
+      await user.click(screen.getByRole('button', { name: /Więcej|Dalej/ }));
       screen.getByRole('heading', { name: title });
     }
     await user.click(screen.getByRole('button', { name: 'Zaczynamy' }));
@@ -156,7 +154,7 @@ describe('Finance tour works when', () => {
     await screen.findByRole('alert');
     mockBackend(null, true);
 
-    await user.click(screen.getByRole('button', { name: 'Spróbuj ponownie' }));
+    await user.click(screen.getByRole('button', { name: 'Ponów' }));
 
     await waitFor(() => expect(saved).toHaveLength(2));
   });

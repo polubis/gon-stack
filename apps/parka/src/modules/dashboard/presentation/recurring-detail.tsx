@@ -98,7 +98,7 @@ export const RecurringDetail = ({
           action="edit"
           title={`Zapisać zmiany w „${recurring.name}”?`}
           subject="Wybierz, które płatności tej serii objąć zmianą. Samo naliczanie nie zmienia się."
-          confirmLabel="Zapisz zmiany"
+          confirmLabel="Zapisz"
           onClose={() => setPending(null)}
           onConfirm={(scope) => {
             ctx.updateRecurring(pending, period, scope, upcoming.date);

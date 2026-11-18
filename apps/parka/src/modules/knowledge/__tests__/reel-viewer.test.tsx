@@ -213,7 +213,7 @@ describe('reel viewer', () => {
       'KNOWLEDGE_REELS_LOAD_FAILED',
     );
     backend.state.failReelReads = false;
-    await user.click(alert.getByRole('button', { name: 'Spróbuj ponownie' }));
+    await user.click(alert.getByRole('button', { name: 'Ponów' }));
     expect(await screen.findByText('Pierwsza')).toBeVisible();
   });
 

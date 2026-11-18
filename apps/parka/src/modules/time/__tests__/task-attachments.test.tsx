@@ -126,7 +126,12 @@ describe('task attachments', () => {
     const details = await openDetails(user);
 
     expect(await details.findByText('Załączniki (5/5)')).toBeVisible();
-    expect(details.getByRole('button', { name: 'Dodaj plik' })).toBeDisabled();
+    expect(
+      within(details.getByRole('region', { name: 'Załączniki' })).getByRole(
+        'button',
+        { name: 'Dodaj' },
+      ),
+    ).toBeDisabled();
   });
 
   it('shows an error toast with retry when the upload fails', async () => {
@@ -139,7 +144,7 @@ describe('task attachments', () => {
     await pick(details, new File(['x'], 'a.txt', { type: 'text/plain' }));
 
     expect(await screen.findByText('ATTACHMENT_UPLOAD')).toBeVisible();
-    expect(screen.getByRole('button', { name: /ponownie/i })).toBeVisible();
+    expect(screen.getByRole('button', { name: /ponów/i })).toBeVisible();
     expect(details.queryByRole('link', { name: 'a.txt' })).toBeNull();
   });
 
@@ -242,7 +247,7 @@ describe('task attachments', () => {
     await details.findByText('ATTACHMENTS_LOAD');
     backend.state.failAttachmentReads = false;
 
-    await user.click(details.getByRole('button', { name: 'Spróbuj ponownie' }));
+    await user.click(details.getByRole('button', { name: 'Ponów' }));
 
     expect(
       await details.findByRole('link', { name: 'umowa.pdf' }),
@@ -423,12 +428,13 @@ describe('image attachments', () => {
         /Dodaj zdjęcie, wideo \(do 20 MB\), PDF lub plik tekstowy/,
       ),
     ).toBeVisible();
+    expect(within(empty).getByRole('button', { name: 'Dodaj' })).toBeVisible();
     expect(
-      within(empty).getByRole('button', { name: 'Dodaj plik' }),
-    ).toBeVisible();
-    expect(details.getAllByRole('button', { name: 'Dodaj plik' })).toHaveLength(
-      1,
-    );
+      within(details.getByRole('region', { name: 'Załączniki' })).getAllByRole(
+        'button',
+        { name: 'Dodaj' },
+      ),
+    ).toHaveLength(1);
   });
 
   it('shows the upload error outside the popup while it stays open', async () => {
@@ -539,9 +545,7 @@ describe('video attachments', () => {
       new File(['frames'], 'demo.mp4', { type: 'video/mp4' }),
     );
     const trim = await screen.findByRole('dialog', { name: 'Przytnij wideo' });
-    await user.click(
-      within(trim).getByRole('button', { name: 'Dodaj bez przycinania' }),
-    );
+    await user.click(within(trim).getByRole('button', { name: 'Pomiń' }));
 
     expect(await details.findByText('Zapisywanie…')).toBeVisible();
     expect(backend.state.attachments['t-1']).toHaveLength(1);
@@ -640,7 +644,7 @@ describe('video attachments', () => {
     expect(
       details.queryByRole('link', { name: 'plik-3.pdf' }),
     ).not.toBeInTheDocument();
-    await user.click(details.getByRole('button', { name: 'Pokaż więcej (1)' }));
+    await user.click(details.getByRole('button', { name: 'Więcej (1)' }));
     expect(details.getByRole('link', { name: 'plik-3.pdf' })).toBeVisible();
   });
 });

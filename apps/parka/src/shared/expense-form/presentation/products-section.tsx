@@ -52,7 +52,7 @@ export const ProductsSection = ({
           onClick={addProduct}
           className="inline-flex items-center gap-1 text-sm font-medium text-brand-dark"
         >
-          <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj produkt
+          <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj
         </button>
       </div>
 

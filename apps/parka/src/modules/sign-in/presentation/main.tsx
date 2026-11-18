@@ -78,7 +78,7 @@ const SignInView = () => {
           ) : null}
 
           <Button type="submit" data-e2e="auth:submit" disabled={pending}>
-            {pending ? 'Chwila…' : 'Zaloguj się'}
+            {pending ? 'Chwila…' : 'Zaloguj'}
           </Button>
         </form>
 
@@ -97,7 +97,7 @@ const SignInView = () => {
             href={APP_ROUTER.signUp()}
             className="font-semibold text-brand-dark underline"
           >
-            Zarejestruj się
+            Zarejestruj
           </a>
         </p>
       </div>

@@ -28,7 +28,7 @@ const stubExpenses = () => {
 
 const openAllExpenses = async (user: ReturnType<typeof userEvent.setup>) => {
   await screen.findByText('Sklep 2');
-  await user.click(screen.getByRole('button', { name: 'Pokaż wszystkie' }));
+  await user.click(screen.getByRole('button', { name: 'Wszystkie' }));
   return within(await screen.findByRole('dialog'));
 };
 

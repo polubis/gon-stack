@@ -274,9 +274,7 @@ describe('voice dictation into a text field', () => {
     render(<Form />);
     await userEvent.click(mic());
     say('kup mleko');
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Zakończ dyktowanie' }),
-    );
+    await userEvent.click(screen.getByRole('button', { name: 'Zakończ' }));
   };
 
   it('keeps the preview after listening stops', async () => {
@@ -289,7 +287,7 @@ describe('voice dictation into a text field', () => {
   it('continues dictating after listening stopped', async () => {
     await stopListening();
 
-    await userEvent.click(screen.getByRole('button', { name: 'Dyktuj dalej' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Dyktuj' }));
     say('i chleb');
     await userEvent.click(screen.getByRole('button', { name: 'Wstaw' }));
 
@@ -433,10 +431,8 @@ describe('resuming after a pause on a phone', () => {
     say('kup');
     say('kup', 'mleko');
     say('kup', 'mleko', 'prawda');
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Zakończ dyktowanie' }),
-    );
-    await userEvent.click(screen.getByRole('button', { name: 'Dyktuj dalej' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Zakończ' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Dyktuj' }));
     say('kup', 'mleko', 'prawda', 'ale');
     await userEvent.click(screen.getByRole('button', { name: 'Wstaw' }));
 
@@ -449,10 +445,8 @@ describe('resuming after a pause on a phone', () => {
 
     await userEvent.click(mic());
     say('kup', 'mleko', 'prawda');
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Zakończ dyktowanie' }),
-    );
-    await userEvent.click(screen.getByRole('button', { name: 'Dyktuj dalej' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Zakończ' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Dyktuj' }));
     say('prawda');
     await userEvent.click(screen.getByRole('button', { name: 'Wstaw' }));
 
@@ -482,10 +476,8 @@ describe('editing while dictating', () => {
     say('kup');
     await userEvent.clear(preview());
     await userEvent.type(preview(), 'mleko');
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Zakończ dyktowanie' }),
-    );
-    await userEvent.click(screen.getByRole('button', { name: 'Dyktuj dalej' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Zakończ' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Dyktuj' }));
     say('chleb');
 
     expect(preview()).toHaveValue('mleko chleb');

@@ -13,6 +13,16 @@ import {
   vi,
 } from 'vitest';
 
+const submitButton = () =>
+  screen
+    .getAllByRole('button', { name: 'Dodaj' })
+    .find((button) => button.getAttribute('type') === 'submit')!;
+
+const addProductButton = () =>
+  within(screen.getByRole('region', { name: /Produkty/ })).getByRole('button', {
+    name: 'Dodaj',
+  });
+
 const { navigateTo } = vi.hoisted(() => ({ navigateTo: vi.fn() }));
 
 vi.mock('@/shared/router/navigation', async (importOriginal) => ({
@@ -93,7 +103,7 @@ describe('editing an expense on its own page', () => {
     expect(screen.getByLabelText('Metoda płatności')).toHaveValue('Karta');
     expect(screen.getByText('Produkty (1)')).toBeVisible();
     expect(screen.getByRole('button', { name: /Chleb/ })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Dodaj produkt' })).toBeEnabled();
+    expect(addProductButton()).toBeEnabled();
     expect(
       screen.queryByRole('tab', { name: 'Cykliczny' }),
     ).not.toBeInTheDocument();
@@ -126,7 +136,7 @@ describe('editing an expense on its own page', () => {
     const user = await open();
     await screen.findByLabelText('Sklep');
 
-    await user.click(screen.getByRole('button', { name: 'Zapisz zmiany' }));
+    await user.click(screen.getByRole('button', { name: 'Zapisz' }));
     expect(written).toHaveLength(0);
     const choice = within(
       await screen.findByRole('dialog', { name: /Zapisać zmiany/ }),
@@ -134,7 +144,7 @@ describe('editing an expense on its own page', () => {
     await user.click(
       choice.getByRole('radio', { name: /Edytuj ten i następne/ }),
     );
-    await user.click(choice.getByRole('button', { name: 'Zapisz zmiany' }));
+    await user.click(choice.getByRole('button', { name: 'Zapisz' }));
 
     await waitFor(() => expect(written).toHaveLength(1));
     expect(written[0]).toMatchObject({
@@ -149,14 +159,14 @@ describe('editing an expense on its own page', () => {
     const user = await open();
     await screen.findByLabelText('Sklep');
 
-    await user.click(screen.getByRole('button', { name: 'Dodaj produkt' }));
+    await user.click(addProductButton());
     await user.type(screen.getByLabelText('Nazwa produktu'), 'Masło');
     await user.type(screen.getByLabelText('Cena'), '7');
     await user.click(screen.getByRole('button', { name: 'Gotowe' }));
     await waitFor(() =>
       expect(screen.queryByLabelText('Nazwa produktu')).not.toBeInTheDocument(),
     );
-    await user.click(screen.getByRole('button', { name: 'Zapisz zmiany' }));
+    await user.click(screen.getByRole('button', { name: 'Zapisz' }));
 
     await waitFor(() => expect(written).toHaveLength(1));
     expect(written[0]).toMatchObject({
@@ -174,9 +184,9 @@ describe('editing an expense on its own page', () => {
     const user = await open();
 
     await user.click(await screen.findByRole('button', { name: /Chleb/ }));
-    await user.click(screen.getByRole('button', { name: 'Usuń produkt' }));
+    await user.click(screen.getByRole('button', { name: 'Usuń' }));
     await screen.findByText('Produkty (0)');
-    await user.click(screen.getByRole('button', { name: 'Zapisz zmiany' }));
+    await user.click(screen.getByRole('button', { name: 'Zapisz' }));
 
     await waitFor(() => expect(written).toHaveLength(1));
     expect(written[0]).toMatchObject({ items: [] });
@@ -186,9 +196,7 @@ describe('editing an expense on its own page', () => {
     mockBackend([STORED], 500);
     const user = await open();
 
-    await user.click(
-      await screen.findByRole('button', { name: 'Zapisz zmiany' }),
-    );
+    await user.click(await screen.findByRole('button', { name: 'Zapisz' }));
 
     expect(await screen.findByText(/boom/)).toBeVisible();
     expect(navigateTo).not.toHaveBeenCalled();
@@ -237,13 +245,13 @@ describe('duplicating an expense', () => {
     expect(screen.getByLabelText('Sklep')).toHaveValue('Piekarnia');
     expect(screen.getByLabelText('Metoda płatności')).toHaveValue('Karta');
     expect(screen.getByRole('button', { name: /Chleb/ })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Dodaj wydatek' })).toBeEnabled();
+    expect(submitButton()).toBeEnabled();
   });
 
   it('saves a new expense dated today and keeps the original', async () => {
     const { user, written } = await duplicate();
 
-    await user.click(screen.getByRole('button', { name: 'Dodaj wydatek' }));
+    await user.click(submitButton());
 
     await waitFor(() => expect(written).toHaveLength(1));
     expect(written[0]).toMatchObject({

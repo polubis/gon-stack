@@ -183,7 +183,7 @@ export const VoiceOverlay = ({
           ) : (
             <Mic className="h-3.5 w-3.5" aria-hidden="true" />
           )}
-          {listening ? 'Zakończ dyktowanie' : 'Dyktuj dalej'}
+          {listening ? 'Zakończ' : 'Dyktuj'}
         </button>
         <div className="flex w-full gap-2">
           <button

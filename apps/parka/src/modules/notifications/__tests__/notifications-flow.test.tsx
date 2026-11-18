@@ -244,9 +244,7 @@ describe('notifications screen', () => {
 
     await waitFor(() => expect(screen.getByRole('alert')).toBeTruthy());
     expect(screen.getByText('NOTIFICATIONS_LOAD')).toBeTruthy();
-    expect(
-      screen.getByRole('button', { name: 'Spróbuj ponownie' }),
-    ).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Ponów' })).toBeTruthy();
   });
 });
 
@@ -272,16 +270,12 @@ describe('read state', () => {
     render(<Main />);
     await screen.findByText('Zmieniono wydatek');
 
-    await user.click(
-      screen.getAllByRole('button', { name: 'Oznacz jako przeczytane' })[0]!,
-    );
+    await user.click(screen.getAllByRole('button', { name: 'Oznacz' })[0]!);
 
     expect(await screen.findByText('11 nieprzeczytanych')).toBeTruthy();
     expect(rows()).toHaveLength(2);
     expect(screen.getByText('Przeczytane')).toBeTruthy();
-    expect(
-      screen.getAllByRole('button', { name: 'Oznacz jako przeczytane' }),
-    ).toHaveLength(1);
+    expect(screen.getAllByRole('button', { name: 'Oznacz' })).toHaveLength(1);
   });
 
   it('has no mark-all-as-read button in the header', async () => {
@@ -304,9 +298,7 @@ describe('read state', () => {
     const user = userEvent.setup();
     render(<Main />);
 
-    await user.click(
-      await screen.findByRole('button', { name: 'Oznacz jako przeczytane' }),
-    );
+    await user.click(await screen.findByRole('button', { name: 'Oznacz' }));
 
     expect(await screen.findByText('1 nieprzeczytane')).toBeTruthy();
     expect(screen.getByText('NOTIFICATION_MARK_READ_FAILED')).toBeTruthy();
@@ -360,9 +352,7 @@ describe('infinite scroll', () => {
     const user = userEvent.setup();
     render(<Main />);
 
-    await user.click(
-      await screen.findByRole('button', { name: 'Wczytaj więcej' }),
-    );
+    await user.click(await screen.findByRole('button', { name: 'Więcej' }));
 
     await waitFor(() => expect(rows()).toHaveLength(4));
   });
@@ -412,9 +402,7 @@ describe('infinite scroll', () => {
 
     await screen.findByText('NOTIFICATIONS_LOAD_MORE');
     expect(rows()).toHaveLength(1);
-    expect(
-      screen.getByRole('button', { name: 'Spróbuj ponownie' }),
-    ).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Ponów' })).toBeTruthy();
   });
 
   it('continues with the next page after the retry', async () => {
@@ -426,7 +414,7 @@ describe('infinite scroll', () => {
     scrollToEnd();
     await screen.findByText('NOTIFICATIONS_LOAD_MORE');
 
-    await user.click(screen.getByRole('button', { name: 'Spróbuj ponownie' }));
+    await user.click(screen.getByRole('button', { name: 'Ponów' }));
 
     await waitFor(() => expect(rows()).toHaveLength(2));
     expect(screen.getByText('To wszystkie powiadomienia.')).toBeTruthy();
@@ -484,9 +472,7 @@ describe('infinite scroll', () => {
       const user = userEvent.setup();
       render(<Main />);
       await startSelecting(user);
-      await user.click(
-        screen.getByRole('button', { name: 'Zaznacz wszystkie' }),
-      );
+      await user.click(screen.getByRole('button', { name: 'Zaznacz' }));
       await user.click(screen.getByRole('button', { name: 'Akcje' }));
       await user.click(
         screen.getByRole('menuitem', { name: 'Usuń zaznaczone (3)' }),
@@ -538,9 +524,7 @@ describe('infinite scroll', () => {
       const user = userEvent.setup();
       render(<Main />);
       await startSelecting(user);
-      await user.click(
-        screen.getByRole('button', { name: 'Zaznacz wszystkie' }),
-      );
+      await user.click(screen.getByRole('button', { name: 'Zaznacz' }));
       await user.click(screen.getByRole('button', { name: 'Akcje' }));
       await user.click(
         screen.getByRole('menuitem', { name: 'Usuń zaznaczone (3)' }),

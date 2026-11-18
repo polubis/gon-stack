@@ -29,7 +29,7 @@ export const PriorityPicker = ({
           className={PICKER_LINK}
         >
           <Plus className="h-3 w-3" aria-hidden="true" />
-          Nowy priorytet
+          Nowy
         </button>
       }
     >

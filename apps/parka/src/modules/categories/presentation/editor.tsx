@@ -142,7 +142,7 @@ const Form = ({ base }: FormProps) => {
               Anuluj
             </Button>
             <Button type="submit" data-e2e="categories:form-save">
-              {base ? 'Zapisz zmiany' : 'Dodaj kategorię'}
+              {base ? 'Zapisz' : 'Dodaj'}
             </Button>
           </div>
 
@@ -153,7 +153,7 @@ const Form = ({ base }: FormProps) => {
                 data-e2e="categories:form-delete"
                 onClick={deleting.open}
               >
-                <Trash2 className="h-4 w-4" aria-hidden="true" /> Usuń kategorię
+                <Trash2 className="h-4 w-4" aria-hidden="true" /> Usuń
               </Button>
             </div>
           ) : null}
@@ -211,7 +211,7 @@ export const Main = () => {
           description="Ta kategoria nie istnieje lub została już usunięta."
           onRetry={ctx.load}
           backHref={APP_ROUTER.categories()}
-          backLabel="Wróć do listy"
+          backLabel="Wróć"
         />
       </div>
     );

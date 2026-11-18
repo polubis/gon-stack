@@ -36,14 +36,14 @@ export const EmptyKnowledge = () => {
             className="w-auto px-3 py-2"
           >
             <Sparkles className="size-4" aria-hidden="true" />
-            {demoBusy ? 'Wczytuję kurs…' : 'Wczytaj kurs demo'}
+            {demoBusy ? 'Wczytuję…' : 'Wczytaj'}
           </Button>
           <Button
             variant="ghost"
             onClick={() => openModal(newModal('topic'))}
             className="w-auto px-3 py-2"
           >
-            <Plus className="size-4" aria-hidden="true" /> Dodaj temat
+            <Plus className="size-4" aria-hidden="true" /> Dodaj
           </Button>
         </div>
       }
@@ -88,7 +88,7 @@ export const EmptyPeriod = () => {
           onClick={() => openModal(newModal('topic'))}
           className="w-auto px-3 py-2"
         >
-          <Plus className="size-4" aria-hidden="true" /> Dodaj temat
+          <Plus className="size-4" aria-hidden="true" /> Dodaj
         </Button>
       }
     />

@@ -72,7 +72,7 @@ const DataExportView = () => {
                 className="w-auto px-3 py-2"
                 href={APP_ROUTER.dashboard()}
               >
-                Dodaj wydatek
+                Dodaj
               </Button>
             }
           />

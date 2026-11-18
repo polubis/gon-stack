@@ -48,7 +48,7 @@ const Limit = ({ summary, period }: { summary: Summary; period: Period }) => {
         onClick={focusSection}
         className="font-semibold text-accent underline"
       >
-        Ustaw limit
+        Ustaw
       </a>
     );
   }

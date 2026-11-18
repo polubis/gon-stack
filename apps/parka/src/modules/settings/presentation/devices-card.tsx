@@ -120,11 +120,7 @@ const PhotoField = ({
         onClick={() => input.current?.click()}
       >
         <ImagePlus className="h-4 w-4" aria-hidden="true" />
-        {uploading
-          ? 'Przesyłanie…'
-          : device.photo
-            ? 'Zmień zdjęcie urządzenia'
-            : 'Dodaj zdjęcie'}
+        {uploading ? 'Przesyłanie…' : device.photo ? 'Zmień' : 'Dodaj'}
       </Button>
       {editor}
     </div>
@@ -294,7 +290,7 @@ export const DevicesCard = ({
             onClick={identify}
           >
             <LocateFixed className="h-4 w-4" aria-hidden="true" />
-            Rozpoznaj to urządzenie
+            Rozpoznaj
           </Button>
         ) : null}
       </div>

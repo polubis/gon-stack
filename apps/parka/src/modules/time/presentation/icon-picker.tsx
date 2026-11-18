@@ -104,7 +104,7 @@ const Panel = ({ value, color, onChange, close }: PanelProps) => {
                 setGroup('all');
               }}
             >
-              Wyczyść wyszukiwanie
+              Wyczyść
             </Button>
           }
         />

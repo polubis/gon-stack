@@ -1,4 +1,5 @@
 import { screen, waitFor, within } from '@testing-library/react';
+import { emptyAdd } from './empty-state';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderTime } from './render-time';
@@ -25,9 +26,7 @@ const row = (title: string) =>
   screen.findByRole('button', { name: `Edytuj zadanie: ${title}` });
 
 const openAddDialog = async (user: ReturnType<typeof userEvent.setup>) => {
-  await user.click(
-    await screen.findByRole('button', { name: 'Dodaj zadanie' }),
-  );
+  await user.click(await emptyAdd());
   return within(await screen.findByRole('dialog'));
 };
 
@@ -317,9 +316,7 @@ describe('recurring tasks', () => {
     await user.click(
       scopeDialog().getByRole('radio', { name: /Edytuj tylko następne/ }),
     );
-    await user.click(
-      scopeDialog().getByRole('button', { name: 'Zapisz zmiany' }),
-    );
+    await user.click(scopeDialog().getByRole('button', { name: 'Zapisz' }));
 
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     expect(backend.writes()[0]).toMatchObject({
