@@ -183,7 +183,7 @@ export const VideoTrimDialog = ({
               disabled={trimming}
               onClick={() => finish(file)}
             >
-              Dodaj bez przycinania
+              Pomiń
             </Button>
             <Button
               data-e2e="time:trim-save"
@@ -197,7 +197,7 @@ export const VideoTrimDialog = ({
                   aria-hidden="true"
                 />
               ) : null}
-              Przytnij i dodaj
+              Przytnij
             </Button>
           </ModalFooter>
         </Dialog.Content>

@@ -17,7 +17,7 @@ describe('privacy page', () => {
   it('links to data management', () => {
     render(<Main />);
 
-    const link = screen.getByRole('link', { name: /Zarządzaj danymi/ });
+    const link = screen.getByRole('link', { name: /Zarządzaj/ });
 
     expect(link.getAttribute('href')).toBe('/app/data-export/');
   });
@@ -39,7 +39,7 @@ describe('privacy page', () => {
     render(<Main />);
 
     const link = screen.getByRole('link', {
-      name: 'Otwórz politykę prywatności',
+      name: 'Polityka',
     });
 
     expect(link.getAttribute('href')).toBe('/privacy-policy/');

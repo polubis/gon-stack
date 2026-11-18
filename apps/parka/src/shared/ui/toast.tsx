@@ -94,7 +94,7 @@ export const Toast = ({
               }}
               className="rounded-full border border-danger-line bg-card px-3 py-1 font-semibold text-danger hover:bg-danger-faint"
             >
-              Spróbuj ponownie
+              Ponów
             </button>
           </div>
         ) : null}

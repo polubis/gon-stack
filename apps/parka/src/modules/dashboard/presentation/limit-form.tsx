@@ -142,7 +142,7 @@ export const LimitForm = ({
                 data-e2e="dashboard:limit-delete"
                 onClick={() => openModal(limitDeleteModal(limit.id))}
               >
-                Usuń limit
+                Usuń
               </Button>
             ) : null
           }

@@ -17,7 +17,7 @@ export const STEPS: WalkthroughStep[] = [
     illustration: SummaryIllustration,
     title: 'Witaj w Parce',
     body: 'Na start widzisz wydatki miesiąca, średnią dzienną i to, ile zostało do limitu.',
-    cta: 'Pokaż więcej',
+    cta: 'Więcej',
   },
   {
     id: 2 as WalkthroughStepId,

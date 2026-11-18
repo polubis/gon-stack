@@ -1,4 +1,5 @@
 import { screen, within } from '@testing-library/react';
+import { emptyAdd } from './empty-state';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderTime } from './render-time';
@@ -67,9 +68,7 @@ describe('date labels in time', () => {
   it('shows the weekday of the day chosen for a new task', async () => {
     const user = userEvent.setup();
     renderTime();
-    await user.click(
-      await screen.findByRole('button', { name: 'Dodaj zadanie' }),
-    );
+    await user.click(await emptyAdd());
 
     const dialog = within(await screen.findByRole('dialog'));
 

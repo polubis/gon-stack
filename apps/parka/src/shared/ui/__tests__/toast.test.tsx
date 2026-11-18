@@ -36,9 +36,7 @@ describe('Toast', () => {
     const retry = vi.fn();
     render(<Toast notice={failure(retry)} onClose={onClose} />);
 
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Spróbuj ponownie' }),
-    );
+    await userEvent.click(screen.getByRole('button', { name: 'Ponów' }));
 
     expect(retry).toHaveBeenCalledOnce();
     expect(onClose).toHaveBeenCalledOnce();

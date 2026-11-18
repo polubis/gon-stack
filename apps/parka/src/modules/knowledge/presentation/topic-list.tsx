@@ -64,7 +64,7 @@ const CatalogSection = ({
           data-e2e={`knowledge:topic-more:${catalog.id}`}
           onClick={() => setAll(true)}
         >
-          Pokaż więcej ({hidden})
+          Więcej ({hidden})
         </Button>
       ) : null}
     </section>

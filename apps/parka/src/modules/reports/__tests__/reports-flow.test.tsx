@@ -56,7 +56,7 @@ describe('report screen', () => {
 
     render(<Main />);
 
-    const csv = screen.getByRole('button', { name: /Pobierz CSV/ });
+    const csv = screen.getByRole('button', { name: /CSV/ });
     expect(csv).toHaveProperty('disabled', true);
     await waitFor(() => expect(csv).toHaveProperty('disabled', false));
   });

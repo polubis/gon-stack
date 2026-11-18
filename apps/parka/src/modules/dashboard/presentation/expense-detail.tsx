@@ -188,7 +188,7 @@ export const ExpenseDetail = ({
           modal={confirmId}
           title={`Usunąć wydatek „${expense.merchant}”?`}
           description="Wydatek zostanie usunięty z listy i podsumowania."
-          confirmLabel="Usuń wydatek"
+          confirmLabel="Usuń"
           onClose={confirming.close}
           onConfirm={() =>
             closeModalThen(confirmId, () => {

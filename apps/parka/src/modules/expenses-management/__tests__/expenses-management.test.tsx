@@ -21,6 +21,16 @@ import {
   vi,
 } from 'vitest';
 
+const submitButton = () =>
+  screen
+    .getAllByRole('button', { name: 'Dodaj' })
+    .find((button) => button.getAttribute('type') === 'submit')!;
+
+const addProductButton = () =>
+  within(screen.getByRole('region', { name: /Produkty/ })).getByRole('button', {
+    name: 'Dodaj',
+  });
+
 const { navigateTo, handoff } = vi.hoisted(() => ({
   navigateTo: vi.fn(),
   handoff: { file: null as File | null },
@@ -165,8 +175,7 @@ describe('adding an expense on its own page', () => {
     mockBackend();
     await open();
 
-    const bar = screen.getByRole('button', { name: 'Dodaj wydatek' })
-      .parentElement as HTMLElement;
+    const bar = submitButton().parentElement as HTMLElement;
 
     expect(bar).toHaveTextContent('Razem');
   });
@@ -189,7 +198,7 @@ describe('adding an expense on its own page', () => {
       await user.type(screen.getByLabelText('Sklep'), 'Piekarnia');
       await user.type(screen.getByLabelText('Kwota'), '25');
       setDate('2025-04-10T14:30');
-      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+      await user.click(submitButton());
 
       await waitFor(() => expect(written).toHaveLength(1));
       expect(written[0]!.body).toMatchObject({
@@ -222,7 +231,7 @@ describe('adding an expense on its own page', () => {
       await user.type(screen.getByLabelText('Sklep'), 'Piekarnia');
       await user.type(screen.getByLabelText('Kwota'), '25');
       const before = Date.now();
-      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+      await user.click(submitButton());
 
       await waitFor(() => expect(written).toHaveLength(1));
       const saved = written[0]!.body.date as string;
@@ -248,7 +257,7 @@ describe('adding an expense on its own page', () => {
       await user.type(screen.getByLabelText('Kwota'), '25');
       setDate('');
 
-      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+      await user.click(submitButton());
 
       expect(written).toHaveLength(0);
     });
@@ -259,7 +268,7 @@ describe('adding an expense on its own page', () => {
 
       await user.type(screen.getByLabelText('Sklep'), 'Piekarnia');
       await user.type(screen.getByLabelText('Kwota'), '25');
-      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+      await user.click(submitButton());
 
       await waitFor(() => expect(written).toHaveLength(1));
       expect(written[0]!.body.device).toMatchObject({
@@ -279,7 +288,7 @@ describe('adding an expense on its own page', () => {
         await user.type(screen.getByLabelText('Sklep'), merchant);
         await user.clear(screen.getByLabelText('Kwota'));
         await user.type(screen.getByLabelText('Kwota'), '5');
-        await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+        await user.click(submitButton());
         await waitFor(() => expect(written.length).toBeGreaterThan(0));
         window.history.replaceState(null, '', '/app/expenses/new/');
       }
@@ -295,7 +304,7 @@ describe('adding an expense on its own page', () => {
       await user.type(screen.getByLabelText('Sklep'), 'Piekarnia');
       await user.type(screen.getByLabelText('Kwota'), '25');
       setDate('2025-04-15T09:00');
-      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+      await user.click(submitButton());
 
       await waitFor(() =>
         expect(navigateTo).toHaveBeenCalledWith('/app/?month=2025-04'),
@@ -307,9 +316,9 @@ describe('adding an expense on its own page', () => {
       const user = await open();
       await user.type(screen.getByLabelText('Sklep'), 'Piekarnia');
 
-      await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await user.click(addProductButton());
       await closeProduct(user);
-      await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await user.click(addProductButton());
       await closeProduct(user);
 
       expect(screen.getByLabelText(/^Kwota/)).toHaveAttribute('readonly');
@@ -320,17 +329,17 @@ describe('adding an expense on its own page', () => {
       const written = mockBackend();
       const user = await open();
       await user.type(screen.getByLabelText('Sklep'), 'Piekarnia');
-      await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await user.click(addProductButton());
       await user.type(screen.getByLabelText('Nazwa produktu'), 'Chleb');
       await user.type(screen.getByLabelText('Cena'), '3,20');
       await user.clear(screen.getByLabelText('Ilość'));
       await user.type(screen.getByLabelText('Ilość'), '2');
       await closeProduct(user);
-      await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await user.click(addProductButton());
       await user.type(screen.getByLabelText('Nazwa produktu'), 'Bułka');
       await closeProduct(user);
 
-      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+      await user.click(submitButton());
 
       await waitFor(() => expect(written).toHaveLength(1));
       expect(written[0]!.body).toMatchObject({ amount: 6.4 });
@@ -341,7 +350,7 @@ describe('adding an expense on its own page', () => {
       mockBackend();
       const user = await open();
 
-      await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await user.click(addProductButton());
       await user.type(screen.getByLabelText('Nazwa produktu'), 'Chleb');
       const popup = screen.getByRole('dialog', { name: 'Chleb' });
       await user.click(within(popup).getByRole('button', { name: 'Gotowe' }));
@@ -355,7 +364,7 @@ describe('adding an expense on its own page', () => {
     it('reopens a product popup from its row', async () => {
       mockBackend();
       const user = await open();
-      await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await user.click(addProductButton());
       await user.type(screen.getByLabelText('Nazwa produktu'), 'Chleb');
       await closeProduct(user);
 
@@ -368,9 +377,9 @@ describe('adding an expense on its own page', () => {
       mockBackend();
       const user = await open();
 
-      await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await user.click(addProductButton());
       await user.type(screen.getByLabelText('Cena'), '10');
-      await user.click(screen.getByRole('button', { name: 'Usuń produkt' }));
+      await user.click(screen.getByRole('button', { name: 'Usuń' }));
 
       expect(await screen.findByText('Produkty (0)')).toBeVisible();
       expect(screen.getByLabelText('Kwota')).not.toHaveAttribute('readonly');
@@ -381,14 +390,14 @@ describe('adding an expense on its own page', () => {
         user: Awaited<ReturnType<typeof open>>,
       ) => {
         await user.type(screen.getByLabelText('Sklep'), 'Sklep');
-        await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+        await user.click(submitButton());
       };
 
       it('takes the category of the only product', async () => {
         const written = mockBackend([CATEGORY, OTHER]);
         const user = await open();
 
-        await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+        await user.click(addProductButton());
         await user.type(screen.getByLabelText('Nazwa produktu'), 'Kino');
         await pickOption(
           user,
@@ -407,7 +416,7 @@ describe('adding an expense on its own page', () => {
         const written = mockBackend([CATEGORY, OTHER]);
         const user = await open();
 
-        await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+        await user.click(addProductButton());
         await user.type(screen.getByLabelText('Nazwa produktu'), 'Chleb');
         await pickOption(
           user,
@@ -415,7 +424,7 @@ describe('adding an expense on its own page', () => {
           'Spożywcze',
         );
         await closeProduct(user);
-        await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+        await user.click(addProductButton());
         await user.type(screen.getByLabelText('Nazwa produktu'), 'Kino');
         await closeProduct(user);
 
@@ -429,7 +438,7 @@ describe('adding an expense on its own page', () => {
         mockBackend([CATEGORY, OTHER]);
         const user = await open();
 
-        await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+        await user.click(addProductButton());
 
         expect(
           screen.queryByRole('combobox', { name: 'Kategoria' }),
@@ -439,9 +448,9 @@ describe('adding an expense on its own page', () => {
       it('lets the user pick again after removing every product', async () => {
         mockBackend([CATEGORY, OTHER]);
         const user = await open();
-        await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+        await user.click(addProductButton());
 
-        await user.click(screen.getByRole('button', { name: 'Usuń produkt' }));
+        await user.click(screen.getByRole('button', { name: 'Usuń' }));
 
         expect(
           screen.getByRole('combobox', { name: 'Kategoria' }),
@@ -464,14 +473,14 @@ describe('adding an expense on its own page', () => {
 
       await user.type(screen.getByLabelText('Sklep'), 'Piekarnia');
       await user.type(screen.getByLabelText('Kwota'), '25');
-      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+      await user.click(submitButton());
 
       const toast = await screen.findByRole('alert');
       expect(toast).toHaveTextContent('Nie udało się dodać wydatku');
       expect(toast).toHaveTextContent('EXPENSE_CREATE_FAILED');
       expect(toast).toHaveTextContent('x');
       expect(
-        within(toast).getByRole('button', { name: 'Spróbuj ponownie' }),
+        within(toast).getByRole('button', { name: 'Ponów' }),
       ).toBeVisible();
       expect(navigateTo).not.toHaveBeenCalled();
       expect(screen.getByLabelText('Sklep')).toHaveValue('Piekarnia');
@@ -481,12 +490,8 @@ describe('adding an expense on its own page', () => {
       mockBackend([]);
       await open();
 
-      expect(
-        screen.getByRole('link', { name: 'Dodaj kategorię' }),
-      ).toBeVisible();
-      expect(
-        screen.getByRole('button', { name: /Dodaj wydatek/ }),
-      ).toBeDisabled();
+      expect(screen.getByRole('link', { name: 'Dodaj' })).toBeVisible();
+      expect(submitButton()).toBeDisabled();
     });
   });
 
@@ -534,9 +539,7 @@ describe('adding an expense on its own page', () => {
       fireEvent.change(screen.getByLabelText(/^Koniec/), {
         target: { value: '2025-12-31' },
       });
-      await user.click(
-        screen.getByRole('button', { name: 'Dodaj wydatek cykliczny' }),
-      );
+      await user.click(submitButton());
 
       await waitFor(() =>
         expect(navigateTo).toHaveBeenCalledWith('/app/?month=2025-05'),
@@ -561,7 +564,7 @@ describe('adding an expense on its own page', () => {
       name: string,
       price: string,
     ) => {
-      await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await user.click(addProductButton());
       await user.type(screen.getByLabelText('Nazwa produktu'), name);
       await user.type(screen.getByLabelText('Cena'), price);
       await closeProduct(user);
@@ -587,9 +590,7 @@ describe('adding an expense on its own page', () => {
       await user.click(screen.getByRole('tab', { name: 'Cykliczny' }));
       await user.type(screen.getByLabelText('Nazwa'), 'Zakupy');
       await addProduct(user, 'Chleb', '12');
-      await user.click(
-        screen.getByRole('button', { name: 'Dodaj wydatek cykliczny' }),
-      );
+      await user.click(submitButton());
 
       await waitFor(() => expect(written).toHaveLength(1));
       expect(written[0]).toMatchObject({
@@ -609,11 +610,9 @@ describe('adding an expense on its own page', () => {
 
       await user.click(screen.getByRole('tab', { name: 'Cykliczny' }));
       await user.type(screen.getByLabelText('Nazwa'), 'Zakupy');
-      await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await user.click(addProductButton());
       await closeProduct(user);
-      await user.click(
-        screen.getByRole('button', { name: 'Dodaj wydatek cykliczny' }),
-      );
+      await user.click(submitButton());
 
       expect(screen.getByLabelText('Nazwa produktu')).toBeInvalid();
       expect(written).toHaveLength(0);
@@ -650,9 +649,7 @@ describe('adding an expense on its own page', () => {
 
       await upload(user, photo());
       await screen.findByLabelText('Nazwa');
-      await user.click(
-        screen.getByRole('button', { name: 'Dodaj wydatek cykliczny' }),
-      );
+      await user.click(submitButton());
 
       await waitFor(() => expect(written).toHaveLength(1));
       expect(written[0]).toMatchObject({
@@ -680,7 +677,7 @@ describe('adding an expense on its own page', () => {
       const alert = await screen.findByRole('alert');
       expect(within(alert).getByText('RECEIPT_SCAN')).toBeVisible();
       expect(
-        within(alert).getByRole('button', { name: 'Spróbuj ponownie' }),
+        within(alert).getByRole('button', { name: 'Ponów' }),
       ).toBeVisible();
     });
   });
@@ -708,7 +705,7 @@ describe('adding an expense on its own page', () => {
 
       await upload(user, photo());
       await screen.findByDisplayValue('Biedronka');
-      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+      await user.click(submitButton());
 
       await waitFor(() => expect(written).toHaveLength(1));
       expect(written[0]!.body).toMatchObject({
@@ -750,7 +747,7 @@ describe('adding an expense on its own page', () => {
 
       await upload(user, photo());
       await screen.findByDisplayValue('Biedronka');
-      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+      await user.click(submitButton());
 
       await waitFor(() => expect(written).toHaveLength(1));
       const items = written[0]!.body.items as { categoryId: string }[];
@@ -782,7 +779,7 @@ describe('adding an expense on its own page', () => {
 
       await upload(user, photo());
       await screen.findByDisplayValue('Biedronka');
-      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+      await user.click(submitButton());
 
       await waitFor(() => expect(written).toHaveLength(1));
       const items = written[0]!.body.items as { categoryId: string }[];
@@ -817,7 +814,7 @@ describe('adding an expense on its own page', () => {
 
       await upload(user, photo());
       await screen.findByDisplayValue('Biedronka');
-      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+      await user.click(submitButton());
 
       await waitFor(() => expect(written).toHaveLength(1));
       expect(written[0]!.body.date).toBe(DRAFT.date);
@@ -831,7 +828,7 @@ describe('adding an expense on its own page', () => {
       await upload(user, photo());
       await screen.findByDisplayValue('Biedronka');
       setDate('2025-03-01T18:45');
-      await user.click(screen.getByRole('button', { name: /Dodaj wydatek/ }));
+      await user.click(submitButton());
 
       await waitFor(() => expect(written).toHaveLength(1));
       expect(written[0]!.body.date).toBe(
@@ -911,9 +908,7 @@ describe('adding an expense on its own page', () => {
       await upload(user, photo());
       const alert = await screen.findByRole('alert');
 
-      await user.click(
-        within(alert).getByRole('button', { name: 'Spróbuj ponownie' }),
-      );
+      await user.click(within(alert).getByRole('button', { name: 'Ponów' }));
 
       await waitFor(() =>
         expect(screen.getByLabelText('Sklep')).toHaveValue('Biedronka'),
@@ -964,9 +959,7 @@ describe('adding an expense on its own page', () => {
       await upload(user, photo('application/pdf'));
       const alert = await screen.findByRole('alert');
 
-      await user.click(
-        within(alert).getByRole('button', { name: 'Spróbuj ponownie' }),
-      );
+      await user.click(within(alert).getByRole('button', { name: 'Ponów' }));
 
       expect(screen.getByLabelText('Sklep')).toHaveValue('');
     });

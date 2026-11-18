@@ -96,7 +96,7 @@ export const RecurringForm = ({ draft }: { draft: ReceiptDraft | null }) => {
               href={APP_ROUTER.categories()}
               className="text-sm font-medium underline"
             >
-              Dodaj kategorię
+              Dodaj
             </a>
           </Card>
         ) : null}
@@ -224,7 +224,7 @@ export const RecurringForm = ({ draft }: { draft: ReceiptDraft | null }) => {
           ) : (
             <Check className="h-4 w-4" aria-hidden="true" />
           )}{' '}
-          Dodaj wydatek cykliczny
+          Dodaj
         </Button>
       </ModalFooter>
     </form>

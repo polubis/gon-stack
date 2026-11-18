@@ -42,7 +42,7 @@ describe('sign up view', () => {
   it('links to the sign in page for existing users', () => {
     render(<Main />);
 
-    expect(screen.getByRole('link', { name: 'Zaloguj się' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Zaloguj' })).toHaveAttribute(
       'href',
       '/sign-in/',
     );
@@ -81,7 +81,7 @@ describe('sign up view', () => {
     await user.type(screen.getByLabelText('E-mail'), 'a@b.co');
     await user.type(screen.getByLabelText('Hasło'), 'secret1');
 
-    await user.click(screen.getByRole('button', { name: 'Utwórz konto' }));
+    await user.click(screen.getByRole('button', { name: 'Utwórz' }));
 
     expect(
       await screen.findByRole('button', { name: 'Chwila…' }),
@@ -104,7 +104,7 @@ describe('sign up view', () => {
     await user.type(screen.getByLabelText('E-mail'), 'a@b.co');
     await user.type(screen.getByLabelText('Hasło'), 'secret1');
 
-    await user.click(screen.getByRole('button', { name: 'Utwórz konto' }));
+    await user.click(screen.getByRole('button', { name: 'Utwórz' }));
 
     await waitFor(() => expect(navigateTo).toHaveBeenCalled());
     expect(body).toEqual({ email: 'a@b.co', password: 'secret1' });
@@ -117,7 +117,7 @@ describe('sign up view', () => {
     await user.type(screen.getByLabelText('E-mail'), 'a@b.co');
     await user.type(screen.getByLabelText('Hasło'), 'secret1');
 
-    await user.click(screen.getByRole('button', { name: 'Utwórz konto' }));
+    await user.click(screen.getByRole('button', { name: 'Utwórz' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Sign-up failed. Try again.',
@@ -131,7 +131,7 @@ describe('sign up view', () => {
     await user.type(screen.getByLabelText('E-mail'), 'a@b.co');
     await user.type(screen.getByLabelText('Hasło'), 'secret1');
 
-    await user.click(screen.getByRole('button', { name: 'Utwórz konto' }));
+    await user.click(screen.getByRole('button', { name: 'Utwórz' }));
 
     expect(await screen.findByRole('alert')).toBeInTheDocument();
     expect(navigateTo).not.toHaveBeenCalled();
@@ -143,11 +143,11 @@ describe('sign up view', () => {
     render(<Main />);
     await user.type(screen.getByLabelText('E-mail'), 'a@b.co');
     await user.type(screen.getByLabelText('Hasło'), 'secret1');
-    await user.click(screen.getByRole('button', { name: 'Utwórz konto' }));
+    await user.click(screen.getByRole('button', { name: 'Utwórz' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Taken');
 
     serve(redirect);
-    await user.click(screen.getByRole('button', { name: 'Utwórz konto' }));
+    await user.click(screen.getByRole('button', { name: 'Utwórz' }));
 
     await waitFor(() => expect(navigateTo).toHaveBeenCalledTimes(1));
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
@@ -159,11 +159,11 @@ describe('sign up view', () => {
     render(<Main />);
     await user.type(screen.getByLabelText('E-mail'), 'a@b.co');
     await user.type(screen.getByLabelText('Hasło'), 'secret1');
-    await user.click(screen.getByRole('button', { name: 'Utwórz konto' }));
+    await user.click(screen.getByRole('button', { name: 'Utwórz' }));
     expect(await screen.findByRole('status')).toBeInTheDocument();
 
     serve(() => rejection('Taken'));
-    await user.click(screen.getByRole('button', { name: 'Utwórz konto' }));
+    await user.click(screen.getByRole('button', { name: 'Utwórz' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Taken');
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
@@ -189,13 +189,13 @@ describe('sign up view', () => {
     const user = userEvent.setup();
     render(<Main />);
     await user.type(screen.getByLabelText('E-mail'), 'nope');
-    await user.click(screen.getByRole('button', { name: 'Utwórz konto' }));
+    await user.click(screen.getByRole('button', { name: 'Utwórz' }));
     expect(await screen.findByRole('alert')).toBeInTheDocument();
 
     await user.clear(screen.getByLabelText('E-mail'));
     await user.type(screen.getByLabelText('E-mail'), 'a@b.co');
     await user.type(screen.getByLabelText('Hasło'), 'secret1');
-    await user.click(screen.getByRole('button', { name: 'Utwórz konto' }));
+    await user.click(screen.getByRole('button', { name: 'Utwórz' }));
 
     await waitFor(() => expect(navigateTo).toHaveBeenCalled());
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();

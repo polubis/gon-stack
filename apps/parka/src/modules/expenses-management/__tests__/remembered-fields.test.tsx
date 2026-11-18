@@ -16,6 +16,11 @@ import {
   vi,
 } from 'vitest';
 
+const submitButton = () =>
+  screen
+    .getAllByRole('button', { name: 'Dodaj' })
+    .find((button) => button.getAttribute('type') === 'submit')!;
+
 const { navigateTo } = vi.hoisted(() => ({ navigateTo: vi.fn() }));
 
 vi.mock('@/shared/router/navigation', async (importOriginal) => ({
@@ -86,7 +91,7 @@ const addExpense = async (
   await user.clear(screen.getByLabelText('Metoda płatności'));
   if (method)
     await user.type(screen.getByLabelText('Metoda płatności'), method);
-  await user.click(screen.getByRole('button', { name: 'Dodaj wydatek' }));
+  await user.click(submitButton());
   await waitFor(() => expect(navigateTo).toHaveBeenCalled());
 };
 

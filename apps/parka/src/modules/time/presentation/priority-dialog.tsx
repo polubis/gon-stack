@@ -102,7 +102,7 @@ export const PriorityDialog = ({ modal }: { modal: string }) => {
           <Button variant="ghost" onClick={() => closeModal(modal)}>
             Anuluj
           </Button>
-          <Button type="submit">Dodaj priorytet</Button>
+          <Button type="submit">Dodaj</Button>
         </ModalFooter>
       </form>
     </ModalShell>

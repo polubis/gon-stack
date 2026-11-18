@@ -15,7 +15,7 @@ export const ProtectedScreen = () => (
       Zaloguj się, aby korzystać z aplikacji.
     </p>
     <div className="w-full max-w-xs">
-      <Button href={APP_ROUTER.signIn()}>Przejdź do logowania</Button>
+      <Button href={APP_ROUTER.signIn()}>Zaloguj</Button>
     </div>
   </main>
 );

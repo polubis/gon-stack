@@ -24,9 +24,7 @@ describe('task category icon picker', () => {
     await open();
     await userEvent.type(screen.getByLabelText('Szukaj ikony'), 'zzzz');
 
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Wyczyść wyszukiwanie' }),
-    );
+    await userEvent.click(screen.getByRole('button', { name: 'Wyczyść' }));
 
     expect(screen.queryByRole('heading', { name: 'Brak ikon' })).toBeNull();
     expect(screen.getByRole('button', { name: 'Kino' })).toBeTruthy();

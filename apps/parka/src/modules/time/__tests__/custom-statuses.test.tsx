@@ -45,7 +45,7 @@ describe('custom task statuses', () => {
     renderTime();
 
     const dialog = within(await openEditor(user));
-    await user.click(dialog.getByRole('button', { name: 'Dodaj status' }));
+    await user.click(dialog.getByRole('button', { name: 'Dodaj' }));
     await user.type(
       dialog.getByRole('textbox', { name: 'Nazwa statusu 2' }),
       'Review',
@@ -67,7 +67,7 @@ describe('custom task statuses', () => {
     const user = userEvent.setup();
     renderTime();
     const dialog = within(await openEditor(user));
-    await user.click(dialog.getByRole('button', { name: 'Dodaj status' }));
+    await user.click(dialog.getByRole('button', { name: 'Dodaj' }));
 
     await user.click(dialog.getByRole('button', { name: 'Zapisz' }));
 
@@ -79,7 +79,7 @@ describe('custom task statuses', () => {
     const user = userEvent.setup();
     renderTime();
     const dialog = within(await openEditor(user));
-    await user.click(dialog.getByRole('button', { name: 'Dodaj status' }));
+    await user.click(dialog.getByRole('button', { name: 'Dodaj' }));
     await user.type(
       dialog.getByRole('textbox', { name: 'Nazwa statusu 2' }),
       'w trakcie',

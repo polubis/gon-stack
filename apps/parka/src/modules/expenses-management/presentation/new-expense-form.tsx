@@ -55,7 +55,7 @@ export const NewExpenseForm = ({
       categories={categories}
       saving={saving}
       prefill={!source}
-      submitLabel="Dodaj wydatek"
+      submitLabel="Dodaj"
       onSubmit={(values) =>
         ctx.createExpense({
           ...values,

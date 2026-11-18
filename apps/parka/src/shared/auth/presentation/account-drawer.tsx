@@ -191,7 +191,7 @@ const Options = ({
           onClick={onRetry}
           className={cn(ITEM, 'justify-center font-semibold')}
         >
-          Spróbuj ponownie
+          Ponów
         </button>
       </div>
     );
@@ -240,7 +240,7 @@ const Options = ({
         className={ITEM}
       >
         <UserPlus className="size-4" aria-hidden="true" />
-        {full ? `Limit kont: ${MAX_ACCOUNTS}` : 'Dodaj konto'}
+        {full ? `Limit kont: ${MAX_ACCOUNTS}` : 'Dodaj'}
       </a>
       <button
         type="button"
@@ -250,7 +250,7 @@ const Options = ({
         className={ITEM}
       >
         <LogOut className="size-4" aria-hidden="true" />
-        Wyloguj to konto
+        Wyloguj
       </button>
       {items.length > 1 ? (
         <button
@@ -261,7 +261,7 @@ const Options = ({
           className={ITEM}
         >
           <Users className="size-4" aria-hidden="true" />
-          Wyloguj ze wszystkich
+          Wszędzie
         </button>
       ) : null}
     </>

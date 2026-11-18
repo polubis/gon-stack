@@ -354,7 +354,7 @@ export const TaskComments = ({ taskId }: { taskId: TaskId }) => {
       disabled={!items}
       onClick={() => setComposing(true)}
     >
-      Dodaj komentarz
+      Dodaj
     </Button>
   );
 
@@ -395,7 +395,7 @@ export const TaskComments = ({ taskId }: { taskId: TaskId }) => {
               setAttempt((n) => n + 1);
             }}
           >
-            Spróbuj ponownie
+            Ponów
           </Button>
         </div>
       ) : !loaded ? (

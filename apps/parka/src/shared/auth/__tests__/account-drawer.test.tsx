@@ -234,15 +234,12 @@ describe('account drawer', () => {
     backend();
     await openMenu();
 
-    expect(
-      await screen.findByRole('link', { name: 'Dodaj konto' }),
-    ).toHaveAttribute('href', '/sign-in/');
-    expect(
-      screen.getByRole('button', { name: 'Wyloguj to konto' }),
-    ).toBeVisible();
-    expect(
-      screen.getByRole('button', { name: 'Wyloguj ze wszystkich' }),
-    ).toBeVisible();
+    expect(await screen.findByRole('link', { name: 'Dodaj' })).toHaveAttribute(
+      'href',
+      '/sign-in/',
+    );
+    expect(screen.getByRole('button', { name: 'Wyloguj' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Wszędzie' })).toBeVisible();
   });
 
   it('opens a drawer with the user name, email and an edit button', async () => {
@@ -405,7 +402,7 @@ describe('account drawer', () => {
     await openMenu();
 
     await userEvent.click(
-      await screen.findByRole('button', { name: 'Wyloguj to konto' }),
+      await screen.findByRole('button', { name: 'Wyloguj' }),
     );
 
     await waitFor(() => expect(assign).toHaveBeenCalledWith('/sign-in/'));
@@ -426,7 +423,7 @@ describe('account drawer', () => {
     unsubscribe.mockClear();
 
     await userEvent.click(
-      await screen.findByRole('button', { name: 'Wyloguj to konto' }),
+      await screen.findByRole('button', { name: 'Wyloguj' }),
     );
 
     await waitFor(() => expect(unsubscribe).toHaveBeenCalledTimes(1));
@@ -452,7 +449,7 @@ describe('account drawer', () => {
     unsubscribe.mockClear();
 
     await userEvent.click(
-      await screen.findByRole('button', { name: 'Wyloguj to konto' }),
+      await screen.findByRole('button', { name: 'Wyloguj' }),
     );
 
     expect(

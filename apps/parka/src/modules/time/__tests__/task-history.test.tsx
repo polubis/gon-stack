@@ -136,7 +136,7 @@ describe('task history', () => {
     await details.findByRole('alert');
     backend.state.failHistoryReads = false;
 
-    await user.click(details.getByRole('button', { name: 'Spróbuj ponownie' }));
+    await user.click(details.getByRole('button', { name: 'Ponów' }));
 
     expect(await details.findByText('Utworzono zadanie „X”')).toBeVisible();
   });

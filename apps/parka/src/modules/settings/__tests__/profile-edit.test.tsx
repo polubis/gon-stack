@@ -121,9 +121,7 @@ describe('profile edit', () => {
     expect(
       screen.queryByRole('textbox', { name: 'Imię i nazwisko' }),
     ).toBeNull();
-    expect(
-      screen.queryByRole('button', { name: 'Zmień zdjęcie profilowe' }),
-    ).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Zmień' })).toBeNull();
   });
 
   it('does not link to the expense categories from settings', async () => {

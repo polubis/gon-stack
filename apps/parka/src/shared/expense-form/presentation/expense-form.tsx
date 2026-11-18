@@ -128,7 +128,7 @@ export const ExpenseForm = ({
                 href={APP_ROUTER.categories()}
                 className="text-sm font-medium underline"
               >
-                Dodaj kategorię
+                Dodaj
               </a>
             </Card>
           ) : null}

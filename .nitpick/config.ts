@@ -617,6 +617,10 @@ Skill ${ref('evidence')}, key = task id, out \`.evidences/<task-id>/\`.
         importance: 'A',
         doc: 'Form labels of required fields get a red asterisk (aria-hidden, `Field required`); optional fields get none',
       },
+      'ux-button-name': {
+        importance: 'A',
+        doc: 'Button names are one word only (`Dodaj`, not `Dodaj wydatek`); context comes from location, `aria-label` may stay descriptive',
+      },
       'ux-change-transitions': {
         importance: 'A',
         doc: 'Every create/update/delete shows a transition on the changed item: create fades + slides in, update flashes a brief highlight, delete fades + slides out and neighbours glide into the gap. All disabled with `motion-reduce`, no jumping UI',

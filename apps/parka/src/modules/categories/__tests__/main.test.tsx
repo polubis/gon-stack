@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
@@ -52,9 +52,7 @@ describe('categories screen', () => {
     const created = setup([GROCERIES]);
     await screen.findByRole('link', { name: /Edytuj kategorię/ });
 
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Dodaj wszystkie' }),
-    );
+    await userEvent.click(screen.getByRole('button', { name: 'Dodaj' }));
 
     await waitFor(() => expect(created).toHaveLength(5));
     expect(created.map((c) => c.name)).not.toContain('category.groceries');
@@ -67,7 +65,7 @@ describe('categories screen', () => {
       await screen.findByText('Nie masz jeszcze kategorii'),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('link', { name: /Dodaj kategorię/ }),
+      within(screen.getByRole('status')).getByRole('link', { name: 'Dodaj' }),
     ).toBeInTheDocument();
   });
 
@@ -75,9 +73,7 @@ describe('categories screen', () => {
     const created = setup([]);
     await screen.findByText('Nie masz jeszcze kategorii');
 
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Dodaj wszystkie' }),
-    );
+    await userEvent.click(screen.getByRole('button', { name: 'Dodaj' }));
 
     await waitFor(() => expect(created).toHaveLength(6));
   });

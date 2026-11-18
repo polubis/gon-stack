@@ -57,8 +57,7 @@ export const BacklogDialog = ({ modal }: { modal: string }) => {
                 onClick={() => openModal(NEW_BACKLOG_MODAL)}
                 className="w-auto px-3 py-2"
               >
-                <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj do
-                backlogu
+                <Plus className="h-4 w-4" aria-hidden="true" /> Backlog
               </Button>
             }
           />
@@ -75,8 +74,7 @@ export const BacklogDialog = ({ modal }: { modal: string }) => {
                 onClick={() => openModal(NEW_BACKLOG_MODAL)}
                 className="w-auto px-3 py-2"
               >
-                <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj do
-                backlogu
+                <Plus className="h-4 w-4" aria-hidden="true" /> Backlog
               </Button>
             </div>
           </>
