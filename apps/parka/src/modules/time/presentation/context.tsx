@@ -93,6 +93,8 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
     statuses: facade.useStatuses(),
     initializing: facade.useInitializing(),
     loaded,
+    /** Writes in flight. */
+    pending: facade.usePending(),
     isLoading: facade.useIsLoading(),
     error: facade.useError(),
     notice: facade.useNotice(),

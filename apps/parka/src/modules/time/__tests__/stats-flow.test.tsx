@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { registerNavigator } from '@/shared/router/navigation';
@@ -165,5 +165,34 @@ describe('moves statistics', () => {
 
     expect(await within(card).findByText('3')).toBeInTheDocument();
     expect(within(card).getByText('2')).toBeInTheDocument();
+  });
+
+  it('counts two quick moves at once, without a reload', async () => {
+    const user = userEvent.setup();
+    backend.seed([
+      task({ id: 't-1', title: 'Raport' }),
+      task({ id: 't-2', title: 'Obiad' }),
+      task({ id: 't-3', title: 'Spacer' }),
+    ]);
+    backend.state.updateDelayMs = 100;
+    renderTime('day');
+    await row('Raport');
+
+    for (const title of ['Raport', 'Obiad']) {
+      await user.click(
+        await screen.findByRole('button', { name: `Więcej: ${title}` }),
+      );
+      await user.click(
+        await screen.findByRole('menuitem', {
+          name: `Przenieś na jutro: ${title}`,
+        }),
+      );
+    }
+
+    const card = (
+      await screen.findByRole('heading', { name: 'Przeniesienia' })
+    ).closest('div.rounded-3xl') as HTMLElement;
+    await waitFor(() => expect(backend.writes()).toHaveLength(2));
+    await waitFor(() => expect(within(card).getAllByText('2')).toHaveLength(2));
   });
 });
