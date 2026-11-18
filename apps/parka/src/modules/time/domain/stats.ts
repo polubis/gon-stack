@@ -1,5 +1,11 @@
 import { dayLabel, monthNameLabel, weekdayLabel } from '@/shared/date/date';
-import { daysBetween } from '@/shared/period/period';
+import {
+  addDays,
+  bucketOf,
+  daysBetween,
+  periodMonths,
+  resolvePeriod,
+} from '@/shared/period/period';
 import type { BacklogTask, Category, Priority, Task, TimeKind } from './models';
 import { priorityLevel, priorityWeight, type PriorityLevel } from './priority';
 import { gridHours, isTimed, monthGrid, rangeOf, weekDays } from './schedule';
@@ -10,8 +16,10 @@ export type StatsInput = {
   categories: readonly Category[];
   priorities: readonly Priority[];
   kind: TimeKind;
-  /** Any day inside the viewed period. */
+  /** Any day inside the viewed period; the first day of an own range. */
   anchor: string;
+  /** Last day of an own range. */
+  to?: string;
   today: string;
 };
 
@@ -77,6 +85,7 @@ const bucketsOf = (
   tasks: readonly Task[],
   kind: TimeKind,
   anchor: string,
+  last?: string,
 ): Bucket[] => {
   const fill = (
     entries: { key: string; label: string; title: string }[],
@@ -118,6 +127,29 @@ const bucketsOf = (
         })),
         (task) => task.day,
       );
+    case 'custom': {
+      const period = resolvePeriod(kind, anchor, last);
+      if (bucketOf(period) === 'month')
+        return fill(
+          periodMonths(period).map((month) => ({
+            key: month,
+            label: `${monthNameLabel(Number(month.slice(5)) - 1, 'short')} ${month.slice(2, 4)}`,
+            title: `${monthNameLabel(Number(month.slice(5)) - 1)} ${month.slice(0, 4)}`,
+          })),
+          (task) => task.day.slice(0, 7),
+        );
+      return fill(
+        Array.from(
+          { length: daysBetween(period.from, period.to) + 1 },
+          (_, i) => addDays(period.from, i),
+        ).map((day) => ({
+          key: day,
+          label: String(Number(day.slice(8))),
+          title: dayLabel(day, 'long', false),
+        })),
+        (task) => task.day,
+      );
+    }
     case 'year':
       return fill(
         Array.from({ length: 12 }, (_, index) => ({
@@ -138,9 +170,10 @@ export const taskStats = ({
   priorities,
   kind,
   anchor,
+  to: last,
   today,
 }: StatsInput): TaskStats => {
-  const { from, to } = rangeOf(kind, anchor);
+  const { from, to } = rangeOf(kind, anchor, last);
   const tasks = all.filter((task) => task.day >= from && task.day <= to);
   const total = tasks.length;
   const done = tasks.filter((task) => task.done).length;
@@ -195,7 +228,7 @@ export const taskStats = ({
     backlog: backlog.length,
     byCategory,
     byPriority,
-    buckets: bucketsOf(tasks, kind, anchor),
+    buckets: bucketsOf(tasks, kind, anchor, last),
     busiest: kind === 'day' ? null : busiest,
     active,
   };

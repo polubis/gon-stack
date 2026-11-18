@@ -1,14 +1,6 @@
 export const DASHBOARD_E2E_IDS = [
   'dashboard:main',
   'dashboard:avatar-image',
-  'dashboard:period-range-dialog',
-  'dashboard:period-range-prev',
-  'dashboard:period-range-next',
-  'dashboard:period-range-month',
-  'dashboard:period-range-year',
-  'dashboard:period-range-year-prev',
-  'dashboard:period-range-year-next',
-  'dashboard:period-range-apply',
   'dashboard:total',
   'dashboard:change',
   'dashboard:daily-average',
@@ -85,8 +77,6 @@ export type DashboardDynamicE2eId =
   | `dashboard:upcoming:${string}`
   | `dashboard:limit-edit:${string | number}`
   | `dashboard:filter:${string | number}`
-  | `dashboard:period-range-day:${string}`
-  | `dashboard:period-range-month-option:${string}`
   | `dashboard:expense-device-name:${string}`
   | `dashboard:add-option:${string}`
   | `dashboard:dialog-close:${string}`;

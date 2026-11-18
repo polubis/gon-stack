@@ -130,7 +130,7 @@ export type Recurring = {
   endDate: string | null;
 };
 
-export type TimeKind = 'day' | 'week' | 'month' | 'year';
+export type TimeKind = 'day' | 'week' | 'month' | 'year' | 'custom';
 
 export type NoticeBody =
   | {

@@ -8,7 +8,8 @@ export const FEATURE_NAME = 'Time';
 export const TIME_KINDS: readonly {
   kind: TimeKind;
   label: string;
-  href: (date: string) => string;
+  /** `to` closes an own range that starts on `date`. */
+  href: (date: string, to: string) => string;
 }[] = [
   { kind: 'day', label: 'Dzień', href: (date) => APP_ROUTER.time({ date }) },
   {
@@ -22,6 +23,11 @@ export const TIME_KINDS: readonly {
     href: (date) => APP_ROUTER.timeMonth({ date }),
   },
   { kind: 'year', label: 'Rok', href: (date) => APP_ROUTER.timeYear({ date }) },
+  {
+    kind: 'custom',
+    label: 'Własny',
+    href: (from, to) => APP_ROUTER.timeRange({ from, to }),
+  },
 ];
 
 /** Query param holding the viewed day. */

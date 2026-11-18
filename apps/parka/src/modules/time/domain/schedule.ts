@@ -1,4 +1,8 @@
-import { addDays, periodContaining } from '@/shared/period/period';
+import {
+  addDays,
+  periodContaining,
+  resolvePeriod,
+} from '@/shared/period/period';
 import type { TaskSort } from './filters';
 import type { Priority, Task, TimeKind } from './models';
 import { priorityWeight } from './priority';
@@ -97,8 +101,11 @@ export const gridHours = (tasks: readonly Task[]): number[] => {
   return Array.from({ length: last - first + 1 }, (_, i) => first + i);
 };
 
-/** First and last day (inclusive) of the period of `kind` around `anchor`. */
-export const rangeOf = (kind: TimeKind, anchor: string) => {
-  const { from, to } = periodContaining(kind, anchor);
+/**
+ * First and last day (inclusive) of the period of `kind` around `anchor`; an
+ * own range starts on `anchor` and ends on `last`.
+ */
+export const rangeOf = (kind: TimeKind, anchor: string, last?: string) => {
+  const { from, to } = resolvePeriod(kind, anchor, last);
   return { from, to };
 };

@@ -61,6 +61,13 @@ export type TimeQuery = {
   date?: string;
 };
 
+export type TimeRangeQuery = {
+  /** First day (`YYYY-MM-DD`) of the own range. */
+  from?: string;
+  /** Last day of the own range. */
+  to?: string;
+};
+
 export type CategoryEditQuery = {
   id?: string;
 };
@@ -98,6 +105,9 @@ export const APP_ROUTER = {
   timeWeek: routeWithQuery<'/app/time/week/', TimeQuery>('/app/time/week/'),
   timeMonth: routeWithQuery<'/app/time/month/', TimeQuery>('/app/time/month/'),
   timeYear: routeWithQuery<'/app/time/year/', TimeQuery>('/app/time/year/'),
+  timeRange: routeWithQuery<'/app/time/range/', TimeRangeQuery>(
+    '/app/time/range/',
+  ),
   knowledge: route('/app/knowledge/'),
   notifications: route('/app/notifications/'),
   privacy: route('/app/privacy/'),

@@ -4,7 +4,7 @@ import {
   monthNameLabel,
   rangeLabel,
 } from '@/shared/date/date';
-import { periodContaining } from '@/shared/period/period';
+import { resolvePeriod } from '@/shared/period/period';
 import type { TimeKind } from './models';
 
 /**
@@ -12,12 +12,17 @@ import type { TimeKind } from './models';
  * `poniedziałek, 19 – niedziela, 25 października 2026`, `październik 2026`,
  * `2026`.
  */
-export const periodTitle = (kind: TimeKind, anchor: string): string => {
-  const { from, to } = periodContaining(kind, anchor);
+export const periodTitle = (
+  kind: TimeKind,
+  anchor: string,
+  last?: string,
+): string => {
+  const { from, to } = resolvePeriod(kind, anchor, last);
   switch (kind) {
     case 'day':
       return dayLabel(from, 'long');
     case 'week':
+    case 'custom':
       return rangeLabel(from, to, 'long');
     case 'month':
       return monthLabel(from.slice(0, 7));

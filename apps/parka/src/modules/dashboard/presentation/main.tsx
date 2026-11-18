@@ -27,7 +27,7 @@ import { LimitsCard } from './limits-card';
 import { expenseModal, expenseOfModal } from './modal-ids';
 import { MonthExpenses } from './month-expenses';
 import { Header } from './header';
-import { PeriodRangeDialog } from './period-range-dialog';
+import { PeriodRangeDialog } from '@/shared/period-control/presentation/period-range-dialog';
 import { PeriodControl } from '@/shared/period-control/presentation/period-control';
 import { TotalHero } from './total-hero';
 import { RecurringDetail } from './recurring-detail';

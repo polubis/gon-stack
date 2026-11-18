@@ -356,8 +356,8 @@ const MovesCard = ({ moves }: { moves: MoveStats }) => (
  * write in flight: the history row exists once the server has answered.
  */
 const useMoves = (kind: TimeKind): MoveStats => {
-  const { tasks, anchor, pending } = useContext();
-  const { from, to } = rangeOf(kind, anchor);
+  const { tasks, anchor, rangeTo, pending } = useContext();
+  const { from, to } = rangeOf(kind, anchor, rangeTo);
   const [moves, setMoves] = useState<Move[]>([]);
   useEffect(() => {
     if (pending > 0) return;
@@ -377,7 +377,8 @@ const useMoves = (kind: TimeKind): MoveStats => {
 };
 
 const useStats = (kind: TimeKind): TaskStats => {
-  const { tasks, backlog, categories, priorities, now, anchor } = useContext();
+  const { tasks, backlog, categories, priorities, now, anchor, rangeTo } =
+    useContext();
   return taskStats({
     tasks,
     backlog,
@@ -385,6 +386,7 @@ const useStats = (kind: TimeKind): TaskStats => {
     priorities,
     kind,
     anchor,
+    to: rangeTo,
     today: now.day,
   });
 };

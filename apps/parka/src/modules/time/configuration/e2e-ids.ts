@@ -3,6 +3,7 @@ export const TIME_E2E_IDS = [
   'time:week',
   'time:month',
   'time:year',
+  'time:custom',
   'time:main',
   'time:toast',
   'time:load-error',
@@ -112,6 +113,7 @@ export type TimeDynamicE2eId =
   | `time:form-icon:${string}`
   | `time:form-color-option:${string}`
   | `time:add-day:${string}`
+  | `time:range-day:${string}`
   | `time:task:${string | number}`
   | `time:task-key:${string | number}`
   | `time:task-done:${string | number}`

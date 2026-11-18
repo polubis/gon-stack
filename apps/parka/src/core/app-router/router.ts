@@ -89,6 +89,10 @@ const timeTree = timeRoute.addChildren([
     APP_ROUTER.timeYear(),
     () => import('@/modules/time/presentation/year'),
   ),
+  timeChild(
+    APP_ROUTER.timeRange(),
+    () => import('@/modules/time/presentation/range'),
+  ),
 ]);
 
 export const router = createRouter({

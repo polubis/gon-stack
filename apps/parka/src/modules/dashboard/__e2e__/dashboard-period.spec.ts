@@ -115,50 +115,46 @@ const commands = {
   },
   'i pick the own range': ({ getByE2e }) => pickKind(getByE2e, 'custom'),
   'i choose the whole of June of last year': async ({ getByE2e }) => {
-    const dialog = getByE2e('dashboard:period-range-dialog');
+    const dialog = getByE2e('period-control:range-dialog');
     await expect(dialog).toBeVisible();
     // Walk the calendar back to June of last year.
     for (let guard = 0; guard < 36; guard++) {
-      const month = await getByE2e(
-        'dashboard:period-range-month',
-      ).textContent();
+      const month = await getByE2e('period-control:range-month').textContent();
       if (month?.includes(String(lastYear)) && /czerwiec/i.test(month)) break;
-      await getByE2e('dashboard:period-range-prev').click();
+      await getByE2e('period-control:range-prev').click();
     }
-    await getByE2e(`dashboard:period-range-day:${lastYear}-06-01`).click();
-    await getByE2e(`dashboard:period-range-day:${lastYear}-06-30`).click();
-    await getByE2e('dashboard:period-range-apply').click();
+    await getByE2e(`period-control:range-day:${lastYear}-06-01`).click();
+    await getByE2e(`period-control:range-day:${lastYear}-06-30`).click();
+    await getByE2e('period-control:range-apply').click();
     await expect(dialog).toBeHidden();
   },
   'i jump in the calendar to June of last year': async ({ getByE2e }) => {
-    await getByE2e('dashboard:period-range-month').click();
-    await getByE2e('dashboard:period-range-year').click();
+    await getByE2e('period-control:range-month').click();
+    await getByE2e('period-control:range-year').click();
     await getByE2e(`ui:option:${lastYear}`).click();
-    await getByE2e(
-      `dashboard:period-range-month-option:${lastYear}-06`,
-    ).click();
-    await expect(getByE2e('dashboard:period-range-month')).toContainText(
+    await getByE2e(`period-control:range-month-option:${lastYear}-06`).click();
+    await expect(getByE2e('period-control:range-month')).toContainText(
       String(lastYear),
     );
   },
   'i pick the first and the last day of June and apply': async ({
     getByE2e,
   }) => {
-    await getByE2e(`dashboard:period-range-day:${lastYear}-06-01`).click();
-    await getByE2e(`dashboard:period-range-day:${lastYear}-06-30`).click();
-    await getByE2e('dashboard:period-range-apply').click();
-    await expect(getByE2e('dashboard:period-range-dialog')).toBeHidden();
+    await getByE2e(`period-control:range-day:${lastYear}-06-01`).click();
+    await getByE2e(`period-control:range-day:${lastYear}-06-30`).click();
+    await getByE2e('period-control:range-apply').click();
+    await expect(getByE2e('period-control:range-dialog')).toBeHidden();
   },
   'the month grid has no future month': async ({ getByE2e }) => {
-    await getByE2e('dashboard:period-range-month').click();
+    await getByE2e('period-control:range-month').click();
     const future = `${Number(todayDay().slice(0, 4)) + 1}-01`;
     await expect(
-      getByE2e(`dashboard:period-range-month-option:${future}`),
+      getByE2e(`period-control:range-month-option:${future}`),
     ).toHaveCount(0);
-    await expect(getByE2e('dashboard:period-range-year-next')).toBeDisabled();
+    await expect(getByE2e('period-control:range-year-next')).toBeDisabled();
   },
   'the range modal is open': async ({ page, getByE2e }) => {
-    await expect(getByE2e('dashboard:period-range-dialog')).toBeVisible();
+    await expect(getByE2e('period-control:range-dialog')).toBeVisible();
     expect(new URL(page.url()).searchParams.getAll('modal')).toEqual([
       'period-range',
     ]);
@@ -167,7 +163,7 @@ const commands = {
     await page.goBack();
   },
   'the range modal is closed': async ({ getByE2e }) => {
-    await expect(getByE2e('dashboard:period-range-dialog')).toBeHidden();
+    await expect(getByE2e('period-control:range-dialog')).toBeHidden();
   },
   'the label shows the June range': async ({ getByE2e }) => {
     await expect(getByE2e('period-control:label')).toContainText(
