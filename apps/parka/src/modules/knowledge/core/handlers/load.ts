@@ -6,7 +6,7 @@ import type { Bus } from '../bus';
 import type { Store } from '../store';
 
 /** Lists of a view: everything (brain, structure), the period and the backlog. */
-const fetchView = async ({ from, to, filters }: View) => {
+export const fetchView = async ({ from, to, filters }: View) => {
   const query = toListQuery(filters);
   const [everything, ranged, backlog] = await Promise.all([
     fetchKnowledge({}),
@@ -14,6 +14,24 @@ const fetchView = async ({ from, to, filters }: View) => {
     fetchKnowledge({ ...query, scope: 'undated' }),
   ]);
   return { everything, ranged: ranged.topics, backlog: backlog.topics };
+};
+
+type ViewData = Awaited<ReturnType<typeof fetchView>>;
+
+/** Puts read data on screen unless a write is in flight (then the read is stale). */
+export const applyView = (store: Store, data: ViewData, seq: number) => {
+  // Writes in flight would be overwritten by older data: ask again.
+  if (store.$pending.get() > 0 || store.$writeSeq.get() !== seq) {
+    store.$stale.set(true);
+    return;
+  }
+  store.$categories.set(data.everything.categories);
+  store.$catalogs.set(data.everything.catalogs);
+  store.$tags.set(data.everything.tags);
+  store.$all.set(data.everything.topics);
+  store.$ranged.set(data.ranged);
+  store.$backlog.set(data.backlog);
+  store.$loaded.set(true);
 };
 
 /** Reads the view; the previous data stays on screen meanwhile. */
@@ -33,20 +51,7 @@ export const load = (store: Store, { ofType }: Bus) => {
     })),
     switchMap(({ view, id, seq }) =>
       from(fetchView(view)).pipe(
-        tap(({ everything, ranged, backlog }) => {
-          // Writes in flight would be overwritten by older data: ask again.
-          if (store.$pending.get() > 0 || store.$writeSeq.get() !== seq) {
-            store.$stale.set(true);
-            return;
-          }
-          store.$categories.set(everything.categories);
-          store.$catalogs.set(everything.catalogs);
-          store.$tags.set(everything.tags);
-          store.$all.set(everything.topics);
-          store.$ranged.set(ranged);
-          store.$backlog.set(backlog);
-          store.$loaded.set(true);
-        }),
+        tap((data) => applyView(store, data, seq)),
         catchError((error: unknown) => {
           store.$error.set(
             error instanceof Error

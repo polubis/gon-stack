@@ -5,6 +5,7 @@ import {
   prepareAttachment,
   type AttachmentImages,
 } from '../application/shared/attachment-image';
+import { KNOWLEDGE_MEDIA_BUCKET } from '../application/shared/knowledge';
 import {
   TASK_ATTACHMENT_BUCKET,
   taskAttachmentPath,
@@ -62,6 +63,42 @@ export type NewTask = {
   at: string | null;
 };
 
+export type KnowledgeTopicQuery = {
+  catalogId: string | null;
+  tagId: string | null;
+  q: string | null;
+  from: string | null;
+  to: string | null;
+  scope: 'all' | 'scheduled' | 'undated';
+  limit: number;
+  offset: number;
+};
+
+/** Fields a caller may change; a missing key stays as it was. */
+export type KnowledgeCategoryPatch = {
+  name?: string;
+  color?: string;
+  position?: number;
+};
+export type KnowledgeCatalogPatch = {
+  name?: string;
+  description?: string;
+  /** `null` takes the catalog out of its category. */
+  categoryId?: string | null;
+  position?: number;
+};
+export type KnowledgeTopicPatch = {
+  catalogId?: string;
+  title?: string;
+  description?: string;
+  /** `null` moves the topic to the backlog. */
+  studyDay?: string | null;
+  /** Replaces all tags of the topic. */
+  tagIds?: string[];
+  position?: number;
+};
+export type KnowledgeReelPatch = { body?: string; position?: number };
+
 export type CategoryPatch = { name?: string; icon?: string; color?: string };
 
 export type UploadRequest = { name: string; mime: string };
@@ -100,7 +137,8 @@ export type UploadGateway = {
 
 /**
  * Everything the MCP surface may do with the data: what the tasks UI does
- * (tasks, categories, priorities) and reading expenses.
+ * (tasks, categories, priorities), what the knowledge module does and
+ * reading expenses.
  */
 export type McpGateway = {
   authenticate: () => Promise<void>;
@@ -135,6 +173,52 @@ export type McpGateway = {
   createPriority: (input: { name: string; value: number }) => Promise<unknown>;
   listExpenses: (query: ExpenseQuery) => Promise<unknown>;
   getExpense: (id: string) => Promise<unknown>;
+  listKnowledgeCategories: () => Promise<unknown>;
+  createKnowledgeCategory: (input: {
+    name: string;
+    color: string | null;
+  }) => Promise<unknown>;
+  updateKnowledgeCategory: (
+    id: string,
+    patch: KnowledgeCategoryPatch,
+  ) => Promise<unknown>;
+  deleteKnowledgeCategory: (id: string) => Promise<unknown>;
+  listKnowledgeCatalogs: (categoryId: string | null) => Promise<unknown>;
+  createKnowledgeCatalog: (input: {
+    name: string;
+    categoryId: string | null;
+    description: string | null;
+  }) => Promise<unknown>;
+  updateKnowledgeCatalog: (
+    id: string,
+    patch: KnowledgeCatalogPatch,
+  ) => Promise<unknown>;
+  deleteKnowledgeCatalog: (id: string) => Promise<unknown>;
+  listKnowledgeTags: () => Promise<unknown>;
+  createKnowledgeTag: (name: string) => Promise<unknown>;
+  updateKnowledgeTag: (id: string, name: string) => Promise<unknown>;
+  deleteKnowledgeTag: (id: string) => Promise<unknown>;
+  listKnowledgeTopics: (query: KnowledgeTopicQuery) => Promise<unknown>;
+  getKnowledgeTopic: (id: string) => Promise<unknown>;
+  createKnowledgeTopic: (input: {
+    catalogId: string;
+    title: string;
+    description: string | null;
+    studyDay: string | null;
+    tagIds: string[];
+  }) => Promise<unknown>;
+  updateKnowledgeTopic: (
+    id: string,
+    patch: KnowledgeTopicPatch,
+  ) => Promise<unknown>;
+  deleteKnowledgeTopic: (id: string) => Promise<unknown>;
+  createKnowledgeReel: (topicId: string, body: string) => Promise<unknown>;
+  updateKnowledgeReel: (
+    id: string,
+    patch: KnowledgeReelPatch,
+  ) => Promise<unknown>;
+  deleteKnowledgeReel: (id: string) => Promise<unknown>;
+  setKnowledgeProgress: (reelId: string, done: boolean) => Promise<unknown>;
 };
 
 type RpcResult = {
@@ -185,6 +269,23 @@ export const createSupabaseGateway = (token: string): McpGateway => {
         p_task_id: taskId,
       }),
     ) as { userId: string; items: { id: string }[] } | null;
+
+  const knowledgeFiles = () =>
+    createClient<Database>(
+      import.meta.env.PUBLIC_PARKA_SUPABASE_URL,
+      import.meta.env.PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY,
+      {
+        auth: { persistSession: false, autoRefreshToken: false },
+        global: { headers: { 'x-mcp-token': token } },
+      },
+    ).storage.from(KNOWLEDGE_MEDIA_BUCKET);
+
+  /** Rows are gone: the function handed back the files that went with them. */
+  const dropKnowledgeFiles = async (deleted: unknown) => {
+    const { paths } = (deleted ?? { paths: [] }) as { paths: string[] };
+    if (paths.length > 0) await knowledgeFiles().remove(paths);
+    return deleted !== null;
+  };
 
   return {
     authenticate: async () => {
@@ -311,6 +412,123 @@ export const createSupabaseGateway = (token: string): McpGateway => {
       ),
     getExpense: async (p_id) =>
       unwrap(await db.rpc('mcp_get_expense', { p_token, p_id })),
+    listKnowledgeCategories: async () =>
+      unwrap(await db.rpc('mcp_list_knowledge_categories', { p_token })),
+    createKnowledgeCategory: async (c) =>
+      unwrap(
+        await db.rpc('mcp_create_knowledge_category', {
+          p_token,
+          p_name: c.name,
+          p_color: c.color ?? undefined,
+        }),
+      ),
+    updateKnowledgeCategory: async (p_id, p_patch) =>
+      unwrap(
+        await db.rpc('mcp_update_knowledge_category', {
+          p_token,
+          p_id,
+          p_patch,
+        }),
+      ),
+    deleteKnowledgeCategory: async (p_id) =>
+      unwrap(await db.rpc('mcp_delete_knowledge_category', { p_token, p_id })),
+    listKnowledgeCatalogs: async (categoryId) =>
+      unwrap(
+        await db.rpc('mcp_list_knowledge_catalogs', {
+          p_token,
+          p_category_id: categoryId ?? undefined,
+        }),
+      ),
+    createKnowledgeCatalog: async (c) =>
+      unwrap(
+        await db.rpc('mcp_create_knowledge_catalog', {
+          p_token,
+          p_name: c.name,
+          p_category_id: c.categoryId ?? undefined,
+          p_description: c.description ?? undefined,
+        }),
+      ),
+    updateKnowledgeCatalog: async (p_id, p_patch) =>
+      unwrap(
+        await db.rpc('mcp_update_knowledge_catalog', {
+          p_token,
+          p_id,
+          p_patch,
+        }),
+      ),
+    deleteKnowledgeCatalog: async (p_id) =>
+      dropKnowledgeFiles(
+        unwrap(await db.rpc('mcp_delete_knowledge_catalog', { p_token, p_id })),
+      ),
+    listKnowledgeTags: async () =>
+      unwrap(await db.rpc('mcp_list_knowledge_tags', { p_token })),
+    createKnowledgeTag: async (p_name) =>
+      unwrap(await db.rpc('mcp_create_knowledge_tag', { p_token, p_name })),
+    updateKnowledgeTag: async (p_id, p_name) =>
+      unwrap(
+        await db.rpc('mcp_update_knowledge_tag', { p_token, p_id, p_name }),
+      ),
+    deleteKnowledgeTag: async (p_id) =>
+      unwrap(await db.rpc('mcp_delete_knowledge_tag', { p_token, p_id })),
+    listKnowledgeTopics: async (q) =>
+      unwrap(
+        await db.rpc('mcp_list_knowledge_topics', {
+          p_token,
+          p_catalog_id: q.catalogId ?? undefined,
+          p_tag_id: q.tagId ?? undefined,
+          p_q: q.q ?? undefined,
+          p_from: q.from ?? undefined,
+          p_to: q.to ?? undefined,
+          p_scope: q.scope,
+          p_limit: q.limit,
+          p_offset: q.offset,
+        }),
+      ),
+    getKnowledgeTopic: async (p_id) =>
+      unwrap(await db.rpc('mcp_get_knowledge_topic', { p_token, p_id })),
+    createKnowledgeTopic: async (t) =>
+      unwrap(
+        await db.rpc('mcp_create_knowledge_topic', {
+          p_token,
+          p_catalog_id: t.catalogId,
+          p_title: t.title,
+          p_description: t.description ?? undefined,
+          p_study_day: t.studyDay ?? undefined,
+          p_tag_ids: t.tagIds,
+        }),
+      ),
+    updateKnowledgeTopic: async (p_id, p_patch) =>
+      unwrap(
+        await db.rpc('mcp_update_knowledge_topic', { p_token, p_id, p_patch }),
+      ),
+    deleteKnowledgeTopic: async (p_id) =>
+      dropKnowledgeFiles(
+        unwrap(await db.rpc('mcp_delete_knowledge_topic', { p_token, p_id })),
+      ),
+    createKnowledgeReel: async (p_topic_id, p_body) =>
+      unwrap(
+        await db.rpc('mcp_create_knowledge_reel', {
+          p_token,
+          p_topic_id,
+          p_body,
+        }),
+      ),
+    updateKnowledgeReel: async (p_id, p_patch) =>
+      unwrap(
+        await db.rpc('mcp_update_knowledge_reel', { p_token, p_id, p_patch }),
+      ),
+    deleteKnowledgeReel: async (p_id) =>
+      dropKnowledgeFiles(
+        unwrap(await db.rpc('mcp_delete_knowledge_reel', { p_token, p_id })),
+      ),
+    setKnowledgeProgress: async (p_reel_id, p_done) =>
+      unwrap(
+        await db.rpc('mcp_set_knowledge_progress', {
+          p_token,
+          p_reel_id,
+          p_done,
+        }),
+      ),
   };
 };
 

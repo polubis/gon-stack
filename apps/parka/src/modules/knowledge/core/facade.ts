@@ -18,6 +18,7 @@ import type {
 /** Public API of the module: triggers and state selectors. The reel viewer uses `useReels`, `loadReels`, `setProgress`. */
 export const createFacade = (store: Store, trigger: Registry['trigger']) => ({
   load: (view: View) => trigger('[TRIGGER]_LOAD', { view }),
+  refresh: () => trigger('[TRIGGER]_REFRESH'),
   createCategory: (category: Category) =>
     trigger('[TRIGGER]_CREATE_CATEGORY', { category }),
   updateCategory: (category: Category) =>

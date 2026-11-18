@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { context } from '@repo/react-kit/context';
+import { useDataChanges } from '@/shared/data-sync/presentation/use-data-changes';
 import { isDay, periodContaining } from '@/shared/period/period';
 import {
   readQueryParam,
@@ -77,6 +78,9 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
       resetKnowledgeReads();
     };
   }, [register]);
+
+  // MCP changed the data: reload quietly.
+  useDataChanges('knowledge', facade.refresh);
 
   // Back / Forward may land on another period or filters.
   useEffect(() => {

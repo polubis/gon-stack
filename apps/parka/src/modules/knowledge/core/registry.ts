@@ -12,6 +12,7 @@ import {
 import { loadDemo } from './handlers/demo';
 import { dismissNotice } from './handlers/dismiss-notice';
 import { load } from './handlers/load';
+import { refresh } from './handlers/refresh';
 import {
   createReel,
   deleteReel,
@@ -30,6 +31,7 @@ export const createRegistry = (store: Store) => {
 
   const register = bus.createRegistry(
     load(store, bus),
+    refresh(store, bus),
     createCategory(store, bus),
     updateCategory(store, bus),
     deleteCategory(store, bus),

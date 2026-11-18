@@ -61,6 +61,56 @@ const HISTORY_ENTRY = {
   botRef: '0b9a4a52',
 };
 
+const K = {
+  category: 'c0a1c0a1-0000-4000-8000-00000000ca01',
+  catalog: 'c0a1c0a1-0000-4000-8000-00000000c001',
+  tag: 'c0a1c0a1-0000-4000-8000-00000000a001',
+  topic: 'c0a1c0a1-0000-4000-8000-00000000d001',
+  reel: 'c0a1c0a1-0000-4000-8000-00000000e001',
+};
+
+const KNOWLEDGE_TOPIC = {
+  id: K.topic,
+  catalogId: K.catalog,
+  title: 'RLS',
+  description: '',
+  position: 0,
+  studyDay: '2026-11-18',
+  tagIds: [K.tag],
+  reelCount: 1,
+  doneCount: 0,
+  createdAt: '2026-11-18T08:00:00.000Z',
+  updatedAt: '2026-11-18T08:00:00.000Z',
+};
+
+const KNOWLEDGE_REEL = {
+  id: K.reel,
+  topicId: K.topic,
+  body: '# Policies',
+  position: 0,
+  mediaKind: null,
+  done: false,
+  createdAt: '2026-11-18T08:00:00.000Z',
+  updatedAt: '2026-11-18T08:00:00.000Z',
+};
+
+const KNOWLEDGE_CATEGORY = {
+  id: K.category,
+  name: 'Backend',
+  color: '#6366f1',
+  position: 0,
+  catalogCount: 1,
+};
+
+const KNOWLEDGE_CATALOG = {
+  id: K.catalog,
+  categoryId: K.category,
+  name: 'Supabase',
+  description: '',
+  position: 0,
+  topicCount: 1,
+};
+
 type RpcJson = {
   error: { code: number };
   result: {
@@ -193,6 +243,99 @@ const fakeGateway = (
       await record('deleteTaskAttachment', id);
       return id === ATTACHMENT.id;
     },
+    listKnowledgeCategories: async () => {
+      await record('listKnowledgeCategories');
+      return { items: [KNOWLEDGE_CATEGORY] };
+    },
+    createKnowledgeCategory: async (c) => {
+      await record('createKnowledgeCategory', c);
+      return { ...KNOWLEDGE_CATEGORY, name: c.name, catalogCount: 0 };
+    },
+    updateKnowledgeCategory: async (id, patch) => {
+      await record('updateKnowledgeCategory', id, patch);
+      return id === K.category ? { ...KNOWLEDGE_CATEGORY, ...patch } : null;
+    },
+    deleteKnowledgeCategory: async (id) => {
+      await record('deleteKnowledgeCategory', id);
+      throw new McpInputError('The category still has catalogs');
+    },
+    listKnowledgeCatalogs: async (categoryId) => {
+      await record('listKnowledgeCatalogs', categoryId);
+      return { items: [KNOWLEDGE_CATALOG] };
+    },
+    createKnowledgeCatalog: async (c) => {
+      await record('createKnowledgeCatalog', c);
+      return c.categoryId === null || c.categoryId === K.category
+        ? { ...KNOWLEDGE_CATALOG, name: c.name, categoryId: c.categoryId }
+        : null;
+    },
+    updateKnowledgeCatalog: async (id, patch) => {
+      await record('updateKnowledgeCatalog', id, patch);
+      return id === K.catalog ? { ...KNOWLEDGE_CATALOG, ...patch } : null;
+    },
+    deleteKnowledgeCatalog: async (id) => {
+      await record('deleteKnowledgeCatalog', id);
+      return id === K.catalog;
+    },
+    listKnowledgeTags: async () => {
+      await record('listKnowledgeTags');
+      return { items: [{ id: K.tag, name: 'sql', topicCount: 1 }] };
+    },
+    createKnowledgeTag: async (name) => {
+      await record('createKnowledgeTag', name);
+      return { id: K.tag, name, topicCount: 0 };
+    },
+    updateKnowledgeTag: async (id, name) => {
+      await record('updateKnowledgeTag', id, name);
+      return id === K.tag ? { id, name, topicCount: 1 } : null;
+    },
+    deleteKnowledgeTag: async (id) => {
+      await record('deleteKnowledgeTag', id);
+      return id === K.tag;
+    },
+    listKnowledgeTopics: async (q) => {
+      await record('listKnowledgeTopics', q);
+      return {
+        items: [KNOWLEDGE_TOPIC],
+        nextOffset: q.offset === 0 ? 25 : null,
+      };
+    },
+    getKnowledgeTopic: async (id) => {
+      await record('getKnowledgeTopic', id);
+      return id === K.topic
+        ? { topic: KNOWLEDGE_TOPIC, reels: [KNOWLEDGE_REEL] }
+        : null;
+    },
+    createKnowledgeTopic: async (t) => {
+      await record('createKnowledgeTopic', t);
+      return t.catalogId === K.catalog
+        ? { ...KNOWLEDGE_TOPIC, title: t.title, studyDay: t.studyDay }
+        : null;
+    },
+    updateKnowledgeTopic: async (id, patch) => {
+      await record('updateKnowledgeTopic', id, patch);
+      return id === K.topic ? { ...KNOWLEDGE_TOPIC, ...patch } : null;
+    },
+    deleteKnowledgeTopic: async (id) => {
+      await record('deleteKnowledgeTopic', id);
+      return id === K.topic;
+    },
+    createKnowledgeReel: async (topicId, body) => {
+      await record('createKnowledgeReel', topicId, body);
+      return topicId === K.topic ? { ...KNOWLEDGE_REEL, body } : null;
+    },
+    updateKnowledgeReel: async (id, patch) => {
+      await record('updateKnowledgeReel', id, patch);
+      return id === K.reel ? { ...KNOWLEDGE_REEL, ...patch } : null;
+    },
+    deleteKnowledgeReel: async (id) => {
+      await record('deleteKnowledgeReel', id);
+      return id === K.reel;
+    },
+    setKnowledgeProgress: async (reelId, done) => {
+      await record('setKnowledgeProgress', reelId, done);
+      return reelId === K.reel ? { ...KNOWLEDGE_REEL, done } : null;
+    },
   };
 };
 
@@ -314,24 +457,45 @@ describe('mcp tools list', () => {
     expect(tools.map((t) => t.name).sort()).toEqual([
       'add_task_comment',
       'create_category',
+      'create_knowledge_catalog',
+      'create_knowledge_category',
+      'create_knowledge_reel',
+      'create_knowledge_tag',
+      'create_knowledge_topic',
       'create_priority',
       'create_task',
       'delete_category',
+      'delete_knowledge_catalog',
+      'delete_knowledge_category',
+      'delete_knowledge_reel',
+      'delete_knowledge_tag',
+      'delete_knowledge_topic',
       'delete_task',
       'delete_task_attachment',
       'get_expense',
+      'get_knowledge_topic',
       'get_task',
       'get_task_history',
       'list_categories',
       'list_expenses',
+      'list_knowledge_catalogs',
+      'list_knowledge_categories',
+      'list_knowledge_tags',
+      'list_knowledge_topics',
       'list_priorities',
       'list_statuses',
       'list_task_attachments',
       'list_task_comments',
       'list_tasks',
       'request_attachment_upload',
+      'set_knowledge_progress',
       'set_task_status',
       'update_category',
+      'update_knowledge_catalog',
+      'update_knowledge_category',
+      'update_knowledge_reel',
+      'update_knowledge_tag',
+      'update_knowledge_topic',
       'update_task',
     ]);
     expect(tools.every((t) => t.inputSchema.type === 'object')).toBe(true);
@@ -352,7 +516,16 @@ describe('mcp tools list', () => {
         .filter((t) => t.annotations.destructiveHint)
         .map((t) => t.name)
         .sort(),
-    ).toEqual(['delete_category', 'delete_task', 'delete_task_attachment']);
+    ).toEqual([
+      'delete_category',
+      'delete_knowledge_catalog',
+      'delete_knowledge_category',
+      'delete_knowledge_reel',
+      'delete_knowledge_tag',
+      'delete_knowledge_topic',
+      'delete_task',
+      'delete_task_attachment',
+    ]);
   });
 });
 
@@ -912,6 +1085,249 @@ describe('mcp task management', () => {
 
     expect(json.result.isError).toBe(true);
     expect(calls).toEqual([]);
+  });
+});
+
+describe('mcp knowledge', () => {
+  const call = (
+    rpc: ReturnType<typeof setup>['rpc'],
+    name: string,
+    args: unknown,
+  ) => rpc('tools/call', { name, arguments: args });
+
+  it('lists categories, catalogs and tags', async () => {
+    const { rpc } = setup();
+
+    const categories = await call(rpc, 'list_knowledge_categories', {});
+    const catalogs = await call(rpc, 'list_knowledge_catalogs', {
+      categoryId: K.category,
+    });
+    const tags = await call(rpc, 'list_knowledge_tags', {});
+
+    expect(categories.json.result.structuredContent.items).toEqual([
+      KNOWLEDGE_CATEGORY,
+    ]);
+    expect(catalogs.json.result.structuredContent.items).toEqual([
+      KNOWLEDGE_CATALOG,
+    ]);
+    expect(tags.json.result.structuredContent.items).toHaveLength(1);
+  });
+
+  it('pages topics filtered by catalog, tag, text and study days', async () => {
+    const { rpc, calls } = setup();
+
+    const { json } = await call(rpc, 'list_knowledge_topics', {
+      catalogId: K.catalog,
+      tagId: K.tag,
+      q: 'rls',
+      from: '2026-11-01',
+      to: '2026-11-30',
+    });
+
+    expect(json.result.structuredContent.items).toEqual([KNOWLEDGE_TOPIC]);
+    expect(json.result.structuredContent.nextCursor).toEqual(
+      expect.any(String),
+    );
+    expect(calls).toEqual([
+      {
+        name: 'listKnowledgeTopics',
+        args: [
+          {
+            catalogId: K.catalog,
+            tagId: K.tag,
+            q: 'rls',
+            from: '2026-11-01',
+            to: '2026-11-30',
+            scope: 'all',
+            limit: 25,
+            offset: 0,
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('refuses a half study-day range and a malformed id', async () => {
+    const { rpc, calls } = setup();
+
+    const half = await call(rpc, 'list_knowledge_topics', {
+      from: '2026-11-01',
+    });
+    const bad = await call(rpc, 'get_knowledge_topic', { id: 'not-a-uuid' });
+
+    expect(half.json.result.isError).toBe(true);
+    expect(bad.json.result.isError).toBe(true);
+    expect(calls).toEqual([]);
+  });
+
+  it('returns a topic with its reels in order', async () => {
+    const { rpc } = setup();
+
+    const { json } = await call(rpc, 'get_knowledge_topic', { id: K.topic });
+
+    expect(json.result.structuredContent).toEqual({
+      topic: KNOWLEDGE_TOPIC,
+      reels: [KNOWLEDGE_REEL],
+    });
+  });
+
+  it('says so when a topic does not exist', async () => {
+    const { rpc } = setup();
+
+    const { json } = await call(rpc, 'get_knowledge_topic', {
+      id: K.catalog,
+    });
+
+    expect(json.result.isError).toBe(true);
+    expect(json.result.content[0].text).toContain('not found');
+  });
+
+  it('creates a backlog topic with tags when no study day is given', async () => {
+    const { rpc, calls } = setup();
+
+    const { json } = await call(rpc, 'create_knowledge_topic', {
+      catalogId: K.catalog,
+      title: 'Realtime',
+      tagIds: [K.tag],
+    });
+
+    expect(json.result.structuredContent).toMatchObject({
+      title: 'Realtime',
+      studyDay: null,
+    });
+    expect(calls[0]?.args[0]).toEqual({
+      catalogId: K.catalog,
+      title: 'Realtime',
+      description: null,
+      studyDay: null,
+      tagIds: [K.tag],
+    });
+  });
+
+  it('refuses a topic in a catalog that does not exist', async () => {
+    const { rpc } = setup();
+
+    const { json } = await call(rpc, 'create_knowledge_topic', {
+      catalogId: K.category,
+      title: 'Orphan',
+    });
+
+    expect(json.result.isError).toBe(true);
+  });
+
+  it('moves a topic to the backlog with a null study day', async () => {
+    const { rpc, calls } = setup();
+
+    await call(rpc, 'update_knowledge_topic', {
+      id: K.topic,
+      studyDay: null,
+    });
+
+    expect(calls).toEqual([
+      { name: 'updateKnowledgeTopic', args: [K.topic, { studyDay: null }] },
+    ]);
+  });
+
+  it('refuses an update that changes nothing', async () => {
+    const { rpc, calls } = setup();
+
+    const { json } = await call(rpc, 'update_knowledge_category', {
+      id: K.category,
+    });
+
+    expect(json.result.isError).toBe(true);
+    expect(calls).toEqual([]);
+  });
+
+  it('adds a reel, edits it and marks it done', async () => {
+    const { rpc } = setup();
+
+    const created = await call(rpc, 'create_knowledge_reel', {
+      topicId: K.topic,
+      body: '# Policies',
+    });
+    const edited = await call(rpc, 'update_knowledge_reel', {
+      id: K.reel,
+      body: '# Policies v2',
+    });
+    const done = await call(rpc, 'set_knowledge_progress', {
+      reelId: K.reel,
+      done: true,
+    });
+
+    expect(created.json.result.structuredContent).toMatchObject({
+      topicId: K.topic,
+      done: false,
+    });
+    expect(edited.json.result.structuredContent).toMatchObject({
+      body: '# Policies v2',
+    });
+    expect(done.json.result.structuredContent).toMatchObject({ done: true });
+  });
+
+  it('refuses an empty or oversized reel body', async () => {
+    const { rpc, calls } = setup();
+
+    const empty = await call(rpc, 'create_knowledge_reel', {
+      topicId: K.topic,
+      body: '   ',
+    });
+    const huge = await call(rpc, 'create_knowledge_reel', {
+      topicId: K.topic,
+      body: 'x'.repeat(8001),
+    });
+
+    expect(empty.json.result.isError).toBe(true);
+    expect(huge.json.result.isError).toBe(true);
+    expect(calls).toEqual([]);
+  });
+
+  it('deletes a knowledge item only when confirmed', async () => {
+    const { rpc, calls } = setup();
+
+    const refused = await call(rpc, 'delete_knowledge_topic', {
+      id: K.topic,
+    });
+    const done = await call(rpc, 'delete_knowledge_topic', {
+      id: K.topic,
+      confirm: true,
+    });
+    const missing = await call(rpc, 'delete_knowledge_reel', {
+      id: K.topic,
+      confirm: true,
+    });
+
+    expect(refused.json.result.isError).toBe(true);
+    expect(done.json.result.structuredContent).toEqual({
+      id: K.topic,
+      deleted: true,
+    });
+    expect(missing.json.result.isError).toBe(true);
+    expect(calls.map((c) => c.name)).toEqual([
+      'deleteKnowledgeTopic',
+      'deleteKnowledgeReel',
+    ]);
+  });
+
+  it('reports a category that is still in use as a readable tool error', async () => {
+    const { rpc } = setup();
+
+    const { json } = await call(rpc, 'delete_knowledge_category', {
+      id: K.category,
+      confirm: true,
+    });
+
+    expect(json.result.isError).toBe(true);
+    expect(json.result.content[0].text).toBe('The category still has catalogs');
+  });
+
+  it('announces a knowledge change after a write, not a time one', async () => {
+    const { rpc, notices } = setup();
+
+    await call(rpc, 'set_knowledge_progress', { reelId: K.reel, done: true });
+    await call(rpc, 'list_knowledge_topics', {});
+
+    expect(notices).toEqual(['knowledge']);
   });
 });
 

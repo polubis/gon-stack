@@ -1,4 +1,5 @@
 import z from 'zod';
+import type { DataDomain } from '@schemas/data-changes';
 import {
   ATTACHMENT_MIME_TYPES,
   attachmentRejection,
@@ -62,10 +63,10 @@ const jsonSchema = (schema: z.ZodType, io: 'input' | 'output') => {
   return rest;
 };
 
-/** Every write tool changes tasks, categories or priorities: the time module. */
-const announceWrite = async (gateway: McpGateway) => {
+/** Tells the owner's open app which module a write changed (default: time). */
+const announceWrite = async (gateway: McpGateway, domain: DataDomain) => {
   try {
-    await gateway.notifyChange('time');
+    await gateway.notifyChange(domain);
   } catch {
     // The write is done; a missed live refresh must not fail it.
   }
@@ -78,6 +79,8 @@ const defineTool = <I extends z.ZodType, O extends z.ZodType>(tool: {
   input: I;
   output: O;
   annotations: ToolAnnotations;
+  /** Module a write changes; tasks, categories and priorities are `time`. */
+  domain?: DataDomain;
   run: (
     args: z.infer<I>,
     gateway: McpGateway,
@@ -104,7 +107,8 @@ const defineTool = <I extends z.ZodType, O extends z.ZodType>(tool: {
         await tool.run(parsed.data, gateway, context),
       );
       if (!out.success) return failure('The server returned unexpected data');
-      if (!tool.annotations.readOnlyHint) await announceWrite(gateway);
+      if (!tool.annotations.readOnlyHint)
+        await announceWrite(gateway, tool.domain ?? 'time');
       return {
         content: text(JSON.stringify(out.data)),
         structuredContent: out.data as Record<string, unknown>,
@@ -354,7 +358,7 @@ const toPage = <T>(
   return { items: items as T[], nextCursor: encodeCursor(nextOffset) };
 };
 
-export const MCP_TOOLS: readonly RegisteredTool[] = [
+const CORE_TOOLS: readonly RegisteredTool[] = [
   defineTool({
     name: 'list_tasks',
     title: 'List tasks',
@@ -758,4 +762,446 @@ export const MCP_TOOLS: readonly RegisteredTool[] = [
       return found as z.input<ReturnType<typeof expenseDetail>>;
     },
   }),
+];
+
+const kId = (what: string) => z.uuid().describe(`${what} id`);
+const kName = (max: number) => z.string().trim().min(1).max(max);
+const kPosition = () =>
+  z.number().int().min(0).max(100000).describe('Order inside its parent');
+
+const knowledgeCategory = () =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    color: z.string(),
+    position: z.number().int(),
+    catalogCount: z.number().int(),
+  });
+
+const knowledgeCatalog = () =>
+  z.object({
+    id: z.string(),
+    categoryId: z.string().nullable(),
+    name: z.string(),
+    description: z.string(),
+    position: z.number().int(),
+    topicCount: z.number().int(),
+  });
+
+const knowledgeTag = () =>
+  z.object({ id: z.string(), name: z.string(), topicCount: z.number().int() });
+
+const knowledgeTopic = () =>
+  z.object({
+    id: z.string(),
+    catalogId: z.string(),
+    title: z.string(),
+    description: z.string(),
+    position: z.number().int(),
+    studyDay: z.string().nullable().describe('Planned day; null = backlog'),
+    tagIds: z.array(z.string()),
+    reelCount: z.number().int(),
+    doneCount: z.number().int().describe('Reels the user finished'),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+  });
+
+const knowledgeReel = () =>
+  z.object({
+    id: z.string(),
+    topicId: z.string(),
+    body: z.string().describe('Markdown'),
+    position: z.number().int(),
+    mediaKind: z
+      .enum(['image', 'video'])
+      .nullable()
+      .describe('Picture or clip added in the app; not readable over MCP'),
+    done: z.boolean(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+  });
+
+const listOf = <T extends z.ZodType>(item: T) =>
+  z.object({ items: z.array(item) });
+
+const deleted = () => z.object({ id: z.string(), deleted: z.literal(true) });
+
+const KNOWLEDGE = { domain: 'knowledge' } as const;
+
+/** Deleting tool of one knowledge item; `what` names it in messages. */
+const deleteKnowledge = (
+  what: string,
+  note: string,
+  remove: (gateway: McpGateway, id: string) => Promise<unknown>,
+) =>
+  defineTool({
+    ...KNOWLEDGE,
+    name: `delete_knowledge_${what}`,
+    title: `Delete a knowledge ${what} permanently`,
+    description: `PERMANENTLY deletes one knowledge ${what}${note}. It cannot be undone. Use only when the user explicitly asked for it. Requires \`confirm: true\`.`,
+    input: z.strictObject({
+      id: kId(what),
+      confirm: z.literal(true).describe('Must be true: confirms the deletion'),
+    }),
+    output: deleted(),
+    annotations: DESTRUCTIVE,
+    run: async (args, gateway) => {
+      if (!(await remove(gateway, args.id)))
+        throw new ToolError(`Knowledge ${what} "${args.id}" not found`);
+      return { id: args.id, deleted: true as const };
+    },
+  });
+
+const notFound = (what: string, id: string) =>
+  new ToolError(`Knowledge ${what} "${id}" not found`);
+
+const changedFields = (v: object) => Object.keys(v).length > 1;
+const AT_LEAST_ONE = 'Give at least one field to change';
+
+const KNOWLEDGE_TOOLS: readonly RegisteredTool[] = [
+  defineTool({
+    name: 'list_knowledge_categories',
+    title: 'List knowledge categories',
+    description:
+      'Lists the knowledge categories (areas grouping catalogs), in the order of the app.',
+    input: z.strictObject({}),
+    output: listOf(knowledgeCategory()),
+    annotations: READ_ONLY,
+    run: async (_args, gateway) =>
+      (await gateway.listKnowledgeCategories()) as z.input<
+        ReturnType<typeof listOf<ReturnType<typeof knowledgeCategory>>>
+      >,
+  }),
+  defineTool({
+    ...KNOWLEDGE,
+    name: 'create_knowledge_category',
+    title: 'Create a knowledge category',
+    description:
+      'Creates a knowledge category. The name is unique ignoring case.',
+    input: z.strictObject({
+      name: kName(40),
+      color: categoryColor().nullable().default(null),
+    }),
+    output: knowledgeCategory(),
+    annotations: WRITE,
+    run: async (args, gateway) =>
+      (await gateway.createKnowledgeCategory(args)) as z.input<
+        ReturnType<typeof knowledgeCategory>
+      >,
+  }),
+  defineTool({
+    ...KNOWLEDGE,
+    name: 'update_knowledge_category',
+    title: 'Update a knowledge category',
+    description: 'Changes the given fields of a knowledge category.',
+    input: z
+      .strictObject({
+        id: kId('Category'),
+        name: kName(40).optional(),
+        color: categoryColor().optional(),
+        position: kPosition().optional(),
+      })
+      .refine(changedFields, AT_LEAST_ONE),
+    output: knowledgeCategory(),
+    annotations: { ...WRITE, idempotentHint: true },
+    run: async ({ id: categoryId, ...patch }, gateway) => {
+      const updated = await gateway.updateKnowledgeCategory(categoryId, patch);
+      if (!updated) throw notFound('category', categoryId);
+      return updated as z.input<ReturnType<typeof knowledgeCategory>>;
+    },
+  }),
+  deleteKnowledge(
+    'category',
+    '; refused while catalogs still use it',
+    (gateway, id) => gateway.deleteKnowledgeCategory(id),
+  ),
+  defineTool({
+    name: 'list_knowledge_catalogs',
+    title: 'List knowledge catalogs',
+    description:
+      'Lists the knowledge catalogs (folders of topics), optionally of one category.',
+    input: z.strictObject({ categoryId: kId('Category').optional() }),
+    output: listOf(knowledgeCatalog()),
+    annotations: READ_ONLY,
+    run: async (args, gateway) =>
+      (await gateway.listKnowledgeCatalogs(args.categoryId ?? null)) as z.input<
+        ReturnType<typeof listOf<ReturnType<typeof knowledgeCatalog>>>
+      >,
+  }),
+  defineTool({
+    ...KNOWLEDGE,
+    name: 'create_knowledge_catalog',
+    title: 'Create a knowledge catalog',
+    description:
+      'Creates a catalog, optionally filed under a category (list_knowledge_categories).',
+    input: z.strictObject({
+      name: kName(80),
+      categoryId: kId('Category').nullable().default(null),
+      description: z.string().trim().max(500).nullable().default(null),
+    }),
+    output: knowledgeCatalog(),
+    annotations: WRITE,
+    run: async (args, gateway) => {
+      const created = await gateway.createKnowledgeCatalog(args);
+      if (!created) throw notFound('category', args.categoryId ?? '');
+      return created as z.input<ReturnType<typeof knowledgeCatalog>>;
+    },
+  }),
+  defineTool({
+    ...KNOWLEDGE,
+    name: 'update_knowledge_catalog',
+    title: 'Update a knowledge catalog',
+    description:
+      'Changes the given fields of a catalog. `categoryId: null` takes it out of its category.',
+    input: z
+      .strictObject({
+        id: kId('Catalog'),
+        name: kName(80).optional(),
+        description: z.string().trim().max(500).optional(),
+        categoryId: kId('Category').nullable().optional(),
+        position: kPosition().optional(),
+      })
+      .refine(changedFields, AT_LEAST_ONE),
+    output: knowledgeCatalog(),
+    annotations: { ...WRITE, idempotentHint: true },
+    run: async ({ id: catalogId, ...patch }, gateway) => {
+      const updated = await gateway.updateKnowledgeCatalog(catalogId, patch);
+      if (!updated) throw notFound('catalog', catalogId);
+      return updated as z.input<ReturnType<typeof knowledgeCatalog>>;
+    },
+  }),
+  deleteKnowledge(
+    'catalog',
+    ' with all its topics, reels, progress and files',
+    (gateway, id) => gateway.deleteKnowledgeCatalog(id),
+  ),
+  defineTool({
+    name: 'list_knowledge_tags',
+    title: 'List knowledge tags',
+    description: 'Lists the tags that label knowledge topics, by name.',
+    input: z.strictObject({}),
+    output: listOf(knowledgeTag()),
+    annotations: READ_ONLY,
+    run: async (_args, gateway) =>
+      (await gateway.listKnowledgeTags()) as z.input<
+        ReturnType<typeof listOf<ReturnType<typeof knowledgeTag>>>
+      >,
+  }),
+  defineTool({
+    ...KNOWLEDGE,
+    name: 'create_knowledge_tag',
+    title: 'Create a knowledge tag',
+    description: 'Creates a tag. The name is unique ignoring case.',
+    input: z.strictObject({ name: kName(30) }),
+    output: knowledgeTag(),
+    annotations: WRITE,
+    run: async (args, gateway) =>
+      (await gateway.createKnowledgeTag(args.name)) as z.input<
+        ReturnType<typeof knowledgeTag>
+      >,
+  }),
+  defineTool({
+    ...KNOWLEDGE,
+    name: 'update_knowledge_tag',
+    title: 'Rename a knowledge tag',
+    description: 'Renames a tag.',
+    input: z.strictObject({ id: kId('Tag'), name: kName(30) }),
+    output: knowledgeTag(),
+    annotations: { ...WRITE, idempotentHint: true },
+    run: async (args, gateway) => {
+      const updated = await gateway.updateKnowledgeTag(args.id, args.name);
+      if (!updated) throw notFound('tag', args.id);
+      return updated as z.input<ReturnType<typeof knowledgeTag>>;
+    },
+  }),
+  deleteKnowledge(
+    'tag',
+    '; topics keep existing, only lose the label',
+    (gateway, id) => gateway.deleteKnowledgeTag(id),
+  ),
+  defineTool({
+    name: 'list_knowledge_topics',
+    title: 'List knowledge topics',
+    description:
+      'Lists knowledge topics (a stack of reels each) with progress counts, scheduled ones by study day, then backlog ones. Filter by catalog, tag, text, study-day range (`from` and `to` together) or scope. Paginated.',
+    input: z
+      .strictObject({
+        catalogId: kId('Catalog').optional(),
+        tagId: kId('Tag').optional(),
+        q: z
+          .string()
+          .trim()
+          .min(1)
+          .max(100)
+          .optional()
+          .describe('Text found in title or description, ignoring case'),
+        from: day().optional().describe('First study day, inclusive'),
+        to: day().optional().describe('Last study day, inclusive'),
+        scope: z
+          .enum(['all', 'scheduled', 'undated'])
+          .default('all')
+          .describe('Undated (backlog) topics have no study day'),
+        limit: limit(),
+        cursor: cursor(),
+      })
+      .refine(
+        (v) => (v.from === undefined) === (v.to === undefined),
+        'Give `from` and `to` together',
+      ),
+    output: pageOf(knowledgeTopic()),
+    annotations: READ_ONLY,
+    run: async (args, gateway) =>
+      toPage<z.input<ReturnType<typeof knowledgeTopic>>>(
+        await gateway.listKnowledgeTopics({
+          catalogId: args.catalogId ?? null,
+          tagId: args.tagId ?? null,
+          q: args.q ?? null,
+          from: args.from ?? null,
+          to: args.to ?? null,
+          scope: args.scope,
+          limit: args.limit,
+          offset: decodeCursor(args.cursor),
+        }),
+      ),
+  }),
+  defineTool({
+    name: 'get_knowledge_topic',
+    title: 'Get a knowledge topic',
+    description: 'Returns one topic with all its reels in order.',
+    input: z.strictObject({ id: kId('Topic') }),
+    output: z.object({
+      topic: knowledgeTopic(),
+      reels: z.array(knowledgeReel()),
+    }),
+    annotations: READ_ONLY,
+    run: async (args, gateway) => {
+      const found = await gateway.getKnowledgeTopic(args.id);
+      if (!found) throw notFound('topic', args.id);
+      return found as {
+        topic: z.input<ReturnType<typeof knowledgeTopic>>;
+        reels: z.input<ReturnType<typeof knowledgeReel>>[];
+      };
+    },
+  }),
+  defineTool({
+    ...KNOWLEDGE,
+    name: 'create_knowledge_topic',
+    title: 'Create a knowledge topic',
+    description:
+      'Creates a topic in a catalog. Without `studyDay` it lands in the backlog. `tagIds` come from list_knowledge_tags. Add its reels with create_knowledge_reel.',
+    input: z.strictObject({
+      catalogId: kId('Catalog'),
+      title: kName(120),
+      description: z.string().trim().max(500).nullable().default(null),
+      studyDay: day().nullable().default(null).describe('Null for the backlog'),
+      tagIds: z.array(kId('Tag')).max(50).default([]),
+    }),
+    output: knowledgeTopic(),
+    annotations: WRITE,
+    run: async (args, gateway) => {
+      const created = await gateway.createKnowledgeTopic(args);
+      if (!created) throw notFound('catalog', args.catalogId);
+      return created as z.input<ReturnType<typeof knowledgeTopic>>;
+    },
+  }),
+  defineTool({
+    ...KNOWLEDGE,
+    name: 'update_knowledge_topic',
+    title: 'Update a knowledge topic',
+    description:
+      'Changes the given fields of a topic. `tagIds` replaces all its tags; `studyDay: null` moves it to the backlog; `catalogId` moves it to another catalog.',
+    input: z
+      .strictObject({
+        id: kId('Topic'),
+        catalogId: kId('Catalog').optional(),
+        title: kName(120).optional(),
+        description: z.string().trim().max(500).optional(),
+        studyDay: day()
+          .nullable()
+          .optional()
+          .describe('Null sends it to the backlog'),
+        tagIds: z.array(kId('Tag')).max(50).optional(),
+        position: kPosition().optional(),
+      })
+      .refine(changedFields, AT_LEAST_ONE),
+    output: knowledgeTopic(),
+    annotations: { ...WRITE, idempotentHint: true },
+    run: async ({ id: topicId, ...patch }, gateway) => {
+      const updated = await gateway.updateKnowledgeTopic(topicId, patch);
+      if (!updated) throw notFound('topic', topicId);
+      return updated as z.input<ReturnType<typeof knowledgeTopic>>;
+    },
+  }),
+  deleteKnowledge(
+    'topic',
+    ' with all its reels, progress and files',
+    (gateway, id) => gateway.deleteKnowledgeTopic(id),
+  ),
+  defineTool({
+    ...KNOWLEDGE,
+    name: 'create_knowledge_reel',
+    title: 'Create a knowledge reel',
+    description:
+      'Adds a reel (one short portion of Markdown, 1 to 8000 characters) at the end of a topic.',
+    input: z.strictObject({
+      topicId: kId('Topic'),
+      body: z.string().trim().min(1).max(8000).describe('Markdown'),
+    }),
+    output: knowledgeReel(),
+    annotations: WRITE,
+    run: async (args, gateway) => {
+      const created = await gateway.createKnowledgeReel(
+        args.topicId,
+        args.body,
+      );
+      if (!created) throw notFound('topic', args.topicId);
+      return created as z.input<ReturnType<typeof knowledgeReel>>;
+    },
+  }),
+  defineTool({
+    ...KNOWLEDGE,
+    name: 'update_knowledge_reel',
+    title: 'Update a knowledge reel',
+    description: 'Changes the Markdown body or the position of a reel.',
+    input: z
+      .strictObject({
+        id: kId('Reel'),
+        body: z.string().trim().min(1).max(8000).optional(),
+        position: kPosition().optional(),
+      })
+      .refine(changedFields, AT_LEAST_ONE),
+    output: knowledgeReel(),
+    annotations: { ...WRITE, idempotentHint: true },
+    run: async ({ id: reelId, ...patch }, gateway) => {
+      const updated = await gateway.updateKnowledgeReel(reelId, patch);
+      if (!updated) throw notFound('reel', reelId);
+      return updated as z.input<ReturnType<typeof knowledgeReel>>;
+    },
+  }),
+  deleteKnowledge('reel', ' with its progress and file', (gateway, id) =>
+    gateway.deleteKnowledgeReel(id),
+  ),
+  defineTool({
+    ...KNOWLEDGE,
+    name: 'set_knowledge_progress',
+    title: 'Mark a knowledge reel done or not',
+    description:
+      'Marks a reel finished (`done: true`) or not finished. Safe to repeat.',
+    input: z.strictObject({ reelId: kId('Reel'), done: z.boolean() }),
+    output: knowledgeReel(),
+    annotations: { ...WRITE, idempotentHint: true },
+    run: async (args, gateway) => {
+      const updated = await gateway.setKnowledgeProgress(
+        args.reelId,
+        args.done,
+      );
+      if (!updated) throw notFound('reel', args.reelId);
+      return updated as z.input<ReturnType<typeof knowledgeReel>>;
+    },
+  }),
+];
+
+export const MCP_TOOLS: readonly RegisteredTool[] = [
+  ...CORE_TOOLS,
+  ...KNOWLEDGE_TOOLS,
 ];
