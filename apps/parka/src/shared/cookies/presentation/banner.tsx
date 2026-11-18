@@ -20,7 +20,7 @@ export const Banner = ({
     role="region"
     aria-label={copy.banner.title}
     data-e2e="cookies:banner"
-    className="fixed bottom-4 left-1/2 z-(--z-modal) flex max-h-[90dvh] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 flex-col gap-4 overflow-y-auto rounded-4xl border border-line bg-card p-5 shadow-popover sm:bottom-6 sm:max-w-2xl sm:p-6"
+    className="fixed bottom-4 left-1/2 z-(--z-modal) flex max-h-[90dvh] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 flex-col gap-4 overflow-y-auto scroll-in-radius rounded-4xl border border-line bg-card p-5 shadow-popover sm:bottom-6 sm:max-w-2xl sm:p-6"
   >
     <div className="flex items-center gap-3">
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand">

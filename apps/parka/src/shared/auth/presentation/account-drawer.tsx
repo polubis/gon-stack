@@ -311,7 +311,7 @@ const Drawer = ({
           data-e2e="account-menu:menu"
           style={anchor ?? undefined}
           aria-describedby={undefined}
-          className="fixed inset-y-2 right-2 z-(--z-modal) flex w-[calc(100%-1rem)] max-w-sm animate-drawer-in flex-col overflow-y-auto overscroll-contain rounded-4xl border border-line bg-card p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-popover focus:outline-none motion-reduce:animate-none"
+          className="fixed inset-y-2 right-2 z-(--z-modal) flex w-[calc(100%-1rem)] max-w-sm animate-drawer-in flex-col overflow-y-auto scroll-in-radius overscroll-contain rounded-4xl border border-line bg-card p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-popover focus:outline-none motion-reduce:animate-none"
         >
           <div className="hero-card flex items-start gap-3 rounded-3xl p-4">
             <AccountAvatar

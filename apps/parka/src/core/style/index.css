@@ -25,6 +25,31 @@
 }
 
 /*
+ * Scrollable surface with a big corner radius: a slim round thumb, no arrow
+ * buttons, and the track pulled in from both ends by the radius, so nothing
+ * of the scrollbar sticks out past the rounded border (the native one draws
+ * square buttons into the corners).
+ */
+@utility scroll-in-radius {
+  &::-webkit-scrollbar {
+    width: 0.75rem;
+  }
+  &::-webkit-scrollbar-button {
+    display: none;
+  }
+  &::-webkit-scrollbar-track {
+    margin-block: 1.5rem;
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    border: 0.25rem solid transparent;
+    border-radius: 9999px;
+    background-color: var(--line-strong);
+    background-clip: content-box;
+  }
+}
+
+/*
  * Theme tokens — single source for app colors, shadows and z-index.
  * "Aurora" look: pearl ground with a peach/lilac aura, white cards, ink
  * (black) actions, one lime accent that only ever fills (never text on light).

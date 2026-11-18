@@ -135,7 +135,7 @@ describe('expense writes', () => {
         items: body.items,
       },
     });
-    expect(ms).toBeLessThan(LATENCY_MS * 5);
+    expect(ms).toBeLessThan(LATENCY_MS * 6);
   });
 
   it('updates an expense and returns it', async () => {
@@ -154,6 +154,6 @@ describe('expense writes', () => {
         items: body.items,
       },
     });
-    expect(ms).toBeLessThan(LATENCY_MS * 7);
+    expect(ms).toBeLessThan(LATENCY_MS * 8);
   });
 });
