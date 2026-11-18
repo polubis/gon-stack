@@ -1,166 +1,126 @@
 import { describe, expect, it } from 'vitest';
 import {
   areaFills,
-  filterNodes,
+  areaOfCategory,
+  cortexSplit,
   fillOf,
-  knowledgeStats,
-  nextStatus,
-  parseTags,
-  priorityLevel,
-  sortByPriority,
+  groupTopics,
+  progressLabel,
+  summaryOf,
+  topicFill,
 } from '../domain/learning';
 import type {
+  Catalog,
+  CatalogId,
   Category,
-  Folder,
-  KnowledgeNode,
-  Priority,
+  CategoryId,
+  Topic,
+  TopicId,
 } from '../domain/models';
 
-const node = (overrides: Partial<KnowledgeNode> = {}): KnowledgeNode => ({
-  id: 'n-1' as KnowledgeNode['id'],
-  folderId: 'f-1' as Folder['id'],
-  title: 'Grafy',
-  notes: null,
-  categoryId: 'c-1' as Category['id'],
-  priorityId: 'p-mid' as Priority['id'],
-  tags: [],
-  status: 'to-learn',
-  ...overrides,
+const category = (id: string, position: number): Category => ({
+  id: id as CategoryId,
+  name: id,
+  color: '#2563eb',
+  position,
+});
+const catalog = (id: string, categoryId: string | null): Catalog => ({
+  id: id as CatalogId,
+  categoryId: categoryId as CategoryId | null,
+  name: id,
+  description: '',
+  position: 0,
+});
+const topic = (
+  id: string,
+  catalogId: string,
+  doneCount: number,
+  reelCount = 4,
+): Topic => ({
+  id: id as TopicId,
+  catalogId: catalogId as CatalogId,
+  title: id,
+  description: '',
+  position: 0,
+  studyDay: null,
+  tagIds: [],
+  reelCount,
+  doneCount,
+  createdAt: '',
 });
 
-const priorities: Priority[] = [
-  { id: 'p-low' as Priority['id'], name: 'Niski', value: 2 },
-  { id: 'p-mid' as Priority['id'], name: 'Średni', value: 5 },
-  { id: 'p-high' as Priority['id'], name: 'Wysoki', value: 9 },
-];
+const categories = ['c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6'].map(category);
 
-describe('learning progress', () => {
-  it('walks the statuses and wraps back to the first', () => {
-    expect(nextStatus('to-learn')).toBe('learning');
-    expect(nextStatus('learning')).toBe('learned');
-    expect(nextStatus('learned')).toBe('to-learn');
-  });
-
-  it('counts mastered fully and studying by half', () => {
-    expect(
-      fillOf([node({ status: 'learned' }), node({ status: 'learning' })]),
-    ).toBe(0.75);
+describe('knowledge learning', () => {
+  it('fills a topic with its finished reels, empty topic stays 0', () => {
+    expect(topicFill({ doneCount: 1, reelCount: 4 })).toBe(0.25);
+    expect(topicFill({ doneCount: 0, reelCount: 0 })).toBe(0);
     expect(fillOf([])).toBe(0);
+    expect(fillOf([topic('a', 'k', 4), topic('b', 'k', 0)])).toBe(0.5);
   });
 
-  it('fills only the area whose folders hold the knowledge', () => {
-    const folders: Folder[] = [
-      { id: 'f-1' as Folder['id'], name: 'A', areaId: 'frontal' },
-      { id: 'f-2' as Folder['id'], name: 'B', areaId: 'temporal' },
+  it('counts untouched, started and done topics and reels', () => {
+    const summary = summaryOf([
+      topic('a', 'k', 0),
+      topic('b', 'k', 2),
+      topic('c', 'k', 4),
+      topic('d', 'k', 0, 0),
+    ]);
+
+    expect(summary).toEqual({
+      topics: 4,
+      startedTopics: 1,
+      doneTopics: 1,
+      reels: 12,
+      doneReels: 6,
+    });
+  });
+
+  it('gives categories the brain areas in order, round and round', () => {
+    expect(areaOfCategory('c0' as CategoryId, categories)).toBe('frontal');
+    expect(areaOfCategory('c4' as CategoryId, categories)).toBe('cerebellum');
+    expect(areaOfCategory('c6' as CategoryId, categories)).toBe('frontal');
+    expect(areaOfCategory(null, categories)).toBe('frontal');
+  });
+
+  it('fills each area from the topics of its categories', () => {
+    const catalogs = [catalog('k0', 'c0'), catalog('k1', 'c1')];
+    const fills = areaFills(categories, catalogs, [
+      topic('a', 'k0', 4),
+      topic('b', 'k1', 2),
+    ]);
+
+    expect(fills.find((f) => f.id === 'frontal')?.fill).toBe(1);
+    expect(fills.find((f) => f.id === 'parietal')?.fill).toBe(0.5);
+    expect(fills.find((f) => f.id === 'brainstem')?.fill).toBe(0);
+  });
+
+  it('splits the fill between the cortex and the rest', () => {
+    const catalogs = [catalog('k0', 'c0'), catalog('k4', 'c4')];
+    const split = cortexSplit(categories, catalogs, [
+      topic('a', 'k0', 4),
+      topic('b', 'k4', 0),
+    ]);
+
+    expect(split).toEqual({ cortex: 1, rest: 0 });
+  });
+
+  it('labels progress as done/total', () => {
+    expect(progressLabel({ doneCount: 2, reelCount: 5 })).toBe('2/5');
+  });
+
+  it('groups topics by category then catalog and drops empty groups', () => {
+    const catalogs = [
+      catalog('k0', 'c0'),
+      catalog('k1', 'c1'),
+      catalog('kx', null),
     ];
-    const fills = areaFills(folders, [
-      node({ status: 'learned' }),
-      node({ folderId: 'f-2' as Folder['id'], status: 'to-learn' }),
+    const groups = groupTopics(categories, catalogs, [
+      topic('a', 'k0', 0),
+      topic('b', 'kx', 0),
     ]);
 
-    expect(fills.find((a) => a.id === 'frontal')?.fill).toBe(1);
-    expect(fills.find((a) => a.id === 'temporal')?.fill).toBe(0);
-    expect(fills.find((a) => a.id === 'cerebellum')?.fill).toBe(0);
-  });
-});
-
-describe('priorities', () => {
-  it('reads the level from the weight', () => {
-    expect(priorityLevel(9)).toBe('high');
-    expect(priorityLevel(5)).toBe('medium');
-    expect(priorityLevel(2)).toBe('low');
-  });
-
-  it('puts the most urgent node first and keeps ties in order', () => {
-    const sorted = sortByPriority(
-      [
-        node({
-          id: 'a' as KnowledgeNode['id'],
-          priorityId: 'p-low' as Priority['id'],
-        }),
-        node({
-          id: 'b' as KnowledgeNode['id'],
-          priorityId: 'p-high' as Priority['id'],
-        }),
-        node({
-          id: 'c' as KnowledgeNode['id'],
-          priorityId: 'p-high' as Priority['id'],
-        }),
-      ],
-      priorities,
-    );
-
-    expect(sorted.map((n) => n.id)).toEqual(['b', 'c', 'a']);
-  });
-});
-
-describe('search and tags', () => {
-  it('finds a node by title, notes or tag, ignoring case', () => {
-    const nodes = [
-      node({ title: 'Grafy' }),
-      node({
-        id: 'n-2' as KnowledgeNode['id'],
-        title: 'Inne',
-        tags: ['react'],
-      }),
-      node({
-        id: 'n-3' as KnowledgeNode['id'],
-        title: 'Trzecie',
-        notes: 'o REACT',
-      }),
-    ];
-
-    expect(filterNodes(nodes, ' REACT ').map((n) => n.id)).toEqual([
-      'n-2',
-      'n-3',
-    ]);
-    expect(filterNodes(nodes, '')).toHaveLength(3);
-  });
-
-  it('cleans, de-duplicates and bounds tags', () => {
-    expect(parseTags(' React, react ,, UX,abcdefghij', 2, 5)).toEqual([
-      'react',
-      'ux',
-    ]);
-  });
-});
-
-describe('statistics', () => {
-  it('summarizes progress, categories, priorities and tags', () => {
-    const categories: Category[] = [
-      {
-        id: 'c-1' as Category['id'],
-        name: 'Kod',
-        icon: 'laptop',
-        color: '#000',
-      },
-      {
-        id: 'c-2' as Category['id'],
-        name: 'Puste',
-        icon: 'book',
-        color: '#111',
-      },
-    ];
-    const stats = knowledgeStats(
-      [
-        node({ status: 'learned', tags: ['a', 'b'] }),
-        node({
-          id: 'n-2' as KnowledgeNode['id'],
-          priorityId: 'p-high' as Priority['id'],
-          tags: ['a'],
-        }),
-      ],
-      categories,
-      priorities,
-    );
-
-    expect(stats.total).toBe(2);
-    expect(stats.progress).toBe(50);
-    expect(stats.byStatus).toEqual({ 'to-learn': 1, learning: 0, learned: 1 });
-    expect(stats.byCategory).toEqual([
-      { name: 'Kod', color: '#000', count: 2 },
-    ]);
-    expect(stats.byPriority.find((p) => p.level === 'high')?.count).toBe(1);
-    expect(stats.topTags[0]).toEqual({ tag: 'a', count: 2 });
+    expect(groups.map((g) => g.category?.id ?? null)).toEqual(['c0', null]);
+    expect(groups[0]?.catalogs[0]?.topics.map((t) => t.id)).toEqual(['a']);
   });
 });

@@ -15,6 +15,7 @@ const deviceUse = base.projects![0]!.use;
 const REAL_BACKEND_SPECS = [
   '**/__e2e__/backend.spec.ts',
   '**/__e2e__/accounts.spec.ts',
+  '**/modules/knowledge/__e2e__/knowledge-viewer.spec.ts',
   '**/modules/time/__e2e__/time.spec.ts',
   '**/modules/time/__e2e__/mcp-live-refresh.spec.ts',
   '**/modules/time/__e2e__/task-history.spec.ts',

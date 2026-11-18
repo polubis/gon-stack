@@ -188,6 +188,246 @@ export type Database = {
         };
         Relationships: [];
       };
+      knowledge_catalogs: {
+        Row: {
+          category_id: string | null;
+          created_at: string;
+          description: string;
+          id: string;
+          name: string;
+          position: number;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          category_id?: string | null;
+          created_at?: string;
+          description?: string;
+          id?: string;
+          name: string;
+          position?: number;
+          user_id: string;
+        };
+        Update: {
+          category_id?: string | null;
+          created_at?: string;
+          description?: string;
+          id?: string;
+          name?: string;
+          position?: number;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'knowledge_catalogs_user_id_category_id_fkey';
+            columns: ['user_id', 'category_id'];
+            isOneToOne: false;
+            referencedRelation: 'knowledge_categories';
+            referencedColumns: ['user_id', 'id'];
+          },
+        ];
+      };
+      knowledge_categories: {
+        Row: {
+          color: string;
+          created_at: string;
+          id: string;
+          name: string;
+          position: number;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          color?: string;
+          created_at?: string;
+          id?: string;
+          name: string;
+          position?: number;
+          user_id: string;
+        };
+        Update: {
+          color?: string;
+          created_at?: string;
+          id?: string;
+          name?: string;
+          position?: number;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      knowledge_reel_progress: {
+        Row: {
+          completed_at: string;
+          reel_id: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          completed_at?: string;
+          reel_id: string;
+          user_id: string;
+        };
+        Update: {
+          completed_at?: string;
+          reel_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'knowledge_reel_progress_user_id_reel_id_fkey';
+            columns: ['user_id', 'reel_id'];
+            isOneToOne: true;
+            referencedRelation: 'knowledge_reels';
+            referencedColumns: ['user_id', 'id'];
+          },
+        ];
+      };
+      knowledge_reels: {
+        Row: {
+          body: string;
+          created_at: string;
+          id: string;
+          media_kind: string | null;
+          media_path: string | null;
+          position: number;
+          topic_id: string;
+          updated_at: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          body: string;
+          created_at?: string;
+          id?: string;
+          media_kind?: string | null;
+          media_path?: string | null;
+          position?: number;
+          topic_id: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          body?: string;
+          created_at?: string;
+          id?: string;
+          media_kind?: string | null;
+          media_path?: string | null;
+          position?: number;
+          topic_id?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'knowledge_reels_user_id_topic_id_fkey';
+            columns: ['user_id', 'topic_id'];
+            isOneToOne: false;
+            referencedRelation: 'knowledge_topics';
+            referencedColumns: ['user_id', 'id'];
+          },
+        ];
+      };
+      knowledge_tags: {
+        Row: {
+          created_at: string;
+          id: string;
+          name: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      knowledge_topic_tags: {
+        Row: {
+          tag_id: string;
+          topic_id: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          tag_id: string;
+          topic_id: string;
+          user_id: string;
+        };
+        Update: {
+          tag_id?: string;
+          topic_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'knowledge_topic_tags_user_id_tag_id_fkey';
+            columns: ['user_id', 'tag_id'];
+            isOneToOne: false;
+            referencedRelation: 'knowledge_tags';
+            referencedColumns: ['user_id', 'id'];
+          },
+          {
+            foreignKeyName: 'knowledge_topic_tags_user_id_topic_id_fkey';
+            columns: ['user_id', 'topic_id'];
+            isOneToOne: false;
+            referencedRelation: 'knowledge_topics';
+            referencedColumns: ['user_id', 'id'];
+          },
+        ];
+      };
+      knowledge_topics: {
+        Row: {
+          catalog_id: string;
+          created_at: string;
+          description: string;
+          id: string;
+          position: number;
+          study_day: string | null;
+          title: string;
+          updated_at: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          catalog_id: string;
+          created_at?: string;
+          description?: string;
+          id?: string;
+          position?: number;
+          study_day?: string | null;
+          title: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          catalog_id?: string;
+          created_at?: string;
+          description?: string;
+          id?: string;
+          position?: number;
+          study_day?: string | null;
+          title?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'knowledge_topics_user_id_catalog_id_fkey';
+            columns: ['user_id', 'catalog_id'];
+            isOneToOne: false;
+            referencedRelation: 'knowledge_catalogs';
+            referencedColumns: ['user_id', 'id'];
+          },
+        ];
+      };
       limits: {
         Row: {
           alert_at: number;

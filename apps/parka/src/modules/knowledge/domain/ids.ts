@@ -1,7 +1,7 @@
-import type { FolderId, NodeId } from './models';
+/** Placeholder id of an item the server has not stored yet (swapped on answer). */
+export const TEMP_PREFIX = 'tmp-';
 
-/** Client-generated ids, valid for any backend (`min(1)`). */
-export const newNodeId = (): NodeId => `knode-${crypto.randomUUID()}` as NodeId;
+export const newTempId = <T extends string>(): T =>
+  `${TEMP_PREFIX}${crypto.randomUUID()}` as T;
 
-export const newFolderId = (): FolderId =>
-  `kfolder-${crypto.randomUUID()}` as FolderId;
+export const isTempId = (id: string): boolean => id.startsWith(TEMP_PREFIX);

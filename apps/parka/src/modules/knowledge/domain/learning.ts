@@ -1,158 +1,111 @@
-import { BRAIN_AREAS, type BrainAreaId } from './brain-area';
-import type {
-  Category,
-  Folder,
-  KnowledgeNode,
-  LearnStatus,
-  Priority,
-  PriorityId,
-} from './models';
+import { BRAIN_AREA_IDS, isCortex, type BrainAreaId } from './brain-area';
+import { stateOf } from './filters';
+import type { Catalog, Category, CategoryId, Topic } from './models';
 
-export const STATUS_ORDER: readonly LearnStatus[] = [
-  'to-learn',
-  'learning',
-  'learned',
-];
-
-export const STATUS_NAMES: Record<LearnStatus, string> = {
-  'to-learn': 'Do nauki',
-  learning: 'W nauce',
-  learned: 'Opanowane',
+/** Mirrors the `summary` of the knowledge API; counted locally so writes update it at once. */
+export type KnowledgeSummary = {
+  topics: number;
+  /** Touched: at least one finished reel, not all. */
+  startedTopics: number;
+  doneTopics: number;
+  reels: number;
+  doneReels: number;
 };
 
-/** How much of a node already sits in the brain. */
-const WEIGHT: Record<LearnStatus, number> = {
-  'to-learn': 0,
-  learning: 0.5,
-  learned: 1,
-};
+/** 0..1: how much of a topic sits in the brain (finished reels). */
+export const topicFill = (
+  topic: Pick<Topic, 'doneCount' | 'reelCount'>,
+): number =>
+  topic.reelCount === 0 ? 0 : Math.min(1, topic.doneCount / topic.reelCount);
 
-/** The next step of learning, then back to the first. */
-export const nextStatus = (status: LearnStatus): LearnStatus =>
-  STATUS_ORDER[(STATUS_ORDER.indexOf(status) + 1) % STATUS_ORDER.length]!;
-
-export type PriorityLevel = 'low' | 'medium' | 'high';
-
-/** high >= 8, low <= 3, medium in between. */
-export const priorityLevel = (value: number): PriorityLevel =>
-  value >= 8 ? 'high' : value <= 3 ? 'low' : 'medium';
-
-export const priorityLabel = (priority: Priority): string =>
-  `${priority.value} - ${priority.name}`;
-
-const weightOf = (priorities: readonly Priority[], id: PriorityId): number =>
-  priorities.find((p) => p.id === id)?.value ?? -Infinity;
-
-/** Most urgent to learn first; ties keep the stored order. */
-export const sortByPriority = (
-  nodes: readonly KnowledgeNode[],
-  priorities: readonly Priority[],
-): KnowledgeNode[] =>
-  [...nodes].sort(
-    (a, b) =>
-      weightOf(priorities, b.priorityId) - weightOf(priorities, a.priorityId),
-  );
-
-/** 0..1: how full the given nodes make a brain (mastered 1, studying half). */
-export const fillOf = (nodes: readonly KnowledgeNode[]): number =>
-  nodes.length === 0
+/** 0..1: mean fill of topics; no topics = 0. */
+export const fillOf = (topics: readonly Topic[]): number =>
+  topics.length === 0
     ? 0
-    : nodes.reduce((sum, n) => sum + WEIGHT[n.status], 0) / nodes.length;
+    : topics.reduce((sum, t) => sum + topicFill(t), 0) / topics.length;
 
-/** Fill of each brain area: its folders' nodes together. Empty area stays 0. */
-export const areaFills = (
-  folders: readonly Folder[],
-  nodes: readonly KnowledgeNode[],
-): { id: BrainAreaId; fill: number }[] =>
-  BRAIN_AREAS.map(({ id }) => {
-    const folderIds = new Set(
-      folders.filter((f) => f.areaId === id).map((f) => f.id),
-    );
-    return {
-      id,
-      fill: fillOf(nodes.filter((n) => folderIds.has(n.folderId))),
-    };
-  });
+export const summaryOf = (topics: readonly Topic[]): KnowledgeSummary => ({
+  topics: topics.length,
+  startedTopics: topics.filter((t) => stateOf(t) === 'started').length,
+  doneTopics: topics.filter((t) => t.reelCount > 0 && stateOf(t) === 'done')
+    .length,
+  reels: topics.reduce((sum, t) => sum + t.reelCount, 0),
+  doneReels: topics.reduce((sum, t) => sum + t.doneCount, 0),
+});
 
-export type KnowledgeStats = {
-  total: number;
-  /** 0..100 */
-  progress: number;
-  byStatus: Record<LearnStatus, number>;
-  byCategory: { name: string; color: string; count: number }[];
-  byPriority: { level: PriorityLevel; count: number; learned: number }[];
-  topTags: { tag: string; count: number }[];
-};
-
-export const knowledgeStats = (
-  nodes: readonly KnowledgeNode[],
+/**
+ * Brain area of a category: categories take the areas in their order, round
+ * and round. Uncategorised catalogs sit in the first area.
+ */
+export const areaOfCategory = (
+  categoryId: CategoryId | null,
   categories: readonly Category[],
-  priorities: readonly Priority[],
-): KnowledgeStats => {
-  const byStatus: Record<LearnStatus, number> = {
-    'to-learn': 0,
-    learning: 0,
-    learned: 0,
-  };
-  nodes.forEach((n) => (byStatus[n.status] += 1));
-  const levels: PriorityLevel[] = ['high', 'medium', 'low'];
-  const tags = new Map<string, number>();
-  nodes.forEach((n) =>
-    n.tags.forEach((tag) => tags.set(tag, (tags.get(tag) ?? 0) + 1)),
+): BrainAreaId => {
+  const at = categories.findIndex((c) => c.id === categoryId);
+  return BRAIN_AREA_IDS[at < 0 ? 0 : at % BRAIN_AREA_IDS.length]!;
+};
+
+const areaOfTopic = (
+  topic: Topic,
+  catalogs: readonly Catalog[],
+  categories: readonly Category[],
+): BrainAreaId =>
+  areaOfCategory(
+    catalogs.find((c) => c.id === topic.catalogId)?.categoryId ?? null,
+    categories,
   );
+
+/** Fill of each brain area: its categories' topics together. Empty area stays 0. */
+export const areaFills = (
+  categories: readonly Category[],
+  catalogs: readonly Catalog[],
+  topics: readonly Topic[],
+): { id: BrainAreaId; fill: number }[] =>
+  BRAIN_AREA_IDS.map((id) => ({
+    id,
+    fill: fillOf(
+      topics.filter((t) => areaOfTopic(t, catalogs, categories) === id),
+    ),
+  }));
+
+/** Fill of the cortex (four lobes) vs the rest (cerebellum, brainstem). */
+export const cortexSplit = (
+  categories: readonly Category[],
+  catalogs: readonly Catalog[],
+  topics: readonly Topic[],
+): { cortex: number; rest: number } => {
+  const inCortex = (t: Topic) => isCortex(areaOfTopic(t, catalogs, categories));
   return {
-    total: nodes.length,
-    progress: Math.round(fillOf(nodes) * 100),
-    byStatus,
-    byCategory: categories
-      .map(({ id, name, color }) => ({
-        name,
-        color,
-        count: nodes.filter((n) => n.categoryId === id).length,
-      }))
-      .filter((c) => c.count > 0),
-    byPriority: levels.map((level) => {
-      const inLevel = nodes.filter(
-        (n) =>
-          priorityLevel(
-            priorities.find((p) => p.id === n.priorityId)?.value ?? 5,
-          ) === level,
-      );
-      return {
-        level,
-        count: inLevel.length,
-        learned: inLevel.filter((n) => n.status === 'learned').length,
-      };
-    }),
-    topTags: [...tags]
-      .map(([tag, count]) => ({ tag, count }))
-      .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag))
-      .slice(0, 6),
+    cortex: fillOf(topics.filter(inCortex)),
+    rest: fillOf(topics.filter((t) => !inCortex(t))),
   };
 };
 
-/** Lower-cased text a search looks through. */
-const haystack = (node: KnowledgeNode): string =>
-  [node.title, node.notes ?? '', ...node.tags].join(' ').toLowerCase();
+/** Label of `x/y` reels. */
+export const progressLabel = (
+  topic: Pick<Topic, 'doneCount' | 'reelCount'>,
+): string => `${topic.doneCount}/${topic.reelCount}`;
 
-/** Nodes matching the phrase and (when set) living in the given area. */
-export const filterNodes = (
-  nodes: readonly KnowledgeNode[],
-  query: string,
-): KnowledgeNode[] => {
-  const phrase = query.trim().toLowerCase();
-  return phrase
-    ? nodes.filter((n) => haystack(n).includes(phrase))
-    : [...nodes];
+/** Topics by category then catalog, in the given orders; empty groups dropped. */
+export type TopicGroup = {
+  category: Category | null;
+  catalogs: { catalog: Catalog; topics: Topic[] }[];
 };
 
-/** Splits a comma list into clean, unique, bounded tags. */
-export const parseTags = (value: string, max: number, length: number) =>
-  [
-    ...new Set(
-      value
-        .split(',')
-        .map((tag) => tag.trim().toLowerCase().slice(0, length))
-        .filter(Boolean),
-    ),
-  ].slice(0, max);
+export const groupTopics = (
+  categories: readonly Category[],
+  catalogs: readonly Catalog[],
+  topics: readonly Topic[],
+): TopicGroup[] => {
+  const groups = [...categories, null].map((category) => ({
+    category,
+    catalogs: catalogs
+      .filter((c) => (c.categoryId ?? null) === (category?.id ?? null))
+      .map((catalog) => ({
+        catalog,
+        topics: topics.filter((t) => t.catalogId === catalog.id),
+      }))
+      .filter((entry) => entry.topics.length > 0),
+  }));
+  return groups.filter((group) => group.catalogs.length > 0);
+};

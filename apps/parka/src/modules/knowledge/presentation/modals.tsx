@@ -1,58 +1,212 @@
 import { useEffect } from 'react';
-import { closeModal, useModalStack } from '@/shared/router/modal-stack';
+import {
+  closeModal,
+  closeModalThen,
+  useModalStack,
+} from '@/shared/router/modal-stack';
+import { BacklogDialog } from './backlog-dialog';
+import { CatalogDialog } from './catalog-dialog';
+import { CategoryDialog } from './category-dialog';
 import { useContext } from './context';
 import { DeleteDialog } from './delete-dialog';
-import { FolderDialog } from './folder-dialog';
+import { FiltersDrawer } from './filters-drawer';
+import { ListDialog } from './list-dialog';
 import {
-  deletedNodeOf,
-  editedNodeOf,
-  newNodeFolderOf,
-  NEW_FOLDER_MODAL,
-  NEW_NODE_MODAL,
+  BACKLOG_MODAL,
+  FILTERS_MODAL,
+  LIST_MODAL,
+  NEW_BACKLOG_TOPIC_MODAL,
+  editModal,
+  newModal,
+  newTopicCatalogOf,
+  parseEntityModal,
+  reelMediaOf,
+  reelsTopicOf,
+  viewedTopicOf,
 } from './modal-ids';
-import { NodeDialog } from './node-dialog';
+import { ReelViewer } from './reel-viewer';
+import { ReelsDialog } from './reels-dialog';
+import { TagDialog } from './tag-dialog';
+import { TopicDialog } from './topic-dialog';
 
 /** Renders the popups that are open in the URL stack, in their order. */
-export const Modals = () => {
-  const { nodes, initializing, deleteNode } = useContext();
+export const Modals = ({ defaultDay }: { defaultDay: string }) => {
+  const {
+    categories,
+    catalogs,
+    tags,
+    allTopics,
+    reels,
+    initializing,
+    deleteCategory,
+    deleteCatalog,
+    deleteTag,
+    deleteTopic,
+    deleteReel,
+    removeReelMedia,
+  } = useContext();
   const stack = useModalStack();
 
-  // A popup of a node that is gone (stale link) must not linger in the URL.
-  const dangling = initializing
-    ? undefined
-    : stack.find((modal) => {
-        const id = editedNodeOf(modal) ?? deletedNodeOf(modal);
-        return id !== null && !nodes.some((n) => n.id === id);
-      });
+  const known = (entity: string, id: string): boolean =>
+    entity === 'category'
+      ? categories.some((c) => c.id === id)
+      : entity === 'catalog'
+        ? catalogs.some((c) => c.id === id)
+        : entity === 'tag'
+          ? tags.some((t) => t.id === id)
+          : entity === 'topic'
+            ? allTopics.some((t) => t.id === id)
+            : Object.values(reels).some((list) =>
+                list.some((r) => r.id === id),
+              );
+
+  // A deep link to something that is gone must not leave a dead `modal=` param.
   useEffect(() => {
-    if (dangling) closeModal(dangling);
-  }, [dangling]);
+    if (initializing) return;
+    for (const modal of stack) {
+      const parsed = parseEntityModal(modal);
+      const topicId = reelsTopicOf(modal) ?? viewedTopicOf(modal);
+      if (
+        (parsed?.id && !known(parsed.entity, parsed.id)) ||
+        (topicId && !allTopics.some((t) => t.id === topicId))
+      )
+        closeModal(modal);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initializing, stack, categories, catalogs, tags, allTopics, reels]);
 
   // Nothing to edit before the data is here.
   if (initializing) return null;
 
-  return stack.map((modal) => {
-    if (modal === NEW_NODE_MODAL)
-      return <NodeDialog key={modal} modal={modal} />;
-    if (modal === NEW_FOLDER_MODAL) return <FolderDialog key={modal} />;
-    const folderId = newNodeFolderOf(modal);
-    if (folderId)
-      return <NodeDialog key={modal} modal={modal} folderId={folderId} />;
-    const edited = editedNodeOf(modal);
-    const editedNode = nodes.find((n) => n.id === edited);
-    if (editedNode)
-      return <NodeDialog key={modal} modal={modal} node={editedNode} />;
-    const deleted = deletedNodeOf(modal);
-    const deletedNode = nodes.find((n) => n.id === deleted);
-    if (deletedNode)
+  const dialog = (modal: string) => {
+    if (modal === FILTERS_MODAL)
+      return <FiltersDrawer key={modal} modal={modal} />;
+    if (modal === BACKLOG_MODAL)
+      return <BacklogDialog key={modal} modal={modal} />;
+    if (modal === NEW_BACKLOG_TOPIC_MODAL)
+      return <TopicDialog key={modal} modal={modal} defaultDay={null} />;
+    for (const entity of ['category', 'catalog', 'tag'] as const)
+      if (modal === LIST_MODAL[entity])
+        return <ListDialog key={modal} modal={modal} entity={entity} />;
+    if (modal === newModal('category'))
+      return <CategoryDialog key={modal} modal={modal} />;
+    if (modal === newModal('catalog'))
+      return <CatalogDialog key={modal} modal={modal} />;
+    if (modal === newModal('tag'))
+      return <TagDialog key={modal} modal={modal} />;
+    if (modal === newModal('topic'))
+      return <TopicDialog key={modal} modal={modal} defaultDay={defaultDay} />;
+    const catalogId = newTopicCatalogOf(modal);
+    if (catalogId)
+      return (
+        <TopicDialog
+          key={modal}
+          modal={modal}
+          catalogId={catalogId}
+          defaultDay={defaultDay}
+        />
+      );
+    const reelsOf = reelsTopicOf(modal);
+    const reelsTopic = allTopics.find((t) => t.id === reelsOf);
+    if (reelsTopic)
+      return <ReelsDialog key={modal} modal={modal} topic={reelsTopic} />;
+    const viewed = allTopics.find((t) => t.id === viewedTopicOf(modal));
+    if (viewed) return <ReelViewer key={modal} modal={modal} topic={viewed} />;
+
+    const mediaOf = reelMediaOf(modal);
+    if (mediaOf)
       return (
         <DeleteDialog
           key={modal}
           modal={modal}
-          node={deletedNode}
-          onConfirm={() => deleteNode(deletedNode.id)}
+          title="Usunąć media rolki?"
+          description="Obraz lub wideo zostanie usunięte z rolki, sam tekst zostaje."
+          onConfirm={() => {
+            removeReelMedia(mediaOf);
+            closeModal(modal);
+          }}
         />
       );
-    return null;
-  });
+
+    const parsed = parseEntityModal(modal);
+    if (!parsed?.id) return null;
+    const { entity, action, id } = parsed;
+    if (action === 'edit') {
+      const category = categories.find((c) => c.id === id);
+      if (entity === 'category' && category)
+        return <CategoryDialog key={modal} modal={modal} category={category} />;
+      const catalog = catalogs.find((c) => c.id === id);
+      if (entity === 'catalog' && catalog)
+        return <CatalogDialog key={modal} modal={modal} catalog={catalog} />;
+      const tag = tags.find((t) => t.id === id);
+      if (entity === 'tag' && tag)
+        return <TagDialog key={modal} modal={modal} tag={tag} />;
+      const topic = allTopics.find((t) => t.id === id);
+      if (entity === 'topic' && topic)
+        return (
+          <TopicDialog
+            key={modal}
+            modal={modal}
+            topic={topic}
+            defaultDay={null}
+          />
+        );
+      return null;
+    }
+    // Delete: confirmation, then the form it came from closes too.
+    const subject =
+      entity === 'category'
+        ? categories.find((c) => c.id === id)?.name
+        : entity === 'catalog'
+          ? catalogs.find((c) => c.id === id)?.name
+          : entity === 'tag'
+            ? tags.find((t) => t.id === id)?.name
+            : entity === 'topic'
+              ? allTopics.find((t) => t.id === id)?.title
+              : 'rolka';
+    if (subject === undefined) return null;
+    const confirm: Record<typeof entity, () => void> = {
+      category: () => deleteCategory(id as never),
+      catalog: () => deleteCatalog(id as never),
+      tag: () => deleteTag(id as never),
+      topic: () => deleteTopic(id as never),
+      reel: () => deleteReel(id as never),
+    };
+    const copy: Record<typeof entity, [string, string]> = {
+      category: [
+        'Usunąć kategorię?',
+        `Kategoria „${subject}” zostanie usunięta, jej katalogi zostaną bez kategorii.`,
+      ],
+      catalog: [
+        'Usunąć katalog?',
+        `Katalog „${subject}” zostanie usunięty razem ze wszystkimi tematami i rolkami.`,
+      ],
+      tag: [
+        'Usunąć tag?',
+        `Tag „${subject}” zostanie zdjęty ze wszystkich tematów.`,
+      ],
+      topic: [
+        'Usunąć temat?',
+        `Temat „${subject}” zostanie usunięty razem z rolkami i postępem.`,
+      ],
+      reel: [
+        'Usunąć rolkę?',
+        'Rolka zostanie usunięta bez możliwości cofnięcia.',
+      ],
+    };
+    return (
+      <DeleteDialog
+        key={modal}
+        modal={modal}
+        title={copy[entity][0]}
+        description={copy[entity][1]}
+        onConfirm={() => {
+          confirm[entity]();
+          closeModalThen(modal, () => closeModal(editModal(entity, id)));
+        }}
+      />
+    );
+  };
+
+  return <>{stack.map(dialog)}</>;
 };

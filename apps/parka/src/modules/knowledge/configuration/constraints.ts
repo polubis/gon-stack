@@ -1,19 +1,53 @@
+import type { PeriodKind } from '../domain/models';
+
 export const FEATURE_NAME = 'Knowledge';
 
+export const NAME_MAX_LENGTH = 40;
+export const CATALOG_NAME_MAX_LENGTH = 80;
+export const TAG_MAX_LENGTH = 30;
 export const TITLE_MAX_LENGTH = 120;
-export const NOTES_MAX_LENGTH = 2000;
-export const FOLDER_NAME_MAX_LENGTH = 40;
-export const TAG_MAX_LENGTH = 24;
-export const TAGS_MAX_COUNT = 8;
+export const DESCRIPTION_MAX_LENGTH = 500;
+export const REEL_MAX_LENGTH = 8000;
+export const QUERY_MAX_LENGTH = 100;
 
-/** Id of the built-in medium priority, preselected for a new node. */
-export const DEFAULT_PRIORITY_ID = 'medium';
+/** Query params holding the viewed period. */
+export const DATE_PARAM = 'date';
+export const KIND_PARAM = 'view';
 
-/** Simulated round trip of the mock gateway. */
-export const MOCK_LATENCY_MS = 350;
+export const PERIOD_KINDS: readonly PeriodKind[] = [
+  'day',
+  'week',
+  'month',
+  'year',
+];
 
-/** Skeleton rows per folder while the first load runs. */
-export const SKELETON_ROWS = 3;
+/** Topics a list shows before "Pokaż więcej". */
+export const TOPICS_PREVIEW = 6;
+
+/** Colour presets of a category (same palette as the other modules). */
+export const CATEGORY_COLORS = [
+  '#0f7a4f',
+  '#2563eb',
+  '#7c3aed',
+  '#c2410c',
+  '#be123c',
+  '#0891b2',
+  '#a16207',
+  '#4b5a52',
+  '#dc2626',
+  '#ea580c',
+  '#ca8a04',
+  '#65a30d',
+  '#0d9488',
+  '#0284c7',
+  '#4f46e5',
+  '#c026d3',
+  '#db2777',
+  '#57534e',
+  '#0f172a',
+] as const;
+
+export const SKELETON_ROWS = 5;
 
 export const ERROR_CODES = {
   load: 'KNOWLEDGE_LOAD',

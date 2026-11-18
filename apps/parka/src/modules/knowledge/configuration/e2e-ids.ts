@@ -6,45 +6,102 @@ export const KNOWLEDGE_E2E_IDS = [
   'knowledge:hero',
   'knowledge:brain',
   'knowledge:progress',
-  'knowledge:folders',
+  'knowledge:touched',
+  'knowledge:cortex',
+  'knowledge:area',
+  'knowledge:list',
   'knowledge:empty',
-  'knowledge:empty-search',
-  'knowledge:search',
+  'knowledge:empty-demo',
+  'knowledge:empty-period',
+  'knowledge:empty-filters',
+  'knowledge:empty-clear-filters',
+  'knowledge:demo',
   'knowledge:add-trigger',
   'knowledge:add-fab',
-  'knowledge:folder-add',
-  'knowledge:stats',
-  'knowledge:stats-empty',
-  'knowledge:node-dialog',
-  'knowledge:node-form',
-  'knowledge:node-title',
-  'knowledge:node-notes',
-  'knowledge:node-tags',
-  'knowledge:node-folder',
-  'knowledge:node-category',
-  'knowledge:node-priority',
-  'knowledge:node-status',
-  'knowledge:node-save',
-  'knowledge:node-cancel',
-  'knowledge:folder-dialog',
-  'knowledge:folder-form',
-  'knowledge:folder-name',
-  'knowledge:folder-area',
-  'knowledge:folder-save',
-  'knowledge:folder-cancel',
+  'knowledge:add-menu',
+  'knowledge:filters-open',
+  'knowledge:filters-drawer',
+  'knowledge:filters-clear',
+  'knowledge:filters-apply',
+  'knowledge:filter-query',
+  'knowledge:backlog-open',
+  'knowledge:backlog-dialog',
+  'knowledge:structure-open',
+  'knowledge:list-dialog',
+  'knowledge:list-add',
+  'knowledge:topic-dialog',
+  'knowledge:topic-title',
+  'knowledge:topic-description',
+  'knowledge:topic-catalog',
+  'knowledge:topic-day',
+  'knowledge:topic-save',
+  'knowledge:topic-cancel',
+  'knowledge:topic-delete',
+  'knowledge:category-dialog',
+  'knowledge:category-name',
+  'knowledge:category-save',
+  'knowledge:category-cancel',
+  'knowledge:category-delete',
+  'knowledge:catalog-dialog',
+  'knowledge:catalog-name',
+  'knowledge:catalog-description',
+  'knowledge:catalog-category',
+  'knowledge:catalog-save',
+  'knowledge:catalog-cancel',
+  'knowledge:catalog-delete',
+  'knowledge:tag-dialog',
+  'knowledge:tag-name',
+  'knowledge:tag-save',
+  'knowledge:tag-cancel',
+  'knowledge:tag-delete',
+  'knowledge:form-color',
   'knowledge:delete-dialog',
   'knowledge:delete-confirm',
   'knowledge:delete-cancel',
+  'knowledge:reels-dialog',
+  'knowledge:reel-body',
+  'knowledge:reel-add',
+  'knowledge:reel-viewer',
+  'knowledge:viewer-title',
+  'knowledge:viewer-status',
+  'knowledge:viewer-stage',
+  'knowledge:viewer-skeleton',
+  'knowledge:viewer-error',
+  'knowledge:viewer-complete',
+  'knowledge:viewer-prev',
+  'knowledge:viewer-next',
+  'knowledge:viewer-prev-lesson',
+  'knowledge:viewer-next-lesson',
+  'knowledge:viewer-next-lesson-cta',
 ] as const;
 
 export type KnowledgeDynamicE2eId =
-  | `knowledge:folder:${string}`
-  | `knowledge:folder-toggle:${string}`
-  | `knowledge:folder-new-node:${string}`
-  | `knowledge:node:${string}`
-  | `knowledge:node-status:${string}`
-  | `knowledge:node-edit:${string}`
-  | `knowledge:node-delete:${string}`
+  | `knowledge:category:${string}`
+  | `knowledge:catalog:${string}`
+  | `knowledge:topic:${string}`
+  | `knowledge:topic-toggle:${string}`
+  | `knowledge:topic-play:${string}`
+  | `knowledge:topic-edit:${string}`
+  | `knowledge:topic-reels:${string}`
+  | `knowledge:topic-delete:${string}`
+  | `knowledge:topic-more:${string}`
+  | `knowledge:structure-open:${string}`
+  | `knowledge:list-edit:${string}`
+  | `knowledge:reel:${string}`
+  | `knowledge:viewer-reel:${string}`
+  | `knowledge:viewer-segment:${string}`
+  | `knowledge:reel-upload:${string}`
+  | `knowledge:reel-media-remove:${string}`
+  | `knowledge:reel-media:${string}`
+  | `knowledge:reel-preview:${string}`
+  | `knowledge:reel-save:${string}`
+  | `knowledge:reel-up:${string}`
+  | `knowledge:reel-down:${string}`
+  | `knowledge:reel-delete:${string}`
+  | `knowledge:reel-body:${string}`
+  | `knowledge:add-option:${string}`
+  | `knowledge:form-color-option:${string}`
+  | `knowledge:tag-chip:${string}`
   | `knowledge:modal-close:${string}`;
 
 export type KnowledgeE2eId =

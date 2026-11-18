@@ -1,9 +1,13 @@
 import { useEffect, useSyncExternalStore } from 'react';
 import { fetchSettings } from '../integration/repository';
 
-type Form = 'Twoje' | 'Twój';
+type Form = 'Twoje' | 'Twój' | 'Twoja';
 
-const SHARED: Record<Form, string> = { Twoje: 'Wasze', Twój: 'Wasz' };
+const SHARED: Record<Form, string> = {
+  Twoje: 'Wasze',
+  Twój: 'Wasz',
+  Twoja: 'Wasza',
+};
 
 let deviceCount = 0;
 let requested = false;

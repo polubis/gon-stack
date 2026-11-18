@@ -476,6 +476,52 @@
       transform: none;
     }
   }
+
+  /* Reel viewer: a reel slides in from the side, a lesson from above or below. */
+  --animate-reel-next: reel-next 0.3s var(--ease-enter) both;
+  @keyframes reel-next {
+    from {
+      opacity: 0;
+      transform: translateX(40%);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  --animate-reel-prev: reel-prev 0.3s var(--ease-enter) both;
+  @keyframes reel-prev {
+    from {
+      opacity: 0;
+      transform: translateX(-40%);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  --animate-lesson-next: lesson-next 0.35s var(--ease-enter) both;
+  @keyframes lesson-next {
+    from {
+      opacity: 0;
+      transform: translateY(-30%);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  --animate-lesson-prev: lesson-prev 0.35s var(--ease-enter) both;
+  @keyframes lesson-prev {
+    from {
+      opacity: 0;
+      transform: translateY(30%);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
 /* Ambient ground. On `body` and on full-screen layers that cover it. */
