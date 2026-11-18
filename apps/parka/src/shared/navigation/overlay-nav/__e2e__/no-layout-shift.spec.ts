@@ -51,6 +51,15 @@ const geometry = (page: Page): Promise<Geometry> =>
     };
   });
 
+/** Bottom fade of the page scroll area, the sibling right before the fab layer. */
+const fadeOf = (page: Page): Promise<string> =>
+  page.evaluate(
+    () =>
+      getComputedStyle(
+        document.getElementById('fab-layer')!.previousElementSibling!,
+      ).maskImage,
+  );
+
 const layoutOf = ({
   columnHeight,
   scrollHeight,
@@ -80,6 +89,22 @@ const commands = {
   'i close the add menu': async ({ page, getByE2e }) => {
     await page.keyboard.press('Escape');
     await expect(getByE2e('dashboard:add-menu')).toHaveCount(0);
+  },
+  'the bottom nav is hidden': async ({ page }) => {
+    await expect(
+      page.getByRole('navigation', { name: 'Nawigacja główna' }),
+    ).toBeHidden();
+  },
+  'the bottom nav is back': async ({ page }) => {
+    await expect(
+      page.getByRole('navigation', { name: 'Nawigacja główna' }),
+    ).toBeVisible();
+  },
+  'no fade is left over the page bottom': async ({ page }) => {
+    await expect.poll(() => fadeOf(page)).toBe('none');
+  },
+  'the page bottom fades into the nav': async ({ page }) => {
+    await expect.poll(() => fadeOf(page)).not.toBe('none');
   },
   'the layout is unchanged': async ({ page }) => {
     await expect
@@ -138,6 +163,29 @@ test.describe('on a narrow screen', () => {
       ['i close the add menu'],
       ['the layout is unchanged'],
       ['the add button rests at its usual distance from the nav'],
+    );
+  });
+
+  test('the whole frosted nav leaves with the add menu and returns', async ({
+    e2e,
+  }) => {
+    await interpreter(commands, e2e)(
+      ['i open the dashboard'],
+      ['i open the add menu'],
+      ['the bottom nav is hidden'],
+      ['i close the add menu'],
+      ['the bottom nav is back'],
+    );
+  });
+
+  test('no blurry fade stays behind the open add menu', async ({ e2e }) => {
+    await interpreter(commands, e2e)(
+      ['i open the dashboard'],
+      ['the page bottom fades into the nav'],
+      ['i open the add menu'],
+      ['no fade is left over the page bottom'],
+      ['i close the add menu'],
+      ['the page bottom fades into the nav'],
     );
   });
 });
