@@ -10,9 +10,11 @@ import { FabRail } from '@/shared/navigation/overlay-nav/presentation/fab-rail';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { PeriodControl } from '@/shared/period-control/presentation/period-control';
 import { usePeriodSwipe } from '@/shared/period-control/presentation/use-period-swipe';
+import { PeriodRangeDialog } from '@/shared/period-control/presentation/period-range-dialog';
 import {
+  addDays,
   containsDay,
-  periodContaining,
+  resolvePeriod,
   type Period,
 } from '@/shared/period/period';
 import { navigateTo } from '@/shared/router/navigation';
@@ -42,18 +44,24 @@ const ADD_BUTTON =
 const anchorOf = (period: Period, today: string): string =>
   containsDay(period, today) ? today : period.from;
 
+/** How far past today an own range may reach (tasks live in the future too). */
+const RANGE_AHEAD_DAYS = 366;
+
 /** Moves to a period: same kind keeps the route, another kind switches it. */
 const usePeriodChange = (kind: TimeKind) => {
-  const { setAnchor, now } = useContext();
+  const { setAnchor, setRange, settle, now } = useContext();
   return (period: Period) => {
-    const day = anchorOf(period, now.day);
+    const own = period.kind === 'custom';
+    const day = own ? period.from : anchorOf(period, now.day);
     if (period.kind === kind) {
-      setAnchor(day);
+      if (own) setRange(period.from, period.to);
+      else setAnchor(day);
       return;
     }
     const target = TIME_KINDS.find((item) => item.kind === period.kind);
     if (!target) return;
-    const url = new URL(target.href(day), window.location.origin);
+    settle(day, own ? period.to : undefined);
+    const url = new URL(target.href(day, period.to), window.location.origin);
     // Filters follow the user from day to week to month.
     const current = new URLSearchParams(window.location.search);
     Object.values(FILTER_PARAMS).forEach((name) => {
@@ -77,12 +85,19 @@ const RangeControl = ({
     today={useContext().now.day}
     onChange={onChange}
     allowFuture
+    renderRange={(range) => (
+      <PeriodRangeDialog
+        {...range}
+        last={addDays(range.today, RANGE_AHEAD_DAYS)}
+      />
+    )}
   />
 );
 
 const Screen = ({ kind, children }: Props) => {
   const {
     anchor,
+    rangeTo,
     now,
     initializing,
     isLoading,
@@ -94,7 +109,7 @@ const Screen = ({ kind, children }: Props) => {
   } = useContext();
   const eyebrow = useOwnerEyebrow('Twój');
   const total = usePeriodTotal(kind);
-  const period = periodContaining(kind, anchor);
+  const period = resolvePeriod(kind, anchor, rangeTo);
   const { gesture, contentRef, go } = usePeriodSwipe({
     period,
     today: now.day,
@@ -102,7 +117,7 @@ const Screen = ({ kind, children }: Props) => {
     allowFuture: true,
   });
   const id: TimeE2eId = `time:${kind}`;
-  const { from, to } = rangeOf(kind, anchor);
+  const { from, to } = rangeOf(kind, anchor, rangeTo);
   const defaultDay =
     kind === 'day' ? anchor : now.day >= from && now.day <= to ? now.day : from;
 
@@ -195,7 +210,7 @@ const Screen = ({ kind, children }: Props) => {
   );
 };
 
-/** Chrome shared by the four views: header, range control, store, toasts. */
+/** Chrome shared by the five views: header, range control, store, toasts. */
 export const TimeScreen = ({ kind, children }: Props) => (
   <ErrorBoundary
     fallback={({ error, reset }) => (

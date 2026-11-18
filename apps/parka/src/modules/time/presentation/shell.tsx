@@ -7,11 +7,12 @@ const KIND_BY_PATH: Record<string, TimeKind> = {
   [APP_ROUTER.timeWeek()]: 'week',
   [APP_ROUTER.timeMonth()]: 'month',
   [APP_ROUTER.timeYear()]: 'year',
+  [APP_ROUTER.timeRange()]: 'custom',
 };
 
 /**
- * Layout route of the four views: one store survives day -> week -> month ->
- * year, so switching the range never flashes a skeleton or loses a toast.
+ * Layout route of the five views: one store survives day -> week -> month ->
+ * year or own range, so switching the range never flashes a skeleton or loses a toast.
  */
 export const Main = () => {
   const pathname = useRouterState({ select: (s) => s.location.pathname });

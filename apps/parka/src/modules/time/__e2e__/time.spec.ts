@@ -34,6 +34,7 @@ const COMMENT_EMAIL = `e2e-time-comment-${Date.now()}@parka.test`;
 const OPEN_ONLY_EMAIL = `e2e-time-open-only-${Date.now()}@parka.test`;
 const UPFRONT_EMAIL = `e2e-time-upfront-${Date.now()}@parka.test`;
 const STRUCTURE_EMAIL = `e2e-time-structure-${Date.now()}@parka.test`;
+const RANGE_EMAIL = `e2e-time-range-${Date.now()}@parka.test`;
 const BAR_EMAIL = `e2e-time-backlog-bar-${Date.now()}@parka.test`;
 const PASSWORD = 'secret123';
 const ATTACHMENT_TEXT = 'Treść załącznika E2E';
@@ -1108,6 +1109,53 @@ const commands = {
     await ctx.page.waitForLoadState('networkidle');
   },
 
+  'i register an account for the own range': async (ctx) => {
+    await registerAndConfirm(ctx, RANGE_EMAIL, PASSWORD);
+    await ctx.page.waitForLoadState('networkidle');
+  },
+
+  'i add a task on the first day of the own range': async ({
+    page,
+    getByE2e,
+  }) => {
+    await open(page, APP_ROUTER.time({ date: DAY }));
+    await getByE2e('time:empty-add').click();
+    await getByE2e('time:task-name').fill('Zakres E2E');
+    await Promise.all([
+      synced(page, 'POST', 201),
+      getByE2e('time:task-save').click(),
+    ]);
+  },
+
+  'the own range lists the task and its statistics': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
+    await open(page, APP_ROUTER.timeRange({ from: DAY, to: NEXT_WEEK }));
+    await expect(getByE2e('time:custom')).toBeVisible();
+    await expect(getByE2e(`time:range-day:${DAY}`)).toBeVisible();
+    await expect(taskEdit(getByE2ePrefix, 'Zakres E2E')).toBeVisible();
+    await expect(getByE2e('time:stats-total')).toContainText('1');
+    await expect(getByE2e('time:stats-moves-total')).toBeVisible();
+    await expect(page).toHaveURL(/from=2026-10-20&to=2026-10-27/);
+  },
+
+  'a range after the task is empty and the preset opens the calendar': async ({
+    page,
+    getByE2e,
+  }) => {
+    await open(page, APP_ROUTER.timeRange({ from: LATER, to: AFTER_LATER }));
+    await expect(getByE2e('time:empty')).toBeVisible();
+    await getByE2e('period-control:kind').click();
+    await getByE2e('period-control:preset:day').click();
+    await expect(page).toHaveURL(/\/app\/time\/\?date=/);
+    await getByE2e('period-control:kind').click();
+    await getByE2e('period-control:preset:custom').click();
+    await expect(page).toHaveURL(/\/app\/time\/range\/\?from=.*&to=/);
+    await expect(getByE2e('period-control:range-dialog')).toBeVisible();
+  },
+
   'i add one task to the week': async ({ page, getByE2e }) => {
     await open(page, APP_ROUTER.timeWeek({ date: DAY }));
     await getByE2e('time:empty-add').click();
@@ -1288,6 +1336,17 @@ test('the time screen stacks summary, tasks and statistics on the real backend',
     ['the summary comes first, the tasks next and the statistics last'],
     ['on a phone every statistics card comes after the tasks'],
     ['there is no separate statistics tab'],
+  );
+});
+
+test('the own range lists tasks and statistics on the real backend', async ({
+  e2e,
+}) => {
+  await interpreter(commands, e2e)(
+    ['i register an account for the own range'],
+    ['i add a task on the first day of the own range'],
+    ['the own range lists the task and its statistics'],
+    ['a range after the task is empty and the preset opens the calendar'],
   );
 });
 

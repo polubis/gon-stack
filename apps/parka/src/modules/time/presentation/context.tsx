@@ -5,7 +5,8 @@ import {
   writeQueryParam,
   writeQueryParams,
 } from '@/shared/router/navigation';
-import { isDay, todayDay } from '@/shared/period/period';
+import { APP_ROUTER, normalizePath } from '@/shared/router/routes';
+import { isDay, periodContaining, todayDay } from '@/shared/period/period';
 import { createMediator } from '../core/mediator';
 import { DATE_PARAM, FEATURE_NAME } from '../configuration/constraints';
 import {
@@ -21,9 +22,19 @@ import { resetTimeReads } from '../integration/repository';
 import { useDataChanges } from '@/shared/data-sync/presentation/use-data-changes';
 import { useClock } from './clock';
 
-const dateFromUrl = (): string => {
-  const value = readQueryParam(DATE_PARAM);
-  return value !== null && isDay(value) ? value : todayDay();
+const dayParam = (name: string): string | null => {
+  const value = readQueryParam(name);
+  return value !== null && isDay(value) ? value : null;
+};
+
+/** The viewed day, or the first and last day of the own range route. */
+const viewFromUrl = (): { anchor: string; to?: string } => {
+  if (normalizePath(window.location.pathname) !== APP_ROUTER.timeRange())
+    return { anchor: dayParam(DATE_PARAM) ?? todayDay(), to: undefined };
+  const fallback = periodContaining('custom', todayDay());
+  const from = dayParam('from') ?? fallback.from;
+  const to = dayParam('to') ?? fallback.to;
+  return from <= to ? { anchor: from, to } : { anchor: to, to: from };
 };
 
 const filtersFromUrl = (): TaskFilters =>
@@ -31,12 +42,13 @@ const filtersFromUrl = (): TaskFilters =>
 
 /**
  * The module store plus the viewed day (`anchor`, mirrored in the `date`
- * query param) and the clock. `newCategory` / `newPriority` hold the last
+ * query param; an own range keeps `from` and `to` instead) and the clock. `newCategory` / `newPriority` hold the last
  * created item so the task form below its stacked dialog can select it.
  */
 export const [Provider, useContext] = context(FEATURE_NAME, () => {
   const [{ facade, register }] = useState(createMediator);
-  const [anchor, setAnchorState] = useState(dateFromUrl);
+  const [view, setView] = useState(viewFromUrl);
+  const { anchor, to: rangeTo } = view;
   const [filters, setFiltersState] = useState(filtersFromUrl);
   const [newCategory, setNewCategory] = useState<Category>();
   const [newPriority, setNewPriority] = useState<Priority>();
@@ -61,7 +73,7 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
   // Back / Forward may land on another `date`.
   useEffect(() => {
     const onPop = () => {
-      setAnchorState(dateFromUrl());
+      setView(viewFromUrl());
       setFiltersState(filtersFromUrl());
     };
     window.addEventListener('popstate', onPop);
@@ -69,11 +81,20 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
   }, []);
 
   return {
+    /** Viewed day; the first day of an own range. */
     anchor,
+    /** Last day of an own range, `undefined` in the other views. */
+    rangeTo,
     setAnchor: (day: string) => {
-      setAnchorState(day);
+      setView({ anchor: day, to: undefined });
       writeQueryParam(DATE_PARAM, day);
     },
+    setRange: (from: string, to: string) => {
+      setView({ anchor: from, to });
+      writeQueryParams({ from, to });
+    },
+    /** Takes a view the route change already put in the URL. */
+    settle: (day: string, to?: string) => setView({ anchor: day, to }),
     now,
     newCategory,
     newPriority,

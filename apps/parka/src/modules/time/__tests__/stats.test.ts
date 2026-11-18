@@ -214,4 +214,52 @@ describe('task statistics', () => {
     expect(day.buckets.find((b) => b.key === '10')?.total).toBe(1);
     expect(day.busiest).toBeNull();
   });
+
+  it('counts an own range from its first to its last day, bucketed by day', () => {
+    const tasks = [
+      task('a', { day: '2026-10-09' }),
+      task('b', { day: '2026-10-10', done: true }),
+      task('c', { day: '2026-10-14' }),
+      task('d', { day: '2026-10-15' }),
+    ];
+
+    const result = taskStats({
+      tasks,
+      backlog: [],
+      categories: CATEGORIES,
+      priorities: PRIORITIES,
+      kind: 'custom',
+      anchor: '2026-10-10',
+      to: '2026-10-14',
+      today: '2026-10-21',
+    });
+
+    expect(result.total).toBe(2);
+    expect(result.done).toBe(1);
+    expect(result.perDay).toBe(0.4);
+    expect(result.buckets.map((b) => b.key)).toEqual([
+      '2026-10-10',
+      '2026-10-11',
+      '2026-10-12',
+      '2026-10-13',
+      '2026-10-14',
+    ]);
+  });
+
+  it('buckets a long own range by month', () => {
+    const result = taskStats({
+      tasks: [task('a', { day: '2026-03-02' }), task('b')],
+      backlog: [],
+      categories: CATEGORIES,
+      priorities: PRIORITIES,
+      kind: 'custom',
+      anchor: '2026-01-01',
+      to: '2026-10-31',
+      today: '2026-10-21',
+    });
+
+    expect(result.buckets).toHaveLength(10);
+    expect(result.buckets[2]).toMatchObject({ key: '2026-03', total: 1 });
+    expect(result.buckets[9]).toMatchObject({ key: '2026-10', total: 1 });
+  });
 });
