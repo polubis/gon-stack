@@ -21,7 +21,10 @@ class FakeEventSource {
 }
 
 const unsubscribers: (() => void)[] = [];
-const watch = (domain: 'time' | 'finance', listener: () => void) => {
+const watch = (
+  domain: 'time' | 'finance' | 'knowledge',
+  listener: () => void,
+) => {
   const stop = watchDataChanges(domain, listener);
   unsubscribers.push(stop);
   return stop;

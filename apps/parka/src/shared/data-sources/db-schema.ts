@@ -1287,6 +1287,38 @@ export type Database = {
         };
         Returns: Json;
       };
+      mcp_create_knowledge_catalog: {
+        Args: {
+          p_category_id?: string;
+          p_description?: string;
+          p_name: string;
+          p_token: string;
+        };
+        Returns: Json;
+      };
+      mcp_create_knowledge_category: {
+        Args: { p_color?: string; p_name: string; p_token: string };
+        Returns: Json;
+      };
+      mcp_create_knowledge_reel: {
+        Args: { p_body: string; p_token: string; p_topic_id: string };
+        Returns: Json;
+      };
+      mcp_create_knowledge_tag: {
+        Args: { p_name: string; p_token: string };
+        Returns: Json;
+      };
+      mcp_create_knowledge_topic: {
+        Args: {
+          p_catalog_id: string;
+          p_description?: string;
+          p_study_day?: string;
+          p_tag_ids?: string[];
+          p_title: string;
+          p_token: string;
+        };
+        Returns: Json;
+      };
       mcp_create_priority: {
         Args: { p_name: string; p_token: string; p_value: number };
         Returns: Json;
@@ -1306,6 +1338,26 @@ export type Database = {
       mcp_delete_category: {
         Args: { p_id: string; p_token: string };
         Returns: boolean;
+      };
+      mcp_delete_knowledge_catalog: {
+        Args: { p_id: string; p_token: string };
+        Returns: Json;
+      };
+      mcp_delete_knowledge_category: {
+        Args: { p_id: string; p_token: string };
+        Returns: boolean;
+      };
+      mcp_delete_knowledge_reel: {
+        Args: { p_id: string; p_token: string };
+        Returns: Json;
+      };
+      mcp_delete_knowledge_tag: {
+        Args: { p_id: string; p_token: string };
+        Returns: boolean;
+      };
+      mcp_delete_knowledge_topic: {
+        Args: { p_id: string; p_token: string };
+        Returns: Json;
       };
       mcp_delete_task: {
         Args: { p_id: string; p_token: string };
@@ -1329,8 +1381,24 @@ export type Database = {
         Args: { p_id: string; p_token: string };
         Returns: Json;
       };
+      mcp_get_knowledge_topic: {
+        Args: { p_id: string; p_token: string };
+        Returns: Json;
+      };
       mcp_get_task: { Args: { p_id: string; p_token: string }; Returns: Json };
       mcp_header_user: { Args: Record<PropertyKey, never>; Returns: string };
+      mcp_knowledge_catalog_json: {
+        Args: { p_id: string; p_user: string };
+        Returns: Json;
+      };
+      mcp_knowledge_reel_json: {
+        Args: { p_id: string; p_user: string };
+        Returns: Json;
+      };
+      mcp_knowledge_topic_json: {
+        Args: { p_id: string; p_user: string };
+        Returns: Json;
+      };
       mcp_list_categories: { Args: { p_token: string }; Returns: Json };
       mcp_list_expenses: {
         Args: {
@@ -1338,6 +1406,29 @@ export type Database = {
           p_from?: string;
           p_limit?: number;
           p_offset?: number;
+          p_to?: string;
+          p_token: string;
+        };
+        Returns: Json;
+      };
+      mcp_list_knowledge_catalogs: {
+        Args: { p_category_id?: string; p_token: string };
+        Returns: Json;
+      };
+      mcp_list_knowledge_categories: {
+        Args: { p_token: string };
+        Returns: Json;
+      };
+      mcp_list_knowledge_tags: { Args: { p_token: string }; Returns: Json };
+      mcp_list_knowledge_topics: {
+        Args: {
+          p_catalog_id?: string;
+          p_from?: string;
+          p_limit?: number;
+          p_offset?: number;
+          p_q?: string;
+          p_scope?: string;
+          p_tag_id?: string;
           p_to?: string;
           p_token: string;
         };
@@ -1395,15 +1486,43 @@ export type Database = {
         Args: { p_ref: string; p_user: string };
         Returns: string;
       };
+      mcp_set_knowledge_progress: {
+        Args: { p_done: boolean; p_reel_id: string; p_token: string };
+        Returns: Json;
+      };
       mcp_set_task_status: {
         Args: { p_id: string; p_status: string; p_token: string };
         Returns: Json;
+      };
+      mcp_sync_knowledge_topic_tags: {
+        Args: { p_tags: string[]; p_topic: string; p_user: string };
+        Returns: undefined;
       };
       mcp_task_json: { Args: { p_id: string; p_user: string }; Returns: Json };
       mcp_ticket_hash: { Args: { p_ticket: string }; Returns: string };
       mcp_ticket_user: { Args: Record<PropertyKey, never>; Returns: string };
       mcp_token_user: { Args: { p_token: string }; Returns: string };
       mcp_update_category: {
+        Args: { p_id: string; p_patch: Json; p_token: string };
+        Returns: Json;
+      };
+      mcp_update_knowledge_catalog: {
+        Args: { p_id: string; p_patch: Json; p_token: string };
+        Returns: Json;
+      };
+      mcp_update_knowledge_category: {
+        Args: { p_id: string; p_patch: Json; p_token: string };
+        Returns: Json;
+      };
+      mcp_update_knowledge_reel: {
+        Args: { p_id: string; p_patch: Json; p_token: string };
+        Returns: Json;
+      };
+      mcp_update_knowledge_tag: {
+        Args: { p_id: string; p_name: string; p_token: string };
+        Returns: Json;
+      };
+      mcp_update_knowledge_topic: {
         Args: { p_id: string; p_patch: Json; p_token: string };
         Returns: Json;
       };

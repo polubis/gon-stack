@@ -18,6 +18,7 @@ export type View = { from: string; to: string; filters: KnowledgeFilters };
 
 export type Event =
   | TriggerEvent<'[TRIGGER]_LOAD', { view: View }>
+  | TriggerEvent<'[TRIGGER]_REFRESH'>
   | TriggerEvent<'[TRIGGER]_CREATE_CATEGORY', { category: Category }>
   | TriggerEvent<'[TRIGGER]_UPDATE_CATEGORY', { category: Category }>
   | TriggerEvent<'[TRIGGER]_DELETE_CATEGORY', { id: CategoryId }>
