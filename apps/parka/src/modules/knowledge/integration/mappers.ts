@@ -1,49 +1,64 @@
-import { BRAIN_AREA_IDS, type BrainAreaId } from '../domain/brain-area';
+import type { z } from 'zod';
 import type {
+  knowledgeCatalog,
+  knowledgeCategory,
+  knowledgeReel,
+  knowledgeTag,
+  knowledgeTopic,
+} from '@schemas/knowledge';
+import type {
+  Catalog,
+  CatalogId,
   Category,
   CategoryId,
-  Folder,
-  FolderId,
-  KnowledgeNode,
-  LearnStatus,
-  NodeId,
-  Priority,
-  PriorityId,
+  Reel,
+  ReelId,
+  Tag,
+  TagId,
+  Topic,
+  TopicId,
 } from '../domain/models';
-import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
-import type { CategoryDto, FolderDto, NodeDto, PriorityDto } from './contracts';
 
-const STATUSES: readonly LearnStatus[] = ['to-learn', 'learning', 'learned'];
+type Dto<T extends () => z.ZodType> = z.infer<ReturnType<T>>;
 
-/** Unknown values from a newer backend fall back to the safest one. */
-const areaOf = (value: string): BrainAreaId =>
-  BRAIN_AREA_IDS.find((id) => id === value) ?? 'frontal';
-
-const statusOf = (value: string): LearnStatus =>
-  STATUSES.find((s) => s === value) ?? 'to-learn';
-
-export const toCategory = (dto: CategoryDto): Category => ({
-  ...dto,
+export const toCategory = (dto: Dto<typeof knowledgeCategory>): Category => ({
   id: dto.id as CategoryId,
-  icon: dto.icon as CategoryIconId,
-});
-
-export const toPriority = (dto: PriorityDto): Priority => ({
-  ...dto,
-  id: dto.id as PriorityId,
-});
-
-export const toFolder = (dto: FolderDto): Folder => ({
-  id: dto.id as FolderId,
   name: dto.name,
-  areaId: areaOf(dto.areaId),
+  color: dto.color,
+  position: dto.position,
 });
 
-export const toNode = (dto: NodeDto): KnowledgeNode => ({
-  ...dto,
-  id: dto.id as NodeId,
-  folderId: dto.folderId as FolderId,
-  categoryId: dto.categoryId as CategoryId,
-  priorityId: dto.priorityId as PriorityId,
-  status: statusOf(dto.status),
+export const toCatalog = (dto: Dto<typeof knowledgeCatalog>): Catalog => ({
+  id: dto.id as CatalogId,
+  categoryId: dto.categoryId as CategoryId | null,
+  name: dto.name,
+  description: dto.description,
+  position: dto.position,
+});
+
+export const toTag = (dto: Dto<typeof knowledgeTag>): Tag => ({
+  id: dto.id as TagId,
+  name: dto.name,
+});
+
+export const toTopic = (dto: Dto<typeof knowledgeTopic>): Topic => ({
+  id: dto.id as TopicId,
+  catalogId: dto.catalogId as CatalogId,
+  title: dto.title,
+  description: dto.description,
+  position: dto.position,
+  studyDay: dto.studyDay,
+  tagIds: dto.tagIds as TagId[],
+  reelCount: dto.reelCount,
+  doneCount: dto.doneCount,
+  createdAt: dto.createdAt,
+});
+
+export const toReel = (dto: Dto<typeof knowledgeReel>): Reel => ({
+  id: dto.id as ReelId,
+  topicId: dto.topicId as TopicId,
+  body: dto.body,
+  position: dto.position,
+  media: dto.media,
+  done: dto.done,
 });

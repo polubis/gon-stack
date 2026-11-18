@@ -20,6 +20,14 @@ describe('BrainFill', () => {
     expect(screen.queryByRole('button')).toBeNull();
   });
 
+  it('announces the given overall fill instead of the area mean', () => {
+    render(<BrainFill areas={areas} total={0.6} />);
+
+    expect(screen.getByRole('img')).toHaveAccessibleName(
+      /^Mózg wypełniony wiedzą w 60%/,
+    );
+  });
+
   it('lists every area with its percent in the caption', () => {
     render(<BrainFill areas={areas} />);
 

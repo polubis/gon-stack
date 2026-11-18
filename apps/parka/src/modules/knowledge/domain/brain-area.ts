@@ -29,3 +29,14 @@ export const BRAIN_AREAS: readonly BrainArea[] = [
 
 export const areaName = (id: BrainAreaId): string =>
   BRAIN_AREAS.find((area) => area.id === id)?.name ?? id;
+
+/** The cerebral cortex: four lobes. Cerebellum and brainstem sit below it. */
+export const CORTEX_AREA_IDS: readonly BrainAreaId[] = [
+  'frontal',
+  'parietal',
+  'temporal',
+  'occipital',
+];
+
+export const isCortex = (id: BrainAreaId): boolean =>
+  CORTEX_AREA_IDS.includes(id);

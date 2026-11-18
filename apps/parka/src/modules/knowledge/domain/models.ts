@@ -1,40 +1,65 @@
 import type { Brand } from '@repo/type-beast/brand';
-import type { CategoryIconId } from '@/shared/ui/category-icon-ids';
-import type { BrainAreaId } from './brain-area';
 
-export type NodeId = Brand<string, 'KnowledgeNodeId'>;
-export type FolderId = Brand<string, 'KnowledgeFolderId'>;
 export type CategoryId = Brand<string, 'KnowledgeCategoryId'>;
-export type PriorityId = Brand<string, 'KnowledgePriorityId'>;
+export type CatalogId = Brand<string, 'KnowledgeCatalogId'>;
+export type TagId = Brand<string, 'KnowledgeTagId'>;
+export type TopicId = Brand<string, 'KnowledgeTopicId'>;
+export type ReelId = Brand<string, 'KnowledgeReelId'>;
 
+/** Area: groups catalogs. Colour is user data, not a theme token. */
 export type Category = {
   id: CategoryId;
   name: string;
-  icon: CategoryIconId;
-  /** User-picked hex colour (data, not a theme token). */
   color: string;
+  position: number;
 };
 
-/** A priority is a name plus a weight: 1 (least) .. 10 (most) urgent to learn. */
-export type Priority = { id: PriorityId; name: string; value: number };
+export type Catalog = {
+  id: CatalogId;
+  categoryId: CategoryId | null;
+  name: string;
+  description: string;
+  position: number;
+};
 
-/** Groups knowledge and points at the brain area it lives in. */
-export type Folder = { id: FolderId; name: string; areaId: BrainAreaId };
+export type Tag = { id: TagId; name: string };
 
-/** Where a piece of knowledge stands: not touched, in study, mastered. */
-export type LearnStatus = 'to-learn' | 'learning' | 'learned';
-
-export type KnowledgeNode = {
-  id: NodeId;
-  folderId: FolderId;
+/** Stack of reels. Counts cover the whole topic. */
+export type Topic = {
+  id: TopicId;
+  catalogId: CatalogId;
   title: string;
-  /** Longer notes; `null` when there are none. */
-  notes: string | null;
-  categoryId: CategoryId;
-  priorityId: PriorityId;
-  tags: string[];
-  status: LearnStatus;
+  description: string;
+  position: number;
+  /** Planned day to study (`YYYY-MM-DD`); `null` = backlog. */
+  studyDay: string | null;
+  tagIds: TagId[];
+  reelCount: number;
+  doneCount: number;
+  createdAt: string;
 };
+
+/** `url` is a short-lived signed link, `null` when it could not be signed. */
+export type ReelMedia = { kind: 'image' | 'video'; url: string | null };
+
+/** One portion of Markdown. */
+export type Reel = {
+  id: ReelId;
+  topicId: TopicId;
+  body: string;
+  position: number;
+  media: ReelMedia | null;
+  done: boolean;
+};
+
+export type KnowledgeData = {
+  categories: Category[];
+  catalogs: Catalog[];
+  tags: Tag[];
+  topics: Topic[];
+};
+
+export type PeriodKind = 'day' | 'week' | 'month' | 'year';
 
 export type NoticeBody =
   | { tone: 'success'; message: string }

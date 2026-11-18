@@ -149,6 +149,7 @@ export const ClearableTextarea = ({
     <div className="relative">
       <textarea
         {...props}
+        id={props.id ?? field?.id}
         ref={ref}
         aria-label={ariaLabel}
         className={cn(inputClass, 'pr-16', className)}

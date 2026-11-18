@@ -153,6 +153,8 @@ export type BrainFillArea = {
 type BrainFillProps = Omit<ComponentProps<'figure'>, 'children'> & {
   /** Missing areas count as fill 0. */
   areas: readonly BrainFillArea[];
+  /** 0..1 overall fill; defaults to the mean of the six areas. */
+  total?: number;
   /** Lit area (hovered/focused folder); the rest dims a bit. */
   highlighted?: BrainAreaId | null;
   /** Click/Enter/Space on an area; absent = areas not interactive. */
@@ -161,6 +163,7 @@ type BrainFillProps = Omit<ComponentProps<'figure'>, 'children'> & {
 
 export const BrainFill = ({
   areas,
+  total: overall,
   highlighted = null,
   onSelectArea,
   className,
@@ -173,9 +176,13 @@ export const BrainFill = ({
     name: areaName(areaId),
     fill: clamp(areas.find((area) => area.id === areaId)?.fill ?? 0),
   }));
-  const total = Math.round(
-    (fills.reduce((sum, area) => sum + area.fill, 0) / fills.length) * 100,
-  );
+  const total =
+    overall === undefined
+      ? Math.round(
+          (fills.reduce((sum, area) => sum + area.fill, 0) / fills.length) *
+            100,
+        )
+      : percent(overall);
   const label = `Mózg wypełniony wiedzą w ${total}%: ${fills
     .map((area) => `${area.name} ${percent(area.fill)}%`)
     .join(', ')}`;
