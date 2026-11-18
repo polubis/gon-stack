@@ -45,7 +45,7 @@ export const ModalShell = ({
             e.preventDefault();
             if (e.target instanceof HTMLElement) e.target.focus();
           }}
-          className={`fixed inset-x-4 bottom-[calc(var(--kb-inset,0rem)+1rem)] z-(--z-modal) mx-auto max-h-[calc(100dvh-var(--kb-inset,0rem)-2rem)] max-w-md animate-pop-in touch-pan-y overflow-y-auto overscroll-contain rounded-4xl border border-line bg-card ${MODAL_PADDING} shadow-popover focus:outline-none motion-reduce:animate-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2`}
+          className={`fixed inset-x-4 bottom-[calc(var(--kb-inset,0rem)+1rem)] z-(--z-modal) mx-auto max-h-[calc(100dvh-var(--kb-inset,0rem)-2rem)] max-w-md animate-pop-in touch-pan-y overflow-y-auto scroll-in-radius overscroll-contain rounded-4xl border border-line bg-card ${MODAL_PADDING} shadow-popover focus:outline-none motion-reduce:animate-none lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2`}
         >
           <div className="mb-3 flex items-center gap-3">
             <div className="min-w-0 flex-1">
