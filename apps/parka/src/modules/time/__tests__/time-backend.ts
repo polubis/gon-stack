@@ -78,6 +78,8 @@ export const setupTimeBackend = () => {
     delayMs: 0,
     /** Slows task creation, to see the app before the server answers. */
     createDelayMs: 0,
+    /** Slows task updates, to see the app before the server answers. */
+    updateDelayMs: 0,
     /** Files per task id; the real server keeps them in storage. */
     attachments: {} as Record<string, Json[]>,
     failAttachmentReads: false,
@@ -290,7 +292,15 @@ export const setupTimeBackend = () => {
     }),
     http.put('/api/time/tasks/:id/', async ({ request }) => {
       const body = await record(request);
+      if (state.updateDelayMs) await delay(state.updateDelayMs);
       if (state.failWrites) return HttpResponse.json(FAILURE);
+      // Like the server, a changed day leaves a move behind (newest first).
+      const before = state.tasks.find((t) => t.id === body!.id);
+      if (before && before.day !== body!.day)
+        state.moves = [
+          { taskId: body!.id, at: new Date().toISOString() },
+          ...state.moves,
+        ];
       // Giving a backlog task a day moves it onto the board.
       state.backlog = state.backlog.filter((t) => t.id !== body!.id);
       state.tasks = state.tasks.some((t) => t.id === body!.id)
@@ -377,6 +387,7 @@ export const setupTimeBackend = () => {
     calls.length = 0;
     created = 0;
     state.createDelayMs = 0;
+    state.updateDelayMs = 0;
     state.statuses = [{ id: 'in_progress', name: 'W trakcie' }];
     state.tasks = [];
     state.backlog = [];

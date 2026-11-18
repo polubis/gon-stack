@@ -352,13 +352,15 @@ const MovesCard = ({ moves }: { moves: MoveStats }) => (
 
 /**
  * Moves of tasks between days made in the viewed period. Read again when the
- * tasks change, since a move is a change of a task's day.
+ * tasks change, since a move is a change of a task's day, but only with no
+ * write in flight: the history row exists once the server has answered.
  */
 const useMoves = (kind: TimeKind): MoveStats => {
-  const { tasks, anchor } = useContext();
+  const { tasks, anchor, pending } = useContext();
   const { from, to } = rangeOf(kind, anchor);
   const [moves, setMoves] = useState<Move[]>([]);
   useEffect(() => {
+    if (pending > 0) return;
     let current = true;
     fetchMoves(from, to)
       .then((items) => {
@@ -370,7 +372,7 @@ const useMoves = (kind: TimeKind): MoveStats => {
     return () => {
       current = false;
     };
-  }, [from, to, tasks]);
+  }, [from, to, tasks, pending]);
   return moveStats(moves, from, to);
 };
 
