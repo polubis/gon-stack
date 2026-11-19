@@ -12,7 +12,8 @@ type Props = {
  * an overlay is open, as the first step of the overlay sequence (see
  * nav-sequence); hidden it is inert (no focus, no reading). Only opacity and
  * translate animate (compositor), on the frosted `nav` itself so its blur
- * fades and slides with it (an opacity on an ancestor would cut the blur at
+ * fades and slides with it. The nav's own glass background and blur are
+ * explicitly dropped while hidden and eased back at rest (an opacity on an ancestor would cut the blur at
  * once). The wrapper only flips `visibility` after the slide, which drops the
  * blur layer for good. Its height is published as
  * `--bottom-nav-h` for the add button.
@@ -52,9 +53,9 @@ export const NavSlot = ({ placement, children }: Props) => {
       aria-hidden={hidden || undefined}
       data-overlay-hidden={hidden}
       className={cn(
-        'z-(--z-raised) absolute inset-x-0 bottom-0 flow-root ease-out [transition-duration:120ms] [transition-property:visibility] motion-reduce:transition-none lg:hidden [&_nav]:ease-out [&_nav]:[transition-duration:120ms] [&_nav]:[transition-property:opacity,translate] motion-reduce:[&_nav]:transition-none',
+        'z-(--z-raised) absolute inset-x-0 bottom-0 flow-root ease-out [transition-duration:120ms] [transition-property:visibility] motion-reduce:transition-none lg:hidden [&_nav]:ease-out [&_nav]:[transition-duration:120ms] [&_nav]:[transition-property:opacity,translate,background-color,backdrop-filter,-webkit-backdrop-filter] motion-reduce:[&_nav]:transition-none',
         hidden &&
-          'invisible [&_nav]:translate-y-full [&_nav]:opacity-0 [&_nav]:will-change-[translate,opacity]',
+          'invisible [&_nav]:translate-y-full [&_nav]:bg-transparent [&_nav]:opacity-0 [&_nav]:[-webkit-backdrop-filter:none] [&_nav]:[backdrop-filter:none] [&_nav]:will-change-[translate,opacity]',
       )}
     >
       {children}

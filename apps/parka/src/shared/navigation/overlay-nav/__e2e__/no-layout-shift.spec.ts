@@ -101,6 +101,42 @@ const commands = {
       page.getByRole('navigation', { name: 'Nawigacja główna' }),
     ).toBeVisible();
   },
+  'the bottom nav shows its background and blur': async ({ page }) => {
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const nav = document.querySelector<HTMLElement>(
+            '[data-overlay-hidden] nav',
+          )!;
+          const { backgroundColor, backdropFilter, opacity, visibility } =
+            getComputedStyle(nav);
+          const alpha = Number(
+            backgroundColor.match(/[\d.]+(?=\)$)/)?.[0] ?? 1,
+          );
+          return {
+            background: alpha > 0,
+            blur: backdropFilter.includes('blur('),
+            opaque: opacity === '1' && visibility === 'visible',
+          };
+        }),
+      )
+      .toEqual({ background: true, blur: true, opaque: true });
+  },
+  'the bottom nav has no background and no blur': async ({ page }) => {
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const { backgroundColor, backdropFilter } = getComputedStyle(
+            document.querySelector('[data-overlay-hidden] nav')!,
+          );
+          return { backgroundColor, backdropFilter };
+        }),
+      )
+      .toEqual({
+        backgroundColor: 'rgba(0, 0, 0, 0)',
+        backdropFilter: 'none',
+      });
+  },
   'the page runs to the screen bottom': async ({ page }) => {
     await expect.poll(() => pageToScreen(page)).toBe(0);
   },
@@ -183,6 +219,26 @@ test.describe('on a narrow screen', () => {
       ['the page runs to the screen bottom'],
       ['i close the add menu'],
       ['the bottom nav is back'],
+    );
+  });
+
+  test('the resting nav shows its background and blur', async ({ e2e }) => {
+    await interpreter(commands, e2e)(
+      ['i open the dashboard'],
+      ['the bottom nav shows its background and blur'],
+    );
+  });
+
+  test('the nav background and blur return after the add menu closes', async ({
+    e2e,
+  }) => {
+    await interpreter(commands, e2e)(
+      ['i open the dashboard'],
+      ['i open the add menu'],
+      ['the bottom nav is hidden'],
+      ['the bottom nav has no background and no blur'],
+      ['i close the add menu'],
+      ['the bottom nav shows its background and blur'],
     );
   });
 });
