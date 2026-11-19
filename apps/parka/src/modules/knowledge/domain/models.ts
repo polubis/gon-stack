@@ -59,8 +59,6 @@ export type KnowledgeData = {
   topics: Topic[];
 };
 
-export type PeriodKind = 'day' | 'week' | 'month' | 'year';
-
 export type NoticeBody =
   | { tone: 'success'; message: string }
   | {

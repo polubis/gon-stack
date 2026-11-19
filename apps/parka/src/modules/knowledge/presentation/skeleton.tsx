@@ -4,17 +4,19 @@ import { SKELETON_ROWS } from '../configuration/constraints';
 
 const range = (length: number) => Array.from({ length }, (_, i) => i);
 
-/** Mimics the hero: heading, percent, brain and the three counters. */
+/** Mimics the summary: ring, finished count and the three counters. */
 const HeroSkeleton = () => (
   <div
     aria-hidden="true"
-    className="hero-card flex flex-col gap-4 rounded-4xl p-5 md:p-7 xl:col-span-5 xl:h-full xl:justify-between"
+    className="hero-card flex flex-col gap-4 rounded-4xl p-5 md:p-7 xl:col-span-5 xl:h-full xl:justify-center"
   >
-    <div className="flex flex-col gap-1">
-      <Skeleton className="h-4 w-40 bg-hero-track" />
-      <Skeleton className="h-12 w-28 bg-hero-track md:h-14" />
+    <div className="flex items-center gap-5">
+      <Skeleton className="size-28 rounded-full bg-hero-track md:size-32" />
+      <div className="flex flex-col gap-1">
+        <Skeleton className="h-4 w-32 bg-hero-track" />
+        <Skeleton className="h-10 w-24 bg-hero-track md:h-12" />
+      </div>
     </div>
-    <Skeleton className="mx-auto aspect-4/3 w-full max-w-sm bg-hero-track" />
     <div className="grid grid-cols-3 divide-x divide-hero-line border-t border-hero-line pt-4">
       {range(3).map((i) => (
         <div key={i} className="flex flex-col items-center gap-0.5 px-2">

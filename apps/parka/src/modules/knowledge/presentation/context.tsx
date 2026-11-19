@@ -1,21 +1,12 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { context } from '@repo/react-kit/context';
 import { useDataChanges } from '@/shared/data-sync/presentation/use-data-changes';
-import { isDay, periodContaining } from '@/shared/period/period';
-import {
-  readQueryParam,
-  writeQueryParam,
-  writeQueryParams,
-} from '@/shared/router/navigation';
-import {
-  DATE_PARAM,
-  FEATURE_NAME,
-  KIND_PARAM,
-  PERIOD_KINDS,
-} from '../configuration/constraints';
+import { writeQueryParams } from '@/shared/router/navigation';
+import { FEATURE_NAME } from '../configuration/constraints';
 import { createMediator } from '../core/mediator';
 import {
   filtersFromParams,
+  FILTER_PARAMS,
   filtersToParams,
   type KnowledgeFilters,
 } from '../domain/filters';
@@ -26,7 +17,6 @@ import type {
   CatalogId,
   Category,
   CategoryId,
-  PeriodKind,
   Reel,
   ReelId,
   Tag,
@@ -37,16 +27,6 @@ import type {
 import { resetKnowledgeReads } from '../integration/repository';
 import { useToday } from './clock';
 
-const kindFromUrl = (): PeriodKind => {
-  const value = readQueryParam(KIND_PARAM);
-  return PERIOD_KINDS.find((kind) => kind === value) ?? 'month';
-};
-
-const dateFromUrl = (today: string): string => {
-  const value = readQueryParam(DATE_PARAM);
-  return value !== null && isDay(value) ? value : today;
-};
-
 const filtersFromUrl = (): KnowledgeFilters =>
   filtersFromParams(new URLSearchParams(window.location.search));
 
@@ -54,15 +34,13 @@ const nextPosition = (items: readonly { position: number }[]): number =>
   items.reduce((max, item) => Math.max(max, item.position + 1), 0);
 
 /**
- * The module store plus the viewed period (`kind` and `anchor`, mirrored in
- * the `view` / `date` params), the filters (mirrored in the query params) and
- * writers that build new items with placeholder ids.
+ * The module store plus the filters (mirrored in the query params, the
+ * picked catalog among them) and writers that build new items with
+ * placeholder ids.
  */
 export const [Provider, useContext] = context(FEATURE_NAME, () => {
   const [{ facade, register }] = useState(createMediator);
   const today = useToday();
-  const [kind, setKindState] = useState(kindFromUrl);
-  const [anchor, setAnchorState] = useState(() => dateFromUrl(today));
   const [filters, setFiltersState] = useState(filtersFromUrl);
   const categories = facade.useCategories();
   const catalogs = facade.useCatalogs();
@@ -82,36 +60,31 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
   // MCP changed the data: reload quietly.
   useDataChanges('knowledge', facade.refresh);
 
-  // Back / Forward may land on another period or filters.
+  // Back / Forward may land on other filters or another catalog.
   useEffect(() => {
-    const onPop = () => {
-      setKindState(kindFromUrl());
-      setAnchorState(dateFromUrl(today));
-      setFiltersState(filtersFromUrl());
-    };
+    const onPop = () => setFiltersState(filtersFromUrl());
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
-  }, [today]);
+  }, []);
 
-  const period = periodContaining(kind, anchor);
   const summary = useMemo(() => summaryOf(allTopics), [allTopics]);
+  // The picked catalog; a missing or unknown one falls back to the first.
+  const catalog =
+    catalogs.find((c) => c.id === filters.catalogId) ?? catalogs[0] ?? null;
+  const listed = facade.useListed();
+  const topics = useMemo(
+    () => listed.filter((t) => t.catalogId === catalog?.id),
+    [listed, catalog],
+  );
 
   return {
     today,
-    kind,
-    anchor,
-    period,
-    /** Moves to a period; another kind switches the view. */
-    setPeriod: (next: { kind: PeriodKind; day: string }) => {
-      setKindState(next.kind);
-      setAnchorState(next.day);
-      writeQueryParams({ [KIND_PARAM]: next.kind, [DATE_PARAM]: next.day });
-    },
-    setAnchor: (day: string) => {
-      setAnchorState(day);
-      writeQueryParam(DATE_PARAM, day);
-    },
     filters,
+    /** Moves to another catalog; the lists stay loaded. */
+    selectCatalog: (id: CatalogId) => {
+      setFiltersState((current) => ({ ...current, catalogId: id }));
+      writeQueryParams({ [FILTER_PARAMS.catalogId]: id });
+    },
     setFilters: (next: KnowledgeFilters) => {
       setFiltersState(next);
       writeQueryParams(filtersToParams(next));
@@ -121,7 +94,8 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
     tags,
     allTopics,
     summary,
-    topics: facade.useRanged(),
+    catalog,
+    topics,
     backlog: facade.useBacklog(),
     reels,
     mediaBusy: facade.useMediaBusy(),

@@ -1,4 +1,4 @@
-import { inRange, matchesFilters, sortTopics } from '../../domain/filters';
+import { matchesFilters, sortTopics } from '../../domain/filters';
 import type { Topic, TopicId } from '../../domain/models';
 import type { Store } from '../store';
 
@@ -12,7 +12,7 @@ export const place = (store: Store, topic: Topic): void => {
   const into = (list: Topic[], yes: boolean) =>
     yes ? sortTopics([...without(list), topic], sort) : without(list);
   store.$all.set(sortTopics([...without(store.$all.get()), topic], 'position'));
-  store.$ranged.set(into(store.$ranged.get(), fits && inRange(topic, view)));
+  store.$listed.set(into(store.$listed.get(), fits));
   store.$backlog.set(
     into(store.$backlog.get(), fits && topic.studyDay === null),
   );
@@ -21,7 +21,7 @@ export const place = (store: Store, topic: Topic): void => {
 export const dropTopic = (store: Store, id: TopicId): void => {
   const keep = (list: Topic[]) => list.filter((t) => t.id !== id);
   store.$all.set(keep(store.$all.get()));
-  store.$ranged.set(keep(store.$ranged.get()));
+  store.$listed.set(keep(store.$listed.get()));
   store.$backlog.set(keep(store.$backlog.get()));
   const { [id]: _gone, ...reels } = store.$reels.get();
   store.$reels.set(reels);
@@ -36,7 +36,7 @@ export const patchTopic = (
   const apply = (list: Topic[]) =>
     list.map((t) => (t.id === id ? patch(t) : t));
   store.$all.set(apply(store.$all.get()));
-  store.$ranged.set(apply(store.$ranged.get()));
+  store.$listed.set(apply(store.$listed.get()));
   store.$backlog.set(apply(store.$backlog.get()));
 };
 
@@ -69,6 +69,6 @@ export const rekeyTopic = (store: Store, from: TopicId, saved: Topic): void => {
   }
   const swap = (list: Topic[]) => list.map((t) => (t.id === from ? saved : t));
   store.$all.set(swap(store.$all.get()));
-  store.$ranged.set(swap(store.$ranged.get()));
+  store.$listed.set(swap(store.$listed.get()));
   store.$backlog.set(swap(store.$backlog.get()));
 };

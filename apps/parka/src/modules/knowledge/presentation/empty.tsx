@@ -8,14 +8,13 @@ import {
 import { openModal } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
 import { EmptyState } from '@/shared/ui/empty-state';
-import { periodLabel } from '@/shared/period-control/domain/format';
 import {
   activeFilterCount,
   describeFilters,
   NO_FILTERS,
 } from '../domain/filters';
 import { useContext } from './context';
-import { newModal } from './modal-ids';
+import { newModal, newTopicInModal } from './modal-ids';
 
 /** Nothing stored yet: offers the sample course or a first topic. */
 export const EmptyKnowledge = () => {
@@ -51,10 +50,17 @@ export const EmptyKnowledge = () => {
   );
 };
 
-/** No topics in the viewed period: names the period (and the filters) and offers a way on. */
-export const EmptyPeriod = () => {
-  const { period, filters, setFilters, categories, catalogs, tags, isLoading } =
-    useContext();
+/** No topics in the picked catalog: names the catalog (and the filters) and offers a way on. */
+export const EmptyCatalog = () => {
+  const {
+    catalog,
+    filters,
+    setFilters,
+    categories,
+    catalogs,
+    tags,
+    isLoading,
+  } = useContext();
   // A reload may still bring topics: claim emptiness only once it ends.
   if (isLoading) return null;
   if (activeFilterCount(filters) > 0)
@@ -63,12 +69,14 @@ export const EmptyPeriod = () => {
         data-e2e="knowledge:empty-filters"
         icon={FilterX}
         title={`Brak wyników dla ${describeFilters(filters, categories, catalogs, tags)}`}
-        description={`Nic nie pasuje do filtrów: ${periodLabel(period)}. Zmniejsz filtry albo dodaj temat.`}
+        description={`Nic nie pasuje do filtrów w katalogu: ${catalog?.name}. Zmniejsz filtry albo dodaj temat.`}
         action={
           <Button
             variant="ghost"
             data-e2e="knowledge:empty-clear-filters"
-            onClick={() => setFilters(NO_FILTERS)}
+            onClick={() =>
+              setFilters({ ...NO_FILTERS, catalogId: filters.catalogId })
+            }
             className="w-auto px-3 py-2"
           >
             <SlidersHorizontal className="size-4" aria-hidden="true" /> Wyczyść
@@ -79,13 +87,15 @@ export const EmptyPeriod = () => {
     );
   return (
     <EmptyState
-      data-e2e="knowledge:empty-period"
+      data-e2e="knowledge:empty-catalog"
       icon={BrainCircuit}
-      title="Brak tematów w tym okresie"
-      description={`Nic nie zaplanowano: ${periodLabel(period)}. Dodaj temat albo sprawdź backlog.`}
+      title="Brak tematów w tym katalogu"
+      description={`Katalog jest pusty: ${catalog?.name}. Dodaj pierwszy temat.`}
       action={
         <Button
-          onClick={() => openModal(newModal('topic'))}
+          onClick={() =>
+            openModal(catalog ? newTopicInModal(catalog.id) : newModal('topic'))
+          }
           className="w-auto px-3 py-2"
         >
           <Plus className="size-4" aria-hidden="true" /> Dodaj

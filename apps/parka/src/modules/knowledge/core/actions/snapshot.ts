@@ -7,7 +7,7 @@ export const snapshot = (store: Store): (() => void) => {
     catalogs: store.$catalogs.get(),
     tags: store.$tags.get(),
     all: store.$all.get(),
-    ranged: store.$ranged.get(),
+    listed: store.$listed.get(),
     backlog: store.$backlog.get(),
     reels: store.$reels.get(),
   };
@@ -16,7 +16,7 @@ export const snapshot = (store: Store): (() => void) => {
     store.$catalogs.set(saved.catalogs);
     store.$tags.set(saved.tags);
     store.$all.set(saved.all);
-    store.$ranged.set(saved.ranged);
+    store.$listed.set(saved.listed);
     store.$backlog.set(saved.backlog);
     store.$reels.set(saved.reels);
   };

@@ -5,15 +5,15 @@ import { fetchKnowledge } from '../../integration/repository';
 import type { Bus } from '../bus';
 import type { Store } from '../store';
 
-/** Lists of a view: everything (brain, structure), the period and the backlog. */
-export const fetchView = async ({ from, to, filters }: View) => {
+/** Lists of a view: everything (summary, structure), the filtered topics and the backlog. */
+export const fetchView = async ({ filters }: View) => {
   const query = toListQuery(filters);
-  const [everything, ranged, backlog] = await Promise.all([
+  const [everything, listed, backlog] = await Promise.all([
     fetchKnowledge({}),
-    fetchKnowledge({ ...query, from, to }),
+    fetchKnowledge(query),
     fetchKnowledge({ ...query, scope: 'undated' }),
   ]);
-  return { everything, ranged: ranged.topics, backlog: backlog.topics };
+  return { everything, listed: listed.topics, backlog: backlog.topics };
 };
 
 type ViewData = Awaited<ReturnType<typeof fetchView>>;
@@ -29,7 +29,7 @@ export const applyView = (store: Store, data: ViewData, seq: number) => {
   store.$catalogs.set(data.everything.catalogs);
   store.$tags.set(data.everything.tags);
   store.$all.set(data.everything.topics);
-  store.$ranged.set(data.ranged);
+  store.$listed.set(data.listed);
   store.$backlog.set(data.backlog);
   store.$loaded.set(true);
 };

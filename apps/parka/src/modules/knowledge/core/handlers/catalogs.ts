@@ -41,7 +41,7 @@ export const createCatalog = (store: Store, bus: Bus) =>
               t.catalogId === catalog.id ? { ...t, catalogId: saved.id } : t,
             );
           store.$all.set(swap(store.$all.get()));
-          store.$ranged.set(swap(store.$ranged.get()));
+          store.$listed.set(swap(store.$listed.get()));
           store.$backlog.set(swap(store.$backlog.get()));
         },
         rollback: () =>
@@ -102,7 +102,7 @@ export const deleteCatalog = (store: Store, bus: Bus) =>
       const keep = <T extends { catalogId: string }>(list: T[]) =>
         list.filter((t) => t.catalogId !== id);
       store.$all.set(keep(store.$all.get()));
-      store.$ranged.set(keep(store.$ranged.get()));
+      store.$listed.set(keep(store.$listed.get()));
       store.$backlog.set(keep(store.$backlog.get()));
       return mutate(store, bus, {
         run: () => removeCatalog(resolveId(store, id)),

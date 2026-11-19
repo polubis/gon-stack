@@ -15,10 +15,10 @@ export const createStore = () => {
   const $categories = atom<Category[]>([]);
   const $catalogs = atom<Catalog[]>([]);
   const $tags = atom<Tag[]>([]);
-  /** Every topic, unfiltered: feeds the brain and the summary. */
+  /** Every topic, unfiltered: feeds the summary. */
   const $all = atom<Topic[]>([]);
-  /** Topics planned inside the viewed period, filtered and sorted. */
-  const $ranged = atom<Topic[]>([]);
+  /** Topics the filters let through, sorted. */
+  const $listed = atom<Topic[]>([]);
   /** Topics without a study day, filtered and sorted. */
   const $backlog = atom<Topic[]>([]);
   /** Reels of the topics opened so far (editor, viewer). */
@@ -55,7 +55,7 @@ export const createStore = () => {
     $catalogs,
     $tags,
     $all,
-    $ranged,
+    $listed,
     $backlog,
     $reels,
     $mediaBusy,

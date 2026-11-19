@@ -94,12 +94,11 @@ export const filtersToParams = (
 /** Trimmed phrase the server and the local matching both use. */
 export const phraseOf = (query: string): string => query.trim();
 
-/** Filters that narrow the lists (sorting does not hide anything). */
+/** Filters that narrow the lists (sorting does not hide anything; the catalog is picked in the header). */
 export const activeFilterCount = (filters: KnowledgeFilters): number =>
   [
     phraseOf(filters.query) !== '',
     filters.categoryId !== null,
-    filters.catalogId !== null,
     filters.tagId !== null,
     filters.progress !== 'all',
   ].filter(Boolean).length;
@@ -155,15 +154,6 @@ export const matchesFilters = (
     (filters.progress === 'all' || stateOf(topic) === filters.progress)
   );
 };
-
-/** Study day inside the inclusive range; `null` range = no days (backlog list). */
-export const inRange = (
-  topic: Topic,
-  range: { from: string; to: string },
-): boolean =>
-  topic.studyDay !== null &&
-  topic.studyDay >= range.from &&
-  topic.studyDay <= range.to;
 
 const byPosition = (a: Topic, b: Topic) =>
   a.position - b.position || a.createdAt.localeCompare(b.createdAt);

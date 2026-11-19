@@ -1,19 +1,32 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderKnowledge } from './render-knowledge';
-import { setupKnowledgeBackend, topic } from './knowledge-backend';
+import { catalog, setupKnowledgeBackend, topic } from './knowledge-backend';
 
 const backend = setupKnowledgeBackend();
 
 afterEach(() => vi.useRealTimers());
 
 const seed = () => {
+  backend.state.catalogs = [
+    catalog(),
+    catalog({ id: 'k-sql', name: 'SQL', position: 1 }),
+    catalog({ id: 'k-go', name: 'Go', position: 2 }),
+  ];
   backend.state.topics = [
     topic({ id: 't-1', title: 'Phrasal verbs', doneCount: 1 }),
     topic({ id: 't-2', title: 'Idiomy', position: 1, studyDay: '2026-10-21' }),
     topic({ id: 't-3', title: 'Zaległy temat', position: 2, studyDay: null }),
-    topic({ id: 't-far', title: 'Listopadowy', studyDay: '2026-11-05' }),
+    topic({
+      id: 't-sql',
+      catalogId: 'k-sql',
+      title: 'Joiny',
+      reelCount: 2,
+      doneCount: 2,
+      studyDay: '2026-11-05',
+    }),
+    topic({ id: 't-go', catalogId: 'k-go', title: 'Gorutyny', reelCount: 0 }),
   ];
 };
 
@@ -21,24 +34,23 @@ const row = async (title: string) =>
   within((await screen.findByText(title)).closest('li')!);
 
 describe('knowledge screen', () => {
-  it('shows the brain summary and the topics of the period under their catalog', async () => {
+  it('shows finished against unfinished topics and the first catalog', async () => {
     seed();
     renderKnowledge();
 
+    expect(await screen.findByText('1 z 5')).toBeVisible();
     expect(
-      await screen.findByRole('group', { name: /Mózg wypełniony wiedzą/ }),
-    ).toBeVisible();
+      screen.getByText('Nieukończone').nextElementSibling,
+    ).toHaveTextContent('4');
     const english = within(
       await screen.findByRole('region', { name: 'Katalog: Angielski' }),
     );
     expect(english.getByText('Phrasal verbs')).toBeVisible();
+    // Any study day, dated or not, is listed; other catalogs stay out.
     expect(english.getByText('Idiomy')).toBeVisible();
-    // Another month and the backlog stay out of the period list.
-    expect(screen.queryByText('Listopadowy')).toBeNull();
-    expect(screen.queryByText('Zaległy temat')).toBeNull();
-    expect(
-      screen.getByRole('region', { name: 'Kategoria: Języki' }),
-    ).toBeVisible();
+    expect(english.getByText('Zaległy temat')).toBeVisible();
+    expect(screen.queryByText('Joiny')).toBeNull();
+    expect(screen.queryByRole('group', { name: 'Zakres czasu' })).toBeNull();
   });
 
   it('shows x/y reels and a progress bar on a topic', async () => {
@@ -55,44 +67,78 @@ describe('knowledge screen', () => {
     ).toHaveAttribute('aria-valuenow', '25');
   });
 
-  it('asks the server for the period range and for the backlog', async () => {
+  it('steps to the next catalog and round to the first, arrows never disabled', async () => {
+    const user = userEvent.setup();
     seed();
     renderKnowledge();
     await screen.findByText('Phrasal verbs');
+    const next = screen.getByRole('button', { name: 'Następny katalog' });
 
-    const urls = backend.lists().map((c) => new URL(c.url).searchParams);
+    await user.click(next);
+    expect(await screen.findByText('Joiny')).toBeVisible();
+    expect(screen.queryByText('Phrasal verbs')).toBeNull();
+    await user.click(next);
+    expect(await screen.findByText('Gorutyny')).toBeVisible();
+    await user.click(next);
+
+    expect(await screen.findByText('Phrasal verbs')).toBeVisible();
+    expect(next).toBeEnabled();
     expect(
-      urls.some(
-        (q) => q.get('from') === '2026-10-01' && q.get('to') === '2026-10-31',
-      ),
-    ).toBe(true);
-    expect(urls.some((q) => q.get('scope') === 'undated')).toBe(true);
+      screen.getByRole('button', { name: 'Poprzedni katalog' }),
+    ).toBeEnabled();
   });
 
-  it('moves to the next month and loads its topics', async () => {
+  it('steps back from the first catalog to the last', async () => {
     const user = userEvent.setup();
     seed();
     renderKnowledge();
     await screen.findByText('Phrasal verbs');
 
-    await user.click(screen.getByRole('button', { name: /następn/i }));
+    await user.click(screen.getByRole('button', { name: 'Poprzedni katalog' }));
 
-    expect(await screen.findByText('Listopadowy')).toBeVisible();
+    expect(await screen.findByText('Gorutyny')).toBeVisible();
+  });
+
+  it('picks a catalog from the list', async () => {
+    const user = userEvent.setup();
+    seed();
+    renderKnowledge();
+    await screen.findByText('Phrasal verbs');
+
+    await user.click(
+      screen.getByRole('button', { name: /Wybierz katalog: Angielski/ }),
+    );
+    await user.click(await screen.findByRole('button', { name: 'SQL' }));
+
+    expect(await screen.findByText('Joiny')).toBeVisible();
+    expect(window.location.search).toContain('catalog=k-sql');
+  });
+
+  it('restores the picked catalog from the URL', async () => {
+    seed();
+    renderKnowledge('?catalog=k-sql');
+
+    expect(await screen.findByText('Joiny')).toBeVisible();
     expect(screen.queryByText('Phrasal verbs')).toBeNull();
   });
 
-  it('keeps the data on screen while a period reloads', async () => {
-    const user = userEvent.setup();
+  it('moves to the next catalog on a swipe left and back on a swipe right', async () => {
     seed();
     renderKnowledge();
     await screen.findByText('Phrasal verbs');
-    backend.state.delayMs = 150;
+    const area = screen.getByRole('main');
+    const swipe = (dx: number) => {
+      fireEvent.touchStart(area, { touches: [{ clientX: 200, clientY: 100 }] });
+      fireEvent.touchEnd(area, {
+        changedTouches: [{ clientX: 200 + dx, clientY: 100 }],
+      });
+    };
 
-    await user.click(screen.getByRole('button', { name: /następn/i }));
+    swipe(-120);
+    expect(await screen.findByText('Joiny')).toBeVisible();
+    swipe(120);
 
-    expect(screen.getByText('Phrasal verbs')).toBeVisible();
-    expect(screen.queryByTestId('skeleton')).toBeNull();
-    expect(await screen.findByText('Listopadowy')).toBeVisible();
+    expect(await screen.findByText('Phrasal verbs')).toBeVisible();
   });
 
   it('opens the backlog with undated topics and the count on its button', async () => {
@@ -237,7 +283,7 @@ describe('knowledge writes', () => {
       catalogId: 'k-en',
       studyDay: '2026-10-20',
     });
-    await waitFor(() => expect(backend.state.topics).toHaveLength(5));
+    await waitFor(() => expect(backend.state.topics).toHaveLength(6));
     expect(screen.getByText('Conditionals')).toBeVisible();
   });
 
