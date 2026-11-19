@@ -60,6 +60,24 @@ const fadeOf = (page: Page): Promise<string> =>
       ).maskImage,
   );
 
+type Glass = { fill: number; blur: number; ring: string; content: string };
+
+/** Fill alpha, blur radius, shadow and content opacity of the bottom nav. */
+const glassOf = (page: Page): Promise<Glass> =>
+  page.evaluate(() => {
+    const el = document.querySelector<HTMLElement>(
+      '[data-overlay-hidden] > nav[aria-label="Nawigacja główna"]',
+    )!;
+    const style = getComputedStyle(el);
+    const alpha = style.backgroundColor.match(/[\d.]+/g)!.map(Number)[3] ?? 1;
+    return {
+      fill: alpha,
+      blur: Number(/blur\(([\d.]+)px/.exec(style.backdropFilter)?.[1] ?? 0),
+      ring: style.boxShadow,
+      content: getComputedStyle(el.firstElementChild!).opacity,
+    };
+  });
+
 const layoutOf = ({
   columnHeight,
   scrollHeight,
@@ -105,6 +123,27 @@ const commands = {
   },
   'the page bottom fades into the nav': async ({ page }) => {
     await expect.poll(() => fadeOf(page)).not.toBe('none');
+  },
+  'the nav has its fill and blur': async ({ page }) => {
+    await expect
+      .poll(async () => {
+        const { fill, blur, content } = await glassOf(page);
+        return fill > 0.5 && blur > 10 && content === '1';
+      })
+      .toBe(true);
+  },
+  'the nav has no fill and no blur': async ({ page }) => {
+    await expect
+      .poll(async () => {
+        const { fill, blur, ring, content } = await glassOf(page);
+        return (
+          fill === 0 &&
+          blur === 0 &&
+          content === '0' &&
+          !/rgba?\((?!0, 0, 0, 0)/.test(ring)
+        );
+      })
+      .toBe(true);
   },
   'the layout is unchanged': async ({ page }) => {
     await expect
@@ -186,6 +225,19 @@ test.describe('on a narrow screen', () => {
       ['no fade is left over the page bottom'],
       ['i close the add menu'],
       ['the page bottom fades into the nav'],
+    );
+  });
+
+  test('fill and blur leave and return together with the add menu', async ({
+    e2e,
+  }) => {
+    await interpreter(commands, e2e)(
+      ['i open the dashboard'],
+      ['the nav has its fill and blur'],
+      ['i open the add menu'],
+      ['the nav has no fill and no blur'],
+      ['i close the add menu'],
+      ['the nav has its fill and blur'],
     );
   });
 });

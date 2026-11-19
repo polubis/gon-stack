@@ -10,12 +10,15 @@ type Props = {
 /**
  * Holds the app nav. The bottom nav (mobile only) fades and slides away while
  * an overlay is open, as the first step of the overlay sequence (see
- * nav-sequence); hidden it is inert (no focus, no reading). Only opacity and
- * translate animate (compositor), on the frosted `nav` itself so its blur
- * fades and slides with it (an opacity on an ancestor would cut the blur at
- * once). The wrapper only flips `visibility` after the slide, which drops the
- * blur layer for good; its space stays. Its height is published as
- * `--bottom-nav-h` for the add button.
+ * nav-sequence); hidden it is inert (no focus, no reading). The frosted
+ * surface (fill, blur, ring/shadow) lives on the `nav` itself and its three
+ * properties transition on that one element, so they leave together; an
+ * `opacity` on the nav would be unreliable (some engines cut the blur layer
+ * at once and keep the fill). Its children fade with plain opacity, the nav
+ * slides with translate. The wrapper flips `visibility` after the slide,
+ * which drops the blur layer for good; its space stays. Its height is
+ * published as `--bottom-nav-h` for the add button. Closed state is the plain
+ * `glass` utility, untouched.
  * Motion is off under `motion-reduce`. The side nav (desktop) is never touched.
  */
 export const NavSlot = ({ placement, children }: Props) => {
@@ -52,9 +55,9 @@ export const NavSlot = ({ placement, children }: Props) => {
       aria-hidden={hidden || undefined}
       data-overlay-hidden={hidden}
       className={cn(
-        'z-(--z-raised) flow-root shrink-0 ease-out [transition-duration:120ms] [transition-property:visibility] motion-reduce:transition-none lg:hidden [&_nav]:ease-out [&_nav]:[transition-duration:120ms] [&_nav]:[transition-property:opacity,translate] motion-reduce:[&_nav]:transition-none',
+        'z-(--z-raised) flow-root shrink-0 ease-out [transition-duration:120ms] [transition-property:visibility] motion-reduce:transition-none lg:hidden [&_nav]:ease-out [&_nav]:[transition-duration:120ms] [&_nav]:[transition-property:translate,background-color,backdrop-filter,box-shadow] motion-reduce:[&_nav]:transition-none [&_nav>*]:ease-out [&_nav>*]:[transition-duration:120ms] [&_nav>*]:[transition-property:opacity] motion-reduce:[&_nav>*]:transition-none',
         hidden &&
-          'invisible [&_nav]:translate-y-full [&_nav]:opacity-0 [&_nav]:will-change-[translate,opacity]',
+          'invisible [&_nav]:translate-y-full [&_nav]:bg-transparent [&_nav]:[backdrop-filter:blur(0)_saturate(1)] [&_nav]:[box-shadow:inset_0_0_0_0.0625rem_transparent,0_0_0_0_transparent] [&_nav]:will-change-[translate,background-color,backdrop-filter] [&_nav>*]:opacity-0',
       )}
     >
       {children}
