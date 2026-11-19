@@ -51,14 +51,13 @@ const geometry = (page: Page): Promise<Geometry> =>
     };
   });
 
-/** Gap between the bottom of the page scroll area (the sibling right before the fab layer) and the screen bottom. */
-const pageToScreen = (page: Page): Promise<number> =>
+/** Bottom fade of the page scroll area, the sibling right before the fab layer. */
+const fadeOf = (page: Page): Promise<string> =>
   page.evaluate(
     () =>
-      window.innerHeight -
-      document
-        .getElementById('fab-layer')!
-        .previousElementSibling!.getBoundingClientRect().bottom,
+      getComputedStyle(
+        document.getElementById('fab-layer')!.previousElementSibling!,
+      ).maskImage,
   );
 
 const layoutOf = ({
@@ -101,44 +100,11 @@ const commands = {
       page.getByRole('navigation', { name: 'Nawigacja główna' }),
     ).toBeVisible();
   },
-  'the bottom nav shows its background and blur': async ({ page }) => {
-    await expect
-      .poll(() =>
-        page.evaluate(() => {
-          const nav = document.querySelector<HTMLElement>(
-            '[data-overlay-hidden] nav',
-          )!;
-          const { backgroundColor, backdropFilter, opacity, visibility } =
-            getComputedStyle(nav);
-          const alpha = Number(
-            backgroundColor.match(/[\d.]+(?=\)$)/)?.[0] ?? 1,
-          );
-          return {
-            background: alpha > 0,
-            blur: backdropFilter.includes('blur('),
-            opaque: opacity === '1' && visibility === 'visible',
-          };
-        }),
-      )
-      .toEqual({ background: true, blur: true, opaque: true });
+  'no fade is left over the page bottom': async ({ page }) => {
+    await expect.poll(() => fadeOf(page)).toBe('none');
   },
-  'the bottom nav has no background and no blur': async ({ page }) => {
-    await expect
-      .poll(() =>
-        page.evaluate(() => {
-          const { backgroundColor, backdropFilter } = getComputedStyle(
-            document.querySelector('[data-overlay-hidden] nav')!,
-          );
-          return { backgroundColor, backdropFilter };
-        }),
-      )
-      .toEqual({
-        backgroundColor: 'rgba(0, 0, 0, 0)',
-        backdropFilter: 'none',
-      });
-  },
-  'the page runs to the screen bottom': async ({ page }) => {
-    await expect.poll(() => pageToScreen(page)).toBe(0);
+  'the page bottom fades into the nav': async ({ page }) => {
+    await expect.poll(() => fadeOf(page)).not.toBe('none');
   },
   'the layout is unchanged': async ({ page }) => {
     await expect
@@ -212,33 +178,14 @@ test.describe('on a narrow screen', () => {
     );
   });
 
-  test('no empty nav band stays behind the open add menu', async ({ e2e }) => {
+  test('no blurry fade stays behind the open add menu', async ({ e2e }) => {
     await interpreter(commands, e2e)(
       ['i open the dashboard'],
+      ['the page bottom fades into the nav'],
       ['i open the add menu'],
-      ['the page runs to the screen bottom'],
+      ['no fade is left over the page bottom'],
       ['i close the add menu'],
-      ['the bottom nav is back'],
-    );
-  });
-
-  test('the resting nav shows its background and blur', async ({ e2e }) => {
-    await interpreter(commands, e2e)(
-      ['i open the dashboard'],
-      ['the bottom nav shows its background and blur'],
-    );
-  });
-
-  test('the nav background and blur return after the add menu closes', async ({
-    e2e,
-  }) => {
-    await interpreter(commands, e2e)(
-      ['i open the dashboard'],
-      ['i open the add menu'],
-      ['the bottom nav is hidden'],
-      ['the bottom nav has no background and no blur'],
-      ['i close the add menu'],
-      ['the bottom nav shows its background and blur'],
+      ['the page bottom fades into the nav'],
     );
   });
 });
