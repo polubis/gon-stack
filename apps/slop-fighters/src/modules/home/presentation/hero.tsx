@@ -1,0 +1,104 @@
+import { Calendar, Info, Quote, ShieldCheck } from 'lucide-react';
+
+import type { ResolvedImage } from '../domain/models';
+
+import { BookingWidget } from './booking-widget';
+import { copy } from './copy';
+import { BOOKING_URL } from './links';
+import { OptimizedImage } from './optimized-image';
+import { ServicesGrid } from './services-grid';
+
+type HeroProps = {
+  image: ResolvedImage;
+};
+
+export const Hero = ({ image }: HeroProps) => (
+  <section className="relative">
+    <div className="relative overflow-hidden">
+      <div className="absolute left-6 top-10 h-24 w-24 dot-grid-pattern opacity-40 sm:left-10" />
+
+      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 pb-24 pt-16 md:pb-10 lg:grid-cols-2 lg:pb-32 lg:pt-20">
+        <div className="relative z-10">
+          <p className="text-xs font-bold tracking-[0.2em] text-primary">
+            {copy.hero.eyebrow}
+          </p>
+          <h1
+            data-e2e="home:hero-heading"
+            className="mt-4 font-display text-4xl font-bold leading-[1.15] text-secondary sm:text-5xl"
+          >
+            <span className="sr-only">{copy.hero.headingKeyword} — </span>
+            {copy.hero.headingLine1}
+            <br />
+            <span className="text-primary">{copy.hero.headingLine2}</span>
+          </h1>
+          <p className="mt-5 max-w-md text-base leading-relaxed text-ink-light">
+            {copy.hero.subheading}
+          </p>
+
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <a
+              href={BOOKING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold uppercase text-on-primary shadow-sm sm:w-auto sm:justify-start"
+            >
+              <Calendar className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
+              {copy.hero.ctaPrimary}
+            </a>
+            <a
+              href="#o-mnie"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-primary px-5 py-3 text-sm font-bold uppercase text-primary sm:w-auto sm:justify-start"
+            >
+              <Info className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
+              {copy.hero.ctaSecondary}
+            </a>
+          </div>
+
+          <p className="mt-6 flex items-start gap-2 text-sm text-ink-light">
+            <ShieldCheck
+              className="h-4.5 w-4.5 shrink-0 text-primary"
+              aria-hidden="true"
+            />
+            {copy.hero.trustLine}
+          </p>
+        </div>
+
+        <div className="relative z-10">
+          <div className="w-full overflow-hidden rounded-[3rem] shadow-md">
+            <OptimizedImage
+              image={image}
+              alt={copy.hero.imageAlt}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              className="block h-auto w-full rounded-[3rem]"
+            />
+          </div>
+
+          <div className="-mt-10 flex justify-center md:-mt-24 lg:hidden">
+            <BookingWidget className="max-w-none md:max-w-lg" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div className="mx-auto max-w-7xl px-6 pb-20 pt-10 lg:pb-28">
+      <div className="lg:max-w-[58%]">
+        <ServicesGrid />
+
+        <blockquote className="mt-10 flex items-start gap-4 rounded-2xl bg-surface px-6 py-5 ring-1 ring-line">
+          <Quote className="h-6 w-6 shrink-0 text-primary" aria-hidden="true" />
+          <p className="font-display text-base italic text-secondary">
+            {copy.hero.quote}
+          </p>
+        </blockquote>
+      </div>
+    </div>
+
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-20 mx-auto hidden max-w-7xl px-6 lg:block">
+      <div className="pointer-events-auto absolute right-6 top-[26rem] w-full max-w-sm">
+        <BookingWidget />
+      </div>
+    </div>
+  </section>
+);
