@@ -565,7 +565,6 @@
 /* Frosted floating surface: dock, sidebar, sticky bars. */
 @utility glass {
   background-color: var(--glass);
-  -webkit-backdrop-filter: blur(1.25rem) saturate(1.6);
   backdrop-filter: blur(1.25rem) saturate(1.6);
   box-shadow: var(--shadow-dock-value);
 }
