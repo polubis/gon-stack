@@ -3,16 +3,19 @@ export const KNOWLEDGE_E2E_IDS = [
   'knowledge:toast',
   'knowledge:load-error',
   'knowledge:skeleton',
-  'knowledge:hero',
-  'knowledge:brain',
+  'knowledge:summary',
   'knowledge:progress',
-  'knowledge:touched',
-  'knowledge:cortex',
-  'knowledge:area',
+  'knowledge:total',
+  'knowledge:done',
+  'knowledge:unfinished',
+  'knowledge:catalog-prev',
+  'knowledge:catalog-next',
+  'knowledge:catalog-picker',
+  'knowledge:catalog-label',
   'knowledge:list',
   'knowledge:empty',
   'knowledge:empty-demo',
-  'knowledge:empty-period',
+  'knowledge:empty-catalog',
   'knowledge:empty-filters',
   'knowledge:empty-clear-filters',
   'knowledge:demo',
@@ -78,6 +81,7 @@ export const KNOWLEDGE_E2E_IDS = [
 export type KnowledgeDynamicE2eId =
   | `knowledge:category:${string}`
   | `knowledge:catalog:${string}`
+  | `knowledge:catalog-option:${string}`
   | `knowledge:topic:${string}`
   | `knowledge:topic-toggle:${string}`
   | `knowledge:topic-play:${string}`

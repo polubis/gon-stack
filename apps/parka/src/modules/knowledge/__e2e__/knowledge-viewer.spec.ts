@@ -49,12 +49,9 @@ const commands = {
     await expect(ctx.getByE2e('knowledge:list')).toBeVisible();
   },
 
-  'i see the brain hero and the lessons': async ({
-    getByE2e,
-    getByE2ePrefix,
-  }) => {
-    await expect(getByE2e('knowledge:hero')).toBeVisible();
-    await expect(getByE2e('knowledge:brain')).toBeVisible();
+  'i see the summary and the lessons': async ({ getByE2e, getByE2ePrefix }) => {
+    await expect(getByE2e('knowledge:summary')).toBeVisible();
+    await expect(getByE2e('knowledge:catalog-picker')).toBeVisible();
     await expect(topicRow(getByE2ePrefix, FIRST)).toBeVisible();
   },
 
@@ -149,7 +146,7 @@ test.describe('knowledge viewer', () => {
   }) => {
     await interpreter(commands, e2e)(
       ['i register and load the demo course'],
-      ['i see the brain hero and the lessons'],
+      ['i see the summary and the lessons'],
       ['i open the first lesson'],
       ['i swipe left and right between reels'],
       ['i swipe down past the last reel into the next lesson'],

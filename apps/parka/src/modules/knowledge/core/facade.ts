@@ -53,7 +53,7 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => ({
   useCatalogs: () => store.$catalogs.use(),
   useTags: () => store.$tags.use(),
   useAllTopics: () => store.$all.use(),
-  useRanged: () => store.$ranged.use(),
+  useListed: () => store.$listed.use(),
   useBacklog: () => store.$backlog.use(),
   useReels: () => store.$reels.use(),
   useMediaBusy: () => store.$mediaBusy.use(),

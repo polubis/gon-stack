@@ -23,7 +23,7 @@ export const createTag = (store: Store, bus: Bus) =>
               tagIds: t.tagIds.map((id) => (id === tag.id ? saved.id : id)),
             }));
           store.$all.set(swap(store.$all.get()));
-          store.$ranged.set(swap(store.$ranged.get()));
+          store.$listed.set(swap(store.$listed.get()));
           store.$backlog.set(swap(store.$backlog.get()));
         },
         rollback: () =>
@@ -71,7 +71,7 @@ export const deleteTag = (store: Store, bus: Bus) =>
       const strip = <T extends { tagIds: string[] }>(list: T[]) =>
         list.map((t) => ({ ...t, tagIds: t.tagIds.filter((x) => x !== id) }));
       store.$all.set(strip(store.$all.get()));
-      store.$ranged.set(strip(store.$ranged.get()));
+      store.$listed.set(strip(store.$listed.get()));
       store.$backlog.set(strip(store.$backlog.get()));
       return mutate(store, bus, {
         run: () => removeTag(resolveId(store, id)),

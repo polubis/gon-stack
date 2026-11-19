@@ -102,8 +102,7 @@ const Radios = <T extends string>({
  * lists change behind it and a link restores the same view.
  */
 export const FiltersDrawer = ({ modal }: { modal: string }) => {
-  const { filters, setFilters, categories, catalogs, tags, topics, backlog } =
-    useContext();
+  const { filters, setFilters, categories, tags, topics } = useContext();
   useModalMounted(modal);
   const active = activeFilterCount(filters);
   const dirty = active > 0 || filters.sort !== NO_FILTERS.sort;
@@ -177,23 +176,6 @@ export const FiltersDrawer = ({ modal }: { modal: string }) => {
                 </Toggle>
               ))}
             </Group>
-            <Group label="Katalog">
-              {catalogs.map((catalog) => (
-                <Toggle
-                  key={catalog.id}
-                  pressed={filters.catalogId === catalog.id}
-                  onClick={() =>
-                    setFilters({
-                      ...filters,
-                      catalogId:
-                        filters.catalogId === catalog.id ? null : catalog.id,
-                    })
-                  }
-                >
-                  {catalog.name}
-                </Toggle>
-              ))}
-            </Group>
             <Group label="Tag">
               {tags.map((tag) => (
                 <Toggle
@@ -230,7 +212,9 @@ export const FiltersDrawer = ({ modal }: { modal: string }) => {
               variant="ghost"
               data-e2e="knowledge:filters-clear"
               disabled={!dirty}
-              onClick={() => setFilters(NO_FILTERS)}
+              onClick={() =>
+                setFilters({ ...NO_FILTERS, catalogId: filters.catalogId })
+              }
               className="flex-1 disabled:opacity-50"
             >
               <RotateCcw className="size-4" aria-hidden="true" /> Wyczyść
@@ -240,7 +224,7 @@ export const FiltersDrawer = ({ modal }: { modal: string }) => {
               onClick={() => closeModal(modal)}
               className="flex-1"
             >
-              {`Pokaż tematy: ${topics.length + backlog.length}`}
+              {`Pokaż tematy: ${topics.length}`}
             </Button>
           </div>
         </Dialog.Content>

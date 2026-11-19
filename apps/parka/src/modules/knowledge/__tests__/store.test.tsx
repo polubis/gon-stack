@@ -7,14 +7,14 @@ import { reel, setupKnowledgeBackend, topic } from './knowledge-backend';
 
 const backend = setupKnowledgeBackend();
 
-const VIEW = { from: '2026-10-01', to: '2026-10-31', filters: NO_FILTERS };
+const VIEW = { filters: NO_FILTERS };
 
-/** Mediator with its public selectors, loaded for October 2026. */
+/** Mediator with its public selectors, loaded without filters. */
 const open = async () => {
   const { facade, register } = createMediator();
   const hook = renderHook(() => ({
     all: facade.useAllTopics(),
-    ranged: facade.useRanged(),
+    listed: facade.useListed(),
     backlog: facade.useBacklog(),
     catalogs: facade.useCatalogs(),
     categories: facade.useCategories(),
@@ -30,7 +30,7 @@ const open = async () => {
 };
 
 describe('knowledge store', () => {
-  it('splits topics into the period list, the backlog and the whole set', async () => {
+  it('splits topics into the listed ones, the backlog and the whole set', async () => {
     backend.state.topics = [
       topic({ id: 't-1' }),
       topic({ id: 't-2', studyDay: null }),
@@ -40,7 +40,11 @@ describe('knowledge store', () => {
     const { hook } = await open();
 
     await waitFor(() => expect(hook.result.current.backlog).toHaveLength(1));
-    expect(hook.result.current.ranged.map((t) => t.id)).toEqual(['t-1']);
+    expect(hook.result.current.listed.map((t) => t.id)).toEqual([
+      't-1',
+      't-2',
+      't-3',
+    ]);
     expect(hook.result.current.all).toHaveLength(3);
   });
 
@@ -64,7 +68,7 @@ describe('knowledge store', () => {
     );
 
     expect(hook.result.current.backlog.map((t) => t.id)).toContain('tmp-1');
-    expect(hook.result.current.ranged.map((t) => t.id)).not.toContain('tmp-1');
+    expect(hook.result.current.listed.map((t) => t.id)).toContain('tmp-1');
     await waitFor(() =>
       expect(hook.result.current.backlog.map((t) => t.id)).toContain('srv-1'),
     );

@@ -13,8 +13,8 @@ import type {
   TopicId,
 } from './models';
 
-/** What the lists show: the period of study days plus the filters. */
-export type View = { from: string; to: string; filters: KnowledgeFilters };
+/** What the lists show: every topic the filters let through. */
+export type View = { filters: KnowledgeFilters };
 
 export type Event =
   | TriggerEvent<'[TRIGGER]_LOAD', { view: View }>
