@@ -21,7 +21,6 @@ const lineOf = (text: string, index: number): number =>
   text.slice(0, index).split('\n').length;
 
 export const mswBackendMocks: RuleUnit = {
-  importance: 'A',
   include: [
     'apps/*/src/**/*.test.ts',
     'apps/*/src/**/*.test.tsx',

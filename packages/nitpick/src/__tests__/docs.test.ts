@@ -4,9 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { config } from '../config.js';
 import type { Config } from '../config.js';
-import { AODI_LEGEND, buildDocs } from '../docs.js';
-
-const A = 'A' as const;
+import { buildDocs } from '../docs.js';
 
 const build = async (value: Config, sources: Record<string, string> = {}) => {
   const root = await mkdtemp(join(tmpdir(), 'nitpick-'));
@@ -24,7 +22,7 @@ const build = async (value: Config, sources: Record<string, string> = {}) => {
 };
 
 const oneRule = (doc: Config['rules'][string][string]['doc']): Config => ({
-  rules: { g: { r: { importance: A, doc } } },
+  rules: { g: { r: { doc } } },
 });
 
 describe('Root docs work when', () => {
@@ -43,12 +41,12 @@ describe('Root docs work when', () => {
 
   it('are replaced by an entry callback with header and links', async () => {
     const { read, problems } = await build({
-      rules: { g: { r: { importance: A, doc: 'x' } } },
+      rules: { g: { r: { doc: 'x' } } },
       entry: { doc: ({ header, ref }) => `${header} ${ref('r')}` },
     });
     expect(problems).toEqual([]);
     expect(read('.ai', 'AGENTS.md')).toBe(
-      `# Information for AI [r](rules/g.md)\n\n## Rule files\n\n${AODI_LEGEND}\n\n- [rules/g.md](rules/g.md)\n`,
+      `# Information for AI [r](rules/g.md)\n\n## Rule files\n\n- [rules/g.md](rules/g.md)\n`,
     );
   });
 
@@ -82,17 +80,17 @@ describe('Rule groups work when', () => {
     const { read, keys } = await build({
       rules: {
         git: {
-          late: { importance: 'I', doc: 'third' },
-          first: { importance: A, doc: 'first' },
+          late: { doc: 'third' },
+          first: { doc: 'first' },
         },
-        ui: { x: { importance: 'D', doc: 'x' } },
+        ui: { x: { doc: 'x' } },
       },
     });
     expect(read('.ai', 'rules', 'git.md')).toBe(
-      '## Git\n\n1. (I) third\n2. (A) first\n',
+      '## Git\n\n1. third\n2. first\n',
     );
     expect(read('.ai', 'AGENTS.md')).toContain(
-      `## Rule files\n\n${AODI_LEGEND}\n\n- [rules/git.md](rules/git.md)\n- [rules/ui.md](rules/ui.md)\n`,
+      `## Rule files\n\n- [rules/git.md](rules/git.md)\n- [rules/ui.md](rules/ui.md)\n`,
     );
     expect(keys).toEqual([
       join('.ai', 'AGENTS.md'),
@@ -103,18 +101,18 @@ describe('Rule groups work when', () => {
 
   it('derives the title from the group key', async () => {
     const { read } = await build({
-      rules: { 'unit-testing': { r: { importance: A, doc: 'x' } } },
+      rules: { 'unit-testing': { r: { doc: 'x' } } },
     });
     expect(read('.ai', 'rules', 'unit-testing.md')).toBe(
-      '## Unit Testing\n\n1. (A) x\n',
+      '## Unit Testing\n\n1. x\n',
     );
   });
 
   it('reports bad group names', async () => {
     const { problems } = await build({
       rules: {
-        'bad name': { r: { importance: A, doc: 'x' } },
-        same: { same: { importance: A, doc: 'x' } },
+        'bad name': { r: { doc: 'x' } },
+        same: { same: { doc: 'x' } },
       },
     });
     expect(problems).toEqual([
@@ -128,36 +126,36 @@ describe('Rule docs work when', () => {
   it('link a group by its name from a rule doc', async () => {
     const { read } = await build({
       rules: {
-        g: { a: { importance: A, doc: ({ ref }) => `see ${ref('g')}` } },
+        g: { a: { doc: ({ ref }) => `see ${ref('g')}` } },
       },
     });
-    expect(read('.ai', 'rules', 'g.md')).toBe('## G\n\n1. (A) see [g](g.md)\n');
+    expect(read('.ai', 'rules', 'g.md')).toBe('## G\n\n1. see [g](g.md)\n');
   });
 
   it('inline strings and callbacks in the group file', async () => {
     const { read } = await build({
       rules: {
         g: {
-          a: { importance: A, doc: 'plain' },
-          b: { importance: A, doc: ({ ref }) => `to ${ref('a')}` },
+          a: { doc: 'plain' },
+          b: { doc: ({ ref }) => `to ${ref('a')}` },
         },
       },
     });
     expect(read('.ai', 'rules', 'g.md')).toBe(
-      '## G\n\n1. (A) plain\n2. (A) to [a](g.md)\n',
+      '## G\n\n1. plain\n2. to [a](g.md)\n',
     );
   });
 
   it('write a file doc as its own file and link it from the group', async () => {
     const { read, problems } = await build(
       {
-        rules: { g: { r: { importance: A, doc: { file: './r.md' } } } },
+        rules: { g: { r: { doc: { file: './r.md' } } } },
         refs: { 'x/k': './k.md' },
       },
       { 'r.md': 'see {{ref:x/k}} and {{ref:x/k}}\r\n', 'k.md': '' },
     );
     expect(problems).toEqual([]);
-    expect(read('.ai', 'rules', 'g.md')).toContain('1. (A) [r](r.md)');
+    expect(read('.ai', 'rules', 'g.md')).toContain('1. [r](r.md)');
     expect(read('.ai', 'rules', 'r.md')).toBe(
       'see [x/k](../references/x/k.md) and [x/k](../references/x/k.md)\n',
     );
@@ -169,8 +167,8 @@ describe('Rule docs work when', () => {
       {
         rules: {
           g: {
-            r: { importance: A, doc: { file: './r.md' }, unlisted: true },
-            s: { importance: A, doc: 'shown' },
+            r: { doc: { file: './r.md' }, unlisted: true },
+            s: { doc: 'shown' },
           },
         },
       },
@@ -178,7 +176,7 @@ describe('Rule docs work when', () => {
     );
     expect(problems).toEqual([]);
     expect(read('.ai', 'rules', 'g.md')).not.toContain('r.md');
-    expect(read('.ai', 'rules', 'g.md')).toContain('1. (A) shown');
+    expect(read('.ai', 'rules', 'g.md')).toContain('1. shown');
     expect(read('.ai', 'rules', 'r.md')).toBe('hidden\n');
   });
 
@@ -187,8 +185,8 @@ describe('Rule docs work when', () => {
       {
         rules: {
           g: {
-            a: { importance: A, doc: { file: './gone.md' } },
-            b: { importance: A, doc: { file: './b.md' } },
+            a: { doc: { file: './gone.md' } },
+            b: { doc: { file: './b.md' } },
           },
         },
       },
@@ -205,8 +203,8 @@ describe('Rule docs work when', () => {
     const { problems } = await build({
       rules: {
         g: {
-          a: { importance: A, doc: 'a', run: () => {} },
-          b: { importance: A, doc: 'b', run: () => {}, fix: 'f' },
+          a: { doc: 'a', run: () => {} },
+          b: { doc: 'b', run: () => {}, fix: 'f' },
         },
       },
     } as unknown as Config);
@@ -232,7 +230,6 @@ describe('Insert works when', () => {
         rules: {
           g: {
             r: {
-              importance: A,
               doc: ({ insert }) => `a ${insert('i')} b`,
             },
           },
@@ -243,7 +240,7 @@ describe('Insert works when', () => {
     );
     expect(problems).toEqual([]);
     expect(read('.ai', 'rules', 'g.md')).toContain(
-      '1. (A) a body [k](../references/k.md) b',
+      '1. a body [k](../references/k.md) b',
     );
   });
 
@@ -283,7 +280,7 @@ describe('Agents work when', () => {
   it('writes one file per agent and lists them in the root', async () => {
     const { read, problems } = await build(
       {
-        rules: { g: { r: { importance: A, doc: 'r' } } },
+        rules: { g: { r: { doc: 'r' } } },
         agents: {
           plain: { doc: ' Plain ' },
           fn: { doc: ({ ref }) => `to ${ref('plain')} ${ref('r')}` },
@@ -327,8 +324,8 @@ describe('Agents work when', () => {
   it('reports an id shared by rules and agents', async () => {
     const { problems } = await build({
       rules: {
-        a: { x: { importance: A, doc: '1' } },
-        b: { x: { importance: A, doc: '2' } },
+        a: { x: { doc: '1' } },
+        b: { x: { doc: '2' } },
       },
       agents: { x: { doc: '3' } },
     });
@@ -368,7 +365,7 @@ describe('Table of contents works when', () => {
   it('hides the rule and reference lists but still writes their files', async () => {
     const { read, problems } = await build(
       {
-        rules: { g: { r: { importance: A, doc: 'Body' } } },
+        rules: { g: { r: { doc: 'Body' } } },
         refs: { k: './k.md' },
         output: [
           {
@@ -383,7 +380,7 @@ describe('Table of contents works when', () => {
     expect(problems).toEqual([]);
     expect(read('.ai', 'AGENTS.md')).not.toContain('## Rule files');
     expect(read('.ai', 'AGENTS.md')).not.toContain('## Reference files');
-    expect(read('.ai', 'rules', 'g.md')).toContain('1. (A) Body');
+    expect(read('.ai', 'rules', 'g.md')).toContain('1. Body');
     expect(read('.ai', 'references', 'k.md')).toBe('ref\n');
   });
 
@@ -412,8 +409,8 @@ describe('Table of contents works when', () => {
   it('lists the group of a listed rule even when the rule list is hidden', async () => {
     const { read, problems } = await build({
       rules: {
-        g: { r: { importance: A, doc: 'Body', listed: true } },
-        h: { s: { importance: A, doc: 'Other' } },
+        g: { r: { doc: 'Body', listed: true } },
+        h: { s: { doc: 'Other' } },
       },
       output: [{ path: '.ai', root: 'AGENTS.md', toc: { rules: false } }],
     });
@@ -492,7 +489,7 @@ describe('Outputs work when', () => {
     build(
       {
         output,
-        rules: { g: { x: { importance: A, doc: { file: './x.md' } } } },
+        rules: { g: { x: { doc: { file: './x.md' } } } },
         refs: { k: './k.md' },
       },
       { 'k.md': 'leaf', 'x.md': 'x' },
@@ -511,7 +508,7 @@ describe('Outputs work when', () => {
       join('.ai', 'references', 'k.md'),
       join('.ai', 'AGENTS.md'),
     ]);
-    expect(read('.ai', 'rules', 'g.md')).toContain('1. (A) [x](x.md)');
+    expect(read('.ai', 'rules', 'g.md')).toContain('1. [x](x.md)');
   });
 
   it('makes every next output reference the first one', async () => {
@@ -539,8 +536,8 @@ describe('Outputs work when', () => {
         output: [{ path: 'out\\dir', root: 'R.md' }],
         rules: {
           g: {
-            a: { importance: A, doc: 'a' },
-            b: { importance: A, doc: { file: './b.md' } },
+            a: { doc: 'a' },
+            b: { doc: { file: './b.md' } },
           },
         },
       },
@@ -641,7 +638,7 @@ describe('Settings generation works when', () => {
 
 describe('Config helper works when', () => {
   it('returns the given rules untouched', () => {
-    const value = config({ rules: { g: { r: { importance: A, doc: 'x' } } } });
+    const value = config({ rules: { g: { r: { doc: 'x' } } } });
     expect(Object.keys(value.rules)).toEqual(['g']);
   });
 });
@@ -653,7 +650,6 @@ describe('Rule refs work when', () => {
         rules: {
           g: {
             r: {
-              importance: A,
               doc: { file: './r.md' },
               refs: { k: './k.md' },
             },
@@ -671,7 +667,7 @@ describe('Rule refs work when', () => {
     const { problems } = await build(
       {
         rules: {
-          g: { r: { importance: A, doc: 'x', refs: { k: './a.md' } } },
+          g: { r: { doc: 'x', refs: { k: './a.md' } } },
         },
         refs: { k: './b.md' },
       },
@@ -686,7 +682,7 @@ describe('Rule refs work when', () => {
     const { problems } = await build(
       {
         rules: {
-          g: { r: { importance: A, doc: 'x', refs: { k: './k.md' } } },
+          g: { r: { doc: 'x', refs: { k: './k.md' } } },
         },
         refs: { k: './k.md' },
       },

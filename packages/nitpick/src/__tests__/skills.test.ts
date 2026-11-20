@@ -58,7 +58,7 @@ describe('Skills work when', () => {
     const { read } = await build(
       { '.nitpick/skills/demo/SKILL.md': SKILL },
       { demo: { source: './skills/demo' } },
-      { g: { r: { importance: 'A', doc: ({ ref }) => `see ${ref('demo')}` } } },
+      { g: { r: { doc: ({ ref }) => `see ${ref('demo')}` } } },
     );
     expect(read('.ai', 'AGENTS.md')).toContain(
       '## Skill files\n\n- [skills/demo/SKILL.md](skills/demo/SKILL.md)\n',
@@ -104,7 +104,7 @@ describe('Skills work when', () => {
     const { problems } = await build(
       { '.nitpick/skills/demo/SKILL.md': SKILL },
       { demo: { source: './skills/demo' } },
-      { g: { demo: { importance: 'A', doc: 'x' } } },
+      { g: { demo: { doc: 'x' } } },
     );
     expect(problems).toEqual(['Duplicate id "demo"']);
   });
@@ -126,7 +126,6 @@ describe('Skills contract works when', () => {
       rules: {
         g: {
           r: {
-            importance: 'A',
             doc: ({ ref }) => {
               expectTypeOf(ref)
                 .parameter(0)

@@ -1,6 +1,5 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { basename, dirname, join, posix, relative, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { listRules } from './config.js';
 import type { Config, EntryDoc, RefSource } from './config.js';
 import { buildSettings } from './settings.js';
@@ -40,11 +39,6 @@ const shiftHeadings = (text: string): string => {
     })
     .join('\n');
 };
-
-export const AODI_LEGEND = readSource(
-  fileURLToPath(new URL('rules/aodi-framework.md', import.meta.url)),
-  '.',
-).trim();
 
 const instructionPath = (id: string): string => posix.join('rules', `${id}.md`);
 
@@ -308,7 +302,7 @@ export const buildDocs = (
       .filter((rule) => rule.group === group && !rule.unlisted)
       .map(
         (rule, index) =>
-          `${index + 1}. (${rule.importance}) ${
+          `${index + 1}. ${
             typeof rule.doc === 'object'
               ? link(from, instructionPath(rule.id), rule.id)
               : resolveDoc(rule.doc, `Rule "${rule.id}"`, from)
@@ -339,7 +333,6 @@ export const buildDocs = (
   if (ruleGroups.length > 0) {
     sections.push(
       '## Rule files',
-      AODI_LEGEND,
       ruleGroups
         .map(
           (group) => `- ${link('root.md', groupPath(group), groupPath(group))}`,

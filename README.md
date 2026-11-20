@@ -57,7 +57,7 @@ gon-stack is a **generic ecosystem for full stack AI development**, working as a
 
 ```mermaid
 flowchart LR
-  T["Task<br/>VYB-245"] --> P["Plan<br/>.claude/rules + AODI"]
+  T["Task<br/>VYB-245"] --> P["Plan<br/>.claude/rules"]
   P --> B["Build<br/>agents + humans"]
   B --> V["Verify<br/>pnpm ci:verify"]
   V --> E["Evidence<br/>.evidences/KEY"]
@@ -126,7 +126,7 @@ Shared packages stay available: use them, swap them or delete them.
 | [`@repo/react-kit`](packages/react-kit)                 | React utils: `cn`, Context API helpers                             |
 | [`@repo/type-beast`](packages/type-beast)               | Shared TypeScript types                                            |
 | [`@repo/vibe-test`](packages/vibe-test)                 | Internal e2e lib, type-safe selectors                              |
-| [`@repo/nitpick`](packages/nitpick)                     | Keeps AI rule docs (AODI) in sync with code, runs project checks   |
+| [`@repo/nitpick`](packages/nitpick)                     | Keeps AI rule docs in sync with code, runs project checks   |
 | [`@repo/ui`](packages/ui)                               | Shared component library                                           |
 | [`@repo/astro-config`](packages/astro-config)           | Shared Astro config                                                |
 | [`@repo/tailwind-config`](packages/tailwind-config)     | Shared Tailwind styles and tokens                                  |
@@ -154,7 +154,7 @@ Shared packages stay available: use them, swap them or delete them.
 | --------------------- | ------------------------------------------------------------------------------------------- |
 | `.claude/CLAUDE.md`   | Entry point, rule index                                                                     |
 | `.claude/rules/`      | Git, testing, UX, UI, a11y, security, styling, TypeScript, React, Astro, Supabase           |
-| `.claude/references/` | AODI framework, frontend architecture                                                       |
+| `.claude/references/` | frontend architecture                                                       |
 | `.claude/skills/`     | Reusable workflows: `evidence`, `plan-*`, `black-box-tester`, `sloth`, `witch-doctor`, more |
 | `.claude/agents/`     | `boss`, `worker`, `doctor` roles                                                            |
 

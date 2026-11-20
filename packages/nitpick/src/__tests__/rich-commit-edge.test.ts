@@ -202,10 +202,6 @@ describe('Message handling works when', () => {
 });
 
 describe('Rule definition works when', () => {
-  it('has an explicit importance', () => {
-    expect(richCommit.importance).toBe('A');
-  });
-
   it('points to an absolute instruction file', () => {
     expect(typeof richCommit.doc).toBe('object');
     if (typeof richCommit.doc !== 'object') return;

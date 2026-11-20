@@ -1,5 +1,4 @@
 import { config } from '@repo/nitpick/config';
-import { aodiFramework } from '@repo/nitpick/rules/aodi-framework';
 import { decisionLog } from '@repo/nitpick/rules/decision-log';
 import { mswBackendMocks } from '@repo/nitpick/rules/msw-backend-mocks';
 import { supabaseErrorMapping } from '@repo/nitpick/rules/supabase-error-mapping';
@@ -19,8 +18,6 @@ export default config({
     doc: ({ insert, ref }) => `# gon-stack \`.claude\`
 
 ## Rules
-
-${insert('aodi-framework')}
 
 - ${ref('git')}
 - ${ref('way-of-work')}
@@ -54,15 +51,14 @@ ${insert('project-map')}`,
       frontmatter: {
         name: 'boss',
         description:
-          'Entry point for every task — checks aodi-framework and rules, scopes the task, delegates to worker, relays acceptance.',
+          'Entry point for every task — checks rules, scopes the task, delegates to worker, relays acceptance.',
       },
-      doc: ({ file, ref }) => `# Boss
+      doc: ({ ref }) => `# Boss
 
 Entry point for every task from dev. You never do the work yourself: you scope it and delegate to ${ref('worker')}.
 
 Read before routing:
 
-- ${file('aodi-framework')}
 - \`rules/*.md\` (force applicable rules into the task)
 
 ## Flow
@@ -92,14 +88,13 @@ Read before routing:
         description:
           'Does the work solo — short plan for complex tasks, test pyramid, basic repo checks, cheapest sufficient proof, then waits for dev acceptance.',
       },
-      doc: ({ file, ref }) => `# Worker
+      doc: ({ ref }) => `# Worker
 
 Entry point from dev. You know the catalog under \`rules/\`, \`skills/\`, \`references/\`, \`agents/\` — **do not load contents upfront**; read only when routing requires it.
 
 Read before work:
 
 - \`@../CLAUDE.md\`
-- ${file('aodi-framework')}
 
 ## Flow
 
@@ -127,13 +122,13 @@ Read before work:
         description:
           'After work — rules audit (with fixes), checks, proof it works, optional commit/push, cleanup.',
       },
-      doc: ({ file }) => `# Doctor
+      doc: () => `# Doctor
 
 Takes the worker’s output. You finish quality, proof, and session closure.
 
 ## 1. Rules audit
 
-- Match applicable \`rules/*.md\` to the changes (${file('aodi-framework')}).
+- Match applicable \`rules/*.md\` to the changes.
 - **Fix violations immediately** — do not report-only.
 - Re-run **basic repo checks** after fixes.
 
@@ -312,7 +307,6 @@ Skill ${ref('evidence')}, key = task id, out \`.evidences/<task-id>/\`.
     'witch-doctor': { source: './skills/witch-doctor' },
   },
   refs: {
-    'aodi-framework': aodiFramework,
     'frontend-architecture': './references/frontend-architecture.md',
     'project-map': './references/project-map.md',
     'herdr-keyboard': './references/herdr-keyboard.md',
@@ -320,21 +314,17 @@ Skill ${ref('evidence')}, key = task id, out \`.evidences/<task-id>/\`.
   rules: {
     'way-of-work': {
       'way-of-work-caveman': {
-        importance: 'A',
         doc: ({ ref }) =>
           `For "document" creation and code comments use ${ref('caveman')}; same for communication.`,
       },
       'way-of-work-conventions': {
-        importance: 'A',
         doc: 'During modification follow conventions/style around',
       },
       'way-of-work-evidence': {
-        importance: 'A',
         doc: ({ ref }) =>
           `After each work make evidence via ${ref('evidence')} skill`,
       },
       'way-of-work-tests': {
-        importance: 'A',
         doc: 'After each work add tests: e2e, unit, integration, whatever fits',
       },
     },
@@ -350,60 +340,49 @@ Skill ${ref('evidence')}, key = task id, out \`.evidences/<task-id>/\`.
       },
       'rich-commit': { ...richCommit, unlisted: false },
       'git-no-artifacts': {
-        importance: 'A',
         doc: 'Never commit artifacts: videos, screenshots, recordings, logs, build/test output, scratch files',
       },
       'git-new-branch-from-main': {
-        importance: 'A',
         doc: 'Always do the work on a new branch created from fresh main: checkout main, pull --rebase with origin, then branch',
       },
     },
     testing: {
       'msw-backend-mocks': mswBackendMocks,
       'testing-black-box-aaa': {
-        importance: 'A',
         doc: 'Black Box/Arrange Act Assert organized',
       },
       'testing-no-implementation-details': {
-        importance: 'I',
         doc: 'No implementation details',
       },
       'testing-story-names': {
-        importance: 'A',
         doc: 'Short and "like user story" test names',
       },
-      'testing-no-gherkin': { importance: 'A', doc: 'No Gherkin' },
+      'testing-no-gherkin': { doc: 'No Gherkin' },
       'testing-behaviors': {
-        importance: 'A',
         doc: 'Test behaviors/not implementation',
       },
       'testing-ts-public-interface': {
-        importance: 'A',
         doc: 'Verify TypeScript behavior in tests for public interface',
       },
       'testing-no-internals': {
-        importance: 'A',
         doc: 'No internals testing, public behaviors only',
       },
-      'testing-pyramid': { importance: 'A', doc: 'Test pyramid' },
+      'testing-pyramid': { doc: 'Test pyramid' },
     },
     accessibility: {
-      'a11y-wcag': { importance: 'A', doc: 'WCAG 2.2' },
-      'a11y-aria': { importance: 'A', doc: 'Aria attributes' },
+      'a11y-wcag': { doc: 'WCAG 2.2' },
+      'a11y-aria': { doc: 'Aria attributes' },
       'a11y-keyboard': {
-        importance: 'A',
         doc: 'Full supported keyboard navigation',
       },
     },
     architecture: {
       'architecture-frontend': {
-        importance: 'A',
         doc: ({ file }) => `Use ${file('frontend-architecture')} for frontend`,
       },
     },
     astro: {
       'astro-backend-endpoints': {
-        importance: 'A',
         doc: 'Backend endpoints via builded-in adapaters and type-safe input/output validation',
       },
     },
@@ -412,217 +391,170 @@ Skill ${ref('evidence')}, key = task id, out \`.evidences/<task-id>/\`.
     },
     coding: {
       'coding-minimal-code': {
-        importance: 'A',
         doc: 'Turbo minimal code',
       },
       'coding-export-order': {
-        importance: 'A',
         doc: 'Inline exports in order public bottom/private top order',
       },
       'coding-no-barrel-export': {
-        importance: 'A',
         doc: 'Never barrel export',
       },
     },
     frontend: {
       'frontend-csr-ssr': {
-        importance: 'I',
         doc: 'When authentication required prefer `CSR`, otherwise `SSR/SSG`',
       },
     },
     react: {
       'react-context-react-kit': {
-        importance: 'A',
         doc: '`Context API` via `react-kit` utils',
       },
       'react-use-effect-event': {
-        importance: 'A',
         doc: '`useEffectEvent` instead of hacks',
       },
       'react-component-props': {
-        importance: 'A',
         doc: '`ComponentProps` for generic components def merging',
       },
       'react-no-custom-data-e2e': {
-        importance: 'A',
         doc: 'No custom `data-e2e` prop. Intead `ComponentProps` with already defined `data-e2e`',
       },
     },
     security: {
       'security-no-vulnerabilities': {
-        importance: 'A',
         doc: 'Zero known dependency vulnerabilities (`pnpm audit:check`, any severity, enforced in pre-commit + PR CI). Fix via update/version up, else `overrides`',
       },
       'security-sensitive-data': {
-        importance: 'A',
         doc: 'Yield and stop everything when any personal or sensitive data detected',
       },
     },
     styling: {
-      'styling-no-raw-px': { importance: 'A', doc: 'No raw `px`' },
-      'styling-design-tokens': { importance: 'A', doc: 'Design tokens' },
+      'styling-no-raw-px': { doc: 'No raw `px`' },
+      'styling-design-tokens': { doc: 'Design tokens' },
       'styling-no-direct-values': {
-        importance: 'A',
         doc: 'No direct colors/spacing/z-index/fonts',
       },
       'styling-theming-single-file': {
-        importance: 'A',
         doc: 'Theming in single app/lib file',
       },
-      'styling-cn': { importance: 'A', doc: '`cn` from `react-kit`' },
+      'styling-cn': { doc: '`cn` from `react-kit`' },
       'styling-z-index-scale': {
-        importance: 'A',
         doc: 'Z-index scale only in top of app `index.css` as tokens, low to high: raised, modal/dialog, popover/menu, toast, tooltip',
       },
       'styling-z-index-tokens': {
-        importance: 'A',
         doc: 'Use scale tokens everywhere (`z-(--z-toast)`), never raw `z-*` values',
       },
       'styling-toast-above-modals': {
-        importance: 'A',
         doc: 'Toast stays above modals, reachable, dismiss never closes modal',
       },
     },
     'unit-testing': {
       'unit-accessible-selectors': {
-        importance: 'A',
         doc: 'Accessible selectors',
       },
       'unit-no-e2e-selectors': {
-        importance: 'A',
         doc: 'Do not use `e2e` selectors',
       },
     },
     'e2e-testing': {
       'e2e-vibe-test': {
-        importance: 'A',
         doc: 'Done via `vibe-test` internal lib',
       },
       'e2e-unique-selectors': {
-        importance: 'A',
         doc: 'Unique type-safe selectors',
       },
       'e2e-selectors-per-module': {
-        importance: 'A',
         doc: 'Selectors per "module" and combined in single place',
       },
       'e2e-disable-animations': {
-        importance: 'A',
         doc: 'Disable animations/images when testing visuals',
       },
       'e2e-partial-selectors': {
-        importance: 'A',
         doc: 'Partial type-safe selectors for dynamic content `range:name:${string|number}`',
       },
     },
     typescript: {
-      'ts-strict': { importance: 'A', doc: 'Type-safe & Strict' },
+      'ts-strict': { doc: 'Type-safe & Strict' },
       'ts-exhaustive': {
-        importance: 'I',
         doc: 'Exh checking and disc property',
       },
     },
     ui: {
-      'ui-mobile-first': { importance: 'A', doc: 'Mobile first & RWD' },
-      'ui-dark-mode': { importance: 'A', doc: 'Dark mode supported' },
+      'ui-mobile-first': { doc: 'Mobile first & RWD' },
+      'ui-dark-mode': { doc: 'Dark mode supported' },
       'ui-a11y-customization': {
-        importance: 'A',
         doc: 'Accessibility customization supported',
       },
       'ui-breakpoints': {
-        importance: 'A',
         doc: 'Breakpoints supported in px: `320, 480, 640, 768, 1024, 1280, 1440, 1920`',
       },
-      'ui-icons': { importance: 'A', doc: 'Icons via `lucide-react`' },
+      'ui-icons': { doc: 'Icons via `lucide-react`' },
       'ui-scroll-gap': {
-        importance: 'A',
         doc: 'Scrollable lists keep a proper gap between items and scrollbar',
       },
       'ui-dashboard-centered': {
-        importance: 'A',
         doc: "Dashboard UI's with side panel should have all content centered in x-axis",
       },
       'ui-no-overlap': {
-        importance: 'A',
         doc: 'No button/input/controls text overlap',
       },
       'ui-no-stacked-spacing': {
-        importance: 'A',
         doc: 'Conditional branches must not stack padding, margin, or offset - keep spacing on the stable wrapper only',
       },
     },
     ux: {
       'ux-error-pattern': {
-        importance: 'A',
         doc: 'Proper errors display with pattern: `icon:title:tech-code:description:retry-option:back-option`',
       },
       'ux-skeleton': {
-        importance: 'A',
         doc: 'Skeleton when loading app/modules/features that mimics current layout',
       },
       'ux-spinner': {
-        importance: 'A',
         doc: 'Spinner in less important places, f.e: search inputs, button indicator',
       },
       'ux-optimistic-ui': {
-        importance: 'A',
         doc: 'Optimistic UI and toasts when create/update/delete happens',
       },
       'ux-no-data-hide': {
-        importance: 'A',
         doc: 'No data hide during reload, filters change. In that case loading banner',
       },
-      'ux-no-jumping': { importance: 'A', doc: 'No jumping UI' },
+      'ux-no-jumping': { doc: 'No jumping UI' },
       'ux-delete-confirmation': {
-        importance: 'A',
         doc: 'Delete via confirmation',
       },
       'ux-no-results-message': {
-        importance: 'A',
         doc: 'When filters applied and no data include normalized filters in message. F.e: `No results for "phrase"`',
       },
       'ux-no-duplicates': {
-        importance: 'A',
         doc: 'No needless duplicates on screen: same info/control shown once. F.e: no preview card repeating what fields already show',
       },
       'ux-view-animation': {
-        importance: 'A',
         doc: 'Each view entry is smoothly animated as a whole (fade + slight slide), disabled with `motion-reduce`',
       },
       'ux-error-toast': {
-        importance: 'A',
         doc: 'Error toasts follow pattern: `title:tech-code:description:close-option:retry-option`. Success toasts stay a plain message',
       },
       'ux-modal-stack': {
-        importance: 'A',
         doc: 'Opening a modal over another stacks it on top: previous stays mounted underneath, never closed/replaced',
       },
       'ux-modal-url': {
-        importance: 'A',
         doc: 'Open modals live in URL query params (stack order kept): deep link/reload restores the stack, Back closes only the topmost',
       },
       'ux-modal-footer': {
-        importance: 'A',
         doc: 'Modal footer (actions) is always sticky to the bottom edge: solid-color background for contrast, soft gradient fade only on its top edge so content scrolls under it smoothly. One shared component, no per-modal copies',
       },
       'ux-input-clear': {
-        importance: 'A',
         doc: 'Every text input (text/email/password/search/tel/url) has an "x" icon button (`lucide-react`) clearing it; click focuses the input. Shown only when value present. Not on select, number, date',
       },
       'ux-empty-state': {
-        importance: 'A',
         doc: 'Proper empty states display with pattern: `icon:title:description:primary-action`',
       },
       'ux-required-mark': {
-        importance: 'A',
         doc: 'Form labels of required fields get a red asterisk (aria-hidden, `Field required`); optional fields get none',
       },
       'ux-button-name': {
-        importance: 'A',
         doc: 'Button names are one word only (`Dodaj`, not `Dodaj wydatek`); context comes from location, `aria-label` may stay descriptive',
       },
       'ux-change-transitions': {
-        importance: 'A',
         doc: 'Every create/update/delete shows a transition on the changed item: create fades + slides in, update flashes a brief highlight, delete fades + slides out and neighbours glide into the gap. All disabled with `motion-reduce`, no jumping UI',
       },
     },

@@ -1,5 +1,3 @@
-export type Importance = 'A' | 'O' | 'D' | 'I';
-
 export type CheckContext = {
   files: string[];
   readText: (file: string) => Promise<string>;
@@ -43,11 +41,6 @@ type Ctx<I extends string, K extends string> = {
   insert: (key: K) => string;
 };
 
-type UnitIds<
-  R extends Record<string, Record<string, unknown>>,
-  A extends string,
-> = { [G in keyof R]: keyof R[G] & string }[keyof R] | (keyof R & string) | A;
-
 type Doc<I extends string, K extends string> =
   string | { file: string } | ((ctx: Ctx<I, K>) => string);
 
@@ -64,7 +57,6 @@ type Output = {
 export type RefSource = string | { file: string; listed?: boolean };
 
 export type RuleUnit<I extends string = never, K extends string = never> = {
-  importance: Importance;
   doc: Doc<I, K>;
   include?: string[];
   exclude?: string[];
@@ -107,21 +99,22 @@ export const listRules = (value: Config): ListedRule[] =>
   );
 
 export const config = <
-  const R extends Record<string, Record<string, unknown>>,
+  const G extends string,
+  const I extends string,
   const A extends string = never,
   const S extends string = never,
   const F extends Record<string, RefSource> = Record<never, never>,
 >(value: {
   settings?: Settings;
   plugins?: Plugin[];
-  entry?: { doc: EntryDoc<UnitIds<R, A | S>, keyof F & string> };
+  entry?: { doc: EntryDoc<G | I | A | S, keyof F & string> };
   rules: {
-    [G in keyof R]: {
-      [I in keyof R[G]]: RuleUnit<UnitIds<R, A | S>, keyof F & string>;
+    [K in G]: {
+      [J in I]?: RuleUnit<NoInfer<G | I | A | S>, NoInfer<keyof F & string>>;
     };
   };
-  agents?: { [I in A]: AgentUnit<UnitIds<R, A | S>, keyof F & string> };
-  skills?: { [I in S]: SkillUnit };
+  agents?: { [K in A]: AgentUnit<NoInfer<G | I | A | S>, keyof F & string> };
+  skills?: { [K in S]: SkillUnit };
   refs?: F;
   output?: Output[];
 }): Config => {

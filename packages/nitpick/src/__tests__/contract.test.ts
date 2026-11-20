@@ -19,9 +19,8 @@ describe('Config contract types work when', () => {
     config({
       rules: {
         a11y: {
-          kb: { importance: 'A', doc: () => 'kb' },
+          kb: { doc: () => 'kb' },
           wcag: {
-            importance: 'A',
             doc: ({ ref, file }) => {
               expectTypeOf(ref)
                 .parameter(0)
@@ -33,7 +32,7 @@ describe('Config contract types work when', () => {
             },
           },
         },
-        ui: { style: { importance: 'O', doc: 'plain' } },
+        ui: { style: { doc: 'plain' } },
       },
       agents: {
         repo: { doc: 'Repo agent' },
@@ -48,7 +47,6 @@ describe('Config contract types work when', () => {
       rules: {
         g: {
           r: {
-            importance: 'A',
             doc: ({ ref }) => {
               expectTypeOf(ref)
                 .parameter(0)
@@ -64,7 +62,7 @@ describe('Config contract types work when', () => {
       },
     });
     config({
-      rules: { g: { r: { importance: 'A', doc: 'r' } } },
+      rules: { g: { r: { doc: 'r' } } },
       agents: {
         // @ts-expect-error typo inside an all-callback agents object
         a: { doc: ({ ref }) => ref('nope') },
@@ -74,7 +72,7 @@ describe('Config contract types work when', () => {
       rules: {
         g: {
           // @ts-expect-error typo in a rule next to all-callback agents
-          r: { importance: 'A', doc: ({ ref }) => ref('nope') },
+          r: { doc: ({ ref }) => ref('nope') },
         },
       },
       agents: { a: { doc: ({ ref }) => ref('r') } },
@@ -85,16 +83,16 @@ describe('Config contract types work when', () => {
     config({
       rules: {
         // @ts-expect-error unknown rule id
-        a: { x: { importance: 'A', doc: ({ ref }) => ref('nope') } },
+        a: { x: { doc: ({ ref }) => ref('nope') } },
       },
     });
     config({
-      rules: { a: { x: { importance: 'A', doc: 'x' } } },
+      rules: { a: { x: { doc: 'x' } } },
       // @ts-expect-error unknown id in agent
       agents: { y: { doc: ({ ref }) => ref('nope') } },
     });
     config({
-      rules: { a: { x: { importance: 'A', doc: 'x' } } },
+      rules: { a: { x: { doc: 'x' } } },
       // @ts-expect-error unknown id in entry
       entry: { doc: ({ ref }) => ref('nope') },
     });
@@ -104,7 +102,7 @@ describe('Config contract types work when', () => {
     config({
       rules: {
         // @ts-expect-error unknown refs key
-        a: { x: { importance: 'A', doc: ({ file }) => file('nope') } },
+        a: { x: { doc: ({ file }) => file('nope') } },
       },
       refs: { guide: './guide.md' },
     });
@@ -120,9 +118,9 @@ describe('Config contract types work when', () => {
       },
       rules: {
         g: {
-          s: { importance: 'A', doc: 'text' },
-          f: { importance: 'A', doc: { file: './f.md' } },
-          c: { importance: 'A', doc: ({ insert }) => insert('c') },
+          s: { doc: 'text' },
+          f: { doc: { file: './f.md' } },
+          c: { doc: ({ insert }) => insert('c') },
         },
       },
       agents: { a: { doc: { file: './a.md' } }, b: { doc: 'b' } },
@@ -135,14 +133,14 @@ describe('Config contract types work when', () => {
     config({
       rules: {
         // @ts-expect-error unknown refs key
-        g: { a: { importance: 'A', doc: ({ insert }) => insert('nope') } },
+        g: { a: { doc: ({ insert }) => insert('nope') } },
       },
       refs: { guide: './guide.md' },
     });
     config({
       rules: {
         // @ts-expect-error doc cannot be a number
-        g: { a: { importance: 'A', doc: 1 } },
+        g: { a: { doc: 1 } },
       },
     });
   });
@@ -152,14 +150,14 @@ describe('Config contract types work when', () => {
       rules: {
         a: {
           // @ts-expect-error legacy field name
-          x: { importance: 'A', doc: 'x', instructions: 'x' },
+          x: { doc: 'x', instructions: 'x' },
         },
       },
     });
     config({
       // @ts-expect-error unknown top-level field
       knowledge: {},
-      rules: { a: { x: { importance: 'A', doc: 'x' } } },
+      rules: { a: { x: { doc: 'x' } } },
     });
   });
 
@@ -167,13 +165,7 @@ describe('Config contract types work when', () => {
     config({
       rules: {
         // @ts-expect-error doc is required
-        a: { x: { importance: 'A' } },
-      },
-    });
-    config({
-      rules: {
-        // @ts-expect-error importance is required
-        a: { x: { doc: 'x' } },
+        a: { x: {} },
       },
     });
   });
@@ -182,9 +174,9 @@ describe('Config contract types work when', () => {
     config({
       rules: {
         a: {
-          x: { importance: 'A', doc: 'x', run: () => {}, fix: 'how' },
+          x: { doc: 'x', run: () => {}, fix: 'how' },
           // @ts-expect-error fix is required with run
-          y: { importance: 'A', doc: 'y', run: () => {} },
+          y: { doc: 'y', run: () => {} },
         },
       },
       agents: {
@@ -200,8 +192,8 @@ describe('Config contract runtime works when', () => {
     expect(() =>
       config({
         rules: {
-          a: { x: { importance: 'A', doc: 'x' } },
-          b: { x: { importance: 'A', doc: 'x' } },
+          a: { x: { doc: 'x' } },
+          b: { x: { doc: 'x' } },
         },
       }),
     ).toThrow('Duplicate unit id "x"');
@@ -210,7 +202,7 @@ describe('Config contract runtime works when', () => {
   it('throws on an id shared by a rule and an agent', () => {
     expect(() =>
       config({
-        rules: { a: { x: { importance: 'A', doc: 'x' } } },
+        rules: { a: { x: { doc: 'x' } } },
         agents: { x: { doc: 'x' } },
       }),
     ).toThrow('Duplicate unit id "x"');
@@ -219,7 +211,7 @@ describe('Config contract runtime works when', () => {
   it('reports a missing refs file in the docs verification step', async () => {
     const { problems } = await build(
       config({
-        rules: { a: { x: { importance: 'A', doc: 'x' } } },
+        rules: { a: { x: { doc: 'x' } } },
         refs: { gone: './gone.md' },
       }),
     );
@@ -231,8 +223,8 @@ describe('Config contract runtime works when', () => {
       config({
         rules: {
           g: {
-            a: { importance: 'A', doc: ({ ref }) => `to ${ref('b')}` },
-            b: { importance: 'A', doc: ({ ref }) => `to ${ref('a')}` },
+            a: { doc: ({ ref }) => `to ${ref('b')}` },
+            b: { doc: ({ ref }) => `to ${ref('a')}` },
           },
         },
         agents: {
@@ -241,7 +233,7 @@ describe('Config contract runtime works when', () => {
       }),
     );
     expect(problems).toEqual([]);
-    expect(read('.ai', 'rules', 'g.md')).toContain('1. (A) to [b](g.md)');
+    expect(read('.ai', 'rules', 'g.md')).toContain('1. to [b](g.md)');
     expect(read('.ai', 'agents', 'me.md')).toBe('see [me](me.md)\n');
   });
 });
