@@ -40,7 +40,7 @@ export const Main = () => {
           {anchor === now.day ? 'Zadania na dziś' : 'Zadania na ten dzień'}
         </h2>
         {scheduledRows.length ? (
-          <ol className="flex flex-col">
+          <ol className="flex flex-col gap-2">
             {scheduledRows.map(({ key, item, phase, at }) => (
               <Fragment key={key}>
                 <TaskRow
@@ -71,7 +71,7 @@ export const Main = () => {
               {byHour ? 'Bez godziny' : 'Wszystkie zadania'}
             </h3>
           )}
-          <ul className="flex flex-col">
+          <ul className="flex flex-col gap-2">
             {unscheduledRows.map(({ key, item, phase, at }) => (
               <TaskRow
                 key={key}

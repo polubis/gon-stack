@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderTime } from './render-time';
 import { backlogTask, setupTimeBackend, task } from './time-backend';
+import { openEditor } from './edit-task';
 
 const backend = setupTimeBackend();
 
@@ -123,11 +124,7 @@ describe('task description field', () => {
     backend.seed([task({ description: 'Stare notatki' })]);
     renderTime();
 
-    await user.click(
-      await screen.findByRole('button', {
-        name: 'Edytuj zadanie: Raport miesięczny',
-      }),
-    );
+    await openEditor(user, 'Raport miesięczny');
     const form = within(await screen.findByRole('dialog'));
 
     expect(form.getByLabelText('Opis (opcjonalnie)')).toHaveValue(
@@ -253,7 +250,7 @@ describe('task details', () => {
     renderTime();
 
     await screen.findByRole('button', {
-      name: 'Edytuj zadanie: Raport miesięczny',
+      name: 'Szczegóły zadania: Raport miesięczny',
     });
 
     expect(screen.queryByText('Tajna notatka')).toBeNull();

@@ -63,7 +63,7 @@ export const BacklogDialog = ({ modal }: { modal: string }) => {
           />
         ) : (
           <>
-            <ul className="flex flex-col">
+            <ul className="flex flex-col gap-2">
               {rowsOf.map(({ key, item, phase }) => (
                 <TaskRow key={key} task={item} phase={phase} />
               ))}

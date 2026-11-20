@@ -72,7 +72,7 @@ const DayCard = ({ day, index }: { day: string; index: number }) => {
         <AddDayButton day={day} />
       </div>
       {allDayRows.length + timedRows.length ? (
-        <ul className="flex flex-col">
+        <ul className="flex flex-col gap-2">
           {allDayRows.map(({ key, item, phase }) => (
             <TaskRow key={key} task={item} phase={phase} />
           ))}
@@ -156,7 +156,7 @@ const HourGrid = ({ days }: { days: string[] }) => {
             </th>
             {days.map((day) => (
               <td key={day} className="p-1 align-top">
-                <ul className="flex min-h-9 flex-col">
+                <ul className="flex min-h-9 flex-col gap-2">
                   {tasksOn(tasks, day, priorities, filters.sort)
                     .filter((task) => task.at === null)
                     .map((task) => (
@@ -198,7 +198,7 @@ const HourGrid = ({ days }: { days: string[] }) => {
                         <NowLine offset={hourOffset(now.time)} />
                       ) : null}
                       {ofHour.length ? (
-                        <ul className="flex flex-col">
+                        <ul className="flex flex-col gap-2">
                           {ofHour.map((task) => (
                             <TaskRow key={task.id} task={task} />
                           ))}

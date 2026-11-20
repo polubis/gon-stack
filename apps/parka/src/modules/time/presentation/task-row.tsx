@@ -1,4 +1,12 @@
-import { CheckCircle2, Circle, LoaderCircle, Pencil } from 'lucide-react';
+import {
+  Check,
+  ChevronsRight,
+  Eye,
+  Play,
+  RotateCcw,
+  SquareDashed,
+  type LucideProps,
+} from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { openModal } from '@/shared/router/modal-stack';
 import {
@@ -7,9 +15,17 @@ import {
   type ChangePhase,
 } from '@/shared/ui/list-changes';
 import type { BacklogTask, Status, Task } from '../domain/models';
-import { nextStep, stepName, stepOf, withStep } from '../domain/status';
+import {
+  IN_PROGRESS,
+  nextStep,
+  progress,
+  stepName,
+  stepOf,
+  withStep,
+  type Step,
+} from '../domain/status';
 import { useContext } from './context';
-import { editBacklogModal, editTaskModal, viewTaskModal } from './modal-ids';
+import { viewTaskModal } from './modal-ids';
 import { PriorityBadge } from './priority-badge';
 import { RecurringMark } from './recurring-mark';
 import { stagger } from './stagger';
@@ -26,7 +42,7 @@ type Props = {
   phase?: ChangePhase;
 };
 
-/** The next step of the user's workflow, then back to the first. */
+/** The next step of the user's workflow; after the last one (done) the task is reopened. */
 const advance = (
   task: Task,
   statuses: Status[],
@@ -38,7 +54,18 @@ const advance = (
   };
 };
 
-/** Task line: status cycle, title (opens details), a muted meta line, edit and a "more" menu. Backlog tasks have no status. */
+const StepIcon = ({ step, ...rest }: { step: Step } & LucideProps) =>
+  step === 'open' ? (
+    <SquareDashed {...rest} />
+  ) : step === 'done' ? (
+    <Check {...rest} />
+  ) : step === IN_PROGRESS ? (
+    <Play {...rest} />
+  ) : (
+    <Eye {...rest} />
+  );
+
+/** Task line: title (opens details), a muted meta line, a button to the next step and a "more" menu with edit. Backlog tasks have no status. */
 export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
   const { categories, priorities, statuses, updateTask } = useContext();
   const board = 'day' in task ? task : null;
@@ -46,6 +73,8 @@ export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
   const priority = priorities.find((item) => item.id === task.priorityId);
   const change = changeProps(phase);
   const entrance = useEntrance(phase, step !== undefined);
+  const current = board ? stepOf(board) : null;
+  const position = current ? progress(current, statuses) : null;
   return (
     <li
       aria-current={now ? 'time' : undefined}
@@ -57,43 +86,12 @@ export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
         entrance.entering && step !== undefined ? stagger(step) : undefined
       }
       className={cn(
-        'flex items-start gap-0.5 rounded-2xl py-1 pl-1 pr-0.5 transition-colors duration-200 hover:bg-hover-soft motion-reduce:transition-none',
+        'flex items-start gap-0.5 rounded-2xl pb-1.5 pt-1 pl-3 pr-0.5 transition-colors duration-200 hover:bg-hover-soft motion-reduce:transition-none',
         entrance.entering && 'animate-item-in motion-reduce:animate-none',
         change.className,
         now && 'bg-accent-soft',
       )}
     >
-      {board ? (
-        <button
-          type="button"
-          role="checkbox"
-          aria-checked={board.done ? true : board.inProgress ? 'mixed' : false}
-          aria-label={`Zrobione: ${task.title}`}
-          data-e2e={`time:task-done:${task.id}`}
-          onClick={() => {
-            const next = advance(board, statuses);
-            updateTask(next.task, next.message);
-          }}
-          className="grid h-8 w-8 shrink-0 place-items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-        >
-          {board.done ? (
-            <CheckCircle2
-              className="h-5.5 w-5.5 fill-accent text-on-accent"
-              aria-hidden="true"
-            />
-          ) : board.inProgress ? (
-            <LoaderCircle
-              className="h-5 w-5 animate-spin text-brand motion-reduce:animate-none"
-              strokeWidth={3}
-              aria-hidden="true"
-            />
-          ) : (
-            <Circle className="h-5.5 w-5.5 text-ink-soft" aria-hidden="true" />
-          )}
-        </button>
-      ) : (
-        <span className="w-2 shrink-0" aria-hidden="true" />
-      )}
       <div className="flex min-w-0 flex-1 flex-col py-1.5">
         <button
           type="button"
@@ -124,33 +122,62 @@ export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
               <span className="truncate">{category.name}</span>
             </span>
           ) : null}
-          {board?.inProgress ? (
+          {current && position ? (
             <span
-              data-e2e={`time:task-progress-badge:${task.id}`}
-              className="font-medium text-brand"
+              key={current}
+              data-e2e={`time:task-step:${task.id}`}
+              className="inline-flex animate-item-in items-center gap-1 font-semibold text-ink motion-reduce:animate-none"
             >
-              {stepName(stepOf(board), statuses)}
+              <StepIcon
+                step={current}
+                className="h-3 w-3 shrink-0"
+                aria-hidden="true"
+              />
+              <span className="tabular-nums">
+                {position.at}/{position.total}
+              </span>
+              <span>{stepName(current, statuses)}</span>
             </span>
           ) : null}
           {board?.recurringId != null ? <RecurringMark /> : null}
           {priority ? <PriorityBadge priority={priority} compact /> : null}
         </p>
       </div>
-      <button
-        type="button"
-        aria-label={
-          board
-            ? `Edytuj zadanie: ${task.title}`
-            : `Edytuj zadanie z backlogu: ${task.title}`
-        }
-        data-e2e={`time:task-edit:${task.id}`}
-        onClick={() =>
-          openModal(board ? editTaskModal(task.id) : editBacklogModal(task.id))
-        }
-        className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink-soft transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-      >
-        <Pencil className="h-4 w-4" aria-hidden="true" />
-      </button>
+      {board && current ? (
+        <button
+          type="button"
+          aria-label={
+            board.done
+              ? `Otwórz ponownie: ${task.title}`
+              : `Następny krok: ${task.title}`
+          }
+          title={
+            board.done
+              ? 'Otwórz ponownie'
+              : `Następny krok: ${stepName(nextStep(board, statuses), statuses)}`
+          }
+          data-e2e={`time:task-advance:${task.id}`}
+          onClick={() => {
+            const next = advance(board, statuses);
+            updateTask(next.task, next.message);
+          }}
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink-soft transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+        >
+          {board.done ? (
+            <RotateCcw
+              key="reopen"
+              className="h-4 w-4 animate-item-in motion-reduce:animate-none"
+              aria-hidden="true"
+            />
+          ) : (
+            <ChevronsRight
+              key="next"
+              className="h-4.5 w-4.5 animate-item-in motion-reduce:animate-none"
+              aria-hidden="true"
+            />
+          )}
+        </button>
+      ) : null}
       <TaskMenu task={task} />
     </li>
   );

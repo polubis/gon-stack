@@ -50,3 +50,14 @@ export const stepName = (step: Step, statuses: Status[]): string =>
       ? DONE_NAME
       : (statuses.find((status) => status.id === step)?.name ??
         DEFAULT_STATUSES[0]!.name);
+
+/** Position of a step in the workflow, counted from 1, and the length of the workflow. A removed step is read as the built-in one. */
+export const progress = (
+  step: Step,
+  statuses: Status[],
+): { at: number; total: number } => {
+  const steps = workflow(statuses);
+  const found = steps.indexOf(step);
+  const at = found === -1 ? steps.indexOf(IN_PROGRESS) : found;
+  return { at: Math.max(at, 0) + 1, total: steps.length };
+};

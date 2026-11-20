@@ -4,6 +4,7 @@ import {
   DEFAULT_STATUSES,
   IN_PROGRESS,
   nextStep,
+  progress,
   stepName,
   stepOf,
   withStep,
@@ -84,5 +85,20 @@ describe('status workflow', () => {
     expect(stepName('open', STATUSES)).toBe('Do zrobienia');
     expect(stepName(REVIEW.id, STATUSES)).toBe('Review');
     expect(stepName('done', STATUSES)).toBe('Zrobione');
+  });
+});
+
+describe('status progress', () => {
+  it('counts steps from 1 across the whole workflow', () => {
+    expect(
+      (['open', IN_PROGRESS, REVIEW.id, 'done'] as const).map(
+        (step) => progress(step, STATUSES).at,
+      ),
+    ).toEqual([1, 2, 3, 4]);
+    expect(progress('done', DEFAULT_STATUSES)).toEqual({ at: 3, total: 3 });
+  });
+
+  it('reads a removed step as the built-in one', () => {
+    expect(progress('gone' as StatusId, STATUSES)).toEqual({ at: 2, total: 4 });
   });
 });

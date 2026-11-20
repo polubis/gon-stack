@@ -11,8 +11,9 @@ import {
   commentEdit,
   moveItem,
   taskDelete,
-  taskDone,
-  taskEdit,
+  editTask,
+  taskAdvance,
+  taskStep,
   taskInfo,
   taskMore,
 } from './locators';
@@ -184,7 +185,7 @@ const commands = {
     getByE2ePrefix,
   }) => {
     await getByE2e('time:backlog-open').click();
-    await taskEdit(getByE2ePrefix, 'Dentysta E2E').click();
+    await editTask(getByE2ePrefix, 'Dentysta E2E');
 
     await getByE2e('time:backlog-name').fill('Dentysta piątek E2E');
     await Promise.all([
@@ -193,7 +194,7 @@ const commands = {
     ]);
     await reload(page);
     await expect(page).toHaveURL(/modal=backlog/);
-    await expect(taskEdit(getByE2ePrefix, 'Dentysta piątek E2E')).toBeVisible();
+    await expect(taskInfo(getByE2ePrefix, 'Dentysta piątek E2E')).toBeVisible();
     await getByE2e('time:modal-close:backlog').click();
   },
 
@@ -212,7 +213,7 @@ const commands = {
     await expect(getByE2e('time:backlog-empty')).toBeVisible();
     await getByE2e('time:modal-close:backlog').click();
     await open(page, APP_ROUTER.time({ date: localDay(new Date()) }));
-    await expect(taskEdit(getByE2ePrefix, 'Dentysta piątek E2E')).toBeVisible();
+    await expect(taskInfo(getByE2ePrefix, 'Dentysta piątek E2E')).toBeVisible();
     await expect(getByE2e('time:backlog-open')).toHaveAccessibleName('Backlog');
   },
 
@@ -237,7 +238,7 @@ const commands = {
     ]);
     await expect(getByE2e('time:backlog-empty')).toBeVisible();
     await open(page, APP_ROUTER.time({ date: NEXT_WEEK }));
-    await expect(taskEdit(getByE2ePrefix, 'Auto E2E')).toBeVisible();
+    await expect(taskInfo(getByE2ePrefix, 'Auto E2E')).toBeVisible();
   },
 
   'i register an account for popover actions': async (ctx) => {
@@ -262,7 +263,7 @@ const commands = {
       synced(page, 'POST', 201),
       getByE2e('time:task-save').click(),
     ]);
-    await expect(taskEdit(getByE2ePrefix, 'Menu E2E')).toBeVisible();
+    await expect(taskInfo(getByE2ePrefix, 'Menu E2E')).toBeVisible();
   },
 
   'the delete confirmation from the task menu stays open until answered':
@@ -321,9 +322,9 @@ const commands = {
       synced(page, 'POST', 201),
       getByE2e('time:task-save').click(),
     ]);
-    await expect(taskEdit(getByE2ePrefix, 'Raport E2E')).toBeVisible();
+    await expect(taskInfo(getByE2ePrefix, 'Raport E2E')).toBeVisible();
     await reload(page);
-    await expect(taskEdit(getByE2ePrefix, 'Raport E2E')).toBeVisible();
+    await expect(taskInfo(getByE2ePrefix, 'Raport E2E')).toBeVisible();
   },
 
   'the task keeps the device it was created on': async ({
@@ -347,7 +348,7 @@ const commands = {
     await more.click();
     await expect(getByE2e('time:task-row-device').first()).toBeVisible();
     await closeMenu();
-    await taskEdit(getByE2ePrefix, 'Raport E2E').click();
+    await editTask(getByE2ePrefix, 'Raport E2E');
     await expect(getByE2e('time:task-device')).toContainText('device-');
     await getByE2e('time:task-cancel').click();
   },
@@ -356,17 +357,21 @@ const commands = {
     page,
     getByE2ePrefix,
   }) => {
-    const box = taskDone(getByE2ePrefix, 'Raport E2E');
-    await Promise.all([synced(page, 'PUT', 200), box.click()]);
-    await expect(box).toHaveAttribute('aria-checked', 'mixed');
-    await Promise.all([synced(page, 'PUT', 200), box.click()]);
-    await expect(box).toBeChecked();
+    const next = taskAdvance(getByE2ePrefix, 'Raport E2E');
+    const step = taskStep(getByE2ePrefix, 'Raport E2E');
+    await Promise.all([synced(page, 'PUT', 200), next.click()]);
+    await expect(step).toHaveText(/2\/3\s*W trakcie/);
+    await Promise.all([synced(page, 'PUT', 200), next.click()]);
+    await expect(step).toHaveText(/3\/3\s*Zrobione/);
+    await expect(next).toHaveAccessibleName('Otwórz ponownie: Raport E2E');
     await reload(page);
-    await expect(taskDone(getByE2ePrefix, 'Raport E2E')).toBeChecked();
+    await expect(taskStep(getByE2ePrefix, 'Raport E2E')).toHaveText(
+      /3\/3\s*Zrobione/,
+    );
   },
 
   'i rename the task': async ({ page, getByE2e, getByE2ePrefix }) => {
-    await taskEdit(getByE2ePrefix, 'Raport E2E').click();
+    await editTask(getByE2ePrefix, 'Raport E2E');
     const title = getByE2e('time:task-name');
     await title.fill('Raport kwartalny');
     await Promise.all([
@@ -374,7 +379,7 @@ const commands = {
       getByE2e('time:task-save').click(),
     ]);
     await reload(page);
-    await expect(taskEdit(getByE2ePrefix, 'Raport kwartalny')).toBeVisible();
+    await expect(taskInfo(getByE2ePrefix, 'Raport kwartalny')).toBeVisible();
   },
 
   'the month view marks the day and the year view counts it': async ({
@@ -420,7 +425,7 @@ const commands = {
     getByE2ePrefix,
   }) => {
     await open(page, APP_ROUTER.time({ date: DAY }));
-    await taskEdit(getByE2ePrefix, 'Raport kwartalny').click();
+    await editTask(getByE2ePrefix, 'Raport kwartalny');
     await getByE2e('time:task-delete').click();
     await expect(getByE2e('time:delete-dialog')).toBeVisible();
     await Promise.all([
@@ -452,7 +457,7 @@ const commands = {
         synced(page, 'POST', 201),
         getByE2e('time:task-save').click(),
       ]);
-      const occurrence = taskEdit(getByE2ePrefix, 'Siłownia E2E');
+      const occurrence = taskInfo(getByE2ePrefix, 'Siłownia E2E');
       await expect(occurrence).toBeVisible();
       await expect(getByE2e('time:recurring-mark')).toHaveCount(1);
       await reload(page);
@@ -465,10 +470,10 @@ const commands = {
   'the series reaches the following weeks and never revives a deleted task':
     async ({ page, getByE2e, getByE2ePrefix }) => {
       await open(page, APP_ROUTER.time({ date: NEXT_WEEK }));
-      const occurrence = taskEdit(getByE2ePrefix, 'Siłownia E2E');
+      const occurrence = taskInfo(getByE2ePrefix, 'Siłownia E2E');
       await expect(occurrence).toBeVisible();
 
-      await occurrence.click();
+      await editTask(getByE2ePrefix, 'Siłownia E2E');
       await getByE2e('time:task-delete').click();
       await getByE2e('ui:scope:this').check();
       await Promise.all([
@@ -484,7 +489,7 @@ const commands = {
 
   'i delete only the following tasks and the opened and earlier ones stay':
     async ({ page, getByE2e, getByE2ePrefix }) => {
-      await taskEdit(getByE2ePrefix, 'Siłownia E2E').click();
+      await editTask(getByE2ePrefix, 'Siłownia E2E');
       await getByE2e('time:task-delete').click();
       await getByE2e('ui:scope:following').check();
       await Promise.all([
@@ -492,10 +497,10 @@ const commands = {
         getByE2e('ui:scope-confirm').click(),
       ]);
       await open(page, APP_ROUTER.time({ date: LATER }));
-      await expect(taskEdit(getByE2ePrefix, 'Siłownia E2E')).toBeVisible();
+      await expect(taskInfo(getByE2ePrefix, 'Siłownia E2E')).toBeVisible();
       await expect(getByE2e('time:recurring-mark')).toHaveCount(1);
       await open(page, APP_ROUTER.time({ date: DAY }));
-      await expect(taskEdit(getByE2ePrefix, 'Siłownia E2E')).toBeVisible();
+      await expect(taskInfo(getByE2ePrefix, 'Siłownia E2E')).toBeVisible();
       // The series ended there: nothing is made for the later weeks.
       await open(page, APP_ROUTER.time({ date: AFTER_LATER }));
       await expect(getByE2e('time:empty')).toBeVisible();
@@ -519,7 +524,7 @@ const commands = {
       synced(page, 'POST', 201),
       getByE2e('time:task-save').click(),
     ]);
-    const occurrence = taskEdit(getByE2ePrefix, 'Basen E2E');
+    const occurrence = taskInfo(getByE2ePrefix, 'Basen E2E');
     for (const day of [DAY, NEXT_WEEK, LATER]) {
       await open(page, APP_ROUTER.time({ date: day }));
       await expect(occurrence).toBeVisible();
@@ -548,7 +553,7 @@ const commands = {
       getByE2e('time:task-save').click(),
     ]);
     await reload(page);
-    await expect(taskEdit(getByE2ePrefix, LONG_TITLE)).toBeVisible();
+    await expect(taskInfo(getByE2ePrefix, LONG_TITLE)).toBeVisible();
   },
 
   'the description shows only in the details, in full': async ({
@@ -1135,7 +1140,7 @@ const commands = {
     await open(page, APP_ROUTER.timeRange({ from: DAY, to: NEXT_WEEK }));
     await expect(getByE2e('time:custom')).toBeVisible();
     await expect(getByE2e(`time:range-day:${DAY}`)).toBeVisible();
-    await expect(taskEdit(getByE2ePrefix, 'Zakres E2E')).toBeVisible();
+    await expect(taskInfo(getByE2ePrefix, 'Zakres E2E')).toBeVisible();
     await expect(getByE2e('time:stats-total')).toContainText('1');
     await expect(getByE2e('time:stats-moves-total')).toBeVisible();
     await expect(page).toHaveURL(/from=2026-10-20&to=2026-10-27/);
@@ -1270,11 +1275,12 @@ const commands = {
       synced(page, 'POST', 201),
       getByE2e('time:task-save').click(),
     ]);
-    const box = taskDone(getByE2ePrefix, 'Zrobione E2E');
-    await Promise.all([synced(page, 'PUT', 200), box.click()]);
-    await expect(box).toHaveAttribute('aria-checked', 'mixed');
-    await Promise.all([synced(page, 'PUT', 200), box.click()]);
-    await expect(box).toBeChecked();
+    const next = taskAdvance(getByE2ePrefix, 'Zrobione E2E');
+    await Promise.all([synced(page, 'PUT', 200), next.click()]);
+    await Promise.all([synced(page, 'PUT', 200), next.click()]);
+    await expect(taskStep(getByE2ePrefix, 'Zrobione E2E')).toHaveText(
+      /Zrobione/,
+    );
   },
 
   'the filters panel hides done tasks and keeps the choice after a reload':

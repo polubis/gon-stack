@@ -13,7 +13,7 @@ afterEach(() => {
 });
 
 const row = (title: string) =>
-  screen.findAllByRole('button', { name: `Edytuj zadanie: ${title}` });
+  screen.findAllByRole('button', { name: `Szczegóły zadania: ${title}` });
 
 const seedWeek = () =>
   backend.seed([
@@ -136,7 +136,7 @@ describe('time period kind', () => {
     registerNavigator(historyNavigator(push));
     backend.seed([task({ id: 't-1' })]);
     renderTime('week');
-    await screen.findAllByRole('button', { name: /^Edytuj zadanie/ });
+    await screen.findAllByRole('button', { name: /^Szczegóły zadania/ });
 
     await userEvent.click(screen.getByRole('button', { name: /^Zakres:/ }));
     await userEvent.click(
