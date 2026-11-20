@@ -1,6 +1,6 @@
 # @repo/nitpick
 
-Keeps AI rules documentation (AODI format) in sync with the code, and runs project checks from the same rule definitions. Config lives in `.nitpick/config.ts`.
+Keeps AI rules documentation in sync with the code, and runs project checks from the same rule definitions. Config lives in `.nitpick/config.ts`.
 
 ## Pruning
 
@@ -11,7 +11,7 @@ Nitpick owns only `rules/`, `agents/`, `references/` and `skills/` (recursively)
 Implemented:
 
 - `--sync` and `--check` (default) modes, exit codes 0/1/2/3
-- AODI docs output (default `.ai/AGENTS.md`)
+- Docs output (default `.ai/AGENTS.md`)
 - `refs` with `file()` and `{{ref:key}}` inside ref files; typed `ref()` between rules and agents
 - Config validation: missing file, self reference, unknown ref, cycle, duplicate rule `id`
 - Check snapshot: `files`, `readText`, `git`, `meta`
@@ -33,8 +33,7 @@ Not wired yet:
 
 Rules live under `rules.<group>.<id>`. Group = key, id = key, nothing else to author.
 
-- `importance`: `A | O | D | I`, required. Printed as tag, e.g. `1. (I) text`.
-- `doc`: see [Doc forms](#doc-forms). A `{ file }` doc is written to `<path>/rules/<id>.md` and linked as `N. (A) [id](id.md)`; string and callback docs are inlined in the group file.
+- `doc`: see [Doc forms](#doc-forms). A `{ file }` doc is written to `<path>/rules/<id>.md` and linked as `N. [id](id.md)`; string and callback docs are inlined in the group file.
 - `run`: optional check script (was `check`). Gets `CheckContext`. Needs `fix`.
 - `fix`: text after the problems of the rule (`Fix: ...`). Required with `run`.
 - `include` / `exclude`: globs (`path.matchesGlob`) filtering `files` passed to `run`.
@@ -57,7 +56,6 @@ export default config({
     git: { 'rich-commit': richCommit },
     react: {
       'react-hooks': {
-        importance: 'A',
         include: ['apps/*/src/**/*.tsx'],
         doc: ({ ref, file }) =>
           `Follow ${file('react-state')}, then ${ref('rich-commit')}.`,
@@ -79,9 +77,8 @@ export default config({
 
 - Ids come from keys. `ref(id)` takes the union of all rule, agent and skill ids (typo = compile error). `file(key)` takes the union of `refs` keys. Inferred, no manual generics.
 - `ref(id)` links to the file that documents the unit (group file, rule file or `agents/<id>.md`). It never inlines, so cycles are harmless and cannot hang.
-- Unknown or extra fields, missing `importance`/`doc`, `run` on an agent, `run` without `fix`: compile errors.
+- Unknown or extra fields, missing `doc`, `run` on an agent, `run` without `fix`: compile errors.
 - `entry.doc` replaces header and intro of the root file (`header` = `# Information for AI`).
-- Override a ready-made rule by spreading it: `{ ...richCommit, importance: 'D' }`.
 - `agents`: each writes `<path>/agents/<id>.md` and is listed under `## Agent files` in the root. Optional `frontmatter: Record<string, string>` renders as a `---` block before the doc. No `run`. Agent ids are typed even when every agent `doc` is a callback.
 - `skills`: id -> `{ source }`, a directory relative to `.nitpick/`. The whole tree is written to `<path>/skills/<id>/` (same relative paths, listed under `## Skill files` in the root). `ref(id)` links to `skills/<id>/SKILL.md`. Config error (exit 3): missing directory, no `SKILL.md`, `SKILL.md` frontmatter without `name` or `description`, `name` different from the id, id shared with a rule or agent. Files ending in `.md` are CRLF normalized to LF (also for `--check`); every other file is copied as raw bytes and `--check` compares bytes.
 - `refs`: id -> markdown file (relative to `.nitpick/`), written to `<path>/references/<key>.md`; `{{ref:key}}` links inside files; missing file, self ref, unknown ref, cycle = config error.
@@ -89,7 +86,7 @@ export default config({
 
 ### Docs
 
-Without `entry` the root docs start with `# Information for AI`. The built-in AODI tag legend (`src/rules/aodi-framework.md`, not configurable) is always written under `## Rule files`, above the file list. `entry.doc` replaces the head only.
+Without `entry` the root docs start with `# Information for AI`. `entry.doc` replaces the head only.
 
 - Group file title comes from the group key: split on `-`, words capitalized (`unit-testing` -> `Unit Testing`).
 
@@ -177,7 +174,7 @@ Where to run it (commit hook, pre-push, CI) is up to the consumer.
 
 ## `richCommit` rule
 
-Id `rich-commit`, importance `A`. Its instruction lives in the library (`src/rules/rich-commit.md`, next to the rule; `.md` files in `src/rules` are copied to `dist` on build) and is generated as `rules/rich-commit.md`. Validates `git.commitMessages`:
+Id `rich-commit`. Its instruction lives in the library (`src/rules/rich-commit.md`, next to the rule; `.md` files in `src/rules` are copied to `dist` on build) and is generated as `rules/rich-commit.md`. Validates `git.commitMessages`:
 
 - Subject `type(scope)!: title`; types: `feat fix docs style refactor perf test build ci chore revert`; scope required.
 - Blank line after the subject.
@@ -186,7 +183,7 @@ Id `rich-commit`, importance `A`. Its instruction lives in the library (`src/rul
 
 ## `decisionLog` rule
 
-Factory `decisionLog({ scopes })`, id `decision-log`, group `general`, importance `A`. Rule file `rules/decision-log.md` (`src/rules/decision-log.md`) follows `{{ref:decision-log-template}}`. The rule registers that ref itself through its `refs` field (`src/rules/decision-log-template.md`, written to `references/decision-log-template.md`), so config needs no manual `refs` entry. `scopes`: regexes a `scope` must match (see `.nitpick/config.ts`). Validates `git.stagedAddedFiles` / `git.stagedFiles` (works with `--commit-msg`, i.e. in the `commit-msg` hook):
+Factory `decisionLog({ scopes })`, id `decision-log`, group `general`. Rule file `rules/decision-log.md` (`src/rules/decision-log.md`) follows `{{ref:decision-log-template}}`. The rule registers that ref itself through its `refs` field (`src/rules/decision-log-template.md`, written to `references/decision-log-template.md`), so config needs no manual `refs` entry. `scopes`: regexes a `scope` must match (see `.nitpick/config.ts`). Validates `git.stagedAddedFiles` / `git.stagedFiles` (works with `--commit-msg`, i.e. in the `commit-msg` hook):
 
 - Exactly one newly staged file `decisions/NNNN-<scope-prefix>-<verb>-<object>.md`. New files under any `__log__/` are reported as wrong location. A commit that only touches `decisions/` files (moves, edits) needs no new entry.
 - Name: `NNNN` = max existing + 1, slug `[a-z0-9-]` 8-60 chars, starts with the first `scope` segment, then a verb from the allow-list (`VERBS` in the rule), then an object.
@@ -241,7 +238,6 @@ Haiku 5.5 ◔ 43% | $3.96/1.2M | td 20%/1.2M | wk 66%/3.1M
 
 ## Package
 
-- Built-in references: `import { aodiFramework } from '@repo/nitpick/rules/aodi-framework'` gives the absolute path of the framework doc (`src/rules/aodi-framework.md`; copied to `dist` with the other `.md` files in `src/rules`); use it as a `refs` value: `refs: { 'aodi-framework': aodiFramework }`, then `file('aodi-framework')` / `insert('aodi-framework')`.
 - Imports: `@repo/nitpick/<module>` (`config`, `rules/rich-commit`), exported from `dist`.
 - Bin: `nitpick` (`dist/cli.js`).
 - Scripts: `build`, `dev`, `check-types`, `lint`, `test`, `test:coverage`.

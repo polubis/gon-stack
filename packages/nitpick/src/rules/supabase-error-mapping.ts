@@ -11,7 +11,6 @@ const lineOf = (text: string, index: number): number =>
   text.slice(0, index).split('\n').length;
 
 export const supabaseErrorMapping: RuleUnit = {
-  importance: 'A',
   include: ['apps/*/src/server/**/*.ts'],
   exclude: [
     '**/__tests__/**',

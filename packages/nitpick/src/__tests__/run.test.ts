@@ -47,7 +47,7 @@ const project = async (
 const withRule = (check = '', extra = '') => `
 export default {
   ${extra}
-  rules: { g: { r: { importance: 'A', doc: 'do r', fix: 'fix r', ${check} } } },
+  rules: { g: { r: { doc: 'do r', fix: 'fix r', ${check} } } },
 };`;
 
 let errors: string[];
@@ -91,8 +91,8 @@ describe('CLI config works when', () => {
   it('exits 3 when a rule has a check but no fix', async () => {
     const root = await project(
       `export default { rules: { g: {
-        r: { importance: 'A', doc: 'do r', run: () => {} },
-        ok: { importance: 'A', doc: 'ok' },
+        r: { doc: 'do r', run: () => {} },
+        ok: { doc: 'ok' },
       } } };`,
     );
     expect(await run(['--check'], root)).toBe(3);
@@ -118,7 +118,7 @@ describe('CLI sync works when', () => {
     expect(await run(['--sync'], root)).toBe(0);
     expect(
       await readFile(join(root, '.ai', 'rules', 'g.md'), 'utf8'),
-    ).toContain('1. (A) do r');
+    ).toContain('1. do r');
     expect(
       await readFile(join(root, '.ai', 'references', 'a.md'), 'utf8'),
     ).toBe('knowledge');
@@ -187,7 +187,6 @@ describe('CLI check works when', () => {
   it('filters files by include and exclude and serves text and meta', async () => {
     const root = await synced(
       `export default { rules: { g: { r: {
-        importance: 'A',
         include: ['src/**/*.ts'],
         exclude: ['**/*.test.ts'],
         doc: 'x',

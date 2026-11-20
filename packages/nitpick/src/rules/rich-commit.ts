@@ -73,7 +73,6 @@ export const richCommitTemplateReference = fileURLToPath(
 );
 
 export const richCommit: RuleUnit = {
-  importance: 'A',
   fix: FIX,
   doc: {
     file: fileURLToPath(new URL('rich-commit.md', import.meta.url)),

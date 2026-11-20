@@ -32,18 +32,9 @@ describe('Repo config works when', () => {
     expect(worker).not.toContain('coord');
   });
 
-  it('writes the built-in AODI reference from the package', async () => {
-    const aodi = (await built()).read(
-      '.claude',
-      'references',
-      'aodi-framework.md',
-    );
-    expect(aodi).toContain('| `A` | always');
-  });
-
   it('rejects a ref typo to a peer agent at compile time', () => {
     config({
-      rules: { g: { r: { importance: 'A', doc: 'r' } } },
+      rules: { g: { r: { doc: 'r' } } },
       agents: {
         worker: { doc: 'w' },
         doctor: {

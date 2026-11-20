@@ -3,7 +3,6 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { AODI_LEGEND } from '../docs.js';
 import { EXIT_CONFIG, EXIT_PROBLEMS, EXIT_USAGE, run } from '../run.js';
 
 const configPath = join(import.meta.dirname, '..', 'config.ts')
@@ -49,7 +48,7 @@ const project = async (
 };
 
 const rule = (body: string, extra = '') =>
-  `'r': { importance: 'A', doc: () => 'do r', ${extra} fix: 'f', run: async (c) => { ${body} } }`;
+  `'r': { doc: () => 'do r', ${extra} fix: 'f', run: async (c) => { ${body} } }`;
 
 const source = (...rules: string[]) =>
   `export default { rules: { g: { ${rules.join(',')} } } };`;
@@ -138,8 +137,8 @@ describe('CLI config works when', () => {
   it('prefixes every config problem and reports all of them', async () => {
     const root = await project(
       `export default { rules: {
-        g: { a: { importance: 'A', doc: '' } },
-        h: { a: { importance: 'A', doc: { file: './missing.md' } } },
+        g: { a: { doc: '' } },
+        h: { a: { doc: { file: './missing.md' } } },
       } };`,
     );
     expect(await run(['--sync'], root)).toBe(EXIT_CONFIG);
@@ -150,9 +149,7 @@ describe('CLI config works when', () => {
   });
 
   it('writes nothing when the config is invalid', async () => {
-    const root = await project(
-      source(`'a': { importance: 'A', doc: { file: './nope.md' } }`),
-    );
+    const root = await project(source(`'a': { doc: { file: './nope.md' } }`));
     await run(['--sync'], root);
     await expect(readFile(join(root, '.ai', 'AGENTS.md'))).rejects.toThrow();
   });
@@ -254,8 +251,8 @@ describe('Check execution works when', () => {
   it('runs rules in config order and reports in that order', async () => {
     const root = await synced(
       source(
-        `'one': { importance: 'A', doc: () => '1', fix: 'f', run: ({ report }) => report('a') }`,
-        `'two': { importance: 'A', doc: () => '2', fix: 'f', run: ({ report }) => report('b') }`,
+        `'one': { doc: () => '1', fix: 'f', run: ({ report }) => report('a') }`,
+        `'two': { doc: () => '2', fix: 'f', run: ({ report }) => report('b') }`,
       ),
     );
     await run(['--check'], root);
@@ -263,9 +260,7 @@ describe('Check execution works when', () => {
   });
 
   it('skips rules without a check', async () => {
-    const root = await synced(
-      source(`'x': { importance: 'A', doc: () => 'x' }`),
-    );
+    const root = await synced(source(`'x': { doc: () => 'x' }`));
     expect(await run(['--check'], root)).toBe(0);
   });
 
@@ -289,7 +284,7 @@ describe('Check execution works when', () => {
     const root = await synced(
       source(
         rule('throw new Error("boom");'),
-        `'next': { importance: 'A', doc: () => 'n', fix: 'f', run: ({ report }) => report('still ran') }`,
+        `'next': { doc: () => 'n', fix: 'f', run: ({ report }) => report('still ran') }`,
       ),
     );
     expect(await run(['--check'], root)).toBe(EXIT_PROBLEMS);
@@ -300,7 +295,7 @@ describe('Check execution works when', () => {
     const root = await synced(
       source(
         rule('return Promise.reject(new Error("nope"));'),
-        `'s': { importance: 'A', doc: () => 's', fix: 'f', run: () => { throw 'text'; } }`,
+        `'s': { doc: () => 's', fix: 'f', run: () => { throw 'text'; } }`,
       ),
     );
     await run(['--check'], root);
@@ -327,7 +322,7 @@ describe('Check execution works when', () => {
   it('gives each rule its own id and the project root in meta', async () => {
     const root = await synced(
       source(
-        `'x': { importance: 'A', doc: () => '', fix: 'f', run: ({ report, meta }) => report(meta.ruleId + '@' + meta.projectRoot) }`,
+        `'x': { doc: () => '', fix: 'f', run: ({ report, meta }) => report(meta.ruleId + '@' + meta.projectRoot) }`,
       ),
     );
     await run(['--check'], root);
@@ -444,7 +439,7 @@ describe('Files snapshot works when', () => {
     const root = await synced(
       source(
         rule('c.report(c.files.join(","));', 'include: ["**/*.md"],'),
-        `'dot': { importance: 'A', doc: () => '', include: ['.ai/**'], fix: 'f', run: ({ files, report }) => report(files.join()) }`,
+        `'dot': { doc: () => '', include: ['.ai/**'], fix: 'f', run: ({ files, report }) => report(files.join()) }`,
       ),
       { 'docs/a.md': '' },
     );
@@ -458,8 +453,8 @@ describe('Files snapshot works when', () => {
   it('gives different rules different file lists', async () => {
     const root = await synced(
       source(
-        `'ts': { importance: 'A', doc: () => '', include: ['**/*.ts'], fix: 'f', run: ({ files, report }) => report(files.join()) }`,
-        `'md': { importance: 'A', doc: () => '', include: ['docs/*.md'], fix: 'f', run: ({ files, report }) => report(files.join()) }`,
+        `'ts': { doc: () => '', include: ['**/*.ts'], fix: 'f', run: ({ files, report }) => report(files.join()) }`,
+        `'md': { doc: () => '', include: ['docs/*.md'], fix: 'f', run: ({ files, report }) => report(files.join()) }`,
       ),
       { 'a.ts': '', 'docs/b.md': '' },
     );
@@ -679,16 +674,15 @@ describe('Rich commit through the CLI works when', () => {
     const root = await synced(rich);
     expect(await readFile(join(root, '.ai', 'AGENTS.md'), 'utf8')).toBe(
       '# Information for AI\n\n## Rule files\n\n' +
-        AODI_LEGEND +
-        '\n\n- [rules/git.md](rules/git.md)\n\n## Reference files\n\n- [references/rich-commit-template.md](references/rich-commit-template.md)\n',
+        '- [rules/git.md](rules/git.md)\n\n## Reference files\n\n- [references/rich-commit-template.md](references/rich-commit-template.md)\n',
     );
     expect(await readFile(join(root, '.ai', 'rules', 'git.md'), 'utf8')).toBe(
-      '## Git\n\n1. (A) [rich-commit](rich-commit.md)\n',
+      '## Git\n\n1. [rich-commit](rich-commit.md)\n',
     );
     expect(
       await readFile(join(root, '.ai', 'rules', 'rich-commit.md'), 'utf8'),
     ).toContain(
-      '1. (A) Commit message follows [rich-commit-template](../references/rich-commit-template.md).',
+      '1. Commit message follows [rich-commit-template](../references/rich-commit-template.md).',
     );
     expect(
       await readFile(

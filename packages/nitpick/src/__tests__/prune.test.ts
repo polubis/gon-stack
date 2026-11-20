@@ -19,7 +19,7 @@ const project = async (output = '') => {
   agents: { a: { doc: 'agent' } },
   skills: { s: { source: './skills/s' } },
   refs: { r: './r.md' },
-  rules: { g: { x: { importance: 'A', doc: 'do x' } } },
+  rules: { g: { x: { doc: 'do x' } } },
 };`,
     '.nitpick/r.md': 'ref',
     '.nitpick/skills/s/SKILL.md': SKILL,

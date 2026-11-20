@@ -7,7 +7,7 @@ import type { Config } from '../config.js';
 import { buildDocs } from '../docs.js';
 import { statusLine } from '../plugins/statusline.js';
 
-const rules = { g: { r: { importance: 'A' as const, doc: 'do r' } } };
+const rules = { g: { r: { doc: 'do r' } } };
 
 const commandOf = (plugin: { settings: object }): string =>
   (plugin.settings as { statusLine: { command: string } }).statusLine.command;

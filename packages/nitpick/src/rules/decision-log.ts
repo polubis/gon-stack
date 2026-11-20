@@ -400,7 +400,6 @@ export const validateDecisionLog = (
 };
 
 export const decisionLog = (options: Options): RuleUnit => ({
-  importance: 'A',
   fix: `Add exactly one new file to the commit and stage it (a commit that only moves or edits files in decisions/ needs none). Template:\n${TEMPLATE}\nSummary ${SUMMARY.min}-${SUMMARY.max} chars, why ${WHY.min}-${WHY.max} chars, slug ${SLUG.min}-${SLUG.max} chars, ${BULLETS.min}-${BULLETS.max} bullets of max ${LINE_MAX} chars. Allowed scopes: ${options.scopes.map(String).join(' ')}`,
   doc: {
     file: fileURLToPath(new URL('decision-log.md', import.meta.url)),
