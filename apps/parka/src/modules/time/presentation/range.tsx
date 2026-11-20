@@ -33,7 +33,7 @@ const DaySection = ({ day }: { day: string }) => {
       <h2 className="border-b border-line px-2 pb-1 text-sm font-semibold first-letter:uppercase">
         {fullDate(day)}
       </h2>
-      <ul className="flex flex-col">
+      <ul className="flex flex-col gap-2">
         {rows.map(({ key, item, phase, at }) => (
           <TaskRow key={key} task={item} step={at} phase={phase} />
         ))}

@@ -2,6 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import { emptyAdd } from './empty-state';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { openEditor } from './edit-task';
 import { renderTime } from './render-time';
 import { task, setupTimeBackend } from './time-backend';
 
@@ -23,7 +24,7 @@ const DEVICE = {
 };
 
 const row = (title: string) =>
-  screen.findByRole('button', { name: `Edytuj zadanie: ${title}` });
+  screen.findByRole('button', { name: `Szczegóły zadania: ${title}` });
 
 const openAddDialog = async (user: ReturnType<typeof userEvent.setup>) => {
   await user.click(await emptyAdd());
@@ -75,7 +76,7 @@ describe('task device', () => {
     backend.seed([task({ device: DEVICE })]);
     renderTime();
 
-    await user.click(await row('Raport miesięczny'));
+    await openEditor(user, 'Raport miesięczny');
 
     const dialog = within(await screen.findByRole('dialog'));
     expect(dialog.getByText('device-phone-1')).toBeVisible();
@@ -83,12 +84,12 @@ describe('task device', () => {
 
   const weekBox = async () =>
     (
-      await screen.findAllByRole('checkbox', {
-        name: 'Zrobione: Raport miesięczny',
+      await screen.findAllByRole('button', {
+        name: 'Następny krok: Raport miesięczny',
       })
     )[0]!;
 
-  it('shows a done toggle on a week day', async () => {
+  it('advances a week day task to done and offers reopening', async () => {
     const user = userEvent.setup();
     backend.seed([task({ device: DEVICE, at: null })]);
     renderTime('week');
@@ -97,13 +98,13 @@ describe('task device', () => {
     await user.click(box);
     await user.click(box);
 
-    await waitFor(() =>
-      expect(
-        screen.getAllByRole('checkbox', {
-          name: 'Zrobione: Raport miesięczny',
-        })[0],
-      ).toHaveAttribute('aria-checked', 'true'),
-    );
+    expect(
+      (
+        await screen.findAllByRole('button', {
+          name: 'Otwórz ponownie: Raport miesięczny',
+        })
+      )[0],
+    ).toBeVisible();
   });
 
   it('shows the device in the more menu of a week day row', async () => {
@@ -125,7 +126,7 @@ describe('task device', () => {
     const user = userEvent.setup();
     backend.seed([task({ device: DEVICE })]);
     renderTime();
-    await user.click(await row('Raport miesięczny'));
+    await openEditor(user, 'Raport miesięczny');
     const dialog = within(await screen.findByRole('dialog'));
     await user.click(dialog.getByRole('button', { name: 'Zapisz' }));
 
@@ -190,7 +191,7 @@ describe('recurring tasks', () => {
     const user = userEvent.setup();
     backend.seed([task()]);
     renderTime();
-    await user.click(await row('Raport miesięczny'));
+    await openEditor(user, 'Raport miesięczny');
     const dialog = within(await screen.findByRole('dialog'));
 
     expect(dialog.queryByRole('switch', { name: 'Powtarzaj' })).toBeNull();
@@ -253,7 +254,7 @@ describe('recurring tasks', () => {
       task({ recurringId: 'trec-1', occurrenceDate: '2026-10-20' }),
     ]);
     renderTime();
-    await user.click(await row('Raport miesięczny'));
+    await openEditor(user, 'Raport miesięczny');
     return within(await screen.findByRole('dialog'));
   };
 
@@ -329,7 +330,7 @@ describe('recurring tasks', () => {
     const user = userEvent.setup();
     backend.seed([task()]);
     renderTime();
-    await user.click(await row('Raport miesięczny'));
+    await openEditor(user, 'Raport miesięczny');
     await user.click(
       within(await screen.findByRole('dialog')).getByRole('button', {
         name: 'Zapisz',

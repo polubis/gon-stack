@@ -44,11 +44,13 @@ describe('own range view', () => {
 
     expect(
       await screen.findByRole('button', {
-        name: 'Edytuj zadanie: Pierwszy w zakresie',
+        name: 'Szczegóły zadania: Pierwszy w zakresie',
       }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Edytuj zadanie: Drugi w zakresie' }),
+      screen.getByRole('button', {
+        name: 'Szczegóły zadania: Drugi w zakresie',
+      }),
     ).toBeInTheDocument();
     expect(screen.queryByText('Przed zakresem')).toBeNull();
     expect(screen.queryByText('Po zakresie')).toBeNull();
@@ -108,7 +110,7 @@ describe('own range view', () => {
     registerNavigator(historyNavigator(push));
     seedRange();
     renderTime('week');
-    await screen.findAllByRole('button', { name: /^Edytuj zadanie/ });
+    await screen.findAllByRole('button', { name: /^Szczegóły zadania/ });
 
     await userEvent.click(screen.getByRole('button', { name: /^Zakres:/ }));
     await userEvent.click(

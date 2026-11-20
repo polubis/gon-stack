@@ -7,11 +7,11 @@ import { interpreter, type CommandRegistry } from '@repo/vibe-test';
 import { test, type Ctx } from '@/__e2e__/test';
 import { registerAndConfirm } from '@/__e2e__/mailbox';
 import { API_ROUTER, APP_ROUTER } from '@/shared/router/routes';
-import { taskDone } from './locators';
+import { taskAdvance } from './locators';
 
 /**
  * Custom task statuses against the real Supabase backend: the user adds a step
- * in the app, the task circle walks through it, and an MCP client lists the
+ * in the app, the advance button walks through it, and an MCP client lists the
  * workflow and moves a task by the step's name.
  */
 
@@ -59,12 +59,10 @@ const call = async (page: Page, name: string, args: unknown) => {
   }
 };
 
-const circle = (prefix: Ctx['getByE2ePrefix']) => taskDone(prefix, 'Raport');
+const advanceBtn = (prefix: Ctx['getByE2ePrefix']) =>
+  taskAdvance(prefix, 'Raport');
 const badge = (prefix: Ctx['getByE2ePrefix']) =>
-  prefix(
-    'time:task-progress-badge:',
-    prefix('time:task:').filter({ hasText: 'Raport' }),
-  );
+  prefix('time:task-step:', prefix('time:task:').filter({ hasText: 'Raport' }));
 
 const commands = {
   'i register the account': async (ctx) => {
@@ -117,15 +115,18 @@ const commands = {
     await expect(dialog).toBeHidden();
   },
 
-  'the circle walks through the new step': async ({ page, getByE2ePrefix }) => {
+  'the advance button walks through the new step': async ({
+    page,
+    getByE2ePrefix,
+  }) => {
     await open(page, APP_ROUTER.time({ date: DAY }));
-    const box = circle(getByE2ePrefix);
+    const box = advanceBtn(getByE2ePrefix);
     await box.click();
-    await expect(box).toHaveAttribute('aria-checked', 'mixed');
+    await expect(badge(getByE2ePrefix)).toHaveText(/2\/4\s*W trakcie/);
     await box.click();
-    await expect(badge(getByE2ePrefix)).toHaveText('Review');
+    await expect(badge(getByE2ePrefix)).toHaveText(/3\/4\s*Review/);
     await box.click();
-    await expect(box).toBeChecked();
+    await expect(badge(getByE2ePrefix)).toHaveText(/4\/4\s*Zrobione/);
     await page.waitForLoadState('networkidle');
   },
 
@@ -139,7 +140,7 @@ const commands = {
       'Review',
       'Zrobione',
     ]);
-    // The circle saves in the background: wait until the server has the task as done.
+    // The advance button saves in the background: wait until the server has the task as done.
     let doneId: string | undefined;
     await expect
       .poll(async () => {
@@ -157,11 +158,7 @@ const commands = {
 
   'the app shows the step the client set': async ({ page, getByE2ePrefix }) => {
     await open(page, APP_ROUTER.time({ date: DAY }));
-    await expect(badge(getByE2ePrefix)).toHaveText('Review');
-    await expect(circle(getByE2ePrefix)).toHaveAttribute(
-      'aria-checked',
-      'mixed',
-    );
+    await expect(badge(getByE2ePrefix)).toHaveText(/3\/4\s*Review/);
   },
 
   'removing the step sends its task back to in progress': async ({
@@ -180,7 +177,7 @@ const commands = {
       getByE2e('time:statuses-save').click(),
     ]);
     await open(page, APP_ROUTER.time({ date: DAY }));
-    await expect(badge(getByE2ePrefix)).toHaveText('W trakcie');
+    await expect(badge(getByE2ePrefix)).toHaveText(/2\/3\s*W trakcie/);
     await expect(
       badge(getByE2ePrefix).filter({ hasText: 'Review' }),
     ).toHaveCount(0);
@@ -198,7 +195,7 @@ test.describe('custom task statuses', () => {
       ['i generate an mcp token'],
       ['a task exists and the workflow is the default one'],
       ['i add the Review step in the editor'],
-      ['the circle walks through the new step'],
+      ['the advance button walks through the new step'],
       ['the client sees the step and moves the task by its name'],
       ['the app shows the step the client set'],
       ['removing the step sends its task back to in progress'],

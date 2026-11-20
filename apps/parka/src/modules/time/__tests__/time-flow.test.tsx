@@ -4,13 +4,14 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderTime, TODAY } from './render-time';
 import { task, setupTimeBackend } from './time-backend';
+import { openEditor } from './edit-task';
 
 const backend = setupTimeBackend();
 
 afterEach(() => vi.useRealTimers());
 
 const row = (title: string) =>
-  screen.findByRole('button', { name: `Edytuj zadanie: ${title}` });
+  screen.findByRole('button', { name: `Szczegóły zadania: ${title}` });
 
 const queryParams = (url: string) => new URL(url).searchParams;
 
@@ -338,7 +339,7 @@ describe('time task creation', () => {
     expect(toast.getByText('TASK_CREATE_FAILED')).toBeVisible();
     expect(toast.getByText('Database unavailable')).toBeVisible();
     expect(
-      screen.queryByRole('button', { name: /Edytuj zadanie: Kurs/ }),
+      screen.queryByRole('button', { name: /Szczegóły zadania: Kurs/ }),
     ).toBeNull();
   });
 
@@ -354,31 +355,31 @@ describe('time task creation', () => {
 });
 
 describe('time task maintenance', () => {
-  it('shows a task as in progress after the first click on its circle', async () => {
+  it('shows a task as in progress after the first click on its advance button', async () => {
     const user = userEvent.setup();
     backend.seed([task()]);
     renderTime();
-    const box = await screen.findByRole('checkbox', {
-      name: 'Zrobione: Raport miesięczny',
+    const box = await screen.findByRole('button', {
+      name: 'Następny krok: Raport miesięczny',
     });
 
     await user.click(box);
 
-    expect(box).toHaveAttribute('aria-checked', 'mixed');
+    expect(within(box.closest('li')!).getByText('W trakcie')).toBeVisible();
   });
 
   it('marks a task done and saves it', async () => {
     const user = userEvent.setup();
     backend.seed([task()]);
     renderTime();
-    const box = await screen.findByRole('checkbox', {
-      name: 'Zrobione: Raport miesięczny',
+    const box = await screen.findByRole('button', {
+      name: 'Następny krok: Raport miesięczny',
     });
 
     await user.click(box);
     await user.click(box);
 
-    expect(box).toBeChecked();
+    expect(box).toHaveAccessibleName('Otwórz ponownie: Raport miesięczny');
     await waitFor(() => expect(backend.writes()).toHaveLength(2));
     expect(backend.writes()[1]).toMatchObject({
       body: { id: 't-1', done: true, inProgress: false },
@@ -390,14 +391,14 @@ describe('time task maintenance', () => {
     backend.seed([task()]);
     renderTime();
 
-    const box = await screen.findByRole('checkbox', {
-      name: 'Zrobione: Raport miesięczny',
+    const box = await screen.findByRole('button', {
+      name: 'Następny krok: Raport miesięczny',
     });
     await user.click(box);
     await user.click(box);
     await user.click(box);
 
-    expect(box).toHaveAttribute('aria-checked', 'false');
+    expect(box).toHaveAccessibleName('Następny krok: Raport miesięczny');
     await waitFor(() => expect(backend.writes()).toHaveLength(3));
     expect(backend.writes().map((w) => w.body)).toMatchObject([
       { inProgress: true, done: false },
@@ -412,8 +413,8 @@ describe('time task maintenance', () => {
     renderTime();
 
     await user.click(
-      await screen.findByRole('checkbox', {
-        name: 'Zrobione: Raport miesięczny',
+      await screen.findByRole('button', {
+        name: 'Następny krok: Raport miesięczny',
       }),
     );
 
@@ -434,8 +435,8 @@ describe('time task maintenance', () => {
     renderTime();
 
     await user.click(
-      await screen.findByRole('checkbox', {
-        name: 'Zrobione: Raport miesięczny',
+      await screen.findByRole('button', {
+        name: 'Następny krok: Raport miesięczny',
       }),
     );
 
@@ -454,7 +455,7 @@ describe('time task maintenance', () => {
     const user = userEvent.setup();
     backend.seed([task()]);
     renderTime();
-    await user.click(await row('Raport miesięczny'));
+    await openEditor(user, 'Raport miesięczny');
 
     const dialog = within(await screen.findByRole('dialog'));
     const title = dialog.getByRole('textbox', { name: 'Nazwa' });
@@ -476,20 +477,20 @@ describe('time task maintenance', () => {
     backend.state.failWrites = true;
     renderTime();
 
-    const box = await screen.findByRole('checkbox', {
-      name: 'Zrobione: Raport miesięczny',
+    const box = await screen.findByRole('button', {
+      name: 'Następny krok: Raport miesięczny',
     });
     await user.click(box);
 
     const toast = within(await screen.findByRole('alert'));
     expect(toast.getByText('TASK_UPDATE_FAILED')).toBeVisible();
-    expect(box).not.toBeChecked();
+    expect(box).toHaveAccessibleName('Następny krok: Raport miesięczny');
   });
 
   const askToDeleteTask = async (user: ReturnType<typeof userEvent.setup>) => {
     backend.seed([task()]);
     renderTime();
-    await user.click(await row('Raport miesięczny'));
+    await openEditor(user, 'Raport miesięczny');
     await user.click(
       within(await screen.findByRole('dialog')).getByRole('button', {
         name: 'Usuń',
@@ -519,7 +520,7 @@ describe('time task maintenance', () => {
 
     await waitFor(() =>
       expect(
-        screen.queryByRole('button', { name: /Edytuj zadanie: Raport/ }),
+        screen.queryByRole('button', { name: /Szczegóły zadania: Raport/ }),
       ).toBeNull(),
     );
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
@@ -537,7 +538,7 @@ describe('time task maintenance', () => {
     const user = userEvent.setup();
     backend.seed([task()]);
     renderTime();
-    await user.click(await row('Raport miesięczny'));
+    await openEditor(user, 'Raport miesięczny');
     await user.click(
       within(await screen.findByRole('dialog')).getByRole('button', {
         name: 'Usuń',
@@ -673,7 +674,7 @@ describe('time task maintenance', () => {
     backend.seed([task()]);
     backend.state.failWrites = true;
     renderTime();
-    await user.click(await row('Raport miesięczny'));
+    await openEditor(user, 'Raport miesięczny');
     await user.click(
       within(await screen.findByRole('dialog')).getByRole('button', {
         name: 'Usuń',
@@ -794,7 +795,7 @@ describe('time add on list item', () => {
     backend.seed([task({ day: '2026-10-21' })]);
     renderTime('week');
     await screen.findAllByRole('button', {
-      name: 'Edytuj zadanie: Raport miesięczny',
+      name: 'Szczegóły zadania: Raport miesięczny',
     });
 
     await user.click(

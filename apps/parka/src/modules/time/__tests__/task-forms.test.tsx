@@ -5,6 +5,7 @@ import { sortPriorities } from '../domain/priority';
 import type { Priority, PriorityId } from '../domain/models';
 import { renderTime } from './render-time';
 import { task, setupTimeBackend } from './time-backend';
+import { openEditor } from './edit-task';
 
 const backend = setupTimeBackend();
 
@@ -232,11 +233,7 @@ describe('time task edit', () => {
     backend.seed([task()]);
     renderTime();
 
-    await user.click(
-      await screen.findByRole('button', {
-        name: 'Edytuj zadanie: Raport miesięczny',
-      }),
-    );
+    await openEditor(user, 'Raport miesięczny');
 
     const dialog = within(await screen.findByRole('dialog'));
     expect(
@@ -254,7 +251,9 @@ describe('time task edit', () => {
 
     const rowOf = async (title: string) =>
       (
-        await screen.findByRole('button', { name: `Edytuj zadanie: ${title}` })
+        await screen.findByRole('button', {
+          name: `Szczegóły zadania: ${title}`,
+        })
       ).closest('li')!;
 
     expect(

@@ -6,6 +6,7 @@ import {
   CalendarPlus,
   Ellipsis,
   Inbox,
+  Pencil,
   Sun,
   Trash2,
 } from 'lucide-react';
@@ -19,7 +20,7 @@ import type { BacklogTask, Task } from '../domain/models';
 import { weekDays } from '../domain/schedule';
 import { moveFocus } from './add-menu';
 import { useContext } from './context';
-import { deleteTaskModal } from './modal-ids';
+import { deleteTaskModal, editBacklogModal, editTaskModal } from './modal-ids';
 import { TaskDeviceBadge } from './task-device';
 
 const ITEM =
@@ -30,7 +31,7 @@ const shortDay = (day: string): string => dayLabel(day, 'short', false);
 
 type Target = { day: string; label: string; text: string; Icon: LucideIcon };
 
-/** "More" popover of a task row: quick moves, backlog, delete and where the task came from. */
+/** "More" popover of a task row: edit, quick moves, backlog, delete and where the task came from. */
 export const TaskMenu = ({ task }: { task: Task | BacklogTask }) => {
   const { now, updateTask, moveBacklogTask, sendTaskToBacklog } = useContext();
   // A repeating task shows once per day: each row needs its own popover id.
@@ -94,6 +95,25 @@ export const TaskMenu = ({ task }: { task: Task | BacklogTask }) => {
             onKeyDown={moveFocus}
             className="flex flex-col gap-1"
           >
+            <button
+              type="button"
+              role="menuitem"
+              aria-label={
+                board
+                  ? `Edytuj zadanie: ${task.title}`
+                  : `Edytuj zadanie z backlogu: ${task.title}`
+              }
+              data-e2e={`time:task-edit:${task.id}`}
+              onClick={() =>
+                openModal(
+                  board ? editTaskModal(task.id) : editBacklogModal(task.id),
+                )
+              }
+              className={ITEM}
+            >
+              <Pencil className="h-4 w-4 text-ink-soft" aria-hidden="true" />
+              Edytuj
+            </button>
             {targets.map(({ day, label, text, Icon }) => (
               <button
                 key={day}

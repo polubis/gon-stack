@@ -158,7 +158,7 @@ describe('backlog list', () => {
       await screen.findByRole('heading', { name: 'Brak zadań' }),
     ).toBeVisible();
     expect(
-      screen.queryByRole('button', { name: /^Edytuj zadanie:/ }),
+      screen.queryByRole('button', { name: /^Szczegóły zadania:/ }),
     ).toBeNull();
   });
 });
@@ -192,7 +192,7 @@ describe('backlog moving', () => {
     await closeBacklog(user);
     expect(
       await screen.findByRole('button', {
-        name: 'Edytuj zadanie: Umówić dentystę',
+        name: 'Szczegóły zadania: Umówić dentystę',
       }),
     ).toBeVisible();
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
@@ -236,7 +236,7 @@ describe('backlog moving', () => {
     expect(await screen.findByText('BACKLOG_MOVE_FAILED')).toBeVisible();
     expect(await list.findByText('Umówić dentystę')).toBeVisible();
     expect(
-      screen.queryByRole('button', { name: /^Edytuj zadanie:/ }),
+      screen.queryByRole('button', { name: /^Następny krok:/ }),
     ).toBeNull();
   });
 
@@ -289,11 +289,7 @@ describe('backlog editing', () => {
     renderTime();
     const list = await openBacklog(user);
 
-    await user.click(
-      await list.findByRole('button', {
-        name: 'Edytuj zadanie z backlogu: Umówić dentystę',
-      }),
-    );
+    await pickFromMenu(user, list, 'Edytuj zadanie z backlogu');
 
     const form = within(
       await screen.findByRole('dialog', { name: 'Edytuj zadanie z backlogu' }),
@@ -307,11 +303,7 @@ describe('backlog editing', () => {
     backend.seedBacklog([backlogTask()]);
     renderTime();
     const list = await openBacklog(user);
-    await user.click(
-      await list.findByRole('button', {
-        name: 'Edytuj zadanie z backlogu: Umówić dentystę',
-      }),
-    );
+    await pickFromMenu(user, list, 'Edytuj zadanie z backlogu');
     const form = within(
       await screen.findByRole('dialog', { name: 'Edytuj zadanie z backlogu' }),
     );

@@ -6,14 +6,19 @@ type Prefixer = Ctx['getByE2ePrefix'];
 
 const taskRow = (prefix: Prefixer, title: string) =>
   prefix('time:task:').filter({ hasText: title });
-export const taskEdit = (prefix: Prefixer, title: string) =>
-  prefix('time:task-edit:', taskRow(prefix, title));
+// Edit lives in the task menu (a portal): open "More" first, then pick the one open item.
+export const editTask = async (prefix: Prefixer, title: string) => {
+  await prefix('time:task-more:', taskRow(prefix, title)).click();
+  await prefix('time:task-edit:').click();
+};
 export const taskInfo = (prefix: Prefixer, title: string) =>
   prefix('time:task-info:', taskRow(prefix, title));
 export const taskMore = (prefix: Prefixer, title: string) =>
   prefix('time:task-more:', taskRow(prefix, title));
-export const taskDone = (prefix: Prefixer, title: string) =>
-  prefix('time:task-done:', taskRow(prefix, title));
+export const taskAdvance = (prefix: Prefixer, title: string) =>
+  prefix('time:task-advance:', taskRow(prefix, title));
+export const taskStep = (prefix: Prefixer, title: string) =>
+  prefix('time:task-step:', taskRow(prefix, title));
 // The task menu is a portal: its single open instance is searched page-wide.
 export const taskDelete = (prefix: Prefixer) => prefix('time:task-delete:');
 export const moveItem = (prefix: Prefixer, text: string) =>

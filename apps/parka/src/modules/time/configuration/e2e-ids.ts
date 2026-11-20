@@ -116,8 +116,8 @@ export type TimeDynamicE2eId =
   | `time:range-day:${string}`
   | `time:task:${string | number}`
   | `time:task-key:${string | number}`
-  | `time:task-done:${string | number}`
-  | `time:task-progress-badge:${string | number}`
+  | `time:task-advance:${string | number}`
+  | `time:task-step:${string | number}`
   | `time:task-info:${string | number}`
   | `time:task-edit:${string | number}`
   | `time:task-move:${string | number}`
