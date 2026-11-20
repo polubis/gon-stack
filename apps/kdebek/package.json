@@ -39,6 +39,7 @@
     "@axe-core/playwright": "catalog:",
     "@playwright/test": "catalog:",
     "@repo/astro-config": "workspace:*",
+    "@repo/ecosystem-resources": "workspace:*",
     "@repo/eslint-config": "workspace:*",
     "@repo/vibe-test": "workspace:*",
     "@testing-library/jest-dom": "catalog:",

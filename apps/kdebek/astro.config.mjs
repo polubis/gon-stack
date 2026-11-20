@@ -1,8 +1,10 @@
 // @ts-check
 import { createAstroConfig } from '@repo/astro-config';
+import { ports } from '@repo/ecosystem-resources/ports';
 
 const config = createAstroConfig({
   site: 'https://masazysta-olsztyn.pl',
+  port: ports.dev.kdebek,
 });
 
 export default {

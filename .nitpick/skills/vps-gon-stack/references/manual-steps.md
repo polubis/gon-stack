@@ -416,7 +416,7 @@ Log in as factory first. Example for one app (`parka`), repeat per app.
 
 ```bash
 cd ~/workspaces/gon-stack/apps/parka
-# Starts all containers on rootless Docker. Fixed ports: API 54321, DB 54322, Studio 54323
+# Starts all containers on rootless Docker. Ports come from packages/ecosystem-resources/src/ports.ts (parka: API 54101, DB 54102, Studio 54105)
 pnpm db:start
 # Running? (prints URLs and keys)
 pnpm exec supabase status

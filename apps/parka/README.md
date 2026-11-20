@@ -31,7 +31,7 @@ no seed data in the database or the frontend store.
 pnpm dev
 ```
 
-Access the app at `http://localhost:4321`
+Access the app at `http://localhost:4303`
 
 ## Build
 

@@ -40,7 +40,11 @@
     "clean:install": "bash scripts/clean-install.sh",
     "nitpick": "nitpick",
     "nitpick:sync": "pnpm nitpick --sync",
-    "nitpick:check": "pnpm nitpick --check"
+    "nitpick:check": "pnpm nitpick --check",
+    "ecosystem": "node packages/ecosystem-resources/src/cli.ts",
+    "ecosystem:sync": "pnpm ecosystem --sync",
+    "ecosystem:check": "pnpm ecosystem --check",
+    "reset": "pnpm ecosystem --reset"
   },
   "devDependencies": {
     "@playwright/test": "catalog:",

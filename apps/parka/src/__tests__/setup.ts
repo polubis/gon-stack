@@ -1,6 +1,10 @@
 import '@testing-library/jest-dom';
+import { ports } from '@repo/ecosystem-resources/ports';
 
-vi.stubEnv('PUBLIC_PARKA_SUPABASE_URL', 'http://localhost:54321');
+vi.stubEnv(
+  'PUBLIC_PARKA_SUPABASE_URL',
+  `http://localhost:${ports['supabase-parka'].api}`,
+);
 vi.stubEnv('PUBLIC_PARKA_SUPABASE_PUBLISHABLE_KEY', 'dasdsa-dadasd-231edd');
 
 afterAll(() => {

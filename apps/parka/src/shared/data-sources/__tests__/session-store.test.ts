@@ -1,6 +1,7 @@
 // @vitest-environment node
 import type { AstroCookies } from 'astro';
 import { describe, expect, it } from 'vitest';
+import { ports } from '@repo/ecosystem-resources/ports';
 import { sessionStore } from '../session-store';
 
 type Written = { value: string; options: Record<string, unknown> };
@@ -72,7 +73,7 @@ describe('session cookies', () => {
 
   it('marks cookies secure on https only', () => {
     const secure = arrange({}, 'https://parka.app/');
-    const plain = arrange({}, 'http://localhost:4325/');
+    const plain = arrange({}, `http://localhost:${ports.e2e.parka}/`);
     const cookie = [
       { name: 'parka-auth', value: encode(ID_A, 'a@parka.test'), options: {} },
     ];
