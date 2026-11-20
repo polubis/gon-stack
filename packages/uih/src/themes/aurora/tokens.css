@@ -1,0 +1,83 @@
+@layer ds.tokens, ds.base, ds.components;
+
+@layer ds.tokens {
+  :where(:root, [data-ds-theme]) {
+    /* primitives */
+    --ds-palette-ink-900: #121216;
+    --ds-palette-white: #ffffff;
+
+    /* color roles */
+    --ds-color-primary: var(--ds-palette-ink-900);
+    --ds-color-on-primary: var(--ds-palette-white);
+    --ds-color-neutral: var(--ds-palette-ink-900);
+    --ds-color-on-neutral: var(--ds-palette-white);
+
+    /* color surfaces */
+    --ds-color-surface: #f4f2f7;
+    --ds-color-on-surface: #101014;
+    --ds-color-border: rgb(22 18 44 / 0.12);
+    --ds-color-focus: var(--ds-palette-ink-900);
+    --ds-color-black: #000000;
+
+    /*
+     * density: subtree multiplier for type and space, 1 = as is.
+     * Device scaling is separate: scale.css steps the root font size.
+     */
+    --ds-density: 1;
+
+    /* type */
+    --ds-font-sans: Outfit, ui-sans-serif, system-ui, sans-serif;
+    --ds-font-weight-semibold: 600;
+    --ds-text-xs: calc(0.75rem * var(--ds-density));
+    --ds-text-sm: calc(0.875rem * var(--ds-density));
+    --ds-text-md: calc(1rem * var(--ds-density));
+    --ds-leading-xs: 1.3333;
+    --ds-leading-sm: 1.4286;
+    --ds-leading-md: 1.5;
+
+    /* shape */
+    --ds-radius-full: 100vmax;
+    --ds-hairline: 0.0625rem;
+    --ds-outline-width: 0.125rem;
+    --ds-outline-offset: 0.125rem;
+
+    /* space */
+    --ds-space: calc(0.25rem * var(--ds-density));
+    --ds-target-size: 2rem;
+
+    /* depth */
+    --ds-gloss: radial-gradient(
+      120% 150% at 88% -50%,
+      rgb(255 255 255 / 0.34),
+      transparent 58%
+    );
+    --ds-shadow-raised:
+      inset 0 0.0625rem 0 rgb(255 255 255 / 0.24),
+      0 0.875rem 1.5rem -0.875rem rgb(18 18 22 / 0.7);
+
+    /* motion */
+    --ds-duration-fast: 0.15s;
+    --ds-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --ds-motion-lift: -0.0625rem;
+    --ds-motion-sink: 0.0625rem;
+    --ds-motion-press-scale: 0.985;
+  }
+
+  /* Reduced motion lives here once. Components stay free of it. */
+  @media (prefers-reduced-motion: reduce) {
+    :where(:root, [data-ds-theme]) {
+      --ds-duration-fast: 0s;
+      --ds-motion-lift: 0rem;
+      --ds-motion-sink: 0rem;
+      --ds-motion-press-scale: 1;
+    }
+  }
+}
+
+/* ds-exception: role rules need tokens but must sit in ds.base (VAR-1A), kept beside the tokens they map */
+@layer ds.base {
+  :where([data-color='primary']) {
+    --ds-role: var(--ds-color-primary);
+    --ds-role-on: var(--ds-color-on-primary);
+  }
+}

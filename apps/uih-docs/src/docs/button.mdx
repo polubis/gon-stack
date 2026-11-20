@@ -1,70 +1,91 @@
 ---
 title: Button
-description: Native button with variants.
+description: Native button, solid primary, sizes s / m / l.
 order: 1
 ---
 
 import { Button } from '@repo/uih/button';
 
-export const VARIANTS = ['primary', 'secondary', 'ghost', 'danger'];
+export const SIZES = ['s', 'm', 'l'];
 
 # Button
 
-Native `<button>` with `variant` and `type` (defaults to `button`). Hooks: `data-ds-button`, `data-variant`.
+Native `<button>`. Axes: `appearance` (`solid`), `color` (`primary`), `size` (`s | m | l`, default `m`), plus `type` (default `button`).
+
+Hooks: `data-ds="button"`, `data-appearance`, `data-color`, `data-size`.
 
 ## Usage
 
 ```tsx
 import { Button } from '@repo/uih/button';
-import '@repo/uih/theme/button.css';
-
-<Button.Root variant="primary">Save</Button.Root>;
 ```
 
-## Variants
+```css
+@import '@repo/uih/themes/aurora/index.css';
+@import '@repo/uih/button/index.css';
+```
 
-<div class="not-prose flex flex-wrap gap-3">
-  {VARIANTS.map((variant) => (
-    <Button.Root variant={variant}>{variant}</Button.Root>
+```tsx
+<Button.Root size="m">Save</Button.Root>
+```
+
+## Sizes
+
+<div class="not-prose flex flex-wrap items-center gap-4" data-e2e="sizes">
+  {SIZES.map((size) => (
+    <Button.Root size={size} data-e2e={`size-${size}`}>
+      Size {size}
+    </Button.Root>
   ))}
 </div>
 
 ## Disabled
 
-<div class="not-prose flex flex-wrap gap-3">
-  {VARIANTS.map((variant) => (
-    <Button.Root variant={variant} disabled>
-      {variant}
+<div class="not-prose flex flex-wrap items-center gap-4">
+  {SIZES.map((size) => (
+    <Button.Root size={size} disabled>
+      Size {size}
     </Button.Root>
   ))}
 </div>
 
-## Override with Tailwind
+## Scaling
 
-`className` utilities beat every `ds` style, no `!important` needed. The theme lives in `@layer ds`, declared below `utilities`:
-
-```css
-@layer theme, base, ds, components, utilities;
-@import 'tailwindcss';
-@import '@repo/uih/theme/all.css';
-```
-
-Background, text color, padding, radius, border, font size and hover are all replaced below:
+The theme scales the whole page by device (see Responsive). For one dense area, wrap it in a theme scope and lower `--ds-density`:
 
 ```tsx
-<Button.Root
-  variant="primary"
-  className="rounded-full border-4 border-amber-500 bg-emerald-600 px-10 py-4 text-2xl font-bold text-amber-100 hover:bg-emerald-800"
->
-  Overridden
-</Button.Root>
+<div data-ds-theme style={{ '--ds-density': 0.8 }}>
+  <Button.Root>Compact</Button.Root>
+</div>
 ```
 
-<div class="not-prose flex flex-wrap gap-3">
+<div data-ds-theme class="not-prose flex flex-wrap items-center gap-4" style="--ds-density: 0.8" data-e2e="dense-buttons">
+  {SIZES.map((size) => (
+    <Button.Root size={size}>Dense {size}</Button.Root>
+  ))}
+</div>
+
+## Override
+
+Lowest tier first. Component token on any wrapper:
+
+```css
+.brand-zone {
+  --ds-button-bg: #7c3aed;
+  --ds-button-radius: 0.5rem;
+}
+```
+
+Or a Tailwind class, no `!important` (hooks are `:where()`, specificity 0):
+
+```tsx
+<Button.Root className="rounded-md bg-emerald-600">Overridden</Button.Root>
+```
+
+<div class="not-prose flex flex-wrap gap-4">
   <Button.Root
     data-e2e="tailwind-override"
-    variant="primary"
-    className="rounded-full border-4 border-amber-500 bg-emerald-600 px-10 py-4 text-2xl font-bold text-amber-100 hover:bg-emerald-800"
+    className="rounded-md bg-emerald-600 bg-none"
   >
     Overridden
   </Button.Root>

@@ -1,0 +1,43 @@
+/*
+ * Device scale. One number, --ds-scale, applied once on the root font size.
+ * Every rem in the page follows. Mobile first, rem = px / 16.
+ * Phone < 480 keeps the base. 480 large phone, 768 tablet, 1280 laptop, 1920 desktop.
+ * 640, 1024, 1440 inherit the step below, so nothing jumps.
+ * Media queries in rem ignore the root font size, breakpoints keep their px meaning.
+ * Consumer overrides with any unlayered `html { font-size }`, or skips this file.
+ */
+@layer ds.tokens {
+  :where(:root) {
+    --ds-scale: 0.875;
+  }
+
+  @media (min-width: 30rem) {
+    :where(:root) {
+      --ds-scale: 0.9375;
+    }
+  }
+
+  @media (min-width: 48rem) {
+    :where(:root) {
+      --ds-scale: 1;
+    }
+  }
+
+  @media (min-width: 80rem) {
+    :where(:root) {
+      --ds-scale: 1.0625;
+    }
+  }
+
+  @media (min-width: 120rem) {
+    :where(:root) {
+      --ds-scale: 1.125;
+    }
+  }
+}
+
+@layer ds.base {
+  :where(html) {
+    font-size: calc(100% * var(--ds-scale));
+  }
+}

@@ -10,28 +10,34 @@
   ],
   "exports": {
     "./button": {
-      "types": "./dist/button/button.d.ts",
-      "import": "./dist/button/button.js"
+      "types": "./dist/button/index.d.ts",
+      "import": "./dist/button/index.js"
     },
-    "./theme/tokens.css": "./dist/theme/tokens.css",
-    "./theme/button.css": "./dist/theme/button.css",
-    "./theme/all.css": "./dist/theme/all.css"
+    "./button/index.css": "./dist/button/index.css",
+    "./themes/*": "./dist/themes/*"
   },
   "license": "MIT",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && node scripts/copy-theme.mjs",
+    "build": "tsc -p tsconfig.build.json && node scripts/copy-css.mjs",
     "check-types": "tsc --noEmit",
     "lint": "eslint src --max-warnings 0",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:update-snapshots": "playwright test --update-snapshots",
     "test:coverage": "vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text"
+  },
+  "dependencies": {
+    "@repo/react-kit": "workspace:*"
   },
   "peerDependencies": {
     "react": "catalog:"
   },
   "devDependencies": {
+    "@playwright/test": "catalog:",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@repo/vibe-test": "workspace:*",
     "@testing-library/jest-dom": "catalog:",
     "@testing-library/react": "catalog:",
     "@testing-library/user-event": "catalog:",

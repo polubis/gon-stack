@@ -1,0 +1,122 @@
+@layer ds.tokens, ds.base, ds.components;
+
+@layer ds.components.button {
+  /* root: private tokens, layout, paint from private tokens */
+  :where([data-ds='button']) {
+    --_c: var(--ds-role);
+    --_on: var(--ds-role-on);
+    --_bg: var(--ds-button-bg, var(--_c));
+    --_fg: var(--ds-button-fg, var(--_on));
+    --_border: var(--ds-button-border-color, transparent);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ds-button-gap, calc(var(--ds-space) * 2));
+    box-sizing: border-box;
+    inline-size: var(--ds-button-inline-size, auto);
+    block-size: var(--_h);
+    min-block-size: var(--ds-target-size);
+    min-inline-size: var(--ds-target-size);
+    padding-inline: var(--_px);
+    border: var(--ds-hairline) solid var(--_border);
+    border-radius: var(--ds-button-radius, var(--ds-radius-full));
+    background-color: var(--_bg);
+    color: var(--_fg);
+    font-family: inherit;
+    font-size: var(--_fs);
+    font-weight: var(--ds-button-font-weight, var(--ds-font-weight-semibold));
+    line-height: var(--_lh);
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      transform var(--ds-duration-fast) var(--ds-ease),
+      background-color var(--ds-duration-fast) var(--ds-ease),
+      border-color var(--ds-duration-fast) var(--ds-ease),
+      box-shadow var(--ds-duration-fast) var(--ds-ease),
+      color var(--ds-duration-fast) var(--ds-ease);
+  }
+
+  /* appearances: read --ds-role, --ds-role-on only */
+  :where([data-ds='button'][data-appearance='solid']) {
+    background-image: var(--ds-button-gloss, var(--ds-gloss));
+    box-shadow: var(--ds-button-shadow, var(--ds-shadow-raised));
+  }
+
+  /* sizes: set --_h, --_px, --_fs, --_lh only */
+  :where([data-ds='button'][data-size='s']) {
+    --_h: calc(var(--ds-space) * 8);
+    --_px: calc(var(--ds-space) * 4);
+    --_fs: var(--ds-text-xs);
+    --_lh: var(--ds-leading-xs);
+  }
+
+  :where([data-ds='button'][data-size='m']) {
+    --_h: calc(var(--ds-space) * 11);
+    --_px: calc(var(--ds-space) * 5);
+    --_fs: var(--ds-text-sm);
+    --_lh: var(--ds-leading-sm);
+  }
+
+  :where([data-ds='button'][data-size='l']) {
+    --_h: calc(var(--ds-space) * 13);
+    --_px: calc(var(--ds-space) * 6);
+    --_fs: var(--ds-text-md);
+    --_lh: var(--ds-leading-md);
+  }
+
+  /* states */
+  :where([data-ds='button']:active:not(:disabled, [aria-disabled='true'])) {
+    transform: translateY(var(--ds-motion-sink))
+      scale(var(--ds-motion-press-scale));
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    :where(
+      [data-ds='button']:hover:not(:active, :disabled, [aria-disabled='true'])
+    ) {
+      transform: translateY(var(--ds-motion-lift));
+    }
+  }
+
+  @media (hover: hover) {
+    :where(
+      [data-ds='button'][data-appearance='solid']:hover:not(
+          :disabled,
+          [aria-disabled='true']
+        )
+    ) {
+      --_bg: var(
+        --ds-button-bg-hover,
+        color-mix(
+          in oklab,
+          var(--ds-button-bg, var(--_c)),
+          var(--ds-color-black) 60%
+        )
+      );
+    }
+  }
+
+  :where([data-ds='button']:focus-visible) {
+    outline: var(--ds-outline-width) solid var(--ds-color-focus);
+    outline-offset: var(--ds-outline-offset);
+  }
+
+  :where(
+    [data-ds='button']:disabled,
+    [data-ds='button'][aria-disabled='true']
+  ) {
+    opacity: var(--ds-button-disabled-opacity, 0.5);
+    cursor: not-allowed;
+  }
+
+  @media (forced-colors: active) {
+    :where([data-ds='button']) {
+      border-color: ButtonText;
+    }
+
+    :where([data-ds='button']:focus-visible) {
+      outline-color: Highlight;
+    }
+  }
+}

@@ -1,7 +1,19 @@
 @layer theme, base, ds, components, utilities;
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
-@import '@repo/uih/theme/all.css';
+@import '@repo/uih/themes/aurora/index.css';
+@import '@repo/uih/button/index.css';
+
+/* Outfit variable (OFL), self-hosted: the aurora theme's `--ds-font-sans`. */
+@font-face {
+  font-family: Outfit;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/outfit-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+2000-206F, U+20AC, U+2122;
+}
 
 @theme {
   --color-page: #f9fafb;

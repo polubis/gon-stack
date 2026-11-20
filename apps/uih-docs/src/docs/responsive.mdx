@@ -1,0 +1,84 @@
+---
+title: Responsive
+description: One scale token, stepped per breakpoint, for phone to desktop.
+order: 2
+---
+
+import { Button } from '@repo/uih/button';
+import { BreakpointTable } from '@/components/breakpoint-table';
+
+export const ROWS = [
+  { width: 320, rem: '20rem', device: 'Small phone', scale: '0.875', source: 'Base step' },
+  { width: 480, rem: '30rem', device: 'Large phone', scale: '0.9375', source: 'Own step' },
+  { width: 640, rem: '40rem', device: 'Phablet, small tablet portrait', scale: '0.9375', source: 'Inherits 480' },
+  { width: 768, rem: '48rem', device: 'Tablet', scale: '1', source: 'Own step' },
+  { width: 1024, rem: '64rem', device: 'Tablet landscape, small laptop', scale: '1', source: 'Inherits 768' },
+  { width: 1280, rem: '80rem', device: 'Laptop', scale: '1.0625', source: 'Own step' },
+  { width: 1440, rem: '90rem', device: 'Large laptop', scale: '1.0625', source: 'Inherits 1280' },
+  { width: 1920, rem: '120rem', device: 'Desktop', scale: '1.125', source: 'Own step' },
+];
+
+# Responsive
+
+Components have no media queries. The theme's `scale.css` sets one unitless token, `--ds-scale`, and applies it once to the root font size. Every `rem` on the page follows, the library's and yours. Mobile first: the base is the smallest, `min-width` queries in `rem` raise it.
+
+## Breakpoints
+
+Resize the window. The active row is highlighted.
+
+<BreakpointTable client:load rows={ROWS} />
+
+Below 320px the base step (`0.875`) applies. Media queries in `rem` ignore the root font size, so each breakpoint keeps its pixel meaning.
+
+## Default setup
+
+`@repo/uih/themes/aurora/scale.css`, part of `index.css`. Nothing to configure. Skip the file to keep a fixed size, or replace the steps:
+
+```css
+:where(:root) { --ds-scale: 0.875; }
+
+@media (min-width: 30rem) { :where(:root) { --ds-scale: 0.9375; } }
+@media (min-width: 48rem) { :where(:root) { --ds-scale: 1; } }
+@media (min-width: 80rem) { :where(:root) { --ds-scale: 1.0625; } }
+@media (min-width: 120rem) { :where(:root) { --ds-scale: 1.125; } }
+
+:where(html) { font-size: calc(100% * var(--ds-scale)); }
+```
+
+## Buttons at this width
+
+<div class="not-prose flex flex-wrap items-center gap-4" data-e2e="button:board-row">
+  <Button.Root size="s" data-e2e="button:board:s">Size s</Button.Root>
+  <Button.Root size="m" data-e2e="button:board:m">Size m</Button.Root>
+  <Button.Root size="l" data-e2e="button:board:l">Size l</Button.Root>
+</div>
+
+## Change the steps
+
+Your CSS wins over the theme (the theme is layered, specificity 0). Own one more breakpoint:
+
+```css
+@media (min-width: 64rem) {
+  :root { --ds-scale: 1.03125; }
+}
+```
+
+Or take over the root size completely:
+
+```css
+html { font-size: 100%; }
+```
+
+## Dense area
+
+`--ds-scale` is root only. For one area use `--ds-density`, a multiplier on type and space (default `1`). Tokens are computed where declared, so the area needs `data-ds-theme`:
+
+```html
+<div data-ds-theme style="--ds-density: 0.8">...</div>
+```
+
+<div data-ds-theme class="not-prose flex flex-wrap items-center gap-4" style="--ds-density: 0.8" data-e2e="responsive-dense">
+  <Button.Root size="s">Dense s</Button.Root>
+  <Button.Root size="m">Dense m</Button.Root>
+  <Button.Root size="l">Dense l</Button.Root>
+</div>

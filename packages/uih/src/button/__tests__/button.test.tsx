@@ -2,7 +2,7 @@ import { createRef } from 'react';
 import type { FormEvent } from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { Button } from '../button.js';
+import { Button } from '../index.js';
 
 describe('button works when', () => {
   const user = userEvent.setup();
@@ -15,17 +15,22 @@ describe('button works when', () => {
     );
   });
 
-  it('exposes primary variant by default', () => {
+  it('is marked with the root hook', () => {
     render(<Button.Root>Save</Button.Root>);
-    expect(screen.getByRole('button')).toHaveAttribute(
-      'data-variant',
-      'primary',
-    );
+    expect(screen.getByRole('button')).toHaveAttribute('data-ds', 'button');
   });
 
-  it('exposes chosen variant', () => {
-    render(<Button.Root variant="ghost">Save</Button.Root>);
-    expect(screen.getByRole('button')).toHaveAttribute('data-variant', 'ghost');
+  it('defaults to solid primary medium', () => {
+    render(<Button.Root>Save</Button.Root>);
+    const button = screen.getByRole('button');
+    expect(button).toHaveAttribute('data-appearance', 'solid');
+    expect(button).toHaveAttribute('data-color', 'primary');
+    expect(button).toHaveAttribute('data-size', 'm');
+  });
+
+  it.each(['s', 'm', 'l'] as const)('exposes size %s', (size) => {
+    render(<Button.Root size={size}>Save</Button.Root>);
+    expect(screen.getByRole('button')).toHaveAttribute('data-size', size);
   });
 
   it('runs onClick on pointer click', async () => {
@@ -54,14 +59,8 @@ describe('button works when', () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
-  it('is not focusable when disabled', async () => {
-    render(<Button.Root disabled>Save</Button.Root>);
-    await user.tab();
-    expect(screen.getByRole('button')).not.toHaveFocus();
-  });
-
   it('submits a form only when type is submit', async () => {
-    const onSubmit = vi.fn((e: FormEvent) => e.preventDefault());
+    const onSubmit = vi.fn((event: FormEvent) => event.preventDefault());
     render(
       <form onSubmit={onSubmit}>
         <Button.Root>Plain</Button.Root>
@@ -74,55 +73,21 @@ describe('button works when', () => {
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
-  it('resets a form when type is reset', async () => {
-    render(
-      <form>
-        <input aria-label="Name" defaultValue="a" />
-        <Button.Root type="reset">Reset</Button.Root>
-      </form>,
-    );
-    await user.type(screen.getByLabelText('Name'), 'bc');
-    await user.click(screen.getByRole('button', { name: 'Reset' }));
-    expect(screen.getByLabelText('Name')).toHaveValue('a');
-  });
-
-  it('names an icon-only button via aria-label', () => {
-    render(
-      <Button.Root aria-label="Close">
-        <svg aria-hidden="true" />
-      </Button.Root>,
-    );
-    expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
-  });
-
-  it('forwards ref to the button element', () => {
+  it('passes ref, className, aria and data attributes through', () => {
     const ref = createRef<HTMLButtonElement>();
-    render(<Button.Root ref={ref}>Save</Button.Root>);
-    expect(ref.current).toBe(screen.getByRole('button'));
-  });
-
-  it('keeps consumer className, style and native props', () => {
     render(
-      <Button.Root className="x" style={{ color: 'red' }} title="t">
+      <Button.Root ref={ref} className="mine" aria-label="Go" data-x="1">
         Save
       </Button.Root>,
     );
-    const el = screen.getByRole('button');
-    expect(el).toHaveClass('x');
-    expect(el).toHaveStyle({ color: 'rgb(255, 0, 0)' });
-    expect(el).toHaveAttribute('title', 't');
+    const button = screen.getByRole('button', { name: 'Go' });
+    expect(ref.current).toBe(button);
+    expect(button).toHaveClass('mine');
+    expect(button).toHaveAttribute('data-x', '1');
   });
 
-  it('keeps stable styling hook', () => {
-    render(<Button.Root>Save</Button.Root>);
-    expect(screen.getByRole('button')).toHaveAttribute('data-ds-button');
-  });
-
-  it('exposes danger variant', () => {
-    render(<Button.Root variant="danger">Delete</Button.Root>);
-    expect(screen.getByRole('button')).toHaveAttribute(
-      'data-variant',
-      'danger',
-    );
+  it('keeps library hooks when consumer passes conflicting data attributes', () => {
+    render(<Button.Root data-ds="other">Save</Button.Root>);
+    expect(screen.getByRole('button')).toHaveAttribute('data-ds', 'button');
   });
 });

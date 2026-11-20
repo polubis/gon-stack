@@ -22,10 +22,14 @@ export default defineConfig({
     resolve: {
       alias: [
         {
-          find: '@repo/uih/button',
-          replacement: `${uihSrc}/button/button.tsx`,
+          find: /^@repo\/uih\/button$/,
+          replacement: `${uihSrc}/button/index.tsx`,
         },
-        { find: '@repo/uih/theme', replacement: `${uihSrc}/theme` },
+        {
+          find: /^@repo\/uih\/button\/index\.css$/,
+          replacement: `${uihSrc}/button/index.css`,
+        },
+        { find: /^@repo\/uih\/themes\//, replacement: `${uihSrc}/themes/` },
       ],
     },
   },
