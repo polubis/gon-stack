@@ -1,46 +1,40 @@
 # @repo/uih
 
-Headless React UI. Skeleton + `Button`.
+Headless React UI + optional plain-CSS theme. Rules: [`docs/`](docs/0-vision.md).
 
-## Conventions
+## Components
 
-1. Native element first (`Button.Root` -> `<button>`).
-2. Parts API `Component.Part`. Context only when parts coordinate.
-3. Native props + `ref` forwarded (React 19, `ComponentProps`).
-4. Hooks: `data-ds-<name>` slot, `data-variant`, state `data-*`. No CSS import needed.
-5. No Tailwind in components. Consumers pass `className`.
-6. Theme = optional plain CSS, one file per component, in `@layer ds.*`, selectors in `:where()`.
-7. Tokens `--ds-<component>-<part>`; defaults live in `var()` fallbacks (never set on each element), so ancestor override works.
+- `Button` - axes `appearance` (`solid`), `color` (`primary`), `size` (`s | m | l`).
 
 ## Imports
 
 ```ts
 import { Button } from '@repo/uih/button';
-import '@repo/uih/theme/tokens.css'; // optional
-import '@repo/uih/theme/button.css'; // optional
-import '@repo/uih/theme/all.css'; // bundle
 ```
 
-## Override precedence (low -> high)
+```css
+@import '@repo/uih/themes/aurora/index.css'; /* tokens + reset + typography */
+@import '@repo/uih/button/index.css';
+```
 
-1. `var()` fallback in `button.css`
-2. `tokens.css` global (`:root`)
-3. Subtree: `[data-ds-theme]` wrapper / any ancestor sets `--ds-*`
-4. Single instance: `style={{ '--ds-button-primary-bg': '...' }}`
-5. Unlayered consumer CSS / `className` (beats all `@layer ds.*`, no `!important`)
+Theme files are separate units: `themes/aurora/{tokens,scale,reset,typography,animations,index}.css`. `scale.css` (device scale on the root font size) is optional.
 
-## Not yet
+## Tests
 
-Theme schema/runtime/editor, browser tests, other components.
+- `pnpm test` unit. `pnpm test:e2e` builds uih-docs and checks the scale board at every breakpoint (snapshot per platform, `pnpm test:e2e:update-snapshots` to refresh).
+
+## Override ladder (least to most invasive)
+
+1. Semantic token on a `[data-ds-theme]` scope: `--ds-color-primary`
+2. Component token on any wrapper: `--ds-button-{bg,fg,border-color,radius,gap,shadow,gloss}`
+3. Hook selector: `[data-ds='button'][data-size='l']`
+4. `className` / `style` (all selectors are `:where()`, specificity 0)
 
 ## Tailwind app setup
-
-Declare layer order before `@import 'tailwindcss'` so ds sits above preflight, below utilities (`className` utilities win):
 
 ```css
 @layer theme, base, ds, components, utilities;
 @import 'tailwindcss';
-@import '@repo/uih/theme/button.css';
+@import '@repo/uih/themes/aurora/index.css';
+@import '@repo/uih/button/index.css';
 ```
-
-Tokens: see `src/theme/button.css` (`--ds-button-{radius,px,py,gap,font-size,font-weight,line-height,cursor,disabled-opacity,focus}` and `--ds-button-<variant>-{bg,fg,border,border-width,bg-hover}`). Variants: `primary | secondary | ghost | danger`. Reference: `apps/parka/src/core/style/index.css`.

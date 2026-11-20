@@ -8,7 +8,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@repo/uih/button": ["../../packages/uih/src/button/button.tsx"]
+      "@repo/uih/button": ["../../packages/uih/src/button/index.tsx"]
     }
   }
 }

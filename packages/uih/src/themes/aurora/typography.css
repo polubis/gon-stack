@@ -1,0 +1,6 @@
+@layer ds.base {
+  :where(body) {
+    font-family: var(--ds-font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}

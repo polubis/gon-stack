@@ -1388,13 +1388,23 @@ importers:
         version: 6.0.3
 
   packages/uih:
+    dependencies:
+      '@repo/react-kit':
+        specifier: workspace:*
+        version: link:../react-kit
     devDependencies:
+      '@playwright/test':
+        specifier: 'catalog:'
+        version: 1.64.0
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      '@repo/vibe-test':
+        specifier: workspace:*
+        version: link:../vibe-test
       '@testing-library/jest-dom':
         specifier: 'catalog:'
         version: 6.10.0(@testing-library/dom@10.4.2)
