@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "@playwright/test": "catalog:",
+    "@repo/ecosystem-resources": "workspace:*",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@repo/vibe-test": "workspace:*",

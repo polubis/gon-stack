@@ -14,7 +14,7 @@ pnpm install
 pnpm dev
 ```
 
-Access the app at `http://localhost:4321`
+Access the app at `http://localhost:4301`
 
 ## Build
 

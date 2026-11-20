@@ -27,6 +27,7 @@
     "typescript": "catalog:"
   },
   "devDependencies": {
+    "@repo/ecosystem-resources": "workspace:*",
     "@repo/eslint-config": "workspace:*",
     "eslint": "catalog:"
   }

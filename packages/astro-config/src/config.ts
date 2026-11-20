@@ -7,14 +7,18 @@ import { defineConfig } from 'astro/config';
 export type CreateAstroConfigOptions = {
   /** Canonical site URL used by sitemap and absolute URL generation. */
   site: string;
+  /** Dev-server port from `@repo/ecosystem-resources/ports`. Never auto-shifts when busy. */
+  port: number;
 };
 
-export const createAstroConfig = ({ site }: CreateAstroConfigOptions) =>
+export const createAstroConfig = ({ site, port }: CreateAstroConfigOptions) =>
   defineConfig({
     site,
     trailingSlash: 'always',
 
     output: 'server',
+
+    server: { port },
 
     devToolbar: {
       enabled: false,
@@ -55,6 +59,8 @@ export const createAstroConfig = ({ site }: CreateAstroConfigOptions) =>
     integrations: [react(), sitemap()],
 
     vite: {
+      // A busy port must fail loudly, not hop to another one and break callbacks.
+      server: { strictPort: true },
       plugins: [tailwindcss()],
       optimizeDeps: {
         exclude: ['msw', 'msw/node', '@mswjs/interceptors'],

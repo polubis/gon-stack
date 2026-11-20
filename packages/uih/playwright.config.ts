@@ -1,7 +1,8 @@
 import { defineConfig } from '@playwright/test';
+import { ports } from '@repo/ecosystem-resources/ports';
 import { createPlaywrightConfig } from '@repo/vibe-test';
 
-const port = 4327;
+const port = ports.e2e.uih;
 const host = '127.0.0.1';
 const base = createPlaywrightConfig({
   port,

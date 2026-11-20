@@ -63,6 +63,7 @@ Read before routing:
 
 ## Flow
 
+0. Main agent only: run \`pnpm reset\` once before any work (white-page cleanup). Never pass it to ${ref('worker')} or any subagent.
 1. Vague ask: run ${ref('clarify')} first, until the spec is airtight.
 2. Risky change (wide blast, data, auth, migrations): run ${ref('sloth')} — one tiny change, dev confirms each.
 3. Pick the skills and rules that fit the scope; pass them to the worker by path.
@@ -107,6 +108,7 @@ Read before work:
 ## Rules
 
 - **Never delegate** (no workers, no subagents, no ${ref('doctor')}).
+- **Never run \`pnpm reset\`**: it is reserved for the main agent and kills ports/databases other agents may use.
 - **Never commit** (or push). Commit only after dev accepts, and not by worker.
 - Ping dev on ambiguity, missing rules/skills in the catalog, or blockers.
 
@@ -125,6 +127,8 @@ Read before work:
       doc: () => `# Doctor
 
 Takes the worker’s output. You finish quality, proof, and session closure.
+
+Never run \`pnpm reset\` (reserved for the main agent).
 
 ## 1. Rules audit
 
@@ -326,6 +330,14 @@ Skill ${ref('evidence')}, key = task id, out \`.evidences/<task-id>/\`.
       },
       'way-of-work-tests': {
         doc: 'After each work add tests: e2e, unit, integration, whatever fits',
+      },
+      'way-of-work-reset': {
+        doc: 'Main agent only, never subagents: before ANY work run `pnpm reset` once (white-page cleanup: wipes `.evidences` and Playwright output, stops databases and wipes their data, kills every port of the ecosystem registry). Subagents never run it. `pnpm reset --dry-run` shows the plan',
+      },
+    },
+    ecosystem: {
+      'ecosystem-ports-registry': {
+        doc: 'Every local port (dev, e2e, Supabase) is defined only in `packages/ecosystem-resources/src/ports.ts`: dedicated range per group, unique across the repo, validated on load. Never hardcode a port. Generated files (`supabase/config.toml`, `.env.example`) change via `pnpm ecosystem:sync`, drift fails `pnpm ecosystem:check`',
       },
     },
     git: {

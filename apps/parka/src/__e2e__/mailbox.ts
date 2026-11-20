@@ -1,9 +1,10 @@
 import { expect, type Page } from '@playwright/test';
+import { ports } from '@repo/ecosystem-resources/ports';
 import { APP_ROUTER } from '@/shared/router/routes';
 import type { Ctx } from './test';
 
-/** Local Supabase mail server (Mailpit) web/API port from `supabase/config.toml`. */
-const MAILBOX_URL = 'http://localhost:54324';
+/** Local Supabase mail server (Mailpit) web/API, port from the ecosystem registry. */
+const MAILBOX_URL = `http://localhost:${ports['supabase-parka'].mail}`;
 const CONFIRM_LINK = /https?:\/\/[^\s"<>]+\/auth\/v1\/verify\?[^\s"<>]+/;
 
 type Message = { ID: string };

@@ -1,6 +1,7 @@
 // @ts-check
 import process from 'node:process';
 import { createAstroConfig } from '@repo/astro-config';
+import { ports } from '@repo/ecosystem-resources/ports';
 import pkg from './package.json' with { type: 'json' };
 
 /** `package.json` version + commit, so every deploy yields a new version. */
@@ -8,6 +9,7 @@ const APP_VERSION = `${pkg.version}+${process.env.GITHUB_SHA?.slice(0, 7) ?? 'de
 
 const config = createAstroConfig({
   site: 'https://parka.com',
+  port: ports.dev.parka,
 });
 
 export default {
