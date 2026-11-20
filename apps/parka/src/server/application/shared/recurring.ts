@@ -148,7 +148,8 @@ export const materializeRecurring = async (
           occurrence_date: day,
         })),
         {
-          onConflict: 'user_id,recurring_id,occurrence_date',
+          // id is rule:day, so pk and occurrence key match; one arbiter, parallel race stays no-op
+          onConflict: 'user_id,id',
           ignoreDuplicates: true,
         },
       )
