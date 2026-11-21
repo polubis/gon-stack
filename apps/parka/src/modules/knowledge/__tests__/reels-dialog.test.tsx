@@ -53,6 +53,32 @@ describe('reels editor', () => {
     });
   });
 
+  it('edits a reel on the full screen and keeps the text', async () => {
+    const user = userEvent.setup();
+    open();
+
+    const dialog = within(
+      await screen.findByRole('dialog', { name: 'Rolki: Phrasal verbs' }),
+    );
+    await user.click(
+      await dialog.findByRole('button', {
+        name: 'Edytuj na pełnym ekranie: Rolka 1',
+      }),
+    );
+    const editor = await screen.findByRole('textbox', {
+      name: 'Rolka 1 w pełnym ekranie',
+    });
+    await user.type(editor, ' pełna');
+    await user.click(screen.getByRole('button', { name: 'Gotowe' }));
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('textbox', { name: 'Rolka 1 w pełnym ekranie' }),
+      ).toBeNull(),
+    );
+    expect(dialog.getByLabelText('Rolka 1')).toHaveValue('Pierwsza pełna');
+  });
+
   it('asks before deleting a reel', async () => {
     const user = userEvent.setup();
     open();

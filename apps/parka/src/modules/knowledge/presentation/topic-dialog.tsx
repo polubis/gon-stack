@@ -4,7 +4,8 @@ import { cn } from '@repo/react-kit/cn';
 import { dayLabel } from '@/shared/date/date';
 import { isDay } from '@/shared/period/period';
 import { closeModal, openModal } from '@/shared/router/modal-stack';
-import { ClearableInput, ClearableTextarea } from '@/shared/ui/clearable';
+import { ClearableInput } from '@/shared/ui/clearable';
+import { ExpandableTextarea } from '@/shared/ui/expandable-textarea';
 import { Button, Field, Input, Select } from '@/shared/ui/controls';
 import {
   DESCRIPTION_MAX_LENGTH,
@@ -97,7 +98,9 @@ export const TopicDialog = ({ modal, topic, catalogId, defaultDay }: Props) => {
           />
         </Field>
         <Field label="Opis">
-          <ClearableTextarea
+          <ExpandableTextarea
+            modal="topic-description-editor"
+            title="Opis lekcji"
             data-e2e="knowledge:topic-description"
             rows={3}
             value={description}

@@ -44,9 +44,6 @@ const ENTER: Record<Motion, string> = {
 
 const NAV_BUTTON =
   'grid size-11 shrink-0 place-items-center rounded-full text-ink transition-colors hover:bg-hover disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
-const LESSON_BUTTON =
-  'flex min-h-11 min-w-0 items-center gap-1 rounded-full px-3 text-xs font-medium text-ink-soft transition-colors hover:bg-hover disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
-
 const atEdge = (el: HTMLElement | null, edge: 'top' | 'bottom'): boolean =>
   !el ||
   (edge === 'top'
@@ -211,15 +208,17 @@ export const ReelViewer = ({
       axis: null,
       id: event.pointerId,
     };
-    event.currentTarget.setPointerCapture(event.pointerId);
   };
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     const g = gesture.current;
     if (!g || g.id !== event.pointerId) return;
     const dx = event.clientX - g.x;
     const dy = event.clientY - g.y;
-    if (!g.axis && Math.max(Math.abs(dx), Math.abs(dy)) > AXIS_LOCK)
+    if (!g.axis && Math.max(Math.abs(dx), Math.abs(dy)) > AXIS_LOCK) {
       g.axis = Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
+      // Capture only once it is a swipe, so a long press can still select text.
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
     if (g.axis === 'x') setDrag({ x: dx, y: 0 });
     else if (g.axis === 'y') setDrag({ x: 0, y: dy });
   };
@@ -303,7 +302,7 @@ export const ReelViewer = ({
             onPointerMove={onPointerMove}
             onPointerUp={onPointerEnd}
             onPointerCancel={onPointerEnd}
-            className="relative min-h-0 flex-1 touch-pan-y select-none overflow-hidden"
+            className="relative min-h-0 flex-1 touch-pan-y select-text overflow-hidden"
           >
             {failed ? (
               <div
@@ -380,6 +379,17 @@ export const ReelViewer = ({
                         To była ostatnia lekcja.
                       </p>
                     )}
+                    {prev ? (
+                      <Button
+                        variant="ghost"
+                        className="w-auto px-4 py-2"
+                        data-e2e="knowledge:viewer-prev-lesson-cta"
+                        onClick={() => goLesson(prev, 'lesson-prev')}
+                      >
+                        <ChevronUp className="size-4" aria-hidden="true" />
+                        Poprzednia lekcja: {prev.title}
+                      </Button>
+                    ) : null}
                     <Button
                       variant="ghost"
                       className="w-auto px-4 py-2"
@@ -417,7 +427,7 @@ export const ReelViewer = ({
 
           <nav
             aria-label="Nawigacja po rolkach"
-            className="mx-auto flex w-full max-w-2xl flex-col gap-1 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2"
+            className="mx-auto flex w-full max-w-2xl flex-col px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2"
           >
             <div className="flex items-center justify-between gap-2">
               <button
@@ -445,28 +455,6 @@ export const ReelViewer = ({
                 className={NAV_BUTTON}
               >
                 <ChevronRight className="size-6" aria-hidden="true" />
-              </button>
-            </div>
-            <div className="flex items-center justify-between gap-2">
-              <button
-                type="button"
-                data-e2e="knowledge:viewer-prev-lesson"
-                disabled={!prev || !onFirstReel}
-                onClick={() => goLesson(prev, 'lesson-prev')}
-                className={LESSON_BUTTON}
-              >
-                <ChevronUp className="size-4 shrink-0" aria-hidden="true" />
-                <span className="truncate">Poprzednia lekcja</span>
-              </button>
-              <button
-                type="button"
-                data-e2e="knowledge:viewer-next-lesson"
-                disabled={!next || !onLastReel}
-                onClick={() => goLesson(next, 'lesson-next')}
-                className={LESSON_BUTTON}
-              >
-                <span className="truncate">Następna lekcja</span>
-                <ChevronDown className="size-4 shrink-0" aria-hidden="true" />
               </button>
             </div>
           </nav>

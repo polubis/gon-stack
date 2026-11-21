@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { closeModal } from '@/shared/router/modal-stack';
-import { ClearableInput, ClearableTextarea } from '@/shared/ui/clearable';
+import { ClearableInput } from '@/shared/ui/clearable';
+import { ExpandableTextarea } from '@/shared/ui/expandable-textarea';
 import { Field, Select } from '@/shared/ui/controls';
 import {
   CATALOG_NAME_MAX_LENGTH,
@@ -77,7 +78,9 @@ export const CatalogDialog = ({
           />
         </Field>
         <Field label="Opis">
-          <ClearableTextarea
+          <ExpandableTextarea
+            modal="catalog-description-editor"
+            title="Opis katalogu"
             data-e2e="knowledge:catalog-description"
             rows={3}
             value={description}
