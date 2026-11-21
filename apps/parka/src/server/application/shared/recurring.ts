@@ -118,88 +118,100 @@ export const materializeRecurring = async (
   userId: string,
   today: string,
 ): Promise<void> => {
-  const { data: rows, error } = await db
-    .from('recurring_expenses')
-    .select('*')
-    .eq('active', true);
+  // Rules and their products are independent reads: one round trip.
+  const [{ data: rows, error }, ruleItems] = await Promise.all([
+    db.from('recurring_expenses').select('*').eq('active', true),
+    loadRuleItems(db),
+  ]);
   if (error) throw fromSupabaseError(error);
 
-  const ruleItems = await loadRuleItems(db);
-  const accrued: NotificationEvent[] = [];
-  for (const row of rows) {
-    const due = dueOccurrences(toRule(row), today);
-    const newest = due.at(-1);
-    if (newest === undefined) continue;
+  // Read once, only when some rule accrues, and shared by every rule.
+  let namesLoad: ReturnType<typeof loadCategoryNames> | undefined;
+  const categoryNames = () => (namesLoad ??= loadCategoryNames(db));
 
-    const { data: inserted, error: insertError } = await db
-      .from('expenses')
-      .upsert(
-        due.map((day) => ({
-          user_id: userId,
-          id: `${row.id}:${day}`,
-          merchant: row.name,
-          date: occurrenceInstant(day),
-          amount: row.cost,
-          category_id: row.category_id,
-          payment_method: row.payment_method,
-          is_bill: true,
-          source: 'manual',
-          recurring_id: row.id,
-          occurrence_date: day,
-        })),
-        {
-          // id is rule:day, so pk and occurrence key match; one arbiter, parallel race stays no-op
-          onConflict: 'user_id,id',
-          ignoreDuplicates: true,
-        },
-      )
-      .select('occurrence_date');
-    if (insertError) throw fromSupabaseError(insertError);
+  // Rules are independent: one round trip chain per rule, all in parallel.
+  // Events keep the rule order.
+  const events = await Promise.all(
+    rows.map(async (row): Promise<NotificationEvent | null> => {
+      const due = dueOccurrences(toRule(row), today);
+      const newest = due.at(-1);
+      if (newest === undefined) return null;
 
-    // Only rows this call really created: a parallel request that lost the race adds none.
-    const days = inserted
-      .map((e) => e.occurrence_date)
-      .filter((day): day is string => day !== null)
-      .sort();
-
-    // Each new expense gets its own copy of the products, so a later edit of the rule leaves it as is.
-    const products = ruleItems.filter((i) => i.recurring_id === row.id);
-    if (products.length > 0 && days.length > 0) {
-      const { error: itemsError } = await db.from('receipt_items').upsert(
-        days.flatMap((day) =>
-          products.map((it) => ({
+      const { data: inserted, error: insertError } = await db
+        .from('expenses')
+        .upsert(
+          due.map((day) => ({
             user_id: userId,
-            id: `${row.id}:${day}:${it.id}`,
-            expense_id: `${row.id}:${day}`,
-            name: it.name,
-            unit_price: it.unit_price,
-            quantity: it.quantity,
-            discount: it.discount,
-            category_id: it.category_id,
+            id: `${row.id}:${day}`,
+            merchant: row.name,
+            date: occurrenceInstant(day),
+            amount: row.cost,
+            category_id: row.category_id,
+            payment_method: row.payment_method,
+            is_bill: true,
+            source: 'manual',
+            recurring_id: row.id,
+            occurrence_date: day,
           })),
-        ),
-        { onConflict: 'user_id,id', ignoreDuplicates: true },
-      );
-      if (itemsError) throw fromSupabaseError(itemsError);
-    }
-    if (days.length > 0) {
-      accrued.push({
-        kind: 'recurring-accrued',
-        payload: {
-          rule: recurringSnapshot(row, await loadCategoryNames(db)),
-          days,
-        },
-      });
-    }
+          {
+            // id is rule:day, so pk and occurrence key match; one arbiter, parallel race stays no-op
+            onConflict: 'user_id,id',
+            ignoreDuplicates: true,
+          },
+        )
+        .select('occurrence_date');
+      if (insertError) throw fromSupabaseError(insertError);
 
-    // Only forward: a slower parallel request must not roll the mark back.
-    const { error: markError } = await db
-      .from('recurring_expenses')
-      .update({ last_materialized_date: newest })
-      .eq('id', row.id)
-      .or(`last_materialized_date.is.null,last_materialized_date.lt.${newest}`);
-    if (markError) throw fromSupabaseError(markError);
-  }
+      // Only rows this call really created: a parallel request that lost the race adds none.
+      const days = inserted
+        .map((e) => e.occurrence_date)
+        .filter((day): day is string => day !== null)
+        .sort();
 
+      // Each new expense gets its own copy of the products, so a later edit of the rule leaves it as is.
+      const products = ruleItems.filter((i) => i.recurring_id === row.id);
+      if (products.length > 0 && days.length > 0) {
+        const { error: itemsError } = await db.from('receipt_items').upsert(
+          days.flatMap((day) =>
+            products.map((it) => ({
+              user_id: userId,
+              id: `${row.id}:${day}:${it.id}`,
+              expense_id: `${row.id}:${day}`,
+              name: it.name,
+              unit_price: it.unit_price,
+              quantity: it.quantity,
+              discount: it.discount,
+              category_id: it.category_id,
+            })),
+          ),
+          { onConflict: 'user_id,id', ignoreDuplicates: true },
+        );
+        if (itemsError) throw fromSupabaseError(itemsError);
+      }
+      const event: NotificationEvent | null =
+        days.length > 0
+          ? {
+              kind: 'recurring-accrued',
+              payload: {
+                rule: recurringSnapshot(row, await categoryNames()),
+                days,
+              },
+            }
+          : null;
+
+      // Only forward: a slower parallel request must not roll the mark back.
+      const { error: markError } = await db
+        .from('recurring_expenses')
+        .update({ last_materialized_date: newest })
+        .eq('id', row.id)
+        .or(
+          `last_materialized_date.is.null,last_materialized_date.lt.${newest}`,
+        );
+      if (markError) throw fromSupabaseError(markError);
+      return event;
+    }),
+  );
+
+  const accrued = events.filter((e): e is NotificationEvent => e !== null);
   await tryRecordNotifications(db, userId, accrued);
 };
