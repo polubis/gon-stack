@@ -212,6 +212,15 @@ export type McpGateway = {
     patch: KnowledgeTopicPatch,
   ) => Promise<unknown>;
   deleteKnowledgeTopic: (id: string) => Promise<unknown>;
+  /** Topic, tags and reels in one transaction; null when the catalog is not found. */
+  createKnowledgeLesson: (input: {
+    catalogId: string;
+    title: string;
+    description: string | null;
+    studyDay: string | null;
+    tags: string[];
+    reels: string[];
+  }) => Promise<unknown>;
   createKnowledgeReel: (topicId: string, body: string) => Promise<unknown>;
   updateKnowledgeReel: (
     id: string,
@@ -504,6 +513,18 @@ export const createSupabaseGateway = (token: string): McpGateway => {
     deleteKnowledgeTopic: async (p_id) =>
       dropKnowledgeFiles(
         unwrap(await db.rpc('mcp_delete_knowledge_topic', { p_token, p_id })),
+      ),
+    createKnowledgeLesson: async (l) =>
+      unwrap(
+        await db.rpc('mcp_create_knowledge_lesson', {
+          p_token,
+          p_catalog_id: l.catalogId,
+          p_title: l.title,
+          p_description: l.description ?? undefined,
+          p_study_day: l.studyDay ?? undefined,
+          p_tag_names: l.tags,
+          p_reels: l.reels,
+        }),
       ),
     createKnowledgeReel: async (p_topic_id, p_body) =>
       unwrap(

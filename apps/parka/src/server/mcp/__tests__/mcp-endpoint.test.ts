@@ -320,6 +320,24 @@ const fakeGateway = (
       await record('deleteKnowledgeTopic', id);
       return id === K.topic;
     },
+    createKnowledgeLesson: async (l) => {
+      await record('createKnowledgeLesson', l);
+      if (l.catalogId !== K.catalog) return null;
+      if (l.title === 'Broken') throw new McpInputError('Invalid lesson');
+      return {
+        topic: {
+          ...KNOWLEDGE_TOPIC,
+          title: l.title,
+          studyDay: l.studyDay,
+          reelCount: l.reels.length,
+        },
+        reels: l.reels.map((body, position) => ({
+          ...KNOWLEDGE_REEL,
+          body,
+          position,
+        })),
+      };
+    },
     createKnowledgeReel: async (topicId, body) => {
       await record('createKnowledgeReel', topicId, body);
       return topicId === K.topic ? { ...KNOWLEDGE_REEL, body } : null;
@@ -459,6 +477,7 @@ describe('mcp tools list', () => {
       'create_category',
       'create_knowledge_catalog',
       'create_knowledge_category',
+      'create_knowledge_lesson',
       'create_knowledge_reel',
       'create_knowledge_tag',
       'create_knowledge_topic',
@@ -472,6 +491,7 @@ describe('mcp tools list', () => {
       'delete_knowledge_topic',
       'delete_task',
       'delete_task_attachment',
+      'get_course_authoring_guide',
       'get_expense',
       'get_knowledge_topic',
       'get_task',
@@ -1263,6 +1283,166 @@ describe('mcp knowledge', () => {
       body: '# Policies v2',
     });
     expect(done.json.result.structuredContent).toMatchObject({ done: true });
+  });
+
+  it('tells the model to read the guide and build lessons with the lesson tool', async () => {
+    const { rpc } = setup();
+
+    const { json } = await rpc('initialize', {
+      protocolVersion: '2025-06-18',
+    });
+
+    const text = (json.result as unknown as { instructions: string })
+      .instructions;
+    expect(text).toContain('get_course_authoring_guide');
+    expect(text).toContain('create_knowledge_lesson');
+  });
+
+  it('returns the guide with the Polish note for pl', async () => {
+    const { rpc, calls } = setup();
+
+    const { json } = await call(rpc, 'get_course_authoring_guide', {
+      language: 'pl-PL',
+    });
+
+    const { markdown } = json.result.structuredContent as unknown as {
+      markdown: string;
+    };
+    expect(markdown).toContain('Course authoring guide');
+    expect(markdown).toContain('"Ty"');
+    expect(markdown).toContain('Voice reference (do not copy)');
+    expect(calls).toEqual([]);
+  });
+
+  it('returns the guide in English by default', async () => {
+    const { rpc } = setup();
+
+    const { json } = await call(rpc, 'get_course_authoring_guide', {
+      subject: 'Supabase RLS',
+    });
+
+    const { markdown, language } = json.result.structuredContent as unknown as {
+      markdown: string;
+      language: string;
+    };
+    expect(language).toBe('en');
+    expect(markdown).toContain('casual "you"');
+    expect(markdown).toContain('Supabase RLS');
+  });
+
+  it('gives a generic note for an unknown language', async () => {
+    const { rpc } = setup();
+
+    const { json } = await call(rpc, 'get_course_authoring_guide', {
+      language: 'xx',
+    });
+
+    const { markdown } = json.result.structuredContent as unknown as {
+      markdown: string;
+    };
+    expect(markdown).toContain('Do not translate jokes literally');
+  });
+
+  it('refuses a language that is not a BCP-47 code', async () => {
+    const { rpc } = setup();
+
+    const { json } = await call(rpc, 'get_course_authoring_guide', {
+      language: 'not a code!',
+    });
+
+    expect(json.result.isError).toBe(true);
+  });
+
+  it('creates a lesson with its reels in the given order and a study day', async () => {
+    const { rpc, calls, notices } = setup();
+
+    const { json } = await call(rpc, 'create_knowledge_lesson', {
+      catalogId: K.catalog,
+      title: 'Lesson',
+      studyDay: '2026-11-30',
+      tags: ['sql', 'rls'],
+      reels: ['one', 'two', 'three'],
+    });
+
+    const out = json.result.structuredContent as unknown as {
+      topic: { studyDay: string; reelCount: number };
+      reels: { body: string; position: number }[];
+    };
+    expect(out.topic).toMatchObject({ studyDay: '2026-11-30', reelCount: 3 });
+    expect(out.reels.map((r) => [r.position, r.body])).toEqual([
+      [0, 'one'],
+      [1, 'two'],
+      [2, 'three'],
+    ]);
+    expect(calls.map((c) => c.name)).toEqual(['createKnowledgeLesson']);
+    expect(notices).toEqual(['knowledge']);
+  });
+
+  it('puts a lesson without a study day in the backlog', async () => {
+    const { rpc } = setup();
+
+    const { json } = await call(rpc, 'create_knowledge_lesson', {
+      catalogId: K.catalog,
+      title: 'Lesson',
+      reels: ['one'],
+    });
+
+    expect(json.result.structuredContent).toMatchObject({
+      topic: { studyDay: null },
+    });
+  });
+
+  it('refuses a lesson with an oversized reel and creates nothing', async () => {
+    const { rpc, calls } = setup();
+
+    const { json } = await call(rpc, 'create_knowledge_lesson', {
+      catalogId: K.catalog,
+      title: 'Lesson',
+      reels: ['ok', 'x'.repeat(8001)],
+    });
+
+    expect(json.result.isError).toBe(true);
+    expect(calls).toEqual([]);
+  });
+
+  it('refuses a lesson with too many reels and creates nothing', async () => {
+    const { rpc, calls } = setup();
+
+    const { json } = await call(rpc, 'create_knowledge_lesson', {
+      catalogId: K.catalog,
+      title: 'Lesson',
+      reels: Array.from({ length: 31 }, (_, i) => `reel ${i}`),
+    });
+
+    expect(json.result.isError).toBe(true);
+    expect(calls).toEqual([]);
+  });
+
+  it('reports an unknown catalog for a lesson', async () => {
+    const { rpc } = setup();
+
+    const { json } = await call(rpc, 'create_knowledge_lesson', {
+      catalogId: 'c0a1c0a1-0000-4000-8000-00000000c999',
+      title: 'Lesson',
+      reels: ['one'],
+    });
+
+    expect(json.result.isError).toBe(true);
+    expect(json.result.content[0]?.text).toContain('not found');
+  });
+
+  it('returns the refusal and announces nothing when the lesson fails', async () => {
+    const { rpc, notices } = setup();
+
+    const { json } = await call(rpc, 'create_knowledge_lesson', {
+      catalogId: K.catalog,
+      title: 'Broken',
+      reels: ['one'],
+    });
+
+    expect(json.result.isError).toBe(true);
+    expect(json.result.content[0]?.text).toBe('Invalid lesson');
+    expect(notices).toEqual([]);
   });
 
   it('refuses an empty or oversized reel body', async () => {

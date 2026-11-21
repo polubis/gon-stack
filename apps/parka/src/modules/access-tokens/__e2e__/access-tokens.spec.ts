@@ -195,7 +195,7 @@ const commands = {
     );
   },
 
-  'the client lists exactly the forty-two tools': async ({ page }) => {
+  'the client lists exactly the forty-four tools': async ({ page }) => {
     const { status, json } = await mcp(page, latest(page), 'tools/list');
     expect(status).toBe(200);
     expect(json.result!.tools!.map((t) => t.name).sort()).toEqual([
@@ -203,6 +203,7 @@ const commands = {
       'create_category',
       'create_knowledge_catalog',
       'create_knowledge_category',
+      'create_knowledge_lesson',
       'create_knowledge_reel',
       'create_knowledge_tag',
       'create_knowledge_topic',
@@ -216,6 +217,7 @@ const commands = {
       'delete_knowledge_topic',
       'delete_task',
       'delete_task_attachment',
+      'get_course_authoring_guide',
       'get_expense',
       'get_knowledge_topic',
       'get_task',
@@ -448,7 +450,7 @@ test.describe('mcp access tokens', () => {
       ['i close the secret dialog'],
       ['the token is listed only in masked form'],
       ['i reload and the secret is gone for good'],
-      ['the client lists exactly the forty-two tools'],
+      ['the client lists exactly the forty-four tools'],
       ['the client reads the task and the expense'],
       ['the client marks the task done'],
       ['the app shows the task as done'],
