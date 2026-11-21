@@ -22,7 +22,7 @@ import {
   knowledgeMediaRejection,
 } from '@/shared/attachments/knowledge-media';
 import { openModal } from '@/shared/router/modal-stack';
-import { ClearableTextarea } from '@/shared/ui/clearable';
+import { ExpandableTextarea } from '@/shared/ui/expandable-textarea';
 import { Button, Field } from '@/shared/ui/controls';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { REEL_MAX_LENGTH } from '../configuration/constraints';
@@ -169,7 +169,9 @@ const ReelEditor = ({
             <Markdown source={body} />
           </div>
         ) : (
-          <ClearableTextarea
+          <ExpandableTextarea
+            modal={`reel-editor:${reel.id}`}
+            title={`Rolka ${index + 1}`}
             data-e2e={`knowledge:reel-body:${reel.id}`}
             rows={4}
             value={body}
@@ -287,7 +289,9 @@ export const ReelsDialog = ({
         )}
         <form onSubmit={add} className="flex flex-col gap-2" noValidate>
           <Field label="Nowa rolka" required>
-            <ClearableTextarea
+            <ExpandableTextarea
+              modal="reel-editor-new"
+              title="Nowa rolka"
               data-e2e="knowledge:reel-body"
               rows={4}
               value={draft}
