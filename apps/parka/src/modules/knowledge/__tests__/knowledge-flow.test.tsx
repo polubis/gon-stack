@@ -347,12 +347,26 @@ describe('knowledge writes', () => {
     expect(await screen.findByText('Idiomy')).toBeVisible();
   });
 
-  it('adds a category from the structure list', async () => {
+  it('offers no structure buttons beside the topics heading', async () => {
+    seed();
+    renderKnowledge();
+
+    await screen.findByRole('heading', { name: 'Tematy' });
+    for (const name of ['Kategorie', 'Katalogi', 'Tagi'])
+      expect(screen.queryByRole('button', { name })).toBeNull();
+  });
+
+  it('adds a category from the list opened by the add menu', async () => {
     const user = userEvent.setup();
     seed();
     renderKnowledge();
 
-    await user.click(await screen.findByRole('button', { name: 'Kategorie' }));
+    await user.click(
+      (await screen.findAllByRole('button', { name: 'Dodaj' }))[0]!,
+    );
+    await user.click(
+      await screen.findByRole('menuitem', { name: 'Kategorie' }),
+    );
     const list = within(
       await screen.findByRole('dialog', { name: 'Kategorie' }),
     );
