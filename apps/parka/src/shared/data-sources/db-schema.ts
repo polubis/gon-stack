@@ -1300,6 +1300,18 @@ export type Database = {
         Args: { p_color?: string; p_name: string; p_token: string };
         Returns: Json;
       };
+      mcp_create_knowledge_lesson: {
+        Args: {
+          p_catalog_id: string;
+          p_description?: string;
+          p_reels?: string[];
+          p_study_day?: string;
+          p_tag_names?: string[];
+          p_title: string;
+          p_token: string;
+        };
+        Returns: Json;
+      };
       mcp_create_knowledge_reel: {
         Args: { p_body: string; p_token: string; p_topic_id: string };
         Returns: Json;

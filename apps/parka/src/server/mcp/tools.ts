@@ -7,6 +7,7 @@ import {
 import { API_ROUTER } from '@/shared/router/routes';
 import { isDay } from '@/shared/period/period';
 import { CATEGORY_ICON_IDS } from '@/shared/ui/category-icon-ids';
+import { buildCourseGuide } from './course-guide';
 import { McpInputError, type McpGateway } from './gateway';
 
 /** Raised by a tool for a failure the model should read and may act on. */
@@ -828,6 +829,9 @@ const deleted = () => z.object({ id: z.string(), deleted: z.literal(true) });
 
 const KNOWLEDGE = { domain: 'knowledge' } as const;
 
+const MAX_REEL_LENGTH = 8000;
+const MAX_LESSON_REELS = 30;
+
 /** Deleting tool of one knowledge item; `what` names it in messages. */
 const deleteKnowledge = (
   what: string,
@@ -1102,6 +1106,68 @@ const KNOWLEDGE_TOOLS: readonly RegisteredTool[] = [
       const created = await gateway.createKnowledgeTopic(args);
       if (!created) throw notFound('catalog', args.catalogId);
       return created as z.input<ReturnType<typeof knowledgeTopic>>;
+    },
+  }),
+  defineTool({
+    name: 'get_course_authoring_guide',
+    title: 'Get the course authoring guide',
+    description:
+      'Read-only. Returns the Markdown guide for writing a course in the knowledge module: mapping, lesson skeleton, technical rules and writing style. Call it BEFORE creating any course, then create lessons with create_knowledge_lesson.',
+    input: z.strictObject({
+      language: z
+        .string()
+        .trim()
+        .regex(
+          /^[A-Za-z]{2,3}([-_][A-Za-z0-9]{2,8})*$/,
+          'Expected a BCP-47 code',
+        )
+        .max(35)
+        .default('en')
+        .describe('BCP-47 code of the course language, e.g. pl, en, de'),
+      subject: z.string().trim().min(1).max(200).optional(),
+    }),
+    output: z.object({ language: z.string(), markdown: z.string() }),
+    annotations: READ_ONLY,
+    run: async (args) => ({
+      language: args.language,
+      markdown: buildCourseGuide(args.language, args.subject),
+    }),
+  }),
+  defineTool({
+    ...KNOWLEDGE,
+    name: 'create_knowledge_lesson',
+    title: 'Create a knowledge lesson',
+    description: `Creates a lesson (topic) with all its reels in one atomic call: everything or nothing. Reels keep the order given. \`tags\` are names; missing ones are created. Without \`studyDay\` the lesson lands in the backlog. Up to ${MAX_LESSON_REELS} reels of 1 to ${MAX_REEL_LENGTH} characters per call. Read get_course_authoring_guide first.`,
+    input: z.strictObject({
+      catalogId: kId('Catalog'),
+      title: kName(120),
+      description: z.string().trim().max(500).nullable().default(null),
+      studyDay: day().nullable().default(null).describe('Null for the backlog'),
+      tags: z.array(kName(30)).max(50).default([]),
+      reels: z
+        .array(
+          z
+            .string()
+            .trim()
+            .min(1)
+            .max(MAX_REEL_LENGTH)
+            .describe('Markdown of one reel'),
+        )
+        .min(1)
+        .max(MAX_LESSON_REELS),
+    }),
+    output: z.object({
+      topic: knowledgeTopic(),
+      reels: z.array(knowledgeReel()),
+    }),
+    annotations: WRITE,
+    run: async (args, gateway) => {
+      const created = await gateway.createKnowledgeLesson(args);
+      if (!created) throw notFound('catalog', args.catalogId);
+      return created as {
+        topic: z.input<ReturnType<typeof knowledgeTopic>>;
+        reels: z.input<ReturnType<typeof knowledgeReel>>[];
+      };
     },
   }),
   defineTool({

@@ -12,7 +12,7 @@ export const MCP_PROTOCOL_VERSIONS = [
 const SERVER_INFO = { name: 'parka', title: 'Parka', version: '1.0.0' };
 
 const INSTRUCTIONS =
-  'Parka personal finance and tasks. Read expenses. Manage tasks like the tasks UI: list, create, update (status, day, backlog, category tag, priority), delete; also categories and priorities. Deleting is permanent: only on explicit request.';
+  'Parka personal finance and tasks. Read expenses. Manage tasks like the tasks UI: list, create, update (status, day, backlog, category tag, priority), delete; also categories and priorities. Deleting is permanent: only on explicit request. Knowledge module (courses): before creating a course call get_course_authoring_guide, then create each lesson with create_knowledge_lesson (topic with its reels in one atomic call).';
 
 const ERROR = {
   parse: -32700,
