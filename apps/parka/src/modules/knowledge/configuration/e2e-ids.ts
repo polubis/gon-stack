@@ -73,8 +73,7 @@ export const KNOWLEDGE_E2E_IDS = [
   'knowledge:viewer-complete',
   'knowledge:viewer-prev',
   'knowledge:viewer-next',
-  'knowledge:viewer-prev-lesson',
-  'knowledge:viewer-next-lesson',
+  'knowledge:viewer-prev-lesson-cta',
   'knowledge:viewer-next-lesson-cta',
 ] as const;
 

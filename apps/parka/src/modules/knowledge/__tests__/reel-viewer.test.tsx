@@ -155,6 +155,57 @@ describe('reel viewer', () => {
     expect(screen.getByRole('dialog', { name: 'Idioms' })).toBeVisible();
   });
 
+  it('keeps lesson buttons off the reel screen and offers them on the end screen', async () => {
+    const user = userEvent.setup();
+    seed();
+    renderKnowledge(VIEWER);
+
+    await screen.findByText('Pierwsza');
+    expect(screen.queryByRole('button', { name: /lekcja/i })).toBeNull();
+    await user.keyboard('{ArrowRight}{ArrowRight}{ArrowRight}');
+    expect(
+      await screen.findByRole('button', { name: /Następna lekcja: Idioms/ }),
+    ).toBeVisible();
+
+    await user.click(
+      screen.getByRole('button', { name: /Następna lekcja: Idioms/ }),
+    );
+    await screen.findByText('Idiom');
+    await user.keyboard('{ArrowRight}');
+    await user.click(
+      await screen.findByRole('button', {
+        name: /Poprzednia lekcja: Phrasal verbs/,
+      }),
+    );
+    expect(
+      await screen.findByRole('dialog', { name: 'Phrasal verbs' }),
+    ).toBeVisible();
+  });
+
+  it('leaves text selectable and captures the pointer only once it is a swipe', async () => {
+    seed();
+    renderKnowledge(VIEWER);
+    await screen.findByText('Pierwsza');
+    const stage = screen.getByRole('region', { name: 'Rolki: Phrasal verbs' });
+    const capture = vi.fn();
+    stage.setPointerCapture = capture;
+    stage.hasPointerCapture = () => false;
+    const touch = { pointerId: 1, pointerType: 'touch', isPrimary: true };
+
+    expect(stage).not.toHaveClass('select-none');
+    fireEvent.pointerDown(stage, {
+      ...touch,
+      clientX: 200,
+      clientY: 100,
+      button: 0,
+    });
+    expect(capture).not.toHaveBeenCalled();
+    fireEvent.pointerMove(stage, { ...touch, clientX: 120, clientY: 100 });
+    expect(capture).toHaveBeenCalledTimes(1);
+    fireEvent.pointerUp(stage, { ...touch, clientX: 120, clientY: 100 });
+    expect(await screen.findByText('Druga')).toBeVisible();
+  });
+
   it('goes to the next lesson with ArrowDown on the last reel and back with ArrowUp', async () => {
     const user = userEvent.setup();
     seed();
