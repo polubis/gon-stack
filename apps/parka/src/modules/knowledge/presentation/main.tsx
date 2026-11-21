@@ -1,17 +1,15 @@
 import { useEffect } from 'react';
-import { Layers, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import { FabRail } from '@/shared/navigation/overlay-nav/presentation/fab-rail';
 import { APP_ROUTER } from '@/shared/router/routes';
-import { openModal } from '@/shared/router/modal-stack';
 import { ErrorState } from '@/shared/ui/error-state';
 import { Card, ScreenHeader } from '@/shared/ui/layout';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
 import { Toast } from '@/shared/ui/toast';
 import { useOwnerEyebrow } from '@/modules/settings/presentation/owner-eyebrow';
 import { ERROR_CODES } from '../configuration/constraints';
-import { Button } from '@/shared/ui/controls';
 import { AddMenu } from './add-menu';
 import { BacklogButton } from './backlog-button';
 import { Provider, useContext } from './context';
@@ -20,19 +18,12 @@ import { FiltersButton } from './filters-button';
 import { Summary } from './summary';
 import { CatalogPicker, cycleCatalog } from './catalog-picker';
 import { useCatalogSwipe } from './use-catalog-swipe';
-import { LIST_MODAL } from './modal-ids';
 import { Modals } from './modals';
 import { ScreenSkeleton } from './skeleton';
 import { TopicList } from './topic-list';
 
 const ADD_BUTTON =
   'pressable cta shadow-cta inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold hover:bg-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2';
-
-const STRUCTURE = [
-  ['category', 'Kategorie'],
-  ['catalog', 'Katalogi'],
-  ['tag', 'Tagi'],
-] as const;
 
 const Screen = () => {
   const {
@@ -132,23 +123,7 @@ const Screen = () => {
                 <Summary />
               </div>
               <Card className="flex flex-col gap-4 xl:col-span-7">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h2 className="text-base font-semibold">Tematy</h2>
-                  <div className="flex flex-wrap gap-1">
-                    {STRUCTURE.map(([entity, label]) => (
-                      <Button
-                        key={entity}
-                        variant="ghost"
-                        data-e2e={`knowledge:structure-open:${entity}`}
-                        className="w-auto px-3 py-1.5 text-xs"
-                        onClick={() => openModal(LIST_MODAL[entity])}
-                      >
-                        <Layers className="size-3.5" aria-hidden="true" />
-                        {label}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
+                <h2 className="text-base font-semibold">Tematy</h2>
                 {nothing && !isLoading ? (
                   <EmptyKnowledge />
                 ) : topics.length === 0 ? (

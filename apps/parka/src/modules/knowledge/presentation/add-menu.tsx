@@ -10,14 +10,14 @@ import {
 } from 'lucide-react';
 import { useSequencedOpen } from '@/shared/navigation/overlay-nav/presentation/use-sequenced-open';
 import { usePopoverOpen } from '@/shared/ui/use-popover-open';
-import { NEW_BACKLOG_TOPIC_MODAL, newModal } from './modal-ids';
+import { LIST_MODAL, NEW_BACKLOG_TOPIC_MODAL, newModal } from './modal-ids';
 
 const OPTIONS: readonly { label: string; modal: string; icon: LucideIcon }[] = [
   { label: 'Temat', modal: newModal('topic'), icon: ListChecks },
   { label: 'Temat do backlogu', modal: NEW_BACKLOG_TOPIC_MODAL, icon: Inbox },
-  { label: 'Katalog', modal: newModal('catalog'), icon: FolderTree },
-  { label: 'Kategoria', modal: newModal('category'), icon: Layers },
-  { label: 'Tag', modal: newModal('tag'), icon: Tag },
+  { label: 'Katalogi', modal: LIST_MODAL.catalog, icon: FolderTree },
+  { label: 'Kategorie', modal: LIST_MODAL.category, icon: Layers },
+  { label: 'Tagi', modal: LIST_MODAL.tag, icon: Tag },
 ];
 
 const KEYS = ['ArrowDown', 'ArrowUp', 'Home', 'End'];
@@ -42,7 +42,7 @@ const moveFocus = (e: KeyboardEvent<HTMLElement>) => {
   items[target]?.focus();
 };
 
-/** "Dodaj" trigger + chooser of what to create; every option opens its form modal. */
+/** "Dodaj" trigger + chooser of what to create; topic options open a form, structure options open their list (which leads to the form). */
 export const AddMenu = ({
   children,
   side,
