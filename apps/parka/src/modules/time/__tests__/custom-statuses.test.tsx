@@ -198,3 +198,20 @@ describe('task status label', () => {
     expect(item.getByText('Review')).toBeVisible();
   });
 });
+
+describe('started task marker', () => {
+  it('marks only tasks that are in progress', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    renderTime();
+    const row = (await box()).closest('li')!;
+
+    expect(row).not.toHaveAttribute('data-started');
+
+    await user.click(await box());
+    expect(row).toHaveAttribute('data-started');
+
+    await user.click(await box());
+    expect(row).not.toHaveAttribute('data-started');
+  });
+});

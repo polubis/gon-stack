@@ -75,9 +75,11 @@ export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
   const entrance = useEntrance(phase, step !== undefined);
   const current = board ? stepOf(board) : null;
   const position = current ? progress(current, statuses) : null;
+  const started = current !== null && current !== 'open' && current !== 'done';
   return (
     <li
       aria-current={now ? 'time' : undefined}
+      data-started={started ? '' : undefined}
       data-e2e={`time:task:${task.id}`}
       aria-hidden={change['aria-hidden']}
       inert={change.inert}
@@ -86,12 +88,18 @@ export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
         entrance.entering && step !== undefined ? stagger(step) : undefined
       }
       className={cn(
-        'flex items-start gap-0.5 rounded-2xl pb-1.5 pt-1 pl-3 pr-0.5 transition-colors duration-200 hover:bg-hover-soft motion-reduce:transition-none',
+        'relative flex items-start gap-0.5 rounded-2xl pb-1.5 pt-1 pl-3 pr-0.5 transition-colors duration-200 hover:bg-hover-soft motion-reduce:transition-none',
         entrance.entering && 'animate-item-in motion-reduce:animate-none',
         change.className,
         now && 'bg-accent-soft',
       )}
     >
+      {started ? (
+        <span
+          aria-hidden="true"
+          className="absolute inset-y-2.5 left-1 w-0.5 animate-item-in rounded-full bg-brand/50 motion-reduce:animate-none"
+        />
+      ) : null}
       <div className="flex min-w-0 flex-1 flex-col py-1.5">
         <button
           type="button"
