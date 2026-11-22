@@ -107,6 +107,7 @@ const ExpenseList = ({
   categories,
   onSelect,
   scope,
+  menuScope,
   empty,
 }: {
   expenses: Expense[];
@@ -114,6 +115,8 @@ const ExpenseList = ({
   onSelect: (id: ExpenseId) => void;
   /** Changes of the list scope (period, filter) swap rows without animation. */
   scope: string;
+  /** Row menus of the card list and of the modal list must not share state. */
+  menuScope: string;
   /** Shown once no row is left, after the last one finished leaving. */
   empty?: ReactNode;
 }) => {
@@ -158,7 +161,7 @@ const ExpenseList = ({
                 </span>
               </span>
             </Row>
-            <ExpenseMenu expense={e} />
+            <ExpenseMenu expense={e} scope={menuScope} />
           </li>
         );
       })}
@@ -377,6 +380,7 @@ export const MonthExpenses = ({
             categories={categories}
             onSelect={onSelect}
             scope={scope}
+            menuScope="card"
             empty={
               <EmptyState
                 variant="card"
@@ -434,6 +438,7 @@ export const MonthExpenses = ({
             categories={categories}
             onSelect={onSelect}
             scope={scope}
+            menuScope="all"
           />
         </DetailDialog>
       )}

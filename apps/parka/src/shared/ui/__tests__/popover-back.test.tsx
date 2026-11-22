@@ -35,7 +35,7 @@ const period = (
 const cases = [
   {
     name: 'menu',
-    ui: <ExpenseMenu expense={expense} />,
+    ui: <ExpenseMenu expense={expense} scope="card" />,
     trigger: { name: 'Więcej: Lidl' },
     content: () => screen.queryByRole('menu'),
   },
@@ -157,7 +157,7 @@ describe('menu on a desktop', () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it('opens and keeps itself in the URL', async () => {
-    render(<ExpenseMenu expense={expense} />);
+    render(<ExpenseMenu expense={expense} scope="card" />);
 
     await userEvent.click(screen.getByRole('button', { name: 'Więcej: Lidl' }));
 
