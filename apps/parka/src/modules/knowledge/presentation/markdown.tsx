@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { parseQuiz, Quiz } from './quiz';
 
 type Block =
   | { type: 'heading'; level: 1 | 2 | 3; text: string }
@@ -191,7 +192,9 @@ const render = (block: Block, key: number): ReactNode => {
         </Tag>
       );
     }
-    case 'code':
+    case 'code': {
+      const quiz = block.lang === 'quiz' ? parseQuiz(block.text) : null;
+      if (quiz) return <Quiz key={key} items={quiz} />;
       return (
         <pre
           key={key}
@@ -201,6 +204,7 @@ const render = (block: Block, key: number): ReactNode => {
           <code data-lang={block.lang || undefined}>{block.text}</code>
         </pre>
       );
+    }
     case 'quote':
       return (
         <blockquote
