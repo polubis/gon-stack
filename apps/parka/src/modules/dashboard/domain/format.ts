@@ -1,4 +1,9 @@
-import { dayLabel, instantDateTimeLabel, localMonth } from '@/shared/date/date';
+import {
+  dayLabel,
+  instantDateTimeLabel,
+  localDay,
+  localMonth,
+} from '@/shared/date/date';
 import type { Month } from './models';
 
 const MONTH_PATTERN = /^\d{4}-\d{2}$/;
@@ -14,6 +19,9 @@ const toYearMonth = (month: Month): [number, number] =>
   month.split('-').map(Number) as [number, number];
 
 export const money = (value: number): string => plMoney.format(value);
+
+/** Spent amount shown as an outflow: `62.1` → `-62,10 zł`. */
+export const spentMoney = (value: number): string => plMoney.format(-value);
 
 export const percent = (value: number): string =>
   `${value > 0 ? '+' : ''}${Math.round(value)}%`;
@@ -52,3 +60,15 @@ export const itemTotal = (item: {
   quantity: number;
   discount: number;
 }): number => item.unitPrice * item.quantity - item.discount;
+
+/** Local day `YYYY-MM-DD` of an expense instant. */
+export const dayOf = (iso: string): string => localDay(iso);
+
+/** `dzisiaj` / `wczoraj` / `pon. 17 lis`; the year only when it is not `today`'s. */
+export const dayHeading = (day: string, today: string): string => {
+  const yesterday = new Date(`${today}T00:00:00Z`);
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  if (day === today) return 'Dzisiaj';
+  if (day === yesterday.toISOString().slice(0, 10)) return 'Wczoraj';
+  return dayLabel(day, 'short', day.slice(0, 4) !== today.slice(0, 4));
+};
