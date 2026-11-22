@@ -1,25 +1,34 @@
+import { Trash2 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { cn } from '@repo/react-kit/cn';
-import { closeModal } from '@/shared/router/modal-stack';
+import { closeModal, openModal } from '@/shared/router/modal-stack';
 import { Button, Field } from '@/shared/ui/controls';
 import { ClearableInput } from '@/shared/ui/clearable';
 import { NAME_MAX_LENGTH, PRIORITY_VALUES } from '../configuration/constraints';
+import type { Priority } from '../domain/models';
 import { useContext } from './context';
+import { deletePriorityModal } from './modal-ids';
 import { PriorityBadge } from './priority-badge';
 import { ModalShell } from './modal-shell';
 import { ModalFooter } from '@/shared/ui/modal-footer';
 
-/** New priority form: a name and a value from 1 to 10. */
-export const PriorityDialog = ({ modal }: { modal: string }) => {
-  const { priorities, createPriority } = useContext();
-  const [name, setName] = useState('');
-  const [value, setValue] = useState(5);
+/** Priority form (new, or `priority` being edited): a name and a value from 1 to 10. */
+export const PriorityDialog = ({
+  modal,
+  priority,
+}: {
+  modal: string;
+  priority?: Priority;
+}) => {
+  const { priorities, createPriority, updatePriority } = useContext();
+  const [name, setName] = useState(priority?.name ?? '');
+  const [value, setValue] = useState(priority?.value ?? 5);
   const [showErrors, setShowErrors] = useState(false);
 
   const trimmed = name.trim();
   const nameError = !trimmed
     ? 'Podaj nazwę priorytetu.'
-    : priorities.some((p) => p.name === trimmed)
+    : priorities.some((p) => p.id !== priority?.id && p.name === trimmed)
       ? 'Priorytet o takiej nazwie już istnieje.'
       : null;
 
@@ -29,7 +38,8 @@ export const PriorityDialog = ({ modal }: { modal: string }) => {
       setShowErrors(true);
       return;
     }
-    createPriority({ name: trimmed, value });
+    if (priority) updatePriority({ ...priority, name: trimmed, value });
+    else createPriority({ name: trimmed, value });
     closeModal(modal);
   };
 
@@ -37,7 +47,7 @@ export const PriorityDialog = ({ modal }: { modal: string }) => {
     <ModalShell
       modal={modal}
       data-e2e="time:priority-dialog"
-      title="Nowy priorytet"
+      title={priority ? 'Edytuj priorytet' : 'Nowy priorytet'}
       description="Nazwa i ważność od 1 do 10: 8-10 wysoki, 4-7 średni, 1-3 niski."
     >
       <form onSubmit={submit} noValidate className="space-y-5">
@@ -98,11 +108,25 @@ export const PriorityDialog = ({ modal }: { modal: string }) => {
           </p>
         </fieldset>
 
+        {priority ? (
+          <div className="border-t border-line pt-5">
+            <Button
+              variant="danger"
+              data-e2e="time:priority-delete"
+              onClick={() => openModal(deletePriorityModal(priority.id))}
+            >
+              <Trash2 className="h-4 w-4" aria-hidden="true" /> Usuń
+            </Button>
+          </div>
+        ) : null}
+
         <ModalFooter className="flex gap-2">
           <Button variant="ghost" onClick={() => closeModal(modal)}>
             Anuluj
           </Button>
-          <Button type="submit">Dodaj</Button>
+          <Button type="submit" data-e2e="time:priority-save">
+            {priority ? 'Zapisz' : 'Dodaj'}
+          </Button>
         </ModalFooter>
       </form>
     </ModalShell>

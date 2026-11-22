@@ -3,6 +3,7 @@ import { Check, LoaderCircle } from 'lucide-react';
 import { categoryLabel } from '@/shared/i18n/category-label';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { Button, Field, Input, Select, inputClass } from '@/shared/ui/controls';
+import { ManageLink } from '@/shared/ui/manage-link';
 import { useRememberedField } from '@/shared/form-memory/presentation/use-remembered-field';
 import { useSuggestions } from '@/shared/form-memory/presentation/use-suggestions';
 import {
@@ -31,6 +32,8 @@ type Props = {
   prefill?: boolean;
   /** Extra footer buttons (cancel, delete) shown next to the submit. */
   actions?: ReactNode;
+  /** Opens the management of the categories; the link shows next to the category select. */
+  onManageCategories?: () => void;
   onSubmit: (values: ExpenseFormValues) => void;
 };
 
@@ -42,6 +45,7 @@ export const ExpenseForm = ({
   submitLabel,
   prefill = false,
   actions,
+  onManageCategories,
   onSubmit,
 }: Props) => {
   const suggestions = useSuggestions();
@@ -171,6 +175,15 @@ export const ExpenseForm = ({
             <Field
               required={!hasProducts}
               label="Kategoria"
+              action={
+                onManageCategories && !hasProducts ? (
+                  <ManageLink
+                    aria-label="Zarządzaj kategoriami"
+                    data-e2e="expense-form:category-manage"
+                    onClick={onManageCategories}
+                  />
+                ) : undefined
+              }
               hint={hasProducts ? 'Wynika z kategorii produktów.' : undefined}
             >
               {hasProducts ? (

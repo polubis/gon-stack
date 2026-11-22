@@ -3,6 +3,8 @@ import {
   createTimeBacklogTaskSchema,
   updateTimeBacklogTaskSchema,
   createTimePrioritySchema,
+  deleteTimePrioritySchema,
+  updateTimePrioritySchema,
   createTimeRecurringSchema,
   createTimeTaskSchema,
   listTimeSchema,
@@ -108,6 +110,43 @@ describe('time contracts', () => {
         value,
       }).success,
     ).toBe(false);
+  });
+
+  it.each([0, 11, 2.5])(
+    'rejects updating a priority to the value %s',
+    (value) => {
+      expect(
+        updateTimePrioritySchema().shape.in.safeParse({
+          id: 'p-1',
+          name: 'Pilny',
+          value,
+        }).success,
+      ).toBe(false);
+    },
+  );
+
+  it('accepts renaming a priority to a value from 1 to 10', () => {
+    expect(
+      updateTimePrioritySchema().shape.in.safeParse({
+        id: 'p-1',
+        name: 'Pilny',
+        value: 10,
+      }).success,
+    ).toBe(true);
+  });
+
+  it('needs an id to delete a priority and can answer with a conflict', () => {
+    const schema = deleteTimePrioritySchema().shape;
+
+    expect(schema.in.safeParse({ id: '' }).success).toBe(false);
+    expect(schema.in.safeParse({ id: 'p-1' }).success).toBe(true);
+    expect(
+      schema.out.safeParse({
+        code: 409,
+        type: 'conflict',
+        message: 'Still referenced by other records',
+      }).success,
+    ).toBe(true);
   });
 
   it('requires the end of a listing', () => {

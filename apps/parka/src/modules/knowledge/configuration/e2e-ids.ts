@@ -36,6 +36,8 @@ export const KNOWLEDGE_E2E_IDS = [
   'knowledge:topic-title',
   'knowledge:topic-description',
   'knowledge:topic-catalog',
+  'knowledge:catalog-manage',
+  'knowledge:tag-manage',
   'knowledge:topic-day',
   'knowledge:topic-save',
   'knowledge:topic-cancel',

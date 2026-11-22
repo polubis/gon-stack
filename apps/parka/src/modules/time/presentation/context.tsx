@@ -131,6 +131,8 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
     createRecurring: facade.createRecurring,
     updateCategory: facade.updateCategory,
     deleteCategory: facade.deleteCategory,
+    updatePriority: facade.updatePriority,
+    deletePriority: facade.deletePriority,
     dismissNotice: facade.dismissNotice,
     notify: facade.notify,
     createCategory: (input: Omit<Category, 'id'>) => {

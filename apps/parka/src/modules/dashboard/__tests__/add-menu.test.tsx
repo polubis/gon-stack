@@ -17,7 +17,7 @@ const openMenu = async (user: ReturnType<typeof userEvent.setup>) => {
 };
 
 describe('dashboard add menu', () => {
-  it('offers expense, recurring expense, photo, file and category', async () => {
+  it('offers expense, recurring expense, photo, file and categories', async () => {
     server.use(...readHandlers());
     const user = userEvent.setup();
     await openMenu(user);
@@ -25,27 +25,27 @@ describe('dashboard add menu', () => {
     const menu = await screen.findByRole('menu', { name: 'Dodaj' });
 
     expect(menu.textContent).toBe(
-      'WydatekWydatek cyklicznyZe zdjęciaZ plikuKategoria',
+      'WydatekWydatek cyklicznyZe zdjęciaZ plikuKategorie',
     );
     expect(
       screen.getByRole('menuitem', { name: 'Wydatek cykliczny' }),
     ).toHaveAttribute('href', expect.stringContaining('type=recurring'));
   });
 
-  it('opens the category popup from the menu in the URL', async () => {
+  it('opens the categories list from the menu in the URL', async () => {
     server.use(...readHandlers());
     const user = userEvent.setup();
     await openMenu(user);
 
     await user.click(
-      await screen.findByRole('menuitem', { name: 'Kategoria' }),
+      await screen.findByRole('menuitem', { name: 'Kategorie' }),
     );
 
-    await screen.findByRole('dialog', { name: 'Nowa kategoria' });
-    expect(modalsInUrl()).toEqual(['category-new']);
+    await screen.findByRole('dialog', { name: 'Kategorie' });
+    expect(modalsInUrl()).toEqual(['categories-list']);
   });
 
-  it('adds a category from a stacked popup', async () => {
+  it('adds a category from the form stacked over the list', async () => {
     const posted: unknown[] = [];
     server.use(
       ...readHandlers(),
@@ -58,8 +58,10 @@ describe('dashboard add menu', () => {
     const user = userEvent.setup();
     await openMenu(user);
     await user.click(
-      await screen.findByRole('menuitem', { name: 'Kategoria' }),
+      await screen.findByRole('menuitem', { name: 'Kategorie' }),
     );
+    await screen.findByRole('dialog', { name: 'Kategorie' });
+    await user.click(screen.getByRole('button', { name: /Dodaj$/ }));
     const dialog = await screen.findByRole('dialog', {
       name: 'Nowa kategoria',
     });

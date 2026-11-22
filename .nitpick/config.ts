@@ -554,6 +554,9 @@ Skill ${ref('evidence')}, key = task id, out \`.evidences/<task-id>/\`.
       'ux-button-name': {
         doc: 'Button names are one word only (`Dodaj`, not `Dodaj wydatek`); context comes from location, `aria-label` may stay descriptive',
       },
+      'ux-metadata-management': {
+        doc: 'Metadata (category, priority, tag, catalog, status) managed same way in every module: one list modal titled with plural noun (`Kategorie`, `Priorytety`) with full add/edit/delete. "Dodaj" menu opens that list, never the create form. Each form with metadata picker shows shared `ManageLink` ("Zarządzaj", `aria-label` names entity) opening the list stacked over the form. No per-picker "Nowy"/"Nowa" shortcut',
+      },
       'ux-change-transitions': {
         doc: 'Every create/update/delete shows a transition on the changed item: create fades + slides in, update flashes a brief highlight, delete fades + slides out and neighbours glide into the gap. All disabled with `motion-reduce`, no jumping UI',
       },

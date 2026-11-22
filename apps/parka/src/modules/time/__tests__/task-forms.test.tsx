@@ -37,7 +37,7 @@ const ready = async () => {
 
 const openFromMenu = async (
   user: ReturnType<typeof userEvent.setup>,
-  option: 'Zadanie' | 'Zadanie cykliczne' | 'Kategoria' | 'Priorytet',
+  option: 'Zadanie' | 'Zadanie cykliczne' | 'Kategorie' | 'Priorytety',
 ) => {
   await ready();
   const [trigger] = screen.getAllByRole('button', { name: /^Dodaj$/ });
@@ -62,15 +62,18 @@ describe('time dialogs focus', () => {
   it('does not focus the name when a category or priority form opens', async () => {
     const user = userEvent.setup();
 
-    const dialog = await openFromMenu(user, 'Kategoria');
+    const list = await openFromMenu(user, 'Kategorie');
+    await user.click(within(list).getByRole('button', { name: 'Dodaj' }));
+    await waitFor(() => expect(dialogs()).toHaveLength(2));
 
+    const form = topDialog();
     expect(document.activeElement?.tagName).not.toBe('INPUT');
-    expect(dialog.contains(document.activeElement)).toBe(true);
+    expect(form.getByRole('textbox', { name: 'Nazwa' })).not.toHaveFocus();
   });
 });
 
 describe('time add menu', () => {
-  it('offers task, recurring task, backlog, category and priority', async () => {
+  it('offers task, recurring task, backlog, categories and priorities', async () => {
     const user = userEvent.setup();
     await ready();
 
@@ -81,8 +84,8 @@ describe('time add menu', () => {
       'Zadanie',
       'Zadanie cykliczne',
       'Do backlogu',
-      'Kategoria',
-      'Priorytet',
+      'Kategorie',
+      'Priorytety',
       'Statusy zadań',
     ]);
   });
@@ -113,12 +116,17 @@ describe('time add menu', () => {
     await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
   });
 
-  it('opens the priority form from the menu', async () => {
+  it('opens the priorities list from the menu, leading to the form', async () => {
     const user = userEvent.setup();
 
-    await openFromMenu(user, 'Priorytet');
+    const list = within(await openFromMenu(user, 'Priorytety'));
 
-    expect(modalsInUrl()).toEqual(['priority-new']);
+    expect(modalsInUrl()).toEqual(['priorities']);
+    expect(list.getByText('Wszystkie priorytety zadań.')).toBeVisible();
+    await user.click(list.getByRole('button', { name: 'Dodaj' }));
+    await waitFor(() =>
+      expect(modalsInUrl()).toEqual(['priorities', 'priority-new']),
+    );
     expect(screen.getByText('Nowy priorytet')).toBeVisible();
   });
 });
@@ -160,27 +168,41 @@ describe('time task form', () => {
     ]);
   });
 
-  it('stacks the new priority form over the task form', async () => {
+  it('stacks the priorities list over the task form', async () => {
     const user = userEvent.setup();
     await openFromMenu(user, 'Zadanie');
 
-    await user.click(screen.getByRole('button', { name: 'Nowy' }));
+    await user.click(
+      screen.getByRole('button', { name: 'Zarządzaj priorytetami' }),
+    );
 
     await waitFor(() => expect(dialogs()).toHaveLength(2));
-    expect(modalsInUrl()).toEqual(['task-new', 'priority-new']);
+    expect(modalsInUrl()).toEqual(['task-new', 'priorities']);
   });
 
   it('selects a new priority created over the task form', async () => {
     const user = userEvent.setup();
     await openFromMenu(user, 'Zadanie');
-    await user.click(screen.getByRole('button', { name: 'Nowy' }));
+    await user.click(
+      screen.getByRole('button', { name: 'Zarządzaj priorytetami' }),
+    );
     await waitFor(() => expect(dialogs()).toHaveLength(2));
+    await user.click(topDialog().getByRole('button', { name: 'Dodaj' }));
+    await waitFor(() => expect(dialogs()).toHaveLength(3));
     const form = topDialog();
 
     await user.type(form.getByRole('textbox', { name: 'Nazwa' }), 'Pilny');
     await user.click(form.getByRole('radio', { name: '7' }));
     await user.click(form.getByRole('button', { name: 'Dodaj' }));
 
+    await waitFor(() =>
+      expect(modalsInUrl()).toEqual(['task-new', 'priorities']),
+    );
+    await user.click(
+      within(screen.getByRole('dialog')).getByRole('button', {
+        name: 'Zamknij',
+      }),
+    );
     await waitFor(() => expect(modalsInUrl()).toEqual(['task-new']));
     const form2 = within(screen.getByRole('dialog'));
     await waitFor(() =>
@@ -201,15 +223,19 @@ describe('time task form', () => {
     );
   });
 
-  it('offers a category select and no extra add or browse buttons', async () => {
+  it('offers category and priority selects, each with a manage link', async () => {
     const user = userEvent.setup();
 
     const dialog = within(await openFromMenu(user, 'Zadanie'));
 
     expect(dialog.getByRole('combobox', { name: 'Kategoria' })).toBeVisible();
-    expect(dialog.getAllByRole('button', { name: /^Nowy|^Nowa/ })).toHaveLength(
-      1,
-    );
+    expect(
+      dialog.getByRole('button', { name: 'Zarządzaj kategoriami' }),
+    ).toBeVisible();
+    expect(
+      dialog.getByRole('button', { name: 'Zarządzaj priorytetami' }),
+    ).toBeVisible();
+    expect(dialog.queryByRole('button', { name: /^Nowy|^Nowa/ })).toBeNull();
     expect(dialog.queryByRole('button', { name: 'Wszystkie' })).toBeNull();
     expect(dialog.queryByRole('button', { name: 'Edytuj statusy' })).toBeNull();
   });

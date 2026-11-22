@@ -24,23 +24,23 @@ const commands = {
   'i open the add menu': async ({ getByE2e }) => {
     await getByE2e('dashboard:expense-fab').click();
   },
-  'i pick the category option': async ({ getByE2e }) => {
+  'i pick the categories option': async ({ getByE2e }) => {
     await getByE2e('dashboard:add-option:category').click();
   },
   'i press the browser Back button': async ({ page }) => {
     await page.goBack();
   },
 
-  'the category form stays open': async ({ page, getByE2e }) => {
+  'the categories list stays open': async ({ page, getByE2e }) => {
     await page.waitForTimeout(500);
-    await expect(getByE2e('categories:form-name')).toBeVisible();
-    expect(modals(page)).toEqual(['category-new']);
+    await expect(getByE2e('categories:list-dialog')).toBeVisible();
+    expect(modals(page)).toEqual(['categories-list']);
   },
   'the add menu is closed': async ({ getByE2e }) => {
     await expect(getByE2e('dashboard:add-menu')).toHaveCount(0);
   },
-  'the form is closed and the url is clean': async ({ page, getByE2e }) => {
-    await expect(getByE2e('categories:form-name')).toHaveCount(0);
+  'the list is closed and the url is clean': async ({ page, getByE2e }) => {
+    await expect(getByE2e('categories:list-dialog')).toHaveCount(0);
     expect(modals(page)).toEqual([]);
     expect(new URL(page.url()).pathname).toBe(APP_ROUTER.dashboard());
   },
@@ -53,8 +53,8 @@ test.describe('on a narrow screen', () => {
     await interpreter(commands, e2e)(
       ['i open the dashboard'],
       ['i open the add menu'],
-      ['i pick the category option'],
-      ['the category form stays open'],
+      ['i pick the categories option'],
+      ['the categories list stays open'],
       ['the add menu is closed'],
     );
   });
@@ -63,10 +63,10 @@ test.describe('on a narrow screen', () => {
     await interpreter(commands, e2e)(
       ['i open the dashboard'],
       ['i open the add menu'],
-      ['i pick the category option'],
-      ['the category form stays open'],
+      ['i pick the categories option'],
+      ['the categories list stays open'],
       ['i press the browser Back button'],
-      ['the form is closed and the url is clean'],
+      ['the list is closed and the url is clean'],
     );
   });
 });

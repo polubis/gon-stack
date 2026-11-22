@@ -12,6 +12,8 @@ import { createCategory } from './handlers/create-category';
 import { updateCategory } from './handlers/update-category';
 import { deleteCategory } from './handlers/delete-category';
 import { createPriority } from './handlers/create-priority';
+import { updatePriority } from './handlers/update-priority';
+import { deletePriority } from './handlers/delete-priority';
 import { saveStatuses } from './handlers/save-statuses';
 import { refresh } from './handlers/refresh';
 import { dismissNotice } from './handlers/dismiss-notice';
@@ -34,6 +36,8 @@ export const createRegistry = (store: Store) => {
     updateCategory(store, bus),
     deleteCategory(store, bus),
     createPriority(store, bus),
+    updatePriority(store, bus),
+    deletePriority(store, bus),
     saveStatuses(store, bus),
     refresh(store, bus),
     dismissNotice(store, bus),

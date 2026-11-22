@@ -1,5 +1,4 @@
 import { useState, type FormEvent } from 'react';
-import { Plus } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { dayLabel } from '@/shared/date/date';
 import { isDay } from '@/shared/period/period';
@@ -7,6 +6,7 @@ import { closeModal, openModal } from '@/shared/router/modal-stack';
 import { ClearableInput } from '@/shared/ui/clearable';
 import { ExpandableTextarea } from '@/shared/ui/expandable-textarea';
 import { Button, Field, Input, Select } from '@/shared/ui/controls';
+import { ManageLink } from '@/shared/ui/manage-link';
 import {
   DESCRIPTION_MAX_LENGTH,
   TITLE_MAX_LENGTH,
@@ -16,7 +16,7 @@ import type { CatalogId, TagId, Topic } from '../domain/models';
 import { useContext } from './context';
 import { FieldError } from './field-error';
 import { FormFooter } from './form-footer';
-import { newModal } from './modal-ids';
+import { LIST_MODAL } from './modal-ids';
 import { ModalShell } from './modal-shell';
 
 type Props = {
@@ -112,13 +112,11 @@ export const TopicDialog = ({ modal, topic, catalogId, defaultDay }: Props) => {
           label="Katalog"
           required
           action={
-            <button
-              type="button"
-              onClick={() => openModal(newModal('catalog'))}
-              className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium text-brand hover:bg-brand-softer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-            >
-              <Plus className="h-3 w-3" aria-hidden="true" /> Katalog
-            </button>
+            <ManageLink
+              aria-label="Zarządzaj katalogami"
+              data-e2e="knowledge:catalog-manage"
+              onClick={() => openModal(LIST_MODAL.catalog)}
+            />
           }
         >
           <Select
@@ -134,12 +132,19 @@ export const TopicDialog = ({ modal, topic, catalogId, defaultDay }: Props) => {
           />
         </Field>
         <div role="group" aria-label="Tagi" className="flex flex-col gap-2">
-          <span
-            aria-hidden="true"
-            className="text-sm font-medium text-ink-soft"
-          >
-            Tagi
-          </span>
+          <div className="flex items-center justify-between gap-2">
+            <span
+              aria-hidden="true"
+              className="text-sm font-medium text-ink-soft"
+            >
+              Tagi
+            </span>
+            <ManageLink
+              aria-label="Zarządzaj tagami"
+              data-e2e="knowledge:tag-manage"
+              onClick={() => openModal(LIST_MODAL.tag)}
+            />
+          </div>
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
               <button
@@ -158,13 +163,6 @@ export const TopicDialog = ({ modal, topic, catalogId, defaultDay }: Props) => {
                 {tag.name}
               </button>
             ))}
-            <button
-              type="button"
-              onClick={() => openModal(newModal('tag'))}
-              className="pressable inline-flex min-h-9 items-center gap-1 rounded-full border border-dashed border-line-strong px-3 text-sm text-ink-soft hover:bg-brand-softer focus-visible:outline-2 focus-visible:outline-brand"
-            >
-              <Plus className="h-4 w-4" aria-hidden="true" /> Tag
-            </button>
           </div>
         </div>
         <Field

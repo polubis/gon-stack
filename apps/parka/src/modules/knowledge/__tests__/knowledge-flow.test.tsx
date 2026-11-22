@@ -384,6 +384,30 @@ describe('knowledge writes', () => {
     expect(backend.writes()[0]?.body).toMatchObject({ name: 'Nauka' });
   });
 
+  it.each([
+    ['Zarządzaj katalogami', 'Katalogi'],
+    ['Zarządzaj tagami', 'Tagi'],
+  ])('opens the list behind "%s" over the topic form', async (link, title) => {
+    const user = userEvent.setup();
+    seed();
+    renderKnowledge();
+    await user.click(
+      await screen.findByRole('button', {
+        name: 'Dodaj temat do katalogu: Angielski',
+      }),
+    );
+    const form = within(
+      await screen.findByRole('dialog', { name: 'Nowy temat' }),
+    );
+
+    await user.click(form.getByRole('button', { name: link }));
+
+    expect(await screen.findByRole('dialog', { name: title })).toBeVisible();
+    expect(
+      new URLSearchParams(window.location.search).getAll('modal').length,
+    ).toBe(2);
+  });
+
   it('refuses an empty title with a message and sends nothing', async () => {
     const user = userEvent.setup();
     seed();

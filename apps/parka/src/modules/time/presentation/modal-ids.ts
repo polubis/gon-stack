@@ -1,4 +1,4 @@
-import type { CategoryId, TaskId } from '../domain/models';
+import type { CategoryId, PriorityId, TaskId } from '../domain/models';
 
 /** URL ids of the time modals (see `shared/router/modal-stack`). */
 export const NEW_TASK_MODAL = 'task-new';
@@ -16,10 +16,13 @@ export const DESCRIPTION_EDITOR_MODAL = 'description-editor';
 export const NEW_CATEGORY_MODAL = 'category-new';
 export const NEW_PRIORITY_MODAL = 'priority-new';
 export const CATEGORIES_MODAL = 'categories';
+export const PRIORITIES_MODAL = 'priorities';
 export const STATUSES_MODAL = 'statuses';
 
 const EDIT_CATEGORY_PREFIX = 'category-edit:';
 const DELETE_CATEGORY_PREFIX = 'category-delete:';
+const EDIT_PRIORITY_PREFIX = 'priority-edit:';
+const DELETE_PRIORITY_PREFIX = 'priority-delete:';
 const NEW_TASK_ON_PREFIX = 'task-new:';
 const EDIT_BACKLOG_PREFIX = 'backlog-edit:';
 const EDIT_PREFIX = 'task-edit:';
@@ -114,3 +117,19 @@ export const deletedCommentIdOf = (modal: string): string | null =>
 
 /** Trim step shown after a video is picked (the file itself lives in state). */
 export const TRIM_ATTACHMENT_MODAL = 'attachment-trim';
+
+export const editPriorityModal = (id: PriorityId): string =>
+  `${EDIT_PRIORITY_PREFIX}${id}`;
+
+export const editedPriorityIdOf = (modal: string): PriorityId | null =>
+  modal.startsWith(EDIT_PRIORITY_PREFIX)
+    ? (modal.slice(EDIT_PRIORITY_PREFIX.length) as PriorityId)
+    : null;
+
+export const deletePriorityModal = (id: PriorityId): string =>
+  `${DELETE_PRIORITY_PREFIX}${id}`;
+
+export const deletedPriorityIdOf = (modal: string): PriorityId | null =>
+  modal.startsWith(DELETE_PRIORITY_PREFIX)
+    ? (modal.slice(DELETE_PRIORITY_PREFIX.length) as PriorityId)
+    : null;

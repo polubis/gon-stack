@@ -1,15 +1,14 @@
-import { Plus } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { openModal } from '@/shared/router/modal-stack';
 import { Field, Select } from '@/shared/ui/controls';
+import { ManageLink } from '@/shared/ui/manage-link';
 import { priorityLevel } from '../domain/priority';
 import type { PriorityId } from '../domain/models';
 import { useContext } from './context';
-import { NEW_PRIORITY_MODAL } from './modal-ids';
-import { PICKER_LINK } from './picker-link';
+import { PRIORITIES_MODAL } from './modal-ids';
 import { PriorityMeter, PRIORITY_TONE } from './priority-badge';
 
-/** Select of the priorities (highest value first), with the one link to add one. */
+/** Select of the priorities (highest value first), with the link to manage them. */
 export const PriorityPicker = ({
   value,
   onChange,
@@ -23,14 +22,11 @@ export const PriorityPicker = ({
       required
       label="Priorytet"
       action={
-        <button
-          type="button"
-          onClick={() => openModal(NEW_PRIORITY_MODAL)}
-          className={PICKER_LINK}
-        >
-          <Plus className="h-3 w-3" aria-hidden="true" />
-          Nowy
-        </button>
+        <ManageLink
+          aria-label="Zarządzaj priorytetami"
+          data-e2e="time:priority-manage"
+          onClick={() => openModal(PRIORITIES_MODAL)}
+        />
       }
     >
       <Select

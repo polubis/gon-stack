@@ -18,6 +18,10 @@ import {
   FILTERS_MODAL,
   STATUSES_MODAL,
   deletedCategoryIdOf,
+  deletedPriorityIdOf,
+  editedPriorityIdOf,
+  editPriorityModal,
+  PRIORITIES_MODAL,
   deletedIdOf,
   editCategoryModal,
   editedBacklogIdOf,
@@ -33,6 +37,7 @@ import {
 } from './modal-ids';
 import { RecurringScopeDialog } from '@/shared/ui/recurring-scope-dialog';
 import { PriorityDialog } from './priority-dialog';
+import { PrioritiesDialog } from './priorities-dialog';
 import { StatusesDialog } from './statuses-dialog';
 import { TaskDialog } from './task-dialog';
 import { TaskDetails } from './task-details';
@@ -43,8 +48,10 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
     tasks,
     backlog,
     categories,
+    priorities,
     deleteTask,
     deleteCategory,
+    deletePriority,
     initializing,
     isLoading,
   } = useContext();
@@ -78,6 +85,16 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
     }
   }, [initializing, stack, categories]);
 
+  // And for a priority that is gone.
+  useEffect(() => {
+    if (initializing) return;
+    for (const modal of stack) {
+      const id = editedPriorityIdOf(modal) ?? deletedPriorityIdOf(modal);
+      if (id !== null && !priorities.some((priority) => priority.id === id))
+        closeModal(modal);
+    }
+  }, [initializing, stack, priorities]);
+
   const dialog = (modal: string) => {
     if (modal === NEW_TASK_MODAL)
       return <TaskDialog key={modal} modal={modal} defaultDay={defaultDay} />;
@@ -104,6 +121,36 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
       return <StatusesDialog key={modal} modal={modal} />;
     if (modal === CATEGORIES_MODAL)
       return <CategoriesDialog key={modal} modal={modal} />;
+    if (modal === PRIORITIES_MODAL)
+      return <PrioritiesDialog key={modal} modal={modal} />;
+
+    const editedPriority = priorities.find(
+      (priority) => priority.id === editedPriorityIdOf(modal),
+    );
+    if (editedPriority)
+      return (
+        <PriorityDialog key={modal} modal={modal} priority={editedPriority} />
+      );
+
+    const deletedPriority = priorities.find(
+      (priority) => priority.id === deletedPriorityIdOf(modal),
+    );
+    if (deletedPriority)
+      return (
+        <DeleteDialog
+          key={modal}
+          modal={modal}
+          task={{ title: deletedPriority.name }}
+          title="Usunąć priorytet?"
+          description={`Priorytetu „${deletedPriority.name}” nie da się usunąć, dopóki używają go zadania lub cykle.`}
+          onConfirm={() => {
+            deletePriority(deletedPriority.id);
+            closeModalThen(modal, () =>
+              closeModal(editPriorityModal(deletedPriority.id)),
+            );
+          }}
+        />
+      );
 
     const editedCategory = categories.find(
       (category) => category.id === editedCategoryIdOf(modal),

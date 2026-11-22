@@ -170,6 +170,25 @@ export const createTimePrioritySchema = () =>
     ]),
   });
 
+export const updateTimePrioritySchema = () =>
+  z.object({
+    in: timePriority(),
+    out: z.union([
+      z.object({ code: z.literal(200), data: timePriority() }),
+      writeErrors,
+    ]),
+  });
+
+export const deleteTimePrioritySchema = () =>
+  z.object({
+    in: z.object({ id: z.string().min(1) }),
+    out: z.union([
+      z.object({ code: z.literal(200), ok: z.literal(true) }),
+      writeErrors,
+      conflictOut(),
+    ]),
+  });
+
 /** The whole ordered list of steps between open and done replaces the stored one. */
 export const saveTimeStatusesSchema = () =>
   z.object({
