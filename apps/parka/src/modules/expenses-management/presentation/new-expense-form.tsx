@@ -10,6 +10,7 @@ import {
 import { newExpenseId } from '../domain/ids';
 import type { ReceiptDraft, StoredExpense } from '../domain/models';
 import { useContext } from './context';
+import { manageCategories } from './manage-categories';
 
 /** Adds an expense through the shared form; starts from a scan or a copied expense. */
 export const NewExpenseForm = ({
@@ -55,6 +56,7 @@ export const NewExpenseForm = ({
       categories={categories}
       saving={saving}
       prefill={!source}
+      onManageCategories={manageCategories}
       submitLabel="Dodaj"
       onSubmit={(values) =>
         ctx.createExpense({

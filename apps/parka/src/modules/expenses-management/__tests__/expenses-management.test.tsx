@@ -171,6 +171,43 @@ describe('adding an expense on its own page', () => {
     expect(screen.getByLabelText('Sklep')).toBeVisible();
   });
 
+  it('opens the categories list over the form and shows a category added there', async () => {
+    const categories = [CATEGORY];
+    mockBackend(categories);
+    server.use(
+      http.post('/api/categories/', async ({ request }) => {
+        const body = (await request.json()) as Record<string, unknown>;
+        categories.push(body as (typeof categories)[number]);
+        return HttpResponse.json({ code: 201, data: body });
+      }),
+    );
+    const user = await open();
+
+    await user.click(
+      await screen.findByRole('button', { name: 'Zarządzaj kategoriami' }),
+    );
+    const list = await screen.findByRole('dialog', { name: 'Kategorie' });
+    await user.click(within(list).getByRole('button', { name: /Dodaj$/ }));
+    await user.type(
+      await screen.findByRole('textbox', { name: 'Nazwa' }),
+      'Kultura',
+    );
+    await user.click(screen.getByRole('button', { name: /^Dodaj$/ }));
+    await user.click(
+      within(
+        await screen.findByRole('dialog', { name: 'Kategorie' }),
+      ).getByRole('button', { name: 'Zamknij' }),
+    );
+
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog', { name: 'Kategorie' })).toBeNull(),
+    );
+    await user.click(screen.getByRole('combobox', { name: /Kategoria/ }));
+    expect(
+      await screen.findByRole('option', { name: 'Kultura' }),
+    ).toBeVisible();
+  });
+
   it('shows the total next to the save button', async () => {
     mockBackend();
     await open();

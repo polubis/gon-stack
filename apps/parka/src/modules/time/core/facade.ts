@@ -8,6 +8,7 @@ import type {
   Category,
   CategoryId,
   Priority,
+  PriorityId,
   Recurring,
   Status,
   Task,
@@ -46,6 +47,10 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => {
       trigger('[TRIGGER]_DELETE_CATEGORY', { id }),
     createPriority: (priority: Priority) =>
       trigger('[TRIGGER]_CREATE_PRIORITY', { priority }),
+    updatePriority: (priority: Priority) =>
+      trigger('[TRIGGER]_UPDATE_PRIORITY', { priority }),
+    deletePriority: (id: PriorityId) =>
+      trigger('[TRIGGER]_DELETE_PRIORITY', { id }),
     saveStatuses: (statuses: Status[]) =>
       trigger('[TRIGGER]_SAVE_STATUSES', { statuses }),
     notify: (notice: NoticeBody) => notify(store, notice),

@@ -1,5 +1,5 @@
 import type { E2eId } from '@/__e2e__/selectors';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import {
   navigateTo,
@@ -20,6 +20,12 @@ import {
   MONTH_PARAM,
 } from '../configuration/constraints';
 import type { ExpenseKind } from '../domain/models';
+import { CategoryModals } from '@/modules/categories/presentation/category-modals';
+import {
+  CATEGORIES_LIST_MODAL,
+  NEW_CATEGORY_MODAL,
+} from '@/modules/categories/presentation/modal-ids';
+import { useModalStack } from '@/shared/router/modal-stack';
 import { Provider, useContext } from './context';
 import { EditExpenseForm } from './edit-expense-form';
 import { NewExpenseForm } from './new-expense-form';
@@ -66,6 +72,17 @@ const ExpensesManagementView = () => {
   useEffect(() => {
     ctx.load();
   }, [ctx]);
+
+  // Categories managed over the form: read them again once the popups close.
+  const stack = useModalStack();
+  const managing = stack.some(
+    (modal) => modal === CATEGORIES_LIST_MODAL || modal === NEW_CATEGORY_MODAL,
+  );
+  const wasManaging = useRef(false);
+  useEffect(() => {
+    if (wasManaging.current && !managing) ctx.load();
+    wasManaging.current = managing;
+  }, [ctx, managing]);
 
   useEffect(() => {
     if (editing || duplicateId) return;
@@ -167,6 +184,8 @@ const ExpensesManagementView = () => {
           </>
         )}
       </FormModal>
+
+      <CategoryModals />
 
       {notice ? (
         <Toast

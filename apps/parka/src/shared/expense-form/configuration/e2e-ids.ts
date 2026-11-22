@@ -5,6 +5,7 @@ export const EXPENSE_FORM_E2E_IDS = [
   'expense-form:amount',
   'expense-form:date',
   'expense-form:category',
+  'expense-form:category-manage',
   'expense-form:method',
   'expense-form:add-product',
   'expense-form:total',

@@ -184,6 +184,7 @@ export const API_ROUTER = {
   timeCategories: route('/api/time/categories/'),
   timeCategoryById: routeById('/api/time/categories/'),
   timePriorities: route('/api/time/priorities/'),
+  timePriorityById: routeById('/api/time/priorities/'),
   timeStatuses: route('/api/time/statuses/'),
   knowledge: routeWithQuery<'/api/knowledge/'>('/api/knowledge/'),
   knowledgeCategories: route('/api/knowledge/categories/'),

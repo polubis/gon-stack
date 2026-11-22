@@ -7,6 +7,7 @@ import { RecurringScopeDialog } from '@/shared/ui/recurring-scope-dialog';
 import type { ExpenseFormValues } from '@/shared/expense-form/domain/models';
 import type { StoredExpense } from '../domain/models';
 import { useContext } from './context';
+import { manageCategories } from './manage-categories';
 
 /** Edits a stored expense through the same shared form as adding one. */
 export const EditExpenseForm = ({
@@ -39,6 +40,7 @@ export const EditExpenseForm = ({
         categories={categories}
         saving={saving}
         submitLabel="Zapisz"
+        onManageCategories={manageCategories}
         actions={
           <Button
             variant="ghost"

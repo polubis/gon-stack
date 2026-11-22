@@ -13,7 +13,7 @@ import {
   Upload,
   type LucideIcon,
 } from 'lucide-react';
-import { NEW_CATEGORY_MODAL } from '@/modules/categories/presentation/modal-ids';
+import { CATEGORIES_LIST_MODAL } from '@/modules/categories/presentation/modal-ids';
 import { useSequencedOpen } from '@/shared/navigation/overlay-nav/presentation/use-sequenced-open';
 import { usePopoverOpen } from '@/shared/ui/use-popover-open';
 import { navigateTo } from '@/shared/router/navigation';
@@ -39,7 +39,12 @@ const OPTIONS: readonly Option[] = [
   },
   { id: 'photo', label: 'Ze zdjęcia', icon: Camera, pick: 'photo' },
   { id: 'file', label: 'Z pliku', icon: Upload, pick: 'file' },
-  { id: 'category', label: 'Kategoria', icon: Tag, modal: NEW_CATEGORY_MODAL },
+  {
+    id: 'category',
+    label: 'Kategorie',
+    icon: Tag,
+    modal: CATEGORIES_LIST_MODAL,
+  },
 ];
 
 const KEYS = ['ArrowDown', 'ArrowUp', 'Home', 'End'];

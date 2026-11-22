@@ -375,6 +375,27 @@ export const setupTimeBackend = () => {
       state.statuses = body!.statuses as Json[];
       return HttpResponse.json({ code: 200, data: body });
     }),
+    http.put('/api/time/priorities/:id/', async ({ request }) => {
+      const body = await record(request);
+      if (state.failWrites) return HttpResponse.json(FAILURE);
+      state.priorities = state.priorities.map((p) =>
+        p.id === body!.id ? body! : p,
+      );
+      return HttpResponse.json({ code: 200, data: body });
+    }),
+    // A priority that tasks still use stays, like the foreign key does.
+    http.delete('/api/time/priorities/:id/', async ({ request, params }) => {
+      await record(request);
+      if (state.failWrites) return HttpResponse.json(FAILURE);
+      if (state.tasks.some((t) => t.priorityId === params.id))
+        return HttpResponse.json({
+          code: 409,
+          type: 'conflict',
+          message: 'Still referenced by other records',
+        });
+      state.priorities = state.priorities.filter((p) => p.id !== params.id);
+      return HttpResponse.json({ code: 200, ok: true });
+    }),
     http.post('/api/time/priorities/', async ({ request }) => {
       const body = await record(request);
       if (state.failWrites) return HttpResponse.json(FAILURE);

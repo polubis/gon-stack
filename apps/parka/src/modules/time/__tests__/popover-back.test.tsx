@@ -96,7 +96,7 @@ describe('time menus on a phone', () => {
       (await screen.findAllByRole('button', { name: 'Dodaj' }))[0]!,
     );
 
-    await userEvent.click(screen.getByRole('menuitem', { name: 'Kategoria' }));
+    await userEvent.click(screen.getByRole('menuitem', { name: 'Kategorie' }));
 
     expect(await screen.findByRole('dialog')).toBeVisible();
     await new Promise((resolve) => setTimeout(resolve, 100));

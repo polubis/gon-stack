@@ -14,8 +14,8 @@ import { useSequencedOpen } from '@/shared/navigation/overlay-nav/presentation/u
 import { usePopoverOpen } from '@/shared/ui/use-popover-open';
 import {
   NEW_BACKLOG_MODAL,
-  NEW_CATEGORY_MODAL,
-  NEW_PRIORITY_MODAL,
+  CATEGORIES_MODAL,
+  PRIORITIES_MODAL,
   NEW_RECURRING_TASK_MODAL,
   NEW_TASK_MODAL,
   STATUSES_MODAL,
@@ -25,8 +25,8 @@ const OPTIONS: readonly { label: string; modal: string; icon: LucideIcon }[] = [
   { label: 'Zadanie', modal: NEW_TASK_MODAL, icon: ListChecks },
   { label: 'Zadanie cykliczne', modal: NEW_RECURRING_TASK_MODAL, icon: Repeat },
   { label: 'Do backlogu', modal: NEW_BACKLOG_MODAL, icon: Inbox },
-  { label: 'Kategoria', modal: NEW_CATEGORY_MODAL, icon: Tag },
-  { label: 'Priorytet', modal: NEW_PRIORITY_MODAL, icon: Flag },
+  { label: 'Kategorie', modal: CATEGORIES_MODAL, icon: Tag },
+  { label: 'Priorytety', modal: PRIORITIES_MODAL, icon: Flag },
   { label: 'Statusy zadań', modal: STATUSES_MODAL, icon: Settings2 },
 ];
 
@@ -52,7 +52,7 @@ export const moveFocus = (e: KeyboardEvent<HTMLElement>) => {
   items[target]?.focus();
 };
 
-/** "Dodaj" trigger + chooser of what to create; every option opens its form modal. */
+/** "Dodaj" trigger + chooser of what to create; task options open their form, metadata options open their list (which leads to the form). */
 export const AddMenu = ({
   children,
   side,

@@ -6,6 +6,8 @@ import type {
   updateTimeBacklogTaskSchema,
   updateTimeCategorySchema,
   createTimePrioritySchema,
+  updateTimePrioritySchema,
+  deleteTimePrioritySchema,
   createTimeRecurringSchema,
   createTimeTaskSchema,
   deleteTimeCategorySchema,
@@ -23,6 +25,7 @@ import type {
   Category,
   CategoryId,
   Priority,
+  PriorityId,
   Recurring,
   Status,
   Task,
@@ -233,4 +236,27 @@ export const postRecurring = async (recurring: Recurring): Promise<void> => {
   });
   const json = (await response.json()) as Out<typeof createTimeRecurringSchema>;
   if (json.code !== 201) throw new Error(json.message);
+};
+
+export const putPriority = async (priority: Priority): Promise<Priority> => {
+  const response = await send(API_ROUTER.timePriorityById(priority.id), {
+    method: 'PUT',
+    headers: JSON_HEADERS,
+    body: JSON.stringify(priority),
+  });
+  const json = (await response.json()) as Out<typeof updateTimePrioritySchema>;
+  if (json.code !== 200) throw new Error(json.message);
+  return toPriority(json.data);
+};
+
+export class PriorityInUseError extends Error {}
+
+export const removePriority = async (id: PriorityId): Promise<void> => {
+  const response = await send(API_ROUTER.timePriorityById(id), {
+    method: 'DELETE',
+    headers: JSON_HEADERS,
+  });
+  const json = (await response.json()) as Out<typeof deleteTimePrioritySchema>;
+  if (json.code === 409) throw new PriorityInUseError(json.message);
+  if (json.code !== 200) throw new Error(json.message);
 };
