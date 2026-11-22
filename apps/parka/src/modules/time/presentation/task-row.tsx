@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import {
   Check,
   ChevronsRight,
@@ -54,6 +55,26 @@ const advance = (
   };
 };
 
+const MIN_GAP_MS = 4000;
+const MAX_GAP_MS = 12000;
+
+/** While `active`, flips to true after a random 4-12 s gap; call `done` when the sweep ends to wait for the next. */
+const useShimmer = (active: boolean, random = Math.random) => {
+  const [running, setRunning] = useState(false);
+  useEffect(() => {
+    if (!active || running) return;
+    const timer = setTimeout(
+      () => setRunning(true),
+      MIN_GAP_MS + random() * (MAX_GAP_MS - MIN_GAP_MS),
+    );
+    return () => clearTimeout(timer);
+  }, [active, running, random]);
+  return {
+    shimmering: active && running,
+    done: () => setRunning(false),
+  };
+};
+
 const StepIcon = ({ step, ...rest }: { step: Step } & LucideProps) =>
   step === 'open' ? (
     <SquareDashed {...rest} />
@@ -76,10 +97,12 @@ export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
   const current = board ? stepOf(board) : null;
   const position = current ? progress(current, statuses) : null;
   const started = current !== null && current !== 'open' && current !== 'done';
+  const shimmer = useShimmer(started);
   return (
     <li
       aria-current={now ? 'time' : undefined}
       data-started={started ? '' : undefined}
+      data-shimmering={shimmer.shimmering ? '' : undefined}
       data-e2e={`time:task:${task.id}`}
       aria-hidden={change['aria-hidden']}
       inert={change.inert}
@@ -94,11 +117,19 @@ export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
         now && 'bg-accent-soft',
       )}
     >
-      {started ? (
+      {shimmer.shimmering ? (
         <span
           aria-hidden="true"
-          className="absolute inset-y-2.5 left-1 w-0.5 animate-item-in rounded-full bg-brand/50 motion-reduce:animate-none"
-        />
+          className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl motion-reduce:hidden"
+        >
+          <span
+            onAnimationEnd={(event) => {
+              event.stopPropagation();
+              shimmer.done();
+            }}
+            className="block h-full w-full animate-shimmer bg-linear-to-r from-transparent via-brand/20 to-transparent"
+          />
+        </span>
       ) : null}
       <div className="flex min-w-0 flex-1 flex-col py-1.5">
         <button
