@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { Fragment, useState, type ReactNode } from 'react';
 import { Plus, Receipt } from 'lucide-react';
 import { useModal } from '@/shared/router/modal-stack';
 import { categoryLabel } from '@/shared/i18n/category-label';
@@ -14,7 +14,13 @@ import {
   MAX_VISIBLE_EXPENSES,
 } from '../configuration/constraints';
 import { containsDate, todayDay, type Period } from '@/shared/period/period';
-import { money, plainDateLabel, dateTimeLabel } from '../domain/format';
+import {
+  dayHeading,
+  dayOf,
+  money,
+  plainDateLabel,
+  spentMoney,
+} from '../domain/format';
 import { periodTitle } from '../domain/period';
 import type {
   Category,
@@ -79,6 +85,9 @@ const Chip = ({
 const ROW_CLASS =
   'flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left';
 
+/** Expense rows sit flush: the day heading above carries the list's alignment. */
+const EXPENSE_ROW_CLASS = 'flex w-full items-center gap-3 py-2 text-left';
+
 /** Every row, stored or recurring, opens its edit popup. */
 const Row = ({
   id,
@@ -93,7 +102,7 @@ const Row = ({
     type="button"
     onClick={() => onSelect(id)}
     data-e2e={`dashboard:expense:${id}`}
-    className={cn(ROW_CLASS, 'min-w-0 flex-1 hover:bg-hover-soft')}
+    className={cn(EXPENSE_ROW_CLASS, 'min-w-0 flex-1 hover:bg-hover-soft')}
   >
     {children}
   </button>
@@ -101,13 +110,37 @@ const Row = ({
 
 const expenseKey = (e: Expense) => e.id;
 
-/** Rows of the expenses list; every row opens its edit popup. */
+/** Spent per local day, over every expense: a truncated list still shows true sums. */
+const daySums = (expenses: Expense[]): Map<string, number> => {
+  const sums = new Map<string, number>();
+  for (const e of expenses) {
+    const day = dayOf(e.date);
+    sums.set(day, (sums.get(day) ?? 0) + e.amount);
+  }
+  return sums;
+};
+
+/** Day heading: label left, day total right. */
+const DayHeading = ({ day, sum }: { day: string; sum: number | undefined }) => (
+  <li
+    data-e2e={`dashboard:expense-day:${day}`}
+    className="flex items-baseline justify-between gap-3 pt-3 pb-1 text-xs font-semibold tracking-wide text-ink-soft uppercase first:pt-0"
+  >
+    <h3>{dayHeading(day, todayDay())}</h3>
+    {sum === undefined ? null : (
+      <span className="tabular-nums">{spentMoney(sum)}</span>
+    )}
+  </li>
+);
+
+/** Rows of the expenses list grouped by day; every row opens its edit popup. */
 const ExpenseList = ({
   expenses,
   categories,
   onSelect,
   scope,
   menuScope,
+  sums,
   empty,
 }: {
   expenses: Expense[];
@@ -117,52 +150,54 @@ const ExpenseList = ({
   scope: string;
   /** Row menus of the card list and of the modal list must not share state. */
   menuScope: string;
+  /** Day totals over the whole filtered list, not just the rows shown. */
+  sums: Map<string, number>;
   /** Shown once no row is left, after the last one finished leaving. */
   empty?: ReactNode;
 }) => {
   const rows = useListChanges(expenses, expenseKey, scope);
   if (rows.length === 0 && empty) return empty;
   return (
-    <ul className="divide-y divide-line pr-2">
-      {rows.map(({ key, item: e, phase }) => {
+    <ul>
+      {rows.map(({ key, item: e, phase }, i) => {
         const category = categoryOf(categories, e.categoryId);
         const change = changeProps(phase);
+        const day = dayOf(e.date);
+        const newDay = i === 0 || dayOf(rows[i - 1].item.date) !== day;
         return (
-          <li
-            key={key}
-            aria-hidden={change['aria-hidden']}
-            inert={change.inert}
-            className={cn('group flex items-center gap-1', change.className)}
-          >
-            <Row id={e.id} onSelect={onSelect}>
-              <span className="relative shrink-0">
-                <CategoryAvatar category={category} className="h-10 w-10" />
-                {e.recurringId !== null ? <RecurringMark /> : null}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold">
-                  {e.merchant}
+          <Fragment key={key}>
+            {newDay ? <DayHeading day={day} sum={sums.get(day)} /> : null}
+            <li
+              aria-hidden={change['aria-hidden']}
+              inert={change.inert}
+              className={cn(
+                'group flex items-center gap-1 border-b border-line last:border-b-0',
+                change.className,
+              )}
+            >
+              <Row id={e.id} onSelect={onSelect}>
+                <span className="relative shrink-0">
+                  <CategoryAvatar category={category} className="h-10 w-10" />
+                  {e.recurringId !== null ? <RecurringMark /> : null}
                 </span>
-                <span className="flex items-center gap-2 text-xs text-ink-soft">
-                  <span className="shrink-0">
-                    {dateTimeLabel(e.date)}
-                    <span className="sr-only">{`, ${categoryLabel(category.name)}`}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-semibold">
+                    {e.merchant}
                   </span>
-                  {e.device ? <DeviceBadge device={e.device} /> : null}
+                  <span className="flex items-center gap-2 text-xs text-ink-soft">
+                    <span className="truncate">
+                      {categoryLabel(category.name)}
+                    </span>
+                    {e.device ? <DeviceBadge device={e.device} /> : null}
+                  </span>
                 </span>
-              </span>
-              <span className="relative text-sm font-semibold tabular-nums">
-                {money(e.amount)}
-                <span
-                  role="tooltip"
-                  className="pointer-events-none absolute top-1/2 right-full z-(--z-tooltip) mr-3 hidden -translate-y-1/2 rounded-lg bg-card px-3 py-1.5 text-xs font-medium whitespace-nowrap text-ink shadow-popover md:group-hover:block md:group-focus-within:block"
-                >
-                  {categoryLabel(category.name)}
+                <span className="text-sm font-semibold text-danger tabular-nums">
+                  {spentMoney(e.amount)}
                 </span>
-              </span>
-            </Row>
-            <ExpenseMenu expense={e} scope={menuScope} />
-          </li>
+              </Row>
+              <ExpenseMenu expense={e} scope={menuScope} />
+            </li>
+          </Fragment>
         );
       })}
     </ul>
@@ -312,6 +347,7 @@ export const MonthExpenses = ({
     ? inPeriod.filter((e) => touchesCategory(e, categories, active))
     : inPeriod;
 
+  const sums = daySums(visible);
   const scope = useListScope(periodTitle(period), String(active), loading);
 
   return (
@@ -381,6 +417,7 @@ export const MonthExpenses = ({
             onSelect={onSelect}
             scope={scope}
             menuScope="card"
+            sums={sums}
             empty={
               <EmptyState
                 variant="card"
@@ -439,6 +476,7 @@ export const MonthExpenses = ({
             onSelect={onSelect}
             scope={scope}
             menuScope="all"
+            sums={sums}
           />
         </DetailDialog>
       )}
