@@ -36,6 +36,11 @@ export const updateTimeTask = privateProcedure({
     // "Only the following" leaves the opened task as it is.
     const keepsAnchor = series !== null && input.scope === 'following';
 
+    // Independent of the write: read it alongside. The no-op catch only keeps
+    // a failed write from leaving an unhandled rejection behind.
+    const profiles = loadProfiles(db);
+    profiles.catch(() => undefined);
+
     const { data, error } = keepsAnchor
       ? await db
           .from('time_tasks')
@@ -86,7 +91,7 @@ export const updateTimeTask = privateProcedure({
 
     return {
       code: 200 as const,
-      data: toTimeTask(data, await loadProfiles(db)),
+      data: toTimeTask(data, await profiles),
     };
   },
 });
