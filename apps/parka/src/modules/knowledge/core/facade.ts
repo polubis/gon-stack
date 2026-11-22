@@ -46,6 +46,8 @@ export const createFacade = (store: Store, trigger: Registry['trigger']) => ({
     trigger('[TRIGGER]_REMOVE_REEL_MEDIA', { reelId }),
   setProgress: (reelId: ReelId, done: boolean) =>
     trigger('[TRIGGER]_SET_PROGRESS', { reelId, done }),
+  resetTopicProgress: (topicId: TopicId) =>
+    trigger('[TRIGGER]_RESET_TOPIC_PROGRESS', { topicId }),
   loadDemo: () => trigger('[TRIGGER]_LOAD_DEMO'),
   notify: (notice: NoticeBody) => notify(store, notice),
   dismissNotice: () => trigger('[TRIGGER]_DISMISS_NOTICE'),

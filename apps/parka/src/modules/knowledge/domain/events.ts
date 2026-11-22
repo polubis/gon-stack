@@ -38,5 +38,6 @@ export type Event =
   | TriggerEvent<'[TRIGGER]_UPLOAD_REEL_MEDIA', { reelId: ReelId; file: File }>
   | TriggerEvent<'[TRIGGER]_REMOVE_REEL_MEDIA', { reelId: ReelId }>
   | TriggerEvent<'[TRIGGER]_SET_PROGRESS', { reelId: ReelId; done: boolean }>
+  | TriggerEvent<'[TRIGGER]_RESET_TOPIC_PROGRESS', { topicId: TopicId }>
   | TriggerEvent<'[TRIGGER]_LOAD_DEMO'>
   | TriggerEvent<'[TRIGGER]_DISMISS_NOTICE'>;

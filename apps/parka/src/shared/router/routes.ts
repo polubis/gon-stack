@@ -199,6 +199,8 @@ export const API_ROUTER = {
   knowledgeReelById: routeById('/api/knowledge/reels/'),
   knowledgeReelMedia: (id: string) =>
     `/api/knowledge/reels/${id}/media/` as const,
+  knowledgeTopicProgress: (id: string) =>
+    `/api/knowledge/topics/${id}/progress/` as const,
   knowledgeProgress: route('/api/knowledge/progress/'),
   knowledgeDemo: route('/api/knowledge/demo/'),
   settings: route('/api/settings/'),

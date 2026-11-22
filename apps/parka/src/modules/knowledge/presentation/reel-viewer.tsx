@@ -18,13 +18,18 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
-import { closeModal, useModalMounted } from '@/shared/router/modal-stack';
+import {
+  closeModal,
+  openModal,
+  useModalMounted,
+} from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { lessonOrder, neighbourLessons, resumeIndex } from '../domain/lessons';
 import type { Reel, Topic, TopicId } from '../domain/models';
 import { useContext } from './context';
 import { Markdown } from './markdown';
+import { resetProgressModal } from './modal-ids';
 import { ReelMediaView } from './reel-media';
 
 /** Drag distances (in CSS px) that count as a swipe, and where the axis locks. */
@@ -160,6 +165,12 @@ export const ReelViewer = ({
     setProgress(reel.id, true);
   }, [reel, setProgress]);
 
+  // Lesson reset from the end screen: start over at the first reel.
+  if (complete && total > 0 && own?.every((r) => !r.done)) {
+    setMotion('prev');
+    setPosition({ topicId: viewedId, index: 0 });
+  }
+
   const goTo = (to: number, how: Motion) => {
     if (index === null || to < 0 || to > total || to === index) return;
     setMotion(how);
@@ -245,6 +256,10 @@ export const ReelViewer = ({
       ? `Rolka ${index + 1} z ${total}`
       : '';
 
+  const resetLabel = complete
+    ? 'Resetuj postęp lekcji'
+    : 'Resetuj postęp rolki';
+
   return (
     <Dialog.Root
       open
@@ -280,6 +295,23 @@ export const ReelViewer = ({
                   <span data-e2e="knowledge:viewer-status">{status}</span>
                 </Dialog.Description>
               </div>
+              <button
+                type="button"
+                aria-label={resetLabel}
+                title={resetLabel}
+                data-e2e="knowledge:viewer-reset"
+                disabled={!complete && !reel?.done}
+                onClick={() => {
+                  if (complete) {
+                    // Every reel is seen again once the reset is confirmed.
+                    marked.current.clear();
+                    openModal(resetProgressModal(viewedId));
+                  } else if (reel) setProgress(reel.id, false);
+                }}
+                className={cn(NAV_BUTTON, 'text-ink-soft')}
+              >
+                <RotateCcw className="size-5" aria-hidden="true" />
+              </button>
               <Dialog.Close
                 data-e2e={`knowledge:modal-close:${modal}`}
                 aria-label="Zamknij"

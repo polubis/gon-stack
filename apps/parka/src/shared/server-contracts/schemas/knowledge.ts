@@ -358,3 +358,16 @@ export const setKnowledgeProgressSchema = () =>
       writeErrors,
     ]),
   });
+
+/** Clears the progress of every reel of a topic; repeating it is safe. */
+export const resetKnowledgeProgressSchema = () =>
+  z.object({
+    in: z.object({ id: id() }),
+    out: z.union([
+      z.object({
+        code: z.literal(200),
+        data: z.object({ topicId: id() }),
+      }),
+      writeErrors,
+    ]),
+  });

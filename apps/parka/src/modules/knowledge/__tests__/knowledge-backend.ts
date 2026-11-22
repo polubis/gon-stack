@@ -289,6 +289,17 @@ export const setupKnowledgeBackend = () => {
         return { code: 200, data: body! };
       }),
     ),
+    http.delete('/api/knowledge/topics/:id/progress/', ({ request, params }) =>
+      write(request, () => {
+        state.reels = state.reels.map((r) =>
+          r.topicId === params.id ? { ...r, done: false } : r,
+        );
+        state.topics = state.topics.map((t) =>
+          t.id === params.id ? { ...t, doneCount: 0 } : t,
+        );
+        return { code: 200, data: { topicId: params.id as string } };
+      }),
+    ),
     http.post('/api/knowledge/demo/', ({ request }) =>
       write(request, () => {
         state.categories.push(category({ id: 'c-demo', name: 'Bazy danych' }));

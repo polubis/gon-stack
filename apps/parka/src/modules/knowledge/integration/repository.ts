@@ -10,6 +10,7 @@ import type {
   deleteKnowledgeReelMediaSchema,
   getKnowledgeTopicSchema,
   listKnowledgeSchema,
+  resetKnowledgeProgressSchema,
   setKnowledgeProgressSchema,
   updateKnowledgeCatalogSchema,
   updateKnowledgeCategorySchema,
@@ -347,6 +348,15 @@ export const putProgress = async (
     json('PUT', { reelId, done: isDone }),
   );
   done((await response.json()) as Out<typeof setKnowledgeProgressSchema>);
+};
+
+/** Clears the progress of every reel of a topic. */
+export const removeTopicProgress = async (topicId: TopicId): Promise<void> => {
+  const response = await send(
+    API_ROUTER.knowledgeTopicProgress(topicId),
+    json('DELETE'),
+  );
+  done((await response.json()) as Out<typeof resetKnowledgeProgressSchema>);
 };
 
 /** Creates the sample course (once; repeating is safe). */

@@ -8,12 +8,15 @@ export const DeleteDialog = ({
   modal,
   title,
   description,
+  confirmLabel = 'Usuń',
   onConfirm,
 }: {
   /** Its id in the URL modal stack. */
   modal: string;
   title: string;
   description: string;
+  /** Name of the confirm button (one word). */
+  confirmLabel?: string;
   onConfirm: () => void;
 }) => {
   useModalMounted(modal);
@@ -52,7 +55,7 @@ export const DeleteDialog = ({
               data-e2e="knowledge:delete-confirm"
               onClick={onConfirm}
             >
-              Usuń
+              {confirmLabel}
             </Button>
           </ModalFooter>
         </Dialog.Content>
