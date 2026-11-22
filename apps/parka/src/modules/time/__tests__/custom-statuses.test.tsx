@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderTime } from './render-time';
@@ -7,7 +7,10 @@ import { openEditor as openTaskEditor } from './edit-task';
 
 const backend = setupTimeBackend();
 
-afterEach(() => vi.useRealTimers());
+afterEach(() => {
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+});
 
 const REVIEW = { id: 'tstatus-review', name: 'Review' };
 
@@ -199,19 +202,44 @@ describe('task status label', () => {
   });
 });
 
-describe('started task marker', () => {
-  it('marks only tasks that are in progress', async () => {
+describe('started task shimmer', () => {
+  it('sweeps a soft shimmer over a task in progress at a random gap', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0);
     const user = userEvent.setup();
     backend.seed([task()]);
     renderTime();
     const row = (await box()).closest('li')!;
-
-    expect(row).not.toHaveAttribute('data-started');
+    vi.useFakeTimers({ shouldAdvanceTime: true });
 
     await user.click(await box());
     expect(row).toHaveAttribute('data-started');
+    expect(row).not.toHaveAttribute('data-shimmering');
+
+    await act(() => vi.advanceTimersByTimeAsync(3900));
+    expect(row).not.toHaveAttribute('data-shimmering');
+
+    await act(() => vi.advanceTimersByTimeAsync(200));
+    expect(row).toHaveAttribute('data-shimmering');
+    expect(
+      screen.getByRole('button', { name: /Szczegóły zadania/ }),
+    ).toBeVisible();
+  });
+
+  it('keeps open and done tasks still', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    renderTime();
+    const row = (await box()).closest('li')!;
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+
+    await act(() => vi.advanceTimersByTimeAsync(13000));
+    expect(row).not.toHaveAttribute('data-shimmering');
 
     await user.click(await box());
+    await user.click(await box());
+    await act(() => vi.advanceTimersByTimeAsync(13000));
     expect(row).not.toHaveAttribute('data-started');
+    expect(row).not.toHaveAttribute('data-shimmering');
   });
 });
