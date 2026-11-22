@@ -373,6 +373,17 @@
     }
   }
 
+  /* One soft light sweep across a row; pair with `motion-reduce:hidden`. */
+  --animate-shimmer: shimmer 1.8s ease-in-out both;
+  @keyframes shimmer {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+
   /* Staggered rows/cards; set `animation-delay` per item. Pair with `motion-reduce:animate-none`. */
   --animate-item-in: item-in 0.5s var(--ease-enter) both;
   @keyframes item-in {
