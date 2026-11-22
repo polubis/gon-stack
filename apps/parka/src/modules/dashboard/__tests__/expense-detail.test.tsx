@@ -118,4 +118,25 @@ describe('expense popup', () => {
     );
     expect(screen.queryByText('Produkty (1)')).not.toBeInTheDocument();
   });
+
+  it('opens one row menu when More is clicked in the show-all modal', async () => {
+    const many = Array.from({ length: 8 }, (_, i) => ({
+      ...expense(),
+      id: `e-${i + 1}`,
+      merchant: `Sklep ${i + 1}`,
+    }));
+    answerApi(server, ({ url }) =>
+      readBody(url, { expenses: many, categories: [CATEGORY] }),
+    );
+    window.history.replaceState(null, '', '/app/?modal=expenses');
+    const user = userEvent.setup();
+    render(<Main />);
+    const dialog = within(await screen.findByRole('dialog'));
+
+    await user.click(dialog.getByRole('button', { name: 'Więcej: Sklep 1' }));
+
+    expect(
+      await screen.findAllByRole('menuitem', { hidden: true }),
+    ).toHaveLength(1);
+  });
 });

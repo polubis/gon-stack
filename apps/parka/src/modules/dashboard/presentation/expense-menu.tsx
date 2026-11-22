@@ -7,9 +7,21 @@ import { usePopoverOpen } from '@/shared/ui/use-popover-open';
 import type { Expense } from '../domain/models';
 import { ITEM, moveFocus } from './add-menu';
 
-/** "More" popover of an expense row: quick actions that do not open the popup. */
-export const ExpenseMenu = ({ expense }: { expense: Expense }) => {
-  const { open, setOpen } = usePopoverOpen(`expense-menu:${expense.id}`);
+/**
+ * "More" popover of an expense row: quick actions that do not open the popup.
+ * `scope` names the list the row lives in: the card list and the "show all"
+ * modal render the same expense, each needs its own open state.
+ */
+export const ExpenseMenu = ({
+  expense,
+  scope,
+}: {
+  expense: Expense;
+  scope: string;
+}) => {
+  const { open, setOpen } = usePopoverOpen(
+    `expense-menu:${scope}:${expense.id}`,
+  );
   const label = `Więcej: ${expense.merchant}`;
   return (
     <Popover.Root modal open={open} onOpenChange={setOpen}>
