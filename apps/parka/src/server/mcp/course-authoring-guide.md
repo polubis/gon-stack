@@ -21,8 +21,36 @@ A topic without `studyDay` lands in the backlog. Set a study day, or leave it em
 4. Break it on purpose, then fix it. Show the error text.
 5. ASCII diagram, about 50 characters wide at most, inside a code block.
 6. Exam traps, each as: situation / why / what you do.
-7. Quiz: few questions, answers in a separate reel.
+7. Quiz: few questions in one reel as a `quiz` block (see Quiz block). Answers are marked in the block, no separate answers reel.
 8. Summary.
+
+## Quiz block
+
+A fenced block with the language `quiz` becomes interactive in the reel. Questions are separated by a line with `---`. Each has `type:` and `question:`.
+
+- `type: text`: open answer. Add `answer:`, alternatives split by `|`. Case and extra spaces are ignored.
+- `type: single`: one correct option. Options are `- [x] correct` and `- [ ] wrong`, exactly one `[x]`.
+- `type: multiple`: several correct options, at least one `[x]`. Every correct one must be picked.
+- At least two options for `single` and `multiple`.
+
+An invalid block (missing `question:`, no correct option, two correct in `single`) shows as plain code, so check the shape before saving. Answers are never stored. Plain text only inside the block, no Markdown formatting.
+
+```quiz
+type: text
+question: What does RLS stand for?
+answer: Row Level Security
+---
+type: single
+question: Which clause filters rows in a policy?
+- [x] using
+- [ ] returning
+---
+type: multiple
+question: Which are Postgres roles used by Supabase?
+- [x] anon
+- [x] authenticated
+- [ ] guest
+```
 
 ## Beginner perspective
 

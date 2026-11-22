@@ -1,4 +1,5 @@
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { Markdown } from '../presentation/markdown';
 
@@ -74,5 +75,111 @@ describe('Markdown', () => {
       'href',
       'https://ok.dev/a',
     );
+  });
+  describe('quiz', () => {
+    const quiz = (body: string) => '```quiz\n' + body + '\n```';
+
+    it('checks an open text answer ignoring case and spaces', async () => {
+      const user = userEvent.setup();
+      render(
+        <Markdown
+          source={quiz(
+            'type: text\nquestion: Stolica?\nanswer: Warszawa | Warsaw',
+          )}
+        />,
+      );
+
+      await user.type(
+        screen.getByRole('textbox', { name: 'Odpowiedź 1' }),
+        '  warsaw ',
+      );
+      await user.click(screen.getByRole('button', { name: 'Sprawdź' }));
+
+      expect(screen.getByRole('status')).toHaveTextContent(
+        'Poprawna odpowiedź',
+      );
+    });
+
+    it('reports a wrong single choice and a right one', async () => {
+      const user = userEvent.setup();
+      render(
+        <Markdown
+          source={quiz('type: single\nquestion: 2+2?\n- [ ] 3\n- [x] 4')}
+        />,
+      );
+
+      await user.click(screen.getByRole('radio', { name: '3' }));
+      await user.click(screen.getByRole('button', { name: 'Sprawdź' }));
+      expect(screen.getByRole('status')).toHaveTextContent(
+        'Niepoprawna odpowiedź',
+      );
+
+      await user.click(screen.getByRole('radio', { name: '4' }));
+      expect(screen.getByRole('status')).toBeEmptyDOMElement();
+      await user.click(screen.getByRole('button', { name: 'Sprawdź' }));
+      expect(screen.getByRole('status')).toHaveTextContent(
+        'Poprawna odpowiedź',
+      );
+    });
+
+    it('needs every correct option in multiple choice', async () => {
+      const user = userEvent.setup();
+      render(
+        <Markdown
+          source={quiz(
+            'type: multiple\nquestion: Parzyste?\n- [x] 2\n- [ ] 3\n- [x] 4',
+          )}
+        />,
+      );
+
+      await user.click(screen.getByRole('checkbox', { name: '2' }));
+      await user.click(screen.getByRole('button', { name: 'Sprawdź' }));
+      expect(screen.getByRole('status')).toHaveTextContent(
+        'Niepoprawna odpowiedź',
+      );
+
+      await user.click(screen.getByRole('checkbox', { name: '4' }));
+      await user.click(screen.getByRole('button', { name: 'Sprawdź' }));
+      expect(screen.getByRole('status')).toHaveTextContent(
+        'Poprawna odpowiedź',
+      );
+    });
+
+    it('does not keep answers after remount', async () => {
+      const user = userEvent.setup();
+      const source = quiz('type: single\nquestion: Q?\n- [x] a\n- [ ] b');
+      const { unmount } = render(<Markdown source={source} />);
+      await user.click(screen.getByRole('radio', { name: 'a' }));
+      unmount();
+
+      render(<Markdown source={source} />);
+
+      expect(screen.getByRole('radio', { name: 'a' })).not.toBeChecked();
+    });
+
+    it('clears the text answer with the x button', async () => {
+      const user = userEvent.setup();
+      render(<Markdown source={quiz('type: text\nquestion: Q?\nanswer: a')} />);
+      const input = screen.getByRole('textbox', { name: 'Odpowiedź 1' });
+
+      await user.type(input, 'abc');
+      await user.click(
+        screen.getByRole('button', { name: 'Wyczyść odpowiedź' }),
+      );
+
+      expect(input).toHaveValue('');
+      expect(input).toHaveFocus();
+    });
+
+    it('shows an invalid quiz as plain code', () => {
+      render(
+        <Markdown
+          source={quiz('type: single\nquestion: Q?\n- [ ] a\n- [ ] b')}
+        />,
+      );
+
+      expect(screen.queryByRole('button', { name: 'Sprawdź' })).toBeNull();
+      expect(screen.getByText(/type: single/)).toBeVisible();
+    });
   });
 });

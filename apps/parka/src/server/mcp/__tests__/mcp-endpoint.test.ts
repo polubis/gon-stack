@@ -1314,6 +1314,23 @@ describe('mcp knowledge', () => {
     expect(calls).toEqual([]);
   });
 
+  it('teaches the quiz block and no longer a separate answers reel', async () => {
+    const { rpc } = setup();
+
+    const { json } = await call(rpc, 'get_course_authoring_guide', {
+      language: 'en',
+    });
+
+    const { markdown } = json.result.structuredContent as unknown as {
+      markdown: string;
+    };
+    expect(markdown).toContain('## Quiz block');
+    expect(markdown).toContain('type: single');
+    expect(markdown).toContain('type: multiple');
+    expect(markdown).toContain('type: text');
+    expect(markdown).not.toContain('answers in a separate reel');
+  });
+
   it('returns the guide in English by default', async () => {
     const { rpc } = setup();
 

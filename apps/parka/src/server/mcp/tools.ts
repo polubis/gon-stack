@@ -811,7 +811,11 @@ const knowledgeReel = () =>
   z.object({
     id: z.string(),
     topicId: z.string(),
-    body: z.string().describe('Markdown'),
+    body: z
+      .string()
+      .describe(
+        'Markdown, with ```quiz blocks for quizzes (see get_course_authoring_guide)',
+      ),
     position: z.number().int(),
     mediaKind: z
       .enum(['image', 'video'])
@@ -1211,7 +1215,14 @@ const KNOWLEDGE_TOOLS: readonly RegisteredTool[] = [
       'Adds a reel (one short portion of Markdown, 1 to 8000 characters) at the end of a topic.',
     input: z.strictObject({
       topicId: kId('Topic'),
-      body: z.string().trim().min(1).max(8000).describe('Markdown'),
+      body: z
+        .string()
+        .trim()
+        .min(1)
+        .max(8000)
+        .describe(
+          'Markdown, with ```quiz blocks for quizzes (see get_course_authoring_guide)',
+        ),
     }),
     output: knowledgeReel(),
     annotations: WRITE,
