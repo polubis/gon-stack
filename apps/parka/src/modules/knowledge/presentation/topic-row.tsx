@@ -5,6 +5,7 @@ import {
   Film,
   Pencil,
   Play,
+  RotateCcw,
   Trash2,
 } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
@@ -21,6 +22,7 @@ import {
   editModal,
   reelsModal,
   reelViewerModal,
+  resetProgressModal,
 } from './modal-ids';
 
 /** Label of the main action: where the topic stands decides it. */
@@ -135,6 +137,17 @@ export const TopicRow = ({
             >
               <Film className="size-4" aria-hidden="true" />
             </button>
+            {topic.doneCount > 0 ? (
+              <button
+                type="button"
+                aria-label={`Resetuj postęp tematu: ${topic.title}`}
+                data-e2e={`knowledge:topic-reset:${topic.id}`}
+                onClick={() => openModal(resetProgressModal(topic.id))}
+                className={ICON_BUTTON}
+              >
+                <RotateCcw className="size-4" aria-hidden="true" />
+              </button>
+            ) : null}
             <button
               type="button"
               aria-label={`Edytuj temat: ${topic.title}`}

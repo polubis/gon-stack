@@ -282,4 +282,40 @@ describe('reel viewer', () => {
     });
     expect(image).toHaveAttribute('src', 'https://cdn.test/a.png');
   });
+
+  it('resets the progress of the reel on screen', async () => {
+    const user = userEvent.setup();
+    seed();
+    renderKnowledge(VIEWER);
+    await screen.findByText('Pierwsza');
+    const reset = screen.getByRole('button', { name: 'Resetuj postęp rolki' });
+    await waitFor(() => expect(reset).toBeEnabled());
+
+    await user.click(reset);
+
+    await waitFor(() => expect(reset).toBeDisabled());
+    await waitFor(() =>
+      expect(backend.state.reels.find((r) => r.id === 'r-1')?.done).toBe(false),
+    );
+  });
+
+  it('starts the lesson over after resetting it from the end screen', async () => {
+    const user = userEvent.setup();
+    seed();
+    renderKnowledge(VIEWER);
+    await screen.findByText('Pierwsza');
+    await user.keyboard('{ArrowRight}{ArrowRight}{ArrowRight}');
+    await screen.findByRole('heading', { name: 'Lekcja ukończona' });
+
+    await user.click(
+      screen.getByRole('button', { name: 'Resetuj postęp lekcji' }),
+    );
+    const confirm = within(
+      await screen.findByRole('dialog', { name: 'Zresetować postęp?' }),
+    );
+    await user.click(confirm.getByRole('button', { name: 'Resetuj' }));
+
+    expect(await screen.findByText('Pierwsza')).toBeVisible();
+    expect(await status()).toHaveTextContent('Rolka 1 z 3');
+  });
 });

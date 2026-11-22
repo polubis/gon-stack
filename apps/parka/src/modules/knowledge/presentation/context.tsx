@@ -108,6 +108,7 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
     load: facade.load,
     loadReels: facade.loadReels,
     setProgress: facade.setProgress,
+    resetTopicProgress: facade.resetTopicProgress,
     loadDemo: facade.loadDemo,
     dismissNotice: facade.dismissNotice,
     notify: facade.notify,

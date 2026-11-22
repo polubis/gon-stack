@@ -5,6 +5,7 @@ import {
   fetchTopic,
   postReel,
   putProgress,
+  removeTopicProgress,
   putReel,
   removeReel,
   removeReelMedia as sendRemoveReelMedia,
@@ -13,7 +14,7 @@ import {
 import { mutate } from '../actions/mutate';
 import { notify } from '../actions/notify';
 import { resolveId, write } from '../actions/pending';
-import { bumpCounts, patchTopic } from '../actions/topics';
+import { bumpCounts, findTopic, patchTopic } from '../actions/topics';
 import type { Bus } from '../bus';
 import type { Store } from '../store';
 
@@ -269,6 +270,34 @@ export const setProgress = (store: Store, bus: Bus) =>
           code: 'KNOWLEDGE_PROGRESS_FAILED',
         },
         retry: () => bus.emit('[TRIGGER]_SET_PROGRESS', { reelId, done }),
+      });
+    }),
+  );
+
+/** Every reel of the topic becomes unfinished; the counter drops at once. */
+export const resetTopicProgress = (store: Store, bus: Bus) =>
+  bus.ofType('[TRIGGER]_RESET_TOPIC_PROGRESS').pipe(
+    concatMap(({ topicId }) => {
+      const before = findTopic(store, topicId);
+      const loaded = reelsOf(store, topicId);
+      const clear = (reels: Reel[], doneCount: number) => {
+        if (loaded.length > 0) setReels(store, topicId, reels);
+        patchTopic(store, topicId, (t) => ({ ...t, doneCount }));
+      };
+      clear(
+        loaded.map((r) => ({ ...r, done: false })),
+        0,
+      );
+      return mutate(store, bus, {
+        run: () => removeTopicProgress(resolveId(store, topicId)),
+        saved: () => undefined,
+        rollback: () => clear(loaded, before?.doneCount ?? 0),
+        success: 'Postęp zresetowany',
+        failure: {
+          title: 'Nie udało się zresetować postępu',
+          code: 'KNOWLEDGE_PROGRESS_RESET_FAILED',
+        },
+        retry: () => bus.emit('[TRIGGER]_RESET_TOPIC_PROGRESS', { topicId }),
       });
     }),
   );

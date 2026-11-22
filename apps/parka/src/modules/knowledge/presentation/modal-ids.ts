@@ -46,6 +46,14 @@ export const reelsTopicOf = (modal: string): TopicId | null =>
     ? (modal.slice('topic-reels:'.length) as TopicId)
     : null;
 
+/** Confirmation of resetting the progress of a topic. */
+export const resetProgressModal = (id: TopicId): string =>
+  `topic-progress-reset:${id}`;
+export const resetProgressTopicOf = (modal: string): TopicId | null =>
+  modal.startsWith('topic-progress-reset:')
+    ? (modal.slice('topic-progress-reset:'.length) as TopicId)
+    : null;
+
 /** Confirmation of removing the picture or clip of a reel. */
 export const reelMediaDeleteModal = (id: ReelId): string =>
   `reel-media-delete:${id}`;

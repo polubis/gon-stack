@@ -7,6 +7,7 @@ import {
   reelMedia,
   reelUpload,
   topicPlay,
+  topicReset,
   topicRow,
   topicToggle,
 } from './locators';
@@ -14,7 +15,7 @@ import {
 /**
  * Knowledge against the real Supabase backend: the demo course loads, a
  * lesson opens in the full-screen viewer, reels are swiped with a real
- * pointer drag, swiping down moves to the next lesson, and a picture
+ * pointer drag, swiping down moves to the next lesson,  and a picture
  * uploaded in the editor shows up in the reel.
  */
 
@@ -97,6 +98,22 @@ const commands = {
     await expect(getByE2e('knowledge:reel-viewer')).toBeHidden();
   },
 
+  'i reset the progress of the first lesson': async ({
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
+    const row = topicRow(getByE2ePrefix, FIRST);
+    await expect(row.getByText(/^[1-9]\d*\/\d+ rolek$/)).toBeVisible();
+    if (!(await topicReset(getByE2ePrefix, FIRST).isVisible()))
+      await topicToggle(getByE2ePrefix, FIRST).click();
+    await topicReset(getByE2ePrefix, FIRST).click();
+    await getByE2e('knowledge:delete-confirm').click();
+    await expect(row.getByText(/^0\/\d+ rolek$/)).toBeVisible();
+    await expect(topicReset(getByE2ePrefix, FIRST)).toBeHidden();
+    // The success toast must be gone before the next step reaches for the filters.
+    await expect(getByE2e('knowledge:toast')).toBeHidden({ timeout: 15_000 });
+  },
+
   'i filter the lessons by a phrase': async ({ getByE2e, getByE2ePrefix }) => {
     await getByE2e('knowledge:filters-open').click();
     await getByE2e('knowledge:filter-query').fill('Row Level');
@@ -151,6 +168,7 @@ test.describe('knowledge viewer', () => {
       ['i swipe left and right between reels'],
       ['i swipe down past the last reel into the next lesson'],
       ['i close the viewer'],
+      ['i reset the progress of the first lesson'],
       ['i filter the lessons by a phrase'],
       ['i upload a picture to a reel and see it in the viewer'],
     );

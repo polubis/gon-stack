@@ -22,6 +22,7 @@ import {
   parseEntityModal,
   reelMediaOf,
   reelsTopicOf,
+  resetProgressTopicOf,
   viewedTopicOf,
 } from './modal-ids';
 import { ReelViewer } from './reel-viewer';
@@ -44,6 +45,7 @@ export const Modals = ({ defaultDay }: { defaultDay: string }) => {
     deleteTopic,
     deleteReel,
     removeReelMedia,
+    resetTopicProgress,
   } = useContext();
   const stack = useModalStack();
 
@@ -65,7 +67,10 @@ export const Modals = ({ defaultDay }: { defaultDay: string }) => {
     if (initializing) return;
     for (const modal of stack) {
       const parsed = parseEntityModal(modal);
-      const topicId = reelsTopicOf(modal) ?? viewedTopicOf(modal);
+      const topicId =
+        reelsTopicOf(modal) ??
+        viewedTopicOf(modal) ??
+        resetProgressTopicOf(modal);
       if (
         (parsed?.id && !known(parsed.entity, parsed.id)) ||
         (topicId && !allTopics.some((t) => t.id === topicId))
@@ -112,6 +117,22 @@ export const Modals = ({ defaultDay }: { defaultDay: string }) => {
       return <ReelsDialog key={modal} modal={modal} topic={reelsTopic} />;
     const viewed = allTopics.find((t) => t.id === viewedTopicOf(modal));
     if (viewed) return <ReelViewer key={modal} modal={modal} topic={viewed} />;
+
+    const resetOf = allTopics.find((t) => t.id === resetProgressTopicOf(modal));
+    if (resetOf)
+      return (
+        <DeleteDialog
+          key={modal}
+          modal={modal}
+          title="Zresetować postęp?"
+          description={`Wszystkie rolki tematu „${resetOf.title}” znów będą nieukończone.`}
+          confirmLabel="Resetuj"
+          onConfirm={() => {
+            resetTopicProgress(resetOf.id);
+            closeModal(modal);
+          }}
+        />
+      );
 
     const mediaOf = reelMediaOf(modal);
     if (mediaOf)

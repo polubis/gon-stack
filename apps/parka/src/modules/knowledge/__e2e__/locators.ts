@@ -16,3 +16,5 @@ export const reelUpload = (prefix: Prefixer) =>
   prefix('knowledge:reel-upload:').first();
 export const reelMedia = (prefix: Prefixer) =>
   prefix('knowledge:reel-media:').first();
+export const topicReset = (prefix: Prefixer, title: string) =>
+  prefix('knowledge:topic-reset:', topicRow(prefix, title));

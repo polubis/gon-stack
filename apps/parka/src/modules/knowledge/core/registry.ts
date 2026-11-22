@@ -18,6 +18,7 @@ import {
   deleteReel,
   loadReels,
   removeReelMedia,
+  resetTopicProgress,
   setProgress,
   updateReel,
   uploadReelMedia,
@@ -51,6 +52,7 @@ export const createRegistry = (store: Store) => {
     uploadReelMedia(store, bus),
     removeReelMedia(store, bus),
     setProgress(store, bus),
+    resetTopicProgress(store, bus),
     loadDemo(store, bus),
     dismissNotice(store, bus),
   );

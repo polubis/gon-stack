@@ -67,6 +67,68 @@ describe('knowledge screen', () => {
     ).toHaveAttribute('aria-valuenow', '25');
   });
 
+  it('resets the progress of a topic after a confirmation', async () => {
+    const user = userEvent.setup();
+    seed();
+    renderKnowledge();
+    const phrasal = await row('Phrasal verbs');
+
+    await user.click(
+      phrasal.getByRole('button', { name: /Phrasal verbs, rolki/ }),
+    );
+    await user.click(
+      phrasal.getByRole('button', {
+        name: 'Resetuj postęp tematu: Phrasal verbs',
+      }),
+    );
+    const dialog = within(await screen.findByRole('dialog'));
+    expect(dialog.getByText('Zresetować postęp?')).toBeVisible();
+    await user.click(dialog.getByRole('button', { name: 'Resetuj' }));
+
+    expect(await phrasal.findByText('0/4 rolek')).toBeVisible();
+    expect(
+      phrasal.queryByRole('button', {
+        name: 'Resetuj postęp tematu: Phrasal verbs',
+      }),
+    ).toBeNull();
+  });
+
+  it('keeps the progress when the reset is cancelled', async () => {
+    const user = userEvent.setup();
+    seed();
+    renderKnowledge();
+    const phrasal = await row('Phrasal verbs');
+
+    await user.click(
+      phrasal.getByRole('button', { name: /Phrasal verbs, rolki/ }),
+    );
+    await user.click(
+      phrasal.getByRole('button', {
+        name: 'Resetuj postęp tematu: Phrasal verbs',
+      }),
+    );
+    await user.click(
+      within(await screen.findByRole('dialog')).getByRole('button', {
+        name: 'Anuluj',
+      }),
+    );
+
+    expect(phrasal.getByText('1/4 rolek')).toBeVisible();
+  });
+
+  it('offers no reset on an untouched topic', async () => {
+    const user = userEvent.setup();
+    seed();
+    renderKnowledge();
+    const idioms = await row('Idiomy');
+
+    await user.click(idioms.getByRole('button', { name: /Idiomy, rolki/ }));
+
+    expect(
+      idioms.queryByRole('button', { name: /Resetuj postęp tematu/ }),
+    ).toBeNull();
+  });
+
   it('steps to the next catalog and round to the first, arrows never disabled', async () => {
     const user = userEvent.setup();
     seed();

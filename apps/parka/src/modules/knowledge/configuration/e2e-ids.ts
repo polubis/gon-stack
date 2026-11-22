@@ -74,6 +74,7 @@ export const KNOWLEDGE_E2E_IDS = [
   'knowledge:viewer-error',
   'knowledge:viewer-complete',
   'knowledge:viewer-prev',
+  'knowledge:viewer-reset',
   'knowledge:viewer-next',
   'knowledge:viewer-prev-lesson-cta',
   'knowledge:viewer-next-lesson-cta',
@@ -89,6 +90,7 @@ export type KnowledgeDynamicE2eId =
   | `knowledge:topic-edit:${string}`
   | `knowledge:topic-reels:${string}`
   | `knowledge:topic-delete:${string}`
+  | `knowledge:topic-reset:${string}`
   | `knowledge:topic-more:${string}`
   | `knowledge:structure-open:${string}`
   | `knowledge:list-edit:${string}`

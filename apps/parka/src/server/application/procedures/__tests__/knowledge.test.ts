@@ -95,6 +95,7 @@ const { updateKnowledgeTopic } = await import('../update-knowledge-topic');
 const { getKnowledgeTopic } = await import('../get-knowledge-topic');
 const { createKnowledgeReel } = await import('../create-knowledge-reel');
 const { setKnowledgeProgress } = await import('../set-knowledge-progress');
+const { resetKnowledgeProgress } = await import('../reset-knowledge-progress');
 const { listKnowledge } = await import('../list-knowledge');
 const { createKnowledgeDemo } = await import('../create-knowledge-demo');
 
@@ -390,6 +391,27 @@ describe('knowledge progress', () => {
       'reel_id',
       ID,
     ]);
+  });
+
+  it('clears the progress of every reel of an own topic', async () => {
+    results['knowledge_topics.select'] = ok({ id: ID });
+    results['knowledge_reels.select'] = ok([{ id: REEL }, { id: REEL2 }]);
+
+    const response = await run(resetKnowledgeProgress, { id: ID });
+
+    expect(response).toMatchObject({ code: 200, data: { topicId: ID } });
+    expect(eqs['knowledge_reel_progress.delete']).toContainEqual([
+      'user_id',
+      ME,
+    ]);
+  });
+
+  it('answers not found when resetting the topic of someone else', async () => {
+    results['knowledge_topics.select'] = ok(null);
+
+    expect(await run(resetKnowledgeProgress, { id: ID })).toMatchObject({
+      code: 404,
+    });
   });
 
   it('answers not found for a reel of someone else', async () => {
