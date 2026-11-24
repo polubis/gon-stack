@@ -28,6 +28,7 @@ const EDIT_BACKLOG_PREFIX = 'backlog-edit:';
 const EDIT_PREFIX = 'task-edit:';
 const DELETE_PREFIX = 'task-delete:';
 const VIEW_PREFIX = 'task-view:';
+const DUPLICATE_PREFIX = 'task-duplicate:';
 
 /** Add-task form with the day already filled in. */
 export const newTaskOnModal = (day: string): string =>
@@ -39,6 +40,15 @@ export const newTaskDayOf = (modal: string): string | null =>
     : null;
 
 export const editTaskModal = (id: TaskId): string => `${EDIT_PREFIX}${id}`;
+
+/** Add form (task or backlog task) prefilled from an existing one. */
+export const duplicateTaskModal = (id: TaskId): string =>
+  `${DUPLICATE_PREFIX}${id}`;
+
+export const duplicatedIdOf = (modal: string): TaskId | null =>
+  modal.startsWith(DUPLICATE_PREFIX)
+    ? (modal.slice(DUPLICATE_PREFIX.length) as TaskId)
+    : null;
 
 export const deleteTaskModal = (id: TaskId): string => `${DELETE_PREFIX}${id}`;
 

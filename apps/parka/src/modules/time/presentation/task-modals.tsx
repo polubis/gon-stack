@@ -23,6 +23,7 @@ import {
   editPriorityModal,
   PRIORITIES_MODAL,
   deletedIdOf,
+  duplicatedIdOf,
   editCategoryModal,
   editedBacklogIdOf,
   editedCategoryIdOf,
@@ -65,7 +66,8 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
         editedIdOf(modal) ??
         editedBacklogIdOf(modal) ??
         viewedIdOf(modal) ??
-        deletedIdOf(modal);
+        deletedIdOf(modal) ??
+        duplicatedIdOf(modal);
       if (
         id !== null &&
         !tasks.some((task) => task.id === id) &&
@@ -183,6 +185,25 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
     const newDay = newTaskDayOf(modal);
     if (newDay !== null)
       return <TaskDialog key={modal} modal={modal} defaultDay={newDay} />;
+
+    const duplicatedId = duplicatedIdOf(modal);
+    if (duplicatedId !== null) {
+      const sourceTask = tasks.find((task) => task.id === duplicatedId);
+      if (sourceTask)
+        return (
+          <TaskDialog
+            key={modal}
+            modal={modal}
+            source={sourceTask}
+            defaultDay={defaultDay}
+          />
+        );
+      const sourceBacklog = backlog.find((task) => task.id === duplicatedId);
+      if (sourceBacklog)
+        return (
+          <BacklogAddDialog key={modal} modal={modal} source={sourceBacklog} />
+        );
+    }
 
     const viewed = [...tasks, ...backlog].find(
       (task) => task.id === viewedIdOf(modal),
