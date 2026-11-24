@@ -161,23 +161,20 @@ export const mediaPathsOfTopics = async (
   return data.flatMap((r) => (r.media_path ? [r.media_path] : []));
 };
 
-/** Files of all reels inside a catalog (its topics go with it). */
+/** Files of all reels inside a catalog (its topics go with it), in one read. */
 export const mediaPathsOfCatalog = async (
   db: SupabaseServer,
   userId: string,
   catalogId: string,
 ) => {
   const { data, error } = await db
-    .from('knowledge_topics')
-    .select('id')
+    .from('knowledge_reels')
+    .select('media_path, knowledge_topics!inner(catalog_id)')
     .eq('user_id', userId)
-    .eq('catalog_id', catalogId);
+    .eq('knowledge_topics.catalog_id', catalogId)
+    .not('media_path', 'is', null);
   if (error) throw fromSupabaseError(error);
-  return mediaPathsOfTopics(
-    db,
-    userId,
-    data.map((t) => t.id),
-  );
+  return data.flatMap((r) => (r.media_path ? [r.media_path] : []));
 };
 
 /** Postgres unique violation: a name that is already taken. */
