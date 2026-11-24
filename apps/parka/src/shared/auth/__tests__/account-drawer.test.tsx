@@ -254,6 +254,16 @@ describe('account drawer', () => {
     expect(window.location.search).toBe('?modal=account');
   });
 
+  it('labels the edit button with one word', async () => {
+    backend();
+    await openMenu();
+
+    const drawer = await screen.findByRole('dialog', { name: 'Ada' });
+    expect(
+      within(drawer).getByRole('button', { name: 'Edytuj profil' }),
+    ).toHaveTextContent(/^Edytuj$/);
+  });
+
   it('shows the profile name once it is set', async () => {
     backend();
     setProfileSummary({ name: 'Ada Lovelace' });
