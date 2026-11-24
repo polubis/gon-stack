@@ -54,20 +54,22 @@ export const uploadTaskAttachment = privateProcedure({
 })({
   handler: async ({ id: taskId, file }, { db, user, waitUntil, signal }) => {
     signal.throwIfAborted();
-    const task = await db
-      .from('time_tasks')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('id', taskId)
-      .maybeSingle();
+    // Independent reads overlap; "not found" still wins over "full".
+    const [task, count] = await Promise.all([
+      db
+        .from('time_tasks')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('id', taskId)
+        .maybeSingle(),
+      db
+        .from('time_task_attachments')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('task_id', taskId),
+    ]);
     if (task.error) throw fromSupabaseError(task.error);
     if (!task.data) throw new NotFound(undefined, 'Task not found');
-
-    const count = await db
-      .from('time_task_attachments')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('task_id', taskId);
     if (count.error) throw fromSupabaseError(count.error);
     if ((count.count ?? 0) >= ATTACHMENT_MAX_COUNT)
       throw new Conflict(
