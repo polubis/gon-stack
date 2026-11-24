@@ -104,7 +104,7 @@ export const CategoryDialog = ({
               data-e2e="time:category-delete"
               onClick={() => openModal(deleteCategoryModal(category.id))}
             >
-              <Trash2 className="h-4 w-4" aria-hidden="true" /> Usuń
+              <Trash2 className="h-4 w-4" aria-hidden="true" /> Usuń kategorię
             </Button>
           </div>
         ) : null}
@@ -114,7 +114,7 @@ export const CategoryDialog = ({
             Anuluj
           </Button>
           <Button type="submit" data-e2e="time:category-save">
-            {category ? 'Zapisz' : 'Dodaj'}
+            {category ? 'Zapisz zmiany' : 'Dodaj kategorię'}
           </Button>
         </ModalFooter>
       </form>

@@ -117,7 +117,9 @@ const generate = async (
   await user.click(screen.getAllByRole('button', { name: /Generuj/ })[0]!);
   const dialog = await screen.findByRole('dialog', { name: 'Nowy token' });
   await user.type(within(dialog).getByRole('textbox', { name: 'Nazwa' }), name);
-  await user.click(within(dialog).getByRole('button', { name: 'Generuj' }));
+  await user.click(
+    within(dialog).getByRole('button', { name: 'Generuj token' }),
+  );
 };
 
 describe('access tokens list', () => {
@@ -174,7 +176,9 @@ describe('access tokens list', () => {
       await screen.findByText('Nie udało się wczytać tokenów'),
     ).toBeInTheDocument();
     expect(screen.getByText('ACCESS_TOKENS_LOAD')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Ponów' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Spróbuj ponownie' }),
+    ).toBeInTheDocument();
   });
 });
 
@@ -251,7 +255,9 @@ describe('access token creation', () => {
       within(dialog).getByRole('combobox', { name: 'Ważność' }),
       'Bez wygaśnięcia',
     );
-    await user.click(within(dialog).getByRole('button', { name: 'Generuj' }));
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Generuj token' }),
+    );
 
     await screen.findByRole('dialog', { name: 'Twój nowy token' });
     expect(created).toEqual([{ name: 'Forever', ttlDays: null }]);
@@ -263,7 +269,7 @@ describe('access token creation', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Nowy token' });
 
     expect(
-      within(dialog).getByRole('button', { name: 'Generuj' }),
+      within(dialog).getByRole('button', { name: 'Generuj token' }),
     ).toBeDisabled();
   });
 

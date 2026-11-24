@@ -39,9 +39,7 @@ const startComposing = async (
   details: ReturnType<typeof within>,
 ) => {
   await user.click(
-    await within(
-      await details.findByRole('region', { name: 'Komentarze' }),
-    ).findByRole('button', { name: 'Dodaj' }),
+    await details.findByRole('button', { name: 'Dodaj komentarz' }),
   );
   return details.getByLabelText('Nowy komentarz');
 };
@@ -112,12 +110,7 @@ describe('task comments', () => {
     const details = await openDetails(user);
 
     await user.type(await startComposing(user, details), 'Pierwsza notatka');
-    await user.click(
-      within(details.getByRole('region', { name: 'Komentarze' })).getByRole(
-        'button',
-        { name: 'Dodaj' },
-      ),
-    );
+    await user.click(details.getByRole('button', { name: 'Dodaj' }));
 
     expect(await details.findByText('Pierwsza notatka')).toBeVisible();
     expect(backend.state.comments['t-1']).toHaveLength(1);
@@ -131,12 +124,7 @@ describe('task comments', () => {
 
     await user.type(await startComposing(user, details), '   ');
 
-    expect(
-      within(details.getByRole('region', { name: 'Komentarze' })).getByRole(
-        'button',
-        { name: 'Dodaj' },
-      ),
-    ).toBeDisabled();
+    expect(details.getByRole('button', { name: 'Dodaj' })).toBeDisabled();
   });
 
   it('drops the comment and offers a retry when adding fails', async () => {
@@ -147,15 +135,10 @@ describe('task comments', () => {
     backend.state.failCommentWrites = true;
 
     await user.type(input, 'Nie wyjdzie');
-    await user.click(
-      within(details.getByRole('region', { name: 'Komentarze' })).getByRole(
-        'button',
-        { name: 'Dodaj' },
-      ),
-    );
+    await user.click(details.getByRole('button', { name: 'Dodaj' }));
 
     expect(await screen.findByText('COMMENT_CREATE')).toBeVisible();
-    expect(screen.getByRole('button', { name: /ponów/i })).toBeVisible();
+    expect(screen.getByRole('button', { name: /ponownie/i })).toBeVisible();
     await waitFor(() => expect(details.queryByText('Nie wyjdzie')).toBeNull());
   });
 
@@ -295,7 +278,9 @@ describe('task comments', () => {
     await details.findByText('COMMENTS_LOAD');
     backend.state.failCommentReads = false;
 
-    await user.click(details.getAllByRole('button', { name: 'Ponów' })[0]!);
+    await user.click(
+      details.getAllByRole('button', { name: 'Spróbuj ponownie' })[0]!,
+    );
 
     expect(await details.findByText('Zadzwonić do klienta')).toBeVisible();
   });
@@ -314,11 +299,11 @@ describe('task comments', () => {
     expect(await details.findByText('Notatka a')).toBeVisible();
     expect(details.getByText('Notatka b')).toBeVisible();
     expect(details.queryByText('Notatka c')).not.toBeInTheDocument();
-    await user.click(details.getByRole('button', { name: 'Więcej (2)' }));
+    await user.click(details.getByRole('button', { name: 'Pokaż więcej (2)' }));
     expect(details.getByText('Notatka c')).toBeVisible();
     expect(details.getByText('Notatka d')).toBeVisible();
     expect(
-      details.queryByRole('button', { name: /Więcej/ }),
+      details.queryByRole('button', { name: /Pokaż więcej/ }),
     ).not.toBeInTheDocument();
   });
 
@@ -331,7 +316,7 @@ describe('task comments', () => {
 
     expect(await details.findByText('Raport gotowy')).toBeVisible();
     expect(
-      details.queryByRole('button', { name: /Więcej/ }),
+      details.queryByRole('button', { name: /Pokaż więcej/ }),
     ).not.toBeInTheDocument();
   });
 });

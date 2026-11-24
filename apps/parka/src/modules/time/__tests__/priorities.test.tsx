@@ -48,7 +48,7 @@ describe('task priorities', () => {
     await user.clear(name);
     await user.type(name, 'Kiedyś');
     await user.click(form.getByRole('radio', { name: '3' }));
-    await user.click(form.getByRole('button', { name: 'Zapisz' }));
+    await user.click(form.getByRole('button', { name: 'Zapisz zmiany' }));
 
     expect(
       await screen.findByRole('button', { name: 'Edytuj priorytet Kiedyś' }),
@@ -65,7 +65,7 @@ describe('task priorities', () => {
     const name = form.getByLabelText('Nazwa');
     await user.clear(name);
     await user.type(name, 'Wysoki');
-    await user.click(form.getByRole('button', { name: 'Zapisz' }));
+    await user.click(form.getByRole('button', { name: 'Zapisz zmiany' }));
 
     expect(
       await form.findByText('Priorytet o takiej nazwie już istnieje.'),

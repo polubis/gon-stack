@@ -78,7 +78,7 @@ export const CreateDialog = ({ modal }: { modal: string }) => {
             {creating ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
             ) : null}
-            Generuj
+            Generuj token
           </Button>
         </ModalFooter>
       </form>

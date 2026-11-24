@@ -152,7 +152,7 @@ const ExpensesManagementView = () => {
               description="Ten wydatek nie istnieje lub został już usunięty."
               onRetry={() => expenseId && ctx.loadExpense(expenseId)}
               backHref={APP_ROUTER.dashboard({ month: month ?? undefined })}
-              backLabel="Wróć"
+              backLabel="Wróć do podsumowania"
             />
           )
         ) : (

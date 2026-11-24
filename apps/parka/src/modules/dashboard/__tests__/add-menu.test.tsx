@@ -67,7 +67,7 @@ describe('dashboard add menu', () => {
     });
 
     await user.type(screen.getByRole('textbox', { name: 'Nazwa' }), 'Kultura');
-    await user.click(screen.getByRole('button', { name: 'Dodaj' }));
+    await user.click(screen.getByRole('button', { name: 'Dodaj kategorię' }));
 
     await waitFor(() => expect(dialog).not.toBeInTheDocument());
     expect(posted).toMatchObject([{ name: 'Kultura' }]);

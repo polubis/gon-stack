@@ -60,7 +60,9 @@ describe('icon picker', () => {
     await open();
     await userEvent.type(screen.getByLabelText('Szukaj ikony'), 'zzzz');
 
-    await userEvent.click(screen.getByRole('button', { name: 'Wyczyść' }));
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Wyczyść wyszukiwanie' }),
+    );
 
     expect(screen.queryByRole('heading', { name: 'Brak ikon' })).toBeNull();
     expect(screen.getByRole('button', { name: 'Kino' })).toBeTruthy();

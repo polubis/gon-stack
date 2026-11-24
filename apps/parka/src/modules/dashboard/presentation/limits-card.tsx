@@ -65,7 +65,7 @@ export const LimitsCard = ({ period }: { period: Period }) => {
                 onClick={() => openModal(NEW_LIMIT_MODAL)}
               >
                 <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
-                Ustaw
+                Ustaw limit miesięczny
               </Button>
             }
           />

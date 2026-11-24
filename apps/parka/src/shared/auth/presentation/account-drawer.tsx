@@ -191,7 +191,7 @@ const Options = ({
           onClick={onRetry}
           className={cn(ITEM, 'justify-center font-semibold')}
         >
-          Ponów
+          Spróbuj ponownie
         </button>
       </div>
     );
@@ -240,7 +240,7 @@ const Options = ({
         className={ITEM}
       >
         <UserPlus className="size-4" aria-hidden="true" />
-        {full ? `Limit kont: ${MAX_ACCOUNTS}` : 'Dodaj'}
+        {full ? `Limit kont: ${MAX_ACCOUNTS}` : 'Dodaj konto'}
       </a>
       <button
         type="button"
@@ -250,7 +250,7 @@ const Options = ({
         className={ITEM}
       >
         <LogOut className="size-4" aria-hidden="true" />
-        Wyloguj
+        Wyloguj to konto
       </button>
       {items.length > 1 ? (
         <button
@@ -261,7 +261,7 @@ const Options = ({
           className={ITEM}
         >
           <Users className="size-4" aria-hidden="true" />
-          Wszędzie
+          Wyloguj ze wszystkich
         </button>
       ) : null}
     </>
@@ -334,12 +334,11 @@ const Drawer = ({
               <button
                 type="button"
                 data-e2e="account-menu:edit"
-                aria-label="Edytuj profil"
                 onClick={() => openModal(PROFILE_MODAL)}
                 className="pressable mt-3 inline-flex items-center gap-2 rounded-full border border-hero-line px-3.5 py-2 text-sm font-medium hover:bg-hero-track focus-visible:outline-2 focus-visible:outline-accent"
               >
                 <Pencil className="size-4" aria-hidden="true" />
-                Edytuj
+                Edytuj profil
               </button>
             </div>
             <Dialog.Close

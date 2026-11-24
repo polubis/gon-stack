@@ -208,7 +208,7 @@ export const RecurringForm = ({
           data-e2e="dashboard:recurring-form-save"
           disabled={!selected}
         >
-          Zapisz
+          Zapisz zmiany
         </Button>
       </DialogActions>
     </form>

@@ -29,7 +29,7 @@ describe('task categories', () => {
     const name = form.getByLabelText('Nazwa');
     await user.clear(name);
     await user.type(name, 'Mieszkanie');
-    await user.click(form.getByRole('button', { name: 'Zapisz' }));
+    await user.click(form.getByRole('button', { name: 'Zapisz zmiany' }));
 
     expect(
       await screen.findByRole('button', {
@@ -48,7 +48,7 @@ describe('task categories', () => {
     const name = form.getByLabelText('Nazwa');
     await user.clear(name);
     await user.type(name, 'Praca');
-    await user.click(form.getByRole('button', { name: 'Zapisz' }));
+    await user.click(form.getByRole('button', { name: 'Zapisz zmiany' }));
 
     expect(
       await form.findByText('Kategoria o takiej nazwie już istnieje.'),
@@ -61,7 +61,7 @@ describe('task categories', () => {
     renderTime('day', undefined, '&modal=categories');
     const form = await openEditor(user, 'Dom');
 
-    await user.click(form.getByRole('button', { name: 'Usuń' }));
+    await user.click(form.getByRole('button', { name: 'Usuń kategorię' }));
 
     await screen.findByRole('dialog', { name: 'Usunąć kategorię?' });
     expect(backend.writes()).toHaveLength(0);
@@ -71,7 +71,7 @@ describe('task categories', () => {
     const user = userEvent.setup();
     renderTime('day', undefined, '&modal=categories');
     const form = await openEditor(user, 'Dom');
-    await user.click(form.getByRole('button', { name: 'Usuń' }));
+    await user.click(form.getByRole('button', { name: 'Usuń kategorię' }));
     const confirm = within(
       await screen.findByRole('dialog', { name: 'Usunąć kategorię?' }),
     );
@@ -89,7 +89,7 @@ describe('task categories', () => {
     renderTime('day', undefined, '&modal=categories');
 
     const form = await openEditor(user, 'Dom');
-    await user.click(form.getByRole('button', { name: 'Usuń' }));
+    await user.click(form.getByRole('button', { name: 'Usuń kategorię' }));
     await user.click(
       within(
         await screen.findByRole('dialog', { name: 'Usunąć kategorię?' }),

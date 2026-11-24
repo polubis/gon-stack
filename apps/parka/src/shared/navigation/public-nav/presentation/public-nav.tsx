@@ -61,7 +61,7 @@ export const PublicNav = () => {
               data-e2e="public-nav:app"
               className={cn(LINK, 'cta shadow-cta')}
             >
-              Otwórz
+              Przejdź do aplikacji
             </a>
           )}
           {session === 'signed-out' && (
@@ -77,7 +77,7 @@ export const PublicNav = () => {
                     : 'text-ink-soft hover:bg-hover hover:text-ink',
                 )}
               >
-                Zaloguj
+                Zaloguj się
               </a>
               <a
                 href={APP_ROUTER.signUp()}
@@ -88,7 +88,7 @@ export const PublicNav = () => {
                   onSignUp ? 'bg-hover text-ink' : 'cta shadow-cta',
                 )}
               >
-                Zarejestruj
+                Zarejestruj się
               </a>
             </>
           )}

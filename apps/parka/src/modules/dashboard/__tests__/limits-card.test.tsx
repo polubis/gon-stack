@@ -118,7 +118,7 @@ describe('limits managed in a modal', () => {
 
       expect(screen.getByText(/powiadomienie od 80%/)).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: /Edytuj limit/ })).toBeNull();
-      expect(screen.queryByRole('button', { name: /Dodaj/ })).toBeNull();
+      expect(screen.queryByRole('button', { name: /Dodaj limit/ })).toBeNull();
     });
   });
 
@@ -219,7 +219,9 @@ describe('limits managed in a modal', () => {
       const user = await renderCard();
       const dialog = await openEditor(user);
 
-      await user.click(within(dialog).getByRole('button', { name: 'Usuń' }));
+      await user.click(
+        within(dialog).getByRole('button', { name: 'Usuń limit' }),
+      );
       const confirm = await screen.findByRole('dialog', {
         name: 'Usunąć limit?',
       });
@@ -236,7 +238,9 @@ describe('limits managed in a modal', () => {
       const user = await renderCard();
       const dialog = await openEditor(user);
 
-      await user.click(within(dialog).getByRole('button', { name: 'Usuń' }));
+      await user.click(
+        within(dialog).getByRole('button', { name: 'Usuń limit' }),
+      );
       const confirm = await screen.findByRole('dialog', {
         name: 'Usunąć limit?',
       });
@@ -258,7 +262,9 @@ describe('limits managed in a modal', () => {
       await user.click(within(manager).getByRole('button', { name: /Dodaj/ }));
 
       const dialog = await screen.findByRole('dialog', { name: 'Nowy limit' });
-      expect(within(dialog).queryByRole('button', { name: 'Usuń' })).toBeNull();
+      expect(
+        within(dialog).queryByRole('button', { name: 'Usuń limit' }),
+      ).toBeNull();
     });
 
     it('creates a limit for the free category with the chosen threshold', async () => {
@@ -326,7 +332,9 @@ describe('limits managed in a modal', () => {
       );
       const empty = await screen.findByRole('status');
 
-      await user.click(within(empty).getByRole('button', { name: /Ustaw/ }));
+      await user.click(
+        within(empty).getByRole('button', { name: /Ustaw limit miesięczny/ }),
+      );
       const dialog = await screen.findByRole('dialog', { name: 'Nowy limit' });
       await user.click(within(dialog).getByRole('button', { name: 'Zapisz' }));
 

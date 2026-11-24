@@ -90,7 +90,7 @@ export const TaskHistory = ({ taskId }: { taskId: TaskId }) => {
                   setAttempt((n) => n + 1);
                 }}
               >
-                Ponów
+                Spróbuj ponownie
               </Button>
             </div>
           ) : !items ? (

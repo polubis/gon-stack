@@ -28,7 +28,7 @@ describe('reels editor', () => {
     expect(await dialog.findByDisplayValue('Pierwsza')).toBeVisible();
     expect(dialog.getByDisplayValue('Druga')).toBeVisible();
     await user.type(dialog.getByLabelText('Nowa rolka'), 'Trzecia');
-    await user.click(dialog.getByRole('button', { name: 'Dodaj' }));
+    await user.click(dialog.getByRole('button', { name: 'Dodaj rolkę' }));
 
     expect(await dialog.findByDisplayValue('Trzecia')).toBeVisible();
     await waitFor(() => expect(backend.state.reels).toHaveLength(3));

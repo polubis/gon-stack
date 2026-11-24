@@ -356,7 +356,9 @@ export const ReelViewer = ({
                   {notice?.tone === 'error' ? notice.description : ''}
                 </p>
                 <div className="flex w-full gap-2">
-                  <Button onClick={() => loadReels(viewedId)}>Ponów</Button>
+                  <Button onClick={() => loadReels(viewedId)}>
+                    Spróbuj ponownie
+                  </Button>
                   <Button variant="ghost" onClick={() => closeModal(modal)}>
                     Wróć
                   </Button>
@@ -428,7 +430,7 @@ export const ReelViewer = ({
                       onClick={() => goTo(0, 'prev')}
                     >
                       <RotateCcw className="size-4" aria-hidden="true" />
-                      Powtórz
+                      Powtórz lekcję
                     </Button>
                   </div>
                 ) : reel ? (

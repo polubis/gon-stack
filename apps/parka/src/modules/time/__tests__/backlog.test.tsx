@@ -103,7 +103,7 @@ describe('backlog list', () => {
     const list = await openBacklog(user);
     await list.findByRole('heading', { name: 'Backlog jest pusty' });
 
-    await user.click(list.getByRole('button', { name: 'Backlog' }));
+    await user.click(list.getByRole('button', { name: 'Dodaj do backlogu' }));
 
     expect(
       await screen.findByText('Zadanie bez terminu. Dzień wybierzesz później.'),
@@ -121,7 +121,7 @@ describe('backlog list', () => {
     const list = await openBacklog(user);
     await list.findByText('Zadanie 14');
 
-    await user.click(list.getByRole('button', { name: 'Backlog' }));
+    await user.click(list.getByRole('button', { name: 'Dodaj do backlogu' }));
 
     expect(modalsInUrl()).toEqual(['backlog', 'backlog-new']);
   });

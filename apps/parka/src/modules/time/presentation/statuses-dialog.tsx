@@ -143,7 +143,7 @@ export const StatusesDialog = ({ modal }: { modal: string }) => {
             setDraft((list) => [...list, { id: newStatusId(), name: '' }])
           }
         >
-          <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj
+          <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj status
         </Button>
         <ModalFooter className="flex gap-2">
           <Button variant="ghost" onClick={() => closeModal(modal)}>

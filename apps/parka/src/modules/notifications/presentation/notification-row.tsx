@@ -129,7 +129,7 @@ export const NotificationRow = ({
             className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-semibold text-brand-dark hover:bg-brand-softer"
           >
             <CheckCheck className="h-4 w-4" aria-hidden="true" />
-            Oznacz
+            Oznacz jako przeczytane
           </button>
         )}
       </div>

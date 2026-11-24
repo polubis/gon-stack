@@ -245,7 +245,9 @@ describe('knowledge screen', () => {
     backend.state.catalogs = [];
     renderKnowledge();
 
-    await user.click(await screen.findByRole('button', { name: 'Wczytaj' }));
+    await user.click(
+      await screen.findByRole('button', { name: 'Wczytaj kurs demo' }),
+    );
 
     expect(await screen.findByText('Lekcja 1')).toBeVisible();
     expect(backend.writes()[0]?.url).toContain('/api/knowledge/demo/');
@@ -262,7 +264,7 @@ describe('knowledge screen', () => {
     expect(screen.getByText('KNOWLEDGE_LOAD')).toBeVisible();
     backend.state.failReads = false;
     seed();
-    await user.click(screen.getByRole('button', { name: 'Ponów' }));
+    await user.click(screen.getByRole('button', { name: 'Spróbuj ponownie' }));
 
     expect(await screen.findByText('Phrasal verbs')).toBeVisible();
   });
@@ -361,7 +363,9 @@ describe('knowledge writes', () => {
     expect(screen.getByText('KNOWLEDGE_TOPIC_CREATE_FAILED')).toBeVisible();
     expect(screen.getByText('Database unavailable')).toBeVisible();
     expect(screen.queryByText('Conditionals')).toBeNull();
-    expect(screen.getByRole('button', { name: 'Ponów' })).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: 'Spróbuj ponownie' }),
+    ).toBeVisible();
   });
 
   it('asks before deleting and removes the topic at once', async () => {

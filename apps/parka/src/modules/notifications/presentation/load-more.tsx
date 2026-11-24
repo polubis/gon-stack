@@ -85,7 +85,7 @@ export const LoadMore = () => {
             onClick={ctx.loadMore}
             className="mx-auto w-auto"
           >
-            Więcej
+            Wczytaj więcej
           </Button>
         </div>
       )}

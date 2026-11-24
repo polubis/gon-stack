@@ -42,10 +42,9 @@ describe('sign in view', () => {
   it('offers links to sign up and password recovery', () => {
     render(<Main />);
 
-    expect(screen.getByRole('link', { name: 'Zarejestruj' })).toHaveAttribute(
-      'href',
-      '/sign-up/',
-    );
+    expect(
+      screen.getByRole('link', { name: 'Zarejestruj się' }),
+    ).toHaveAttribute('href', '/sign-up/');
     expect(
       screen.getByRole('link', { name: 'Nie pamiętasz hasła?' }),
     ).toBeVisible();
@@ -54,8 +53,12 @@ describe('sign in view', () => {
   it('keeps social sign in disabled as coming soon', () => {
     render(<Main />);
 
-    expect(screen.getByRole('button', { name: 'Google' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Apple' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /Zaloguj przez Google/ }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /Zaloguj przez Apple/ }),
+    ).toBeDisabled();
   });
 
   it('clears the email and refocuses it on the clear button', async () => {
@@ -97,7 +100,7 @@ describe('sign in view', () => {
     await user.type(screen.getByLabelText('E-mail'), 'a@b.co');
     await user.type(screen.getByLabelText('Hasło'), 'secret1');
 
-    await user.click(screen.getByRole('button', { name: 'Zaloguj' }));
+    await user.click(screen.getByRole('button', { name: 'Zaloguj się' }));
 
     expect(
       await screen.findByRole('button', { name: 'Chwila…' }),
@@ -114,7 +117,7 @@ describe('sign in view', () => {
     await user.type(screen.getByLabelText('E-mail'), 'a@b.co');
     await user.type(screen.getByLabelText('Hasło'), 'secret1');
 
-    await user.click(screen.getByRole('button', { name: 'Zaloguj' }));
+    await user.click(screen.getByRole('button', { name: 'Zaloguj się' }));
 
     await waitFor(() => expect(navigateTo).toHaveBeenCalledWith('/app/'));
   });
@@ -126,7 +129,7 @@ describe('sign in view', () => {
     await user.type(screen.getByLabelText('E-mail'), 'a@b.co');
     await user.type(screen.getByLabelText('Hasło'), 'secret1');
 
-    await user.click(screen.getByRole('button', { name: 'Zaloguj' }));
+    await user.click(screen.getByRole('button', { name: 'Zaloguj się' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Sign-in failed. Try again.',
@@ -139,13 +142,13 @@ describe('sign in view', () => {
     render(<Main />);
     await user.type(screen.getByLabelText('E-mail'), 'a@b.co');
     await user.type(screen.getByLabelText('Hasło'), 'wrong12');
-    await user.click(screen.getByRole('button', { name: 'Zaloguj' }));
+    await user.click(screen.getByRole('button', { name: 'Zaloguj się' }));
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Invalid credentials',
     );
 
     login(redirect);
-    await user.click(screen.getByRole('button', { name: 'Zaloguj' }));
+    await user.click(screen.getByRole('button', { name: 'Zaloguj się' }));
 
     await waitFor(() => expect(navigateTo).toHaveBeenCalledTimes(1));
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
@@ -157,12 +160,12 @@ describe('sign in view', () => {
     render(<Main />);
     await user.type(screen.getByLabelText('E-mail'), 'nope');
     await user.type(screen.getByLabelText('Hasło'), '123');
-    await user.click(screen.getByRole('button', { name: 'Zaloguj' }));
+    await user.click(screen.getByRole('button', { name: 'Zaloguj się' }));
     expect(await screen.findByRole('alert')).toBeVisible();
 
     await user.type(screen.getByLabelText('E-mail'), '@b.co');
     await user.type(screen.getByLabelText('Hasło'), '456');
-    await user.click(screen.getByRole('button', { name: 'Zaloguj' }));
+    await user.click(screen.getByRole('button', { name: 'Zaloguj się' }));
 
     await waitFor(() => expect(navigateTo).toHaveBeenCalledTimes(1));
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();

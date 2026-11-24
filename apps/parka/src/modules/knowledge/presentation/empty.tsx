@@ -35,14 +35,14 @@ export const EmptyKnowledge = () => {
             className="w-auto px-3 py-2"
           >
             <Sparkles className="size-4" aria-hidden="true" />
-            {demoBusy ? 'Wczytuję…' : 'Wczytaj'}
+            {demoBusy ? 'Wczytuję kurs…' : 'Wczytaj kurs demo'}
           </Button>
           <Button
             variant="ghost"
             onClick={() => openModal(newModal('topic'))}
             className="w-auto px-3 py-2"
           >
-            <Plus className="size-4" aria-hidden="true" /> Dodaj
+            <Plus className="size-4" aria-hidden="true" /> Dodaj temat
           </Button>
         </div>
       }
@@ -98,7 +98,7 @@ export const EmptyCatalog = () => {
           }
           className="w-auto px-3 py-2"
         >
-          <Plus className="size-4" aria-hidden="true" /> Dodaj
+          <Plus className="size-4" aria-hidden="true" /> Dodaj temat
         </Button>
       }
     />

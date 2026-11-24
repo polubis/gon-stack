@@ -155,7 +155,9 @@ describe('device recognition in settings', () => {
     render(<Main />);
     const first = await row('SM-S918B · Android 14 · Chrome');
 
-    await user.click(screen.getByRole('button', { name: 'Rozpoznaj' }));
+    await user.click(
+      screen.getByRole('button', { name: 'Rozpoznaj to urządzenie' }),
+    );
 
     expect(first).toHaveFocus();
     expect(first).toHaveAttribute('data-highlighted');
@@ -169,6 +171,8 @@ describe('device recognition in settings', () => {
     render(<Main />);
     await row('SM-S918B · Android 14 · Chrome');
 
-    expect(screen.getByRole('button', { name: 'Rozpoznaj' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Rozpoznaj to urządzenie' }),
+    ).toBeDisabled();
   });
 });

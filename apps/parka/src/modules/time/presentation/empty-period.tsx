@@ -24,7 +24,7 @@ export const EmptyPeriod = ({ kind }: { kind: TimeKind }) => {
       onClick={() => openModal(NEW_TASK_MODAL)}
       className="w-auto px-3 py-2"
     >
-      <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj
+      <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj zadanie
     </Button>
   );
   if (activeFilterCount(filters) > 0)
@@ -43,7 +43,7 @@ export const EmptyPeriod = ({ kind }: { kind: TimeKind }) => {
               className="w-auto px-3 py-2"
             >
               <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />{' '}
-              Wyczyść
+              Wyczyść filtry
             </Button>
             {addButton}
           </div>

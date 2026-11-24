@@ -21,6 +21,6 @@ export const ShowMore = ({
       onClick={onClick}
       {...rest}
     >
-      Więcej ({hidden})
+      Pokaż więcej ({hidden})
     </Button>
   ) : null;

@@ -22,7 +22,7 @@ describe('Home landing works when', () => {
   it('offers sign-in for existing accounts', () => {
     render(<Main />);
 
-    expect(screen.getByRole('link', { name: 'Zaloguj' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Zaloguj się' })).toHaveAttribute(
       'href',
       '/sign-in/',
     );
