@@ -54,6 +54,7 @@ export const Header = ({ avatar }: { avatar: Avatar | null }) => {
             <AddMenu
               side="bottom"
               data-e2e="dashboard:expense-new"
+              title="Dodaj (N wydatek, C cykliczny)"
               className={cn(ADD_BUTTON, 'h-11 shrink-0 px-4 max-md:hidden')}
             >
               <Plus className="h-4 w-4" aria-hidden="true" />
