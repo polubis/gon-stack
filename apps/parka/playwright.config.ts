@@ -18,6 +18,7 @@ const REAL_BACKEND_SPECS = [
   '**/modules/knowledge/__e2e__/knowledge-viewer.spec.ts',
   '**/modules/knowledge/__e2e__/mcp-live-refresh.spec.ts',
   '**/modules/time/__e2e__/time.spec.ts',
+  '**/modules/time/__e2e__/duplicate-task.spec.ts',
   '**/modules/time/__e2e__/mcp-live-refresh.spec.ts',
   '**/modules/time/__e2e__/task-history.spec.ts',
   '**/modules/time/__e2e__/custom-statuses.spec.ts',

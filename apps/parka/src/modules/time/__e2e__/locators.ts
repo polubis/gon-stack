@@ -38,3 +38,9 @@ export const commentEdit = (prefix: Prefixer, author: string) =>
     'time:comment-edit:',
     prefix('time:comment:').filter({ hasText: author }),
   );
+
+// Duplicate lives in the task menu too: open "More" first, then pick the one open item.
+export const duplicateTask = async (prefix: Prefixer, title: string) => {
+  await taskMore(prefix, title).click();
+  await prefix('time:task-duplicate:').click();
+};
