@@ -334,11 +334,12 @@ const Drawer = ({
               <button
                 type="button"
                 data-e2e="account-menu:edit"
+                aria-label="Edytuj profil"
                 onClick={() => openModal(PROFILE_MODAL)}
                 className="pressable mt-3 inline-flex items-center gap-2 rounded-full border border-hero-line px-3.5 py-2 text-sm font-medium hover:bg-hero-track focus-visible:outline-2 focus-visible:outline-accent"
               >
                 <Pencil className="size-4" aria-hidden="true" />
-                Edytuj profil
+                Edytuj
               </button>
             </div>
             <Dialog.Close
