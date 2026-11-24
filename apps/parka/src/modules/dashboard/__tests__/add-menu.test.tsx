@@ -25,7 +25,7 @@ describe('dashboard add menu', () => {
     const menu = await screen.findByRole('menu', { name: 'Dodaj' });
 
     expect(menu.textContent).toBe(
-      'WydatekWydatek cyklicznyZe zdjęciaZ plikuKategorie',
+      'WydatekNWydatek cyklicznyCZe zdjęciaZ plikuKategorie',
     );
     expect(
       screen.getByRole('menuitem', { name: 'Wydatek cykliczny' }),

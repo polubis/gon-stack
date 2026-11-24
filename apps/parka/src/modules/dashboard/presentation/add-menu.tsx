@@ -20,21 +20,26 @@ import { navigateTo } from '@/shared/router/navigation';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { stashReceipt } from '@/shared/receipt-handoff/receipt-handoff';
 
-type Option = { id: string; label: string; icon: LucideIcon } & (
-  { href: string } | { modal: string } | { pick: 'photo' | 'file' }
-);
+type Option = {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  shortcut?: string;
+} & ({ href: string } | { modal: string } | { pick: 'photo' | 'file' });
 
 const OPTIONS: readonly Option[] = [
   {
     id: 'expense',
     label: 'Wydatek',
     icon: Receipt,
+    shortcut: 'N',
     href: APP_ROUTER.newExpense(),
   },
   {
     id: 'recurring',
     label: 'Wydatek cykliczny',
     icon: Repeat,
+    shortcut: 'C',
     href: APP_ROUTER.newExpense({ type: 'recurring' }),
   },
   { id: 'photo', label: 'Ze zdjęcia', icon: Camera, pick: 'photo' },
@@ -132,6 +137,11 @@ export const AddMenu = ({
                       aria-hidden="true"
                     />
                     {option.label}
+                    {option.shortcut && (
+                      <kbd className="ml-auto rounded-md border border-line px-1.5 text-xs text-ink-soft max-md:hidden">
+                        {option.shortcut}
+                      </kbd>
+                    )}
                   </>
                 );
                 return 'href' in option ? (
@@ -140,6 +150,13 @@ export const AddMenu = ({
                     role="menuitem"
                     data-e2e={`dashboard:add-option:${option.id}`}
                     href={option.href}
+                    title={
+                      option.shortcut
+                        ? `${option.label} (${option.shortcut})`
+                        : undefined
+                    }
+                    aria-label={option.label}
+                    aria-keyshortcuts={option.shortcut}
                     className={ITEM}
                   >
                     {content}

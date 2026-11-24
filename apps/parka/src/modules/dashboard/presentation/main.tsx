@@ -12,8 +12,13 @@ import {
   openModal,
   useModalStack,
 } from '@/shared/router/modal-stack';
-import { readQueryParam, writeQueryParams } from '@/shared/router/navigation';
+import {
+  navigateTo,
+  readQueryParam,
+  writeQueryParams,
+} from '@/shared/router/navigation';
 import { clampPeriod, todayDay, type Period } from '@/shared/period/period';
+import { useShortcut } from '@/shared/keyboard/use-shortcut';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { ERROR_CODES } from '../configuration/constraints';
 import { periodFromQuery, periodToQuery } from '../domain/period';
@@ -61,6 +66,11 @@ const DashboardView = () => {
   const expenses = ctx.useExpenses();
   const notice = ctx.useNotice();
   const avatar = ctx.useAvatar();
+
+  useShortcut('n', () => navigateTo(APP_ROUTER.newExpense()));
+  useShortcut('c', () =>
+    navigateTo(APP_ROUTER.newExpense({ type: 'recurring' })),
+  );
 
   useEffect(() => {
     ctx.load(period);
