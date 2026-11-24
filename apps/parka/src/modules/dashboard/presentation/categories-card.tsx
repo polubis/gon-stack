@@ -67,7 +67,7 @@ export const CategoriesCard = ({
           icon={ChartPie}
           title="Brak podziału na kategorie"
           description={`Podział pojawi się po dodaniu wydatków: ${periodTitle(period)}.`}
-          action={<NewCategory label="Dodaj" />}
+          action={<NewCategory label="Dodaj kategorię" />}
         />
       ) : (
         <Donut

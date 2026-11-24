@@ -8,10 +8,10 @@ export const SocialButtons = () => (
       aria-disabled="true"
       data-e2e="auth:google"
     >
-      Google
+      Zaloguj przez Google (wkrótce)
     </Button>
     <Button variant="ghost" disabled aria-disabled="true" data-e2e="auth:apple">
-      Apple
+      Zaloguj przez Apple (wkrótce)
     </Button>
   </div>
 );

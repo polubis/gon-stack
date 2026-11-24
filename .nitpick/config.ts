@@ -551,9 +551,6 @@ Skill ${ref('evidence')}, key = task id, out \`.evidences/<task-id>/\`.
       'ux-required-mark': {
         doc: 'Form labels of required fields get a red asterisk (aria-hidden, `Field required`); optional fields get none',
       },
-      'ux-button-name': {
-        doc: 'Button names are one word only (`Dodaj`, not `Dodaj wydatek`); context comes from location, `aria-label` may stay descriptive',
-      },
       'ux-metadata-management': {
         doc: 'Metadata (category, priority, tag, catalog, status) managed same way in every module: one list modal titled with plural noun (`Kategorie`, `Priorytety`) with full add/edit/delete. "Dodaj" menu opens that list, never the create form. Each form with metadata picker shows shared `ManageLink` ("Zarządzaj", `aria-label` names entity) opening the list stacked over the form. No per-picker "Nowy"/"Nowa" shortcut',
       },

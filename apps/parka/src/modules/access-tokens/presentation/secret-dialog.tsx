@@ -79,7 +79,7 @@ export const SecretDialog = ({ secret, onDone }: Props) => {
             ) : (
               <Copy className="h-4 w-4" aria-hidden="true" />
             )}
-            {copied ? 'Skopiowano' : 'Kopiuj'}
+            {copied ? 'Skopiowano' : 'Kopiuj token'}
           </Button>
           <p role="status" className="sr-only">
             {copied ? 'Token skopiowany do schowka' : ''}

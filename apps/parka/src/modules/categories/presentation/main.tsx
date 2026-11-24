@@ -62,7 +62,7 @@ export const Main = () => {
                 href={APP_ROUTER.categoryNew()}
                 className="w-auto px-3 py-2"
               >
-                <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj
+                <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj kategorię
               </Button>
             }
           />
@@ -119,7 +119,7 @@ export const Main = () => {
                 missingDefaults.forEach((d) => ctx.create(toCategory(d)))
               }
             >
-              Dodaj
+              Dodaj wszystkie
             </Button>
           </Card>
         ) : null}

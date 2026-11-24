@@ -1,5 +1,4 @@
 import { screen, within } from '@testing-library/react';
-import { emptyAdd } from './empty-state';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderTime } from './render-time';
@@ -97,9 +96,9 @@ describe('task filters', () => {
     expect(
       await screen.findByRole('heading', { name: 'Brak wyników: Zdrowie' }),
     ).toBeVisible();
-    expect(await emptyAdd()).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Dodaj zadanie' })).toBeVisible();
 
-    await user.click(screen.getByRole('button', { name: 'Wyczyść' }));
+    await user.click(screen.getByRole('button', { name: 'Wyczyść filtry' }));
 
     expect(
       await screen.findByRole('button', detailsOf('Otwarte')),

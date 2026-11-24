@@ -333,7 +333,7 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
           aria-hidden="true"
         />
       ) : null}
-      {uploading ? 'Wysyłanie…' : 'Dodaj'}
+      {uploading ? 'Wysyłanie…' : 'Dodaj plik'}
     </Button>
   );
 
@@ -389,7 +389,7 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
               setAttempt((n) => n + 1);
             }}
           >
-            Ponów
+            Spróbuj ponownie
           </Button>
         </div>
       ) : !items ? (

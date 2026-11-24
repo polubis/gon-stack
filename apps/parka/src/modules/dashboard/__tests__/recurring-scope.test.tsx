@@ -116,7 +116,7 @@ describe('upcoming payment', () => {
     await user.click(await screen.findByRole('button', { name: /Netflix/ }));
     await user.click(
       within(await screen.findByRole('dialog')).getByRole('button', {
-        name: 'Zapisz',
+        name: 'Zapisz zmiany',
       }),
     );
 
@@ -127,7 +127,7 @@ describe('upcoming payment', () => {
     await user.click(
       choice.getByRole('radio', { name: /Edytuj tylko następne/ }),
     );
-    await user.click(choice.getByRole('button', { name: 'Zapisz' }));
+    await user.click(choice.getByRole('button', { name: 'Zapisz zmiany' }));
 
     await waitFor(() => expect(saved).not.toBeNull());
     expect(saved).toMatchObject({
@@ -229,18 +229,18 @@ describe('upcoming payment with products', () => {
     await user.click(await screen.findByRole('button', { name: /Netflix/ }));
     const dialog = within(await screen.findByRole('dialog'));
 
-    await user.click(dialog.getByRole('button', { name: /Dodaj/ }));
+    await user.click(dialog.getByRole('button', { name: /Dodaj produkt/ }));
     await user.type(screen.getByLabelText('Nazwa produktu'), 'Masło');
     await user.type(screen.getByLabelText('Cena'), '7');
     await user.click(screen.getByRole('button', { name: 'Gotowe' }));
     await waitFor(() =>
       expect(screen.queryByLabelText('Nazwa produktu')).not.toBeInTheDocument(),
     );
-    await user.click(dialog.getByRole('button', { name: 'Zapisz' }));
+    await user.click(dialog.getByRole('button', { name: 'Zapisz zmiany' }));
     await user.click(
       within(
         await screen.findByRole('dialog', { name: /Zapisać zmiany/ }),
-      ).getByRole('button', { name: 'Zapisz' }),
+      ).getByRole('button', { name: 'Zapisz zmiany' }),
     );
 
     await waitFor(() => expect(saved).not.toBeNull());
@@ -255,7 +255,7 @@ describe('upcoming payment with products', () => {
     const dialog = within(await screen.findByRole('dialog'));
 
     await user.click(dialog.getByRole('button', { name: /Chleb/ }));
-    await user.click(screen.getByRole('button', { name: /Usuń/ }));
+    await user.click(screen.getByRole('button', { name: /Usuń produkt/ }));
 
     expect(await screen.findByText('Produkty (0)')).toBeVisible();
     expect(dialog.getByLabelText('Koszt płatności')).not.toHaveAttribute(
@@ -377,7 +377,7 @@ describe('many upcoming payments', () => {
       await screen.findByRole('region', { name: /Nadchodzące/ }),
     );
 
-    await user.click(panel.getByRole('button', { name: 'Wszystkie' }));
+    await user.click(panel.getByRole('button', { name: 'Pokaż wszystkie' }));
 
     const dialog = within(await screen.findByRole('dialog'));
     expect(dialog.getAllByRole('listitem')).toHaveLength(5);
@@ -387,7 +387,9 @@ describe('many upcoming payments', () => {
   it('opens a payment from the full list over it', async () => {
     const user = userEvent.setup();
     render(<Main />);
-    await user.click(await screen.findByRole('button', { name: 'Wszystkie' }));
+    await user.click(
+      await screen.findByRole('button', { name: 'Pokaż wszystkie' }),
+    );
     await user.click(
       within(await screen.findByRole('dialog')).getByRole('button', {
         name: /Abonament 4/,
@@ -405,6 +407,8 @@ describe('many upcoming payments', () => {
     render(<Main />);
     await screen.findByRole('region', { name: /Nadchodzące/ });
 
-    expect(screen.queryByRole('button', { name: 'Wszystkie' })).toBeNull();
+    expect(
+      screen.queryByRole('button', { name: 'Pokaż wszystkie' }),
+    ).toBeNull();
   });
 });

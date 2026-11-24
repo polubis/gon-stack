@@ -372,7 +372,7 @@ export const TaskDialog = ({
           action="edit"
           title="Zapisać zmiany w zadaniu?"
           subject={`Zadanie „${pending.title}” jest cykliczne. Wybierz, które zadania tej serii objąć zmianą. Samo tworzenie kolejnych zadań się nie zmienia.`}
-          confirmLabel="Zapisz"
+          confirmLabel="Zapisz zmiany"
           onClose={() => setPending(null)}
           onConfirm={(scope) => {
             updateTask(pending, undefined, scope);

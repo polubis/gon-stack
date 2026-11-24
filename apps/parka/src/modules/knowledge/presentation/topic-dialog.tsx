@@ -183,7 +183,7 @@ export const TopicDialog = ({ modal, topic, catalogId, defaultDay }: Props) => {
                 className="w-auto shrink-0 px-3 py-2"
                 onClick={() => setDay('')}
               >
-                Backlog
+                Do backlogu
               </Button>
             ) : null}
           </div>

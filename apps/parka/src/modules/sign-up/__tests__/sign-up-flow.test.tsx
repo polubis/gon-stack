@@ -44,7 +44,7 @@ const fillAndSubmit = async (email: string, password: string) => {
   render(<Main />);
   await user.type(screen.getByLabelText('E-mail'), email);
   await user.type(screen.getByLabelText('Hasło'), password);
-  await user.click(screen.getByRole('button', { name: 'Utwórz' }));
+  await user.click(screen.getByRole('button', { name: 'Utwórz konto' }));
 };
 
 describe('sign up', () => {

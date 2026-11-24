@@ -14,7 +14,7 @@ describe('empty state', () => {
         icon={Inbox}
         title="Brak wydatków"
         description="Dodaj pierwszy wydatek"
-        action={<button type="button">Dodaj</button>}
+        action={<button type="button">Dodaj wydatek</button>}
       />,
     );
 
@@ -23,7 +23,7 @@ describe('empty state', () => {
       screen.getByRole('heading', { level: 2, name: 'Brak wydatków' }),
     ).toBeInTheDocument();
     screen.getByText('Dodaj pierwszy wydatek');
-    screen.getByRole('button', { name: 'Dodaj' });
+    screen.getByRole('button', { name: 'Dodaj wydatek' });
   });
 
   it('uses a lower heading level inside a card', () => {
@@ -73,7 +73,7 @@ describe('error state', () => {
       />,
     );
 
-    await user.click(screen.getByRole('button', { name: 'Ponów' }));
+    await user.click(screen.getByRole('button', { name: 'Spróbuj ponownie' }));
 
     expect(onRetry).toHaveBeenCalledOnce();
   });

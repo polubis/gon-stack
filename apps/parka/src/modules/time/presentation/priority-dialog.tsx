@@ -125,7 +125,7 @@ export const PriorityDialog = ({
             Anuluj
           </Button>
           <Button type="submit" data-e2e="time:priority-save">
-            {priority ? 'Zapisz' : 'Dodaj'}
+            {priority ? 'Zapisz zmiany' : 'Dodaj priorytet'}
           </Button>
         </ModalFooter>
       </form>

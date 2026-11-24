@@ -154,7 +154,7 @@ describe('dashboard screen', () => {
     render(<Main />);
     const legend = within(await legendOfCategories());
 
-    await user.click(legend.getByRole('button', { name: 'Wszystkie' }));
+    await user.click(legend.getByRole('button', { name: 'Pokaż wszystkie' }));
 
     const dialog = within(await screen.findByRole('dialog'));
     expect(dialog.getByText('Kat 7')).toBeTruthy();
@@ -200,7 +200,7 @@ describe('dashboard screen', () => {
     render(<Main />);
     await screen.findByText('Sklep 2');
 
-    await user.click(screen.getByRole('button', { name: 'Wszystkie' }));
+    await user.click(screen.getByRole('button', { name: 'Pokaż wszystkie' }));
 
     const dialog = within(await screen.findByRole('dialog'));
     expect(dialog.getByText('Sklep 1')).toBeTruthy();
@@ -224,7 +224,7 @@ describe('dashboard screen', () => {
     const user = userEvent.setup();
     render(<Main />);
     await screen.findByText('Sklep 2');
-    await user.click(screen.getByRole('button', { name: 'Wszystkie' }));
+    await user.click(screen.getByRole('button', { name: 'Pokaż wszystkie' }));
     const dialog = within(await screen.findByRole('dialog'));
 
     await user.click(dialog.getByRole('button', { name: 'Zamknij' }));
@@ -238,7 +238,9 @@ describe('dashboard screen', () => {
     render(<Main />);
 
     await screen.findByText('Limity');
-    expect(screen.queryByRole('button', { name: 'Wszystkie' })).toBeNull();
+    expect(
+      screen.queryByRole('button', { name: 'Pokaż wszystkie' }),
+    ).toBeNull();
   });
 
   it('shows the previous month after going back without asking again', async () => {

@@ -15,7 +15,7 @@ export const ShowAllFade = ({
       onClick={onClick}
       data-e2e={dataE2e}
     >
-      Wszystkie
+      Pokaż wszystkie
     </Button>
   </div>
 );

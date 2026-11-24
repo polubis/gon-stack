@@ -121,7 +121,7 @@ const ReportsView = () => {
             disabled={disabled}
             onClick={downloadCsv}
           >
-            <FileText className="h-4 w-4" aria-hidden="true" /> CSV
+            <FileText className="h-4 w-4" aria-hidden="true" /> Pobierz CSV
           </Button>
           <Button
             variant="ghost"
@@ -129,7 +129,8 @@ const ReportsView = () => {
             disabled={disabled}
             onClick={downloadFull}
           >
-            <Download className="h-4 w-4" aria-hidden="true" /> Raport
+            <Download className="h-4 w-4" aria-hidden="true" /> Pobierz pełny
+            raport
           </Button>
         </div>
       </main>

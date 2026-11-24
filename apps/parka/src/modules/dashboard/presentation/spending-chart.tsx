@@ -179,7 +179,7 @@ export const SpendingChart = ({
               href={APP_ROUTER.newExpense()}
               className="w-auto px-3 py-1.5"
             >
-              Dodaj
+              Dodaj wydatek
             </Button>
           }
         />

@@ -122,7 +122,7 @@ export const ProductDialog = ({
               data-e2e={`expense-form:product-remove:${product.id}`}
               onClick={onRemove}
             >
-              <Trash2 className="h-4 w-4" aria-hidden="true" /> Usuń
+              <Trash2 className="h-4 w-4" aria-hidden="true" /> Usuń produkt
             </Button>
             <Button
               className="ml-auto w-auto"

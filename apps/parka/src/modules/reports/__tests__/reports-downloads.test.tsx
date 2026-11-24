@@ -118,7 +118,7 @@ afterEach(() => {
 const loaded = async () => {
   stubApi();
   render(<Main />);
-  const csv = screen.getByRole('button', { name: /CSV/ });
+  const csv = screen.getByRole('button', { name: /Pobierz CSV/ });
   await waitFor(() => expect(csv).toHaveProperty('disabled', false));
 };
 
@@ -140,7 +140,7 @@ describe('report downloads', () => {
   it('downloads a CSV with this month rows only', async () => {
     await loaded();
 
-    await userEvent.click(screen.getByRole('button', { name: /CSV/ }));
+    await userEvent.click(screen.getByRole('button', { name: /Pobierz CSV/ }));
 
     expect(saved).toHaveLength(1);
     expect(saved[0].name).toMatch(/^parka-raport-\d{4}-\d{2}\.csv$/);
@@ -154,7 +154,9 @@ describe('report downloads', () => {
   it('downloads a full report with summary and rows', async () => {
     await loaded();
 
-    await userEvent.click(screen.getByRole('button', { name: /Raport/ }));
+    await userEvent.click(
+      screen.getByRole('button', { name: /Pobierz pełny raport/ }),
+    );
 
     expect(saved).toHaveLength(1);
     expect(saved[0].name).toMatch(/^parka-raport-\d{4}-\d{2}\.txt$/);
@@ -174,20 +176,21 @@ describe('report load failure', () => {
     const alert = await screen.findByRole('alert');
     expect(alert.textContent).toContain('REPORTS_LOAD');
     expect(alert.textContent).toContain('boom');
-    expect(screen.getByRole('button', { name: /CSV/ })).toHaveProperty(
+    expect(screen.getByRole('button', { name: /Pobierz CSV/ })).toHaveProperty(
       'disabled',
       true,
     );
 
     failing = false;
-    await userEvent.click(screen.getByRole('button', { name: 'Ponów' }));
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Spróbuj ponownie' }),
+    );
 
     await waitFor(() => expect(screen.queryByRole('alert')).toBeNull());
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: /CSV/ })).toHaveProperty(
-        'disabled',
-        false,
-      ),
+      expect(
+        screen.getByRole('button', { name: /Pobierz CSV/ }),
+      ).toHaveProperty('disabled', false),
     );
   });
 });

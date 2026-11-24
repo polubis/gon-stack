@@ -40,7 +40,7 @@ describe('ai info page failure', () => {
     render(<Main />);
 
     shouldThrow = false;
-    fireEvent.click(screen.getByRole('button', { name: 'Ponów' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Spróbuj ponownie' }));
 
     expect(
       screen.getByRole('heading', { level: 1, name: 'AI — jak to działa' }),

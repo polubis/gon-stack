@@ -193,7 +193,7 @@ describe('time task form', () => {
 
     await user.type(form.getByRole('textbox', { name: 'Nazwa' }), 'Pilny');
     await user.click(form.getByRole('radio', { name: '7' }));
-    await user.click(form.getByRole('button', { name: 'Dodaj' }));
+    await user.click(form.getByRole('button', { name: 'Dodaj priorytet' }));
 
     await waitFor(() =>
       expect(modalsInUrl()).toEqual(['task-new', 'priorities']),

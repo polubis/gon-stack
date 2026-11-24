@@ -143,7 +143,7 @@ const HomeView = () => (
             href={APP_ROUTER.signIn()}
             className="font-semibold text-ink underline underline-offset-4"
           >
-            Zaloguj
+            Zaloguj się
           </a>
         </p>
       </div>

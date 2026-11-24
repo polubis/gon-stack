@@ -39,13 +39,13 @@ const PrivacyView = () => (
           href={APP_ROUTER.privacyPolicy()}
           className="text-sm font-semibold text-brand-dark underline"
         >
-          Polityka
+          Otwórz politykę prywatności
         </a>
       </Card>
 
       <div className="space-y-2 lg:col-start-3">
         <Button href={APP_ROUTER.dataExport()} data-e2e="privacy:manage-data">
-          <Download className="h-4 w-4" aria-hidden="true" /> Zarządzaj
+          <Download className="h-4 w-4" aria-hidden="true" /> Zarządzaj danymi
         </Button>
       </div>
     </main>

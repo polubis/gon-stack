@@ -18,7 +18,7 @@ export const ProfileAvatar = ({ avatar, uploading, onPick }: Props) => {
     <div className="shrink-0" data-e2e="settings:avatar">
       <button
         type="button"
-        aria-label="Zmień"
+        aria-label="Zmień zdjęcie profilowe"
         aria-busy={uploading}
         disabled={uploading}
         onClick={() => input.current?.click()}

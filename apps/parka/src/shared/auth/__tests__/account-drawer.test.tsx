@@ -234,12 +234,15 @@ describe('account drawer', () => {
     backend();
     await openMenu();
 
-    expect(await screen.findByRole('link', { name: 'Dodaj' })).toHaveAttribute(
-      'href',
-      '/sign-in/',
-    );
-    expect(screen.getByRole('button', { name: 'Wyloguj' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Wszędzie' })).toBeVisible();
+    expect(
+      await screen.findByRole('link', { name: 'Dodaj konto' }),
+    ).toHaveAttribute('href', '/sign-in/');
+    expect(
+      screen.getByRole('button', { name: 'Wyloguj to konto' }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: 'Wyloguj ze wszystkich' }),
+    ).toBeVisible();
   });
 
   it('opens a drawer with the user name, email and an edit button', async () => {
@@ -252,16 +255,6 @@ describe('account drawer', () => {
       within(drawer).getByRole('button', { name: 'Edytuj profil' }),
     ).toBeVisible();
     expect(window.location.search).toBe('?modal=account');
-  });
-
-  it('labels the edit button with one word', async () => {
-    backend();
-    await openMenu();
-
-    const drawer = await screen.findByRole('dialog', { name: 'Ada' });
-    expect(
-      within(drawer).getByRole('button', { name: 'Edytuj profil' }),
-    ).toHaveTextContent(/^Edytuj$/);
   });
 
   it('shows the profile name once it is set', async () => {
@@ -412,7 +405,7 @@ describe('account drawer', () => {
     await openMenu();
 
     await userEvent.click(
-      await screen.findByRole('button', { name: 'Wyloguj' }),
+      await screen.findByRole('button', { name: 'Wyloguj to konto' }),
     );
 
     await waitFor(() => expect(assign).toHaveBeenCalledWith('/sign-in/'));
@@ -433,7 +426,7 @@ describe('account drawer', () => {
     unsubscribe.mockClear();
 
     await userEvent.click(
-      await screen.findByRole('button', { name: 'Wyloguj' }),
+      await screen.findByRole('button', { name: 'Wyloguj to konto' }),
     );
 
     await waitFor(() => expect(unsubscribe).toHaveBeenCalledTimes(1));
@@ -459,7 +452,7 @@ describe('account drawer', () => {
     unsubscribe.mockClear();
 
     await userEvent.click(
-      await screen.findByRole('button', { name: 'Wyloguj' }),
+      await screen.findByRole('button', { name: 'Wyloguj to konto' }),
     );
 
     expect(

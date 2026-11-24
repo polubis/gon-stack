@@ -143,7 +143,7 @@ const ReelEditor = ({
             ) : (
               <ImagePlus className="size-4" aria-hidden="true" />
             )}
-            {reel.media ? 'Zmień' : 'Dodaj'}
+            {reel.media ? 'Zmień plik' : 'Dodaj plik'}
             <span className="sr-only"> rolki {index + 1}</span>
           </Button>
           {reel.media ? (
@@ -307,7 +307,7 @@ export const ReelsDialog = ({
             disabled={draft.trim() === ''}
             className="w-auto self-end px-3 py-2"
           >
-            <Plus className="size-4" aria-hidden="true" /> Dodaj
+            <Plus className="size-4" aria-hidden="true" /> Dodaj rolkę
           </Button>
         </form>
       </div>

@@ -41,9 +41,7 @@ const openDetails = async (user: User): Promise<Details> => {
 
 const startComposing = async (user: User, details: Details) => {
   await user.click(
-    await within(
-      await details.findByRole('region', { name: 'Komentarze' }),
-    ).findByRole('button', { name: 'Dodaj' }),
+    await details.findByRole('button', { name: 'Dodaj komentarz' }),
   );
   return details.getByLabelText('Nowy komentarz');
 };
@@ -236,12 +234,7 @@ describe('task comment editor', () => {
     const details = await openDetails(user);
 
     await user.type(await startComposing(user, details), '  przycięte  ');
-    await user.click(
-      within(details.getByRole('region', { name: 'Komentarze' })).getByRole(
-        'button',
-        { name: 'Dodaj' },
-      ),
-    );
+    await user.click(details.getByRole('button', { name: 'Dodaj' }));
 
     await details.findByText('przycięte');
     expect(backend.writes()[0]?.body).toEqual({ body: 'przycięte' });
@@ -276,12 +269,7 @@ describe('task comment editor', () => {
     backend.state.commentDelayMs = 300;
 
     await user.type(await startComposing(user, details), 'Powoli');
-    await user.click(
-      within(details.getByRole('region', { name: 'Komentarze' })).getByRole(
-        'button',
-        { name: 'Dodaj' },
-      ),
-    );
+    await user.click(details.getByRole('button', { name: 'Dodaj' }));
 
     expect(await details.findByText('Zapisywanie…')).toBeVisible();
     expect(details.getByText('Powoli')).toBeVisible();
@@ -308,12 +296,7 @@ describe('task comment failures', () => {
     };
 
     await user.type(await startComposing(user, details), 'Dwusetny pierwszy');
-    await user.click(
-      within(details.getByRole('region', { name: 'Komentarze' })).getByRole(
-        'button',
-        { name: 'Dodaj' },
-      ),
-    );
+    await user.click(details.getByRole('button', { name: 'Dodaj' }));
 
     expect(await screen.findByText('COMMENT_CREATE')).toBeVisible();
     expect(screen.getByText(/at most 200 comments/)).toBeVisible();
@@ -329,17 +312,12 @@ describe('task comment failures', () => {
     backend.state.failCommentWrites = true;
 
     await user.type(await startComposing(user, details), 'Za drugim razem');
-    await user.click(
-      within(details.getByRole('region', { name: 'Komentarze' })).getByRole(
-        'button',
-        { name: 'Dodaj' },
-      ),
-    );
+    await user.click(details.getByRole('button', { name: 'Dodaj' }));
     await screen.findByText('COMMENT_CREATE');
     backend.state.failCommentWrites = false;
     // Radix marks the body pointer-events none while a modal is open; the toast
     // lifts it only through CSS, which jsdom does not load: use the keyboard.
-    screen.getByRole('button', { name: /ponów/i }).focus();
+    screen.getByRole('button', { name: /ponownie/i }).focus();
     await user.keyboard('{Enter}');
 
     expect(await details.findByText('Za drugim razem')).toBeVisible();

@@ -123,10 +123,10 @@ export const ScanIllustration = () => (
     </div>
     <div className="flex gap-2 text-caption font-semibold">
       <span className="inline-flex items-center gap-1 rounded-lg border border-line-strong bg-card px-2 py-1">
-        <Upload className="h-3 w-3" /> Wgraj
+        <Upload className="h-3 w-3" /> Wgraj z pliku
       </span>
       <span className="inline-flex items-center gap-1 rounded-lg border border-line-strong bg-card px-2 py-1">
-        <Camera className="h-3 w-3" /> Zdjęcie
+        <Camera className="h-3 w-3" /> Zrób zdjęcie
       </span>
     </div>
   </Frame>
@@ -292,10 +292,10 @@ export const ReportsIllustration = () => (
       </div>
       <div className="grid gap-1.5 text-caption font-semibold">
         <span className="inline-flex items-center justify-center gap-1 rounded-lg bg-brand px-2 py-1.5 text-on-brand">
-          <FileText className="h-3 w-3" /> CSV
+          <FileText className="h-3 w-3" /> Pobierz CSV
         </span>
         <span className="inline-flex items-center justify-center gap-1 rounded-lg border border-line-strong px-2 py-1.5 text-brand-dark">
-          <Download className="h-3 w-3" /> Raport
+          <Download className="h-3 w-3" /> Pobierz pełny raport
         </span>
       </div>
     </Card>
