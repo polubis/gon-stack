@@ -4,6 +4,7 @@ import {
   CalendarArrowUp,
   CalendarDays,
   CalendarPlus,
+  Copy,
   Ellipsis,
   Inbox,
   Pencil,
@@ -20,7 +21,12 @@ import type { BacklogTask, Task } from '../domain/models';
 import { weekDays } from '../domain/schedule';
 import { moveFocus } from './add-menu';
 import { useContext } from './context';
-import { deleteTaskModal, editBacklogModal, editTaskModal } from './modal-ids';
+import {
+  deleteTaskModal,
+  duplicateTaskModal,
+  editBacklogModal,
+  editTaskModal,
+} from './modal-ids';
 import { TaskDeviceBadge } from './task-device';
 
 const ITEM =
@@ -113,6 +119,17 @@ export const TaskMenu = ({ task }: { task: Task | BacklogTask }) => {
             >
               <Pencil className="h-4 w-4 text-ink-soft" aria-hidden="true" />
               Edytuj
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              aria-label={`Duplikuj: ${task.title}`}
+              data-e2e={`time:task-duplicate:${task.id}`}
+              onClick={() => openModal(duplicateTaskModal(task.id))}
+              className={ITEM}
+            >
+              <Copy className="h-4 w-4 text-ink-soft" aria-hidden="true" />
+              Duplikuj
             </button>
             {targets.map(({ day, label, text, Icon }) => (
               <button

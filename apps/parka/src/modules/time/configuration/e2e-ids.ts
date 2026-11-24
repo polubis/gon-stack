@@ -125,6 +125,7 @@ export type TimeDynamicE2eId =
   | `time:task-step:${string | number}`
   | `time:task-info:${string | number}`
   | `time:task-edit:${string | number}`
+  | `time:task-duplicate:${string | number}`
   | `time:task-move:${string | number}`
   | `time:task-backlog:${string | number}`
   | `time:task-delete:${string | number}`

@@ -23,11 +23,14 @@ import { ModalFooter } from '@/shared/ui/modal-footer';
 export const BacklogAddDialog = ({
   modal,
   task,
+  source,
 }: {
   /** Its id in the URL modal stack. */
   modal: string;
   /** Backlog task being edited; omitted when adding. */
   task?: BacklogTask;
+  /** Backlog task a new one is copied from (adding only). */
+  source?: BacklogTask;
 }) => {
   const {
     categories,
@@ -38,12 +41,13 @@ export const BacklogAddDialog = ({
     updateBacklogTask,
   } = useContext();
   const editing = task !== undefined;
-  const [title, setTitle] = useState(task?.title ?? '');
+  const seed = task ?? source;
+  const [title, setTitle] = useState(seed?.title ?? '');
   const [pickedCategory, setCategoryId] = useState<CategoryId | undefined>(
-    task?.categoryId,
+    seed?.categoryId,
   );
   const [pickedPriority, setPriorityId] = useState<PriorityId | undefined>(
-    task?.priorityId,
+    seed?.priorityId,
   );
   const categoryId = categories.some((item) => item.id === pickedCategory)
     ? pickedCategory
@@ -63,7 +67,7 @@ export const BacklogAddDialog = ({
     setSeenPriority(newPriority);
     if (newPriority) setPriorityId(newPriority.id);
   }
-  const [description, setDescription] = useState(task?.description ?? '');
+  const [description, setDescription] = useState(seed?.description ?? '');
   const [touched, setTouched] = useState(false);
 
   // The model code is async; have it by the time the user submits.

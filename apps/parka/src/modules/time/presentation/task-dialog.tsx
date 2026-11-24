@@ -42,6 +42,8 @@ type Props = {
   modal: string;
   /** Task being edited; omitted when adding. */
   task?: Task;
+  /** Task a new one is copied from (adding only). */
+  source?: Task;
   /** Day a new task starts on. */
   defaultDay: string;
   /** Opens with "Powtarzaj" already on. */
@@ -55,6 +57,7 @@ const intervalPhrase = (interval: TaskRecurringInterval): string =>
 export const TaskDialog = ({
   modal,
   task,
+  source,
   defaultDay,
   startRepeating = false,
 }: Props) => {
@@ -69,12 +72,13 @@ export const TaskDialog = ({
     createRecurring,
   } = useContext();
   const editing = task !== undefined;
-  const [title, setTitle] = useState(task?.title ?? '');
+  const seed = task ?? source;
+  const [title, setTitle] = useState(seed?.title ?? '');
   const [pickedCategory, setCategoryId] = useState<CategoryId | undefined>(
-    task?.categoryId,
+    seed?.categoryId,
   );
   const [pickedPriority, setPriorityId] = useState<PriorityId | undefined>(
-    task?.priorityId,
+    seed?.priorityId,
   );
   // Defaults are derived, so they still apply when the lists arrive after
   // mount and when a picked item disappears (e.g. its creation failed).
@@ -96,10 +100,10 @@ export const TaskDialog = ({
     setSeenPriority(newPriority);
     if (newPriority) setPriorityId(newPriority.id);
   }
-  const [description, setDescription] = useState(task?.description ?? '');
-  const [day, setDay] = useState(task?.day ?? defaultDay);
-  const [allDay, setAllDay] = useState(!editing || task.at === null);
-  const [at, setAt] = useState(task?.at ?? DEFAULT_TIME);
+  const [description, setDescription] = useState(seed?.description ?? '');
+  const [day, setDay] = useState(seed?.day ?? defaultDay);
+  const [allDay, setAllDay] = useState(seed === undefined || seed.at === null);
+  const [at, setAt] = useState(seed?.at ?? DEFAULT_TIME);
   const [pickedStep, setStep] = useState<Step>(task ? stepOf(task) : 'open');
   const steps = workflow(statuses);
   // A step removed while the form is open reads as the built-in one.
