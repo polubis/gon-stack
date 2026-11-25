@@ -11,6 +11,11 @@ export const updateTimeBacklogTask = privateProcedure({
   schema: withZodSchema({ schema: updateTimeBacklogTaskSchema }),
 })({
   handler: async (input, { db, user }) => {
+    // Independent of the write: read it alongside. The no-op catch only keeps
+    // a failed write from leaving an unhandled rejection behind.
+    const profiles = loadProfiles(db);
+    profiles.catch(() => undefined);
+
     const { data, error } = await db
       .from('time_tasks')
       .update({
@@ -31,7 +36,7 @@ export const updateTimeBacklogTask = privateProcedure({
 
     return {
       code: 200 as const,
-      data: toTimeBacklogTask(data, await loadProfiles(db)),
+      data: toTimeBacklogTask(data, await profiles),
     };
   },
 });
