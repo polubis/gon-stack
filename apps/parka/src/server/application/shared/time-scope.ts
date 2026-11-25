@@ -58,20 +58,22 @@ export const editTaskSeries = async (
   scope: RecurringScope,
   edit: TaskSeriesEdit,
 ): Promise<void> => {
-  for (const part of chunks(ids)) {
-    const { error } = await db
-      .from('time_tasks')
-      .update({
-        title: edit.title,
-        description: edit.description,
-        category_id: edit.categoryId,
-        priority_id: edit.priorityId,
-        at: edit.at,
-      })
-      .eq('user_id', userId)
-      .in('id', part);
-    if (error) throw fromSupabaseError(error);
-  }
+  await Promise.all(
+    chunks(ids).map(async (part) => {
+      const { error } = await db
+        .from('time_tasks')
+        .update({
+          title: edit.title,
+          description: edit.description,
+          category_id: edit.categoryId,
+          priority_id: edit.priorityId,
+          at: edit.at,
+        })
+        .eq('user_id', userId)
+        .in('id', part);
+      if (error) throw fromSupabaseError(error);
+    }),
+  );
   // Occurrences already made are tasks of their own, so the rule changes in place.
   if (scope === 'this') return;
   const { error } = await db
@@ -94,28 +96,30 @@ export const deleteTimeTasks = async (
   userId: string,
   ids: string[],
 ): Promise<void> => {
-  for (const part of chunks(ids)) {
-    const attachments = await db
-      .from('time_task_attachments')
-      .select('id')
-      .eq('user_id', userId)
-      .in('task_id', part);
-    if (attachments.error) throw fromSupabaseError(attachments.error);
-    if (attachments.data.length > 0) {
-      const removed = await db.storage
-        .from(TASK_ATTACHMENT_BUCKET)
-        .remove(
-          attachments.data.map((row) => taskAttachmentPath(userId, row.id)),
-        );
-      if (removed.error) throw fromSupabaseError(removed.error);
-    }
-    const { error } = await db
-      .from('time_tasks')
-      .delete()
-      .eq('user_id', userId)
-      .in('id', part);
-    if (error) throw fromSupabaseError(error);
-  }
+  await Promise.all(
+    chunks(ids).map(async (part) => {
+      const attachments = await db
+        .from('time_task_attachments')
+        .select('id')
+        .eq('user_id', userId)
+        .in('task_id', part);
+      if (attachments.error) throw fromSupabaseError(attachments.error);
+      if (attachments.data.length > 0) {
+        const removed = await db.storage
+          .from(TASK_ATTACHMENT_BUCKET)
+          .remove(
+            attachments.data.map((row) => taskAttachmentPath(userId, row.id)),
+          );
+        if (removed.error) throw fromSupabaseError(removed.error);
+      }
+      const { error } = await db
+        .from('time_tasks')
+        .delete()
+        .eq('user_id', userId)
+        .in('id', part);
+      if (error) throw fromSupabaseError(error);
+    }),
+  );
 };
 
 /** Deletes the tasks `scope` reaches and stops the rule making the occurrences it reaches. */

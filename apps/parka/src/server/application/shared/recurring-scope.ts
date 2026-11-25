@@ -89,15 +89,17 @@ export const deleteExpenses = async (
   db: SupabaseServer,
   ids: string[],
 ): Promise<void> => {
-  for (const part of chunks(ids)) {
-    const items = await db
-      .from('receipt_items')
-      .delete()
-      .in('expense_id', part);
-    if (items.error) throw fromSupabaseError(items.error);
-    const expenses = await db.from('expenses').delete().in('id', part);
-    if (expenses.error) throw fromSupabaseError(expenses.error);
-  }
+  await Promise.all(
+    chunks(ids).map(async (part) => {
+      const items = await db
+        .from('receipt_items')
+        .delete()
+        .in('expense_id', part);
+      if (items.error) throw fromSupabaseError(items.error);
+      const expenses = await db.from('expenses').delete().in('id', part);
+      if (expenses.error) throw fromSupabaseError(expenses.error);
+    }),
+  );
 };
 
 /** Writes what the occurrence edit shares with the other occurrences; each keeps its own day. */
@@ -107,41 +109,47 @@ export const editExpenses = async (
   ids: string[],
   edit: SeriesEdit,
 ): Promise<void> => {
-  for (const part of chunks(ids)) {
-    const updated = await db
-      .from('expenses')
-      .update({
-        merchant: edit.merchant,
-        amount: edit.amount,
-        category_id: edit.categoryId,
-        payment_method: edit.paymentMethod,
-        is_bill: edit.isBill,
-      })
-      .in('id', part);
-    if (updated.error) throw fromSupabaseError(updated.error);
-
-    const wiped = await db
-      .from('receipt_items')
-      .delete()
-      .in('expense_id', part);
-    if (wiped.error) throw fromSupabaseError(wiped.error);
-    if (edit.items.length === 0) continue;
-    const inserted = await db.from('receipt_items').insert(
-      part.flatMap((expenseId) =>
-        edit.items.map((it) => ({
-          user_id: userId,
-          id: `${expenseId}:${it.id.split(':').at(-1)}`,
-          expense_id: expenseId,
-          name: it.name,
-          unit_price: it.unitPrice,
-          quantity: it.quantity,
-          discount: it.discount,
-          category_id: it.categoryId,
-        })),
-      ),
-    );
-    if (inserted.error) throw fromSupabaseError(inserted.error);
-  }
+  await Promise.all(
+    chunks(ids).map(async (part) => {
+      const update = async () => {
+        const updated = await db
+          .from('expenses')
+          .update({
+            merchant: edit.merchant,
+            amount: edit.amount,
+            category_id: edit.categoryId,
+            payment_method: edit.paymentMethod,
+            is_bill: edit.isBill,
+          })
+          .in('id', part);
+        if (updated.error) throw fromSupabaseError(updated.error);
+      };
+      const replaceItems = async () => {
+        const wiped = await db
+          .from('receipt_items')
+          .delete()
+          .in('expense_id', part);
+        if (wiped.error) throw fromSupabaseError(wiped.error);
+        if (edit.items.length === 0) return;
+        const inserted = await db.from('receipt_items').insert(
+          part.flatMap((expenseId) =>
+            edit.items.map((it) => ({
+              user_id: userId,
+              id: `${expenseId}:${it.id.split(':').at(-1)}`,
+              expense_id: expenseId,
+              name: it.name,
+              unit_price: it.unitPrice,
+              quantity: it.quantity,
+              discount: it.discount,
+              category_id: it.categoryId,
+            })),
+          ),
+        );
+        if (inserted.error) throw fromSupabaseError(inserted.error);
+      };
+      await Promise.all([update(), replaceItems()]);
+    }),
+  );
 };
 
 /** Ends the series at `endDate`; `null` removes the rule (nothing is left to make). */
