@@ -164,6 +164,20 @@ export const useEntrance = (phase: ChangePhase, enabled = true) => {
   };
 };
 
+const scrolled = new WeakMap<Element, ChangePhase>();
+
+/** Ref callback: brings a created or updated row into view once per phase. */
+export const scrollToChanged = (el: HTMLElement | null, phase: ChangePhase) => {
+  if (!el) return;
+  if (phase !== 'in' && phase !== 'flash') {
+    scrolled.delete(el);
+    return;
+  }
+  if (scrolled.get(el) === phase) return;
+  scrolled.set(el, phase);
+  el.scrollIntoView?.({ block: 'center', behavior: 'smooth' });
+};
+
 /** Classes and a11y props for a row in the given phase; leaving rows are inert. */
 export const changeProps = (phase: ChangePhase) => ({
   className: CLASSES[phase],

@@ -12,6 +12,7 @@ import { cn } from '@repo/react-kit/cn';
 import { openModal } from '@/shared/router/modal-stack';
 import {
   changeProps,
+  scrollToChanged,
   useEntrance,
   type ChangePhase,
 } from '@/shared/ui/list-changes';
@@ -100,6 +101,7 @@ export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
   const shimmer = useShimmer(started);
   return (
     <li
+      ref={(el) => scrollToChanged(el, phase)}
       aria-current={now ? 'time' : undefined}
       data-started={started ? '' : undefined}
       data-shimmering={shimmer.shimmering ? '' : undefined}
