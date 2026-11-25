@@ -3,6 +3,7 @@ import { BellOff } from 'lucide-react';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { EmptyState } from '@/shared/ui/empty-state';
 import { ErrorState } from '@/shared/ui/error-state';
+import { useListChanges } from '@/shared/ui/list-changes';
 import { ERROR_CODES } from '../configuration/constraints';
 import { useContext } from './context';
 import { ListSkeleton } from './list-skeleton';
@@ -22,6 +23,7 @@ export const Router = () => {
   const initializing = ctx.useInitializing();
   const loadingMore = ctx.useLoadingMore();
   const [now] = useState(Date.now);
+  const rows = useListChanges(notifications, (n) => n.id, String(initializing));
 
   if (initializing)
     return (
@@ -44,7 +46,7 @@ export const Router = () => {
     );
   }
 
-  if (notifications.length === 0) {
+  if (notifications.length === 0 && rows.length === 0) {
     return (
       <EmptyState
         data-e2e="notifications:empty"
@@ -63,8 +65,13 @@ export const Router = () => {
         aria-label="Powiadomienia"
         aria-busy={loadingMore}
       >
-        {notifications.map((n) => (
-          <NotificationRow key={n.id} notification={n} now={now} />
+        {rows.map(({ key, item, phase }) => (
+          <NotificationRow
+            key={key}
+            notification={item}
+            phase={phase}
+            now={now}
+          />
         ))}
       </ul>
       <LoadMore />
