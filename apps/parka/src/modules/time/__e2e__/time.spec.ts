@@ -1171,6 +1171,10 @@ const commands = {
     ]);
   },
 
+  'the free days of the week show an empty state': async ({ getByE2e }) => {
+    await expect(getByE2e(`time:day-empty:2026-10-21`)).toBeVisible();
+  },
+
   'the summary comes first, the tasks next and the statistics last': async ({
     getByE2e,
     getByE2ePrefix,
@@ -1339,6 +1343,7 @@ test('the time screen stacks summary, tasks and statistics on the real backend',
   await interpreter(commands, e2e)(
     ['i register an account for the screen structure'],
     ['i add one task to the week'],
+    ['the free days of the week show an empty state'],
     ['the summary comes first, the tasks next and the statistics last'],
     ['on a phone every statistics card comes after the tasks'],
     ['there is no separate statistics tab'],
