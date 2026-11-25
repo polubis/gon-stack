@@ -11,6 +11,7 @@ import { Button } from '@/shared/ui/controls';
 import { EmptyState } from '@/shared/ui/empty-state';
 import { ErrorState } from '@/shared/ui/error-state';
 import { Card, ScreenHeader } from '@/shared/ui/layout';
+import { useListChanges } from '@/shared/ui/list-changes';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
 import { Toast } from '@/shared/ui/toast';
 import {
@@ -94,6 +95,7 @@ const AccessTokensView = () => {
   const notice = ctx.useNotice();
   const initializing = ctx.useInitializing();
   const isLoading = ctx.useIsLoading();
+  const rows = useListChanges(tokens, (t) => t.id, String(initializing));
   const full = tokens.length >= MAX_TOKENS;
 
   useEffect(() => {
@@ -159,7 +161,7 @@ const AccessTokensView = () => {
               </code>
             </Card>
 
-            {tokens.length === 0 ? (
+            {tokens.length === 0 && rows.length === 0 ? (
               <EmptyState
                 data-e2e="access-tokens:empty"
                 icon={KeyRound}
@@ -178,11 +180,12 @@ const AccessTokensView = () => {
                 data-e2e="access-tokens:list"
                 aria-label="Tokeny"
               >
-                {tokens.map((token) => (
+                {rows.map(({ key, item, phase }) => (
                   <TokenRow
-                    key={token.id}
-                    token={token}
-                    busy={busyIds.includes(token.id)}
+                    key={key}
+                    token={item}
+                    phase={phase}
+                    busy={busyIds.includes(item.id)}
                     onResume={ctx.resume}
                   />
                 ))}
