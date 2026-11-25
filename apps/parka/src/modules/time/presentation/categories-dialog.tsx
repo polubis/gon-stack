@@ -3,13 +3,62 @@ import { openModal } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { EmptyState } from '@/shared/ui/empty-state';
+import {
+  changeProps,
+  useEntrance,
+  useListChanges,
+  type ChangePhase,
+} from '@/shared/ui/list-changes';
+import { cn } from '@repo/react-kit/cn';
+import type { Category } from '../domain/models';
 import { useContext } from './context';
 import { editCategoryModal, NEW_CATEGORY_MODAL } from './modal-ids';
 import { ModalShell } from './modal-shell';
+import { stagger } from './stagger';
+
+const CategoryRow = ({
+  category: c,
+  phase,
+  at,
+}: {
+  category: Category;
+  phase: ChangePhase;
+  at: number;
+}) => {
+  const change = changeProps(phase);
+  const entrance = useEntrance(phase);
+  return (
+    <li
+      aria-hidden={change['aria-hidden']}
+      inert={change.inert}
+      onAnimationEnd={entrance.onAnimationEnd}
+      style={entrance.entering ? stagger(at) : undefined}
+      className={cn(
+        'border-b border-line last:border-0',
+        entrance.entering && 'animate-item-in motion-reduce:animate-none',
+        change.className,
+      )}
+    >
+      <button
+        type="button"
+        aria-label={`Edytuj kategorię ${c.name}`}
+        onClick={() => openModal(editCategoryModal(c.id))}
+        className="flex w-full items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-hover-soft focus-visible:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand"
+      >
+        <CategoryAvatar category={c} />
+        <span className="min-w-0 flex-1 truncate text-sm font-medium">
+          {c.name}
+        </span>
+        <ChevronRight className="h-5 w-5 text-ink-soft" aria-hidden="true" />
+      </button>
+    </li>
+  );
+};
 
 /** Browse list of the categories, same rows as the finance categories list. */
 export const CategoriesDialog = ({ modal }: { modal: string }) => {
-  const { categories } = useContext();
+  const { categories, initializing } = useContext();
+  const rows = useListChanges(categories, (c) => c.id, String(initializing));
   const add = (
     <Button
       onClick={() => openModal(NEW_CATEGORY_MODAL)}
@@ -26,7 +75,7 @@ export const CategoriesDialog = ({ modal }: { modal: string }) => {
       title="Kategorie"
       description="Wszystkie kategorie zadań."
     >
-      {categories.length === 0 ? (
+      {categories.length === 0 && rows.length === 0 ? (
         <EmptyState
           icon={Tags}
           title="Nie masz jeszcze kategorii"
@@ -37,24 +86,8 @@ export const CategoriesDialog = ({ modal }: { modal: string }) => {
         <>
           <div className="mb-3 flex justify-end">{add}</div>
           <ul className="max-h-80 overflow-y-auto overflow-x-hidden rounded-2xl border border-line bg-card">
-            {categories.map((c) => (
-              <li key={c.id} className="border-b border-line last:border-0">
-                <button
-                  type="button"
-                  aria-label={`Edytuj kategorię ${c.name}`}
-                  onClick={() => openModal(editCategoryModal(c.id))}
-                  className="flex w-full items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-hover-soft focus-visible:bg-hover-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand"
-                >
-                  <CategoryAvatar category={c} />
-                  <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                    {c.name}
-                  </span>
-                  <ChevronRight
-                    className="h-5 w-5 text-ink-soft"
-                    aria-hidden="true"
-                  />
-                </button>
-              </li>
+            {rows.map(({ key, item, phase, at }) => (
+              <CategoryRow key={key} category={item} phase={phase} at={at} />
             ))}
           </ul>
         </>

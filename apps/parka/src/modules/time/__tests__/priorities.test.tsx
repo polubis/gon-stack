@@ -39,6 +39,26 @@ describe('task priorities', () => {
     ]);
   });
 
+  it('shows a new priority in the list under the form', async () => {
+    const user = userEvent.setup();
+    renderTime('day', undefined, '&modal=priorities');
+    const list = within(
+      await screen.findByRole('dialog', { name: 'Priorytety' }),
+    );
+    await user.click(list.getByRole('button', { name: 'Dodaj' }));
+    const form = within(
+      await screen.findByRole('dialog', { name: 'Nowy priorytet' }),
+    );
+
+    await user.type(form.getByLabelText('Nazwa'), 'Pilny');
+    await user.click(form.getByRole('radio', { name: '9' }));
+    await user.click(form.getByRole('button', { name: 'Dodaj priorytet' }));
+
+    expect(
+      await screen.findByRole('button', { name: 'Edytuj priorytet Pilny' }),
+    ).toBeVisible();
+  });
+
   it('renames a priority and changes its value', async () => {
     const user = userEvent.setup();
     renderTime('day', undefined, '&modal=priorities');
