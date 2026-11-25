@@ -11,6 +11,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
+import { changeProps, type ChangePhase } from '@/shared/ui/list-changes';
 import { Card } from '@/shared/ui/layout';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { ageLabel, unfinishedSummary } from '../domain/format';
@@ -33,13 +34,16 @@ const ICON: Record<NotificationKind, LucideIcon> = {
 
 export const NotificationRow = ({
   notification,
+  phase,
   now,
 }: {
   notification: Notification;
+  phase: ChangePhase;
   now: number;
 }) => {
   const ctx = useContext();
   const Icon = ICON[notification.kind];
+  const change = changeProps(phase);
   const selecting = ctx.useSelecting();
   const selected = ctx.useSelected().includes(notification.id);
 
@@ -47,9 +51,12 @@ export const NotificationRow = ({
     <Card
       as="li"
       data-e2e={`notifications:row:${notification.id}`}
+      aria-hidden={change['aria-hidden']}
+      inert={change.inert}
       className={cn(
         'flex min-w-0 flex-col gap-1',
         notification.read && 'bg-glass shadow-none',
+        change.className,
       )}
     >
       <div className="flex items-start gap-3">
