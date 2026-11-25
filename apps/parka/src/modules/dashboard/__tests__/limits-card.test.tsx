@@ -70,7 +70,7 @@ const Harness = () => {
   );
 };
 
-const renderCard = async () => {
+const renderCard = async ({ expectTotal = true } = {}) => {
   const user = userEvent.setup();
   render(
     <Provider>
@@ -78,9 +78,10 @@ const renderCard = async () => {
     </Provider>,
   );
   await screen.findByRole('button', { name: /Zarządzaj limitami/ });
-  await waitFor(() =>
-    expect(screen.queryByText('Brak zdefiniowanego limitu.')).toBeNull(),
-  );
+  if (expectTotal)
+    await waitFor(() =>
+      expect(screen.queryByText('Brak limitu miesięcznego')).toBeNull(),
+    );
   return user;
 };
 
@@ -119,6 +120,26 @@ describe('limits managed in a modal', () => {
       expect(screen.getByText(/powiadomienie od 80%/)).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: /Edytuj limit/ })).toBeNull();
       expect(screen.queryByRole('button', { name: /Dodaj limit/ })).toBeNull();
+    });
+  });
+
+  describe('missing monthly limit', () => {
+    it('offers to set it when only category limits exist', async () => {
+      mockBackend([FOOD_LIMIT]);
+      const user = await renderCard({ expectTotal: false });
+
+      expect(
+        await screen.findByRole('heading', {
+          name: 'Brak limitu miesięcznego',
+        }),
+      ).toBeInTheDocument();
+      await user.click(
+        screen.getByRole('button', { name: 'Ustaw limit miesięczny' }),
+      );
+
+      expect(
+        await screen.findByRole('dialog', { name: 'Nowy limit' }),
+      ).toBeInTheDocument();
     });
   });
 

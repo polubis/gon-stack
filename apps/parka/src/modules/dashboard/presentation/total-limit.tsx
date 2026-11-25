@@ -1,8 +1,12 @@
-import { ProgressBar } from '@/shared/ui/controls';
+import { Gauge, Plus } from 'lucide-react';
+import { openModal } from '@/shared/router/modal-stack';
+import { Button, ProgressBar } from '@/shared/ui/controls';
+import { EmptyState } from '@/shared/ui/empty-state';
 import type { Period } from '@/shared/period/period';
 import { money } from '../domain/format';
 import type { TotalProgress } from '../domain/models';
 import { LIMIT_NOUN } from '../domain/period';
+import { NEW_LIMIT_MODAL } from './modal-ids';
 import { limitTone } from './selectors';
 
 /** The always-visible headline of the limits card. */
@@ -18,9 +22,22 @@ export const TotalLimit = ({
 }) => {
   if (!progress)
     return (
-      <p className="text-sm text-ink-soft" data-e2e="dashboard:limit-total">
-        Brak zdefiniowanego limitu.
-      </p>
+      <EmptyState
+        variant="card"
+        data-e2e="dashboard:limit-total"
+        icon={Gauge}
+        title="Brak limitu miesięcznego"
+        description="Ustaw łączny limit, a pasek pokaże, ile z niego wykorzystano."
+        action={
+          <Button
+            className="w-auto px-3 py-1.5"
+            onClick={() => openModal(NEW_LIMIT_MODAL)}
+          >
+            <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
+            Ustaw limit miesięczny
+          </Button>
+        }
+      />
     );
 
   return (
