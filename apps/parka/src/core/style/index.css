@@ -28,9 +28,11 @@
  * Scrollable surface with a big corner radius: a slim round thumb, no arrow
  * buttons, and the track pulled in from both ends by the radius, so nothing
  * of the scrollbar sticks out past the rounded border (the native one draws
- * square buttons into the corners).
+ * square buttons into the corners). The gutter is reserved on both edges, so
+ * the scrollbar never makes the right padding bigger than the left one.
  */
 @utility scroll-in-radius {
+  scrollbar-gutter: stable both-edges;
   &::-webkit-scrollbar {
     width: 0.75rem;
   }
