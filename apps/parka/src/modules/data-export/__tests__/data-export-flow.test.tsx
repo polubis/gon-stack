@@ -149,12 +149,28 @@ describe('data export page', () => {
     expect(screen.queryByText(/Plik został pobrany/)).toBeNull();
   });
 
-  it('offers csv selected by default', () => {
+  it('offers csv selected by default', async () => {
     stubApi(true);
     render(<Main />);
 
     expect(
-      (screen.getByRole('radio', { name: /csv/i }) as HTMLInputElement).checked,
+      ((await screen.findByRole('radio', { name: /csv/i })) as HTMLInputElement)
+        .checked,
     ).toBe(true);
+  });
+
+  it('shows a loading placeholder instead of formats until data arrives', async () => {
+    stubApi(true);
+    render(<Main />);
+
+    expect(
+      screen.getByRole('status', { name: 'Wczytywanie danych do eksportu' }),
+    ).toBeTruthy();
+    expect(screen.queryByRole('radio')).toBeNull();
+
+    expect(await screen.findByRole('radio', { name: /csv/i })).toBeTruthy();
+    expect(
+      screen.queryByRole('status', { name: 'Wczytywanie danych do eksportu' }),
+    ).toBeNull();
   });
 });

@@ -5,6 +5,7 @@ export const DATA_EXPORT_E2E_IDS = [
   'data-export:empty',
   'data-export:run',
   'data-export:done',
+  'data-export:skeleton',
   'data-export:load-error',
 ] as const;
 
