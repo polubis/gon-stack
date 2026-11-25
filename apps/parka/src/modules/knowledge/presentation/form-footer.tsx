@@ -16,7 +16,7 @@ export const FormFooter = ({
   /** Id of the item being edited; omitted when adding. */
   editId?: string;
 }) => (
-  <ModalFooter className="flex items-center gap-2">
+  <ModalFooter className="flex flex-wrap items-center gap-2">
     {editId ? (
       <Button
         variant="danger"
@@ -28,7 +28,7 @@ export const FormFooter = ({
         Usuń
       </Button>
     ) : null}
-    <div className="ml-auto flex gap-2">
+    <div className="ml-auto flex flex-wrap justify-end gap-2">
       <Button
         variant="ghost"
         data-e2e={`knowledge:${entity}-cancel` as KnowledgeE2eId}

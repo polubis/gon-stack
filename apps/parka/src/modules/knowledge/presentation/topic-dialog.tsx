@@ -169,9 +169,10 @@ export const TopicDialog = ({ modal, topic, catalogId, defaultDay }: Props) => {
           label="Dzień nauki"
           hint={day === '' ? 'Bez dnia: temat trafi do backlogu.' : undefined}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Input
               type="date"
+              className="min-w-0 flex-1 basis-40"
               data-e2e="knowledge:topic-day"
               value={day}
               aria-invalid={showErrors && dayError ? true : undefined}
@@ -180,7 +181,7 @@ export const TopicDialog = ({ modal, topic, catalogId, defaultDay }: Props) => {
             {day !== '' ? (
               <Button
                 variant="ghost"
-                className="w-auto shrink-0 px-3 py-2"
+                className="w-auto max-w-full px-3 py-2"
                 onClick={() => setDay('')}
               >
                 Do backlogu
