@@ -148,20 +148,23 @@ export const notifyUnfinishedTasks = async (
   if (localHour(now, timeZone) < END_OF_DAY_HOUR) return;
   try {
     const day = localDay(now, timeZone);
-    const { data, error } = await db
-      .from('time_tasks')
-      .select('title, at')
-      .eq('day', day)
-      .eq('done', false)
-      .order('at', { nullsFirst: true });
+    // Independent reads: one round trip.
+    const [{ data, error }, { count, error: countError }] = await Promise.all([
+      db
+        .from('time_tasks')
+        .select('title, at')
+        .eq('day', day)
+        .eq('done', false)
+        .order('at', { nullsFirst: true }),
+      db
+        .from('time_tasks')
+        .select('id', { count: 'exact', head: true })
+        .eq('done', false)
+        .lte('day', day),
+    ]);
     if (error) throw fromSupabaseError(error);
-    if (data.length === 0) return;
-    const { count, error: countError } = await db
-      .from('time_tasks')
-      .select('id', { count: 'exact', head: true })
-      .eq('done', false)
-      .lte('day', day);
     if (countError) throw fromSupabaseError(countError);
+    if (data.length === 0) return;
     await recordNotificationOnce(db, userId, `time-day-unfinished:${day}`, {
       kind: 'time-day-unfinished',
       payload: {
