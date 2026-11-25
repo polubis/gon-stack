@@ -183,8 +183,11 @@ describe('moves statistics', () => {
         await screen.findByRole('button', { name: `Więcej: ${title}` }),
       );
       await user.click(
-        await screen.findByRole('menuitem', {
-          name: `Przenieś na jutro: ${title}`,
+        await screen.findByRole('menuitem', { name: `Przenieś: ${title}` }),
+      );
+      await user.click(
+        within(await screen.findByRole('dialog')).getByRole('button', {
+          name: 'Przenieś',
         }),
       );
     }

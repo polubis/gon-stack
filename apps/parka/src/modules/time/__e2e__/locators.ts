@@ -21,8 +21,7 @@ export const taskStep = (prefix: Prefixer, title: string) =>
   prefix('time:task-step:', taskRow(prefix, title));
 // The task menu is a portal: its single open instance is searched page-wide.
 export const taskDelete = (prefix: Prefixer) => prefix('time:task-delete:');
-export const moveItem = (prefix: Prefixer, text: string) =>
-  prefix('time:task-move:').filter({ hasText: text });
+export const moveItem = (prefix: Prefixer) => prefix('time:task-move:');
 
 const attachmentRow = (prefix: Prefixer, name: string) =>
   prefix('time:attachment:').filter({ hasText: name });

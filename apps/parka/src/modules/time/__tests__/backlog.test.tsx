@@ -199,14 +199,38 @@ const pickFromMenu = async (
   );
 };
 
+const moveFromMenu = async (
+  user: ReturnType<typeof userEvent.setup>,
+  list: ReturnType<typeof within>,
+  choice: RegExp | string,
+  day?: string,
+  title = 'Umówić dentystę',
+) => {
+  await user.click(
+    await list.findByRole('button', { name: `Więcej: ${title}` }),
+  );
+  await user.click(
+    await screen.findByRole('menuitem', { name: `Przenieś: ${title}` }),
+  );
+  const dialog = within(
+    await screen.findByRole('dialog', { name: /Przenieść/ }),
+  );
+  await user.click(dialog.getByRole('radio', { name: choice }));
+  if (day !== undefined)
+    fireEvent.change(dialog.getByLabelText('Wybrany dzień'), {
+      target: { value: day },
+    });
+  await user.click(dialog.getByRole('button', { name: 'Przenieś' }));
+};
+
 describe('backlog moving', () => {
-  it('puts a task on today from the row menu', async () => {
+  it('puts a task on today with a custom day', async () => {
     const user = userEvent.setup();
     backend.seedBacklog([backlogTask()]);
     renderTime();
     const list = await openBacklog(user);
 
-    await pickFromMenu(user, list, 'Przenieś na dziś');
+    await moveFromMenu(user, list, /^Własny/, TODAY);
 
     expect(
       await list.findByRole('heading', { name: 'Backlog jest pusty' }),
@@ -228,7 +252,7 @@ describe('backlog moving', () => {
     renderTime();
     const list = await openBacklog(user);
 
-    await pickFromMenu(user, list, 'Przenieś na jutro');
+    await moveFromMenu(user, list, /^Następny dzień/);
 
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     expect(backend.writes()[0]!.body).toMatchObject({ day: '2026-10-21' });
@@ -240,7 +264,7 @@ describe('backlog moving', () => {
     renderTime();
     const list = await openBacklog(user);
 
-    await pickFromMenu(user, list, 'Przenieś na następny tydzień');
+    await moveFromMenu(user, list, /^Następny tydzień/);
 
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     expect(backend.writes()[0]!.body).toMatchObject({ day: '2026-10-26' });
@@ -253,7 +277,7 @@ describe('backlog moving', () => {
     renderTime();
     const list = await openBacklog(user);
 
-    await pickFromMenu(user, list, 'Przenieś na dziś');
+    await moveFromMenu(user, list, /^Własny/, TODAY);
 
     expect(await screen.findByText('BACKLOG_MOVE_FAILED')).toBeVisible();
     expect(await list.findByText('Umówić dentystę')).toBeVisible();
@@ -269,7 +293,7 @@ describe('backlog moving', () => {
     renderTime();
     const list = await openBacklog(user);
 
-    await pickFromMenu(user, list, 'Przenieś na dziś');
+    await moveFromMenu(user, list, /^Własny/, TODAY);
 
     await closeBacklog(user);
     const rows = await screen.findAllByRole('button', {
@@ -373,15 +397,7 @@ describe('backlog custom date', () => {
     renderTime();
     const list = await openBacklog(user);
 
-    await user.click(
-      await list.findByRole('button', { name: 'Więcej: Umówić dentystę' }),
-    );
-    fireEvent.change(
-      await screen.findByLabelText(
-        'Przenieś na wybrany dzień: Umówić dentystę',
-      ),
-      { target: { value: '2026-10-30' } },
-    );
+    await moveFromMenu(user, list, /^Własny/, '2026-10-30');
 
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     expect(backend.writes()[0]!.body).toMatchObject({
@@ -391,6 +407,28 @@ describe('backlog custom date', () => {
     expect(
       await list.findByRole('heading', { name: 'Backlog jest pusty' }),
     ).toBeVisible();
+  });
+
+  it('keeps the move button off until a custom day is picked', async () => {
+    const user = userEvent.setup();
+    backend.seedBacklog([backlogTask()]);
+    renderTime();
+    const list = await openBacklog(user);
+    await user.click(
+      await list.findByRole('button', { name: 'Więcej: Umówić dentystę' }),
+    );
+    await user.click(
+      await screen.findByRole('menuitem', {
+        name: 'Przenieś: Umówić dentystę',
+      }),
+    );
+    const dialog = within(
+      await screen.findByRole('dialog', { name: /Przenieść/ }),
+    );
+
+    await user.click(dialog.getByRole('radio', { name: /^Własny/ }));
+
+    expect(dialog.getByRole('button', { name: 'Przenieś' })).toBeDisabled();
   });
 });
 

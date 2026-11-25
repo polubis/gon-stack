@@ -41,6 +41,9 @@ export const TIME_E2E_IDS = [
   'time:recurring-end-notice',
   'time:recurring-end',
   'time:delete-dialog',
+  'time:move-dialog',
+  'time:move-date',
+  'time:move-confirm',
   'time:delete-confirm',
   'time:category-dialog',
   'time:category-save',
@@ -134,7 +137,7 @@ export type TimeDynamicE2eId =
   | `time:task-backlog:${string | number}`
   | `time:task-delete:${string | number}`
   | `time:task-more:${string | number}`
-  | `time:task-date:${string | number}`
+  | `time:move-option:${string}`
   | `time:attachment:${string}`
   | `time:attachment-thumb:${string}`
   | `time:attachment-delete:${string}`

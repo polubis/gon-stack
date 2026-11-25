@@ -46,7 +46,7 @@ const daysInMonth = (year: number, monthIndex: number): number =>
   new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate();
 
 /** `day` moved by `months`, keeping its day of month within shorter months. */
-const addMonths = (day: string, months: number): string => {
+export const addMonths = (day: string, months: number): string => {
   const start = toDate(day);
   const index = start.getUTCFullYear() * 12 + start.getUTCMonth() + months;
   const year = Math.floor(index / 12);

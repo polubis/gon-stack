@@ -2,23 +2,15 @@ import { useId } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import {
   CalendarArrowUp,
-  CalendarDays,
-  CalendarPlus,
   Copy,
   Ellipsis,
   Inbox,
   Pencil,
-  Sun,
   Trash2,
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { usePopoverOpen } from '@/shared/ui/use-popover-open';
-import { Input } from '@/shared/ui/controls';
-import { dayLabel } from '@/shared/date/date';
-import { addDays, isDay } from '@/shared/period/period';
 import type { BacklogTask, Task } from '../domain/models';
-import { weekDays } from '../domain/schedule';
 import { moveFocus } from './add-menu';
 import { useContext } from './context';
 import {
@@ -26,49 +18,21 @@ import {
   duplicateTaskModal,
   editBacklogModal,
   editTaskModal,
+  moveTaskModal,
 } from './modal-ids';
 import { TaskDeviceBadge } from './task-device';
 
 const ITEM =
   'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors hover:bg-hover focus-visible:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
 
-/** `2026-10-30` as `pt. 30 paź`. */
-const shortDay = (day: string): string => dayLabel(day, 'short', false);
-
-type Target = { day: string; label: string; text: string; Icon: LucideIcon };
-
-/** "More" popover of a task row: edit, quick moves, backlog, delete and where the task came from. */
+/** "More" popover of a task row: edit, duplicate, move, backlog, delete and where the task came from. */
 export const TaskMenu = ({ task }: { task: Task | BacklogTask }) => {
-  const { now, updateTask, moveBacklogTask, sendTaskToBacklog } = useContext();
+  const { sendTaskToBacklog } = useContext();
   // A repeating task shows once per day: each row needs its own popover id.
   const { open, setOpen, openModal } = usePopoverOpen(
     `task-menu:${task.id}:${useId()}`,
   );
   const board = 'day' in task ? task : null;
-  const targets: Target[] = [
-    { day: now.day, label: 'dziś', text: 'Przenieś na dziś', Icon: Sun },
-    {
-      day: addDays(now.day, 1),
-      label: 'jutro',
-      text: 'Przenieś na jutro',
-      Icon: CalendarArrowUp,
-    },
-    {
-      day: addDays(weekDays(now.day)[0]!, 7),
-      label: 'następny tydzień',
-      text: 'Przenieś na następny tydzień',
-      Icon: CalendarPlus,
-    },
-  ].filter(({ day }) => (board ? day !== board.day && day !== now.day : true));
-  const move = (day: string, label: string) => {
-    setOpen(false);
-    if (board)
-      updateTask(
-        { ...board, day },
-        `Przeniesiono „${task.title}” na ${label}.`,
-      );
-    else moveBacklogTask(task.id, day, label);
-  };
   return (
     <Popover.Root modal open={open} onOpenChange={setOpen}>
       <Popover.Trigger
@@ -131,23 +95,20 @@ export const TaskMenu = ({ task }: { task: Task | BacklogTask }) => {
               <Copy className="h-4 w-4 text-ink-soft" aria-hidden="true" />
               Duplikuj
             </button>
-            {targets.map(({ day, label, text, Icon }) => (
-              <button
-                key={day}
-                type="button"
-                role="menuitem"
-                aria-label={`${text}: ${task.title}`}
-                data-e2e={`time:task-move:${task.id}:${label}`}
-                onClick={() => move(day, label)}
-                className={ITEM}
-              >
-                <Icon className="h-4 w-4 text-ink-soft" aria-hidden="true" />
-                {text}
-                <span className="ml-auto pl-2 text-xs text-ink-soft">
-                  {shortDay(day)}
-                </span>
-              </button>
-            ))}
+            <button
+              type="button"
+              role="menuitem"
+              aria-label={`Przenieś: ${task.title}`}
+              data-e2e={`time:task-move:${task.id}`}
+              onClick={() => openModal(moveTaskModal(task.id))}
+              className={ITEM}
+            >
+              <CalendarArrowUp
+                className="h-4 w-4 text-ink-soft"
+                aria-hidden="true"
+              />
+              Przenieś
+            </button>
             {board && board.recurringId === null ? (
               <button
                 type="button"
@@ -178,26 +139,6 @@ export const TaskMenu = ({ task }: { task: Task | BacklogTask }) => {
               Usuń
             </button>
           </div>
-          {board ? null : (
-            <div className="mt-1 flex items-center gap-3 border-t border-line px-3 pt-2 text-sm">
-              <CalendarDays
-                className="h-4 w-4 shrink-0 text-ink-soft"
-                aria-hidden="true"
-              />
-              <Input
-                type="date"
-                data-e2e={`time:task-date:${task.id}`}
-                aria-label={`Przenieś na wybrany dzień: ${task.title}`}
-                value=""
-                min={now.day}
-                onChange={(e) => {
-                  const day = e.target.value;
-                  if (isDay(day)) move(day, shortDay(day));
-                }}
-                className="h-9 min-w-0 flex-1 rounded-lg px-3 py-0 text-xs"
-              />
-            </div>
-          )}
           {task.device ? (
             <div className="mt-1 border-t border-line px-3 pt-2">
               <TaskDeviceBadge device={task.device} />
