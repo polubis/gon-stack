@@ -198,7 +198,7 @@ const commands = {
     await getByE2e('time:modal-close:backlog').click();
   },
 
-  'one click moves the backlog task to today and it stays there': async ({
+  'a picked day moves the backlog task to today and it stays there': async ({
     page,
     getByE2e,
     getByE2ePrefix,
@@ -206,9 +206,12 @@ const commands = {
     await getByE2e('time:backlog-open').click();
     await expect(page).toHaveURL(/modal=backlog/);
     await taskMore(getByE2ePrefix, 'Dentysta piątek E2E').click();
+    await moveItem(getByE2ePrefix).click();
+    await getByE2e('time:move-option:custom').check();
+    await getByE2e('time:move-date').fill(localDay(new Date()));
     await Promise.all([
       synced(page, 'PUT', 200),
-      moveItem(getByE2ePrefix, 'Przenieś na dziś').click(),
+      getByE2e('time:move-confirm').click(),
     ]);
     await expect(getByE2e('time:backlog-empty')).toBeVisible();
     await getByE2e('time:modal-close:backlog').click();
@@ -232,9 +235,12 @@ const commands = {
     ]);
     await getByE2e('time:backlog-open').click();
     await taskMore(getByE2ePrefix, 'Auto E2E').click();
+    await moveItem(getByE2ePrefix).click();
+    await getByE2e('time:move-option:custom').check();
+    await getByE2e('time:move-date').fill(NEXT_WEEK);
     await Promise.all([
       synced(page, 'PUT', 200),
-      getByE2ePrefix('time:task-date:').fill(NEXT_WEEK),
+      getByE2e('time:move-confirm').click(),
     ]);
     await expect(getByE2e('time:backlog-empty')).toBeVisible();
     await open(page, APP_ROUTER.time({ date: NEXT_WEEK }));
@@ -1371,7 +1377,7 @@ test('backlog tasks move to the board on the real backend', async ({ e2e }) => {
     ['i register an account for the backlog'],
     ['i add a task to the backlog and it survives a reload'],
     ['i edit the backlog task and it stays in the backlog'],
-    ['one click moves the backlog task to today and it stays there'],
+    ['a picked day moves the backlog task to today and it stays there'],
     ['a picked day moves another backlog task there'],
   );
 });

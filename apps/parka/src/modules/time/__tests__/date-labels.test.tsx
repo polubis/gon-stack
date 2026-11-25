@@ -49,19 +49,24 @@ describe('date labels in time', () => {
     ).toBeVisible();
   });
 
-  it('shows the date each quick move leads to', async () => {
+  it('shows the date each move choice leads to', async () => {
     const user = userEvent.setup();
     backend.seed([task()]);
     renderTime();
     await user.click(
       await screen.findByRole('button', { name: 'Więcej: Raport miesięczny' }),
     );
+    await user.click(
+      await screen.findByRole('menuitem', {
+        name: 'Przenieś: Raport miesięczny',
+      }),
+    );
 
-    const tomorrow = await screen.findByRole('menuitem', {
-      name: 'Przenieś na jutro: Raport miesięczny',
-    });
+    const dialog = within(await screen.findByRole('dialog'));
 
-    expect(tomorrow).toHaveTextContent('śr. 21 paź');
+    expect(
+      dialog.getByRole('radio', { name: /^Następny dzień/ }),
+    ).toHaveAccessibleName(/śr\. 21 paź/);
   });
 
   it('shows the weekday of the day chosen for a new task', async () => {

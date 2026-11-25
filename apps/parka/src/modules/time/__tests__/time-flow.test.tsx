@@ -590,9 +590,11 @@ describe('time task maintenance', () => {
     );
     await user.click(
       await screen.findByRole('menuitem', {
-        name: 'Przenieś na jutro: Raport miesięczny',
+        name: 'Przenieś: Raport miesięczny',
       }),
     );
+    const dialog = within(await screen.findByRole('dialog'));
+    await user.click(dialog.getByRole('button', { name: 'Przenieś' }));
 
     await waitFor(() => expect(backend.writes()).toHaveLength(1));
     expect(backend.writes()[0]!.body).toMatchObject({
@@ -601,7 +603,13 @@ describe('time task maintenance', () => {
     });
   });
 
-  it('moves a task to the next week from the menu', async () => {
+  it.each([
+    [/^Wcześniejszy dzień/, '2026-10-19'],
+    [/^Następny tydzień/, '2026-10-26'],
+    [/^Wcześniejszy tydzień/, '2026-10-12'],
+    [/^Następny miesiąc/, '2026-11-20'],
+    [/^Wcześniejszy miesiąc/, '2026-09-20'],
+  ])('moves a task by %s', async (choice, day) => {
     const user = userEvent.setup();
     backend.seed([task()]);
     renderTime();
@@ -610,12 +618,60 @@ describe('time task maintenance', () => {
     );
     await user.click(
       await screen.findByRole('menuitem', {
-        name: 'Przenieś na następny tydzień: Raport miesięczny',
+        name: 'Przenieś: Raport miesięczny',
+      }),
+    );
+    const dialog = within(await screen.findByRole('dialog'));
+    await user.click(dialog.getByRole('radio', { name: choice }));
+    await user.click(dialog.getByRole('button', { name: 'Przenieś' }));
+
+    await waitFor(() => expect(backend.writes()).toHaveLength(1));
+    expect(backend.writes()[0]!.body).toMatchObject({ day });
+  });
+
+  it('moves a task to a custom day', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    renderTime();
+    await user.click(
+      await screen.findByRole('button', { name: 'Więcej: Raport miesięczny' }),
+    );
+    await user.click(
+      await screen.findByRole('menuitem', {
+        name: 'Przenieś: Raport miesięczny',
+      }),
+    );
+    const dialog = within(await screen.findByRole('dialog'));
+    await user.click(dialog.getByRole('radio', { name: /^Własny/ }));
+    fireEvent.change(dialog.getByLabelText('Wybrany dzień'), {
+      target: { value: '2026-12-24' },
+    });
+    await user.click(dialog.getByRole('button', { name: 'Przenieś' }));
+
+    await waitFor(() => expect(backend.writes()).toHaveLength(1));
+    expect(backend.writes()[0]!.body).toMatchObject({ day: '2026-12-24' });
+  });
+
+  it('keeps the task where it is when the move is cancelled', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    renderTime();
+    await user.click(
+      await screen.findByRole('button', { name: 'Więcej: Raport miesięczny' }),
+    );
+    await user.click(
+      await screen.findByRole('menuitem', {
+        name: 'Przenieś: Raport miesięczny',
+      }),
+    );
+    await user.click(
+      within(await screen.findByRole('dialog')).getByRole('button', {
+        name: 'Anuluj',
       }),
     );
 
-    await waitFor(() => expect(backend.writes()).toHaveLength(1));
-    expect(backend.writes()[0]!.body).toMatchObject({ day: '2026-10-26' });
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(backend.writes()).toHaveLength(0);
   });
 
   it('puts a task in the backlog from the menu', async () => {
@@ -668,7 +724,7 @@ describe('time task maintenance', () => {
 
     expect(
       await screen.findByRole('menuitem', {
-        name: 'Przenieś na jutro: Raport miesięczny',
+        name: 'Przenieś: Raport miesięczny',
       }),
     ).toBeVisible();
     expect(

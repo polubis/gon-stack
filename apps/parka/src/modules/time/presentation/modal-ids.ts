@@ -29,6 +29,7 @@ const EDIT_PREFIX = 'task-edit:';
 const DELETE_PREFIX = 'task-delete:';
 const VIEW_PREFIX = 'task-view:';
 const DUPLICATE_PREFIX = 'task-duplicate:';
+const MOVE_PREFIX = 'task-move:';
 
 /** Add-task form with the day already filled in. */
 export const newTaskOnModal = (day: string): string =>
@@ -48,6 +49,14 @@ export const duplicateTaskModal = (id: TaskId): string =>
 export const duplicatedIdOf = (modal: string): TaskId | null =>
   modal.startsWith(DUPLICATE_PREFIX)
     ? (modal.slice(DUPLICATE_PREFIX.length) as TaskId)
+    : null;
+
+/** Choice of where to move a task or backlog task. */
+export const moveTaskModal = (id: TaskId): string => `${MOVE_PREFIX}${id}`;
+
+export const movedIdOf = (modal: string): TaskId | null =>
+  modal.startsWith(MOVE_PREFIX)
+    ? (modal.slice(MOVE_PREFIX.length) as TaskId)
     : null;
 
 export const deleteTaskModal = (id: TaskId): string => `${DELETE_PREFIX}${id}`;

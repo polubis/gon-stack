@@ -28,6 +28,7 @@ import {
   editedBacklogIdOf,
   editedCategoryIdOf,
   editedIdOf,
+  movedIdOf,
   editTaskModal,
   newTaskDayOf,
   NEW_CATEGORY_MODAL,
@@ -37,6 +38,7 @@ import {
   viewedIdOf,
 } from './modal-ids';
 import { RecurringScopeDialog } from '@/shared/ui/recurring-scope-dialog';
+import { MoveDialog } from './move-dialog';
 import { PriorityDialog } from './priority-dialog';
 import { PrioritiesDialog } from './priorities-dialog';
 import { StatusesDialog } from './statuses-dialog';
@@ -67,7 +69,8 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
         editedBacklogIdOf(modal) ??
         viewedIdOf(modal) ??
         deletedIdOf(modal) ??
-        duplicatedIdOf(modal);
+        duplicatedIdOf(modal) ??
+        movedIdOf(modal);
       if (
         id !== null &&
         !tasks.some((task) => task.id === id) &&
@@ -204,6 +207,11 @@ export const TaskModals = ({ defaultDay }: { defaultDay: string }) => {
           <BacklogAddDialog key={modal} modal={modal} source={sourceBacklog} />
         );
     }
+
+    const moved = [...tasks, ...backlog].find(
+      (task) => task.id === movedIdOf(modal),
+    );
+    if (moved) return <MoveDialog key={modal} modal={modal} task={moved} />;
 
     const viewed = [...tasks, ...backlog].find(
       (task) => task.id === viewedIdOf(modal),
