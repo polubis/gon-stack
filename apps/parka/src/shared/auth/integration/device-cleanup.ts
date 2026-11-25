@@ -1,5 +1,7 @@
 import { STORAGE_KEY as FORM_MEMORY_KEY } from '@/shared/form-memory/integration/storage';
 
+import { clearFilterMemory } from '@/shared/filter-memory/integration/storage';
+
 const LAST_USER_KEY = 'parka:last-user';
 
 /** The push subscription belongs to whoever enabled it: never keep it across accounts. */
@@ -26,6 +28,7 @@ export const reconcileDevice = async (userId: string): Promise<void> => {
     window.localStorage.setItem(LAST_USER_KEY, userId);
     if (last === userId) return;
     window.localStorage.removeItem(FORM_MEMORY_KEY);
+    clearFilterMemory();
     await dropPushSubscription();
   } catch {
     // Storage unavailable: nothing to reconcile.

@@ -306,6 +306,33 @@ describe('knowledge filters', () => {
     expect(await screen.findByText('Brak wyników dla „zzz”')).toBeVisible();
   });
 
+  it('keeps the filters after leaving the view and after a reload', async () => {
+    const user = userEvent.setup();
+    seed();
+    const first = renderKnowledge();
+    await screen.findByText('Phrasal verbs');
+    await user.click(screen.getByRole('button', { name: 'Filtry' }));
+    const drawer = within(
+      await screen.findByRole('dialog', { name: /Filtry/ }),
+    );
+    await user.type(
+      drawer.getByRole('searchbox', { name: 'Szukaj w tematach' }),
+      'idio',
+    );
+    await user.click(drawer.getByRole('button', { name: /Pokaż tematy/ }));
+    await screen.findByText('Idiomy');
+    first.unmount();
+
+    // Back on the view with a clean URL: the choice is still there.
+    renderKnowledge();
+
+    expect(await screen.findByText('Idiomy')).toBeVisible();
+    expect(screen.queryByText('Phrasal verbs')).toBeNull();
+    expect(
+      screen.getByRole('button', { name: /Filtry, aktywne: 1/ }),
+    ).toBeInTheDocument();
+  });
+
   it('filters by progress through the URL params', async () => {
     seed();
     renderKnowledge('?progress=untouched');

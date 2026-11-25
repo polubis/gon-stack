@@ -223,4 +223,24 @@ describe('task order in the day view', () => {
       'Szczegóły zadania: Zebra',
     ]);
   });
+
+  it('keeps the filters after leaving the view and after a reload', async () => {
+    const user = userEvent.setup();
+    seedTasks();
+    const first = renderTime();
+    const panel = await openPanel(user);
+    await user.click(panel.getByRole('button', { name: 'Niezrobione' }));
+    first.unmount();
+
+    // Back on the view with a clean URL: the choice is still there.
+    window.history.replaceState(null, '', '/app/time/?date=2026-10-20');
+    renderTime();
+
+    expect(
+      await screen.findByRole('button', { name: 'Filtry, aktywne: 1' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', detailsOf('Zrobione')),
+    ).not.toBeInTheDocument();
+  });
 });

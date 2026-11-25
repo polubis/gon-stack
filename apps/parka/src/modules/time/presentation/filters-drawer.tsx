@@ -180,12 +180,12 @@ export const FiltersDrawer = ({ modal }: { modal: string }) => {
           }}
           className="fixed inset-y-2 right-2 z-(--z-modal) flex w-[calc(100%-1rem)] max-w-sm animate-drawer-in flex-col overflow-y-auto scroll-in-radius overscroll-contain rounded-4xl border border-line bg-card p-3 pb-0 shadow-popover focus:outline-none motion-reduce:animate-none"
         >
-          <div className="hero-card flex items-start gap-3 rounded-3xl p-4">
+          <div className="flex items-start gap-3 px-1 pt-1">
             <div className="min-w-0 flex-1">
               <Dialog.Title className="truncate text-base font-semibold">
                 Filtry i sortowanie
               </Dialog.Title>
-              <Dialog.Description className="text-sm text-on-hero-soft">
+              <Dialog.Description className="text-sm text-ink-soft">
                 {active === 0
                   ? 'Zawęź listy zadań.'
                   : `Aktywne filtry: ${active}.`}
@@ -194,7 +194,7 @@ export const FiltersDrawer = ({ modal }: { modal: string }) => {
             <Dialog.Close
               data-e2e="time:modal-close:filters"
               aria-label="Zamknij"
-              className="grid size-8 shrink-0 place-items-center rounded-full text-on-hero-soft transition-colors hover:bg-hero-track focus-visible:outline-2 focus-visible:outline-accent"
+              className="grid size-8 shrink-0 place-items-center rounded-full text-ink-soft transition-colors hover:bg-brand-softer focus-visible:outline-2 focus-visible:outline-brand"
             >
               <X className="size-4" aria-hidden="true" />
             </Dialog.Close>

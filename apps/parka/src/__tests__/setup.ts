@@ -9,7 +9,9 @@ afterAll(() => {
 
 // Modals live in the URL: never leak an open one into the next test.
 afterEach(() => {
-  if (typeof window !== 'undefined') window.history.replaceState(null, '', '/');
+  if (typeof window === 'undefined') return;
+  window.history.replaceState(null, '', '/');
+  window.localStorage.clear();
 });
 
 // Radix Select needs pointer capture, scrolling and resize APIs jsdom lacks.
