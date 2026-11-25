@@ -41,6 +41,8 @@ type Props = {
   step?: number;
   /** What just happened to the row: created, updated or leaving. */
   phase?: ChangePhase;
+  /** Flush with the list edges, divided by lines, like the expenses list. */
+  flat?: boolean;
 };
 
 /** The next step of the user's workflow; after the last one (done) the task is reopened. */
@@ -87,7 +89,13 @@ const StepIcon = ({ step, ...rest }: { step: Step } & LucideProps) =>
   );
 
 /** Task line: title (opens details), a muted meta line, a button to the next step and a "more" menu with edit. Backlog tasks have no status. */
-export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
+export const TaskRow = ({
+  task,
+  now,
+  step,
+  phase = 'idle',
+  flat = false,
+}: Props) => {
   const { categories, priorities, statuses, updateTask } = useContext();
   const board = 'day' in task ? task : null;
   const category = categories.find((item) => item.id === task.categoryId);
@@ -111,7 +119,10 @@ export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
         entrance.entering && step !== undefined ? stagger(step) : undefined
       }
       className={cn(
-        'relative flex items-start gap-0.5 rounded-2xl pb-1.5 pt-1 pl-3 pr-0.5 transition-colors duration-200 hover:bg-hover-soft motion-reduce:transition-none',
+        'relative flex items-start gap-0.5 pb-1.5 pt-1 transition-colors duration-200 hover:bg-hover-soft motion-reduce:transition-none',
+        flat
+          ? 'border-b border-line last:border-b-0'
+          : 'rounded-2xl pl-3 pr-0.5',
         entrance.entering && 'animate-item-in motion-reduce:animate-none',
         change.className,
         now && 'bg-accent-soft',
@@ -151,7 +162,7 @@ export const TaskRow = ({ task, now, step, phase = 'idle' }: Props) => {
               {board.at}
             </time>
           ) : null}
-          {category ? (
+          {category && !flat ? (
             <span className="inline-flex min-w-0 items-center gap-1">
               <span
                 className="h-2 w-2 shrink-0 rounded-full"

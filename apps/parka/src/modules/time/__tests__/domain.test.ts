@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { groupByCategory } from '../domain/group';
 import { sortByUsage } from '../domain/category-usage';
 import { periodTitle } from '../domain/period-title';
 import type { Category, Priority, PriorityId, Task } from '../domain/models';
@@ -176,5 +177,34 @@ describe('priority order of tasks', () => {
     expect(sortByPriority(items, PRIORITIES).map((i) => i.id)).toEqual([
       2, 1, 3, 4,
     ]);
+  });
+});
+
+describe('grouping per category', () => {
+  const cat = (id: string) => ({ id }) as Category;
+  const row = (id: string, categoryId: string) => ({
+    id,
+    item: { categoryId },
+  });
+
+  it('keeps category order, row order and collects unknown categories last', () => {
+    const groups = groupByCategory(
+      [
+        row('a', 'work'),
+        row('b', 'home'),
+        row('c', 'work'),
+        row('d', 'gone'),
+      ] as never,
+      [cat('home'), cat('work')],
+    );
+
+    expect(groups.map((g) => g.category?.id ?? null)).toEqual([
+      'home',
+      'work',
+      null,
+    ]);
+    expect(
+      groups.map((g) => g.rows.map((r) => (r as unknown as { id: string }).id)),
+    ).toEqual([['b'], ['a', 'c'], ['d']]);
   });
 });

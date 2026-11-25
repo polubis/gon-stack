@@ -120,6 +120,8 @@ export type TimeDynamicE2eId =
   | `time:add-day:${string}`
   | `time:range-day:${string}`
   | `time:task:${string | number}`
+  | `time:task-group:${string}`
+  | `time:task-list:${string}`
   | `time:task-key:${string | number}`
   | `time:task-advance:${string | number}`
   | `time:task-step:${string | number}`

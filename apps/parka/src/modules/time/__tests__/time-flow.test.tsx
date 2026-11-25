@@ -33,13 +33,48 @@ describe('time loading', () => {
       plan
         .getAllByRole('button', { name: /^Szczegóły zadania:/ })
         .map((b) => b.textContent),
-    ).toEqual(['Raport', 'Obiad']);
-    expect(plan.getByText('Teraz 13:40')).toBeInTheDocument();
+    ).toEqual(['Raport', 'Obiad', 'Rachunek']);
     expect(screen.getByRole('listitem', { current: 'time' })).toHaveTextContent(
       'Obiad',
     );
-    expect(screen.getByText('Rachunek')).toBeInTheDocument();
     expect(screen.queryByText('Inny dzień')).toBeNull();
+  });
+
+  it('splits the day into regular and recurring tiles grouped per category', async () => {
+    backend.seed([
+      task({ id: 't-1', title: 'Raport', categoryId: 'work' }),
+      task({ id: 't-2', title: 'Pranie', categoryId: 'home', at: '10:00' }),
+      task({ id: 't-3', title: 'Spotkanie', categoryId: 'work', at: '11:00' }),
+      task({
+        id: 't-4',
+        title: 'Ćwiczenia',
+        categoryId: 'health',
+        recurringId: 'r-1',
+        occurrenceDate: TODAY,
+      }),
+    ]);
+    renderTime();
+    await row('Raport');
+
+    const plan = within(
+      screen.getByRole('region', { name: 'Zadania na dziś' }),
+    );
+    expect(
+      plan
+        .getAllByRole('region')
+        .map((group) => group.getAttribute('aria-label')),
+    ).toEqual(['Praca', 'Dom']);
+    expect(
+      within(plan.getByRole('region', { name: 'Praca' }))
+        .getAllByRole('button', { name: /^Szczegóły zadania:/ })
+        .map((b) => b.textContent),
+    ).toEqual(['Raport', 'Spotkanie']);
+    const recurring = within(
+      screen.getByRole('region', { name: 'Zadania cykliczne' }),
+    );
+    expect(recurring.getByRole('region', { name: 'Zdrowie' })).toBeVisible();
+    expect(recurring.getByText('Ćwiczenia')).toBeVisible();
+    expect(plan.queryByText('Ćwiczenia')).toBeNull();
   });
 
   it('names the period in the empty state', async () => {
