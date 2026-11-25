@@ -9,7 +9,7 @@ import { sortByPriority } from '../domain/priority';
 import { useContext } from './context';
 import { NEW_BACKLOG_MODAL } from './modal-ids';
 import { ModalShell } from './modal-shell';
-import { TaskRow } from './task-row';
+import { TaskGroups } from './task-groups';
 
 const rows = Array.from({ length: SKELETON_ROWS }, (_, i) => i);
 
@@ -64,11 +64,7 @@ export const BacklogDialog = ({ modal }: { modal: string }) => {
           />
         ) : (
           <>
-            <ul className="flex flex-col gap-2">
-              {rowsOf.map(({ key, item, phase }) => (
-                <TaskRow key={key} task={item} phase={phase} />
-              ))}
-            </ul>
+            <TaskGroups rows={rowsOf} data-e2e="time:task-list:backlog" />
             <div className="sticky -bottom-5 -mx-5 -mb-5 flex justify-end bg-card px-5 pb-5 pt-3">
               <Button
                 data-e2e="time:backlog-add"

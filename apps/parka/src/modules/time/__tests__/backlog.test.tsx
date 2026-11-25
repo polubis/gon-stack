@@ -19,6 +19,28 @@ const closeBacklog = (user: ReturnType<typeof userEvent.setup>) =>
 const modalsInUrl = () =>
   new URLSearchParams(window.location.search).getAll('modal');
 
+describe('backlog grouping', () => {
+  it('lists backlog tasks grouped per category', async () => {
+    const user = userEvent.setup();
+    backend.seedBacklog([
+      backlogTask({ id: 'b-1', title: 'Dentysta', categoryId: 'health' }),
+      backlogTask({ id: 'b-2', title: 'Raport', categoryId: 'work' }),
+      backlogTask({ id: 'b-3', title: 'Okulista', categoryId: 'health' }),
+    ]);
+    renderTime();
+
+    const dialog = await openBacklog(user);
+
+    const zdrowie = within(dialog.getByRole('region', { name: 'Zdrowie' }));
+    expect(
+      zdrowie.getAllByRole('button', { name: /^Szczegóły zadania:/ }),
+    ).toHaveLength(2);
+    expect(
+      within(dialog.getByRole('region', { name: 'Praca' })).getByText('Raport'),
+    ).toBeVisible();
+  });
+});
+
 describe('backlog adding', () => {
   it('adds a task without a day from the add menu', async () => {
     const user = userEvent.setup();

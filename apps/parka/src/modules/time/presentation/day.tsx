@@ -1,15 +1,13 @@
-import { Fragment } from 'react';
 import { useListChanges } from '@/shared/ui/list-changes';
 import { Card } from '@/shared/ui/layout';
 import { isTimed, nowIndexOf, tasksOn } from '../domain/schedule';
 import { useContext } from './context';
 import { EmptyPeriod } from './empty-period';
-import { NowMarker } from './now-marker';
-import { TaskRow } from './task-row';
+import { TaskGroups } from './task-groups';
 
 const taskKey = (task: { id: string }) => task.id;
 
-/** Day view: tasks with a time, then tasks without one. */
+/** Day view: regular and recurring tasks in two tiles, each split per category. */
 export const Main = () => {
   const {
     visibleTasks: tasks,
@@ -21,68 +19,52 @@ export const Main = () => {
   } = useContext();
   const scope = `${anchor}:${initializing}`;
   const day = tasksOn(tasks, anchor, priorities, filters.sort);
-  // Title and priority orders ignore the hour: one list, not two groups.
-  const byHour = filters.sort === 'time';
-  const scheduled = byHour ? day.filter(isTimed) : [];
-  const unscheduled = byHour ? day.filter((task) => task.at === null) : day;
-  const scheduledRows = useListChanges(scheduled, taskKey, scope);
-  const unscheduledRows = useListChanges(unscheduled, taskKey, scope);
+  const nowTask =
+    anchor === now.day && filters.sort === 'time'
+      ? day.filter(isTimed)[nowIndexOf(day.filter(isTimed), now.time)]
+      : undefined;
+  const regular = useListChanges(
+    day.filter((task) => task.recurringId === null),
+    taskKey,
+    scope,
+  );
+  const recurring = useListChanges(
+    day.filter((task) => task.recurringId !== null),
+    taskKey,
+    scope,
+  );
   // Rows include the one still leaving: the empty state waits for its exit.
-  if (scheduledRows.length + unscheduledRows.length === 0)
+  if (regular.length + recurring.length === 0)
     return <EmptyPeriod kind="day" />;
 
-  const nowIndex = anchor === now.day ? nowIndexOf(scheduled, now.time) : -1;
-
   return (
-    <Card className="flex w-full flex-col gap-3">
-      <section aria-labelledby="day-plan" className="flex flex-col gap-1">
-        <h2 id="day-plan" className="text-base font-semibold">
-          {anchor === now.day ? 'Zadania na dziś' : 'Zadania na ten dzień'}
-        </h2>
-        {scheduledRows.length ? (
-          <ol className="flex flex-col gap-2">
-            {scheduledRows.map(({ key, item, phase, at }) => (
-              <Fragment key={key}>
-                <TaskRow
-                  task={item}
-                  now={at >= 0 && at === nowIndex}
-                  step={at}
-                  phase={phase}
-                />
-                {at >= 0 && at === nowIndex ? (
-                  <NowMarker time={now.time} />
-                ) : null}
-              </Fragment>
-            ))}
-          </ol>
-        ) : null}
-      </section>
-      {unscheduledRows.length ? (
-        <section aria-labelledby="day-loose" className="flex flex-col gap-1">
-          {scheduledRows.length ? (
-            <h3
-              id="day-loose"
-              className="border-t border-line px-2 pt-3 text-xs font-medium text-ink-soft"
-            >
-              Bez godziny
-            </h3>
-          ) : (
-            <h3 id="day-loose" className="sr-only">
-              {byHour ? 'Bez godziny' : 'Wszystkie zadania'}
-            </h3>
-          )}
-          <ul className="flex flex-col gap-2">
-            {unscheduledRows.map(({ key, item, phase, at }) => (
-              <TaskRow
-                key={key}
-                task={item}
-                step={scheduled.length + at}
-                phase={phase}
-              />
-            ))}
-          </ul>
-        </section>
+    <div className="flex w-full flex-col gap-3">
+      {regular.length ? (
+        <Card as="section" aria-labelledby="day-plan">
+          <h2 id="day-plan" className="text-base font-semibold">
+            {anchor === now.day ? 'Zadania na dziś' : 'Zadania na ten dzień'}
+          </h2>
+          <TaskGroups
+            data-e2e="time:task-list:regular"
+            rows={regular}
+            nowId={nowTask?.id}
+            firstStep={0}
+          />
+        </Card>
       ) : null}
-    </Card>
+      {recurring.length ? (
+        <Card as="section" aria-labelledby="day-recurring">
+          <h2 id="day-recurring" className="text-base font-semibold">
+            Zadania cykliczne
+          </h2>
+          <TaskGroups
+            data-e2e="time:task-list:recurring"
+            rows={recurring}
+            nowId={nowTask?.id}
+            firstStep={regular.length}
+          />
+        </Card>
+      ) : null}
+    </div>
   );
 };
