@@ -30,13 +30,17 @@ export const listTime = privateProcedure({
         .order('id'),
     ]);
     await materializeTimeRecurring(db, user.id, input.to);
-    if (input.tz) await notifyUnfinishedTasks(db, user.id, input.tz);
+    // The warning never fails and never feeds the answer: it overlaps the dated read.
+    const unfinishedCheck = input.tz
+      ? notifyUnfinishedTasks(db, user.id, input.tz)
+      : undefined;
     const dated = db.from('time_tasks').select('*').not('day', 'is', null);
     const tasks = await (
       input.from ? dated.gte('day', input.from).lte('day', input.to) : dated
     )
       .order('day')
       .order('at', { nullsFirst: false });
+    await unfinishedCheck;
     const [[categories, priorities, statuses, backlog], profiles] =
       await Promise.all([refsLoad, profilesLoad]);
     if (categories.error) throw fromSupabaseError(categories.error);
