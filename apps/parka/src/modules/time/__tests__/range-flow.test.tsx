@@ -121,4 +121,16 @@ describe('own range view', () => {
       '/app/time/range/?from=2026-10-14&to=2026-10-20',
     );
   });
+
+  it('marks free days of a week with an empty state', async () => {
+    seedRange();
+    renderTime('week');
+    await screen.findAllByRole('button', { name: /^Szczegóły zadania/ });
+
+    const free = await screen.findAllByRole('heading', { name: 'Wolny dzień' });
+
+    expect(free.length).toBeGreaterThan(0);
+    expect(free.length).toBeLessThan(7);
+    expect(screen.queryByText('Brak zadań.')).toBeNull();
+  });
 });

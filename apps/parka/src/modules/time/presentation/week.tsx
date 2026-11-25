@@ -1,5 +1,7 @@
 import { Fragment } from 'react';
+import { CalendarPlus } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
+import { EmptyState } from '@/shared/ui/empty-state';
 import { useListChanges } from '@/shared/ui/list-changes';
 import { ALL_DAY_LABEL } from '../configuration/constraints';
 import { monthNameLabel, weekdayLabel } from '@/shared/date/date';
@@ -90,7 +92,13 @@ const DayCard = ({ day, index }: { day: string; index: number }) => {
           ))}
         </ul>
       ) : (
-        <p className="pb-2 pl-2 text-xs text-ink-soft">Brak zadań.</p>
+        <EmptyState
+          variant="card"
+          icon={CalendarPlus}
+          data-e2e={`time:day-empty:${day}`}
+          title="Wolny dzień"
+          description="Nic nie zaplanowano. Dodaj zadanie plusem."
+        />
       )}
     </li>
   );

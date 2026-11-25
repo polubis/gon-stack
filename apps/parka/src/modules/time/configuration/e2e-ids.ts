@@ -118,6 +118,7 @@ export const TIME_E2E_IDS = [
 export type TimeDynamicE2eId =
   | `time:form-icon:${string}`
   | `time:form-color-option:${string}`
+  | `time:day-empty:${string}`
   | `time:add-day:${string}`
   | `time:range-day:${string}`
   | `time:task:${string | number}`
