@@ -6,7 +6,11 @@ import { APP_ROUTER } from '@/shared/router/routes';
 import { CategoryAvatar } from '@/shared/ui/category-chip';
 import { Button } from '@/shared/ui/controls';
 import { EmptyState } from '@/shared/ui/empty-state';
-import { changeProps, useListChanges } from '@/shared/ui/list-changes';
+import {
+  changeProps,
+  scrollToChanged,
+  useListChanges,
+} from '@/shared/ui/list-changes';
 import { Card } from '@/shared/ui/layout';
 import { cn } from '@repo/react-kit/cn';
 import {
@@ -168,6 +172,7 @@ const ExpenseList = ({
           <Fragment key={key}>
             {newDay ? <DayHeading day={day} sum={sums.get(day)} /> : null}
             <li
+              ref={(el) => scrollToChanged(el, phase)}
               aria-hidden={change['aria-hidden']}
               inert={change.inert}
               className={cn(

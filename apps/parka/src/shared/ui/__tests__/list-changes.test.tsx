@@ -2,6 +2,7 @@ import { act, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   changeProps,
+  scrollToChanged,
   useEntrance,
   useListChanges,
   type ChangePhase,
@@ -18,6 +19,7 @@ const List = ({ rows, scope }: { rows: Row[]; scope?: string }) => {
         return (
           <li
             key={key}
+            ref={(el) => scrollToChanged(el, phase)}
             aria-hidden={change['aria-hidden']}
             inert={change.inert}
             className={change.className}
@@ -96,6 +98,39 @@ describe('list change transitions', () => {
     act(() => void vi.advanceTimersByTime(1300));
 
     expect(screen.getByText('Alpha 2').className).toBe('');
+  });
+
+  describe('scrolling to changed rows', () => {
+    const scrollIntoView = vi.fn(function (this: Element) {});
+    beforeEach(() => {
+      scrollIntoView.mockClear();
+      Element.prototype.scrollIntoView = scrollIntoView;
+    });
+
+    it('scrolls to a created row', () => {
+      const { rerender } = render(<List rows={[a]} />);
+
+      rerender(<List rows={[a, b]} />);
+
+      expect(scrollIntoView.mock.contexts).toEqual([screen.getByText('Beta')]);
+    });
+
+    it('scrolls to an updated row once', () => {
+      const { rerender } = render(<List rows={[a, b]} />);
+      rerender(<List rows={[{ ...a, name: 'Alpha 2' }, b]} />);
+
+      rerender(<List rows={[{ ...a, name: 'Alpha 2' }, b]} />);
+
+      expect(scrollIntoView.mock.contexts).toEqual([
+        screen.getByText('Alpha 2'),
+      ]);
+    });
+
+    it('stays put on first render', () => {
+      render(<List rows={[a, b]} />);
+
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    });
   });
 
   it('keeps a deleted row leaving and inert', () => {
