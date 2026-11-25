@@ -7,7 +7,10 @@ import { ErrorState } from '@/shared/ui/error-state';
 import { ERROR_CODES, POINTS } from '../configuration/constraints';
 
 const PrivacyView = () => (
-  <div data-e2e="privacy:main" className="relative flex flex-1 flex-col">
+  <div
+    data-e2e="privacy:main"
+    className="relative flex flex-1 animate-view-enter flex-col motion-reduce:animate-none"
+  >
     <div className="md:px-4 lg:px-6 xl:px-12">
       <ScreenHeader
         title="RODO / Prywatność"
