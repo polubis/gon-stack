@@ -87,8 +87,10 @@ export const createKnowledgeDemo = privateProcedure({
       };
     }
 
-    const categoryId = await ensureCategory(db, user.id);
-    const tagIds = await ensureTags(db, user.id);
+    const [categoryId, tagIds] = await Promise.all([
+      ensureCategory(db, user.id),
+      ensureTags(db, user.id),
+    ]);
 
     const catalog = await db
       .from('knowledge_catalogs')
@@ -123,27 +125,30 @@ export const createKnowledgeDemo = privateProcedure({
       );
       if (topicInsert.error) throw fromSupabaseError(topicInsert.error);
 
-      const tagInsert = await db.from('knowledge_topic_tags').insert(
-        topics.flatMap(({ id, lesson }) =>
-          lesson.tags.map((name) => ({
-            user_id: user.id,
-            topic_id: id,
-            tag_id: tagIds.get(normalize(name)) ?? '',
-          })),
+      // Both only need the topics stored; the builders settle, never reject,
+      // so no write is still running when a failure removes the catalog.
+      const [tagInsert, reelInsert] = await Promise.all([
+        db.from('knowledge_topic_tags').insert(
+          topics.flatMap(({ id, lesson }) =>
+            lesson.tags.map((name) => ({
+              user_id: user.id,
+              topic_id: id,
+              tag_id: tagIds.get(normalize(name)) ?? '',
+            })),
+          ),
         ),
-      );
+        db.from('knowledge_reels').insert(
+          topics.flatMap(({ id, lesson }) =>
+            lesson.reels.map((body, position) => ({
+              user_id: user.id,
+              topic_id: id,
+              body,
+              position,
+            })),
+          ),
+        ),
+      ]);
       if (tagInsert.error) throw fromSupabaseError(tagInsert.error);
-
-      const reelInsert = await db.from('knowledge_reels').insert(
-        topics.flatMap(({ id, lesson }) =>
-          lesson.reels.map((body, position) => ({
-            user_id: user.id,
-            topic_id: id,
-            body,
-            position,
-          })),
-        ),
-      );
       if (reelInsert.error) throw fromSupabaseError(reelInsert.error);
 
       return {
