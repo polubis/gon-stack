@@ -77,6 +77,19 @@ describe('dashboard screen', () => {
     ).toBeGreaterThan(0);
   });
 
+  it('shows current and previous spending as two bars on the first day', async () => {
+    stubApi(false, {
+      expenses: [spend('a', 4), spend('c', 8, 'c-1', previousMonth)],
+    });
+
+    render(<Main />);
+
+    const first = await screen.findByRole('img', {
+      name: /4,00.*poprzednio.*8,00/,
+    });
+    expect(first.querySelectorAll('div')).toHaveLength(2);
+  });
+
   it('says how far over the limit spending went', async () => {
     stubApi(false, { expenses: [spend('a', 130)] });
 
