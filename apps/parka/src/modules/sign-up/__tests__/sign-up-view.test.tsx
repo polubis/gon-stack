@@ -200,4 +200,22 @@ describe('sign up view', () => {
     await waitFor(() => expect(navigateTo).toHaveBeenCalled());
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
+
+  it('shows the rejection as a titled error and retries from it', async () => {
+    serve(() => rejection('Taken'));
+    const user = userEvent.setup();
+    render(<Main />);
+    await user.type(screen.getByLabelText('E-mail'), 'a@b.co');
+    await user.type(screen.getByLabelText('Hasło'), 'secret1');
+    await user.click(screen.getByRole('button', { name: 'Utwórz konto' }));
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Nie udało się');
+    expect(alert).toHaveTextContent('Taken');
+    expect(alert).toHaveTextContent(/SIGN_UP_REJECTED/);
+
+    serve(redirect);
+    await user.click(screen.getByRole('button', { name: 'Spróbuj ponownie' }));
+
+    await waitFor(() => expect(navigateTo).toHaveBeenCalledTimes(1));
+  });
 });

@@ -170,4 +170,22 @@ describe('sign in view', () => {
     await waitFor(() => expect(navigateTo).toHaveBeenCalledTimes(1));
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
+
+  it('shows the rejection as a titled error and retries from it', async () => {
+    login(() => rejection('Taken'));
+    const user = userEvent.setup();
+    render(<Main />);
+    await user.type(screen.getByLabelText('E-mail'), 'a@b.co');
+    await user.type(screen.getByLabelText('Hasło'), 'secret1');
+    await user.click(screen.getByRole('button', { name: 'Zaloguj się' }));
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Nie udało się');
+    expect(alert).toHaveTextContent('Taken');
+    expect(alert).toHaveTextContent(/SIGN_IN_REJECTED/);
+
+    login(redirect);
+    await user.click(screen.getByRole('button', { name: 'Spróbuj ponownie' }));
+
+    await waitFor(() => expect(navigateTo).toHaveBeenCalledTimes(1));
+  });
 });

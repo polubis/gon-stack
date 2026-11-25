@@ -5,6 +5,7 @@ import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import { BrandMark } from '@/shared/ui/brand-mark';
 import { Button, Field } from '@/shared/ui/controls';
 import { ErrorState } from '@/shared/ui/error-state';
+import { FormError } from '@/shared/ui/form-error';
 import { navigateTo } from '@/shared/router/navigation';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { ERROR_CODES } from '../configuration/constraints';
@@ -30,6 +31,11 @@ const SignInView = () => {
     e.preventDefault();
     const credentials = selectCredentials(email, password);
     setInvalidInput(credentials === null);
+    if (credentials) ctx.submit(credentials);
+  };
+
+  const retry = () => {
+    const credentials = selectCredentials(email, password);
     if (credentials) ctx.submit(credentials);
   };
 
@@ -72,9 +78,13 @@ const SignInView = () => {
           </Field>
 
           {error ? (
-            <p role="alert" className="text-sm text-danger">
-              {error}
-            </p>
+            <FormError
+              title={error.title}
+              code={error.code}
+              description={error.description}
+              onRetry={error.retryable ? retry : undefined}
+              backHref={APP_ROUTER.home()}
+            />
           ) : null}
 
           <Button type="submit" data-e2e="auth:submit" disabled={pending}>
