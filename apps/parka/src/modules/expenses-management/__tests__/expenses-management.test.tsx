@@ -202,8 +202,9 @@ describe('adding an expense on its own page', () => {
     mockBackend();
     await open();
 
-    const bar = screen.getByRole('button', { name: 'Dodaj wydatek' })
-      .parentElement as HTMLElement;
+    const bar = screen
+      .getByRole('button', { name: 'Dodaj wydatek' })
+      .closest('[data-modal-footer]') as HTMLElement;
 
     expect(bar).toHaveTextContent('Razem');
   });
