@@ -1,5 +1,6 @@
 export const REPORTS_E2E_IDS = [
   'reports:main',
+  'reports:empty',
   'reports:total',
   'reports:categories',
   'reports:recurring',

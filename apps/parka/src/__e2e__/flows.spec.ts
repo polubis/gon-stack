@@ -712,8 +712,32 @@ const commands = {
     await expect(getByE2e('expenses-management:recurring-form')).toBeVisible();
   },
 
-  'the monthly report downloads a csv': async ({ page, getByE2e }) => {
+  'the monthly report of an empty month offers adding an expense': async ({
+    page,
+    getByE2e,
+  }) => {
     await mockState(page);
+    await open(page, APP_ROUTER.reports());
+    await expect(getByE2e('reports:empty')).toBeVisible();
+    await expect(getByE2e('reports:download-csv')).toBeDisabled();
+  },
+
+  'the monthly report downloads a csv': async ({ page, getByE2e }) => {
+    await mockState(page, {
+      expenses: [
+        {
+          id: 'reported',
+          merchant: 'Sklep reported',
+          date: `${yearMonth(new Date())}-01T12:00:00Z`,
+          amount: 1234,
+          categoryId: CATEGORY.id,
+          paymentMethod: 'Karta',
+          isBill: false,
+          source: 'manual',
+          items: [],
+        },
+      ],
+    });
     await open(page, APP_ROUTER.reports());
     await expect(getByE2e('reports:total')).toBeVisible();
     const [download] = await Promise.all([
@@ -918,6 +942,13 @@ test('the expenses list leads to the recurring expense form', async ({
     commands,
     e2e,
   )(['the expenses list links to adding a recurring expense']);
+});
+
+test('an empty monthly report offers adding an expense', async ({ e2e }) => {
+  await interpreter(
+    commands,
+    e2e,
+  )(['the monthly report of an empty month offers adding an expense']);
 });
 
 test('the monthly report is downloadable', async ({ e2e }) => {
