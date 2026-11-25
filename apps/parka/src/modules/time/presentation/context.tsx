@@ -11,6 +11,7 @@ import { createMediator } from '../core/mediator';
 import { DATE_PARAM, FEATURE_NAME } from '../configuration/constraints';
 import {
   applyFilters,
+  FILTER_PARAMS,
   filtersFromParams,
   filtersToParams,
   type TaskFilters,
@@ -20,6 +21,10 @@ import { newCategoryId, newPriorityId } from '../domain/ids';
 import type { Category, Priority } from '../domain/models';
 import { resetTimeReads } from '../integration/repository';
 import { useDataChanges } from '@/shared/data-sync/presentation/use-data-changes';
+import {
+  readFilterMemory,
+  writeFilterMemory,
+} from '@/shared/filter-memory/integration/storage';
 import { useClock } from './clock';
 
 const dayParam = (name: string): string | null => {
@@ -37,8 +42,12 @@ const viewFromUrl = (): { anchor: string; to?: string } => {
   return from <= to ? { anchor: from, to } : { anchor: to, to: from };
 };
 
-const filtersFromUrl = (): TaskFilters =>
-  filtersFromParams(new URLSearchParams(window.location.search));
+/** Filters of the URL; without any, the ones remembered on this device. */
+const filtersFromUrl = (): TaskFilters => {
+  const url = new URLSearchParams(window.location.search);
+  const given = Object.values(FILTER_PARAMS).some((name) => url.has(name));
+  return filtersFromParams(given ? url : readFilterMemory('time'));
+};
 
 /**
  * The module store plus the viewed day (`anchor`, mirrored in the `date`
@@ -106,6 +115,7 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
     setFilters: (next: TaskFilters) => {
       setFiltersState(next);
       writeQueryParams(filtersToParams(next));
+      writeFilterMemory('time', filtersToParams(next));
     },
     backlog,
     /** Most used first (all tasks and backlog), ties keep stored order. */

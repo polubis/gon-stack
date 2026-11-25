@@ -2,6 +2,10 @@ import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { context } from '@repo/react-kit/context';
 import { useDataChanges } from '@/shared/data-sync/presentation/use-data-changes';
 import { writeQueryParams } from '@/shared/router/navigation';
+import {
+  readFilterMemory,
+  writeFilterMemory,
+} from '@/shared/filter-memory/integration/storage';
 import { FEATURE_NAME } from '../configuration/constraints';
 import { createMediator } from '../core/mediator';
 import {
@@ -27,8 +31,21 @@ import type {
 import { resetKnowledgeReads } from '../integration/repository';
 import { useToday } from './clock';
 
-const filtersFromUrl = (): KnowledgeFilters =>
-  filtersFromParams(new URLSearchParams(window.location.search));
+/**
+ * Filters of the URL; without any (the picked catalog aside), the ones
+ * remembered on this device.
+ */
+const filtersFromUrl = (): KnowledgeFilters => {
+  const url = new URLSearchParams(window.location.search);
+  const given = Object.entries(FILTER_PARAMS).some(
+    ([key, name]) => key !== 'catalogId' && url.has(name),
+  );
+  if (given) return filtersFromParams(url);
+  const remembered = readFilterMemory('knowledge');
+  const catalog = url.get(FILTER_PARAMS.catalogId);
+  if (catalog) remembered.set(FILTER_PARAMS.catalogId, catalog);
+  return filtersFromParams(remembered);
+};
 
 const nextPosition = (items: readonly { position: number }[]): number =>
   items.reduce((max, item) => Math.max(max, item.position + 1), 0);
@@ -82,12 +99,15 @@ export const [Provider, useContext] = context(FEATURE_NAME, () => {
     filters,
     /** Moves to another catalog; the lists stay loaded. */
     selectCatalog: (id: CatalogId) => {
-      setFiltersState((current) => ({ ...current, catalogId: id }));
+      const next = { ...filters, catalogId: id };
+      setFiltersState(next);
       writeQueryParams({ [FILTER_PARAMS.catalogId]: id });
+      writeFilterMemory('knowledge', filtersToParams(next));
     },
     setFilters: (next: KnowledgeFilters) => {
       setFiltersState(next);
       writeQueryParams(filtersToParams(next));
+      writeFilterMemory('knowledge', filtersToParams(next));
     },
     categories,
     catalogs,
