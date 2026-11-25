@@ -5,6 +5,7 @@ import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import { BrandMark } from '@/shared/ui/brand-mark';
 import { Button, Field } from '@/shared/ui/controls';
 import { ErrorState } from '@/shared/ui/error-state';
+import { FormError } from '@/shared/ui/form-error';
 import { navigateTo } from '@/shared/router/navigation';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { ERROR_CODES, MESSAGES } from '../configuration/constraints';
@@ -34,6 +35,11 @@ const SignUpView = () => {
     if (credentials) ctx.submit(credentials);
   };
 
+  const retry = () => {
+    const credentials = selectCredentials(email, password);
+    if (credentials) ctx.submit(credentials);
+  };
+
   return (
     <div
       data-e2e="auth:main"
@@ -44,9 +50,7 @@ const SignUpView = () => {
         <h1 className="text-4xl font-semibold leading-none tracking-tight">
           Załóż konto
         </h1>
-        <p className="mt-2 text-sm text-ink-soft">
-          Zaloguj się, aby kontynuować.
-        </p>
+        <p className="mt-2 text-sm text-ink-soft">Utwórz konto, aby zacząć.</p>
 
         <form className="mt-6 space-y-4" onSubmit={submit} noValidate>
           <Field label="E-mail" required>
@@ -73,9 +77,13 @@ const SignUpView = () => {
           </Field>
 
           {error ? (
-            <p role="alert" className="text-sm text-danger">
-              {error}
-            </p>
+            <FormError
+              title={error.title}
+              code={error.code}
+              description={error.description}
+              onRetry={error.retryable ? retry : undefined}
+              backHref={APP_ROUTER.home()}
+            />
           ) : null}
           {awaitingConfirmation ? (
             <p role="status" className="text-sm text-brand-dark">

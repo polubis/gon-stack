@@ -18,8 +18,13 @@ describe('sign in selectors', () => {
   });
 
   it('prefers the validation message over the server error', () => {
-    expect(selectErrorMessage(true, 'server')).toContain('valid email');
-    expect(selectErrorMessage(false, 'server')).toBe('server');
+    expect(selectErrorMessage(true, 'server')?.description).toContain(
+      'poprawny e-mail',
+    );
+    expect(selectErrorMessage(false, 'server')).toMatchObject({
+      description: 'server',
+      retryable: true,
+    });
     expect(selectErrorMessage(false, null)).toBeNull();
   });
 });

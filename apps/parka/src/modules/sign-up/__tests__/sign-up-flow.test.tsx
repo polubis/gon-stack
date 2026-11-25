@@ -59,7 +59,7 @@ describe('sign up', () => {
     await fillAndSubmit('nope', '123');
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Enter a valid email and password',
+      'Podaj poprawny e-mail i hasło',
     );
     expect(received).not.toHaveBeenCalled();
   });
