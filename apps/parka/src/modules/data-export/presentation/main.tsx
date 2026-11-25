@@ -8,6 +8,7 @@ import { EmptyState } from '@/shared/ui/empty-state';
 import { Card, ScreenHeader } from '@/shared/ui/layout';
 import { ErrorState } from '@/shared/ui/error-state';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
+import { Skeleton } from '@/shared/ui/skeleton';
 import { ERROR_CODES, FORMATS } from '../configuration/constraints';
 import { toFile, toRows } from './selectors';
 import type { Format } from '../domain/models';
@@ -78,37 +79,59 @@ const DataExportView = () => {
           />
         ) : null}
 
-        <fieldset className="grid gap-2 md:max-w-2xl md:grid-cols-2 md:gap-4">
-          <legend className="mb-2 text-sm font-semibold">Format</legend>
-          {FORMATS.map((f) => (
-            <Card
-              as="label"
-              key={f}
-              className={cn(
-                'flex cursor-pointer items-center gap-3',
-                f === format && 'border-brand',
-              )}
-            >
-              <input
-                type="radio"
-                name="format"
-                value={f}
-                checked={f === format}
-                data-e2e={`data-export:format:${f}`}
-                onChange={() => {
-                  setFormat(f);
-                  setDone(false);
-                }}
-              />
-              {f === 'csv' ? (
-                <FileText className="h-5 w-5 text-brand" aria-hidden="true" />
-              ) : (
-                <FileDown className="h-5 w-5 text-brand" aria-hidden="true" />
-              )}
-              <span className="text-sm font-medium uppercase">{f}</span>
-            </Card>
-          ))}
-        </fieldset>
+        {initializing ? (
+          <div
+            data-e2e="data-export:skeleton"
+            aria-busy="true"
+            aria-label="Wczytywanie danych do eksportu"
+            role="status"
+          >
+            <p aria-hidden="true" className="mb-2 text-sm font-semibold">
+              Format
+            </p>
+            <div className="grid gap-2 md:max-w-2xl md:grid-cols-2 md:gap-4">
+              {FORMATS.map((f) => (
+                <Card key={f} className="flex items-center gap-3">
+                  <Skeleton className="h-4 w-4 rounded-full" />
+                  <Skeleton className="h-5 w-5" />
+                  <Skeleton className="h-4 w-10" />
+                </Card>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <fieldset className="grid gap-2 md:max-w-2xl md:grid-cols-2 md:gap-4">
+            <legend className="mb-2 text-sm font-semibold">Format</legend>
+            {FORMATS.map((f) => (
+              <Card
+                as="label"
+                key={f}
+                className={cn(
+                  'flex cursor-pointer items-center gap-3',
+                  f === format && 'border-brand',
+                )}
+              >
+                <input
+                  type="radio"
+                  name="format"
+                  value={f}
+                  checked={f === format}
+                  data-e2e={`data-export:format:${f}`}
+                  onChange={() => {
+                    setFormat(f);
+                    setDone(false);
+                  }}
+                />
+                {f === 'csv' ? (
+                  <FileText className="h-5 w-5 text-brand" aria-hidden="true" />
+                ) : (
+                  <FileDown className="h-5 w-5 text-brand" aria-hidden="true" />
+                )}
+                <span className="text-sm font-medium uppercase">{f}</span>
+              </Card>
+            ))}
+          </fieldset>
+        )}
 
         <Button
           data-e2e="data-export:run"
