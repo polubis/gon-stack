@@ -41,7 +41,7 @@ export const AccountMenu = ({ placement }: Props) => {
         'relative flex items-center rounded-full focus-visible:outline-2 focus-visible:outline-brand',
         side
           ? 'w-full gap-3 bg-hover-soft p-2 pr-3 hover:bg-hover'
-          : 'h-12 grow justify-center px-4 text-ink-soft hover:bg-hover hover:text-ink',
+          : 'h-12 w-full justify-center text-ink-soft hover:bg-hover hover:text-ink',
       )}
     >
       {side ? (

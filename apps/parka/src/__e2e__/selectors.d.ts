@@ -18,6 +18,7 @@ import type { FormMemoryE2eId } from '@/shared/form-memory/configuration/e2e-ids
 import type { CookiesE2eId } from '@/shared/cookies/configuration/e2e-ids';
 import type { ImageEditorE2eId } from '@/shared/image-editor/configuration/e2e-ids';
 import type { PublicNavE2eId } from '@/shared/navigation/public-nav/configuration/e2e-ids';
+import type { AppNavE2eId } from '@/shared/navigation/app-nav/configuration/e2e-ids';
 import type { FinanceTourE2eId } from '@/modules/finance-tour/configuration/e2e-ids';
 import type { PeriodControlE2eId } from '@/shared/period-control/configuration/e2e-ids';
 import type { AccessTokensE2eId } from '@/modules/access-tokens/configuration/e2e-ids';
@@ -57,6 +58,7 @@ export type E2eId =
   | CookiesE2eId
   | ImageEditorE2eId
   | PublicNavE2eId
+  | AppNavE2eId
   | AuthE2eId
   | AppUpdateE2eId
   | UiE2eId
