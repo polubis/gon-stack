@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { FileText, Download } from 'lucide-react';
+import { FileText, Download, FileX, Plus } from 'lucide-react';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import { Button } from '@/shared/ui/controls';
+import { EmptyState } from '@/shared/ui/empty-state';
 import { Card, ScreenHeader } from '@/shared/ui/layout';
 import { ErrorState } from '@/shared/ui/error-state';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
@@ -34,7 +35,8 @@ const ReportsView = () => {
 
   const monthExpenses = expensesForMonth(expenses, month);
   const summary = summarize(monthExpenses, recurring);
-  const disabled = initializing || error !== null;
+  const isEmpty = !initializing && error === null && monthExpenses.length === 0;
+  const disabled = initializing || error !== null || isEmpty;
 
   const downloadCsv = () =>
     downloadBlob(
@@ -76,49 +78,74 @@ const ReportsView = () => {
           </div>
         )}
 
-        <Card className="space-y-4 lg:col-span-2">
-          <div>
-            <p className="text-sm text-ink-soft">Twój miesiąc w liczbach</p>
-            {initializing ? (
-              <Skeleton className="h-9 w-40" />
-            ) : (
-              <p
-                className="text-3xl font-bold tracking-tight"
-                data-e2e="reports:total"
+        {isEmpty ? (
+          <EmptyState
+            data-e2e="reports:empty"
+            className="lg:col-span-2"
+            icon={FileX}
+            title="Brak wydatków w tym miesiącu"
+            description={`Raport za ${monthLabel(month)} jest pusty. Dodaj wydatek, aby go pobrać.`}
+            action={
+              <Button
+                href={APP_ROUTER.newExpense({ month })}
+                className="w-auto px-3 py-2"
               >
-                {money(summary.total)}
-              </p>
-            )}
-            <p className="text-xs text-ink-soft">Łączne wydatki</p>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl bg-brand-softer p-3">
+                <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj wydatek
+              </Button>
+            }
+          />
+        ) : (
+          <Card className="space-y-4 lg:col-span-2">
+            <div>
+              <p className="text-sm text-ink-soft">Twój miesiąc w liczbach</p>
               {initializing ? (
-                <Skeleton className="h-8 w-10" />
+                <Skeleton className="h-9 w-40" />
               ) : (
-                <p className="text-2xl font-bold" data-e2e="reports:categories">
-                  {summary.categoryCount}
+                <p
+                  className="text-3xl font-bold tracking-tight"
+                  data-e2e="reports:total"
+                >
+                  {money(summary.total)}
                 </p>
               )}
-              <p className="text-xs text-ink-soft">Kategorie</p>
+              <p className="text-xs text-ink-soft">Łączne wydatki</p>
             </div>
-            <div className="rounded-xl bg-brand-softer p-3">
-              {initializing ? (
-                <Skeleton className="h-8 w-10" />
-              ) : (
-                <p className="text-2xl font-bold" data-e2e="reports:recurring">
-                  {summary.recurringCount}
-                </p>
-              )}
-              <p className="text-xs text-ink-soft">Transakcje cykliczne</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl bg-brand-softer p-3">
+                {initializing ? (
+                  <Skeleton className="h-8 w-10" />
+                ) : (
+                  <p
+                    className="text-2xl font-bold"
+                    data-e2e="reports:categories"
+                  >
+                    {summary.categoryCount}
+                  </p>
+                )}
+                <p className="text-xs text-ink-soft">Kategorie</p>
+              </div>
+              <div className="rounded-xl bg-brand-softer p-3">
+                {initializing ? (
+                  <Skeleton className="h-8 w-10" />
+                ) : (
+                  <p
+                    className="text-2xl font-bold"
+                    data-e2e="reports:recurring"
+                  >
+                    {summary.recurringCount}
+                  </p>
+                )}
+                <p className="text-xs text-ink-soft">Transakcje cykliczne</p>
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        )}
 
         <div className="space-y-2 md:max-w-sm lg:max-w-none">
           <Button
             data-e2e="reports:download-csv"
             disabled={disabled}
+            className="disabled:cursor-not-allowed disabled:opacity-60"
             onClick={downloadCsv}
           >
             <FileText className="h-4 w-4" aria-hidden="true" /> Pobierz CSV
@@ -127,6 +154,7 @@ const ReportsView = () => {
             variant="ghost"
             data-e2e="reports:download-full"
             disabled={disabled}
+            className="disabled:cursor-not-allowed disabled:opacity-60"
             onClick={downloadFull}
           >
             <Download className="h-4 w-4" aria-hidden="true" /> Pobierz pełny

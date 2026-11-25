@@ -194,3 +194,42 @@ describe('report load failure', () => {
     );
   });
 });
+
+describe('report of an empty month', () => {
+  it('explains it, offers adding an expense and blocks downloads', async () => {
+    stubApi();
+    server.use(
+      http.get('/api/expenses/', () =>
+        HttpResponse.json({
+          code: 200,
+          data: [
+            expense(
+              'e-3',
+              'Stary sklep',
+              '2020-01-15T10:00:00.000Z',
+              99,
+              'c-1',
+            ),
+          ],
+        }),
+      ),
+    );
+    render(<Main />);
+
+    expect(
+      await screen.findByRole('heading', {
+        name: 'Brak wydatków w tym miesiącu',
+      }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole('link', { name: 'Dodaj wydatek' }).getAttribute('href'),
+    ).toMatch(/^\/app\/expenses\/new\/\?month=\d{4}-\d{2}$/);
+    expect(screen.getByRole('button', { name: /Pobierz CSV/ })).toHaveProperty(
+      'disabled',
+      true,
+    );
+    expect(
+      screen.getByRole('button', { name: /Pobierz pełny raport/ }),
+    ).toHaveProperty('disabled', true);
+  });
+});
