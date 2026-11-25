@@ -57,6 +57,17 @@ describe('task priorities', () => {
     expect(write!.body).toMatchObject({ id: 'low', name: 'Kiedyś', value: 3 });
   });
 
+  it('shows the priority only once in the edit form', async () => {
+    const user = userEvent.setup();
+    renderTime('day', undefined, '&modal=priorities');
+
+    const form = await openEditor(user, 'Niski');
+
+    expect(form.getByLabelText('Nazwa')).toHaveValue('Niski');
+    expect(form.queryByText('Tak będzie wyglądać:')).not.toBeInTheDocument();
+    expect(form.queryByText('Niski', { selector: 'span' })).toBeNull();
+  });
+
   it('refuses a name another priority already has', async () => {
     const user = userEvent.setup();
     renderTime('day', undefined, '&modal=priorities');

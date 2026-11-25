@@ -8,7 +8,6 @@ import { NAME_MAX_LENGTH, PRIORITY_VALUES } from '../configuration/constraints';
 import type { Priority } from '../domain/models';
 import { useContext } from './context';
 import { deletePriorityModal } from './modal-ids';
-import { PriorityBadge } from './priority-badge';
 import { ModalShell } from './modal-shell';
 import { ModalFooter } from '@/shared/ui/modal-footer';
 
@@ -102,10 +101,6 @@ export const PriorityDialog = ({
               </label>
             ))}
           </div>
-          <p className="mt-2 flex flex-wrap items-center gap-2 text-xs text-ink-soft">
-            Tak będzie wyglądać:
-            <PriorityBadge priority={{ name: trimmed || 'Priorytet', value }} />
-          </p>
         </fieldset>
 
         {priority ? (
