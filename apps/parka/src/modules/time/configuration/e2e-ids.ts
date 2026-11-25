@@ -111,6 +111,7 @@ export const TIME_E2E_IDS = [
   'time:attachment-media',
   'time:trim-start',
   'time:trim-length',
+  'time:trim-loading',
   'time:trim-save',
 ] as const;
 

@@ -3,6 +3,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { Loader2, Scissors, X } from 'lucide-react';
 import { closeModal, useModalMounted } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
+import { Skeleton } from '@/shared/ui/skeleton';
 import { previewUrl, readDuration, trimVideo } from '../integration/trim-video';
 import { ModalFooter, MODAL_PADDING } from '@/shared/ui/modal-footer';
 
@@ -120,7 +121,20 @@ export const VideoTrimDialog = ({
                 Nie udało się odczytać wideo. Możesz je dodać bez przycinania.
               </p>
             ) : (
-              <p className="text-xs text-ink-soft">Wczytywanie wideo…</p>
+              <div
+                role="status"
+                data-e2e="time:trim-loading"
+                className="flex flex-col gap-3"
+              >
+                <span className="sr-only">Wczytywanie wideo…</span>
+                {[0, 1].map((slider) => (
+                  <div key={slider} className="flex flex-col gap-1">
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                ))}
+                <Skeleton className="h-4 w-48" />
+              </div>
             )
           ) : (
             <>
