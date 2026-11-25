@@ -226,7 +226,7 @@ export const ExpenseForm = ({
         </div>
 
         <ModalFooter className="flex flex-wrap items-center gap-3">
-          <div className="flex-1">
+          <div className="grow">
             <p className="text-xs text-ink-soft">Razem</p>
             <p
               className="text-lg font-bold tabular-nums"
@@ -235,23 +235,25 @@ export const ExpenseForm = ({
               {money(total)}
             </p>
           </div>
-          {actions}
-          <Button
-            type="submit"
-            className="w-auto px-6"
-            data-e2e="expense-form:save"
-            disabled={saving || !selected}
-          >
-            {saving ? (
-              <LoaderCircle
-                className="h-4 w-4 animate-spin motion-reduce:animate-none"
-                aria-hidden="true"
-              />
-            ) : (
-              <Check className="h-4 w-4" aria-hidden="true" />
-            )}{' '}
-            {submitLabel}
-          </Button>
+          <div className="ml-auto flex items-center gap-2">
+            {actions}
+            <Button
+              type="submit"
+              className="w-auto px-6"
+              data-e2e="expense-form:save"
+              disabled={saving || !selected}
+            >
+              {saving ? (
+                <LoaderCircle
+                  className="h-4 w-4 animate-spin motion-reduce:animate-none"
+                  aria-hidden="true"
+                />
+              ) : (
+                <Check className="h-4 w-4" aria-hidden="true" />
+              )}{' '}
+              {submitLabel}
+            </Button>
+          </div>
         </ModalFooter>
       </form>
       <ManageSuggestions memory={suggestions} />
