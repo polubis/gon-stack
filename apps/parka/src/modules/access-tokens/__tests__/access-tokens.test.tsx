@@ -2,7 +2,15 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import { pickOption } from '@/__tests__/pick-option';
 import { Main } from '../presentation/main';
 
@@ -393,6 +401,29 @@ describe('access token management', () => {
 
     expect(screen.queryByText('Claude Desktop')).not.toBeInTheDocument();
     expect(screen.getByText('Nie masz jeszcze tokenów')).toBeInTheDocument();
+  });
+
+  it('lets a deleted token leave the list before it disappears', async () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: false }));
+    try {
+      const { user } = await setup([item()]);
+
+      await user.click(
+        screen.getByRole('button', { name: 'Usuń token Claude Desktop' }),
+      );
+      const dialog = await screen.findByRole('dialog');
+      await user.click(within(dialog).getByRole('button', { name: 'Usuń' }));
+
+      expect(
+        screen.queryByRole('button', { name: 'Usuń token Claude Desktop' }),
+      ).not.toBeInTheDocument();
+      expect(
+        await screen.findByText('Nie masz jeszcze tokenów'),
+      ).toBeInTheDocument();
+      expect(screen.queryByText('Claude Desktop')).not.toBeInTheDocument();
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it('restores the token and explains when deleting fails', async () => {
