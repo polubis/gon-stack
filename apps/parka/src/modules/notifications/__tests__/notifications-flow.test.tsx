@@ -284,16 +284,52 @@ describe('read state', () => {
     ).toHaveLength(1);
   });
 
-  it('has no mark-all-as-read button in the header', async () => {
-    stubApi({ pages: { first: page([updated(), created()]) } });
+  it('keeps every notification visible when all are marked as read', async () => {
+    const calls = stubApi({
+      pages: { first: page([updated(), created()], { unread: 7 }) },
+    });
+    const user = userEvent.setup();
     render(<Main />);
     await screen.findByText('Zmieniono wydatek');
 
+    await user.click(
+      screen.getByRole('button', { name: 'Oznacz wszystkie jako przeczytane' }),
+    );
+
+    expect(await screen.findByText('Wszystko przeczytane')).toBeTruthy();
+    expect(rows()).toHaveLength(2);
+    expect(screen.getAllByText('Przeczytane')).toHaveLength(2);
     expect(
-      screen.queryByRole('button', {
-        name: 'Oznacz wszystkie jako przeczytane',
-      }),
-    ).toBeNull();
+      (
+        screen.getByRole('button', {
+          name: 'Oznacz wszystkie jako przeczytane',
+        }) as HTMLButtonElement
+      ).disabled,
+    ).toBe(true);
+    await waitFor(() =>
+      expect(calls.filter((c) => c.method === 'PUT').map((c) => c.url)).toEqual(
+        ['/api/notifications/read-all/'],
+      ),
+    );
+  });
+
+  it('brings the unread marks back when marking all fails', async () => {
+    stubApi({
+      pages: { first: page([updated(), created()]) },
+      write: { code: 500, type: 'internal-server', message: 'boom' },
+    });
+    const user = userEvent.setup();
+    render(<Main />);
+    await screen.findByText('Zmieniono wydatek');
+
+    await user.click(
+      screen.getByRole('button', { name: 'Oznacz wszystkie jako przeczytane' }),
+    );
+
+    expect(
+      await screen.findByText('NOTIFICATION_MARK_ALL_READ_FAILED'),
+    ).toBeTruthy();
+    expect(screen.getByText('2 nieprzeczytanych')).toBeTruthy();
   });
 
   it('brings the unread mark back when saving fails', async () => {
