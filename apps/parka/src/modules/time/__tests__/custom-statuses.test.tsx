@@ -44,6 +44,18 @@ describe('custom task statuses', () => {
     ).toBeDisabled();
   });
 
+  it('focuses the name of a freshly added step', async () => {
+    const user = userEvent.setup();
+    renderTime();
+
+    const dialog = within(await openEditor(user));
+    await user.click(dialog.getByRole('button', { name: 'Dodaj status' }));
+
+    expect(
+      dialog.getByRole('textbox', { name: 'Nazwa statusu 2' }),
+    ).toHaveFocus();
+  });
+
   it('saves a new step after the existing one', async () => {
     const user = userEvent.setup();
     renderTime();
