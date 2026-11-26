@@ -5,7 +5,10 @@ import { ErrorState } from '@/shared/ui/error-state';
 import { ERROR_CODES, STEPS } from '../configuration/constraints';
 
 const AiInfoView = () => (
-  <div data-e2e="ai-info:main" className="relative flex flex-1 flex-col">
+  <div
+    data-e2e="ai-info:main"
+    className="relative flex flex-1 animate-view-enter flex-col motion-reduce:animate-none"
+  >
     <div className="md:px-4 lg:px-6 xl:px-12">
       <ScreenHeader
         title="AI — jak to działa"
