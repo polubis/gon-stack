@@ -743,6 +743,11 @@ const commands = {
         false,
       );
       await page.keyboard.press('Escape');
+      await expect(player).toBeHidden();
+      await attachmentLink(getByE2ePrefix, 'demo.webm').click();
+      await expect(page).toHaveURL(/modal=attachment-view/);
+      await expect(player).toBeVisible();
+      await page.keyboard.press('Escape');
       await reload(page);
       await expect(attachmentThumb(getByE2ePrefix, 'demo.webm')).toBeVisible();
     },

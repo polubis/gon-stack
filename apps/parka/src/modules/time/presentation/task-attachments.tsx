@@ -418,7 +418,16 @@ export const TaskAttachments = ({ taskId }: { taskId: TaskId }) => {
               className="flex items-center gap-2 rounded-xl border border-line-strong bg-card px-3 py-2 text-sm"
             >
               <Thumb item={item} />
-              {item.status === 'ready' ? (
+              {item.status === 'ready' && isVideoMime(item.mime) ? (
+                <button
+                  type="button"
+                  data-e2e={`time:attachment-link:${item.id}`}
+                  onClick={() => openModal(viewAttachmentModal(item.id))}
+                  className="min-w-0 flex-1 truncate rounded-md text-left font-semibold text-brand hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                >
+                  {item.name}
+                </button>
+              ) : item.status === 'ready' ? (
                 <a
                   data-e2e={`time:attachment-link:${item.id}`}
                   href={API_ROUTER.timeAttachmentById(item.id)}
