@@ -408,9 +408,27 @@ describe('adding an expense on its own page', () => {
       await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
       await user.type(screen.getByLabelText('Cena'), '10');
       await user.click(screen.getByRole('button', { name: 'Usuń produkt' }));
+      await user.click(screen.getByRole('button', { name: 'Usuń' }));
 
       expect(await screen.findByText('Produkty (0)')).toBeVisible();
       expect(screen.getByLabelText('Kwota')).not.toHaveAttribute('readonly');
+    });
+
+    it('keeps the product when removing it is cancelled', async () => {
+      mockBackend();
+      const user = await open();
+
+      await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
+      await user.type(screen.getByLabelText('Nazwa produktu'), 'Chleb');
+      await user.click(screen.getByRole('button', { name: 'Usuń produkt' }));
+      expect(
+        await screen.findByRole('dialog', { name: 'Usunąć produkt?' }),
+      ).toBeVisible();
+      await user.click(screen.getByRole('button', { name: 'Anuluj' }));
+
+      expect(await screen.findByLabelText('Nazwa produktu')).toHaveValue(
+        'Chleb',
+      );
     });
 
     describe('category', () => {
@@ -479,9 +497,10 @@ describe('adding an expense on its own page', () => {
         await user.click(screen.getByRole('button', { name: /Dodaj produkt/ }));
 
         await user.click(screen.getByRole('button', { name: 'Usuń produkt' }));
+        await user.click(screen.getByRole('button', { name: 'Usuń' }));
 
         expect(
-          screen.getByRole('combobox', { name: 'Kategoria' }),
+          await screen.findByRole('combobox', { name: 'Kategoria' }),
         ).toBeVisible();
       });
     });

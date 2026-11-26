@@ -329,6 +329,29 @@ const commands = {
       await expect(date).toHaveJSProperty('required', true);
     },
 
+  'i confirm before a product is removed from an expense': async ({
+    page,
+    getByE2e,
+    getByE2ePrefix,
+  }) => {
+    await mockState(page);
+    await open(page, APP_ROUTER.newExpense());
+    await getByE2e('expense-form:add-product').click();
+    await getByE2ePrefix('expense-form:product-name:').fill('Chleb');
+
+    await getByE2ePrefix('expense-form:product-remove:').click();
+    await expect(getByE2e('expense-form:remove-product-dialog')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(getByE2ePrefix('expense-form:product-name:')).toHaveValue(
+      'Chleb',
+    );
+
+    await getByE2ePrefix('expense-form:product-remove:').click();
+    await getByE2e('expense-form:remove-product-confirm').click();
+    await expect(getByE2e('expense-form:product-dialog')).toHaveCount(0);
+    await expect(page.getByText('Produkty (0)')).toBeVisible();
+  },
+
   'i cannot save a product without a name': async ({
     page,
     getByE2e,

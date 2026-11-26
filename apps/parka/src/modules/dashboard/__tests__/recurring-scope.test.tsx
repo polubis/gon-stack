@@ -256,6 +256,7 @@ describe('upcoming payment with products', () => {
 
     await user.click(dialog.getByRole('button', { name: /Chleb/ }));
     await user.click(screen.getByRole('button', { name: /Usuń produkt/ }));
+    await user.click(screen.getByRole('button', { name: 'Usuń' }));
 
     expect(await screen.findByText('Produkty (0)')).toBeVisible();
     expect(dialog.getByLabelText('Koszt płatności')).not.toHaveAttribute(
