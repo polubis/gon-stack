@@ -105,7 +105,7 @@ const ExpensesManagementView = () => {
   return (
     <div
       data-e2e="expenses-management:main"
-      className="relative flex flex-1 flex-col"
+      className="relative flex flex-1 animate-view-enter flex-col motion-reduce:animate-none"
     >
       <LoadingBanner active={isLoading && !initializing} />
       <FormModal
