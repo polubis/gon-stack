@@ -1,5 +1,6 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import * as Dialog from '@radix-ui/react-dialog';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import {
@@ -94,5 +95,32 @@ describe('app update banner', () => {
     document.dispatchEvent(new Event('visibilitychange'));
 
     await waitFor(() => expect(screen.getByRole('status')).toBeInTheDocument());
+  });
+
+  it('dismisses over an open modal and leaves the modal usable', async () => {
+    deployed('1.0.0+bbb');
+    render(
+      <>
+        <Dialog.Root open>
+          <Dialog.Portal>
+            <Dialog.Content>
+              <Dialog.Title>Edycja</Dialog.Title>
+              <Dialog.Description>Formularz</Dialog.Description>
+              <button type="button">Zapisz</button>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
+        <AppUpdateBanner />
+      </>,
+    );
+    await screen.findByRole('status');
+
+    await userEvent.click(
+      screen.getByRole('button', { name: /zamknij informację/i }),
+    );
+
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Zapisz' }));
   });
 });

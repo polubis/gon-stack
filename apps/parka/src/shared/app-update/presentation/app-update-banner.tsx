@@ -1,5 +1,22 @@
 import { RefreshCw, X } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { useAppUpdate } from './use-app-update';
+
+const HOST_ID = 'app-update-host';
+
+/** Body-level host: outside the app root, so a modal's inert/pointer lock misses it. */
+const getHost = (): HTMLElement => {
+  const existing = document.getElementById(HOST_ID);
+  if (existing) return existing;
+  const host = document.createElement('div');
+  host.id = HOST_ID;
+  // A live region is skipped when a modal hides the rest of the page.
+  host.setAttribute('aria-live', 'polite');
+  // An open modal sets pointer-events none on body; the banner stays clickable.
+  host.style.pointerEvents = 'auto';
+  document.body.appendChild(host);
+  return host;
+};
 
 /**
  * Floating notice (overlays, so it never shifts the layout) offering a reload
@@ -9,10 +26,13 @@ export const AppUpdateBanner = () => {
   const { outdated, dismiss } = useAppUpdate();
   if (!outdated) return null;
 
-  return (
+  return createPortal(
     <div
       role="status"
       data-e2e="app-update:banner"
+      // Keep an open modal from treating the banner as an outside click/focus.
+      onPointerDown={(e) => e.stopPropagation()}
+      onFocus={(e) => e.stopPropagation()}
       className="fixed top-4 left-1/2 z-(--z-popover) flex w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 animate-item-in items-center gap-3 rounded-3xl border border-line bg-card p-3 shadow-popover motion-reduce:animate-none sm:p-4"
     >
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand">
@@ -43,6 +63,7 @@ export const AppUpdateBanner = () => {
       >
         <X className="h-4 w-4" aria-hidden="true" />
       </button>
-    </div>
+    </div>,
+    getHost(),
   );
 };
