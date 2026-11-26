@@ -488,6 +488,19 @@ describe('video attachments', () => {
     expect(player).not.toHaveAttribute('autoplay');
   });
 
+  it('opens a video in a modal player when its name is clicked', async () => {
+    const user = userEvent.setup();
+    backend.seed([task()]);
+    backend.state.attachments['t-1'] = [CLIP];
+    const details = await openDetails(user);
+
+    expect(details.queryByRole('link', { name: 'demo.mp4' })).toBeNull();
+    await user.click(await details.findByRole('button', { name: 'demo.mp4' }));
+
+    const viewer = await screen.findByRole('dialog', { name: 'demo.mp4' });
+    expect(within(viewer).getByLabelText('demo.mp4').tagName).toBe('VIDEO');
+  });
+
   it('tells a video is still being saved and cannot be opened yet', async () => {
     const user = userEvent.setup();
     backend.seed([task()]);
