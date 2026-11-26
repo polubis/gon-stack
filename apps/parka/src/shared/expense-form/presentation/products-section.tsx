@@ -9,7 +9,8 @@ import { createProduct, patchProduct } from '../domain/products';
 import type { Category, CategoryId, Product } from '../domain/models';
 import { ProductCard } from './product-card';
 import { ProductDialog } from './product-dialog';
-import { productModal } from './product-modal-id';
+import { productModal, removeProductModal } from './product-modal-id';
+import { RemoveProductDialog } from './remove-product-dialog';
 
 type Props = {
   products: Product[];
@@ -84,12 +85,26 @@ export const ProductsSection = ({
             onPatch={(patch) =>
               onChange(patchProduct(products, product.id, patch))
             }
-            onRemove={() =>
-              closeModalThen(id, () =>
-                onChange(products.filter((p) => p.id !== product.id)),
+            onRemove={() => openModal(removeProductModal(product.id))}
+            onClose={() => closeModal(id)}
+          />
+        ) : null;
+      })}
+      {products.map((product) => {
+        const confirmId = removeProductModal(product.id);
+        return stack.includes(confirmId) ? (
+          <RemoveProductDialog
+            key={product.id}
+            modal={confirmId}
+            name={product.name}
+            onConfirm={() =>
+              closeModalThen(confirmId, () =>
+                closeModalThen(productModal(product.id), () =>
+                  onChange(products.filter((p) => p.id !== product.id)),
+                ),
               )
             }
-            onClose={() => closeModal(id)}
+            onClose={() => closeModal(confirmId)}
           />
         ) : null;
       })}

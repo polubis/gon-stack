@@ -175,6 +175,7 @@ describe('editing an expense on its own page', () => {
 
     await user.click(await screen.findByRole('button', { name: /Chleb/ }));
     await user.click(screen.getByRole('button', { name: 'Usuń produkt' }));
+    await user.click(screen.getByRole('button', { name: 'Usuń' }));
     await screen.findByText('Produkty (0)');
     await user.click(screen.getByRole('button', { name: 'Zapisz zmiany' }));
 

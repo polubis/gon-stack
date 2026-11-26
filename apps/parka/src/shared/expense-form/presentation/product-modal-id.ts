@@ -7,3 +7,7 @@ export const productModal = (id: ProductId): string => `${PREFIX}${id}`;
 
 export const productOfModal = (modal: string): ProductId | null =>
   modal.startsWith(PREFIX) ? (modal.slice(PREFIX.length) as ProductId) : null;
+
+/** URL id of the confirmation stacked over the popup of product `id`. */
+export const removeProductModal = (id: ProductId): string =>
+  `remove-${PREFIX}${id}`;

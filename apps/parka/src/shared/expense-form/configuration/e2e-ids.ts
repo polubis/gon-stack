@@ -12,6 +12,8 @@ export const EXPENSE_FORM_E2E_IDS = [
   'expense-form:save',
   'expense-form:product-dialog',
   'expense-form:product-done',
+  'expense-form:remove-product-dialog',
+  'expense-form:remove-product-confirm',
 ] as const;
 
 export type ExpenseFormDynamicE2eId =
