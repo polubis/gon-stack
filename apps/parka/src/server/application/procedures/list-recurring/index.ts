@@ -17,10 +17,12 @@ export const listRecurring = privateProcedure({
     // Without the caller's zone "today" is a guess: do not charge early.
     if (input.tz) await materializeRecurring(db, user.id, todayDay(input.tz));
 
-    const { data, error } = await db.from('recurring_expenses').select('*');
+    // Rules and their products are independent reads: one round trip.
+    const [{ data, error }, items] = await Promise.all([
+      db.from('recurring_expenses').select('*'),
+      loadRuleItems(db),
+    ]);
     if (error) throw fromSupabaseError(error);
-
-    const items = await loadRuleItems(db);
 
     return { code: 200 as const, data: data.map((row) => toRule(row, items)) };
   },
