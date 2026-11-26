@@ -72,14 +72,27 @@ const ActionsMenu = () => {
   );
 };
 
-/** The select button, which turns into the actions menu in select mode. */
+/** Mark-all-read plus the select button, which turns into the actions menu in select mode. */
 export const HeaderActions = () => {
   const ctx = useContext();
+  const unread = ctx.useUnreadCount();
   const selecting = ctx.useSelecting();
   const total = ctx.useNotifications().length;
 
   return (
     <>
+      <button
+        type="button"
+        data-e2e="notifications:mark-all-read"
+        disabled={unread === 0}
+        onClick={ctx.markAllRead}
+        className={ROUND_BUTTON}
+      >
+        <CheckCheck className="h-4 w-4" aria-hidden="true" />
+        <span className="max-sm:sr-only">
+          Oznacz wszystkie jako przeczytane
+        </span>
+      </button>
       {selecting ? (
         <ActionsMenu />
       ) : (

@@ -18,6 +18,7 @@ export type NotificationsE2eId =
   | 'notifications:actions-trigger'
   | 'notifications:actions-menu'
   | 'notifications:delete-selected'
+  | 'notifications:mark-all-read'
   | 'notifications:mark-selected-read'
   | 'notifications:selection-bar'
   | 'notifications:select-all'
