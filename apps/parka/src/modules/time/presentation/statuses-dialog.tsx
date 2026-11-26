@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
+import { cn } from '@repo/react-kit/cn';
 import { closeModal } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
 import { ClearableInput } from '@/shared/ui/clearable';
@@ -10,6 +11,7 @@ import { DONE_NAME, IN_PROGRESS, OPEN_NAME } from '../domain/status';
 import { useContext } from './context';
 import { ModalShell } from './modal-shell';
 import { ModalFooter } from '@/shared/ui/modal-footer';
+import { changeProps, useListChanges } from '@/shared/ui/list-changes';
 
 const MAX_STATUSES = 10;
 
@@ -24,6 +26,13 @@ export const StatusesDialog = ({ modal }: { modal: string }) => {
   const { statuses, saveStatuses } = useContext();
   const [draft, setDraft] = useState<Status[]>(statuses);
   const [showErrors, setShowErrors] = useState(false);
+  const [focusId, setFocusId] = useState<string | null>(null);
+  const entries = useListChanges(
+    draft,
+    (status) => status.id,
+    modal,
+    () => '',
+  );
 
   const names = draft.map((status) => status.name.trim().toLowerCase());
   const errorOf = (index: number): string | null =>
@@ -62,64 +71,75 @@ export const StatusesDialog = ({ modal }: { modal: string }) => {
       <form onSubmit={submit} noValidate className="flex flex-col gap-2">
         <p className={FIXED_ROW}>{OPEN_NAME}</p>
         <ol aria-label="Statusy" className="flex flex-col gap-2">
-          {draft.map((status, index) => {
-            const error = showErrors ? errorOf(index) : null;
+          {entries.map(({ key, item: status, phase, at: index }) => {
+            const error = showErrors && index >= 0 ? errorOf(index) : null;
+            const change = changeProps(phase);
             return (
-              <li key={status.id} className="flex flex-col gap-1">
-                <div className="flex items-center gap-1">
-                  <ClearableInput
-                    type="text"
-                    aria-label={`Nazwa statusu ${index + 1}`}
-                    data-e2e={`time:status-name:${status.id}`}
-                    value={status.name}
-                    maxLength={NAME_MAX_LENGTH}
-                    autoComplete="off"
-                    aria-invalid={error ? true : undefined}
-                    aria-describedby={
-                      error ? `status-error-${status.id}` : undefined
-                    }
-                    onChange={(e) =>
-                      setDraft((list) =>
-                        list.map((item) =>
-                          item.id === status.id
-                            ? { ...item, name: e.target.value }
-                            : item,
-                        ),
-                      )
-                    }
-                  />
-                  <button
-                    type="button"
-                    aria-label={`Przesuń wyżej: ${status.name}`}
-                    disabled={index === 0}
-                    onClick={() => move(index, -1)}
-                    className={ICON_BUTTON}
-                  >
-                    <ArrowUp className="h-4 w-4" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={`Przesuń niżej: ${status.name}`}
-                    disabled={index === draft.length - 1}
-                    onClick={() => move(index, 1)}
-                    className={ICON_BUTTON}
-                  >
-                    <ArrowDown className="h-4 w-4" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={`Usuń status: ${status.name}`}
-                    data-e2e={`time:status-delete:${status.id}`}
-                    disabled={status.id === IN_PROGRESS}
-                    onClick={() =>
-                      setDraft((list) =>
-                        list.filter((item) => item.id !== status.id),
-                      )
-                    }
-                    className={ICON_BUTTON}
-                  >
-                    <Trash2 className="h-4 w-4" aria-hidden="true" />
-                  </button>
+              <li
+                key={key}
+                aria-hidden={change['aria-hidden']}
+                inert={change.inert}
+                className={cn('flex flex-col gap-1', change.className)}
+              >
+                <div className="flex flex-wrap items-center gap-1">
+                  <div className="min-w-40 flex-1">
+                    <ClearableInput
+                      type="text"
+                      aria-label={`Nazwa statusu ${index + 1}`}
+                      data-e2e={`time:status-name:${status.id}`}
+                      value={status.name}
+                      maxLength={NAME_MAX_LENGTH}
+                      autoFocus={status.id === focusId}
+                      autoComplete="off"
+                      aria-invalid={error ? true : undefined}
+                      aria-describedby={
+                        error ? `status-error-${status.id}` : undefined
+                      }
+                      onChange={(e) =>
+                        setDraft((list) =>
+                          list.map((item) =>
+                            item.id === status.id
+                              ? { ...item, name: e.target.value }
+                              : item,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="ml-auto flex gap-1">
+                    <button
+                      type="button"
+                      aria-label={`Przesuń wyżej: ${status.name}`}
+                      disabled={index <= 0}
+                      onClick={() => move(index, -1)}
+                      className={ICON_BUTTON}
+                    >
+                      <ArrowUp className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Przesuń niżej: ${status.name}`}
+                      disabled={index === draft.length - 1}
+                      onClick={() => move(index, 1)}
+                      className={ICON_BUTTON}
+                    >
+                      <ArrowDown className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Usuń status: ${status.name}`}
+                      data-e2e={`time:status-delete:${status.id}`}
+                      disabled={status.id === IN_PROGRESS}
+                      onClick={() =>
+                        setDraft((list) =>
+                          list.filter((item) => item.id !== status.id),
+                        )
+                      }
+                      className={ICON_BUTTON}
+                    >
+                      <Trash2 className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                  </div>
                 </div>
                 {error ? (
                   <p
@@ -139,9 +159,11 @@ export const StatusesDialog = ({ modal }: { modal: string }) => {
           variant="ghost"
           data-e2e="time:status-add"
           disabled={draft.length >= MAX_STATUSES}
-          onClick={() =>
-            setDraft((list) => [...list, { id: newStatusId(), name: '' }])
-          }
+          onClick={() => {
+            const id = newStatusId();
+            setFocusId(id);
+            setDraft((list) => [...list, { id, name: '' }]);
+          }}
         >
           <Plus className="h-4 w-4" aria-hidden="true" /> Dodaj status
         </Button>
