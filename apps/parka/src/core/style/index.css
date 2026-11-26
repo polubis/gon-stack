@@ -461,7 +461,7 @@
     }
     to {
       opacity: 1;
-      max-height: 12rem;
+      max-height: var(--row-max, 12rem);
       transform: none;
     }
   }
@@ -475,7 +475,7 @@
   @keyframes row-out {
     from {
       opacity: 1;
-      max-height: 12rem;
+      max-height: var(--row-max, 12rem);
     }
     to {
       opacity: 0;

@@ -11,6 +11,7 @@ import {
 import { cn } from '@repo/react-kit/cn';
 import { openModal } from '@/shared/router/modal-stack';
 import { Button } from '@/shared/ui/controls';
+import { changeProps, type ChangePhase } from '@/shared/ui/list-changes';
 import { Card } from '@/shared/ui/layout';
 import { MODAL } from '../configuration/constraints';
 import { formatWhen, maskToken } from '../domain/format';
@@ -63,15 +64,18 @@ const Meta = ({
 export const TokenRow = ({
   token,
   busy,
+  phase,
   onResume,
 }: {
   token: AccessToken;
   busy: boolean;
+  phase: ChangePhase;
   onResume: (id: TokenId) => void;
 }) => {
   const status = STATUS[token.status];
   const StatusIcon = status.icon;
   const paused = token.status === 'revoked';
+  const change = changeProps(phase);
   const ask = (kind: keyof typeof MODAL) => () =>
     openModal(`${MODAL[kind]}:${token.id}`);
 
@@ -79,7 +83,10 @@ export const TokenRow = ({
     <Card
       as="li"
       data-e2e={`access-tokens:row:${token.id}`}
-      className="space-y-3"
+      aria-hidden={change['aria-hidden']}
+      inert={change.inert}
+      style={{ '--row-max': '24rem' }}
+      className={cn('space-y-3', change.className)}
     >
       <div className="flex items-start justify-between gap-3">
         <h3 className="min-w-0 break-words text-sm font-semibold">
