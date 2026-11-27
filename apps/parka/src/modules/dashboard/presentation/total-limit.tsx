@@ -1,4 +1,6 @@
-import { ProgressBar } from '@/shared/ui/controls';
+import { Gauge, Plus } from 'lucide-react';
+import { Button, ProgressBar } from '@/shared/ui/controls';
+import { EmptyState } from '@/shared/ui/empty-state';
 import type { Period } from '@/shared/period/period';
 import { money } from '../domain/format';
 import type { TotalProgress } from '../domain/models';
@@ -10,17 +12,34 @@ export const TotalLimit = ({
   progress,
   period,
   monthly,
+  onSet,
 }: {
   progress: TotalProgress | null;
   period: Period;
   /** The limit as set, per month; `progress` holds it scaled to the period. */
   monthly: number | undefined;
+  onSet: () => void;
 }) => {
   if (!progress)
     return (
-      <p className="text-sm text-ink-soft" data-e2e="dashboard:limit-total">
-        Brak zdefiniowanego limitu.
-      </p>
+      <EmptyState
+        variant="card"
+        data-e2e="dashboard:limit-total"
+        icon={Gauge}
+        title="Brak limitu miesięcznego"
+        description="Ustaw łączny limit, by śledzić wszystkie wydatki."
+        action={
+          <Button
+            variant="ghost"
+            className="w-auto px-3 py-1.5"
+            data-e2e="dashboard:limit-total-set"
+            onClick={onSet}
+          >
+            <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
+            Ustaw limit miesięczny
+          </Button>
+        }
+      />
     );
 
   return (

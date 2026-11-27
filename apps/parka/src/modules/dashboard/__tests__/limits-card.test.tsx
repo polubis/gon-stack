@@ -79,7 +79,7 @@ const renderCard = async () => {
   );
   await screen.findByRole('button', { name: /Zarządzaj limitami/ });
   await waitFor(() =>
-    expect(screen.queryByText('Brak zdefiniowanego limitu.')).toBeNull(),
+    expect(screen.queryByText('Brak limitu miesięcznego')).toBeNull(),
   );
   return user;
 };
@@ -119,6 +119,35 @@ describe('limits managed in a modal', () => {
       expect(screen.getByText(/powiadomienie od 80%/)).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: /Edytuj limit/ })).toBeNull();
       expect(screen.queryByRole('button', { name: /Dodaj limit/ })).toBeNull();
+    });
+  });
+
+  describe('missing monthly limit', () => {
+    it('offers setting it when only category limits exist', async () => {
+      server.use(
+        ...readHandlers({
+          limits: [FOOD_LIMIT],
+          categories: [
+            CATEGORY,
+            { id: 'c-2', name: 'Transport', icon: 'car', color: '#00a' },
+          ],
+        }),
+      );
+      const user = userEvent.setup();
+      render(
+        <Provider>
+          <Harness />
+        </Provider>,
+      );
+
+      await screen.findByText('Spożywcze');
+      await user.click(
+        screen.getByRole('button', { name: 'Ustaw limit miesięczny' }),
+      );
+
+      expect(
+        await screen.findByRole('dialog', { name: 'Nowy limit' }),
+      ).toBeInTheDocument();
     });
   });
 

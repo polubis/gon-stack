@@ -75,6 +75,7 @@ export const LimitsCard = ({ period }: { period: Period }) => {
               progress={totalProg}
               period={period}
               monthly={total?.amount}
+              onSet={() => openModal(NEW_LIMIT_MODAL)}
             />
             <div className="min-h-0 flex-1 overflow-y-auto pr-2">
               <CategoryLimits
