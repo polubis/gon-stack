@@ -38,7 +38,7 @@ export const BacklogDialog = ({ modal }: { modal: string }) => {
           }
         />
       ) : (
-        <TopicList topics={backlog} scope="backlog" folded={false} />
+        <TopicList topics={backlog} scope="backlog" folded={false} grouped />
       )}
     </ModalShell>
   );
