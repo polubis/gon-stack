@@ -53,6 +53,7 @@ type Category = Row & { name: string; icon: string; color: string };
 type Limit = Row & {
   scope: 'total' | 'category';
   amount: number;
+  categoryId?: string;
   alertAt: number;
 };
 type Recurring = RecurringRule & { paymentMethod: string; items?: Item[] };
