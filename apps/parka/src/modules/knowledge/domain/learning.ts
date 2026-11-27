@@ -1,5 +1,5 @@
 import { stateOf } from './filters';
-import type { Catalog, Category, Topic } from './models';
+import type { Topic } from './models';
 
 /** Mirrors the `summary` of the knowledge API; counted locally so writes update it at once. */
 export type KnowledgeSummary = {
@@ -30,27 +30,3 @@ export const summaryOf = (topics: readonly Topic[]): KnowledgeSummary => ({
 export const progressLabel = (
   topic: Pick<Topic, 'doneCount' | 'reelCount'>,
 ): string => `${topic.doneCount}/${topic.reelCount}`;
-
-/** Topics by category then catalog, in the given orders; empty groups dropped. */
-export type TopicGroup = {
-  category: Category | null;
-  catalogs: { catalog: Catalog; topics: Topic[] }[];
-};
-
-export const groupTopics = (
-  categories: readonly Category[],
-  catalogs: readonly Catalog[],
-  topics: readonly Topic[],
-): TopicGroup[] => {
-  const groups = [...categories, null].map((category) => ({
-    category,
-    catalogs: catalogs
-      .filter((c) => (c.categoryId ?? null) === (category?.id ?? null))
-      .map((catalog) => ({
-        catalog,
-        topics: topics.filter((t) => t.catalogId === catalog.id),
-      }))
-      .filter((entry) => entry.topics.length > 0),
-  }));
-  return groups.filter((group) => group.catalogs.length > 0);
-};

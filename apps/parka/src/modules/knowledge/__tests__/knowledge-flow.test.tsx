@@ -42,13 +42,14 @@ describe('knowledge screen', () => {
     expect(
       screen.getByText('Nieukończone').nextElementSibling,
     ).toHaveTextContent('4');
-    const english = within(
-      await screen.findByRole('region', { name: 'Katalog: Angielski' }),
-    );
-    expect(english.getByText('Phrasal verbs')).toBeVisible();
+    // Flat list: no category or catalog section, just the topics.
+    expect(await screen.findByText('Phrasal verbs')).toBeVisible();
+    expect(screen.getByText('Idiomy')).toBeVisible();
     // Any study day, dated or not, is listed; other catalogs stay out.
-    expect(english.getByText('Idiomy')).toBeVisible();
-    expect(english.getByText('Zaległy temat')).toBeVisible();
+    expect(screen.getByText('Zaległy temat')).toBeVisible();
+    expect(screen.queryByRole('region', { name: /^Katalog:/ })).toBeNull();
+    expect(screen.queryByRole('region', { name: /^Kategoria:/ })).toBeNull();
+    expect(screen.queryByRole('heading', { level: 4 })).toBeNull();
     expect(screen.queryByText('Joiny')).toBeNull();
     expect(screen.queryByRole('group', { name: 'Zakres czasu' })).toBeNull();
   });
@@ -216,6 +217,11 @@ describe('knowledge screen', () => {
       await screen.findByRole('dialog', { name: 'Backlog' }),
     );
     expect(dialog.getByText('Zaległy temat')).toBeVisible();
+    // Topics of many catalogs: one plain heading per catalog, no category level.
+    expect(
+      dialog.getByRole('region', { name: 'Katalog: Angielski' }),
+    ).toBeVisible();
+    expect(dialog.queryByRole('region', { name: /^Kategoria:/ })).toBeNull();
   });
 
   it('opens a topic and offers Start or Continue that opens the viewer modal', async () => {

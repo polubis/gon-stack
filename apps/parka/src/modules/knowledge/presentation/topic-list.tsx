@@ -1,26 +1,22 @@
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
-import { openModal } from '@/shared/router/modal-stack';
-import { Button } from '@/shared/ui/controls';
-import { useListChanges } from '@/shared/ui/list-changes';
 import { TOPICS_PREVIEW } from '../configuration/constraints';
-import { groupTopics } from '../domain/learning';
 import type { Catalog, Topic } from '../domain/models';
 import { useContext } from './context';
-import { newTopicInModal } from './modal-ids';
+import { useListChanges } from '@/shared/ui/list-changes';
+import { Button } from '@/shared/ui/controls';
 import { TopicRow } from './topic-row';
 
-/** Rows of one catalog; a long list folds behind "Pokaż więcej". */
-const CatalogSection = ({
-  catalog,
+/** Flat rows; a long list folds behind "Pokaż więcej". */
+const Rows = ({
   topics,
   scope,
   folded,
+  moreId,
 }: {
-  catalog: Catalog;
   topics: Topic[];
   scope: string;
   folded: boolean;
+  moreId: string;
 }) => {
   const [all, setAll] = useState(false);
   const rows = useListChanges(topics, (t) => t.id, scope);
@@ -29,24 +25,7 @@ const CatalogSection = ({
     folded && !all ? live.slice(0, TOPICS_PREVIEW).map((r) => r.key) : null;
   const hidden = shown ? live.length - shown.length : 0;
   return (
-    <section
-      aria-label={`Katalog: ${catalog.name}`}
-      data-e2e={`knowledge:catalog:${catalog.id}`}
-      className="flex flex-col gap-1"
-    >
-      <div className="flex items-center justify-between gap-2">
-        <h4 className="min-w-0 truncate text-sm font-semibold">
-          {catalog.name}
-        </h4>
-        <button
-          type="button"
-          aria-label={`Dodaj temat do katalogu: ${catalog.name}`}
-          onClick={() => openModal(newTopicInModal(catalog.id))}
-          className="grid size-8 shrink-0 place-items-center rounded-full text-ink-soft hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-        >
-          <Plus className="size-4" aria-hidden="true" />
-        </button>
-      </div>
+    <>
       <ul className="flex flex-col">
         {rows
           .filter(
@@ -61,58 +40,67 @@ const CatalogSection = ({
         <Button
           variant="ghost"
           className="w-auto self-start px-3 py-1.5 text-xs"
-          data-e2e={`knowledge:topic-more:${catalog.id}`}
+          data-e2e={`knowledge:topic-more:${moreId}`}
           onClick={() => setAll(true)}
         >
           Pokaż więcej ({hidden})
         </Button>
       ) : null}
-    </section>
+    </>
   );
 };
 
-/** Topics by category (area), then catalog. `scope` resets the change animations. */
+/**
+ * Topics as one flat list. `grouped` (topics of many catalogs, f.e. backlog)
+ * adds a plain catalog heading per group, like the finance lists.
+ * `scope` resets the change animations.
+ */
 export const TopicList = ({
   topics,
   scope,
   folded = true,
+  grouped = false,
 }: {
   topics: Topic[];
   scope: string;
   folded?: boolean;
+  grouped?: boolean;
 }) => {
-  const { categories, catalogs } = useContext();
-  const groups = groupTopics(categories, catalogs, topics);
+  const { catalogs } = useContext();
+  if (!grouped) {
+    return (
+      <div data-e2e="knowledge:list" className="flex flex-col gap-1">
+        <Rows topics={topics} scope={scope} folded={folded} moreId="all" />
+      </div>
+    );
+  }
+  const groups = catalogs
+    .map((catalog) => ({
+      catalog,
+      own: topics.filter((t) => t.catalogId === catalog.id),
+    }))
+    .filter(
+      (group): group is { catalog: Catalog; own: Topic[] } =>
+        group.own.length > 0,
+    );
   return (
     <div data-e2e="knowledge:list" className="flex flex-col gap-4">
-      {groups.map((group) => (
+      {groups.map(({ catalog, own }) => (
         <section
-          key={group.category?.id ?? 'none'}
-          aria-label={`Kategoria: ${group.category?.name ?? 'Bez kategorii'}`}
-          data-e2e={`knowledge:category:${group.category?.id ?? 'none'}`}
-          className="flex flex-col gap-2"
+          key={catalog.id}
+          aria-label={`Katalog: ${catalog.name}`}
+          data-e2e={`knowledge:catalog:${catalog.id}`}
+          className="flex flex-col gap-1"
         >
-          <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-ink-soft">
-            <span
-              aria-hidden="true"
-              className="size-2 shrink-0 rounded-full bg-line-strong"
-              style={
-                group.category
-                  ? { backgroundColor: group.category.color }
-                  : undefined
-              }
-            />
-            {group.category?.name ?? 'Bez kategorii'}
+          <h3 className="truncate px-2 text-xs font-semibold uppercase tracking-wide text-ink-soft">
+            {catalog.name}
           </h3>
-          {group.catalogs.map(({ catalog, topics: own }) => (
-            <CatalogSection
-              key={catalog.id}
-              catalog={catalog}
-              topics={own}
-              scope={scope}
-              folded={folded}
-            />
-          ))}
+          <Rows
+            topics={own}
+            scope={scope}
+            folded={folded}
+            moreId={catalog.id}
+          />
         </section>
       ))}
     </div>

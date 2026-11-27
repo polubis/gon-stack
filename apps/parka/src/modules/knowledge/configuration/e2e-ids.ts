@@ -81,7 +81,6 @@ export const KNOWLEDGE_E2E_IDS = [
 ] as const;
 
 export type KnowledgeDynamicE2eId =
-  | `knowledge:category:${string}`
   | `knowledge:catalog:${string}`
   | `knowledge:catalog-option:${string}`
   | `knowledge:topic:${string}`

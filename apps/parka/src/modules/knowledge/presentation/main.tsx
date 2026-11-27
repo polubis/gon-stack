@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import { cn } from '@repo/react-kit/cn';
 import { ErrorBoundary } from '@repo/react-kit/error-boundary';
 import { FabRail } from '@/shared/navigation/overlay-nav/presentation/fab-rail';
+import { openModal } from '@/shared/router/modal-stack';
 import { APP_ROUTER } from '@/shared/router/routes';
 import { ErrorState } from '@/shared/ui/error-state';
 import { Card, ScreenHeader } from '@/shared/ui/layout';
@@ -18,6 +19,7 @@ import { FiltersButton } from './filters-button';
 import { Summary } from './summary';
 import { CatalogPicker, cycleCatalog } from './catalog-picker';
 import { useCatalogSwipe } from './use-catalog-swipe';
+import { newTopicInModal } from './modal-ids';
 import { Modals } from './modals';
 import { ScreenSkeleton } from './skeleton';
 import { TopicList } from './topic-list';
@@ -123,7 +125,21 @@ const Screen = () => {
                 <Summary />
               </div>
               <Card className="flex flex-col gap-4 xl:col-span-7">
-                <h2 className="text-base font-semibold">Tematy</h2>
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className="min-w-0 truncate text-base font-semibold">
+                    Tematy
+                  </h2>
+                  {catalog ? (
+                    <button
+                      type="button"
+                      aria-label={`Dodaj temat do katalogu: ${catalog.name}`}
+                      onClick={() => openModal(newTopicInModal(catalog.id))}
+                      className="grid size-9 shrink-0 place-items-center rounded-full text-ink-soft hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                    >
+                      <Plus className="size-4" aria-hidden="true" />
+                    </button>
+                  ) : null}
+                </div>
                 {nothing && !isLoading ? (
                   <EmptyKnowledge />
                 ) : topics.length === 0 ? (
