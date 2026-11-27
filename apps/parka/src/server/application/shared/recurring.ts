@@ -46,9 +46,15 @@ export const toRule = (row: RuleRow, items: ItemRow[] = []): Rule => ({
   items: items.filter((i) => i.recurring_id === row.id).map(toItem),
 });
 
-/** Products of the given rules (RLS scopes the read to the caller). */
-export const loadRuleItems = async (db: SupabaseServer): Promise<ItemRow[]> => {
-  const { data, error } = await db.from('recurring_items').select('*');
+/** Products of one rule, or of every rule (RLS scopes the read to the caller). */
+export const loadRuleItems = async (
+  db: SupabaseServer,
+  recurringId?: string,
+): Promise<ItemRow[]> => {
+  const all = db.from('recurring_items').select('*');
+  const { data, error } = await (recurringId === undefined
+    ? all
+    : all.eq('recurring_id', recurringId));
   if (error) throw fromSupabaseError(error);
   return data;
 };

@@ -89,15 +89,18 @@ export const deleteExpenses = async (
   db: SupabaseServer,
   ids: string[],
 ): Promise<void> => {
-  for (const part of chunks(ids)) {
-    const items = await db
-      .from('receipt_items')
-      .delete()
-      .in('expense_id', part);
-    if (items.error) throw fromSupabaseError(items.error);
-    const expenses = await db.from('expenses').delete().in('id', part);
-    if (expenses.error) throw fromSupabaseError(expenses.error);
-  }
+  // Chunks are independent: each keeps its items-then-expenses order, all run together.
+  await Promise.all(
+    chunks(ids).map(async (part) => {
+      const items = await db
+        .from('receipt_items')
+        .delete()
+        .in('expense_id', part);
+      if (items.error) throw fromSupabaseError(items.error);
+      const expenses = await db.from('expenses').delete().in('id', part);
+      if (expenses.error) throw fromSupabaseError(expenses.error);
+    }),
+  );
 };
 
 /** Writes what the occurrence edit shares with the other occurrences; each keeps its own day. */
@@ -107,41 +110,44 @@ export const editExpenses = async (
   ids: string[],
   edit: SeriesEdit,
 ): Promise<void> => {
-  for (const part of chunks(ids)) {
-    const updated = await db
-      .from('expenses')
-      .update({
-        merchant: edit.merchant,
-        amount: edit.amount,
-        category_id: edit.categoryId,
-        payment_method: edit.paymentMethod,
-        is_bill: edit.isBill,
-      })
-      .in('id', part);
-    if (updated.error) throw fromSupabaseError(updated.error);
+  // Chunks are independent: one round trip chain per chunk, all in parallel.
+  await Promise.all(
+    chunks(ids).map(async (part) => {
+      const updated = await db
+        .from('expenses')
+        .update({
+          merchant: edit.merchant,
+          amount: edit.amount,
+          category_id: edit.categoryId,
+          payment_method: edit.paymentMethod,
+          is_bill: edit.isBill,
+        })
+        .in('id', part);
+      if (updated.error) throw fromSupabaseError(updated.error);
 
-    const wiped = await db
-      .from('receipt_items')
-      .delete()
-      .in('expense_id', part);
-    if (wiped.error) throw fromSupabaseError(wiped.error);
-    if (edit.items.length === 0) continue;
-    const inserted = await db.from('receipt_items').insert(
-      part.flatMap((expenseId) =>
-        edit.items.map((it) => ({
-          user_id: userId,
-          id: `${expenseId}:${it.id.split(':').at(-1)}`,
-          expense_id: expenseId,
-          name: it.name,
-          unit_price: it.unitPrice,
-          quantity: it.quantity,
-          discount: it.discount,
-          category_id: it.categoryId,
-        })),
-      ),
-    );
-    if (inserted.error) throw fromSupabaseError(inserted.error);
-  }
+      const wiped = await db
+        .from('receipt_items')
+        .delete()
+        .in('expense_id', part);
+      if (wiped.error) throw fromSupabaseError(wiped.error);
+      if (edit.items.length === 0) return;
+      const inserted = await db.from('receipt_items').insert(
+        part.flatMap((expenseId) =>
+          edit.items.map((it) => ({
+            user_id: userId,
+            id: `${expenseId}:${it.id.split(':').at(-1)}`,
+            expense_id: expenseId,
+            name: it.name,
+            unit_price: it.unitPrice,
+            quantity: it.quantity,
+            discount: it.discount,
+            category_id: it.categoryId,
+          })),
+        ),
+      );
+      if (inserted.error) throw fromSupabaseError(inserted.error);
+    }),
+  );
 };
 
 /** Ends the series at `endDate`; `null` removes the rule (nothing is left to make). */
@@ -208,7 +214,7 @@ const valuesOf = (row: RuleRow, items: Item[]): RuleValues => {
 };
 
 const itemsOf = async (db: SupabaseServer, row: RuleRow): Promise<Item[]> =>
-  toRule(row, await loadRuleItems(db)).items;
+  toRule(row, await loadRuleItems(db, row.id)).items;
 
 /** An occurrence the series has not turned into an expense yet. */
 const isUpcoming = (row: RuleRow, anchor: string): boolean =>
@@ -297,9 +303,12 @@ export const deleteSeries = async (
   anchor: string,
   scope: RecurringScope,
 ): Promise<void> => {
-  const ids = await seriesExpenseIds(db, ruleId, scope, anchor);
+  // The rule read is independent of the series ids: one round trip.
+  const [ids, row] = await Promise.all([
+    seriesExpenseIds(db, ruleId, scope, anchor),
+    loadRule(db, ruleId),
+  ]);
   await deleteExpenses(db, ids);
-  const row = await loadRule(db, ruleId);
   if (!row) return;
 
   if (scope === 'all') return endRule(db, row, null);
