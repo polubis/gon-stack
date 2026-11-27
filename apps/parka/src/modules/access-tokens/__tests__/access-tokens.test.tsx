@@ -118,6 +118,11 @@ const setup = async (initial: Item[], overrides = {}) => {
   return { user, ...api };
 };
 
+const manyTokens = (count: number): Item[] =>
+  Array.from({ length: count }, (_, i) =>
+    item({ id: `token-${i}`, name: `Client ${i}` }),
+  );
+
 const generate = async (
   user: ReturnType<typeof userEvent.setup>,
   name: string,
@@ -166,6 +171,50 @@ describe('access tokens list', () => {
     await setup([item({ status: 'expired' })]);
 
     expect(screen.getByText('Wygasł')).toBeInTheDocument();
+  });
+
+  it('shows when a token expires, expired or never does', async () => {
+    await setup([
+      item({ id: 'a', name: 'Soon', expiresAt: '2026-12-01T10:00:00.000Z' }),
+      item({
+        id: 'b',
+        name: 'Old',
+        status: 'expired',
+        expiresAt: '2026-10-01T10:00:00.000Z',
+      }),
+      item({ id: 'c', name: 'Forever', ttlDays: null, expiresAt: null }),
+    ]);
+
+    const rows = within(
+      screen.getByRole('list', { name: 'Tokeny' }),
+    ).getAllByRole('listitem');
+    expect(within(rows[0]!).getByText(/^Wygasa /)).toBeInTheDocument();
+    expect(within(rows[1]!).getByText(/^Wygasł /)).toBeInTheDocument();
+    expect(within(rows[2]!).getByText('Bez wygaśnięcia')).toBeInTheDocument();
+  });
+
+  it('shows when a token was last used instead of never', async () => {
+    await setup([item({ lastUsedAt: '2026-11-20T09:30:00.000Z' })]);
+
+    expect(screen.queryByText('Nigdy')).not.toBeInTheDocument();
+  });
+
+  it('lets one more token be generated below the limit', async () => {
+    await setup(manyTokens(9));
+
+    expect(screen.getAllByRole('button', { name: /Generuj/ })[0]).toBeEnabled();
+    expect(screen.queryByText(/Limit 10 tokenów/)).not.toBeInTheDocument();
+  });
+
+  it('blocks generating at the token limit and says why', async () => {
+    await setup(manyTokens(10));
+
+    expect(
+      screen.getAllByRole('button', { name: /Generuj/ })[0],
+    ).toBeDisabled();
+    expect(
+      screen.getByText('Limit 10 tokenów. Usuń nieużywany, aby dodać nowy.'),
+    ).toBeInTheDocument();
   });
 
   it('explains a failed load and offers a retry', async () => {
@@ -243,10 +292,13 @@ describe('access token creation', () => {
     ).toBeInTheDocument();
   });
 
-  it('confirms with a plain toast', async () => {
+  it('stays silent on success, the secret dialog is the feedback', async () => {
     const { user } = await setup([]);
 
     await generate(user, 'Cursor');
+
+    await screen.findByRole('dialog', { name: 'Twój nowy token' });
+    expect(screen.queryByText('Utworzono token.')).not.toBeInTheDocument();
   });
 
   it('sends no expiry for a token that never expires', async () => {
@@ -269,6 +321,43 @@ describe('access token creation', () => {
 
     await screen.findByRole('dialog', { name: 'Twój nowy token' });
     expect(created).toEqual([{ name: 'Forever', ttlDays: null }]);
+  });
+
+  it('sends the name without surrounding spaces', async () => {
+    const { user, created } = await setup([]);
+
+    await generate(user, '  Cursor  ');
+
+    await screen.findByRole('dialog', { name: 'Twój nowy token' });
+    expect(created).toEqual([{ name: 'Cursor', ttlDays: 30 }]);
+  });
+
+  it('keeps the name within 60 characters', async () => {
+    const { user } = await setup([]);
+    await user.click(screen.getAllByRole('button', { name: /Generuj/ })[0]!);
+    const dialog = await screen.findByRole('dialog', { name: 'Nowy token' });
+    const name = within(dialog).getByRole('textbox', { name: /Nazwa/ });
+
+    await user.type(name, 'x'.repeat(75));
+
+    expect(name).toHaveValue('x'.repeat(60));
+  });
+
+  it('copies the secret to the clipboard on request', async () => {
+    const { user } = await setup([]);
+    await generate(user, 'Cursor');
+    const reveal = await screen.findByRole('dialog', {
+      name: 'Twój nowy token',
+    });
+
+    await user.click(
+      within(reveal).getByRole('button', { name: 'Kopiuj token' }),
+    );
+
+    expect(
+      await within(reveal).findByRole('button', { name: 'Skopiowano' }),
+    ).toBeInTheDocument();
+    expect(await navigator.clipboard.readText()).toBe(SECRET);
   });
 
   it('does not submit a blank name', async () => {
