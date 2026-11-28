@@ -2,18 +2,21 @@ import { createKnowledgeTopicSchema } from '@schemas/knowledge';
 import { fromSupabaseError } from '../../adapter/supabase';
 import { withZodSchema } from '../../adapter/zod';
 import { privateProcedure } from '../../core/procedure';
-import { loadTopic, requireOwned, syncTopicTags } from '../../shared/knowledge';
+import {
+  loadTopic,
+  requireOwnedWithTags,
+  writeTopicTags,
+} from '../../shared/knowledge';
 
 export const createKnowledgeTopic = privateProcedure({
   schema: withZodSchema({ schema: createKnowledgeTopicSchema }),
 })({
   handler: async (input, { db, user }) => {
-    await requireOwned(
+    await requireOwnedWithTags(
       db,
       user.id,
-      'knowledge_catalogs',
       input.catalogId,
-      'Catalog not found',
+      input.tagIds ?? [],
     );
 
     const { data, error } = await db
@@ -29,7 +32,9 @@ export const createKnowledgeTopic = privateProcedure({
       .select('id')
       .single();
     if (error) throw fromSupabaseError(error);
-    await syncTopicTags(db, user.id, data.id, input.tagIds ?? []);
+    await writeTopicTags(db, user.id, data.id, input.tagIds ?? [], {
+      fresh: true,
+    });
 
     return {
       code: 201 as const,

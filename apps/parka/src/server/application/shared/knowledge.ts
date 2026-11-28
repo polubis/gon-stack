@@ -218,39 +218,78 @@ export const loadTopic = async (
   return toTopic(data);
 };
 
-/** Makes the topic carry exactly these tags; a tag the owner lacks answers 404. */
-export const syncTopicTags = async (
+/** Fails with 404 unless every tag is the owner's; reads only, so it can run beside other checks. */
+export const requireTags = async (
+  db: SupabaseServer,
+  userId: string,
+  tagIds: string[],
+) => {
+  const wanted = [...new Set(tagIds)];
+  if (wanted.length === 0) return;
+  const { data, error } = await db
+    .from('knowledge_tags')
+    .select('id')
+    .eq('user_id', userId)
+    .in('id', wanted);
+  if (error) throw fromSupabaseError(error);
+  if (data.length !== wanted.length)
+    throw new NotFound(undefined, 'Tag not found');
+};
+
+/**
+ * Makes `tagIds` the topic's tags (already checked with `requireTags`). Adding
+ * and dropping are independent writes, so they run together; a new topic has
+ * nothing to drop.
+ */
+export const writeTopicTags = async (
   db: SupabaseServer,
   userId: string,
   topicId: string,
   tagIds: string[],
+  { fresh = false }: { fresh?: boolean } = {},
 ) => {
   const wanted = [...new Set(tagIds)];
-  if (wanted.length > 0) {
-    const tags = await db
-      .from('knowledge_tags')
-      .select('id')
-      .eq('user_id', userId)
-      .in('id', wanted);
-    if (tags.error) throw fromSupabaseError(tags.error);
-    if (tags.data.length !== wanted.length)
-      throw new NotFound(undefined, 'Tag not found');
-
-    const added = await db.from('knowledge_topic_tags').upsert(
+  const add = async () => {
+    if (wanted.length === 0) return;
+    const { error } = await db.from('knowledge_topic_tags').upsert(
       wanted.map((tag_id) => ({ user_id: userId, topic_id: topicId, tag_id })),
       { onConflict: 'user_id,topic_id,tag_id', ignoreDuplicates: true },
     );
-    if (added.error) throw fromSupabaseError(added.error);
-  }
+    if (error) throw fromSupabaseError(error);
+  };
+  const drop = async () => {
+    if (fresh) return;
+    const removal = db
+      .from('knowledge_topic_tags')
+      .delete()
+      .eq('user_id', userId)
+      .eq('topic_id', topicId);
+    const { error } =
+      wanted.length > 0
+        ? await removal.not('tag_id', 'in', `(${wanted.join(',')})`)
+        : await removal;
+    if (error) throw fromSupabaseError(error);
+  };
+  await Promise.all([add(), drop()]);
+};
 
-  const removal = db
-    .from('knowledge_topic_tags')
-    .delete()
-    .eq('user_id', userId)
-    .eq('topic_id', topicId);
-  const { error } =
-    wanted.length > 0
-      ? await removal.not('tag_id', 'in', `(${wanted.join(',')})`)
-      : await removal;
-  if (error) throw fromSupabaseError(error);
+/** Runs both checks together; the first one named fails first, whatever the timing. */
+export const requireOwnedWithTags = async (
+  db: SupabaseServer,
+  userId: string,
+  catalogId: string,
+  tagIds: string[],
+) => {
+  const [catalog, tags] = await Promise.allSettled([
+    requireOwned(
+      db,
+      userId,
+      'knowledge_catalogs',
+      catalogId,
+      'Catalog not found',
+    ),
+    requireTags(db, userId, tagIds),
+  ]);
+  if (catalog.status === 'rejected') throw catalog.reason;
+  if (tags.status === 'rejected') throw tags.reason;
 };
