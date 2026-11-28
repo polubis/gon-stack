@@ -3,12 +3,16 @@ import { interpreter, type CommandRegistry } from '@repo/vibe-test';
 import { test, type Ctx } from '@/__e2e__/test';
 import { signInAsTestUser } from '@/__e2e__/session';
 import { APP_ROUTER } from '@/shared/router/routes';
-import { addDays, todayDay } from '@/shared/period/period';
+import { addDays } from '@/shared/period/period';
 import { installBackend, type Seed } from './fake-backend';
 
 const FOOD = { id: 'cat-1', name: 'Spożywcze', icon: 'cart', color: '#0f7a4f' };
 
-/** Five rules: two months out, so only the first three fit the panel. */
+/** Fixed mid-month present: the next five days never cross the month edge the panel stops at. */
+const NOW = new Date(new Date().getFullYear(), new Date().getMonth(), 10, 12);
+const TODAY = `${NOW.getFullYear()}-${String(NOW.getMonth() + 1).padStart(2, '0')}-10`;
+
+/** Five rules in the next five days, so only the first three fit the panel. */
 const SEED: Seed = {
   categories: [FOOD],
   expenses: [],
@@ -18,7 +22,7 @@ const SEED: Seed = {
     name: `Abonament ${i}`,
     cost: 10 + i,
     interval: 'yearly' as const,
-    startDate: addDays(todayDay(), 1 + i),
+    startDate: addDays(TODAY, 1 + i),
     endDate: null,
     lastMaterializedDate: null,
     active: true,
@@ -30,7 +34,8 @@ const SEED: Seed = {
 
 const open = async (page: Page, path: string): Promise<void> => {
   await signInAsTestUser(page);
-  await installBackend(page, SEED);
+  await page.clock.setFixedTime(NOW);
+  await installBackend(page, SEED, TODAY);
   await page.goto(path);
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(200);
