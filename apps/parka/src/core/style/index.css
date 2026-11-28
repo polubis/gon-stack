@@ -68,6 +68,9 @@
   --z-toast: 40;
   --z-tooltip: 50;
 
+  /* Side padding of every screen. Use only via `px-gutter` / `px-gutter-inset`. */
+  --gutter-x: 1rem;
+
   color-scheme: light;
 
   --surface: #f4f2f7;
@@ -563,6 +566,26 @@
 }
 
 /* Ambient ground. On `body` and on full-screen layers that cover it. */
+@media (min-width: 48rem) {
+  :root {
+    --gutter-x: 1.25rem;
+  }
+}
+@media (min-width: 80rem) {
+  :root {
+    --gutter-x: 1.5rem;
+  }
+}
+
+/* Screen side padding, one source for every module. */
+@utility px-gutter {
+  padding-inline: var(--gutter-x);
+}
+/* Same gutter for a wrapper around `ScreenHeader`, which already pads 1rem itself. */
+@utility px-gutter-inset {
+  padding-inline: calc(var(--gutter-x) - 1rem);
+}
+
 @utility bg-aura {
   background-color: var(--surface);
   background-image: var(--aura);

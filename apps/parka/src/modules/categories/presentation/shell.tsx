@@ -30,13 +30,13 @@ const Layout = () => {
       >
         {error ? (
           <>
-            <div className="mx-auto w-full max-w-2xl md:px-4">
+            <div className="mx-auto w-full max-w-2xl px-gutter-inset">
               <ScreenHeader
                 title="Kategorie"
                 backHref={APP_ROUTER.settings()}
               />
             </div>
-            <div className="mx-auto w-full max-w-2xl px-4 pt-2 md:px-8">
+            <div className="mx-auto w-full max-w-2xl px-gutter pt-2">
               <ErrorState
                 data-e2e="categories:load-error"
                 title="Nie udało się wczytać kategorii"

@@ -42,10 +42,10 @@ const DataExportView = () => {
       className="relative flex flex-1 animate-view-enter flex-col motion-reduce:animate-none"
     >
       <LoadingBanner active={isLoading && !initializing} />
-      <div className="md:px-4 lg:px-6 xl:px-12">
+      <div className="px-gutter-inset">
         <ScreenHeader title="Eksport danych" backHref={APP_ROUTER.privacy()} />
       </div>
-      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2 md:gap-6 md:px-8 lg:px-10 xl:px-16">
+      <main className="flex flex-1 flex-col gap-4 px-gutter pb-6 pt-2 md:gap-6">
         <p className="max-w-3xl text-sm text-ink-soft md:text-base">
           Pobierz swoje dane finansowe w formacie CSV lub PDF. Masz pełną
           kontrolę nad danymi i możesz je usunąć w każdej chwili.

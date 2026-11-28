@@ -86,14 +86,14 @@ const Form = ({ base }: FormProps) => {
 
   return (
     <>
-      <div className="mx-auto w-full max-w-2xl md:px-4">
+      <div className="mx-auto w-full max-w-2xl px-gutter-inset">
         <ScreenHeader
           data-e2e="categories:form-header"
           title={base ? `Edytuj: ${originalName}` : 'Nowa kategoria'}
           backHref={APP_ROUTER.categories()}
         />
       </div>
-      <main className="mx-auto w-full max-w-2xl flex-1 px-4 pb-8 pt-2 md:px-8">
+      <main className="mx-auto w-full max-w-2xl flex-1 px-gutter pb-8 pt-2">
         <form
           onSubmit={submit}
           noValidate
@@ -176,7 +176,7 @@ const Form = ({ base }: FormProps) => {
 };
 
 const EditorSkeleton = () => (
-  <div className="mx-auto w-full max-w-2xl space-y-6 px-4 pt-6 md:px-8">
+  <div className="mx-auto w-full max-w-2xl space-y-6 px-gutter pt-6">
     <Skeleton className="h-16 w-full rounded-xl" />
     <Skeleton className="h-16 w-full rounded-xl" />
     <Skeleton className="h-16 w-full rounded-xl" />
@@ -203,7 +203,7 @@ export const Main = () => {
   const category = categories.find((c) => c.id === id);
   if (!category) {
     return (
-      <div className="mx-auto w-full max-w-2xl px-4 pt-4 md:px-8">
+      <div className="mx-auto w-full max-w-2xl px-gutter pt-4">
         <ErrorState
           data-e2e="categories:not-found"
           title="Nie znaleziono kategorii"

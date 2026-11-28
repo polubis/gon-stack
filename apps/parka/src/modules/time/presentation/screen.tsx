@@ -131,7 +131,7 @@ const Screen = ({ kind, children }: Props) => {
       className="relative mx-auto flex w-full max-w-7xl flex-1 animate-view-enter flex-col overflow-x-clip motion-reduce:animate-none"
     >
       <LoadingBanner active={isLoading && !initializing} />
-      <div className="md:px-4 lg:px-6 xl:px-12">
+      <div className="px-gutter-inset">
         <ScreenHeader
           title="Czas"
           eyebrow={eyebrow}
@@ -153,7 +153,7 @@ const Screen = ({ kind, children }: Props) => {
       </div>
       <main
         {...gesture}
-        className="flex flex-1 flex-col gap-3 px-4 pb-24 pt-2 md:gap-4 md:px-8 md:pb-6 lg:px-10 xl:px-16"
+        className="flex flex-1 flex-col gap-3 px-gutter pb-24 pt-2 md:gap-4 md:pb-6"
       >
         <RangeControl period={period} onChange={go} />
         <div

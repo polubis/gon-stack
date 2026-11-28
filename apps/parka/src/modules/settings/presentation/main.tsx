@@ -196,10 +196,10 @@ const SettingsView = () => {
       className="relative mx-auto flex w-full max-w-7xl flex-1 animate-view-enter flex-col motion-reduce:animate-none"
     >
       <LoadingBanner active={isLoading && !initializing} />
-      <div className="md:px-4 lg:px-6 xl:px-12">
+      <div className="px-gutter-inset">
         <ScreenHeader title="Ustawienia" eyebrow={eyebrow} />
       </div>
-      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2 md:gap-6 md:px-8 lg:px-10 xl:px-16">
+      <main className="flex flex-1 flex-col gap-4 px-gutter pb-6 pt-2 md:gap-6">
         {error ? (
           <ErrorState
             data-e2e="settings:load-error"

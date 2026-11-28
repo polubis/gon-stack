@@ -103,7 +103,7 @@ const Preview = () => (
 const HomeView = () => (
   <div
     data-e2e="home:main"
-    className="mx-auto grid w-full max-w-7xl flex-1 items-center gap-12 px-4 py-10 md:px-8 lg:grid-cols-2 lg:gap-16 lg:px-10 lg:py-16 xl:px-16"
+    className="mx-auto grid w-full max-w-7xl flex-1 items-center gap-12 px-gutter py-10 lg:grid-cols-2 lg:gap-16 lg:py-16"
   >
     <div className="flex min-w-0 animate-view-enter flex-col items-start motion-reduce:animate-none">
       <h1 className="text-7xl font-semibold leading-none tracking-tighter md:text-8xl xl:text-9xl">

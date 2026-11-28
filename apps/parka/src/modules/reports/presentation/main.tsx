@@ -58,10 +58,10 @@ const ReportsView = () => {
       className="relative flex flex-1 animate-view-enter flex-col motion-reduce:animate-none"
     >
       <LoadingBanner active={isLoading && !initializing} />
-      <div className="md:px-4 lg:px-6 xl:px-12">
+      <div className="px-gutter-inset">
         <ScreenHeader title="Raport" backHref={APP_ROUTER.settings()} />
       </div>
-      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2 md:gap-6 md:px-8 lg:grid lg:grid-cols-3 lg:content-start lg:items-start lg:px-10 xl:px-16">
+      <main className="flex flex-1 flex-col gap-4 px-gutter pb-6 pt-2 md:gap-6 lg:grid lg:grid-cols-3 lg:content-start lg:items-start">
         <p className="text-sm capitalize text-ink-soft lg:col-span-3">
           {monthLabel(month)}
         </p>

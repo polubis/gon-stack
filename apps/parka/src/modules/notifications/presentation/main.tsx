@@ -40,14 +40,14 @@ const NotificationsView = () => {
       className="relative flex flex-1 animate-view-enter flex-col motion-reduce:animate-none"
     >
       <LoadingBanner active={isLoading && !initializing} />
-      <div className="mx-auto w-full max-w-2xl md:px-4">
+      <div className="mx-auto w-full max-w-2xl px-gutter-inset">
         <ScreenHeader
           title="Powiadomienia"
           backHref={APP_ROUTER.settings()}
           action={<HeaderActions />}
         />
       </div>
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 px-4 pb-6 pt-2 md:gap-4 md:px-8">
+      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 px-gutter pb-6 pt-2 md:gap-4">
         {initializing || total === 0 ? null : (
           <p
             role="status"
