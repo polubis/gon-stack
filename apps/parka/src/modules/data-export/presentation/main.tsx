@@ -8,11 +8,11 @@ import { EmptyState } from '@/shared/ui/empty-state';
 import { Card, ScreenHeader } from '@/shared/ui/layout';
 import { ErrorState } from '@/shared/ui/error-state';
 import { LoadingBanner } from '@/shared/ui/loading-banner';
-import { Skeleton } from '@/shared/ui/skeleton';
 import { ERROR_CODES, FORMATS } from '../configuration/constraints';
 import { toFile, toRows } from './selectors';
 import type { Format } from '../domain/models';
 import { Provider, useContext } from './context';
+import { ExportSkeleton } from './skeleton';
 import { download } from './download';
 
 const DataExportView = () => {
@@ -30,6 +30,7 @@ const DataExportView = () => {
   }, [ctx]);
 
   const isEmpty = !initializing && error === null && expenses.length === 0;
+  const ready = !initializing && error === null && !isEmpty;
 
   const exportNow = () => {
     download(toFile(format, toRows(expenses, categories)));
@@ -79,78 +80,67 @@ const DataExportView = () => {
           />
         ) : null}
 
-        {initializing ? (
-          <div
-            data-e2e="data-export:skeleton"
-            aria-busy="true"
-            aria-label="Wczytywanie danych do eksportu"
-            role="status"
-          >
-            <p aria-hidden="true" className="mb-2 text-sm font-semibold">
-              Format
-            </p>
-            <div className="grid gap-2 md:max-w-2xl md:grid-cols-2 md:gap-4">
+        {initializing ? <ExportSkeleton /> : null}
+
+        {ready ? (
+          <>
+            <fieldset className="grid gap-2 md:max-w-2xl md:grid-cols-2 md:gap-4">
+              <legend className="mb-2 text-sm font-semibold">Format</legend>
               {FORMATS.map((f) => (
-                <Card key={f} className="flex items-center gap-3">
-                  <Skeleton className="h-4 w-4 rounded-full" />
-                  <Skeleton className="h-5 w-5" />
-                  <Skeleton className="h-4 w-10" />
+                <Card
+                  as="label"
+                  key={f}
+                  className={cn(
+                    'flex cursor-pointer items-center gap-3',
+                    f === format && 'border-brand',
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="format"
+                    value={f}
+                    checked={f === format}
+                    data-e2e={`data-export:format:${f}`}
+                    onChange={() => {
+                      setFormat(f);
+                      setDone(false);
+                    }}
+                  />
+                  {f === 'csv' ? (
+                    <FileText
+                      className="h-5 w-5 text-brand"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <FileDown
+                      className="h-5 w-5 text-brand"
+                      aria-hidden="true"
+                    />
+                  )}
+                  <span className="text-sm font-medium uppercase">{f}</span>
                 </Card>
               ))}
-            </div>
-          </div>
-        ) : (
-          <fieldset className="grid gap-2 md:max-w-2xl md:grid-cols-2 md:gap-4">
-            <legend className="mb-2 text-sm font-semibold">Format</legend>
-            {FORMATS.map((f) => (
-              <Card
-                as="label"
-                key={f}
-                className={cn(
-                  'flex cursor-pointer items-center gap-3',
-                  f === format && 'border-brand',
-                )}
+            </fieldset>
+
+            <Button
+              data-e2e="data-export:run"
+              className="md:max-w-xs"
+              onClick={exportNow}
+            >
+              Eksportuj
+            </Button>
+
+            {done ? (
+              <p
+                role="status"
+                className="inline-flex items-center gap-2 text-sm font-medium text-brand-dark"
+                data-e2e="data-export:done"
               >
-                <input
-                  type="radio"
-                  name="format"
-                  value={f}
-                  checked={f === format}
-                  data-e2e={`data-export:format:${f}`}
-                  onChange={() => {
-                    setFormat(f);
-                    setDone(false);
-                  }}
-                />
-                {f === 'csv' ? (
-                  <FileText className="h-5 w-5 text-brand" aria-hidden="true" />
-                ) : (
-                  <FileDown className="h-5 w-5 text-brand" aria-hidden="true" />
-                )}
-                <span className="text-sm font-medium uppercase">{f}</span>
-              </Card>
-            ))}
-          </fieldset>
-        )}
-
-        <Button
-          data-e2e="data-export:run"
-          className="md:max-w-xs"
-          disabled={initializing || error !== null || isEmpty}
-          onClick={exportNow}
-        >
-          Eksportuj
-        </Button>
-
-        {done ? (
-          <p
-            role="status"
-            className="inline-flex items-center gap-2 text-sm font-medium text-brand-dark"
-            data-e2e="data-export:done"
-          >
-            <Check className="h-4 w-4" aria-hidden="true" /> Plik został
-            pobrany.
-          </p>
+                <Check className="h-4 w-4" aria-hidden="true" /> Plik został
+                pobrany.
+              </p>
+            ) : null}
+          </>
         ) : null}
       </main>
     </div>
