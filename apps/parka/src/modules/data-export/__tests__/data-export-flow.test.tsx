@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
@@ -51,11 +51,8 @@ describe('data export page', () => {
     URL.createObjectURL = vi.fn(() => 'blob:x');
     URL.revokeObjectURL = vi.fn();
     render(<Main />);
-    const run = screen.getByRole('button', { name: 'Eksportuj' });
+    const run = await screen.findByRole('button', { name: 'Eksportuj' });
 
-    await waitFor(() =>
-      expect((run as HTMLButtonElement).disabled).toBe(false),
-    );
     await userEvent.click(run);
 
     expect(await screen.findByText(/Plik został pobrany/)).toBeTruthy();
@@ -67,10 +64,8 @@ describe('data export page', () => {
 
     expect(await screen.findByRole('alert')).toBeTruthy();
     expect(screen.getByText('DATA_EXPORT_LOAD')).toBeTruthy();
-    expect(
-      (screen.getByRole('button', { name: 'Eksportuj' }) as HTMLButtonElement)
-        .disabled,
-    ).toBe(true);
+    expect(screen.queryByRole('button', { name: 'Eksportuj' })).toBeNull();
+    expect(screen.queryByRole('radio')).toBeNull();
   });
 
   it('shows an empty state and blocks export when there are no expenses', async () => {
@@ -78,10 +73,8 @@ describe('data export page', () => {
     render(<Main />);
 
     expect(await screen.findByText('Brak danych do eksportu')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Eksportuj' })).toHaveProperty(
-      'disabled',
-      true,
-    );
+    expect(screen.queryByRole('button', { name: 'Eksportuj' })).toBeNull();
+    expect(screen.queryByRole('radio')).toBeNull();
   });
 
   it('recovers after retrying a failed load', async () => {
@@ -94,12 +87,10 @@ describe('data export page', () => {
       screen.getByRole('button', { name: /ponów|spróbuj/i }),
     );
 
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Eksportuj' })).toHaveProperty(
-        'disabled',
-        false,
-      ),
-    );
+    expect(
+      await screen.findByRole('button', { name: 'Eksportuj' }),
+    ).toBeTruthy();
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 
   it('shows the server message when loading fails', async () => {
@@ -118,10 +109,7 @@ describe('data export page', () => {
     });
     URL.revokeObjectURL = vi.fn();
     render(<Main />);
-    const run = screen.getByRole('button', { name: 'Eksportuj' });
-    await waitFor(() =>
-      expect((run as HTMLButtonElement).disabled).toBe(false),
-    );
+    const run = await screen.findByRole('button', { name: 'Eksportuj' });
 
     await userEvent.click(screen.getByRole('radio', { name: /pdf/i }));
     await userEvent.click(run);
@@ -137,10 +125,7 @@ describe('data export page', () => {
     URL.createObjectURL = vi.fn(() => 'blob:x');
     URL.revokeObjectURL = vi.fn();
     render(<Main />);
-    const run = screen.getByRole('button', { name: 'Eksportuj' });
-    await waitFor(() =>
-      expect((run as HTMLButtonElement).disabled).toBe(false),
-    );
+    const run = await screen.findByRole('button', { name: 'Eksportuj' });
     await userEvent.click(run);
     await screen.findByText(/Plik został pobrany/);
 
@@ -159,7 +144,7 @@ describe('data export page', () => {
     ).toBe(true);
   });
 
-  it('shows a loading placeholder instead of formats until data arrives', async () => {
+  it('shows a loading placeholder instead of formats and export button until data arrives', async () => {
     stubApi(true);
     render(<Main />);
 
@@ -167,6 +152,7 @@ describe('data export page', () => {
       screen.getByRole('status', { name: 'Wczytywanie danych do eksportu' }),
     ).toBeTruthy();
     expect(screen.queryByRole('radio')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Eksportuj' })).toBeNull();
 
     expect(await screen.findByRole('radio', { name: /csv/i })).toBeTruthy();
     expect(
