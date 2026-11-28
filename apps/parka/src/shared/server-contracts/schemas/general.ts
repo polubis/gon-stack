@@ -74,6 +74,11 @@ export const timeTask = () =>
     device: device().nullable().default(null),
     /** Rule this task came from; `null` for an ordinary one. Server-set. */
     recurringId: z.string().min(1).nullable().default(null),
+    /**
+     * How often the rule repeats; `null` for an ordinary task. Server-set on
+     * reads; on an edit of a recurring task it is the frequency asked for.
+     */
+    recurringInterval: timeRecurringInterval().nullable().default(null),
     /** Day of the rule's series this task stands for. Server-set. */
     occurrenceDate: z.string().regex(DAY).nullable().default(null),
   });

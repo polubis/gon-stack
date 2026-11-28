@@ -30,7 +30,11 @@ export const updateTask = (store: Store, bus: Bus) => {
           });
           // Other tasks of the series changed too: read them again.
           const range = store.$range.get();
-          if (scope !== 'this' && range) emit('[TRIGGER]_LOAD', range);
+          if (scope !== 'this' && range) {
+            // The loaded horizon no longer holds: read it all again.
+            store.$horizon.reset();
+            emit('[TRIGGER]_LOAD', range);
+          }
         }),
         catchError((error: unknown) => {
           const current = store.$tasks.get().find((t) => t.id === task.id);

@@ -22,6 +22,7 @@ const make = (overrides: Partial<Task>): Task => ({
   statusId: null,
   device: null,
   recurringId: null,
+  recurringInterval: null,
   ...overrides,
 });
 

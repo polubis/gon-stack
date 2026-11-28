@@ -322,10 +322,19 @@ const commands = {
       ['st-from', 'Seria B'],
       ['st-next', 'Seria C'],
       ['st-edit', 'Seria D'],
+      ['st-freq', 'Seria E'],
+      ['st-freq-all', 'Seria F'],
     ] as const)
       await createTaskRule(page, id, title);
     const list = await tasks(page, 5);
-    for (const title of ['Seria A', 'Seria B', 'Seria C', 'Seria D'])
+    for (const title of [
+      'Seria A',
+      'Seria B',
+      'Seria C',
+      'Seria D',
+      'Seria E',
+      'Seria F',
+    ])
       expect(titledDays(list, title)).toEqual(
         [-2, -1, 0, 1, 2, 3, 4, 5].map(day),
       );
@@ -389,6 +398,44 @@ const commands = {
       [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(day),
     );
   },
+
+  'changing the frequency from this one repeats the following ones anew':
+    async ({ page }) => {
+      const task = (await tasks(page, 5)).find(
+        (t) => t.title === 'Seria E' && t.day === day(0),
+      )!;
+      const res = await page.request.put(API_ROUTER.timeTaskById(task.id), {
+        data: {
+          ...task,
+          recurringInterval: 'weekly',
+          scope: 'thisAndFollowing',
+        },
+      });
+      expect(res.ok()).toBe(true);
+      const list = await tasks(page, 9);
+      expect(titledDays(list, 'Seria E')).toEqual([-2, -1, 0, 7].map(day));
+      expect(
+        list.find((t) => t.title === 'Seria E' && t.day === day(7))!
+          .recurringInterval,
+      ).toBe('weekly');
+      expect(
+        list.find((t) => t.title === 'Seria E' && t.day === day(-1))!
+          .recurringInterval,
+      ).toBe('daily');
+    },
+
+  'changing the frequency of all repeats the series anew from the opened one':
+    async ({ page }) => {
+      const task = (await tasks(page, 5)).find(
+        (t) => t.title === 'Seria F' && t.day === day(0),
+      )!;
+      const res = await page.request.put(API_ROUTER.timeTaskById(task.id), {
+        data: { ...task, recurringInterval: 'weekly', scope: 'all' },
+      });
+      expect(res.ok()).toBe(true);
+      const list = await tasks(page, 9);
+      expect(titledDays(list, 'Seria F')).toEqual([-2, -1, 0, 5].map(day));
+    },
 } satisfies CommandRegistry<Ctx>;
 
 test('the four scopes of a recurring change reach finance and time', async ({
@@ -412,5 +459,9 @@ test('the four scopes of a recurring change reach finance and time', async ({
     ['deleting this and the following ends the task series before it'],
     ['deleting only the following tasks keeps the opened one'],
     ['editing this and the following renames them and the later ones'],
+    ['changing the frequency from this one repeats the following ones anew'],
+    [
+      'changing the frequency of all repeats the series anew from the opened one',
+    ],
   );
 });

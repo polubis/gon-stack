@@ -11,6 +11,7 @@ import { editTaskSeries, seriesTaskIds } from '../../shared/time-scope';
  * The device and the rule of a task belong to its creation: never taken from
  * the request. `scope` (for a task of a rule) also reaches the other tasks of
  * its series and the rule, counted from the task's own occurrence day.
+ * `recurringInterval` changes how often the series repeats from there on.
  */
 export const updateTimeTask = privateProcedure({
   schema: withZodSchema({ schema: updateTimeTaskSchema }),
@@ -80,18 +81,30 @@ export const updateTimeTask = privateProcedure({
           series.anchor,
         )
       ).filter((id) => id !== input.id);
-      await editTaskSeries(db, user.id, series.ruleId, ids, input.scope, {
-        title: input.title,
-        description: input.description || null,
-        categoryId: input.categoryId,
-        priorityId: input.priorityId,
-        at: input.at,
-      });
+      await editTaskSeries(
+        db,
+        user.id,
+        { ruleId: series.ruleId, anchor: series.anchor, taskId: input.id },
+        ids,
+        input.scope,
+        {
+          title: input.title,
+          description: input.description || null,
+          categoryId: input.categoryId,
+          priorityId: input.priorityId,
+          at: input.at,
+        },
+        input.recurringInterval ?? undefined,
+      );
     }
 
     return {
       code: 200 as const,
-      data: toTimeTask(data, await profiles),
+      data: toTimeTask(
+        data,
+        await profiles,
+        series ? input.recurringInterval : null,
+      ),
     };
   },
 });

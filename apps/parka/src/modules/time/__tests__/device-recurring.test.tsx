@@ -252,7 +252,11 @@ describe('recurring tasks', () => {
     user: ReturnType<typeof userEvent.setup>,
   ) => {
     backend.seed([
-      task({ recurringId: 'trec-1', occurrenceDate: '2026-10-20' }),
+      task({
+        recurringId: 'trec-1',
+        recurringInterval: 'weekly',
+        occurrenceDate: '2026-10-20',
+      }),
     ]);
     renderTime();
     await openEditor(user, 'Raport miesięczny');
@@ -304,6 +308,83 @@ describe('recurring tasks', () => {
     expect(backend.writes()[0]).toMatchObject({
       method: 'DELETE',
       body: { scope: 'thisAndFollowing' },
+    });
+  });
+
+  const changeFrequency = async (
+    user: ReturnType<typeof userEvent.setup>,
+    dialog: ReturnType<typeof within>,
+    label: string,
+  ) => {
+    await user.click(dialog.getByRole('combobox', { name: 'Częstotliwość' }));
+    await user.click(await screen.findByRole('option', { name: label }));
+  };
+
+  it('shows the current frequency of the series when editing', async () => {
+    const user = userEvent.setup();
+
+    const dialog = await openRecurringTask(user);
+
+    expect(
+      dialog.getByRole('combobox', { name: 'Częstotliwość' }),
+    ).toHaveTextContent('Co tydzień');
+  });
+
+  it('sends the new frequency with the chosen scope', async () => {
+    const user = userEvent.setup();
+    const dialog = await openRecurringTask(user);
+    await changeFrequency(user, dialog, 'Co miesiąc');
+    await user.click(dialog.getByRole('button', { name: 'Zapisz' }));
+
+    await user.click(
+      scopeDialog().getByRole('radio', { name: /Edytuj ten i następne/ }),
+    );
+    await user.click(
+      scopeDialog().getByRole('button', { name: 'Zapisz zmiany' }),
+    );
+
+    await waitFor(() => expect(backend.writes()).toHaveLength(1));
+    expect(backend.writes()[0]).toMatchObject({
+      method: 'PUT',
+      body: { recurringInterval: 'monthly', scope: 'thisAndFollowing' },
+    });
+  });
+
+  it('reads the series again after its frequency changes', async () => {
+    const user = userEvent.setup();
+    const dialog = await openRecurringTask(user);
+    await changeFrequency(user, dialog, 'Co miesiąc');
+    await user.click(dialog.getByRole('button', { name: 'Zapisz' }));
+    const readsBefore = backend.reads().length;
+
+    await user.click(
+      scopeDialog().getByRole('radio', { name: /Edytuj wszystkie/ }),
+    );
+    await user.click(
+      scopeDialog().getByRole('button', { name: 'Zapisz zmiany' }),
+    );
+
+    await waitFor(() =>
+      expect(backend.reads().length).toBeGreaterThan(readsBefore),
+    );
+  });
+
+  it('keeps the frequency when only one occurrence is edited', async () => {
+    const user = userEvent.setup();
+    const dialog = await openRecurringTask(user);
+    await changeFrequency(user, dialog, 'Co miesiąc');
+    await user.click(dialog.getByRole('button', { name: 'Zapisz' }));
+
+    await user.click(
+      scopeDialog().getByRole('radio', { name: /Edytuj tylko ten/ }),
+    );
+    await user.click(
+      scopeDialog().getByRole('button', { name: 'Zapisz zmiany' }),
+    );
+
+    await waitFor(() => expect(backend.writes()).toHaveLength(1));
+    expect(backend.writes()[0]).toMatchObject({
+      body: { recurringInterval: 'weekly', scope: 'this' },
     });
   });
 
