@@ -110,7 +110,7 @@ const AccessTokensView = () => {
       className="relative mx-auto flex w-full max-w-2xl flex-1 animate-view-enter flex-col motion-reduce:animate-none"
     >
       <LoadingBanner active={isLoading && !initializing} />
-      <div className="md:px-4">
+      <div className="px-gutter-inset">
         <ScreenHeader
           title="Tokeny MCP"
           backHref={APP_ROUTER.settings()}
@@ -126,7 +126,7 @@ const AccessTokensView = () => {
           }
         />
       </div>
-      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 pt-2 md:px-8">
+      <main className="flex flex-1 flex-col gap-4 px-gutter pb-6 pt-2">
         {error ? (
           <ErrorState
             data-e2e="access-tokens:load-error"

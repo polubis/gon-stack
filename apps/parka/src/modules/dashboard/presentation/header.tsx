@@ -13,7 +13,7 @@ export const Header = ({ avatar }: { avatar: Avatar | null }) => {
   const eyebrow = useOwnerEyebrow('Twoje');
   const unread = useUnreadSummary();
   return (
-    <div className="md:px-4 lg:px-6 xl:px-12">
+    <div className="px-gutter-inset">
       <ScreenHeader
         title="Finanse"
         eyebrow={eyebrow}

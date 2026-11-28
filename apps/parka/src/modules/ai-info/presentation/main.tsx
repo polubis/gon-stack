@@ -9,13 +9,13 @@ const AiInfoView = () => (
     data-e2e="ai-info:main"
     className="relative flex flex-1 animate-view-enter flex-col motion-reduce:animate-none"
   >
-    <div className="md:px-4 lg:px-6 xl:px-12">
+    <div className="px-gutter-inset">
       <ScreenHeader
         title="AI — jak to działa"
         backHref={APP_ROUTER.settings()}
       />
     </div>
-    <main className="flex flex-1 flex-col gap-3 px-4 pb-6 pt-2 md:gap-4 md:px-8 lg:px-10 xl:px-16">
+    <main className="flex flex-1 flex-col gap-3 px-gutter pb-6 pt-2 md:gap-4">
       <p className="max-w-3xl text-sm text-ink-soft md:text-base">
         AI analizuje paragony i pomaga w kategoryzacji oraz wykrywaniu
         nieprawidłowości i nietypowych wydatków.

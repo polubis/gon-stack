@@ -119,7 +119,7 @@ const DashboardView = () => {
         data-e2e="dashboard:main"
         className="flex flex-1 animate-view-enter flex-col motion-reduce:animate-none"
       >
-        <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 pb-6 pt-4 md:px-8 lg:px-10 lg:pt-8 xl:px-16">
+        <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-gutter pb-6 pt-4 lg:pt-8">
           <ErrorState
             data-e2e="dashboard:summary-error"
             title="Nie udało się wczytać podsumowania"
@@ -177,7 +177,7 @@ const DashboardView = () => {
       <Header avatar={avatar} />
       <main
         {...gesture}
-        className="flex flex-1 flex-col gap-3 px-4 pb-24 pt-2 md:gap-4 md:px-8 md:pb-6 lg:px-10 xl:px-16"
+        className="flex flex-1 flex-col gap-3 px-gutter pb-24 pt-2 md:gap-4 md:pb-6"
       >
         <PeriodControl
           period={period}

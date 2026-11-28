@@ -42,7 +42,7 @@ const SignInView = () => {
   return (
     <div
       data-e2e="auth:main"
-      className="flex w-full flex-1 flex-col justify-center px-4 py-8 md:items-center md:px-8 md:py-16"
+      className="flex w-full flex-1 flex-col justify-center px-gutter py-8 md:items-center md:py-16"
     >
       <div className="mx-auto w-full max-w-md animate-view-enter rounded-4xl border border-line bg-card p-6 shadow-popover motion-reduce:animate-none md:p-10 lg:p-12">
         <BrandMark className="mb-6 size-14" />

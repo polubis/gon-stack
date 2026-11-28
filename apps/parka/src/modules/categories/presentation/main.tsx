@@ -33,7 +33,7 @@ export const Main = () => {
 
   return (
     <>
-      <div className="mx-auto w-full max-w-2xl md:px-4">
+      <div className="mx-auto w-full max-w-2xl px-gutter-inset">
         <ScreenHeader
           title="Kategorie"
           backHref={APP_ROUTER.settings()}
@@ -48,7 +48,7 @@ export const Main = () => {
           }
         />
       </div>
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-4 pb-6 pt-2 md:px-8">
+      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-gutter pb-6 pt-2">
         {initializing ? (
           <ListSkeleton />
         ) : categories.length === 0 ? (
