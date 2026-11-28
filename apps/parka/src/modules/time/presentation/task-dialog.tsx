@@ -109,7 +109,9 @@ export const TaskDialog = ({
   // A step removed while the form is open reads as the built-in one.
   const step = steps.includes(pickedStep) ? pickedStep : IN_PROGRESS;
   const [repeat, setRepeat] = useState(startRepeating);
-  const [interval, setInterval] = useState<TaskRecurringInterval>('weekly');
+  const [interval, setInterval] = useState<TaskRecurringInterval>(
+    task?.recurringInterval ?? 'weekly',
+  );
   const [endDate, setEndDate] = useState('');
   const [touched, setTouched] = useState(false);
   // A recurring task waits here while the user picks how far the edit reaches.
@@ -174,6 +176,7 @@ export const TaskDialog = ({
       statusId: null,
       device: task?.device ?? currentDevice(),
       recurringId: task?.recurringId ?? null,
+      recurringInterval: task?.recurringId == null ? null : interval,
     };
     if (editing && next.recurringId !== null) {
       // The edit waits while the user picks how far it reaches.
@@ -321,7 +324,19 @@ export const TaskDialog = ({
             </>
           ) : null}
           {editing && task.recurringId !== null ? (
-            <RecurringMark labelled />
+            <>
+              <RecurringMark labelled />
+              <Field label="Częstotliwość">
+                <Select
+                  value={interval}
+                  data-e2e="time:recurring-interval"
+                  options={INTERVALS}
+                  onValueChange={(value) =>
+                    setInterval(value as TaskRecurringInterval)
+                  }
+                />
+              </Field>
+            </>
           ) : null}
           {editing && task.device ? (
             <TaskDeviceDetail device={task.device} />
@@ -375,11 +390,21 @@ export const TaskDialog = ({
         <RecurringScopeDialog
           action="edit"
           title="Zapisać zmiany w zadaniu?"
-          subject={`Zadanie „${pending.title}” jest cykliczne. Wybierz, które zadania tej serii objąć zmianą. Samo tworzenie kolejnych zadań się nie zmienia.`}
+          subject={`Zadanie „${pending.title}” jest cykliczne. Wybierz, które zadania tej serii objąć zmianą. Zmiana częstotliwości dotyczy zadań od wybranego miejsca w serii, bez opcji „tylko ten”.`}
           confirmLabel="Zapisz zmiany"
           onClose={() => setPending(null)}
           onConfirm={(scope) => {
-            updateTask(pending, undefined, scope);
+            // One occurrence alone does not repeat differently.
+            updateTask(
+              scope === 'this'
+                ? {
+                    ...pending,
+                    recurringInterval: task?.recurringInterval ?? null,
+                  }
+                : pending,
+              undefined,
+              scope,
+            );
             setPending(null);
             closeModal(modal);
           }}

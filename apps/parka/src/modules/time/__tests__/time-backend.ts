@@ -45,6 +45,7 @@ export const task = (overrides: Json = {}): Json => ({
   statusId: null,
   device: null,
   recurringId: null,
+  recurringInterval: null,
   occurrenceDate: null,
   ...overrides,
 });

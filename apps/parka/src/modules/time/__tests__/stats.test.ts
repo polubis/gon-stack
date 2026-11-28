@@ -36,6 +36,7 @@ const task = (id: string, overrides: Partial<Task> = {}): Task => ({
   statusId: null,
   device: null,
   recurringId: null,
+  recurringInterval: null,
   ...overrides,
 });
 

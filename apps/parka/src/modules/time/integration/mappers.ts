@@ -76,4 +76,5 @@ export const toTask = (dto: TaskDto): Task => ({
   statusId: dto.statusId as StatusId | null,
   device: dto.device,
   recurringId: dto.recurringId as RecurringId | null,
+  recurringInterval: dto.recurringInterval,
 });

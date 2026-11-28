@@ -28,7 +28,11 @@ export const deleteTask = (store: Store, bus: Bus) => {
           notify(store, { tone: 'success', message: 'Usunięto zadanie.' });
           // Other tasks of the series went too: read them again.
           const range = store.$range.get();
-          if (scope !== 'this' && range) emit('[TRIGGER]_LOAD', range);
+          if (scope !== 'this' && range) {
+            // The loaded horizon no longer holds: read it all again.
+            store.$horizon.reset();
+            emit('[TRIGGER]_LOAD', range);
+          }
         }),
         catchError((error: unknown) => {
           if (previous)

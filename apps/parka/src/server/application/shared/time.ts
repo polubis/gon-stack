@@ -15,9 +15,9 @@ type RuleRow = Database['public']['Tables']['time_recurring']['Row'];
 const toHourMinute = (value: string | null): string | null =>
   value === null ? null : value.slice(0, 5);
 
-const toInterval = (
-  value: string,
-): 'daily' | 'weekly' | 'monthly' | 'yearly' =>
+type Interval = 'daily' | 'weekly' | 'monthly' | 'yearly';
+
+export const toInterval = (value: string): Interval =>
   value === 'daily' || value === 'monthly' || value === 'yearly'
     ? value
     : 'weekly';
@@ -35,7 +35,12 @@ export const toTimeBacklogTask = (
   device: toDevice(row, profiles),
 });
 
-export const toTimeTask = (row: TaskRow, profiles?: ProfilesByDevice) => ({
+export const toTimeTask = (
+  row: TaskRow,
+  profiles?: ProfilesByDevice,
+  /** Frequency of the rule the task came from. */
+  recurringInterval: Interval | null = null,
+) => ({
   id: row.id,
   key: row.key,
   title: row.title,
@@ -50,6 +55,7 @@ export const toTimeTask = (row: TaskRow, profiles?: ProfilesByDevice) => ({
   statusId: row.status_id,
   device: toDevice(row, profiles),
   recurringId: row.recurring_id,
+  recurringInterval,
   occurrenceDate: row.occurrence_date,
 });
 

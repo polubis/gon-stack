@@ -45,6 +45,8 @@ export type Task = {
   device: Device | null;
   /** Rule the task came from; `null` for an ordinary one. */
   recurringId: RecurringId | null;
+  /** How often that rule repeats; `null` for an ordinary one. */
+  recurringInterval: TaskRecurringInterval | null;
 };
 
 /** File kept with a task (the bytes stay on the server). */
